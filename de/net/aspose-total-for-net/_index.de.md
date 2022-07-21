@@ -1,21 +1,5 @@
 ---
 title: "Aspose.Total für .NET"
-Aliase:
-- /net/aspose-words-for-net/
-- /net/aspose-cells-for-net/
-- /net/aspose-pdf-for-net/
-- /net/aspose-slides-for-net/
-- /net/aspose-email-for-net/
-- /net/aspose-barCode-for-net/
-- /net/aspose-imaging-for-net/
-- /net/aspose-tasks-for-net/
-- /net/aspose-diagram-for-net/
-- /net/aspose-note-for-net/
-- /net/aspose-3d-for-net/
-- /net/aspose-cad-for-net/
-- /net/aspose-html-for-net/
-- /net/aspose-gis-for-net/
-- /net/aspose-ocr-for-net/
 type: docs
 url: /aspose-total-for-net/
 weight: 10

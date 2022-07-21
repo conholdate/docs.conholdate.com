@@ -1,17 +1,5 @@
 ---
 title: "GroupDocs.Total for .NET"
-aliases: 
-    - /net/groupdocs-annotation-for-net/
-    - /net/groupdocs-assembly-for-net/
-    - /net/groupdocs-comparison-for-net/
-    - /net/groupdocs-conversion-for-net/
-    - /net/groupdocs-editor-for-net/
-    - /net/groupdocs-metadata-for-net/
-    - /net/groupdocs-parser-for-net/
-    - /net/groupdocs-search-for-net/
-    - /net/groupdocs-signature-for-net/
-    - /net/groupdocs-viewer-for-net/
-    - /net/groupdocs-watermark-for-net/
 type: docs
 url: /groupdocs-total-for-net/
 weight: 20
