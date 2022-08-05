@@ -3,7 +3,7 @@ title: "Extract Metadata From Image"
 description: "This article demonstrates that how easily you can extract metadata from image using c#."
 keywords: extract metadata from image
 type: docs
-url: /extract-metadata/
+url: /extract-metadata-from-image/
 weight: 20
 ---
 
