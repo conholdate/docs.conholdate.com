@@ -15,7 +15,7 @@ The GroupDocs.Metadata API allows extracting common image properties such as wid
 2. Extract the root metadata package
 3. Use the FileType property to obtain file format information
 
-**Class: AdvancedUsage.ManagingMetadataForSpecificFormats.Image.ImageReadFileFormatProperties**
+**AdvancedUsage.ManagingMetadataForSpecificFormats.Image.ImageReadFileFormatProperties**
 
 ```csharp
 using (Metadata metadata = new Metadata(Constants.InputPng))
