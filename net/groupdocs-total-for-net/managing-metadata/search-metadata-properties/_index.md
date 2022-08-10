@@ -1,5 +1,5 @@
 ---
-title: "View Metadata"
+title: "Search Metadata Properties"
 description: "This article demonstrate that how you can search metadata and extract desired metadata properties from docs like PDF, DOCX, PPTX, XLSX, images, audio, video and many other files of different types in your .NET solution"
 keywords: search metadata
 type: docs
