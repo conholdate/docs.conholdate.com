@@ -4,12 +4,12 @@ description: "This article demonstrate that how you can search metadata and extr
 keywords: search metadata
 type: docs
 url: /search-metadata-properties/
-weight: 20
+weight: 30
 ---
 
 You can easily search metadata and extract desired metadata properties from PDF, DOCX, PPTX, XLSX, images, audio, video and many other files of different types in your .NET solution by using GroupDocs.Metadata API.
 
-GroupDocs.Metadata for .NET supports many file formats. See full list at [supported file formats]({{< ref "metadata/net/getting-started/supported-document-formats.md" >}}) article.
+GroupDocs.Metadata for .NET supports many file formats. See full list at [supported file formats](https://docs.groupdocs.com/metadata/net/supported-document-formats/) article.
 
 ## Use tags to find most common metadata properties
 

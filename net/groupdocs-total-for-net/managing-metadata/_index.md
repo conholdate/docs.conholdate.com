@@ -4,7 +4,7 @@ description: "This section contains articles that how to manage metadata."
 keywords: managing metadata
 type: docs
 url: /managing-metadata/
-weight: 20
+weight: 30
 hideChildren: False
 ---
 
