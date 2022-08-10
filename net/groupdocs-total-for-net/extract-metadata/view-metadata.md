@@ -3,7 +3,7 @@ title: "View Metadata"
 description: "This article demonstrates how to view metadata information of a document."
 keywords: view metadata
 type: docs
-url: /extract-metadata/
+url: /view-metadata/
 weight: 20
 ---
 
