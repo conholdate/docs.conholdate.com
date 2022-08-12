@@ -41,11 +41,6 @@ The Viewer API provides the *Minify* property of the *HtmlViewOptions* class, th
 
 The following code sample shows how to enable minification.
 
-```csharp
-
-```
-**Example**
-
 {{< gist "conholdate-docs-gists" "5746ab59a9c4a41e91c90e1704d50699" "minify-html.cs" >}}
 
 {{< alert style="info" >}}This setting will not compress the content as significantly as this might be achieved using Gzip compression (that should be enabled and configured from your webserver). But it still might be valuable and can be used as additional optimization in combination with Gzip compression. {{< /alert >}}
