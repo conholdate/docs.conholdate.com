@@ -20,7 +20,7 @@ Code snippet below demonstrates how to add text watermark to a document. If the
 
 {{< gist "conholdate-docs-gists" "448470d79d85d0f2ff66b57a55bec360" "AddTextWatermark.cs" >}}
 
-for more details please visit [this article](https://docs.groupdocs.com/watermark/net/adding-text-watermarks/).
+For more details please visit [this article](https://docs.groupdocs.com/watermark/net/adding-text-watermarks/).
 
 
 

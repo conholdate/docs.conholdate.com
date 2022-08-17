@@ -16,6 +16,8 @@ GroupDocs.Watermark which is part of Conholdate.Total for .NET, allows you to ad
 
 {{< gist "conholdate-docs-gists" "a52f00f603e5924078cce7f4f89d4044" "adding-watermark-to-photos.cs" >}}
 
+For more details please visit [this article](https://docs.groupdocs.com/watermark/net/add-watermarks-to-images/).
+
 
 
 
