@@ -1,6 +1,6 @@
 ---
 title: "Compare Text in Two Files"
-description: "This section guide you about the usage of GroupDocs.Comparison API which is a part of Conholdate.Total for .NET, can compare text in two files"
+description: "This article explains the usage of GroupDocs.Comparison API (which is a part of Conholdate.Total for .NET) to compare text in two files."
 keywords: compare text in two files, Compare text in two files using C#
 type: docs
 url: /compare-text-in-two-files/
