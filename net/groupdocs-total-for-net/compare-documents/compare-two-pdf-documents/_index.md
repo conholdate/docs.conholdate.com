@@ -8,7 +8,7 @@ weight: 20
 ---
 ## Compare two PDF documents using C#
 
-It becomes very difficult to find the difference between what was changed in one of the versions, particularly when working with large-volume PDF documents. The **[GroupDocs.Comparison for .NET](https://products.groupdocs.com/comparison/net)** (which is a part of Conholdate.Total for .NET) provides you many choices for comparing a wide range of [supported file formats]({{< ref "https://docs.groupdocs.com/comparison/net/getting-started/supported-document-formats.md" >}}), including PDF format.
+It becomes very difficult to find the difference between what was changed in one of the versions, particularly when working with large-volume PDF documents. The **[GroupDocs.Comparison for .NET](https://products.groupdocs.com/comparison/net)** (which is a part of Conholdate.Total for .NET) provides you many choices for comparing a wide range of [supported file formats](https://docs.groupdocs.com/comparison/net/supported-document-formats/), including PDF format.
 
 After the comparison, there are three colors on the resulting file that highlight the differences.
 
