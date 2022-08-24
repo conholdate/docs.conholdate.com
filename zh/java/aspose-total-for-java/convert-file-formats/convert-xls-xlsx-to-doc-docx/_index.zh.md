@@ -4,7 +4,7 @@ second_title: "Java 的 Conholdate.Total"
 articleTitle: "将 XLS XLSX 转换为 Word"
 linktitle: "将 XLS XLSX 转换为 Word"
 type: docs
-url: /convert-xls-xlsx-to-doc-docx/
+url: /zh/convert-xls-xlsx-to-doc-docx/
 description: "将 XLS XLSX 文件格式转换为 Java 中的 Word DOC DOCX。"
 keywords: "将 excel 转换为 word Java，将 xls 转换为 word Java，将 xlsx 转换为 word Java，java 将 xls xlsx，xls 转换为 doc docx java，xlsx 到 doc docx eclipse java，用于 xls 的 Java 转换器，用于 xlsx 的 Java 转换器，Excel 到 pdf Java , 工作表到 pdf"
 weight: 10

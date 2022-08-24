@@ -4,7 +4,7 @@ second_title: "Conholdate.Total для .NET"
 articleTitle: "Как добавить штрих-код в PDF"
 linktitle: "Как добавить штрих-код в PDF"
 type: docs
-url: /how-to-add-barcode-to-pdf/
+url: /ru/how-to-add-barcode-to-pdf/
 description: "Создайте штрих-код и добавьте его в PDF на C#."
 keywords: "создать штрих-код c#, создать PDF c#, добавить штрих-код в PDf c#, .NET создать штрих-код, .NET создать PDF, .NET добавить штрих-код в PDf"
 weight: 10

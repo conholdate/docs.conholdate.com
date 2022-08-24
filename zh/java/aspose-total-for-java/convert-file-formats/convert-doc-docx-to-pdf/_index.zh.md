@@ -4,7 +4,7 @@ second_title: "Java 的 Conholdate.Total"
 articleTitle: "将 DOC DOCX 转换为 PDF"
 linktitle: "将 DOC DOCX 转换为 PDF"
 type: docs
-url: /convert-doc-docx-to-pdf/
+url: /zh/convert-doc-docx-to-pdf/
 description: "在 Java 中将 DOC 和 DOCX 文件格式转换为 PDF。"
 keywords: "将 doc 转换为 pdf Java，将 docx 转换为 PDf Java，Java 将 doc docx，doc 转换为 pdf Java，docx 转换为 pdf Java"
 weight: 10

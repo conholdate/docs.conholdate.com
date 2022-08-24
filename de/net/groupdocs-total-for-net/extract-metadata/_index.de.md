@@ -3,7 +3,7 @@ title: "Metadaten extrahieren"
 description: "Dieser Artikel demonstriert die erweiterte Verwendung von Tags, Kategorien und anderen Attributen von Metadateneigenschaften zum Extrahieren von Metadaten."
 keywords: "Metadaten extrahieren"
 type: docs
-url: /extract-metadata/
+url: /de/extract-metadata/
 weight: 20
 ---
 

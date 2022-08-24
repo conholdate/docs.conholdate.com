@@ -4,7 +4,7 @@ second_title: "Conholdate.Total для .NET"
 articleTitle: "Преобразование XLS XLSX в PDF"
 linktitle: "Преобразование XLS XLSX в PDF"
 type: docs
-url: /convert-xls-xlsx-to-pdf/
+url: /ru/convert-xls-xlsx-to-pdf/
 description: "Преобразование форматов файлов XLS XLSX в PDF на C#."
 keywords: "конвертировать xls в pdf c#, конвертировать xlsx в pdf c#, .NET конвертировать xls xlsx, xls в pdf .net, xlsx в pdf asp .net, конвертер c# для xls, конвертер c# для xlsx, excel в pdf c#, листы в pdf"
 weight: 10

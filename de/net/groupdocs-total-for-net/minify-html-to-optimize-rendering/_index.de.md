@@ -3,7 +3,7 @@ title: "Minimieren Sie HTML, um das Rendering zu optimieren"
 description: "Dieser Artikel zeigt, wie HTML und CSS minimiert werden, wenn Dokumente in HTML gerendert werden."
 keywords: "html verkleinern, in html rendern"
 type: docs
-url: /minify-html-to-optimize-rendering/
+url: /de/minify-html-to-optimize-rendering/
 weight: 30
 ---
 
@@ -43,7 +43,8 @@ Das folgende Codebeispiel zeigt, wie die Minimierung aktiviert wird.
 
 {{< gist "conholdate-docs-gists" "5746ab59a9c4a41e91c90e1704d50699" "minify-html.cs" >}}
 
-{{< alert style="info" >}}Diese Einstellung komprimiert den Inhalt nicht so stark, wie dies mit der Gzip-Komprimierung erreicht werden könnte (die von Ihrem Webserver aktiviert und konfiguriert werden sollte). Aber es könnte immer noch wertvoll sein und kann als zusätzliche Optimierung in Kombination mit der Gzip-Komprimierung verwendet werden. {{< /Alarm >}}
+{{< alert style="info" >}}Diese Einstellung komprimiert den Inhalt nicht so stark, wie dies mit der Gzip-Komprimierung erreicht werden könnte (die von Ihrem Webserver aktiviert und konfiguriert werden sollte). Aber es könnte immer noch wertvoll sein und kann als zusätzliche Optimierung in Kombination mit der Gzip-Komprimierung verwendet werden. 
+{{< /alert >}}
 
 
 

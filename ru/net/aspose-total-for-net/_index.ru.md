@@ -1,7 +1,7 @@
 ---
 title: "Aspose.Total для .NET"
 type: docs
-url: /aspose-total-for-net/
+url: /ru/aspose-total-for-net/
 weight: 10
 ---
 

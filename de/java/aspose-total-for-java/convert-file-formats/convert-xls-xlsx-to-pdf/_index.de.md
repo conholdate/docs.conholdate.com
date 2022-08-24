@@ -4,7 +4,7 @@ second_title: "Conholdate.Total für Java"
 articleTitle: "Konvertieren Sie XLS XLSX in PDF"
 linktitle: "Konvertieren Sie XLS XLSX in PDF"
 type: docs
-url: /convert-xls-xlsx-to-pdf/
+url: /de/convert-xls-xlsx-to-pdf/
 description: "Konvertieren Sie XLS XLSX-Dateiformate in PDF in Java."
 keywords: "xls in pdf konvertieren Java, xlsx in PDf konvertieren Java, Java xls xlsx konvertieren, xls in pdf Java, xlsx in pdf eclipse Java, Java-Konverter für xls, Java-Konverter für xlsx, Excel in pdf Java, Blätter in pdf"
 weight: 10

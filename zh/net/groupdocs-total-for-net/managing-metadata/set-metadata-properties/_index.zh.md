@@ -3,7 +3,7 @@ title: "设置元数据属性"
 description: "本文展示了用于更新或添加元数据的 SetProperties 方法的用法。"
 keywords: "设置元数据"
 type: docs
-url: /set-metadata-properties/
+url: /zh/set-metadata-properties/
 weight: 50
 ---
 

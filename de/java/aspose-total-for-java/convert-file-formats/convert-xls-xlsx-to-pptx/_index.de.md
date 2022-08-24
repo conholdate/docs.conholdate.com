@@ -4,7 +4,7 @@ second_title: "Conholdate.Total für Java"
 articleTitle: "Konvertieren Sie XLS XLSX in PowerPoint"
 linktitle: "Konvertieren Sie XLS XLSX in PowerPoint"
 type: docs
-url: /convert-xls-xlsx-to-pptx/
+url: /de/convert-xls-xlsx-to-pptx/
 description: "Konvertieren Sie XLS XLSX-Dateiformate in PowerPoint PPTX in Java."
 keywords: "Konvertieren Sie Java, konvertieren Sie Excel in PowerPoint Java, konvertieren Sie xls in pptx Java, konvertieren Sie xlsx in Powerpoint Java, java konvertieren Sie xls xlsx, xls in pptx Java, xlsx in pptx Eclipse Java, Java-Konverter für xls, Java-Konverter für xlsx, Excel in pptx Java, Blatt zu Folie"
 weight: 10

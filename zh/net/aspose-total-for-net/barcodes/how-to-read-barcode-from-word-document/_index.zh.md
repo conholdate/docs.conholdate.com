@@ -4,7 +4,7 @@ second_title: ".NET 的 Conholdate.Total"
 articleTitle: "如何从 Word 中读取条形码"
 linktitle: "如何从 Word 中读取条形码"
 type: docs
-url: /how-to-read-barcode-from-word-document/
+url: /zh/how-to-read-barcode-from-word-document/
 description: "从 MS Word 文档中读取条形码，包括 C# 中的 DOC DOCX。"
 keywords: "读条码 c#, 读条码 Word c#, 读条码 docc#, 读条码 docx c#, 读条码 docx c#, .NET 读条码 docx, 读条码 docx c#.net"
 weight: 20

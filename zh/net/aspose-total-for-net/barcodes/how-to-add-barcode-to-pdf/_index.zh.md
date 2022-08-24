@@ -4,7 +4,7 @@ second_title: ".NET 的 Conholdate.Total"
 articleTitle: "如何将条形码添加到 PDF"
 linktitle: "如何将条形码添加到 PDF"
 type: docs
-url: /how-to-add-barcode-to-pdf/
+url: /zh/how-to-add-barcode-to-pdf/
 description: "在 C# 中创建一个条形码并将其添加到 PDF。"
 keywords: "创建条形码 c#, 创建 PDF c#, 将条形码添加到 PDf c#, .NET 创建条形码, .NET 创建 PDF, .NET 将条形码添加到 PDf"
 weight: 10

@@ -1,7 +1,7 @@
 ---
 title: "Java 的 Conholdate.Total"
 type: docs
-url: /java/
+url: /zh/java/
 weight: 10
 ---
 

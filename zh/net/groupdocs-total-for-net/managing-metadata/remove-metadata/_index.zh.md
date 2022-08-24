@@ -3,7 +3,7 @@ title: "删除元数据"
 description: "本文介绍如何在不应用任何过滤器的情况下清除所有或删除元数据属性。你可以这样做是使用 Sanitize 方法。"
 keywords: "删除元数据"
 type: docs
-url: /remove-metadata/
+url: /zh/remove-metadata/
 weight: 40
 ---
 

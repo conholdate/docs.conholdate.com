@@ -4,7 +4,7 @@ second_title: "Conholdate.Total für Java"
 articleTitle: "Konvertieren Sie DOC DOCX in PDF"
 linktitle: "Konvertieren Sie DOC DOCX in PDF"
 type: docs
-url: /convert-doc-docx-to-pdf/
+url: /de/convert-doc-docx-to-pdf/
 description: "Konvertieren Sie DOC- und DOCX-Dateiformate in PDF in Java."
 keywords: "doc in pdf konvertieren Java, docx in pdf konvertieren Java, Java doc docx konvertieren, doc in pdf Java, docx in pdf Java"
 weight: 10

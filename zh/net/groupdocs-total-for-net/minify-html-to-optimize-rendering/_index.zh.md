@@ -3,7 +3,7 @@ title: "缩小 HTML 以优化渲染"
 description: "本文展示了在将文档呈现为 HTML 时如何缩小 HTML 和 CSS。"
 keywords: "缩小html，渲染成html"
 type: docs
-url: /minify-html-to-optimize-rendering/
+url: /zh/minify-html-to-optimize-rendering/
 weight: 30
 ---
 
@@ -43,7 +43,7 @@ Viewer API 提供 *HtmlViewOptions* 类的 *Minify* 属性，可让您缩小输�
 
 {{< gist "conholdate-docs-gists" "5746ab59a9c4a41e91c90e1704d50699" "minify-html.cs" >}}
 
-{{< alert style="info" >}}此设置不会像使用 Gzip 压缩（应该从您的网络服务器启用和配置）那样显着压缩内容。但它仍然可能很有价值，可以与 Gzip 压缩结合使用作为额外的优化。 {{< /警报 >}}
+{{< alert style="info" >}}此设置不会像使用 Gzip 压缩（应该从您的网络服务器启用和配置）那样显着压缩内容。但它仍然可能很有价值，可以与 Gzip 压缩结合使用作为额外的优化。 {{< /alert >}}
 
 
 

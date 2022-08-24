@@ -4,7 +4,7 @@ second_title: "Conholdate.Total für .NET"
 articleTitle: "So fügen Sie Barcodes zu PDF hinzu"
 linktitle: "So fügen Sie Barcodes zu PDF hinzu"
 type: docs
-url: /how-to-add-barcode-to-pdf/
+url: /de/how-to-add-barcode-to-pdf/
 description: "Erstellen Sie einen Barcode und fügen Sie ihn in C# zu PDF hinzu."
 keywords: "Barcode erstellen c#, PDF erstellen c#, Barcode zu PDF hinzufügen c#, .NET Barcode erstellen, .NET PDF erstellen, .NET Barcode zu PDF hinzufügen"
 weight: 10
