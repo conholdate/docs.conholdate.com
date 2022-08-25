@@ -9,7 +9,7 @@ weight: 50
 
 ## Compare legal documents in C#
 
-The Microsoft Word comparison features may be not enough to to compare contracts and legal documents. Suppose you need your own way to implement comparison logic or you are developing your own app. The [**GroupDocs.Comparison**](https://products.groupdocs.com/comparison/net) (which is a part of Conholdate.Total for .NET) gives the ability to compare documents programmatically and manage found differences in code for wide range of [supported file formats](https://docs.groupdocs.com/comparison/net/supported-document-formats/). Here is an example of how to compare two contracts using GroupDocs.Comparsion API. Usually you just have to follow these steps:
+The Microsoft Word comparison features may be not enough to to compare contracts and legal documents. Suppose you need your own way to implement comparison logic or you are developing your own app. The [**GroupDocs.Comparison**](https://products.groupdocs.com/comparison/net) (which is a part of Conholdate.Total for .NET) gives the ability to compare documents programmatically and manage found differences in code for wide range of [supported file formats](https://docs.groupdocs.com/comparison/net/supported-document-formats/). Here is an example of how to compare two contracts using GroupDocs.Comparsion API. Usually you just have to follow these steps
 
 *   Instantiate [Comparer](https://apireference.groupdocs.com/net/comparison/groupdocs.comparison/comparer) objec with source document path or stream;;
 *   Call [Add](https://apireference.groupdocs.com/net/comparison/groupdocs.comparison/comparer/methods/add/index) method and specify target document path or stream;
