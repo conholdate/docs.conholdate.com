@@ -4,7 +4,7 @@ second_title: "Conholdate.Total для .NET"
 articleTitle: "Конвертировать PDF в HTML"
 linktitle: "Конвертировать PDF в HTML"
 type: docs
-url: /convert-pdf-to-html/
+url: /ru/convert-pdf-to-html/
 description: "Преобразование PDF в HTML на C#."
 keywords: "конвертировать pdf в html c#, конвертировать pdf в c#, .NET конвертировать pdf в html, pdf в html asp .net"
 weight: 10

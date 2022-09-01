@@ -4,7 +4,7 @@ second_title: "Conholdate.Total для .NET"
 articleTitle: "Конвертировать DOC DOCX в PDF"
 linktitle: "Конвертировать DOC DOCX в PDF"
 type: docs
-url: /convert-doc-docx-to-pdf/
+url: /ru/convert-doc-docx-to-pdf/
 description: "Преобразование форматов файлов DOC и DOCX в PDF на C#."
 keywords: "конвертировать doc в pdf c#, конвертировать docx в pdf c#, .NET конвертировать doc docx, doc в pdf .net, docx в pdf asp .net"
 weight: 10

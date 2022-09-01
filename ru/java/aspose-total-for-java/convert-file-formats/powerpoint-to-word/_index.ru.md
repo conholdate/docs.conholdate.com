@@ -4,7 +4,7 @@ second_title: "Conholdate.Total для Java"
 articleTitle: "Конвертировать PPT PPTX в DOC DOCX"
 linktitle: "Конвертировать PPT PPTX в DOC DOCX"
 type: docs
-url: /powerpoint-to-word/
+url: /ru/powerpoint-to-word/
 description: "Преобразование PowerPoint PPT PPTX и других форматов файлов Word DOC DOCX на Java."
 keywords: "конвертировать powerpoint Java, конвертировать PowerPoint в Word Java, конвертировать pptx в docx Java, конвертировать ppt в doc Java, java конвертировать ppt pptx, ppt в docx java, pptx в docx eclipse java, конвертер Java для ppt, конвертер Java для pptx, pptx в слово Java, слайды на страницы docx"
 weight: 10

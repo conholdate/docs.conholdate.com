@@ -4,7 +4,7 @@ second_title: "Conholdate.Total для .NET"
 articleTitle: "Преобразование XLS XLSX в PowerPoint"
 linktitle: "Преобразование XLS XLSX в PowerPoint"
 type: docs
-url: /convert-xls-xlsx-to-pptx/
+url: /ru/convert-xls-xlsx-to-pptx/
 description: "Преобразование форматов файлов XLS XLSX в PowerPoint (PPTX) на C#."
 keywords: "конвертировать c#, конвертировать excel в PowerPoint c#, конвертировать xls в pptx c#, конвертировать xlsx в powerpoint c#, .NET конвертировать xls xlsx, xls в pptx .net, xlsx в pptx asp .net, конвертер c# для xls, конвертер c# для xlsx, excel в pptx c#, лист в слайд"
 weight: 10

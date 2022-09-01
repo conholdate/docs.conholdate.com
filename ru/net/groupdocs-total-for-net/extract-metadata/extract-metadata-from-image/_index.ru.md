@@ -3,7 +3,7 @@ title: "Извлечь метаданные из изображения"
 description: "В этой статье показано, как легко можно извлечь метаданные из изображения с помощью C#."
 keywords: "извлечь метаданные из изображения"
 type: docs
-url: /extract-metadata-from-image/
+url: /ru/extract-metadata-from-image/
 weight: 20
 ---
 

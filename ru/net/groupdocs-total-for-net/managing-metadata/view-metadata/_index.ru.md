@@ -3,7 +3,7 @@ title: "Просмотр метаданных"
 description: "В этой статье показано, как просмотреть метаданные документа."
 keywords: "просмотреть метаданные"
 type: docs
-url: /view-metadata/
+url: /ru/view-metadata/
 weight: 20
 ---
 
