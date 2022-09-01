@@ -1,7 +1,7 @@
 ---
 title: "Conholdate.Total für .NET"
 type: docs
-url: /net/
+url: /de/net/
 weight: 10
 ---
 

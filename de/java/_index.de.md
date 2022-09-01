@@ -1,7 +1,7 @@
 ---
 title: "Conholdate.Total für Java"
 type: docs
-url: /java/
+url: /de/java/
 weight: 10
 ---
 

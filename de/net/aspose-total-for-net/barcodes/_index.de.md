@@ -3,7 +3,7 @@ title: "Barcode C# erstellen oder lesen"
 linktitle: "Barcodes erstellen oder lesen"
 type: docs
 weight: 10
-url: /barcodes/
+url: /de/barcodes/
 keywords: "Barcode C# erstellen, Barcode ASP.NET lesen, Barcode C# erstellen oder lesen, Barcode aus Word PDF C# lesen, Barcode zu Word PDF .net hinzufügen"
 description: "Erstellen Sie Barcodes oder fügen Sie sie zu MS Office, PDF und mehreren anderen Dateiformaten in C# .NET hinzu."
 ---

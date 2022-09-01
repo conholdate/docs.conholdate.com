@@ -3,7 +3,7 @@ title: "Verwalten von Metadaten"
 description: "Dieser Abschnitt enthält Artikel zum Verwalten von Metadaten."
 keywords: "Metadaten verwalten"
 type: docs
-url: /managing-metadata/
+url: /de/managing-metadata/
 weight: 30
 versteckenKinder: Falsch
 ---

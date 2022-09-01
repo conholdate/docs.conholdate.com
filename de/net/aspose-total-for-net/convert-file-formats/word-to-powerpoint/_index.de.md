@@ -4,7 +4,7 @@ second_title: "Conholdate.Total für .NET"
 articleTitle: "Konvertieren Sie DOC DOCX in PPTX"
 linktitle: "Konvertieren Sie DOC DOCX in PPTX"
 type: docs
-url: /word-to-powerpoint/
+url: /de/word-to-powerpoint/
 description: "Konvertieren Sie DOC DOCX-Dateiformate in PowerPoint (PPTX) in C#."
 keywords: "Word c# konvertieren, Word in PowerPoint c# konvertieren, doc in pptx c# konvertieren, docx in Powerpoint c# konvertieren, .NET doc docx konvertieren, doc in pptx .net, docx in pptx asp .net, c#-Konverter für doc, c#-Konverter für docx , Wort zu pptx c#, docx-Seiten zu Folien"
 weight: 10
