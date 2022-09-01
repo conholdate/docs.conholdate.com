@@ -43,7 +43,7 @@ Das folgende Codebeispiel zeigt, wie die Minimierung aktiviert wird.
 
 {{< gist "conholdate-docs-gists" "5746ab59a9c4a41e91c90e1704d50699" "minify-html.cs" >}}
 
-{{< alert style="info" >}}Diese Einstellung komprimiert den Inhalt nicht so stark, wie dies mit der Gzip-Komprimierung erreicht werden könnte (die von Ihrem Webserver aktiviert und konfiguriert werden sollte). Aber es könnte immer noch wertvoll sein und kann als zusätzliche Optimierung in Kombination mit der Gzip-Komprimierung verwendet werden. {{< /Alarm >}}
+{{< alert style="info" >}}Diese Einstellung komprimiert den Inhalt nicht so stark, wie dies mit der Gzip-Komprimierung erreicht werden könnte (die von Ihrem Webserver aktiviert und konfiguriert werden sollte). Aber es könnte immer noch wertvoll sein und kann als zusätzliche Optimierung in Kombination mit der Gzip-Komprimierung verwendet werden. {{< /alert >}}
 
 
 
