@@ -4,7 +4,7 @@ second_title: ".NET 的 Conholdate.Total"
 articleTitle: "将 XLS XLSX 转换为 Word"
 linktitle: "将 XLS XLSX 转换为 Word"
 type: docs
-url: /convert-xls-xlsx-to-doc-docx/
+url: /zh/convert-xls-xlsx-to-doc-docx/
 description: "在 C# 中将 XLS XLSX 文件格式转换为 Word（DOC 或 DOCX）。"
 keywords: "将 excel 转换为 word c#，将 xls 转换为 word c#，将 xlsx 转换为 c#，.NET 将 xls xlsx，xls 转换为 doc docx .net，xlsx 到 doc docx asp .net，用于 xls 的 c# 转换器，用于 xlsx 的 c# 转换器，excel到 pdf c#, 表格到 pdf"
 weight: 10

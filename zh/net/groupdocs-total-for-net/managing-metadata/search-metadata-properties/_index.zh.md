@@ -3,7 +3,7 @@ title: "搜索元数据属性"
 description: "本文演示了如何在 .NET 解决方案中搜索元数据并从 PDF、DOCX、PPTX、XLSX、图像、音频、视频和许多其他不同类型的文件中提取所需的元数据属性"
 keywords: "搜索元数据"
 type: docs
-url: /search-metadata-properties/
+url: /zh/search-metadata-properties/
 weight: 30
 ---
 

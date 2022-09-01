@@ -4,7 +4,7 @@ second_title: ".NET 的 Conholdate.Total"
 articleTitle: "将 PDF 转换为 HTML"
 linktitle: "将 PDF 转换为 HTML"
 type: docs
-url: /convert-pdf-to-html/
+url: /zh/convert-pdf-to-html/
 description: "在 C# 中将 PDF 转换为 HTML。"
 keywords: "将 pdf 转换为 html c#，转换 PDf c#，.NET 将 pdf 转换为 html，将 pdf 转换为 html asp .net"
 weight: 10

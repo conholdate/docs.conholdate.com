@@ -4,7 +4,7 @@ second_title: ".NET 的 Conholdate.Total"
 articleTitle: "将 XLS XLSX 转换为 PDF"
 linktitle: "将 XLS XLSX 转换为 PDF"
 type: docs
-url: /convert-xls-xlsx-to-pdf/
+url: /zh/convert-xls-xlsx-to-pdf/
 description: "在 C# 中将 XLS XLSX 文件格式转换为 PDF。"
 keywords: "将 xls 转换为 pdf c#、将 xlsx 转换为 PDf c#、.NET 将 xls xlsx、xls 转换为 pdf .net、xlsx 到 pdf asp .net、c# 转换器用于 xls、c# 转换器用于 xlsx、excel 到 pdf c#、工作表到 pdf"
 weight: 10

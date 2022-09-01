@@ -4,7 +4,7 @@ second_title: "Java 的 Conholdate.Total"
 articleTitle: "将 XLS XLSX 转换为 PowerPoint"
 linktitle: "将 XLS XLSX 转换为 PowerPoint"
 type: docs
-url: /convert-xls-xlsx-to-pptx/
+url: /zh/convert-xls-xlsx-to-pptx/
 description: "将 XLS XLSX 文件格式转换为 Java 中的 PowerPoint PPTX。"
 keywords: "转换 Java，将 excel 转换为 PowerPoint Java，将 xls 转换为 pptx Java，将 xlsx 转换为 powerpoint Java，java 将 xls xlsx，xls 转换为 pptx java，xlsx 到 pptx eclipse java，Java 转换器的 xls，Java 转换器的 xlsx，excel 到 pptx Java，幻灯片"
 weight: 10

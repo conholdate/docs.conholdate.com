@@ -4,7 +4,7 @@ second_title: "Java 的 Conholdate.Total"
 articleTitle: "将 PDF 转换为 HTML"
 linktitle: "将 PDF 转换为 HTML"
 type: docs
-url: /convert-pdf-to-html/
+url: /zh/convert-pdf-to-html/
 description: "在 Java 中将 PDF 转换为 HTML。"
 keywords: "将pdf转换为html Java，将PDF转换为Java，Java将pdf转换为html，将pdf转换为html Java"
 weight: 10

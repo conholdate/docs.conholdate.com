@@ -1,7 +1,7 @@
 ---
 title: ".NET 的 Conholdate.Total"
 type: docs
-url: /net/
+url: /zh/net/
 weight: 10
 ---
 
