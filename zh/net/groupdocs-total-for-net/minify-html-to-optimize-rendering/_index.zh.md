@@ -43,7 +43,7 @@ Viewer API 提供 *HtmlViewOptions* 类的 *Minify* 属性，可让您缩小输�
 
 {{< gist "conholdate-docs-gists" "5746ab59a9c4a41e91c90e1704d50699" "minify-html.cs" >}}
 
-{{< alert style="info" >}}此设置不会像使用 Gzip 压缩（应该从您的网络服务器启用和配置）那样显着压缩内容。但它仍然可能很有价值，可以与 Gzip 压缩结合使用作为额外的优化。 {{< /警报 >}}
+{{< alert style="info" >}}此设置不会像使用 Gzip 压缩（应该从您的网络服务器启用和配置）那样显着压缩内容。但它仍然可能很有价值，可以与 Gzip 压缩结合使用作为额外的优化。 {{< /alert >}}
 
 
 
