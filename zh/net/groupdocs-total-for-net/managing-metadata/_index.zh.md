@@ -5,7 +5,6 @@ keywords: "管理元数据"
 type: docs
 url: /zh/managing-metadata/
 weight: 30
-隐藏儿童：假
 ---
 
 使用我们直观而强大的 API，只需几行代码，即可快速轻松地管理文档中的元数据。
