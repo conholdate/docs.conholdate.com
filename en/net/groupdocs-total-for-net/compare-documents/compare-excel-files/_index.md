@@ -17,9 +17,9 @@ After the comparison, there are three colors on the resulting file that highligh
 *   Elements wich were deleted from the first file – <font color="red">**red**</font>, by default
 *   Elements that have changed their styles (font, color, etc.) – <font color="green">**green**</font>, by default
 
-## Code sample to compare two Excel files:
+## Code sample to compare two Excel files
 
-{{< gist "conholdate-docs-gists" "f68231657baf755e3160b5c2298e69ca" "compare-excel-files.cs" >}}
+{{< gist "conholdate-docs-gists" "05e9a0800d63d9d68047e17a88f86644" "compare-excel-files.cs" >}}
 
 |  Source / Target / Result Excel files |
 | --- | --- |
