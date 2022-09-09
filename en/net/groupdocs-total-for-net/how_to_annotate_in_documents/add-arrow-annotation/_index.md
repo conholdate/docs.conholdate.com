@@ -1,6 +1,6 @@
 ---
 url: /add-arrow-annotation/
-title: Add arrow annotation
+title: Add Arrow Annotation
 weight: 2
 description: "Learn what is arrow annotation and how to add it to a document programmatically using GroupDocs.Annotation API which is a part of Conholdate.Total for .NET."
 keywords: What is arrow annotation, how to add annotation, add area annotation

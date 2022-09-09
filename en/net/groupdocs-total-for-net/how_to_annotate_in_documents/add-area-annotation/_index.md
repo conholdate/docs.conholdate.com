@@ -1,6 +1,6 @@
 ---
 url: /add-area-annotation/
-title: Add area annotation
+title: Add Area Annotation
 weight: 1
 description: "Learn what is area annotation and how to add it to a document programmatically using GroupDocs.Annotation API which is a part of Conholdate.Total for .NET."
 keywords: What is area annotation, how to add annotation, add area annotation
