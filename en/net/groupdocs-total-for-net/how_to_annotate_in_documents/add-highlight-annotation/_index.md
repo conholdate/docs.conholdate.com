@@ -1,6 +1,6 @@
 ---
 url: /add-highlight-annotation/
-title: Add highlight Annotation
+title: Add Highlight Annotation
 weight: 3
 description: "Learn what is Highlight annotation and how to add it to a document programmatically using GroupDocs.Annotation API which is a part of Conholdate.Total for .NET."
 keywords: What is highlight annotation, how to add annotation, add highlight annotation
