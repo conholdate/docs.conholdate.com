@@ -3,7 +3,7 @@ title: "Vergleichen Sie Excel-Dateien"
 description: "In diesem Artikel wird erläutert, wie Sie die GroupDocs.Comparison-API (die Teil von Conholdate.Total für .NET ist) verwenden, um Excel-Dokumente zu vergleichen."
 keywords: "Excel-Dateien vergleichen, Excel-Dateien in C# vergleichen, Codebeispiel zum Vergleichen von zwei Excel-Dateien"
 type: docs
-url: /compare-excel-files/
+url: /de/compare-excel-files/
 weight: 70
 ---
 

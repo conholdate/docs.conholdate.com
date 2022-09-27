@@ -3,7 +3,7 @@ title: "Сравните юридические документы"
 description: "В этой статье объясняется, как использовать API GroupDocs.Comparison (который является частью Conholdate.Total для .NET) для сравнения юридических документов."
 keywords: "Сравните юридические документы, Сравните юридические документы на C#"
 type: docs
-url: /compare-legal-documents/
+url: /ru/compare-legal-documents/
 weight: 50
 ---
 

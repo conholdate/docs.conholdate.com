@@ -3,7 +3,7 @@ title: "比较两个文件中的文本"
 description: "本文介绍了使用 GroupDocs.Comparison API（它是 .NET 的 Conholdate.Total 的一部分）来比较两个文件中的文本。"
 keywords: "比较两个文件中的文本，使用 C# 比较两个文件中的文本"
 type: docs
-url: /compare-text-in-two-files/
+url: /zh/compare-text-in-two-files/
 weight: 20
 ---
 ## 文件比较

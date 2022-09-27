@@ -3,7 +3,7 @@ title: "Dokumente vergleichen"
 description: "In diesem Abschnitt erfahren Sie mehr über die Verwendung der GroupDocs.Comparison-API, die Teil von Conholdate.Total für .NET ist. Der folgende Artikel zeigt, wie Sie Dokumente einfach vergleichen können."
 keywords: "Dokumente vergleichen"
 type: docs
-url: /compare-documents/
+url: /de/compare-documents/
 weight: 20
 ---
 ## Vergleichsfunktionen

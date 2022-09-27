@@ -3,7 +3,7 @@ title: "比较两个 PDF 文档"
 description: "本文将解释如何使用 GroupDocs.Comparison API 比较两个 pdf 文档，该 API 是 Conholdate.Total for .NET 的一部分。"
 keywords: "比较两个 PDF 文档，使用 C# 比较两个 PDF 文档"
 type: docs
-url: /compare-two-pdf-documents/
+url: /zh/compare-two-pdf-documents/
 weight: 20
 ---
 ## 使用 C# 比较两个 PDF 文档

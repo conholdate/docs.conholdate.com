@@ -3,7 +3,7 @@ title: "Сравните два PDF-документа"
 description: "В этой статье объясняется, как сравнить два pdf-документа с помощью API GroupDocs.Comparison, который является частью Conholdate.Total для .NET."
 keywords: "Сравните два документа PDF, сравните два документа PDF с помощью С#"
 type: docs
-url: /compare-two-pdf-documents/
+url: /ru/compare-two-pdf-documents/
 weight: 20
 ---
 ## Сравните два PDF-документа с помощью C#

@@ -3,7 +3,7 @@ title: "PowerPoint-Dateien vergleichen"
 description: "In diesem Artikel wird die Verwendung der GroupDocs.Comparison-API (die Teil von Conholdate.Total für .NET ist) zum Vergleichen von Powerpoint-Dateien erläutert."
 keywords: "PowerPoint-Dateien vergleichen, PowerPoint-Dateien in C# vergleichen"
 type: docs
-url: /compare-powerpoint-files/
+url: /de/compare-powerpoint-files/
 weight: 50
 ---
 

@@ -3,7 +3,7 @@ title: "Сравните два документа Word на наличие ра
 description: "В этой статье объясняется, как сравнивать два текстовых документа на наличие различий с помощью API GroupDocs.Comparison, который является частью Conholdate.Total для .NET."
 keywords: "Сравните два документа Word на предмет различий, сравните два документа Word на предмет различий в C#"
 type: docs
-url: /compare-two-word-documents-for-differences/
+url: /ru/compare-two-word-documents-for-differences/
 weight: 20
 ---
 ## Сравните два текстовых документа на наличие различий в C#

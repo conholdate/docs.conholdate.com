@@ -3,7 +3,7 @@ title: "Vergleichen Sie zwei Word-Dokumente auf Unterschiede"
 description: "In diesem Artikel wird erläutert, wie zwei Word-Dokumente mithilfe der GroupDocs.Comparison-API, die Teil von Conholdate.Total für .NET ist, auf Unterschiede verglichen werden."
 keywords: "Zwei Word-Dokumente auf Unterschiede vergleichen, Zwei Word-Dokumente auf Unterschiede in C# vergleichen"
 type: docs
-url: /compare-two-word-documents-for-differences/
+url: /de/compare-two-word-documents-for-differences/
 weight: 20
 ---
 ## Vergleichen Sie zwei Word-Dokumente auf Unterschiede in C#

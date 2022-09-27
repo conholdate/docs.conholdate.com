@@ -3,7 +3,7 @@ title: "比较 Powerpoint 文件"
 description: "本文介绍了使用 GroupDocs.Comparison API（它是 Conholdate.Total for .NET 的一部分）来比较 powerpoint 文件。"
 keywords: "比较 Powerpoint 文件，比较 C# 中的 Powerpoint 文件"
 type: docs
-url: /compare-powerpoint-files/
+url: /zh/compare-powerpoint-files/
 weight: 50
 ---
 
