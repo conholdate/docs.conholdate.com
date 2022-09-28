@@ -6,13 +6,9 @@ weight: 3
 description: "This article demonstrates that how to convert a file to PDF, Word, Excel, PowerPoint, Email, JPG, PNG, TIFF and many other formats with just couple of lines of С# (CSharp) code."
 keywords: Convert PDF, Convert Word, Convert Excel, Convert Email, Convert Presentation, Convert a File C#, Convert document C#
 productName: GroupDocs.Conversion for .NET
-hideChildren: False
+
 ---
-{{< alert style="info" >}}
-**Try online**  
-  
-You can try to convert a file online and download results for free using GroupDocs.Conversion [Live Demo](https://products.groupdocs.app/conversion/total)
-{{< /alert >}}
+
 
 The **[GroupDocs.Conversion](https://products.groupdocs.com/conversion/net)**  (which is the part of Conholdate.Total for .NET) provides a convinient way to convert files from supported source format to several range of target formats. The user just need to follow the simple process which is - load a source document converter and after conversion is completed, result will be saved to a chosen file path at local disk or other desired storage.  
   
