@@ -5,7 +5,7 @@ title: Convert files
 weight: 3
 description: "This article demonstrates that how to convert a file to PDF, Word, Excel, PowerPoint, Email, JPG, PNG, TIFF and many other formats with just couple of lines of С# (CSharp) code."
 keywords: Convert PDF, Convert Word, Convert Excel, Convert Email, Convert Presentation, Convert a File C#, Convert document C#
-productName: GroupDocs.Conversion for .NET
+type: docs
 
 ---
 
