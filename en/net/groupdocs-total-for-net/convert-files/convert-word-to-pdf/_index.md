@@ -9,7 +9,7 @@ weight: 70
 
 ## Convert Word to PDF in C#
 
-THe GroupDocs.Conversion which is a part of Conholdate.Total for .NET gives you an easy way to convert MS Word documents such as: DOC or DOCX to PDF. Simply you need to write a couple lines of code to:
+The GroupDocs.Conversion which is a part of Conholdate.Total for .NET gives you an easy way to convert MS Word documents such as: DOC or DOCX to PDF. Simply you need to write a couple lines of code to:
 
 1. Load your DOCX document into a Converter object by providing a filename with extension.
 2. Invoke the Convert method of the Converter object and specify the desired output format as PDF by passing PdfConvertOptions object to it along with the name for the converted file.  
