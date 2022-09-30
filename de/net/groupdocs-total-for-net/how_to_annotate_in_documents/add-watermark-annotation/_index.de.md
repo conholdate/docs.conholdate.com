@@ -1,5 +1,5 @@
 ---
-url: /add-watermark-annotation/
+url: /de/add-watermark-annotation/
 title: "Wasserzeichenanmerkung hinzufügen"
 weight: 3
 description: "Erfahren Sie, was eine Wasserzeichenannotation ist und wie Sie sie mithilfe der GroupDocs.Annotation-API, die Teil von Conholdate.Total für .NET ist, programmgesteuert zu einem Dokument hinzufügen."

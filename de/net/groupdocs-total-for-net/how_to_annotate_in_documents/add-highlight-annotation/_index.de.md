@@ -1,5 +1,5 @@
 ---
-url: /add-highlight-annotation/
+url: /de/add-highlight-annotation/
 title: "Highlight-Anmerkung hinzufügen"
 weight: 3
 description: "Erfahren Sie, was Highlight-Anmerkungen sind und wie Sie sie mithilfe der GroupDocs.Annotation-API, die Teil von Conholdate.Total für .NET ist, programmgesteuert zu einem Dokument hinzufügen."
