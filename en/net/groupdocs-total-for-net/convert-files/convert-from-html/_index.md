@@ -10,7 +10,7 @@ weight: 70
 ## Convert from HTML in C#
 
 The [GroupDocs.Conversion](https://products.groupdocs.com/conversion/net) (which is a part of Conholdate.Total for .NET) allows you to easily convert your HTML document into various other file formats.  
-Here for an instance, the example below shows that how an HTML to PDF conversion code snippet can be written in C#:
+Here for an instance, the example below shows that how an HTML to PDF conversion code snippet can be written in C# language:
 
 {{< gist "conholdate-docs-gists" "82c27ef7bfcabf756992a104e6b954ec" "convert-from-html.cs" >}}
 
