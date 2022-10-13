@@ -17,11 +17,9 @@ Here is an example where the code is written to convert DWG to PDF:
 
 {{< gist "conholdate-docs-gists" "d1073157eddedfa90da1df830f254e3d" "convert-pdf-to-dwg.cs" >}}
 
-## Convert to other CAD format
 
-Conversion of your CAD files to any other CAD format is also bit easy. The following code snippet shows how to convert DWG document to STL format in C# using Conholdate.Total's Conversion API.
 
-{{< gist "conholdate-docs-gists" "d1073157eddedfa90da1df830f254e3d" "convert-dwg-to-stl.cs" >}}
+
 
 
 
