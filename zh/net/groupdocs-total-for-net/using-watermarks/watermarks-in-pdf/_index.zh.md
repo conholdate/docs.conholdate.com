@@ -46,7 +46,7 @@ GroupDocs.Watermark API 使用 Image XObject 和 Form XObject 添加 [ImageWater
 {{< gist "conholdate-docs-gists" "07fa3962d7184541a3a822a1e1273eba" "PdfAddPrintOnlyAnnotationWatermark.cs" >}}
 
 
-有关详细信息，请访问 [本文](https://docs.groupdocs.com/watermark/net/watermarks-in-pdf-document/)。
+有关详细信息，请访问 [本文](https://docs.groupdocs.com/watermark/net/watermarks-in-pdf-document/)
 
 
 
