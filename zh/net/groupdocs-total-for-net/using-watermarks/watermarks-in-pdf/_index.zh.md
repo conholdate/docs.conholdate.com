@@ -25,11 +25,11 @@ GroupDocs.Watermark API 使用 Image XObject 和 Form XObject 添加 [ImageWater
 
 ## 注释
 
-{{<警报样式=“信息”>}}
+{{< alert style="info" >}}
 **PDF 参考 1.7**
 注释将注释、声音或电影等对象与 PDF 文档页面上的位置相关联，或提供一种通过鼠标和键盘与用户交互的方式。 PDF 包括多种标准注释类型。
 水印注释 (PDF 1.6) 用于表示预期在页面上以固定尺寸和位置打印的图形，而与打印页面的尺寸无关。
-{{< /警报 >}}
+{{< /alert >}}
 
 注释是可以表示水印的第三种 PDF 实体。使用以下代码片段通过 [PdfAnnotationWatermarkOptions](https://apireference.groupdocs.com/net/watermark/groupdocs.watermark.options.pdf/pdfannotationwatermarkoptions) 向 PDF 文档添加水印注释。
 
