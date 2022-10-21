@@ -25,7 +25,7 @@ IEnumerable<TocItem> GetToc()
 | [Depth](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/tocitem/properties/depth) | The depth level. |
 | [PageIndex](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/tocitem/properties/pageindex) | The page index. |
 | [Text](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/tocitem/properties/text) | The text. |
-| TextReader [ExtractText()](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/tocitem/methods/extracttext) | Extract a text from the document to which [TocItem](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/tocitem) object refers. For detail, see [Extract Text By Table of Contents Item]({{< ref "parser/net/developer-guide/advanced-usage/working-with-text/extract-text-by-table-of-contents-item.md" >}}) |
+| TextReader [ExtractText()](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/tocitem/methods/extracttext) | Extract a text from the document to which [TocItem](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/tocitem) object refers. For detail|
 
 Follow the steps below to retrieve table of contents from the document.
 
