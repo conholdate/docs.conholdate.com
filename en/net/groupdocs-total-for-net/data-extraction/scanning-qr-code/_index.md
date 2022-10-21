@@ -9,7 +9,7 @@ weight: 70
 
 ## Scanning QR Code in C#
 
-GroupDocs.Parser (which is a part of Conholdate.Total for .NET) allows to scan QR Code from PDF, MS Word (DOC, DOCX), MS PowerPoint (PPT, PPTX), LibreOffice formats and many others (see full list at [supported document formats]({{< ref "parser/net/getting-started/supported-document-formats.md" >}}) article).
+GroupDocs.Parser (which is a part of Conholdate.Total for .NET) allows to scan QR Code from PDF, MS Word (DOC, DOCX), MS PowerPoint (PPT, PPTX), LibreOffice formats and many others.
 
 GroupDocs.Parser's QR Code scanner is easy to use and powerful at the same time. Our sophisticated algorithms allow to read even damaged barcodes.
 
