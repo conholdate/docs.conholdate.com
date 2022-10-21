@@ -1,48 +1,41 @@
 ---
-title: "Extract from ZIP or Attachments"
-description: "This article explains how GroupDocs.Parser for .NET (which is a part of Conholdate.Total for .NET) extract data from ZIP file."
-keywords: Extract from ZIP,extract data from ZIP, Extract from ZIP in C#
+title: "Scanning Barcode"
+description: "This article explains how GroupDocs.Parser for .NET (which is a part of Conholdate.Total for .NET) scan barcode from images, documents and other file formats like PDF, Emails, Ebooks, Words, and others."
+keywords: Scanning Barcode,Scanning Barcode in C#
 type: docs
-url: /extract-from-zip/
+url: /scanning-barcode/
 weight: 70
 ---
 
-## Extract from ZIP in C#
+## Scanning Barcode in C#
 
-GroupDocs.Parser (which is a part of Conholdate.Total for .NET) allows you to extract documents from ZIP files and get attachments from containers simply call the [GetContainer](https://apireference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getcontainer) method.
+GroupDocs.Parser (which is a part of Conholdate.Total for .NET) allows to scan barcode from PDF, Word (DOC, DOCX), PowerPoint (PPT, PPTX), LibreOffice formats and many others.
+
+The Parser API is easy to use and powerful to scan barcodes. The API is capable to read even damaged barcodes.
+
+This article shows how to implement the simplest scenario - read barcode from any supported format without additional settings. 
+
+## How to scan barcode
+
+To scan barcode from your file, simply call [GetBarcodes](https://apireference.groupdocs.com/parser/net/groupdocs.parser/parser/methods/getbarcodes) method.
 
 ```csharp
-IEnumerable<ContainerItem> GetContainer()
-
+IEnumerable<PageBarcodeArea> GetBarcodes();
 ```
 
-This method returns a collection of [ContainerItem](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/containeritem) objects.
+This method returns a collection of [PageBarcodeArea](https://apireference.groupdocs.com/parser/net/groupdocs.parser.data/pagebarcodearea) objects.
 
-| Member | Description |
-| --- | --- |
-| [Name](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/containeritem/properties/name) | The name of the item. |
-| [Directory](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/containeritem/properties/directory) | The directory of the item. |
-| [FilePath](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/containeritem/properties/filepath) | The full path of the item. |
-| [Size](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/containeritem/properties/size) | The size of the item in bytes. |
-| [Metadata](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/containeritem/properties/metadata) | The collection of item metadata. |
-| Stream [OpenStream()](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/containeritem/methods/openstream) | Opens the stream of the item content. |
-| Parser [OpenParser()](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/containeritem/methods/openparser) | Creates the Parser object for the item content. |
-| Parser [OpenParser(LoadOptions)](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data.containeritem/openparser/methods/1) | Creates the Parser object for the item content with [LoadOptions](https://apireference.groupdocs.com/net/parser/groupdocs.parser.options/loadoptions). |
-| Parser [OpenParser(LoadOptions, ParserSettings)](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data.containeritem/openparser/methods/2) | Creates the Parser object for the item content with [LoadOptions](https://apireference.groupdocs.com/net/parser/groupdocs.parser.options/loadoptions) and [ParserSettings](https://apireference.groupdocs.com/net/parser/groupdocs.parser.options/parsersettings). |
+Here are the steps to extract a barcode from file.
 
-Container means that both container-only files (like zip archives, outlook storage) and documents with attachments (like emails, PDF Portfolios).
+- Instantiate [Parser](https://apireference.groupdocs.com/net/parser/groupdocs.parser/parser) object for the initial file.
+- Check if the file supports barcodes extraction.
+- Call [GetBarcodes](https://apireference.groupdocs.com/parser/net/groupdocs.parser/parser/methods/getbarcodes) method and obtain collection of [PageBarcodeArea](https://apireference.groupdocs.com/parser/net/groupdocs.parser.data/pagebarcodearea) objects.
+- Iterate through the collection and get a barcode value.
 
-Follow the steps below to extract an email text from outlook storage
-
-*   Instantiate [Parser](https://apireference.groupdocs.com/net/parser/groupdocs.parser/parser) object for the initial document.
-*   Call [GetContainer](https://apireference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getcontainer) method and obtain collection of document container item objects.
-*   Check if *collection* isn't *null* (container extraction is supported for the document).
-*   Iterate through the collection and obtain [Parser](https://apireference.groupdocs.com/net/parser/groupdocs.parser/parser) object to extract a text.
-
-The following sample code shows how to extract a text from zip entities.
+The following example shows how to scan barcode:
 
 
-{{< gist "conholdate-docs-gists" "7cbce1a3a43e0499231b59427a842a93" "extract-from-zip.cs" >}}
+{{< gist "conholdate-docs-gists" "63ee67bbcee0453c7ff2c3dba12ac3a5" "scanning-barcode.cs" >}}
 
 
 
