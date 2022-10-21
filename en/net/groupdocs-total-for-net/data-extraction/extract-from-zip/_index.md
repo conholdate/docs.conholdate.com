@@ -9,14 +9,14 @@ weight: 70
 
 ## Extract from ZIP in C#
 
-GroupDocs.Parser (which is a part of Conholdate.Total for .NET) allows you to extract documents from ZIP files and get attachments from containers simply call the [GetContainer](https://apireference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getcontainer) method
+GroupDocs.Parser (which is a part of Conholdate.Total for .NET) allows you to extract documents from ZIP files and get attachments from containers simply call the [GetContainer](https://apireference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getcontainer) method.
 
 ```csharp
 IEnumerable<ContainerItem> GetContainer()
 
 ```
 
-This method returns a collection of [ContainerItem](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/containeritem) objects:
+This method returns a collection of [ContainerItem](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/containeritem) objects.
 
 | Member | Description |
 | --- | --- |
@@ -32,14 +32,14 @@ This method returns a collection of [ContainerItem](https://apireference.groupdo
 
 Container means that both container-only files (like zip archives, outlook storage) and documents with attachments (like emails, PDF Portfolios).
 
-Follow the steps below to extract an email text from outlook storage:
+Follow the steps below to extract an email text from outlook storage
 
-*   Instantiate [Parser](https://apireference.groupdocs.com/net/parser/groupdocs.parser/parser) object for the initial document;
-*   Call [GetContainer](https://apireference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getcontainer) method and obtain collection of document container item objects;
-*   Check if *collection* isn't *null* (container extraction is supported for the document);
+*   Instantiate [Parser](https://apireference.groupdocs.com/net/parser/groupdocs.parser/parser) object for the initial document.
+*   Call [GetContainer](https://apireference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getcontainer) method and obtain collection of document container item objects.
+*   Check if *collection* isn't *null* (container extraction is supported for the document).
 *   Iterate through the collection and obtain [Parser](https://apireference.groupdocs.com/net/parser/groupdocs.parser/parser) object to extract a text.
 
-The following sample code shows how to extract a text from zip entities:
+The following sample code shows how to extract a text from zip entities.
 
 
 {{< gist "conholdate-docs-gists" "7cbce1a3a43e0499231b59427a842a93" "extract-from-zip.cs" >}}
