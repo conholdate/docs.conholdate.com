@@ -29,9 +29,9 @@ IEnumerable<TocItem> GetToc()
 
 Follow the steps below to retrieve table of contents from the document.
 
-*   Instantiate [Parser](https://apireference.groupdocs.com/net/parser/groupdocs.parser/parser) object for the initial document;
-*   Call [GetToc](https://apireference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettoc) method and obtain collection of [TocItem](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/tocitem) objects;
-*   Check if *collection* isn't *null* (table of contents  extraction is supported for the document);
+*   Instantiate [Parser](https://apireference.groupdocs.com/net/parser/groupdocs.parser/parser) object for the initial document.
+*   Call [GetToc](https://apireference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettoc) method and obtain collection of [TocItem](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/tocitem) objects.
+*   Check if *collection* isn't *null* (table of contents  extraction is supported for the document).
 *   Iterate through the collection and get page index to extract a page text from the document.
 
 See the following example which shows how to extract table of contents from CHM file.
