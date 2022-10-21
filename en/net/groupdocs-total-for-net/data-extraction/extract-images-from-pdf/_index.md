@@ -31,7 +31,7 @@ The methods return a collection of [PageImageArea](https://apireference.groupdoc
 | Stream [GetImageStream(ImageOptions)](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data.pageimagearea/getimagestream/methods/1) | Returns the image stream in a different format. |
 | void [Save(String)](https://apireference.groupdocs.com/net/parser/groupdocs.parser.data/pageimagearea/methods/save) | Saves the image to the file. |
 | void Save(String, ImageOptions) | Saves the image to the file in a different format. |
-{{< gist "conholdate-docs-gists" "b27ac127cfc657c1dc7b017ced472e9b" "extract-text-from-pdf.cs" >}}
+
 
 The following code snippet demonstrates how to extract all images from the whole document:
 
