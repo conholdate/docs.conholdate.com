@@ -3,7 +3,7 @@ title: "Managing Metadata"
 description: "This section contains articles that how to manage metadata."
 keywords: managing metadata
 type: docs
-url: /managing-metadata/
+url: /net/managing-metadata/
 weight: 30
 hideChildren: False
 ---

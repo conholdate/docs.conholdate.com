@@ -3,7 +3,7 @@ title: "Watermarks in PDF"
 description: "A guide to learn how many ways are available to add watermarks in PDF using GroupDocs.Watermark which is part of Conholdate.Total for .NET."
 keywords: Adding Watermark, watermarks in PDF
 type: docs
-url: /watermarks-in-pdf/
+url: /net/watermarks-in-pdf/
 weight: 70
 ---
 

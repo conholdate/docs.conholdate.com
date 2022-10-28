@@ -3,7 +3,7 @@ title: "Retrieve Table of Contents"
 description: "This article explains how GroupDocs.Parser for .NET (which is a part of Conholdate.Total for .NET) retrieve table of contents from file."
 keywords: Table of Contents,Retrieve Table of Contents, Retrieve Table of Contents in C#
 type: docs
-url: /retrieve-table-of-contents/
+url: /net/retrieve-table-of-contents/
 weight: 70
 ---
 

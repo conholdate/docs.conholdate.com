@@ -3,7 +3,7 @@ title: "Convert From AVI "
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) supports conversion of From AVI."
 keywords: Convert From AVI, Convert From AVI in C#, AVI
 type: docs
-url: /convert-from-avi/
+url: /net/convert-from-avi/
 weight: 70
 ---
 

@@ -3,7 +3,7 @@ title: "Minify HTML to Optimize Rendering"
 description: "This article shows how to minify HTML and CSS when rendering of documents into HTML."
 keywords: minify html, rendering to html
 type: docs
-url: /minify-html-to-optimize-rendering/
+url: /net/minify-html-to-optimize-rendering/
 weight: 30
 ---
 

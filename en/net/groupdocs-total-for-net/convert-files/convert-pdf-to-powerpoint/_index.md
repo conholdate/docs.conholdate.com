@@ -3,7 +3,7 @@ title: "Convert PDF to PowerPoint"
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) converts PDF file into PowerPoint format."
 keywords: Convert PDF to PowerPoint, Convert PDF to PowerPoint in C#
 type: docs
-url: /convert-pdf-to-powerpoint/
+url: /net/convert-pdf-to-powerpoint/
 weight: 70
 ---
 

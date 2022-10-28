@@ -3,7 +3,7 @@ title: "Scanning Barcode"
 description: "This article explains how GroupDocs.Parser for .NET (which is a part of Conholdate.Total for .NET) scan barcode from images, documents and other file formats like PDF, Emails, Ebooks, Words, and others."
 keywords: Scanning Barcode,Scanning Barcode in C#
 type: docs
-url: /scanning-barcode/
+url: /net/scanning-barcode/
 weight: 70
 ---
 

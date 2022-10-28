@@ -3,7 +3,7 @@ title: "Add Watermarks to Diagrams"
 description: "A guide to learn adding watermark to diagrams documents (such as .vsdx) in c# using GroupDocs.Watermark which is a part of Conholdate.Total for .NET."
 keywords: Add Watermarks to Diagrams, adding watermark to diagrams documents in C#
 type: docs
-url: /add-watermarks-to-diagrams/
+url: /net/add-watermarks-to-diagrams/
 weight: 80
 ---
 

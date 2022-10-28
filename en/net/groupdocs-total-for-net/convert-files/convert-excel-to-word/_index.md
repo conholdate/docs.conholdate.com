@@ -3,7 +3,7 @@ title: "Convert Excel to Word"
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) supports Excel conversion to Word."
 keywords: Convert Excel to Word, Convert Excel to Word in C#, Excel to Word
 type: docs
-url: /convert-excel-to-word/
+url: /net/convert-excel-to-word/
 weight: 70
 ---
 

@@ -1,5 +1,5 @@
 ---
-url: /add-text-field-annotation/
+url: /net/add-text-field-annotation/
 title: Add Text Field Annotation
 weight: 3
 description: "Learn what is Text Field annotation and how to add it to a document programmatically using GroupDocs.Annotation API which is a part of Conholdate.Total for .NET."

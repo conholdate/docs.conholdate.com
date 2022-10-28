@@ -3,7 +3,7 @@ title: "Convert PNG to Excel"
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) supports PNG conversion to Excel."
 keywords: Convert PNG to Excel, Convert PNG to Excel in C#, PNG to Excel
 type: docs
-url: /convert-png-to-excel/
+url: /net/convert-png-to-excel/
 weight: 70
 ---
 

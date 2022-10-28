@@ -3,7 +3,7 @@ title: "Convert Word to HTML"
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) supports Word conversion to HTML."
 keywords: Convert Word to HTML, Convert Word to HTML in C#, Word to HTML
 type: docs
-url: /convert-word-to-html/
+url: /net/convert-word-to-html/
 weight: 70
 ---
 

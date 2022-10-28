@@ -3,7 +3,7 @@ title: "Extract from ZIP or Attachments"
 description: "This article explains how GroupDocs.Parser for .NET (which is a part of Conholdate.Total for .NET) extract data from ZIP file."
 keywords: Extract from ZIP,extract data from ZIP, Extract from ZIP in C#
 type: docs
-url: /extract-from-zip/
+url: /net/extract-from-zip/
 weight: 70
 ---
 

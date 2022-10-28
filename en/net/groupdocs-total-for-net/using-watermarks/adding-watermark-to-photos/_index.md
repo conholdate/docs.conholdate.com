@@ -3,7 +3,7 @@ title: "Adding Watermark to Photos"
 description: "A guide to learn adding watermark to photos in c# using GroupDocs.Watermark which is part of Conholdate.Total for .NET ."
 keywords: adding watermark to photos, adding watermark, add watermark, Add watermark to photos or multi-framed images in c#
 type: docs
-url: /adding-watermark-to-photos/
+url: /net/adding-watermark-to-photos/
 weight: 30
 ---
 ## Add watermark to photos or multi-framed images in c#

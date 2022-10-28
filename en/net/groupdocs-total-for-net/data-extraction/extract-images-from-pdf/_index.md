@@ -3,7 +3,7 @@ title: "Extract Images from PDF"
 description: "This article explains how GroupDocs.Parser for .NET (which is a part of Conholdate.Total for .NET) extract images from PDF file."
 keywords: Extract Images from PDF, Extract Images from PDF in C#
 type: docs
-url: /extract-images-from-pdf/
+url: /net/extract-images-from-pdf/
 weight: 70
 ---
 

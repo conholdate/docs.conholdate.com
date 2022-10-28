@@ -3,7 +3,7 @@ title: "Adding Text Watermark"
 description: "A guide to learn adding watermark to photos in c# using GroupDocs.Watermark which is part of Conholdate.Total for .NET ."
 keywords: Adding Text Watermark, Text Watermark, Adding Text Watermark in C#
 type: docs
-url: /adding-text-watermark/
+url: /net/adding-text-watermark/
 weight: 50
 ---
 

@@ -3,7 +3,7 @@ title: "Removing Watermark from Photo"
 description: "A guide to learn removing watermark from photo in c# using GroupDocs.Watermark which is a part of Conholdate.Total for .NET."
 keywords: removing watermark from photo, remove watermark, watermark, remove watermark from photo in c#
 type: docs
-url: /removing-watermark-from-photo/
+url: /net/removing-watermark-from-photo/
 weight: 30
 ---
 ## Remove watermark

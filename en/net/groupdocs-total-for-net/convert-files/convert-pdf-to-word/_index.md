@@ -3,7 +3,7 @@ title: "Convert PDF to Word"
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) supports PDF conversion to all popular formats of Microsoft Word like - DOC, DOCX, RTF etc."
 keywords: Convert PDF to Word, Convert PDF to Word in C#
 type: docs
-url: /convert-pdf-to-word/
+url: /net/convert-pdf-to-word/
 weight: 70
 ---
 

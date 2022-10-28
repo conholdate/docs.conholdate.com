@@ -3,7 +3,7 @@ title: "Convert PNG to PowerPoint"
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) supports PNG conversion to PowerPoint."
 keywords: Convert PNG to PowerPoint, Convert PNG to PowerPoint in C#, PNG to PowerPoint
 type: docs
-url: /convert-png-to-powerpoint/
+url: /net/convert-png-to-powerpoint/
 weight: 70
 ---
 

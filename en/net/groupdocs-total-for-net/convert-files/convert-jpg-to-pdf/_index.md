@@ -3,7 +3,7 @@ title: "Convert JPG to PDF"
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) supports JPG conversion to PDF."
 keywords: Convert JPG to PDF, Convert JPG to PDF in C#, JPG to PDF
 type: docs
-url: /convert-jpg-to-pdf/
+url: /net/convert-jpg-to-pdf/
 weight: 70
 ---
 

@@ -3,7 +3,7 @@ title: "Set Metadata Properties"
 description: "This article shows the usage of SetProperties method which is used to update or add metadata."
 keywords: set metadata
 type: docs
-url: /set-metadata-properties/
+url: /net/set-metadata-properties/
 weight: 50
 ---
 

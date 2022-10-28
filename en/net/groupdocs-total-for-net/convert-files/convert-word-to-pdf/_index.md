@@ -3,7 +3,7 @@ title: "Convert Word to PDF"
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) supports Word conversion to PDF."
 keywords: Convert Word to PDF, Convert Word to PDF in C#, Word to PDF
 type: docs
-url: /convert-word-to-pdf/
+url: /net/convert-word-to-pdf/
 weight: 70
 ---
 

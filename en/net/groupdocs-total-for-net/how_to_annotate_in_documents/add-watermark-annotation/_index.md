@@ -1,5 +1,5 @@
 ---
-url: /add-watermark-annotation/
+url: /net/add-watermark-annotation/
 title: Add Watermark Annotation
 weight: 3
 description: "Learn what is Watermark annotation and how to add it to a document programmatically using GroupDocs.Annotation API which is a part of Conholdate.Total for .NET."

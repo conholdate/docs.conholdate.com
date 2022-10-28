@@ -3,7 +3,7 @@ title: "Extract Metadata"
 description: "This article demonstrates the advanced usage of tags, categories and other attributes of metadata properties to extract metadata."
 keywords: extract metadata
 type: docs
-url: /extract-metadata/
+url: /net/extract-metadata/
 weight: 20
 ---
 

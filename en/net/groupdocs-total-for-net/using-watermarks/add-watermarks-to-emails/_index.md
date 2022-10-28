@@ -3,7 +3,7 @@ title: "Add Watermarks to Emails"
 description: "A guide to learn how to add watermarks to emails in c# using GroupDocs.Watermark API which is part of Conholdate.Total for .NET."
 keywords: add watermark, add watermark to email, Add Watermarks to Emails in C#
 type: docs
-url: /add-watermarks-to-emails/
+url: /net/add-watermarks-to-emails/
 weight: 60
 ---
 

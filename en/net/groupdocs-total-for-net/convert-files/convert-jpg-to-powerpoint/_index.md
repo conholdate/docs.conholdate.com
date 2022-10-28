@@ -3,7 +3,7 @@ title: "Convert JPG to PowerPoint"
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) supports JPG conversion to PowerPoint."
 keywords: Convert JPG to PowerPoint, Convert JPG to PowerPoint in C#, JPG to PowerPoint
 type: docs
-url: /convert-jpg-to-powerpoint/
+url: /net/convert-jpg-to-powerpoint/
 weight: 70
 ---
 

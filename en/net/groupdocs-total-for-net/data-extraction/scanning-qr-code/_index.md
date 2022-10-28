@@ -3,7 +3,7 @@ title: "Scanning QR Code"
 description: "This article explains how GroupDocs.Parser for .NET (which is a part of Conholdate.Total for .NET) scan QR Code from images, documents and other file formats like PDF, Emails, Ebooks, Words, and others."
 keywords: Scanning QR Code,Scanning QR Code in C#
 type: docs
-url: /scanning-qr-code/
+url: /net/scanning-qr-code/
 weight: 70
 ---
 

@@ -3,7 +3,7 @@ title: "Convert Excel to HTML"
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) supports Excel conversion to HTML."
 keywords: Convert Excel to HTML, Convert Excel to PDF in C#, Excel to HTML
 type: docs
-url: /convert-excel-to-html/
+url: /net/convert-excel-to-html/
 weight: 70
 ---
 

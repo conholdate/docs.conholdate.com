@@ -1,5 +1,5 @@
 ---
-url: /add-squiggly-annotation/
+url: /net/add-squiggly-annotation/
 title: Add Squiggly Annotation
 weight: 3
 description: "Learn what is Squiggly annotation and how to add it to a document programmatically using GroupDocs.Annotation API which is a part of Conholdate.Total for .NET."

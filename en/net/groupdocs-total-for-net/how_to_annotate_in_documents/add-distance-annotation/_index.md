@@ -1,5 +1,5 @@
 ---
-url: /add-distance-annotation/
+url: /net/add-distance-annotation/
 title: Add Distance Annotation
 weight: 3
 description: "Learn what is distance annotation and how to add it to a document programmatically using GroupDocs.Annotation API which is a part of Conholdate.Total for .NET."

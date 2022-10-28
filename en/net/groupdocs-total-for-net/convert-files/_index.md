@@ -1,6 +1,6 @@
 ---
 id: convert
-url: /convert-files/
+url: /net/convert-files/
 title: Convert files
 weight: 3
 description: "This article demonstrates that how to convert a file to PDF, Word, Excel, PowerPoint, Email, JPG, PNG, TIFF and many other formats with just couple of lines of С# (CSharp) code."

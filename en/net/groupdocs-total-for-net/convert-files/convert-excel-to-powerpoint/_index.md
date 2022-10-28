@@ -3,7 +3,7 @@ title: "Convert Excel to PowerPoint"
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) supports Excel conversion to PowerPoint."
 keywords: Convert Excel to PowerPoint, Convert Excel to PowerPoint in C#, Excel to PowerPoint
 type: docs
-url: /convert-excel-to-powerpoint/
+url: /net/convert-excel-to-powerpoint/
 weight: 70
 ---
 

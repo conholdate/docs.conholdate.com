@@ -3,7 +3,7 @@ title: "Convert Word to Images"
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) supports Word conversion to Images."
 keywords: Convert Word to Images, Convert Word to Images in C#, Word to Images
 type: docs
-url: /convert-word-to-images/
+url: /net/convert-word-to-images/
 weight: 70
 ---
 

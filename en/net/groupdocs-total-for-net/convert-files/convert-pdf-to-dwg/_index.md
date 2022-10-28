@@ -3,7 +3,7 @@ title: "Convert PDF to DWG"
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) supports conversion of PDF to DWG."
 keywords: Convert PDF to DWGF, Convert PDF to DWG in C#, PDF to DWG, Conversion API, DWG to STL
 type: docs
-url: /convert-pdf-to-dwg/
+url: /net/convert-pdf-to-dwg/
 weight: 70
 ---
 

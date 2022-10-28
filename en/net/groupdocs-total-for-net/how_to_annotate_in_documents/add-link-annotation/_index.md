@@ -1,5 +1,5 @@
 ---
-url: /add-link-annotation/
+url: /net/add-link-annotation/
 title: Add Link Annotation
 weight: 3
 description: "Learn what is Link annotation and how to add it to a document programmatically using GroupDocs.Annotation API which is a part of Conholdate.Total for .NET."

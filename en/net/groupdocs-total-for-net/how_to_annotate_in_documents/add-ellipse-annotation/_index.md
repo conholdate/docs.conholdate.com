@@ -1,5 +1,5 @@
 ---
-url: /add-ellipse-annotation/
+url: /net/add-ellipse-annotation/
 title: Add Ellipse Annotation
 weight: 3
 description: "Learn what is ellipse annotation and how to add it to a document programmatically using GroupDocs.Annotation API which is a part of Conholdate.Total for .NET."

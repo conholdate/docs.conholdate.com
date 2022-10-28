@@ -1,6 +1,6 @@
 ---
 id: convert
-url: /data-extraction/
+url: /net/data-extraction/
 title: Data Extraction
 weight: 3
 description: "This section contains articles which shows the usage of GroupDocs.Parser for.NET (which is a part of Conholdate.Total for .NET) API. This API is known as a powerfull data extraction tool which allows you to extract data from various types of formats e.g. PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, ODT, ODS, RTF, EPUB and many others."

@@ -3,7 +3,7 @@ title: "Convert From MP3 "
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) supports conversion of From MP3."
 keywords: Convert From MP3, Convert From MP3 in C#, MP3
 type: docs
-url: /convert-from-mp3/
+url: /net/convert-from-mp3/
 weight: 70
 ---
 

@@ -1,5 +1,5 @@
 ---
-url: /add-polyline-annotation/
+url: /net/add-polyline-annotation/
 title: Add Polyline Annotation
 weight: 3
 description: "Learn what is Polyline annotation and how to add it to a document programmatically using GroupDocs.Annotation API which is a part of Conholdate.Total for .NET."

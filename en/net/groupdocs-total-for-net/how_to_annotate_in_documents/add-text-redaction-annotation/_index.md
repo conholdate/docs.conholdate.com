@@ -1,5 +1,5 @@
 ---
-url: /add-text-redaction-annotation/
+url: /net/add-text-redaction-annotation/
 title: Add Text Redaction Annotation
 weight: 3
 description: "Learn what is Text Redaction annotation and how to add it to a document programmatically using GroupDocs.Annotation API which is a part of Conholdate.Total for .NET."

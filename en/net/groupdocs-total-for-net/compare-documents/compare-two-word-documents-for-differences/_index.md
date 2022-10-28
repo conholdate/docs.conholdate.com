@@ -3,7 +3,7 @@ title: "Compare Two Word Documents for Differences"
 description: "This article will explain how to compare two word documents for differences using GroupDocs.Comparison API which is a part of Conholdate.Total for .NET."
 keywords: Compare Two Word Documents for Differences, Compare Two Word Documents for Differences in C#
 type: docs
-url: /compare-two-word-documents-for-differences/
+url: /net/compare-two-word-documents-for-differences/
 weight: 20
 ---
 ## Compare two word documents for differences in C#

@@ -3,7 +3,7 @@ title: "Extract Text from PDF"
 description: "This article explains how GroupDocs.Parser for .NET (which is a part of Conholdate.Total for .NET) extract text from PDF file."
 keywords: Extract Text from PDF, Extract Text from PDF in C#
 type: docs
-url: /extract-text-from-pdf/
+url: /net/extract-text-from-pdf/
 weight: 70
 ---
 

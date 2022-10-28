@@ -3,7 +3,7 @@ title: "Convert Excel to PDF"
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) supports Excel conversion to PDF."
 keywords: Convert Excel to PDF, Convert Excel to PDF in C#, Excel to PDF
 type: docs
-url: /convert-excel-to-pdf/
+url: /net/convert-excel-to-pdf/
 weight: 70
 ---
 

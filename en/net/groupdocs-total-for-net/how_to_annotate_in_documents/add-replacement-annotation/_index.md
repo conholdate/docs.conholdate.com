@@ -1,5 +1,5 @@
 ---
-url: /add-replacement-annotation/
+url: /net/add-replacement-annotation/
 title: Add Replacement Annotation
 weight: 3
 description: "Learn what is Replacement annotation and how to add it to a document programmatically using GroupDocs.Annotation API which is a part of Conholdate.Total for .NET."

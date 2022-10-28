@@ -3,7 +3,7 @@ title: "Convert Word to Markdown"
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) supports Word conversion to Markdown."
 keywords: Convert Word to Markdown, Convert Word to Markdown in C#, Word to Markdown
 type: docs
-url: /convert-word-to-markdown/
+url: /net/convert-word-to-markdown/
 weight: 70
 ---
 

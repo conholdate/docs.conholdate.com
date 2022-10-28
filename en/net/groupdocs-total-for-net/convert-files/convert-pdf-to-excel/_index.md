@@ -3,7 +3,7 @@ title: "Convert PDF to Excel"
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) supports PDF conversion to all popular formats of Microsoft Excel - XLS, XLSX, XLSM, XLSB, XLTX, XLT etc."
 keywords: Convert PDF to Excel, Convert PDF to Excel in C#
 type: docs
-url: /convert-pdf-to-excel/
+url: /net/convert-pdf-to-excel/
 weight: 70
 ---
 

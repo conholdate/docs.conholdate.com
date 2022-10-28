@@ -1,5 +1,5 @@
 ---
-url: /add-strikeout-annotation/
+url: /net/add-strikeout-annotation/
 title: Add Strikeout Annotation
 weight: 3
 description: "Learn what is Strikeout annotation and how to add it to a document programmatically using GroupDocs.Annotation API which is a part of Conholdate.Total for .NET."

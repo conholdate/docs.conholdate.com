@@ -3,7 +3,7 @@ title: "Convert DWG to STL "
 description: "This article explains how GroupDocs.Conversion for .NET (which is a part of Conholdate.Total for .NET) supports conversion of DWG to STL."
 keywords: Convert DWG to STL, Convert DWG to STL in C#, DWG to STL
 type: docs
-url: /convert-dwg-to-stl/
+url: /net/convert-dwg-to-stl/
 weight: 70
 ---
 

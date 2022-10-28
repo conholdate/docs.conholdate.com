@@ -1,5 +1,5 @@
 ---
-url: /add-image-annotation/
+url: /net/add-image-annotation/
 title: Add Image Annotation
 weight: 3
 description: "Learn what is Image annotation and how to add it to a document programmatically using GroupDocs.Annotation API which is a part of Conholdate.Total for .NET."
