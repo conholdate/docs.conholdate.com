@@ -3,7 +3,7 @@ title: "Compare Excel Files"
 description: "This article explains how to use GroupDocs.Comparison API (which is a part of Conholdate.Total for Java) to compare excel documents."
 keywords: Compare Excel Files, Compare Excel Files in Java, Code sample to compare two Excel files
 type: docs
-url: /compare-excel-files/
+url: /java/compare-excel-files/
 weight: 70
 ---
 
