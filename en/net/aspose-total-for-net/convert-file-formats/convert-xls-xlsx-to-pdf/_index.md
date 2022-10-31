@@ -4,7 +4,7 @@ second_title: Conholdate.Total for .NET
 articleTitle: Convert XLS XLSX to PDF
 linktitle: Convert XLS XLSX to PDF
 type: docs
-url: /convert-xls-xlsx-to-pdf/
+url: /net/convert-xls-xlsx-to-pdf/
 description: "Convert XLS XLSX file formats to PDF in C#."
 keywords: "convert xls to pdf c#, convert xlsx to PDf c#, .NET convert xls xlsx, xls to pdf .net, xlsx to pdf asp .net, c# converter for xls, c# converter for xlsx, excel to pdf c#, sheets to pdf"
 weight: 10

@@ -4,7 +4,7 @@ second_title: Conholdate.Total for .NET
 articleTitle: Convert PPT PPTX to Excel
 linktitle: Convert PPT PPTX to Excel
 type: docs
-url: /powerpoint-to-excel/
+url: /net/powerpoint-to-excel/
 description: "Convert PowerPoint (PPT PPTX and more) to Excel (XLS XLSX) file formats in C#."
 keywords: "convert powerpoint c#, convert PowerPoint to excel c#, convert pptx to xlsx c#, convert ppt to xls c#, .NET convert ppt pptx, ppt to xlsx .net, pptx to xlsx asp .net, c# converter for ppt, c# converter for pptx, pptx to excel c#, slides to sheets"
 weight: 10

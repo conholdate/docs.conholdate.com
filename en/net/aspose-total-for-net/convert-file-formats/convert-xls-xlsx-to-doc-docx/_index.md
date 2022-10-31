@@ -4,7 +4,7 @@ second_title: Conholdate.Total for .NET
 articleTitle: Convert XLS XLSX to Word
 linktitle: Convert XLS XLSX to Word
 type: docs
-url: /convert-xls-xlsx-to-doc-docx/
+url: /net/convert-xls-xlsx-to-doc-docx/
 description: "Convert XLS XLSX file formats to Word (DOC or DOCX) in C#."
 keywords: "convert excel to word c#, convert xls to word c#, convert xlsx to word c#, .NET convert xls xlsx, xls to doc docx .net, xlsx to doc docx asp .net, c# converter for xls, c# converter for xlsx, excel to pdf c#, sheets to pdf"
 weight: 10

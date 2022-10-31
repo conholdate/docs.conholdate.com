@@ -3,7 +3,7 @@ title: Create or read barcode C#
 linktitle: Create or read barcodes 
 type: docs
 weight: 10
-url: /barcodes/
+url: /net/barcodes/
 keywords: create barcode c#, read barcode ASP.NET, create or read barcode C#, read barcode from word pdf c#, add barcode to word pdf .net
 description: Create barcodes or add them to MS Office, PDF and several other file formats in C# .NET.
 ---

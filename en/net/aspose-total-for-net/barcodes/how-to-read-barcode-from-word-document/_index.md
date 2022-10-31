@@ -4,7 +4,7 @@ second_title: Conholdate.Total for .NET
 articleTitle: How to read barcode from Word
 linktitle: How to read barcode from Word
 type: docs
-url: /how-to-read-barcode-from-word-document/
+url: /net/how-to-read-barcode-from-word-document/
 description: "Read a barcode from MS Word documents including DOC DOCX in C#."
 keywords: "read barcode c#, read barcode Word c#, read bar code doc c#, read barcode docx c#, read word doc docx c#, .NET read word doc docx, read barcode doc docx c#.net"
 weight: 20

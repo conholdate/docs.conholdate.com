@@ -4,7 +4,7 @@ second_title: Conholdate.Total for .NET
 articleTitle: Convert PPT PPTX to DOC DOCX
 linktitle: Convert PPT PPTX to DOC DOCX
 type: docs
-url: /powerpoint-to-word/
+url: /net/powerpoint-to-word/
 description: "Convert PowerPoint (PPT PPTX and more) to Word (DOC DOCX) file formats in C#."
 keywords: "convert powerpoint c#, convert PowerPoint to word c#, convert pptx to docx c#, convert ppt to doc c#, .NET convert ppt pptx, ppt to docx .net, pptx to docx asp .net, c# converter for ppt, c# converter for pptx, pptx to word c#, slides to docx pages"
 weight: 10

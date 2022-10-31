@@ -4,7 +4,7 @@ second_title: Conholdate.Total for .NET
 articleTitle: Convert PDF to HTML
 linktitle: Convert PDF to HTML
 type: docs
-url: /convert-pdf-to-html/
+url: /net/convert-pdf-to-html/
 description: "Convert PDF to HTML in C#."
 keywords: "convert pdf to html c#, convert PDf c#, .NET convert pdf to html, pdf to html asp .net"
 weight: 10

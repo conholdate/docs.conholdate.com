@@ -4,7 +4,7 @@ second_title: Conholdate.Total for .NET
 articleTitle: How to add barcode to PDF
 linktitle: How to add barcode to PDF
 type: docs
-url: /how-to-add-barcode-to-pdf/
+url: /net/how-to-add-barcode-to-pdf/
 description: "Create a barcode and add it to PDF in C#."
 keywords: "create barcode c#, Create PDF c#, Add barcode to PDf c#, .NET create barcode, .NET Create PDF, .NET Add barcode to PDf"
 weight: 10

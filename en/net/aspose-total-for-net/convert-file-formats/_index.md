@@ -3,7 +3,7 @@ title: Convert file formats C#
 linktitle: Convert file formats 
 type: docs
 weight: 10
-url: /convert-file-formats/
+url: /net/convert-file-formats/
 keywords: convert file formats c#, convert file format, convert doc docx c#, convert xls xlsx c#, convert word to pdf ASP .NET, convert PDF to HTML C#, convert html to pdf c#, convert docx to pdf c#, convert xlsx to pdf c#, convert image to pdf C#, convert AutoCad C#, convert png to pdf .net
 description: Convert more than 100 file formats in C# .NET.
 ---

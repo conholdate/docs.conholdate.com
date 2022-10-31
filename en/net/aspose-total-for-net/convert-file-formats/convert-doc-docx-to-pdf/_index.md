@@ -4,7 +4,7 @@ second_title: Conholdate.Total for .NET
 articleTitle: Convert DOC DOCX to PDF
 linktitle: Convert DOC DOCX to PDF
 type: docs
-url: /convert-doc-docx-to-pdf/
+url: /net/convert-doc-docx-to-pdf/
 description: "Convert DOC and DOCX file formats to PDF in C#."
 keywords: "convert doc to pdf c#, convert docx to PDf c#, .NET convert doc docx, doc to pdf .net, docx to pdf asp .net"
 weight: 10
