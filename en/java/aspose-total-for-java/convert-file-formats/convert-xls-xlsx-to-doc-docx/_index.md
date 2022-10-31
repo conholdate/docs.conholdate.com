@@ -4,7 +4,7 @@ second_title: Conholdate.Total for Java
 articleTitle: Convert XLS XLSX to Word
 linktitle: Convert XLS XLSX to Word
 type: docs
-url: /convert-xls-xlsx-to-doc-docx/
+url: /java/convert-xls-xlsx-to-doc-docx/
 description: "Convert XLS XLSX file formats to Word DOC DOCX in Java."
 keywords: "convert excel to word Java, convert xls to word Java, convert xlsx to word Java, java convert xls xlsx, xls to doc docx java, xlsx to doc docx eclipse java, Java converter for xls, Java converter for xlsx, excel to pdf Java, sheets to pdf"
 weight: 10

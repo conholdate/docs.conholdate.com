@@ -4,7 +4,7 @@ second_title: Conholdate.Total for Java
 articleTitle: Convert DOC DOCX to PDF
 linktitle: Convert DOC DOCX to PDF
 type: docs
-url: /convert-doc-docx-to-pdf/
+url: /java/convert-doc-docx-to-pdf/
 description: "Convert DOC and DOCX file formats to PDF in Java."
 keywords: "convert doc to pdf Java, convert docx to PDf Java, Java convert doc docx, doc to pdf Java, docx to pdf Java"
 weight: 10

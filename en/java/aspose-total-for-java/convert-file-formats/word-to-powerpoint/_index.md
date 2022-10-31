@@ -4,7 +4,7 @@ second_title: Conholdate.Total for Java
 articleTitle: Convert DOC DOCX to PPTX
 linktitle: Convert DOC DOCX to PPTX
 type: docs
-url: /word-to-powerpoint/
+url: /java/word-to-powerpoint/
 description: "Convert DOC DOCX file formats to PowerPoint (PPTX) in Java."
 keywords: "convert word Java, convert word to PowerPoint Java, convert doc to pptx Java, convert docx to powerpoint Java, Java convert doc docx, doc to pptx eclipse, docx to pptx eclipse, java converter for doc, java converter for docx, word to pptx java, docx pages to slides"
 weight: 10

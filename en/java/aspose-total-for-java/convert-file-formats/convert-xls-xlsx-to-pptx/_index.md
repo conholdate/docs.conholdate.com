@@ -4,7 +4,7 @@ second_title: Conholdate.Total for Java
 articleTitle: Convert XLS XLSX to PowerPoint
 linktitle: Convert XLS XLSX to PowerPoint
 type: docs
-url: /convert-xls-xlsx-to-pptx/
+url: /java/convert-xls-xlsx-to-pptx/
 description: "Convert XLS XLSX file formats to PowerPoint PPTX in Java."
 keywords: "convert Java, convert excel to PowerPoint Java, convert xls to pptx Java, convert xlsx to powerpoint Java, java convert xls xlsx, xls to pptx java, xlsx to pptx eclipse java, Java converter for xls, Java converter for xlsx, excel to pptx Java, sheet to slide"
 weight: 10

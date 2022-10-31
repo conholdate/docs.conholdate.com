@@ -4,7 +4,7 @@ second_title: Conholdate.Total for Java
 articleTitle: Convert PPT PPTX to Excel
 linktitle: Convert PPT PPTX to Excel
 type: docs
-url: /powerpoint-to-excel/
+url: /java/powerpoint-to-excel/
 description: "Convert PowerPoint PPT PPTX and more to Excel XLS XLSX file formats in Java."
 keywords: "convert powerpoint Java, convert PowerPoint to excel Java, convert pptx to xlsx Java, convert ppt to xls Java, Java convert ppt pptx, ppt to xlsx java, pptx to xlsx eclipse java, Java converter for ppt, Java converter for pptx, pptx to excel Java, slides to sheets"
 weight: 10

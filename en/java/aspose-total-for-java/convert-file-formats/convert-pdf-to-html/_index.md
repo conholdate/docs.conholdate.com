@@ -4,7 +4,7 @@ second_title: Conholdate.Total for Java
 articleTitle: Convert PDF to HTML
 linktitle: Convert PDF to HTML
 type: docs
-url: /convert-pdf-to-html/
+url: /java/convert-pdf-to-html/
 description: "Convert PDF to HTML in Java."
 keywords: "convert pdf to html Java, convert PDf Java, Java convert pdf to html, pdf to html Java"
 weight: 10
