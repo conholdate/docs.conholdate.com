@@ -3,7 +3,7 @@ title: "Hinzufügen von Wasserzeichen zu Fotos"
 description: "Ein Leitfaden zum Erlernen des Hinzufügens von Wasserzeichen zu Fotos in c# mithilfe von GroupDocs.Watermark, das Teil von Conholdate.Total für .NET ist."
 keywords: "Hinzufügen von Wasserzeichen zu Fotos, Hinzufügen von Wasserzeichen, Hinzufügen von Wasserzeichen, Hinzufügen von Wasserzeichen zu Fotos oder Bilder mit mehreren Rahmen in c#"
 type: docs
-url: /de/adding-watermark-to-photos/
+url: /de/net/adding-watermark-to-photos/
 weight: 30
 ---
 ## Hinzufügen von Wasserzeichen zu Fotos oder mehrfach gerahmten Bildern in c#

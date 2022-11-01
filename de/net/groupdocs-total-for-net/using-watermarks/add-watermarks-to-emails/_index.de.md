@@ -3,7 +3,7 @@ title: "Wasserzeichen zu E-Mails hinzufügen"
 description: "Eine Anleitung zum Hinzufügen von Wasserzeichen zu E-Mails in c# mithilfe der GroupDocs.Watermark-API, die Teil von Conholdate.Total für .NET ist."
 keywords: "Wasserzeichen hinzufügen, Wasserzeichen zu E-Mails hinzufügen, Wasserzeichen zu E-Mails in C# hinzufügen"
 type: docs
-url: /de/add-watermarks-to-emails/
+url: /de/net/add-watermarks-to-emails/
 weight: 60
 ---
 

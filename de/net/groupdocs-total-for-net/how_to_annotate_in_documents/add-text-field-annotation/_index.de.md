@@ -1,5 +1,5 @@
 ---
-url: /de/add-text-field-annotation/
+url: /de/net/add-text-field-annotation/
 title: "Textfeldanmerkung hinzufügen"
 weight: 3
 description: "Erfahren Sie, was eine Textfeldannotation ist und wie Sie sie mithilfe der GroupDocs.Annotation-API, die Teil von Conholdate.Total für .NET ist, programmgesteuert zu einem Dokument hinzufügen."

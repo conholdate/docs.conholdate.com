@@ -1,5 +1,5 @@
 ---
-url: /de/add-underline-annotation/
+url: /de/net/add-underline-annotation/
 title: "Unterstrichene Anmerkung hinzufügen"
 weight: 3
 description: "Erfahren Sie, was eine Unterstreichungsannotation ist und wie Sie sie mithilfe der GroupDocs.Annotation-API, die Teil von Conholdate.Total für .NET ist, programmgesteuert zu einem Dokument hinzufügen."

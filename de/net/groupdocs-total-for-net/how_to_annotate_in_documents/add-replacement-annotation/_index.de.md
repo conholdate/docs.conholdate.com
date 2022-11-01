@@ -1,5 +1,5 @@
 ---
-url: /de/add-replacement-annotation/
+url: /de/net/add-replacement-annotation/
 title: "Ersatzanmerkung hinzufügen"
 weight: 3
 description: "Erfahren Sie, was eine Ersatzannotation ist und wie Sie sie mithilfe der GroupDocs.Annotation-API, die Teil von Conholdate.Total für .NET ist, programmgesteuert zu einem Dokument hinzufügen."

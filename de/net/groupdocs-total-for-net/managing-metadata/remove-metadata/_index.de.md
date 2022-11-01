@@ -3,7 +3,7 @@ title: "Metadaten entfernen"
 description: "In diesem Artikel wird gezeigt, wie Sie alle Metadateneigenschaften bereinigen oder entfernen, ohne Filter anzuwenden. Sie können dies tun, indem Sie die Sanitize-Methode verwenden."
 keywords: "Metadaten entfernen"
 type: docs
-url: /de/remove-metadata/
+url: /de/net/remove-metadata/
 weight: 40
 ---
 

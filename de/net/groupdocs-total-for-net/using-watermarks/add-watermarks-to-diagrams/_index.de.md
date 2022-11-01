@@ -3,7 +3,7 @@ title: "Wasserzeichen zu Diagrammen hinzufügen"
 description: "Eine Anleitung zum Erlernen des Hinzufügens von Wasserzeichen zu Diagrammdokumenten (.vsdx) in C# mithilfe von GroupDocs.Watermark, das ein Teil von Conholdate.Total für .NET ist."
 keywords: "Wasserzeichen zu Diagrammen hinzufügen, Wasserzeichen zu Diagrammdokumenten in C# hinzufügen"
 type: docs
-url: /de/add-watermarks-to-diagrams/
+url: /de/net/add-watermarks-to-diagrams/
 weight: 80
 ---
 

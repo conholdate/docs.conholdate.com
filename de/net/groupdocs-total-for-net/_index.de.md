@@ -1,7 +1,7 @@
 ---
 title: "GroupDocs.Total für .NET"
 type: docs
-url: /de/groupdocs-total-for-net/
+url: /de/net/groupdocs-total-for-net/
 weight: 20
 ---
 

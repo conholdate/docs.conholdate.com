@@ -4,7 +4,7 @@ second_title: "Conholdate.Total für Java"
 articleTitle: "Konvertieren Sie XLS XLSX in Word"
 linktitle: "Konvertieren Sie XLS XLSX in Word"
 type: docs
-url: /de/convert-xls-xlsx-to-doc-docx/
+url: /de/java/convert-xls-xlsx-to-doc-docx/
 description: "Konvertieren Sie XLS XLSX-Dateiformate in Word DOC DOCX in Java."
 keywords: "Konvertieren Sie Excel in Word Java, konvertieren Sie xls in Word Java, konvertieren Sie xlsx in Word Java, java konvertieren Sie xls xlsx, xls in doc docx java, xlsx in doc docx eclipse java, Java-Konverter für xls, Java-Konverter für xlsx, Excel in pdf Java , Blätter zu pdf"
 weight: 10

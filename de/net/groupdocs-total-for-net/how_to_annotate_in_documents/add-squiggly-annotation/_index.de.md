@@ -1,5 +1,5 @@
 ---
-url: /de/add-squiggly-annotation/
+url: /de/net/add-squiggly-annotation/
 title: "Verschnörkelte Anmerkung hinzufügen"
 weight: 3
 description: "Erfahren Sie, was Squiggly-Anmerkungen sind und wie Sie sie mithilfe der GroupDocs.Annotation-API, die Teil von Conholdate.Total für .NET ist, programmgesteuert zu einem Dokument hinzufügen."

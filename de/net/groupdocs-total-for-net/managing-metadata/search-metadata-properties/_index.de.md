@@ -3,7 +3,7 @@ title: "Metadaten-Eigenschaften durchsuchen"
 description: "Dieser Artikel zeigt, wie Sie Metadaten suchen und gewünschte Metadateneigenschaften aus Dokumenten wie PDF, DOCX, PPTX, XLSX, Bildern, Audio, Video und vielen anderen Dateien verschiedener Typen in Ihrer .NET-Lösung extrahieren können"
 keywords: "Metadaten suchen"
 type: docs
-url: /de/search-metadata-properties/
+url: /de/net/search-metadata-properties/
 weight: 30
 ---
 

@@ -3,7 +3,7 @@ title: "Legen Sie Metadateneigenschaften fest"
 description: "Dieser Artikel zeigt die Verwendung der SetProperties-Methode, die zum Aktualisieren oder Hinzufügen von Metadaten verwendet wird."
 keywords: "Metadaten festlegen"
 type: docs
-url: /de/set-metadata-properties/
+url: /de/net/set-metadata-properties/
 weight: 50
 ---
 

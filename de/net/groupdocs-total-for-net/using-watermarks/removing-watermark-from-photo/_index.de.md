@@ -3,7 +3,7 @@ title: "Wasserzeichen vom Foto entfernen"
 description: "Ein Leitfaden zum Erlernen des Entfernens von Wasserzeichen aus Fotos in c# mithilfe von GroupDocs.Watermark, das Teil von Conholdate.Total für .NET ist."
 keywords: "Wasserzeichen vom Foto entfernen, Wasserzeichen entfernen, Wasserzeichen, Wasserzeichen vom Foto in c# entfernen"
 type: docs
-url: /de/removing-watermark-from-photo/
+url: /de/net/removing-watermark-from-photo/
 weight: 30
 ---
 ## Wasserzeichen entfernen

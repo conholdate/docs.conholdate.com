@@ -1,5 +1,5 @@
 ---
-url: /de/add-link-annotation/
+url: /de/net/add-link-annotation/
 title: "Link-Anmerkung hinzufügen"
 weight: 3
 description: "Erfahren Sie, was Link-Anmerkungen sind und wie Sie sie mithilfe der GroupDocs.Annotation-API, die Teil von Conholdate.Total für .NET ist, programmgesteuert zu einem Dokument hinzufügen."

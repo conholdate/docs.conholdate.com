@@ -3,7 +3,7 @@ title: "Wasserzeichen im PDF-Format"
 description: "Eine Anleitung, um zu erfahren, wie viele Möglichkeiten es gibt, Wasserzeichen in PDF mit GroupDocs.Watermark hinzuzufügen, das Teil von Conholdate.Total für .NET ist."
 keywords: "Hinzufügen von Wasserzeichen, Wasserzeichen in PDF"
 type: docs
-url: /de/watermarks-in-pdf/
+url: /de/net/watermarks-in-pdf/
 weight: 70
 ---
 

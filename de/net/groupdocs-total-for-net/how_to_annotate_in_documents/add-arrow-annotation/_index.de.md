@@ -1,5 +1,5 @@
 ---
-url: /de/add-arrow-annotation/
+url: /de/net/add-arrow-annotation/
 title: "Pfeilanmerkung hinzufügen"
 weight: 2
 description: "Erfahren Sie, was Pfeilanmerkungen sind und wie Sie sie mithilfe der GroupDocs.Annotation-API, die Teil von Conholdate.Total für .NET ist, programmgesteuert zu einem Dokument hinzufügen."

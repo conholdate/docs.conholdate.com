@@ -3,7 +3,7 @@ title: "Minimieren Sie HTML, um das Rendering zu optimieren"
 description: "Dieser Artikel zeigt, wie HTML und CSS minimiert werden, wenn Dokumente in HTML gerendert werden."
 keywords: "html verkleinern, in html rendern"
 type: docs
-url: /de/minify-html-to-optimize-rendering/
+url: /de/net/minify-html-to-optimize-rendering/
 weight: 30
 ---
 

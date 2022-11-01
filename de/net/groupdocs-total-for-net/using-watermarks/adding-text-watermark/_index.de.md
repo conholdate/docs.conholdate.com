@@ -3,7 +3,7 @@ title: "Textwasserzeichen hinzufügen"
 description: "Ein Leitfaden zum Erlernen des Hinzufügens von Wasserzeichen zu Fotos in c# mithilfe von GroupDocs.Watermark, das Teil von Conholdate.Total für .NET ist."
 keywords: "Hinzufügen von Textwasserzeichen, Textwasserzeichen, Hinzufügen von Textwasserzeichen in C#"
 type: docs
-url: /de/adding-text-watermark/
+url: /de/net/adding-text-watermark/
 weight: 50
 ---
 

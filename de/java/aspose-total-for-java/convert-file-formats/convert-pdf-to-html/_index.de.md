@@ -4,7 +4,7 @@ second_title: "Conholdate.Total für Java"
 articleTitle: "Konvertieren Sie PDF in HTML"
 linktitle: "Konvertieren Sie PDF in HTML"
 type: docs
-url: /de/convert-pdf-to-html/
+url: /de/java/convert-pdf-to-html/
 description: "Konvertieren Sie PDF in HTML in Java."
 keywords: "pdf in html konvertieren Java, pdf konvertieren Java, Java pdf in html konvertieren, pdf in html Java"
 weight: 10

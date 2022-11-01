@@ -3,7 +3,7 @@ title: "Metadaten anzeigen"
 description: "In diesem Artikel wird veranschaulicht, wie Sie Metadateninformationen eines Dokuments anzeigen."
 keywords: "Metadaten anzeigen"
 type: docs
-url: /de/view-metadata/
+url: /de/net/view-metadata/
 weight: 20
 ---
 

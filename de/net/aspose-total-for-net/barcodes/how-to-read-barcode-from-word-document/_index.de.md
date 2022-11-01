@@ -4,7 +4,7 @@ second_title: "Conholdate.Total für .NET"
 articleTitle: "So lesen Sie Barcodes aus Word"
 linktitle: "So lesen Sie Barcodes aus Word"
 type: docs
-url: /de/how-to-read-barcode-from-word-document/
+url: /de/net/how-to-read-barcode-from-word-document/
 description: "Lesen Sie einen Barcode aus MS Word-Dokumenten einschließlich DOC DOCX in C#."
 keywords: "Barcode c# lesen, Barcode Word c# lesen, Barcode doc c# lesen, Barcode docx c# lesen, Wort docx c# lesen, .NET Wort doc docx lesen, Barcode doc docx c# lesen.net"
 weight: 20

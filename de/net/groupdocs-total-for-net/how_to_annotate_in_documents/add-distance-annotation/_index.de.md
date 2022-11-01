@@ -1,5 +1,5 @@
 ---
-url: /de/add-distance-annotation/
+url: /de/net/add-distance-annotation/
 title: "Entfernungsanmerkung hinzufügen"
 weight: 3
 description: "Erfahren Sie, was Distanzanmerkungen sind und wie Sie sie mithilfe der GroupDocs.Annotation-API, die Teil von Conholdate.Total für .NET ist, programmgesteuert zu einem Dokument hinzufügen."

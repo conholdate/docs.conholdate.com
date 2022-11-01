@@ -3,7 +3,7 @@ title: "Text in zwei Dateien vergleichen"
 description: "In diesem Artikel wird die Verwendung der GroupDocs.Comparison-API (die Teil von Conholdate.Total für .NET ist) zum Vergleichen von Text in zwei Dateien erläutert."
 keywords: "Text in zwei Dateien vergleichen, Text in zwei Dateien mit C# vergleichen"
 type: docs
-url: /de/compare-text-in-two-files/
+url: /de/net/compare-text-in-two-files/
 weight: 20
 ---
 ## Dateivergleich
