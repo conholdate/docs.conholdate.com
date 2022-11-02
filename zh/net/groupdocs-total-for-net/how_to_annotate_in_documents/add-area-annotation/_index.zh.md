@@ -1,5 +1,5 @@
 ---
-url: /zh/add-area-annotation/
+url: /zh/net/add-area-annotation/
 title: "添加区域注释"
 weight: 1
 description: "了解什么是区域注释以及如何使用 GroupDocs.Annotation API 以编程方式将其添加到文档中，该 API 是 Conholdate.Total for .NET 的一部分。"

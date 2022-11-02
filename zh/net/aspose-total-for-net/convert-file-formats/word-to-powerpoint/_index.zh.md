@@ -4,7 +4,7 @@ second_title: ".NET 的 Conholdate.Total"
 articleTitle: "将 DOCX 转换为 PPTX"
 linktitle: "将 DOCX 转换为 PPTX"
 type: docs
-url: /zh/word-to-powerpoint/
+url: /zh/net/word-to-powerpoint/
 description: "在 C# 中将 DOC DOCX 文件格式转换为 PowerPoint (PPTX)。"
 keywords: "转换 word c#, 将 word 转换为 PowerPoint c#, 将 doc 转换为 pptx c#, 将 docx 转换为 powerpoint c#, .NET 转换 doc docx, doc 到 pptx .net, docx 到 pptx asp .net, c# doc 转换器, c# docx 转换器, word to pptx c#, docx pages to slides"
 weight: 10

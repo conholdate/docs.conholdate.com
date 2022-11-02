@@ -3,7 +3,7 @@ title: "管理元数据"
 description: "本节包含有关如何管理元数据的文章。"
 keywords: "管理元数据"
 type: docs
-url: /zh/managing-metadata/
+url: /zh/net/managing-metadata/
 weight: 30
 ---
 

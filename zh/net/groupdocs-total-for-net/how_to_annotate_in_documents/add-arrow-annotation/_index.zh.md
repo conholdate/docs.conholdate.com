@@ -1,5 +1,5 @@
 ---
-url: /zh/add-arrow-annotation/
+url: /zh/net/add-arrow-annotation/
 title: "添加箭头注释"
 weight: 2
 description: "了解什么是箭头注释以及如何使用 GroupDocs.Annotation API 以编程方式将其添加到文档中，该 API 是 Conholdate.Total for .NET 的一部分。"

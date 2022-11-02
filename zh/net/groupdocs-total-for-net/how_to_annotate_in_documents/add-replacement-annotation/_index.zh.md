@@ -1,5 +1,5 @@
 ---
-url: /zh/add-replacement-annotation/
+url: /zh/net/add-replacement-annotation/
 title: "添加替换注释"
 weight: 3
 description: "了解什么是替换注释以及如何使用 GroupDocs.Annotation API 以编程方式将其添加到文档中，该 API 是 Conholdate.Total for .NET 的一部分。"

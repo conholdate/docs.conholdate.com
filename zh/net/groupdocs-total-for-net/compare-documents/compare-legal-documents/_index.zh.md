@@ -3,7 +3,7 @@ title: "比较法律文件"
 description: "本文介绍了如何使用 GroupDocs.Comparison API（它是 Conholdate.Total for .NET 的一部分）来比较法律文件。"
 keywords: "比较法律文件，比较 C# 中的法律文件"
 type: docs
-url: /zh/compare-legal-documents/
+url: /zh/net/compare-legal-documents/
 weight: 50
 ---
 

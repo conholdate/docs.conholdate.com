@@ -3,7 +3,7 @@ title: "查看元数据"
 description: "本文演示如何查看文档的元数据信息。"
 keywords: "查看元数据"
 type: docs
-url: /zh/view-metadata/
+url: /zh/net/view-metadata/
 weight: 20
 ---
 

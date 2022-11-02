@@ -1,5 +1,5 @@
 ---
-url: /zh/add-strikeout-annotation/
+url: /zh/net/add-strikeout-annotation/
 title: "添加删除线注释"
 weight: 3
 description: "了解什么是 Strikeout 注释以及如何使用 GroupDocs.Annotation API 以编程方式将其添加到文档中，该 API 是 Conholdate.Total for .NET 的一部分。"

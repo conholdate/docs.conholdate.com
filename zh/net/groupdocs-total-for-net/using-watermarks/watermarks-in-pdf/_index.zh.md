@@ -3,7 +3,7 @@ title: "PDF 中的水印"
 description: "了解有多少种方法可以使用 GroupDocs.Watermark 在 PDF 中添加水印的指南，它是 Conholdate.Total for .NET 的一部分。"
 keywords: "添加水印，PDF中的水印"
 type: docs
-url: /zh/watermarks-in-pdf/
+url: /zh/net/watermarks-in-pdf/
 weight: 70
 ---
 

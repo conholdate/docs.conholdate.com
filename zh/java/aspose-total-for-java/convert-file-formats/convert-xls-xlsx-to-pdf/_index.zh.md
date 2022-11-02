@@ -4,7 +4,7 @@ second_title: "Java 的 Conholdate.Total"
 articleTitle: "将 XLS XLSX 转换为 PDF"
 linktitle: "将 XLS XLSX 转换为 PDF"
 type: docs
-url: /zh/convert-xls-xlsx-to-pdf/
+url: /zh/java/convert-xls-xlsx-to-pdf/
 description: "在 Java 中将 XLS XLSX 文件格式转换为 PDF。"
 keywords: "将 xls 转换为 pdf Java，将 xlsx 转换为 PDf Java，Java 将 xls xlsx，xls 转换为 pdf Java，xlsx 到 pdf eclipse Java，用于 xls 的 Java 转换器，用于 xlsx 的 Java 转换器，Excel 到 pdf Java，表格到 pdf"
 weight: 10

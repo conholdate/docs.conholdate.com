@@ -3,7 +3,7 @@ title: "缩小 HTML 以优化渲染"
 description: "本文展示了在将文档呈现为 HTML 时如何缩小 HTML 和 CSS。"
 keywords: "缩小html，渲染成html"
 type: docs
-url: /zh/minify-html-to-optimize-rendering/
+url: /zh/net/minify-html-to-optimize-rendering/
 weight: 30
 ---
 

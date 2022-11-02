@@ -3,7 +3,7 @@ title: "提取元数据"
 description: "本文演示了使用元数据属性的标签、类别和其他属性来提取元数据的高级用法。"
 keywords: "提取元数据"
 type: docs
-url: /zh/extract-metadata/
+url: /zh/net/extract-metadata/
 weight: 20
 ---
 

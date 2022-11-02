@@ -1,7 +1,7 @@
 ---
 title: "GroupDocs.Total for Java"
 type: docs
-url: /zh/groupdocs-total-for-java/
+url: /zh/java/groupdocs-total-for-java/
 weight: 20
 ---
 

@@ -3,7 +3,7 @@ title: "从图像中提取元数据"
 description: "本文演示了使用 c# 从图像中提取元数据是多么容易。"
 keywords: "从图像中提取元数据"
 type: docs
-url: /zh/extract-metadata-from-image/
+url: /zh/net/extract-metadata-from-image/
 weight: 20
 ---
 

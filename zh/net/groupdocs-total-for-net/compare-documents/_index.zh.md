@@ -3,7 +3,7 @@ title: "比较文件"
 description: "本节将指导您使用 GroupDocs.Comparison API，它是 Conholdate.Total for .NET 的一部分。下面的文章显示了如何简单地比较文档。"
 keywords: "比较文件"
 type: docs
-url: /zh/compare-documents/
+url: /zh/net/compare-documents/
 weight: 20
 ---
 ## 比较功能

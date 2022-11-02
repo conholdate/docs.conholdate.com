@@ -3,7 +3,7 @@ title: "向图表添加水印"
 description: "使用 GroupDocs.Watermark 学习在 c# 中向图表文档（例如 .vsdx）添加水印的指南，该 GroupDocs.Watermark 是 Conholdate.Total for .NET 的一部分。"
 keywords: "向图表添加水印，在 C# 中向图表文档添加水印"
 type: docs
-url: /zh/add-watermarks-to-diagrams/
+url: /zh/net/add-watermarks-to-diagrams/
 weight: 80
 ---
 

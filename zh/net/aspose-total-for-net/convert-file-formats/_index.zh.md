@@ -3,7 +3,7 @@ title: "转换文件格式 C#"
 linktitle: "转换文件格式"
 type: docs
 weight: 10
-url: /zh/convert-file-formats/
+url: /zh/net/convert-file-formats/
 keywords: "转换文件格式 c#, 转换文件格式, 转换 doc docx c#, 转换 xls xlsx c#, 将 word 转换为 pdf ASP .NET, 将 PDF 转换为 HTML C#, 将 html 转换为 pdf c#, 将 docx 转换为 pdf c#, 将 xlsx 转换为 pdf c# , 将图像转换为 pdf C#, 转换 AutoCad C#, 将 png 转换为 pdf .net"
 description: "在 C# .NET 中转换 100 多种文件格式。"
 ---

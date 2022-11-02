@@ -3,7 +3,7 @@ title: "为照片添加水印"
 description: "使用 GroupDocs.Watermark 学习在 c# 中为照片添加水印的指南，它是 Conholdate.Total for .NET 的一部分。"
 keywords: "给照片加水印，加水印，加水印，在c#中给照片或多帧图像加水印"
 type: docs
-url: /zh/adding-watermark-to-photos/
+url: /zh/net/adding-watermark-to-photos/
 weight: 30
 ---
 ## 在c#中为照片或多帧图像添加水印

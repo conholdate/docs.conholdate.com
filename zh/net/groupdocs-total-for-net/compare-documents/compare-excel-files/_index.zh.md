@@ -3,7 +3,7 @@ title: "比较 Excel 文件"
 description: "本文介绍了如何使用 GroupDocs.Comparison API（它是 Conholdate.Total for .NET 的一部分）来比较 excel 文档。"
 keywords: "比较 Excel 文件，比较 C# 中的 Excel 文件，比较两个 Excel 文件的代码示例"
 type: docs
-url: /zh/compare-excel-files/
+url: /zh/net/compare-excel-files/
 weight: 70
 ---
 

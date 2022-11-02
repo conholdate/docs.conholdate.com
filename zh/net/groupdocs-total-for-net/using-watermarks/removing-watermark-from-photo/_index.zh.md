@@ -3,7 +3,7 @@ title: "从照片中去除水印"
 description: "学习使用 GroupDocs.Watermark 从 C# 中的照片中删除水印的指南，它是 Conholdate.Total for .NET 的一部分。"
 keywords: "从照片中去除水印，去除水印，水印，在c＃中从照片中去除水印"
 type: docs
-url: /zh/removing-watermark-from-photo/
+url: /zh/net/removing-watermark-from-photo/
 weight: 30
 ---
 ## 去除水印

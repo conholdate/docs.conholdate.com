@@ -1,7 +1,7 @@
 ---
 title: "Aspose.Total for Java"
 type: docs
-url: /zh/aspose-total-for-java/
+url: /zh/java/aspose-total-for-java/
 weight: 10
 ---
 

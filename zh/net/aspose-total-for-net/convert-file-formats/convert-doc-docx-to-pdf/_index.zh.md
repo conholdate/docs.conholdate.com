@@ -4,7 +4,7 @@ second_title: ".NET 的 Conholdate.Total"
 articleTitle: "将 DOC DOCX 转换为 PDF"
 linktitle: "将 DOC DOCX 转换为 PDF"
 type: docs
-url: /zh/convert-doc-docx-to-pdf/
+url: /zh/net/convert-doc-docx-to-pdf/
 description: "在 C# 中将 DOC 和 DOCX 文件格式转换为 PDF。"
 keywords: "将 doc 转换为 pdf c#, 将 docx 转换为 PDf c#, .NET 将 doc docx, doc 转换为 pdf .net, docx 转换为 pdf asp .net"
 weight: 10

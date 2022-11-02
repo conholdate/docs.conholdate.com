@@ -4,7 +4,7 @@ second_title: "Java 的 Conholdate.Total"
 articleTitle: "将 DOCX 转换为 PPTX"
 linktitle: "将 DOCX 转换为 PPTX"
 type: docs
-url: /zh/word-to-powerpoint/
+url: /zh/java/word-to-powerpoint/
 description: "将 DOC DOCX 文件格式转换为 Java 中的 PowerPoint (PPTX)。"
 keywords: "转换 word Java，将 word 转换为 PowerPoint Java，将 doc 转换为 pptx Java，将 docx 转换为 powerpoint Java，Java 将 doc docx，doc 转换为 pptx eclipse，docx 到 pptx eclipse，用于 doc 的 java 转换器，用于 docx 的 java 转换器，用于 pptx java，docx页面到幻灯片"
 weight: 10

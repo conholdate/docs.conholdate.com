@@ -1,5 +1,5 @@
 ---
-url: /zh/add-text-redaction-annotation/
+url: /zh/net/add-text-redaction-annotation/
 title: "添加文本编辑注释"
 weight: 3
 description: "了解什么是文本编辑注释以及如何使用 GroupDocs.Annotation API 以编程方式将其添加到文档中，该 API 是 Conholdate.Total for .NET 的一部分。"

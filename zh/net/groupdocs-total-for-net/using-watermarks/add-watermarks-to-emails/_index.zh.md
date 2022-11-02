@@ -3,7 +3,7 @@ title: "在电子邮件中添加水印"
 description: "学习如何使用 GroupDocs.Watermark API 在 c# 中为电子邮件添加水印的指南，该 API 是 Conholdate.Total for .NET 的一部分。"
 keywords: "添加水印，向电子邮件添加水印，在 C# 中向电子邮件添加水印"
 type: docs
-url: /zh/add-watermarks-to-emails/
+url: /zh/net/add-watermarks-to-emails/
 weight: 60
 ---
 

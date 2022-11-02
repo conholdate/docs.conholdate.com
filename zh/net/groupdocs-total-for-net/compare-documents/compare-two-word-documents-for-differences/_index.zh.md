@@ -3,7 +3,7 @@ title: "比较两个 Word 文档的差异"
 description: "本文将解释如何使用 GroupDocs.Comparison API 比较两个 word 文档的差异，该 API 是 Conholdate.Total for .NET 的一部分。"
 keywords: "比较两个 Word 文档的差异，比较两个 Word 文档的 C# 差异"
 type: docs
-url: /zh/compare-two-word-documents-for-differences/
+url: /zh/net/compare-two-word-documents-for-differences/
 weight: 20
 ---
 ## 在 C# 中比较两个 word 文档的差异
