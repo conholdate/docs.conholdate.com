@@ -1,5 +1,5 @@
 ---
-url: /ru/add-distance-annotation/
+url: /ru/net/add-distance-annotation/
 title: "Добавить аннотацию расстояния"
 weight: 3
 description: "Узнайте, что такое аннотация расстояния и как добавить ее в документ программно с помощью API GroupDocs.Annotation, который является частью Conholdate.Total для .NET."

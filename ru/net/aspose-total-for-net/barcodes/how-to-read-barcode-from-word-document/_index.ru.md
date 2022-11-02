@@ -4,7 +4,7 @@ second_title: "Conholdate.Total для .NET"
 articleTitle: "Как прочитать штрих-код из Word"
 linktitle: "Как прочитать штрих-код из Word"
 type: docs
-url: /ru/how-to-read-barcode-from-word-document/
+url: /ru/net/how-to-read-barcode-from-word-document/
 description: "Чтение штрих-кода из документов MS Word, включая DOC DOCX на C#."
 keywords: "чтение штрих-кода c#, чтение штрих-кода Word c#, чтение штрих-кода doc c#, чтение штрих-кода docx c#, чтение слова doc docx c#, .NET чтение слова docx, чтение штрих-кода docx c#.net"
 weight: 20

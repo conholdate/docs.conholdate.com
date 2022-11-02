@@ -3,7 +3,7 @@ title: "Добавление текстового водяного знака"
 description: "Руководство по добавлению водяных знаков на фотографии в C# с помощью GroupDocs.Watermark, который является частью Conholdate.Total для .NET."
 keywords: "Добавление текстового водяного знака, текстового водяного знака, добавление текстового водяного знака в С#"
 type: docs
-url: /ru/adding-text-watermark/
+url: /ru/net/adding-text-watermark/
 weight: 50
 ---
 

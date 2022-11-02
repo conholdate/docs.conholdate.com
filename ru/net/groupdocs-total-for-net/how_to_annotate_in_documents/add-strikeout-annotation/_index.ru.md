@@ -1,5 +1,5 @@
 ---
-url: /ru/add-strikeout-annotation/
+url: /ru/net/add-strikeout-annotation/
 title: "Добавить зачеркнутую аннотацию"
 weight: 3
 description: "Узнайте, что такое аннотация Strikeout и как программно добавить ее в документ с помощью API GroupDocs.Annotation, который является частью Conholdate.Total для .NET."

@@ -3,7 +3,7 @@ title: "Сравнить документы"
 description: "В этом разделе рассказывается об использовании API GroupDocs.Comparison, который является частью Conholdate.Total для .NET. В статье ниже показано, как можно просто сравнивать документы."
 keywords: "Сравнить документы"
 type: docs
-url: /ru/compare-documents/
+url: /ru/net/compare-documents/
 weight: 20
 ---
 ## Особенности сравнения

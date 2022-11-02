@@ -4,7 +4,7 @@ second_title: "Conholdate.Total для Java"
 articleTitle: "Конвертировать PPT PPTX в Excel"
 linktitle: "Конвертировать PPT PPTX в Excel"
 type: docs
-url: /ru/powerpoint-to-excel/
+url: /ru/java/powerpoint-to-excel/
 description: "Преобразование PowerPoint PPT PPTX и других форматов файлов Excel XLS XLSX на Java."
 keywords: "конвертировать powerpoint Java, конвертировать PowerPoint в excel Java, конвертировать pptx в xlsx Java, конвертировать ppt в xls Java, Java конвертировать ppt pptx, ppt в xlsx java, pptx в xlsx eclipse java, конвертер Java для ppt, конвертер Java для pptx, pptx в Excel Java, слайды на листы"
 weight: 10

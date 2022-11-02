@@ -3,7 +3,7 @@ title: "Свойства метаданных поиска"
 description: "В этой статье показано, как вы можете искать метаданные и извлекать нужные свойства метаданных из документов, таких как PDF, DOCX, PPTX, XLSX, изображений, аудио, видео и многих других файлов различных типов в вашем решении .NET."
 keywords: "метаданные поиска"
 type: docs
-url: /ru/search-metadata-properties/
+url: /ru/net/search-metadata-properties/
 weight: 30
 ---
 

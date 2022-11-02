@@ -1,5 +1,5 @@
 ---
-url: /ru/add-watermark-annotation/
+url: /ru/net/add-watermark-annotation/
 title: "Добавить аннотацию водяного знака"
 weight: 3
 description: "Узнайте, что такое аннотация водяного знака и как программно добавить ее в документ с помощью API GroupDocs.Annotation, который является частью Conholdate.Total для .NET."

@@ -3,7 +3,7 @@ title: "Минимизируйте HTML для оптимизации ренде
 description: "В этой статье показано, как минимизировать HTML и CSS при преобразовании документов в HTML."
 keywords: "минимизировать html, рендеринг в html"
 type: docs
-url: /ru/minify-html-to-optimize-rendering/
+url: /ru/net/minify-html-to-optimize-rendering/
 weight: 30
 ---
 

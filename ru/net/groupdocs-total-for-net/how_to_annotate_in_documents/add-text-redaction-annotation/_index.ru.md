@@ -1,5 +1,5 @@
 ---
-url: /ru/add-text-redaction-annotation/
+url: /ru/net/add-text-redaction-annotation/
 title: "Добавить аннотацию редактирования текста"
 weight: 3
 description: "Узнайте, что такое аннотация Text Redaction и как программно добавить ее в документ с помощью API GroupDocs.Annotation, который является частью Conholdate.Total для .NET."

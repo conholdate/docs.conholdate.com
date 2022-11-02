@@ -3,7 +3,7 @@ title: "Добавляйте водяные знаки в электронные
 description: "Руководство по добавлению водяных знаков в сообщения электронной почты на C# с помощью API GroupDocs.Watermark, который является частью Conholdate.Total for .NET."
 keywords: "добавить водяной знак, добавить водяной знак в электронную почту, добавить водяные знаки в электронные письма на С#"
 type: docs
-url: /ru/add-watermarks-to-emails/
+url: /ru/net/add-watermarks-to-emails/
 weight: 60
 ---
 

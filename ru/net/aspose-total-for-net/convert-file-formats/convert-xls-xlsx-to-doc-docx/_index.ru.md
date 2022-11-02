@@ -4,7 +4,7 @@ second_title: "Conholdate.Total для .NET"
 articleTitle: "Конвертировать XLS XLSX в Word"
 linktitle: "Конвертировать XLS XLSX в Word"
 type: docs
-url: /ru/convert-xls-xlsx-to-doc-docx/
+url: /ru/net/convert-xls-xlsx-to-doc-docx/
 description: "Преобразование форматов файлов XLS XLSX в Word (DOC или DOCX) на C#."
 keywords: "конвертировать excel в word c#, конвертировать xls в word c#, конвертировать xlsx в word c#, .NET конвертировать xls xlsx, xls в doc docx .net, xlsx в doc docx asp .net, конвертер c# для xls, конвертер c# для xlsx, excel в pdf c#, листы в pdf"
 weight: 10

@@ -1,5 +1,5 @@
 ---
-url: /ru/add-replacement-annotation/
+url: /ru/net/add-replacement-annotation/
 title: "Добавить заменяющую аннотацию"
 weight: 3
 description: "Узнайте, что такое замещающая аннотация и как программно добавить ее в документ с помощью API GroupDocs.Annotation, который является частью Conholdate.Total для .NET."

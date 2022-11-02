@@ -1,5 +1,5 @@
 ---
-url: /ru/add-squiggly-annotation/
+url: /ru/net/add-squiggly-annotation/
 title: "Добавить волнистую аннотацию"
 weight: 3
 description: "Узнайте, что такое аннотация Squiggly и как программно добавить ее в документ с помощью API GroupDocs.Annotation, который является частью Conholdate.Total для .NET."

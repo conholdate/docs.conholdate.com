@@ -3,7 +3,7 @@ title: "Преобразование форматов файлов C#"
 linktitle: "Преобразование форматов файлов"
 type: docs
 weight: 10
-url: /ru/convert-file-formats/
+url: /ru/net/convert-file-formats/
 keywords: "конвертировать форматы файлов c#, конвертировать формат файла, конвертировать doc docx c#, конвертировать xls xlsx c#, конвертировать word в pdf ASP .NET, конвертировать PDF в HTML C#, конвертировать html в pdf c#, конвертировать docx в pdf c#, конвертировать xlsx в pdf c# , конвертировать изображение в pdf C#, конвертировать AutoCad C#, конвертировать png в pdf .net"
 description: "Преобразуйте более 100 форматов файлов в C# .NET."
 ---

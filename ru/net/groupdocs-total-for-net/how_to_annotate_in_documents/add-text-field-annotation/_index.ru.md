@@ -1,5 +1,5 @@
 ---
-url: /ru/add-text-field-annotation/
+url: /ru/net/add-text-field-annotation/
 title: "Добавить аннотацию к текстовому полю"
 weight: 3
 description: "Узнайте, что такое аннотация текстового поля и как программно добавить ее в документ с помощью API GroupDocs.Annotation, который является частью Conholdate.Total для .NET."

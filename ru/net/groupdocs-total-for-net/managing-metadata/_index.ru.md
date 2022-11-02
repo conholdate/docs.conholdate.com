@@ -3,7 +3,7 @@ title: "Управление метаданными"
 description: "Этот раздел содержит статьи о том, как управлять метаданными."
 keywords: "управление метаданными"
 type: docs
-url: /ru/managing-metadata/
+url: /ru/net/managing-metadata/
 weight: 30
 hideChildren: False
 ---

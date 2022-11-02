@@ -3,7 +3,7 @@ title: "Добавляйте водяные знаки к диаграммам"
 description: "Руководство по добавлению водяных знаков в документы диаграмм (например, .vsdx) в C# с использованием GroupDocs.Watermark, который является частью Conholdate.Total для .NET."
 keywords: "Добавление водяных знаков к диаграммам, добавление водяных знаков к документам диаграмм на C#"
 type: docs
-url: /ru/add-watermarks-to-diagrams/
+url: /ru/net/add-watermarks-to-diagrams/
 weight: 80
 ---
 

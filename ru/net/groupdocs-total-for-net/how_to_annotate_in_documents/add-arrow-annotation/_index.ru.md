@@ -1,5 +1,5 @@
 ---
-url: /ru/add-arrow-annotation/
+url: /ru/net/add-arrow-annotation/
 title: "Добавить аннотацию со стрелкой"
 weight: 2
 description: "Узнайте, что такое аннотация со стрелкой и как добавить ее в документ программным путем с помощью API GroupDocs.Annotation, который является частью Conholdate.Total для .NET."

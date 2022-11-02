@@ -3,7 +3,7 @@ title: "Водяные знаки в PDF"
 description: "Руководство, чтобы узнать, сколько способов добавить водяные знаки в PDF с помощью GroupDocs.Watermark, который является частью Conholdate.Total для .NET."
 keywords: "Добавление водяного знака, водяных знаков в PDF"
 type: docs
-url: /ru/watermarks-in-pdf/
+url: /ru/net/watermarks-in-pdf/
 weight: 70
 ---
 

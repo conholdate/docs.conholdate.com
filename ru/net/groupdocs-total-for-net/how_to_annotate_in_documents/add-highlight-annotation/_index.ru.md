@@ -1,5 +1,5 @@
 ---
-url: /ru/add-highlight-annotation/
+url: /ru/net/add-highlight-annotation/
 title: "Добавить выделенную аннотацию"
 weight: 3
 description: "Узнайте, что такое аннотация Highlight и как программно добавить ее в документ с помощью API GroupDocs.Annotation, который является частью Conholdate.Total для .NET."

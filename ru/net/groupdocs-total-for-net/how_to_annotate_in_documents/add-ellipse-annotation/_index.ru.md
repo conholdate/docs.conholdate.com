@@ -1,5 +1,5 @@
 ---
-url: /ru/add-ellipse-annotation/
+url: /ru/net/add-ellipse-annotation/
 title: "Добавить аннотацию эллипса"
 weight: 3
 description: "Узнайте, что такое эллиптическая аннотация и как добавить ее в документ программным путем с помощью API GroupDocs.Annotation, который является частью Conholdate.Total для .NET."

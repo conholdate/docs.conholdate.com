@@ -3,7 +3,7 @@ title: "Установить свойства метаданных"
 description: "В этой статье показано использование метода SetProperties, который используется для обновления или добавления метаданных."
 keywords: "установить метаданные"
 type: docs
-url: /ru/set-metadata-properties/
+url: /ru/net/set-metadata-properties/
 weight: 50
 ---
 

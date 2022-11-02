@@ -1,5 +1,5 @@
 ---
-url: /ru/add-underline-annotation/
+url: /ru/net/add-underline-annotation/
 title: "Добавить аннотацию подчеркивания"
 weight: 3
 description: "Узнайте, что такое аннотация Underline и как добавить ее в документ программно с помощью API GroupDocs.Annotation, который является частью Conholdate.Total для .NET."

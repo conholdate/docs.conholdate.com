@@ -1,5 +1,5 @@
 ---
-url: /ru/add-area-annotation/
+url: /ru/net/add-area-annotation/
 title: "Добавить аннотацию области"
 weight: 1
 description: "Узнайте, что такое аннотация области и как программно добавить ее в документ с помощью API GroupDocs.Annotation, который является частью Conholdate.Total для .NET."

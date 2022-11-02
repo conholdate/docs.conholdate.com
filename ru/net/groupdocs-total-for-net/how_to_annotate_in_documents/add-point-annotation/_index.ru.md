@@ -1,5 +1,5 @@
 ---
-url: /ru/add-point-annotation/
+url: /ru/net/add-point-annotation/
 title: "Добавить аннотацию точки"
 weight: 3
 description: "Узнайте, что такое аннотация Point и как программно добавить ее в документ с помощью API GroupDocs.Annotation, который является частью Conholdate.Total для .NET."

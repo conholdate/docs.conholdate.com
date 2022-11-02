@@ -1,5 +1,5 @@
 ---
-url: /ru/add-polyline-annotation/
+url: /ru/net/add-polyline-annotation/
 title: "Добавить полилинейную аннотацию"
 weight: 3
 description: "Узнайте, что такое аннотация Polyline и как добавить ее в документ программно с помощью API GroupDocs.Annotation, который является частью Conholdate.Total для .NET."

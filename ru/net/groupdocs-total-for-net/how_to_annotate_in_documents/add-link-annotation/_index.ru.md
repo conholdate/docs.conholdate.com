@@ -1,5 +1,5 @@
 ---
-url: /ru/add-link-annotation/
+url: /ru/net/add-link-annotation/
 title: "Добавить аннотацию к ссылке"
 weight: 3
 description: "Узнайте, что такое аннотация ссылки и как программно добавить ее в документ с помощью API GroupDocs.Annotation, который является частью Conholdate.Total для .NET."

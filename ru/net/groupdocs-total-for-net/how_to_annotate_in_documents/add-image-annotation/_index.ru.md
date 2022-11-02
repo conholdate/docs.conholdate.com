@@ -1,5 +1,5 @@
 ---
-url: /ru/add-image-annotation/
+url: /ru/net/add-image-annotation/
 title: "Добавить аннотацию к изображению"
 weight: 3
 description: "Узнайте, что такое аннотация к изображению и как программно добавить ее в документ с помощью API GroupDocs.Annotation, который является частью Conholdate.Total для .NET."

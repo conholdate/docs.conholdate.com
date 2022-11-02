@@ -3,7 +3,7 @@ title: "Удаление водяного знака с фотографии"
 description: "Руководство по удалению водяных знаков с фотографий в C# с помощью GroupDocs.Watermark, который является частью Conholdate.Total для .NET."
 keywords: "удаление водяного знака с фото, удалить водяной знак, водяной знак, удалить водяной знак с фото в c#"
 type: docs
-url: /ru/removing-watermark-from-photo/
+url: /ru/net/removing-watermark-from-photo/
 weight: 30
 ---
 ## Удалить водяной знак
