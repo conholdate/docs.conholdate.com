@@ -3,7 +3,7 @@ title: "Redact in Word"
 description: "This article explains how GroupDocs.Redaction for .NET (which is a part of Conholdate.Total for .NET) redact in Word documents."
 keywords: Extract from ZIP,extract data from ZIP, Extract from ZIP in C#
 type: docs
-url: /net/extract-from-zip/
+url: /net/redact-in-word/
 weight: 70
 ---
 
