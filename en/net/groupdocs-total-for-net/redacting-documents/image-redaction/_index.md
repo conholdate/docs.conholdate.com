@@ -9,7 +9,6 @@ weight: 70
 
 ## Image Redaction in C#
 
-
 GroupDocs.Redaction(which is a part of Conholdate.Total for .NET) supports two ways of redacting images (since version 21.3), both in separate image files and embedded images:
 
 *   Allows to put a colored box over a given area, such as header, footer, or an area, where customer's data are expected to appear.
@@ -41,7 +40,7 @@ If the redaction cannot be applied to this type of files, e.g. MS Word document 
 
 ## Redact recognized text from an image
 
-To enable OCR-processing and search for a text using regular expressions, you have to implement [IOcrConnector](https://apireference.groupdocs.com/net/redaction/groupdocs.redaction.integration.ocr/iocrconnector) interface and pass the instance to [RedactorSettings](https://apireference.groupdocs.com/net/redaction/groupdocs.redaction.options/redactorsettings) constructor. For more details, see [OCR Usage Basics]({{< ref "redaction/net/developer-guide/advanced-usage/using-ocr/ocr-usage-basics" >}}) article.
+To enable OCR-processing and search for a text using regular expressions, you have to implement [IOcrConnector](https://apireference.groupdocs.com/net/redaction/groupdocs.redaction.integration.ocr/iocrconnector) interface and pass the instance to [RedactorSettings](https://apireference.groupdocs.com/net/redaction/groupdocs.redaction.options/redactorsettings) constructor. .
 
 **C#**
 
@@ -77,7 +76,7 @@ If the redaction cannot be applied to this type of files, e.g. BMP image, [Redac
 
 ## Redact embedded images
 
-You can redact image area within all kinds of embedded images inside a document. You can both use [ImageAreaRedaction](https://apireference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/imagearearedaction) class and any type of [TextRedaction](https://apireference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/textredaction) (regular expression, exact phrase), if the OCR is enabled in **RedactorSettings** (see [OCR Usage Basics]({{< ref "redaction/net/developer-guide/advanced-usage/using-ocr/ocr-usage-basics" >}}) article). 
+You can redact image area within all kinds of embedded images inside a document. You can both use [ImageAreaRedaction](https://apireference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/imagearearedaction) class and any type of [TextRedaction](https://apireference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/textredaction) (regular expression, exact phrase), if the OCR is enabled in **RedactorSettings**. 
 
 The following example demonstrates how to redact all embedded images within a Microsoft Word document:
 
