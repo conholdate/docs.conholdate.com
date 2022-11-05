@@ -3,7 +3,7 @@ title: "Redact in Excel"
 description: "This article explains how GroupDocs.Redaction for .NET (which is a part of Conholdate.Total for .NET) allows you to redact in Excel."
 keywords: redact in Excel, redact in Excel using C#
 type: docs
-url: /net/metadata-redaction/
+url: /net/redact-in-excel/
 weight: 70
 ---
 
