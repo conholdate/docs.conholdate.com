@@ -2,7 +2,7 @@
 url: /net/merge-documents/
 title: Merge Documents
 weight: 3
-description: "This section contains articles which shows the usage of GroupDocs.Merger for.NET (which is a part of Conholdate.Total for .NET) API. This API is a cross-platform class library that enables your applications with file merging features. It supports most of the commonly used document formats such as PDF, DOCX, XLSX, PPTX, EPUB and others.
+description: "This section contains articles which shows the usage of GroupDocs.Merger for.NET (which is a part of Conholdate.Total for .NET) API. This API is a cross-platform class library that enables your applications with file merging features. It supports most of the commonly used document formats such as PDF, DOCX, XLSX, PPTX, EPUB and others."
 keywords: Merge Documents, file merging, PDF, DOCX, XLSX, PPTX, EPUB
 type: docs
 
