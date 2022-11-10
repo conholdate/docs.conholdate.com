@@ -9,7 +9,7 @@ weight: 70
 
 ## Merge Word Files in C#
 
-GroupDocs.Merger for .NET (which is a part of Conholdate.Total for .NET) DOCX is a famous format for Microsoft Word documents. It was introduced from 2007 with the release of Microsoft Office 2007, the structure of this new Document format was changed from plain binary to a combination of XML and binary files. The DOCX files can be opened with Word 2007 and Later versions, but not with the earlier versions of MS Word which support DOC file extensions.
+The DOCX is a famous format for Microsoft Word documents. It was introduced from 2007 with the release of Microsoft Office 2007, the structure of this new Document format was changed from plain binary to a combination of XML and binary files. The DOCX files can be opened with Word 2007 and Later versions, but not with the earlier versions of MS Word which support DOC file extensions.
 
 Following C# code snippet in demonstrates that how to merge DOCX files into single file.
 
