@@ -1,5 +1,5 @@
 ---
-title: "Compare Text in Two Files"
+title: "Compare Text in Two Files | Java"
 description: "This article explains the usage of GroupDocs.Comparison API (which is a part of Conholdate.Total for Java) to compare text in two files."
 keywords: compare text in two files, Compare text in two files using Java
 type: docs

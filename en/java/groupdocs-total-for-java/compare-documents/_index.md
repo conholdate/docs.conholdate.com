@@ -1,5 +1,5 @@
 ---
-title: "Compare Documents"
+title: "Compare Documents | Java"
 description: "This section guide you about the usage of GroupDocs.Comparison API which is a part of Conholdate.Total for Java. The article below shows that how you can simply compare documents."
 keywords: Compare Documents, Comparison features 
 type: docs

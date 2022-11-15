@@ -1,5 +1,5 @@
 ---
-title: "Compare Two Word Documents for Differences"
+title: "Compare Two Word Documents for Differences | Java"
 description: "This article will explain how to compare two word documents for differences using GroupDocs.Comparison API which is a part of Conholdate.Total for Java."
 keywords: Compare Two Word Documents for Differences, Compare Two Word Documents for Differences in Java
 type: docs
