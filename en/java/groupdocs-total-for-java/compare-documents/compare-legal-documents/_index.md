@@ -1,5 +1,8 @@
 ---
-title: "Compare Legal Documents | Java"
+title: Compare Legal Documents Java
+second_title: Conholdate.Total for Java
+articleTitle: Compare Legal Documents
+linktitle: Compare Legal Documents
 description: "This article explains how to use GroupDocs.Comparison API (which is a part of Conholdate.Total for Java) to compare legal documents."
 keywords: Compare legal documents, Compare legal documents in Java
 type: docs

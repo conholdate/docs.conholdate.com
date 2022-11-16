@@ -1,5 +1,8 @@
 ---
-title: "Compare Two PDF Documents | Java"
+title: Compare Two PDF Documents Java
+second_title: Conholdate.Total for Java
+articleTitle: Compare Two PDF Documents
+linktitle: Compare Two PDF Documents
 description: "This article will explain how to compare two pdf documents using GroupDocs.Comparison API which is a part of Conholdate.Total for Java."
 keywords: Compare Two PDF Documents, Compare Two PDF Documents using Java
 type: docs

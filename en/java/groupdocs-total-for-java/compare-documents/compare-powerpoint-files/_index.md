@@ -1,5 +1,8 @@
 ---
-title: "Compare Powerpoint Files | Java"
+title: Compare Powerpoint Files Java
+second_title: Conholdate.Total for Java
+articleTitle: Compare Powerpoint Files
+linktitle: Compare Powerpoint Files
 description: "This article explains the usage of GroupDocs.Comparison API (which is a part of Conholdate.Total for Java) to compare powerpoint files."
 keywords: Compare Powerpoint Files, Compare Powerpoint Files in Java
 type: docs
