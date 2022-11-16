@@ -1,4 +1,4 @@
---
+---
 title: Compare Two Word Documents for Differences
 second_title: Conholdate.Total for Java
 articleTitle: Compare Two Word Documents for Differences
