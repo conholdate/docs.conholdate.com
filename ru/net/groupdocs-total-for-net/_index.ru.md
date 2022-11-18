@@ -1,6 +1,7 @@
 ---
 title: "GroupDocs.Total для .NET"
 type: docs
+description: Единый API .NET для управления документами из ваших собственных настольных решений и веб-приложений без использования каких-либо других коммерческих продуктов.
 url: /ru/net/groupdocs-total-for-net/
 weight: 20
 ---

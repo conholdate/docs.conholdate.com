@@ -1,6 +1,7 @@
 ---
 title: "GroupDocs.Total for Java"
 type: docs
+description: Documentation of GroupDocs.Total for Java. APIs to View, Export, Annotate, Compare, Sign, Automate and Search documents from within any Java application.
 url: /java/groupdocs-total-for-java/
 weight: 20
 ---

@@ -1,6 +1,7 @@
 ---
 title: "GroupDocs.Total for Java"
 type: docs
+description: GroupDocs.Total for Java 的文档。 从任何 Java 应用程序中查看、导出、注释、比较、签名、自动化和搜索文档的 API。
 url: /zh/java/groupdocs-total-for-java/
 weight: 20
 ---

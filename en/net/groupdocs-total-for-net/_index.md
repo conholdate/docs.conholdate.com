@@ -1,5 +1,6 @@
 ---
 title: "GroupDocs.Total for .NET"
+description: A single .NET API to Manipulate documents from within your own desktop solutions and web apps without requiring any other commercial products.
 type: docs
 url: /net/groupdocs-total-for-net/
 weight: 20

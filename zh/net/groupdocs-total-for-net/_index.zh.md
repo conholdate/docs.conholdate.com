@@ -1,6 +1,7 @@
 ---
 title: ".NET 的 GroupDocs.Total"
 type: docs
+description: 一个 .NET API 可以在您自己的桌面解决方案和 Web 应用程序中处理文档，而无需任何其他商业
 url: /zh/net/groupdocs-total-for-net/
 weight: 20
 ---
