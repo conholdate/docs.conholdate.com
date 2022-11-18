@@ -1,6 +1,7 @@
 ---
 title: "Conholdate.Total für Java"
 type: docs
+description: Klassenbibliotheken und REST-APIs für Java-Entwickler zum Bearbeiten und Verarbeiten von Dateien aus Word, Excel, PowerPoint, Visio, PDF, CAD und mehreren anderen Kategorien in Web-, Desktop- oder mobilen Apps. Java-Entwickler können auf Windows-, Linux-, MacOS- und Android-Plattformen entwickeln und bereitstellen.
 url: /de/java/
 weight: 10
 ---

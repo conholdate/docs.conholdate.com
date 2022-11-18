@@ -1,6 +1,7 @@
 ---
 title: "Conholdate.Total für .NET"
 type: docs
+description: Klassenbibliotheken und REST-APIs für Entwickler zum Bearbeiten und Verarbeiten von Dateien aus Word, Excel, PowerPoint, Visio, PDF, CAD und mehreren anderen Kategorien in Web-, Desktop- oder mobilen Apps. Entwicklung und Bereitstellung auf Windows-, Linux-, MacOS- und Android-Plattformen.
 url: /de/net/
 weight: 10
 ---
