@@ -1,6 +1,7 @@
 ---
 title: "Aspose.Total for Java"
 type: docs
+description: 一种 Java API，允许您的应用程序执行大量文档处理任务。 它支持DOC、DOCX、RTF、HTML、OpenDocument、PDF、XPS、EPUB等格式。
 url: /zh/java/aspose-total-for-java/
 weight: 10
 ---

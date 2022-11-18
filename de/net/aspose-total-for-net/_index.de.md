@@ -1,6 +1,7 @@
 ---
 title: "Aspose.Total für .NET"
 type: docs
+description: Eine API, mit der Ihre Anwendungen eine Vielzahl von Dokumentenverarbeitungsaufgaben ausführen können. Es unterstützt DOC, DOCX, RTF, HTML, OpenDocument, PDF, XPS, EPUB und viele andere Formate.
 url: /de/net/aspose-total-for-net/
 weight: 10
 ---

@@ -1,6 +1,7 @@
 ---
 title: "Aspose.Total for .NET"
 type: docs
+description: 允许您的应用程序执行大量文档处理任务的 API。 支持DOC、DOCX、RTF、HTML、OpenDocument、PDF、XPS、EPUB等多种格式
 url: /zh/net/aspose-total-for-net/
 weight: 10
 ---
