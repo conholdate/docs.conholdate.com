@@ -1,7 +1,7 @@
 ---
 title: "Metadata Redaction"
-description: "This article explains how GroupDocs.Redaction for .NET (which is a part of Conholdate.Total for .NET) perform image redaction."
-keywords: Image Redaction, Image Redaction in C#
+description: "This article explains how GroupDocs.Redaction for .NET (which is a part of Conholdate.Total for .NET) perform metadata redaction."
+keywords: metadata Redaction, metadata Redaction in C#
 type: docs
 url: /net/metadata-redaction/
 weight: 70
