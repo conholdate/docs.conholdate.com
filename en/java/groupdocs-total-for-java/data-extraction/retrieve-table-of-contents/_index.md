@@ -26,7 +26,7 @@ Iterable<TocItem> getToc();
 | [getDepth](https://apireference.groupdocs.com/java/parser/com.groupdocs.parser.data/TocItem#getDepth()) | The depth level. |
 | [getPageIndex](https://apireference.groupdocs.com/java/parser/com.groupdocs.parser.data/TocItem#getPageIndex()) | The page index. |
 | [getText](https://apireference.groupdocs.com/java/parser/com.groupdocs.parser.data/TocItem#getText()) | The text. |
-| [extractText](https://apireference.groupdocs.com/java/parser/com.groupdocs.parser.data/TocItem#extractText()) | Extracts a text from the document to which [TocItem](https://apireference.groupdocs.com/java/parser/com.groupdocs.parser.data/TocItem) object refers. For detail, see [Extract text by table of contents item]({{< ref "parser/java/developer-guide/advanced-usage/working-with-text/extract-text-by-table-of-contents-item.md" >}}) |
+| [extractText](https://apireference.groupdocs.com/java/parser/com.groupdocs.parser.data/TocItem#extractText()) | Extracts a text from the document to which [TocItem](https://apireference.groupdocs.com/java/parser/com.groupdocs.parser.data/TocItem) object refers. |
 
 Follow the steps below to extract extract table of contents from the document:
 
