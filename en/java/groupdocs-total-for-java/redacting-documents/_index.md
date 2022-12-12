@@ -4,7 +4,6 @@ second_title: Conholdate.Total for Java
 articleTitle: Redacting Documents
 linktitle: Redacting Documents
 url: /java/redacting-documents/
-title: Redacting Documents
 weight: 3
 description: "This section contains articles which shows the usage of GroupDocs.Redaction for Java (which is a part of Conholdate.Total for Java) API. This API is known as an API for removing sensitive and classified information from the documents of different file formats."
 keywords: Redacting Documents,redact PDF documents, PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, ODT, ODS, RTF, EPUB 
