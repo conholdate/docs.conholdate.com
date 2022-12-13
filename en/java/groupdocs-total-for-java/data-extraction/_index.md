@@ -1,5 +1,5 @@
 ---
-title: Data Extraction
+title: Data Extraction Java
 second_title: Conholdate.Total for Java
 articleTitle: Data Extraction
 linktitle: Data Extraction
