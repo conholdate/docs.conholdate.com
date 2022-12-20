@@ -1,14 +1,14 @@
 ---
-title: "Vieweing Word Files"
+title: "Viewing Word Files"
 description: "This demonstrates how to use the GroupDocs.Viewer .NET API (which is a part of Conholdate.Total for .NET) to view Word files in HTML, PDF, PNG, and JPEG formats."
-keywords: Vieweing Word Files, Vieweing Word Files in C#
+keywords: Viewing Word Files, Vieweing Word Files in C#
 type: docs
 url: /net/viewing-word-files/
 weight: 30
 ---
 
 
-## Vieweing Word Files in C#
+## Viewing Word Files in C#
 
 [GroupDocs.Viewer for .NET](https://products.groupdocs.com/viewer/net) allows you to render your Microsoft Word documents in HTML, PDF, PNG, and JPEG formats. You do not need to use Microsoft Word or other word processors to load and view Word documents within your .NET application (web or desktop). 
 
