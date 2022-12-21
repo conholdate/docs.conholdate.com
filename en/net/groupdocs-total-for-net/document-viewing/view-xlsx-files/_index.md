@@ -41,7 +41,7 @@ using (var viewer = new Viewer("invoice.xlsx"))
 
 The following image demonstrates the result:
 
-![Render an Excel file to HTML](viewer/net/images/rendering-basics/render-spreadsheets/convert-excel-to-html.png)
+![Render an Excel file to HTML](https://docs.groupdocs.com/viewer/net/images/rendering-basics/render-spreadsheets/convert-excel-to-html.png)
 
 
 
@@ -93,7 +93,7 @@ using (var viewer = new Viewer("invoice.xlsx"))
 
 The following image demonstrates the result:
 
-![Render an Excel file to PDF](viewer/net/images/rendering-basics/render-spreadsheets/render-excel-to-pdf.png)
+![Render an Excel file to PDF](https://docs.groupdocs.com/viewer/net/images/rendering-basics/render-spreadsheets/render-excel-to-pdf.png)
 
 ## Render spreadsheets as PNG
 
@@ -118,7 +118,7 @@ using (var viewer = new Viewer("invoice.xlsx"))
 ```
 The following image demonstrates the result:
 
-![Render an Excel file to PNG](viewer/net/images/rendering-basics/render-spreadsheets/render-excel-to-png.png)
+![Render an Excel file to PNG](https://docs.groupdocs.com/viewer/net/images/rendering-basics/render-spreadsheets/render-excel-to-png.png)
 
 ## Render spreadsheets as JPEG
 
@@ -199,5 +199,5 @@ using (var viewer = new Viewer("sample.xlsx"))
 
 The following image demonstrates a sample console output:
 
-![Retrieve worksheet names](viewer/net/images/rendering-basics/render-spreadsheets/retrieve-worksheet-names.png)
+![Retrieve worksheet names](https://docs.groupdocs.com/viewer/net/images/rendering-basics/render-spreadsheets/retrieve-worksheet-names.png)
 

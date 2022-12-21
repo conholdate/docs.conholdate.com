@@ -38,7 +38,7 @@ using (var viewer = new Viewer("resume.pdf"))
 
 The following image demonstrates the result:
 
-![Render a PDF file to HTML](viewer/net/images/rendering-basics/render-pdf-documents/render-pdf-to-html.png)
+![Render a PDF file to HTML](https://docs.groupdocs.com/viewer/net/images/rendering-basics/render-pdf-documents/render-pdf-to-html.png)
 
 ### Create an HTML file with external resources
 
@@ -66,7 +66,7 @@ using (var viewer = new Viewer("resume.pdf"))
 
 The image below demonstrates the result. External resources are placed in a separate folder.
 
-![Place HTML resources in a separate folder](viewer/net/images/rendering-basics/render-pdf-documents/render-to-html-external-resources.png)
+![Place HTML resources in a separate folder](https://docs.groupdocs.com/viewer/net/images/rendering-basics/render-pdf-documents/render-to-html-external-resources.png)
 
 ### Adjust image quality in the output HTML file
 
@@ -112,7 +112,7 @@ using (var viewer = new Viewer("resume.pdf"))
 
 The image below illustrates the result. PDF content is exported to HTML as an image, so users cannot select or copy document text.  
 
-![Render PDF content as an image in the output HTML file](viewer/net/images/rendering-basics/render-pdf-documents/render-pdf-to-html-as-image.png)
+![Render PDF content as an image in the output HTML file](https://docs.groupdocs.com/viewer/net/images/rendering-basics/render-pdf-documents/render-pdf-to-html-as-image.png)
 
 ### Enable multi-layer rendering
 
@@ -156,7 +156,7 @@ using (var viewer = new Viewer("resume.pdf"))
 
 The following image demonstrates the result:
 
-![Render a PDF file to PNG](viewer/net/images/rendering-basics/render-pdf-documents/render-pdf-to-png.png)
+![Render a PDF file to PNG](https://docs.groupdocs.com/viewer/net/images/rendering-basics/render-pdf-documents/render-pdf-to-png.png)
 
 ### Convert PDF files to JPEG
 
@@ -253,7 +253,7 @@ using (var viewer = new Viewer("resume_commented.pdf"))
 
 The following image illustrates the result:
 
-![Render PDF comments to PNG](viewer/net/images/rendering-basics/render-pdf-documents/render-pdf-comments.png)
+![Render PDF comments to PNG](https://docs.groupdocs.com/viewer/net/images/rendering-basics/render-pdf-documents/render-pdf-comments.png)
 
 ## Obtain information about a PDF file
 
@@ -293,7 +293,7 @@ using (var viewer = new Viewer("resume.pdf"))
 
 The following image demonstrates a sample console output:
 
-![Get information about a PDF file](viewer/net/images/rendering-basics/render-pdf-documents/retrieve-pdf-file-information.png)
+![Get information about a PDF file](https://docs.groupdocs.com/viewer/net/images/rendering-basics/render-pdf-documents/retrieve-pdf-file-information.png)
 
 ### Extract text from a PDF file
 
@@ -321,4 +321,4 @@ using (var viewer = new Viewer("resume.pdf"))
 }
 ```
 
-![Extract and display PDF text](viewer/net/images/rendering-basics/render-pdf-documents/extract-pdf-text.png)
+![Extract and display PDF text](https://docs.groupdocs.com/viewer/net/images/rendering-basics/render-pdf-documents/extract-pdf-text.png)

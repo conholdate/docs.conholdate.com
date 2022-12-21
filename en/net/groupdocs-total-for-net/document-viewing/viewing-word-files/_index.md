@@ -39,7 +39,7 @@ using (var viewer = new Viewer("resume.docx"))
 
 The following image demonstrates the result:
 
-![Render a Word file to HTML](viewer/net/images/rendering-basics/render-word-documents/render-to-html-embedded-resources.png)
+![Render a Word file to HTML](https://docs.groupdocs.com/viewer/net/images/rendering-basics/render-word-documents/render-to-html-embedded-resources.png)
 
 ### Create an HTML file with external resources
 
@@ -67,7 +67,7 @@ using (var viewer = new Viewer("resume.docx"))
 
 The image below demonstrates the result. External resources are placed in a separate folder.
 
-![Place HTML resources in a separate folder](viewer/net/images/rendering-basics/render-word-documents/render-to-html-external-resources.png)
+![Place HTML resources in a separate folder](https://docs.groupdocs.com/viewer/net/images/rendering-basics/render-word-documents/render-to-html-external-resources.png)
 
 ## View Word documents as PDF
 
@@ -87,7 +87,7 @@ using (var viewer = new Viewer("resume.docx"))
 
 The following image demonstrates the result:
 
-![Render a Word file to PDF](viewer/net/images/rendering-basics/render-word-documents/render-to-pdf.png)
+![Render a Word file to PDF](https://docs.groupdocs.com/viewer/net/images/rendering-basics/render-word-documents/render-to-pdf.png)
 
 ## View Word documents as PNG
 
@@ -110,7 +110,7 @@ using (var viewer = new Viewer("resume.docx"))
 ```
 The following image demonstrates the result:
 
-![Render a Word file to PNG](viewer/net/images/rendering-basics/render-word-documents/render-to-png-image.png)
+![Render a Word file to PNG](https://docs.groupdocs.com/viewer/net/images/rendering-basics/render-word-documents/render-to-png-image.png)
 
 ## View Word documents as JPEG
 
@@ -195,7 +195,7 @@ using (var viewer = new Viewer("TrackChanges.docx"))
 
 The following image illustrates the result:
 
-![Render tracked changes to PDF](viewer/net/images/rendering-basics/render-word-documents/render-track-changes-to-pdf.png)
+![Render tracked changes to PDF](https://docs.groupdocs.com/viewer/net/images/rendering-basics/render-word-documents/render-track-changes-to-pdf.png)
 
 ## Render comments
 
@@ -218,6 +218,6 @@ using (var viewer = new Viewer("resume.docx"))
 
 The following image illustrates the result:
 
-![Render comments to PDF](viewer/net/images/rendering-basics/render-word-documents/render-comments-to-pdf.png)
+![Render comments to PDF](https://docs.groupdocs.com/viewer/net/images/rendering-basics/render-word-documents/render-comments-to-pdf.png)
 
 
