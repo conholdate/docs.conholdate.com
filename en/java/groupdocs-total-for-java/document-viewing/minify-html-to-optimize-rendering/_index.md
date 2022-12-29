@@ -3,7 +3,6 @@ title: Minify HTML to Optimize Rendering Java
 second_title: Conholdate.Total for Java
 articleTitle: Minify HTML to Optimize Rendering
 linktitle: Minify HTML to Optimize Rendering
-title: "Minify HTML to Optimize Rendering"
 description: "This article shows how to minify HTML and CSS when rendering of documents into HTML using Viewer Java API."
 keywords: minify html, rendering to html
 type: docs
