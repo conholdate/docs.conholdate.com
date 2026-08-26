@@ -1,0 +1,213 @@
+---
+title: "Cómo ejecutar GroupDocs.Viewer en Docker"
+sidebar_label: "Cómo ejecutar GroupDocs.Viewer en Docker"
+sidebar_position: 7
+description: "Puedes crear un proyecto desde cero utilizando la CLI de Visual Studio .NET. Te guiamos paso a paso en ambos casos."
+slug: "/net/viewer/v26.5/getting-started/how-to-run-in-docker/"
+product: "viewer"
+platform: "net"
+version: "v26.5"
+source_repo: "GroupDocs.Viewer-Docs"
+source_path: "net/getting-started/how-to-run-in-docker.md"
+source_commit: "1787766828434e84ffee3af8d2b2e72482e06feb"
+source_sha256: "896ed840d5dbf80b922afa14f79b7e3df4cf20c46bbf0b3a94fd5444276165a6"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_source_sha256: "dc106348c27cef8d4382c9feac8d661b3a120e41bdab34842484f2de4bd56fa6"
+translation_updated_at: "2026-08-18T06:12:14.375Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET se incluye en Conholdate.Total for .NET.
+:::
+
+Docker proporciona un entorno aislado para servicios y aplicaciones. En este tema contenedorizamos una aplicación de ejemplo que utiliza GroupDocs.Viewer. Puede obtener más información sobre la contenerización en <a href="https://learn.microsoft.com/en-us/dotnet/core/docker/introduction" rel="nofollow">Introducción a .NET y Docker</a>.
+
+Ejecutar GroupDocs.Viewer en Docker es sencillo. En primer lugar, preparamos una aplicación de ejemplo que utiliza el paquete <a href="https://www.nuget.org/packages/GroupDocs.Viewer.CrossPlatform" rel="nofollow">GroupDocs.Viewer.CrossPlatform</a> de NuGet y, a continuación, compilamos una imagen de Docker y ejecutamos la aplicación en un contenedor de Docker.
+
+En este artículo de documentación utilizaremos <a href="https://learn.microsoft.com/en-us/dotnet/architecture/microservices/net-core-net-framework-containers/official-net-docker-images" rel="nofollow">la imagen oficial de Docker para .NET</a>, que se basa en la distribución de Linux Debian.
+
+## Requisitos previos
+
+**Docker:** Docker debe estar instalado en su sistema. Consulte la documentación oficial de Docker para obtener instrucciones detalladas de instalación en <a href="https://docs.docker.com/get-docker/" rel="nofollow">Instalar Docker</a>.
+
+**Aplicación .NET:** En este tema ejecutaremos una aplicación de ejemplo basada en .NET 8. Puede descargarla desde [aquí](/net/viewer/v26.5/sample-files/how-to-run-groupdocs-viewer-in-docker/DemoApp.zip). Como alternativa, puede utilizar su propia aplicación basada en los fragmentos de código proporcionados a continuación.
+
+<Tabs groupId="demo-app">
+
+<TabItem value="demoapp-csproj" label="DemoApp.csproj" default>
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GroupDocs.Viewer.CrossPlatform" Version="24.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="formatting.docx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
+```
+
+</TabItem>
+
+<TabItem value="program-cs" label="Program.cs">
+
+```cs
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+namespace DemoApp
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            // Instantiate Viewer and pass file name
+            using (Viewer viewer = new Viewer("formatting.docx"))
+            {
+                // Configure view options
+                HtmlViewOptions viewOptions =
+                    HtmlViewOptions.ForEmbeddedResources("output/page-{0}.html");
+
+                // Render DOCX to HTML
+                viewer.View(viewOptions);
+            }
+        }
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="formatting-docx" label="formatting.docx">
+
+`formatting.docx` es un archivo DOCX de ejemplo que utilizaremos en este ejemplo. Haga clic [aquí](/net/viewer/v26.5/sample-files/how-to-run-groupdocs-viewer-in-docker/formatting.docx) para descargarlo.
+
+</TabItem>
+
+</Tabs>
+
+El árbol de carpetas debe verse similar a la siguiente estructura de directorios:
+
+```Directory
+📂 DemoApp
+ ├──DemoApp.csproj
+ ├──Program.cs
+ └──formatting.docx
+```
+
+:::info
+
+Esta aplicación de demostración hace referencia al paquete <a href="https://www.nuget.org/packages/GroupDocs.Viewer.CrossPlatform" rel="nofollow">GroupDocs.Viewer.CrossPlatform</a>. Este paquete se recomienda para Linux y macOS porque no utiliza `System.Drawing.Common` como subsistema gráfico, <a href="https://learn.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/6.0/system-drawing-common-windows-only" rel="nofollow">lo cual solo es compatible con Windows</a>.
+
+:::
+
+## Agregar Dockerfile
+
+Para crear una imagen de Docker, agregue un archivo `Dockerfile` y un archivo `.dockerignore` a su proyecto. 
+
+<Tabs groupId="dockerfile">
+
+<TabItem value="dockerfile" label="Dockerfile" default>
+
+```Dockerfile
+FROM mcr.microsoft.com/dotnet/sdk:8.0
+WORKDIR /app
+
+# Add `contrib` archive area to package sources list
+RUN sed -i 's/^Components: main$/& contrib/' /etc/apt/sources.list.d/debian.sources
+
+# Download the package lists from the repositories
+# and install two packages `fontconfig` and `ttf-mscorefonts-installer`
+RUN apt update && apt install -y \
+    fontconfig \
+    ttf-mscorefonts-installer 
+
+# Copy the application and restore packages
+COPY . .
+RUN dotnet restore 
+
+# Run the application
+ENTRYPOINT ["dotnet", "run"]
+```
+
+</TabItem>
+
+<TabItem value="dockerignore" label=".dockerignore">
+
+```txt
+**/.dockerignore
+**/Dockerfile*
+**/.vs
+**/.vscode
+**/*.*proj.user
+**/bin
+**/obj
+```
+
+</TabItem>
+
+</Tabs>
+
+En este punto, el árbol de carpetas debería verse similar a la siguiente estructura de directorios:
+
+```Directory
+📂 DemoApp
+ ├──DemoApp.csproj
+ ├──Program.cs
+ ├──formatting.docx
+ ├──Dockerfile
+ └──.dockerignore
+```
+
+El `Dockerfile` contiene instrucciones para instalar dos dependencias requeridas por GroupDocs.Viewer:
+
+**fontconfig:** Esta biblioteca configura y personaliza el acceso a las fuentes.
+
+**ttf-mscorefonts-installer:** Este paquete proporciona las fuentes core TrueType de Microsoft. Está disponible en el área de repositorio <a href="https://www.debian.org/doc/debian-policy/ch-archive#s-contrib" rel="nofollow">contrib</a>. (Nota: El uso de fuentes no libres puede tener implicaciones de licencia; por lo tanto, asegúrese de revisar los términos de la licencia.)
+
+## Compilación de la imagen Docker
+
+En este punto ya estamos listos para compilar la imagen Docker. Asegúrese de que Docker esté activo y en ejecución, diríjase al directorio `DemoApp` y ejecute el siguiente comando en la línea de comandos para compilar la imagen.
+
+```bash
+docker build -t viewer-demo-app .
+```
+
+`-t`: se utiliza para nombrar y etiquetar la imagen. Nombramos la imagen como `viewer-demo-app` sin etiqueta.
+
+`.`: ruta del contexto de compilación. En este ejemplo, es el directorio actual.
+
+## Ejecutar el contenedor de Docker
+
+Para ejecutar nuestra aplicación contenida en un contenedor, utilice el siguiente comando en el directorio `DemoApp`.
+
+```bash
+docker run --rm -v ${pwd}/output:/app/output viewer-demo-app
+```
+
+`--rm`: Elimina el contenedor y limpia el sistema de archivos al finalizar.
+
+`-v ${pwd}/output:/app/output`: Mapea el directorio `./output` del sistema operativo anfitrión al directorio `/app/output` dentro del contenedor Docker.
+
+Después de ejecutar la aplicación, el directorio `./output` contendrá dos archivos: `page-1.html` y `page-2.html`, debido a las limitaciones de la versión de evaluación. Para procesar todos los archivos, debe configurar una licencia válida. Obtenga más información sobre las limitaciones de la evaluación y la versión de prueba gratuita en [Cómo evaluar GroupDocs.Viewer](/net/viewer/v26.5/licensing-and-evaluation/).
+
+## Conclusión
+
+Este tema demostró cómo contenerizar una aplicación de ejemplo con .NET 8 mediante Docker para ejecutar GroupDocs.Viewer.
