@@ -53,11 +53,6 @@ const config = {
           label: "Docs"
         },
         {
-          href: "https://www.conholdate.com/products/total/net",
-        label: "Español",
-          position: "right"
-        },
-        {
           type: "localeDropdown",
           position: "right"
         }
