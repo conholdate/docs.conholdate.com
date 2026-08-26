@@ -1,0 +1,44 @@
+name: Deploy QA (CEPH)
+
+on:
+  push:
+    branches:
+      - qa
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-qa-ceph
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: lisbon-runner
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Docusaurus
+        run: npm run build
+
+      - name: Verify AWS CLI
+        run: aws --version
+
+      - name: Deploy to Ceph
+        run: |
+          aws s3 sync ./build s3://docs-conholdate-com \
+            --endpoint-url https://s3-admin-qa.dynabic.com \
+            --region us-east-1 \
+            --delete
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_QA }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_QA }}
