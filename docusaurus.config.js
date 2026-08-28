@@ -12,7 +12,7 @@ const config = {
   onBrokenMarkdownLinks: "warn",
   i18n: {
     defaultLocale: "en",
-    locales: ["en", "es"],
+    locales: ["en", "es", "fr", "de"],
     localeConfigs: {
       en: {
         label: "English",
@@ -22,6 +22,14 @@ const config = {
         label: "Español",
         htmlLang: "es"
       },
+      fr: {
+        label: "Français",
+        htmlLang: "fr"
+      },
+      de: {
+        label: "Deutsch",
+        htmlLang: "de"
+      }
     }
   },
   presets: [
@@ -51,6 +59,11 @@ const config = {
           sidebarId: "docsSidebar",
           position: "left",
           label: "Docs"
+        },
+        {
+          href: "https://www.conholdate.com/products/total/net",
+          label: "Conholdate.Total for .NET",
+          position: "right"
         },
         {
           type: "localeDropdown",

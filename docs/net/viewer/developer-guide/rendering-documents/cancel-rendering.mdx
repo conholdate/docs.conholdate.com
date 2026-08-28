@@ -1,0 +1,146 @@
+---
+title: "Cancel rendering"
+sidebar_label: "Cancel rendering"
+sidebar_position: 3
+description: "Cancel or stop rendering rendering process with cancellation token"
+slug: "/net/viewer/developer-guide/rendering-documents/cancel-rendering/"
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.4.0"
+version: "v26.4.0"
+source_repo: "GroupDocs.Viewer-Docs"
+source_path: "net/developer-guide/rendering-documents/cancel-rendering.md"
+source_commit: "1787766828434e84ffee3af8d2b2e72482e06feb"
+source_sha256: "7a774358e4e9eb82f7dfa036677743e32c397c50c9b4535e4cc75166a40d25ff"
+---
+
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+Since the 21.7 version, GroupDocs.Viewer supports task cancellation using the cancellation token.
+
+To cancel a task, follow these steps:
+
+1. Create the <a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.cancellationtokensource?view=netstandard-2.0" rel="nofollow">CancellationTokenSource</a> object.
+2. Create the <a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.cancellationtoken?view=netstandard-2.0" rel="nofollow">CancellationToken</a> object.
+3. Create the Task object. When creating, specify the cancellation token.
+4. Cancel the task.
+
+You can cancel tasks using one of the following methods:
+
+* To cancel the task in a specified time, call the <a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.cancellationtokensource.cancelafter?view=netstandard-2.0" rel="nofollow">CancelAfter</a> method.
+* To cancel the task at any time, call the <a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.cancellationtokensource.cancel?view=netstandard-2.0" rel="nofollow">Cancel</a> method.
+
+The following code snippet shows how to cancel a task:
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Threading;
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+// Create cancellation token source.
+CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+CancellationToken cancellationToken = cancellationTokenSource.Token;
+
+// Create task and pass token
+Task runTask = Task.Run(() =>
+{
+    using (Viewer viewer = new Viewer("sample.docx"))
+    {
+        HtmlViewOptions options = HtmlViewOptions.ForEmbeddedResources();
+        options.RenderComments = true;
+        viewer.View(options, cancellationToken);
+    }
+}, cancellationToken);
+
+// Cancel task after 1000 ms.
+cancellationTokenSource.CancelAfter(1000);
+
+// Also you can call Cancel method at any time
+//cancellationTokenSource.Cancel();
+
+// Wait for the task to cancel.
+Thread.Sleep(2000);
+
+Debug.Assert(runTask.IsCanceled);
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports System.Threading
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        ' Create cancellation token source.
+        Dim cancellationTokenSource As CancellationTokenSource = New CancellationTokenSource()
+        Dim cancellationToken As CancellationToken = cancellationTokenSource.Token
+
+        ' Create task and pass token
+        Dim runTask As Task = Task.Run(Sub()
+                                           Using viewer As Viewer = New Viewer("sample.docx")
+                                               Dim options As HtmlViewOptions = HtmlViewOptions.ForEmbeddedResources()
+                                               options.RenderComments = True
+                                               viewer.View(options, cancellationToken)
+                                           End Using
+                                       End Sub, cancellationToken)
+
+        ' Cancel task after 1000 ms.
+        cancellationTokenSource.CancelAfter(1000)
+
+        ' Also you can call Cancel method at any time
+        'cancellationTokenSource.Cancel();
+
+        ' Wait for the task to cancel.
+        Thread.Sleep(2000)
+
+        Debug.Assert(runTask.IsCanceled)
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+
+:::info
+If runTask.IsCancelled is `true`, then the task has been canceled.
+
+To properly handle task cancellation, pass a cancellation token to the Task.Run method. Otherwise, runTask.IsCancelled is not `true`.
+:::
+
+
+The following methods of the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer" rel="nofollow">Viewer</a> class also support cancellation:
+
+* <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.viewer/getattachments/methods/1" rel="nofollow">GetAttachments</a>
+* <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.viewer/saveattachment/methods/1" rel="nofollow">SaveAttachment</a>
+* <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.viewer/view/methods/2" rel="nofollow">View</a> with ViewOptions
+* <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.viewer/view/methods/3" rel="nofollow">View</a> with ViewOptions and page numbers array
+
+You can also view the <a href="https://github.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET/blob/master/Examples/GroupDocs.Viewer.Examples.CSharp/AdvancedUsage/Rendering/CommonRenderingOptions/CancelRenderWithCancellationToken.cs" rel="nofollow">example</a> in our public GitHub repository.
+

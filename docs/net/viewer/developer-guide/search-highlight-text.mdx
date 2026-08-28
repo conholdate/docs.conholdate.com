@@ -1,0 +1,124 @@
+---
+title: "Search and highlight text in the loaded document"
+sidebar_label: "Search and highlight text in the loaded document"
+sidebar_position: 8
+description: "Search text by literal or regex and highlight found text in the document, loaded to the GroupDocs.Viewer for .NET"
+slug: "/net/viewer/developer-guide/search-highlight-text/"
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.4.0"
+version: "v26.4.0"
+source_repo: "GroupDocs.Viewer-Docs"
+source_path: "net/developer-guide/search-highlight-text.md"
+source_commit: "1787766828434e84ffee3af8d2b2e72482e06feb"
+source_sha256: "5c7acb87e823e76211e3e9673997c695e9fde34427e23038453cc21a57e40445"
+---
+
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET is included in Conholdate.Total for .NET.
+:::
+
+Starting from <a href="https://releases.groupdocs.com/viewer/net/release-notes/2025/groupdocs-viewer-for-net-25-4-release-notes/" rel="nofollow">version 25.4</a> the GroupDocs.Viewer is able to search the text spans in the loaded documents and highlight the found text. This feature can be described with the next three basic statements:
+
+1. Searching text is supported for almost all document family formats, which may have textual content: all formats within WordProcessing family (DOC, DOCX, ODT, RTF, etc.), Spreadsheet (XLS, XLSX, ODS, CSV, etc.), Presentation (PPT, PPTX, PPS, POT, etc.), e-Books (ePub, AZW3, Mobi), and fixed-layout formats (PDF and XPS).
+2. Search may be performed by entered search term (text literal) or by a regular expression (RegEx).
+3. Highlighting of the found text is adjustable — it is possible to set the color of the found text (foreground color) and/or the color of the background.
+
+
+Once a search operation is performed and some text is found, the document may be rendered to the HTML, PDF, PNG, or JPEG, and the found text will be highlighted in these produced documents. Just need to remember that search must be done _before_ rendering the document, not after.
+
+In order to perform a search a new public instance method was added to the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer" rel="nofollow">`Viewer`</a> class — <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/search/" rel="nofollow">`void Search(Options.SearchHighlightOptions options)`</a>. As it is seen from its signature, this method obtains on input an instance of the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/SearchHighlightOptions/" rel="nofollow">`Options.SearchHighlightOptions`</a> class. This class contains both a search term (phrase), search options, and highlight options, applied to the found text. This is described in detail below:
+
+- <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/searchhighlightoptions/searchterm/" rel="nofollow">`SearchTerm`</a> property of a <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" rel="nofollow">`System.String`</a> type allows to specify a search text, which must be highlighted if found, or a regex pattern for search.
+- <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/searchhighlightoptions/issearchtermregex/" rel="nofollow">`IsSearchTermRegEx`</a> property of <a href="https://learn.microsoft.com/en-us/dotnet/api/system.boolean" rel="nofollow">boolean</a> type indicates whether the value of the previously described `SearchTerm` property should be treated as a text literal (`false`) or as a regular expression (`true`). Default is `false` — treat as a text literal.
+- <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/searchhighlightoptions/backgroundcolor/" rel="nofollow">`BackgroundColor`</a> property of <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.drawing/argb32color/" rel="nofollow">`Argb32Color`</a> type allows to specify a background color of the found text. By default, if this property is not specified, or its value is fully transparent, a yellow color will be applied to the background of the found text.
+- <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/searchhighlightoptions/foregroundcolor/" rel="nofollow">`ForegroundColor`</a> property of <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.drawing/argb32color/" rel="nofollow">`Argb32Color`</a> type allows to specify a color, which will be applied to the found text itself (foreground color). By default, if this property is not specified, or its value is fully transparent, the color of found text will be untouched.
+
+Summing up, in order to search for some text and highlight it using GroupDocs.Viewer, need to perform the next four steps:
+
+1. Load the input document to the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer" rel="nofollow">`Viewer`</a> class through its constructor.
+2. Create an instance <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/SearchHighlightOptions/" rel="nofollow">`SearchHighlightOptions`</a> class and tune its options — specify at least a <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/searchhighlightoptions/searchterm/" rel="nofollow">`SearchTerm`</a> property.
+3. Invoke the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/search/" rel="nofollow">`Viewer.Search(SearchHighlightOptions)`</a> method with a previously created and prepared <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/searchhighlightoptions/" rel="nofollow">`SearchHighlightOptions`</a> instance.
+4. Render the document to the HTML, PDF, PNG, and/or JPEG using a <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/view/#view" rel="nofollow">`Viewer.View()`</a> method.
+
+Code sample below shows loading two distinct documents — DOCX and PDF, and performing search in them using text literal and RegEx. Finally, documents are saved to HTML and PNG.
+
+
+
+<Tabs groupId="Search">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+// Creating two instances of SearchHighlightOptions and adjusting them
+SearchHighlightOptions byLiteral = new SearchHighlightOptions()
+{
+    SearchTerm = "some text",
+    IsSearchTermRegEx = false
+};
+SearchHighlightOptions byRegEx = new SearchHighlightOptions()
+{
+    SearchTerm = @"text\s*#(\d+)",
+    IsSearchTermRegEx = true
+};
+
+// Loading two documents to the two instances of Viewer class
+using (Viewer docxViewer = new Viewer("sample.docx"))
+using (Viewer pdfViewer = new Viewer("sample.pdf"))
+{
+    // Performing search in both Viewer instances
+    docxViewer.Search(byLiteral);
+    pdfViewer.Search(byRegEx);
+
+    // Rendering both documents - 1st to HTML and 2nd to PNG
+    docxViewer.View(HtmlViewOptions.ForEmbeddedResources());
+    pdfViewer.View(new PngViewOptions());
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+' Creating two instances of SearchHighlightOptions and adjusting them
+Dim byLiteral As New SearchHighlightOptions() With {
+    .SearchTerm = "some text",
+    .IsSearchTermRegEx = False
+}
+Dim byRegEx As New SearchHighlightOptions() With {
+    .SearchTerm = "text\s*#(\d+)",
+    .IsSearchTermRegEx = True
+}
+
+' Loading two documents to the two instances of Viewer class
+Using docxViewer As New Viewer("sample.docx"), pdfViewer As New Viewer("sample.pdf")
+    ' Performing search in both Viewer instances
+    docxViewer.Search(byLiteral)
+    pdfViewer.Search(byRegEx)
+
+    'Rendering both documents - 1st to HTML and 2nd to PNG
+    docxViewer.View(HtmlViewOptions.ForEmbeddedResources())
+    pdfViewer.View(New PngViewOptions())
+End Using
+```
+
+</TabItem>
+
+
+</Tabs>

@@ -1,0 +1,140 @@
+---
+title: "Save output to a stream"
+sidebar_label: "Save output to a stream"
+sidebar_position: 8
+description: "This article shows how to save output to a stream when rendering a document"
+slug: "/net/viewer/developer-guide/rendering-documents/save-output-to-stream/"
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.4.0"
+version: "v26.4.0"
+source_repo: "GroupDocs.Viewer-Docs"
+source_path: "net/developer-guide/rendering-documents/save-output-to-stream.md"
+source_commit: "1787766828434e84ffee3af8d2b2e72482e06feb"
+source_sha256: "7cbcaa14dd63447fb29682bf888af35c8994abe1c852b530b28fd8442895509d"
+---
+
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET is included in Conholdate.Total for .NET.
+:::
+
+By default, GroupDocs.Viewer saves output results to the local disk. Also, it can provide results as a stream.
+
+To provide output results as a stream, use one of the following interfaces:
+
+* <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.interfaces/ifilestreamfactory" rel="nofollow">IFileStreamFactory</a> defines methods to instantiate and release the output file streams.
+* <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.interfaces/ipagestreamfactory" rel="nofollow">IPageStreamFactory</a> defines methods to instantiate and release the output page streams.
+* <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.interfaces/iresourcestreamfactory" rel="nofollow">IResourceStreamFactory</a> defines the methods to create resource URLs, instantiate, and release output HTML resource streams.
+
+Use these interface as follows:
+
+* When rendering to PDF, implement the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.interfaces/ifilestreamfactory" rel="nofollow">IFileStreamFactory</a> interface and pass the implementation to the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/pdfviewoptions" rel="nofollow">PdfViewOptions</a> constructor.
+* When rendering to JPG/PNG or HTML with embedded resources, implement the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.interfaces/ipagestreamfactory" rel="nofollow">IPageStreamFactory</a> interface and pass the implementation to the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/jpgviewoptions" rel="nofollow">JpgViewOptions</a>/<a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/pngviewoptions" rel="nofollow">PngViewOptions</a> constructor or to the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/htmlviewoptions" rel="nofollow">HtmlViewOptions</a> <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options.htmlviewoptions/forembeddedresources/methods/3" rel="nofollow">ForEmbeddedResources</a> factory method.
+* When rendering into HTML with external resources, implement the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.interfaces/ipagestreamfactory" rel="nofollow">IPageStreamFactory</a> and <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.interfaces/iresourcestreamfactory" rel="nofollow">IResourceStreamFactory</a> interfaces and pass the implementation to the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/jpgviewoptions" rel="nofollow">JpgViewOptions</a>/<a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/pngviewoptions" rel="nofollow">PngViewOptions</a> constructor or to the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/htmlviewoptions" rel="nofollow">HtmlViewOptions</a> <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options.htmlviewoptions/forexternalresources/methods/3" rel="nofollow">ForExternalResources</a> factory method.
+
+The following code snippet shows how to render to HTML with embedded resources and to provide the output result as a stream. To do this, it implements the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.interfaces/ipagestreamfactory" rel="nofollow">IPageStreamFactory</a> interface only.
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using System.IO;
+using System.Collections.Generic;
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+using GroupDocs.Viewer.Interfaces;
+// ...
+
+// Create the list to store output pages
+List<MemoryStream> pages = new List<MemoryStream>();
+
+using (Viewer viewer = new Viewer("sample.docx"))
+{
+    MemoryPageStreamFactory pageStreamFactory = new MemoryPageStreamFactory(pages);
+    ViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources(pageStreamFactory);
+    viewer.View(viewOptions);
+}
+
+internal class MemoryPageStreamFactory : IPageStreamFactory
+{
+    private readonly List<MemoryStream> _pages;
+
+    public MemoryPageStreamFactory(List<MemoryStream> pages)
+    {
+        _pages = pages;
+    }
+
+    public Stream CreatePageStream(int pageNumber)
+    {
+        MemoryStream pageStream = new MemoryStream();
+        _pages.Add(pageStream);
+        return pageStream;
+    }
+
+    public void ReleasePageStream(int pageNumber, Stream pageStream)
+    {
+        //Do not release page stream as we'll need to keep the stream open
+    }
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports System.IO
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+Imports GroupDocs.Viewer.Interfaces
+' ...
+
+Module Program
+    Sub Main(args As String())
+        ' Create the list to store output pages
+        Dim pages As New List(Of MemoryStream)()
+
+        Using viewer As New Viewer("sample.docx")
+            Dim pageStreamFactory As New MemoryPageStreamFactory(pages)
+            Dim viewOptions As ViewOptions = HtmlViewOptions.ForEmbeddedResources(pageStreamFactory)
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+
+    Class MemoryPageStreamFactory
+        Implements IPageStreamFactory
+
+        Private ReadOnly _pages As List(Of MemoryStream)
+
+        Public Sub New(pages As List(Of MemoryStream))
+            _pages = pages
+        End Sub
+
+        Public Function CreatePageStream(pageNumber As Integer) As Stream Implements IPageStreamFactory.CreatePageStream
+            Dim pageStream As New MemoryStream()
+            _pages.Add(pageStream)
+            Return pageStream
+        End Function
+
+        Public Sub ReleasePageStream(pageNumber As Integer, pageStream As Stream) _
+            Implements IPageStreamFactory.ReleasePageStream
+            'Do not release page stream as we'll need to keep the stream open
+        End Sub
+    End Class
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
