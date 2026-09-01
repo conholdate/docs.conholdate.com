@@ -8,6 +8,11 @@ const config = {
   favicon: "img/favicon.ico",
   organizationName: "conholdate",
   projectName: "docs.conholdate.com",
+  customFields: {
+    docsOwnerSearchApiUrl:
+      process.env.DOCS_OWNER_SEARCH_API_URL ||
+      "http://127.0.0.1:3022/api/search"
+  },
   onBrokenLinks: "warn",
   onBrokenMarkdownLinks: "warn",
   i18n: {
@@ -28,25 +33,32 @@ const config = {
     [
       "classic",
       {
-        docs: {
-          path: "docs",
-          routeBasePath: "/",
-          sidebarPath: require.resolve("./sidebars.js"),
-          lastVersion: "current",
-          versions: {
-            current: {
-              label: "26.6.0",
-              banner: "none",
-              badge: false
-            }
-          },
-          showLastUpdateAuthor: false,
-          showLastUpdateTime: false
-        },
+        docs: false,
         blog: false,
         theme: {
           customCss: require.resolve("./src/css/custom.css")
         }
+      }
+    ]
+  ],
+  plugins: [
+    [
+      "@docusaurus/plugin-content-docs",
+      {
+        id: "net",
+        path: "docs-net",
+        routeBasePath: "net",
+        sidebarPath: require.resolve("./sidebars-net.js"),
+        lastVersion: "current",
+        versions: {
+          current: {
+            label: "26.7.0",
+            banner: "none",
+            badge: false
+          }
+        },
+        showLastUpdateAuthor: false,
+        showLastUpdateTime: false
       }
     ]
   ],
@@ -56,9 +68,15 @@ const config = {
       items: [
         {
           type: "docSidebar",
+          docsPluginId: "net",
           sidebarId: "docsSidebar",
           position: "left",
           label: "Docs"
+        },
+        {
+          type: "search",
+          position: "left",
+          className: "docs-search-navbar"
         },
         {
           href: "https://www.conholdate.com/products/total/net",
@@ -67,6 +85,7 @@ const config = {
         },
         {
           type: "docsVersionDropdown",
+          docsPluginId: "net",
           position: "right",
           dropdownActiveClassDisabled: true
         },

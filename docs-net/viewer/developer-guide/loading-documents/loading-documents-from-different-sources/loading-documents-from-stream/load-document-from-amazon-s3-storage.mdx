@@ -1,0 +1,126 @@
+---
+title: "Load from Amazon S3 Storage"
+sidebar_label: "Load from Amazon S3 Storage"
+sidebar_position: 5
+description: "This article explains how to load a document from Amazon S3 Storage with GroupDocs.Viewer within your .NET applications."
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.4.0"
+version: "v26.4.0"
+source_repo: "GroupDocs.Viewer-Docs"
+source_path: "net/developer-guide/loading-documents/loading-documents-from-different-sources/loading-documents-from-stream/load-document-from-amazon-s3-storage.md"
+source_commit: "1787766828434e84ffee3af8d2b2e72482e06feb"
+source_sha256: "47500ce8f73f12bb69855f80703a09ac6722d2dc13dbc74f497c22137615033f"
+---
+
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET is included in Conholdate.Total for .NET.
+:::
+
+The following code snippet shows how to load a document from Amazon S3 Storage.
+
+
+:::info
+Runnig this code requires installing <a href="https://nuget.org/packages/AWSSDK.S3" target="_blank" rel="nofollow noopener noreferrer">AWSSDK.S3</a> NuGet package.
+:::
+
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using System.IO;
+using System.Threading.Tasks;
+using Amazon.S3;
+using Amazon.S3.Model;
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+string key = "sample.docx";
+Stream stream = await DownloadFileAsync(key);
+
+using (Viewer viewer = new Viewer(stream))
+{
+    HtmlViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources();
+    viewer.View(viewOptions);
+}
+
+static async Task<Stream> DownloadFileAsync(string key)
+{
+    AmazonS3Client client = new AmazonS3Client();
+    string bucketName = "my-bucket";
+    GetObjectRequest request = new GetObjectRequest
+    {
+        Key = key,
+        BucketName = bucketName
+    };
+
+    using (GetObjectResponse response = await client.GetObjectAsync(request))
+    {
+        MemoryStream stream = new MemoryStream();
+        response.ResponseStream.CopyTo(stream);
+        stream.Position = 0;
+        return stream;
+    }
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports System.IO
+Imports System.Threading.Tasks
+Imports Amazon.S3
+Imports Amazon.S3.Model
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Dim key As String = "sample.docx"
+        Dim stream As Stream = DownloadFileAsync(key).GetAwaiter().GetResult()
+
+        Using viewer As New Viewer(stream)
+            Dim viewOptions As HtmlViewOptions = HtmlViewOptions.ForEmbeddedResources()
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+
+    Private Async Function DownloadFileAsync(ByVal key As String) As Task(Of Stream)
+        Dim client As New AmazonS3Client()
+        Dim bucketName As String = "my-bucket"
+        Dim request As New GetObjectRequest With {
+                .Key = key,
+                .BucketName = bucketName
+                }
+
+        Using response As GetObjectResponse = Await client.GetObjectAsync(request)
+            Dim stream As New MemoryStream()
+            response.ResponseStream.CopyTo(stream)
+            stream.Position = 0
+            Return stream
+        End Using
+    End Function
+End Module
+
+```
+
+</TabItem>
+
+
+</Tabs>
+
+

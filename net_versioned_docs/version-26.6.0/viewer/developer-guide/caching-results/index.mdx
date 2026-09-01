@@ -1,0 +1,146 @@
+---
+title: "Cache results"
+sidebar_label: "Cache results"
+sidebar_position: 5
+description: "This article contains caching use-cases with GroupDocs.Viewer within your .NET applications."
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.4.0"
+version: "v26.4.0"
+source_repo: "GroupDocs.Viewer-Docs"
+source_path: "net/developer-guide/caching-results/_index.md"
+source_commit: "1787766828434e84ffee3af8d2b2e72482e06feb"
+source_sha256: "6b86f3712ae27bc7d04d88307c66a57c40d540b13704796049de9860bc290470"
+---
+
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET is included in Conholdate.Total for .NET.
+:::
+
+Caching saves rendering results to a specified location, such as a local disk. When you re-request the rendering results, GroupDocs.Viewer does not render again, but uses the cached results.
+As a document can take a long time to render, use caching if you expect to reuse the rendering results.
+
+To enable caching, follow these steps:
+
+1. Instantiate the desired cache object (for example, <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.caching/filecache" target="_blank" rel="nofollow noopener noreferrer">FileCache</a> to store document rendering results at the local drive)
+2. Instantiate the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer/viewersettings" target="_blank" rel="nofollow noopener noreferrer">ViewerSettings</a> object. Specify the cache object as a parameter of the constructor.
+3. Instantiate the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer/viewer" target="_blank" rel="nofollow noopener noreferrer">Viewer</a> object. Specify the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer/viewersettings" target="_blank" rel="nofollow noopener noreferrer">ViewerSettings</a> object as a parameter of the constructor.
+4. Call the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer/viewer/methods/view" target="_blank" rel="nofollow noopener noreferrer">View</a> method of the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer/viewer" target="_blank" rel="nofollow noopener noreferrer">Viewer</a> class.
+
+The following code snippet shows how to enable caching and displays the difference between rendering a file and getting the cached results:
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using System;
+using System.Diagnostics;
+using System.IO;
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Caching;
+using GroupDocs.Viewer.Options;
+// ...
+
+string outputDirectory = @"C:\output";
+string cachePath = Path.Combine(outputDirectory, "cache");
+string pageFilePathFormat = Path.Combine(outputDirectory, "page_{0}.html");
+// Create a cache.
+FileCache cache = new FileCache(cachePath);
+ViewerSettings settings = new ViewerSettings(cache);
+
+using (Viewer viewer = new Viewer(@"C:\sample.docx", settings))
+{
+    // Create an HTML file.
+    HtmlViewOptions options = HtmlViewOptions.ForEmbeddedResources(pageFilePathFormat);
+    // Render and display the rendering time.
+    Stopwatch stopWatch = Stopwatch.StartNew();
+    viewer.View(options);
+    stopWatch.Stop();
+    Console.WriteLine("Time taken on first call to View method {0} (ms).", stopWatch.ElapsedMilliseconds);
+    // Get cached results and display the time.
+    stopWatch.Restart();
+    viewer.View(options);
+    stopWatch.Stop();
+    Console.WriteLine("Time taken on second call to View method {0} (ms).", stopWatch.ElapsedMilliseconds);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports System
+Imports System.Diagnostics
+Imports System.IO
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Caching
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+            Dim outputDirectory As String = "C:\output"
+            Dim cachePath As String = Path.Combine(outputDirectory, "cache")
+            Dim pageFilePathFormat As String = Path.Combine(outputDirectory, "page_{0}.html")
+            ' Create a cache.
+            Dim cache As FileCache = New FileCache(cachePath)
+            Dim settings As ViewerSettings = New ViewerSettings(cache)
+        
+            Using viewer As Viewer = New Viewer("C:\sample.docx", settings)
+                ' Create an HTML file.
+                Dim options As HtmlViewOptions = HtmlViewOptions.ForEmbeddedResources(pageFilePathFormat)
+                ' Render and display the rendering time.
+                Dim stopWatch As Stopwatch = Stopwatch.StartNew()
+                viewer.View(options)
+                stopWatch.[Stop]()
+                Console.WriteLine("Time taken on first call to View method {0} (ms).", stopWatch.ElapsedMilliseconds)
+                ' Get cached results and display the time.
+                stopWatch.Restart()
+                viewer.View(options)
+                stopWatch.[Stop]()
+                Console.WriteLine("Time taken on second call to View method {0} (ms).", stopWatch.ElapsedMilliseconds)
+            End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net-2" label="VB.NET">
+
+```vb
+CONVERSION ERROR: Conversion for GlobalStatement not implemented, please report this issue in 'string outputDirectory = @"...' at character 160
+
+CONVERSION ERROR: Conversion for GlobalStatement not implemented, please report this issue in 'string cachePath = Path.Com...' at character 200
+
+CONVERSION ERROR: Conversion for GlobalStatement not implemented, please report this issue in 'string pageFilePathFormat =...' at character 260
+
+CONVERSION ERROR: Conversion for GlobalStatement not implemented, please report this issue in 'FileCache cache = new FileC...' at character 357
+
+CONVERSION ERROR: Conversion for GlobalStatement not implemented, please report this issue in 'ViewerSettings settings = n...' at character 402
+
+CONVERSION ERROR: Conversion for GlobalStatement not implemented, please report this issue in 'using (Viewer viewer = new ...' at character 458
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+The following image shows a sample console output:
+
+![](/net/viewer/images/caching-results.png)
+
+For details, please refer to the following pages:
