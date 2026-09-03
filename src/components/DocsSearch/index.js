@@ -40,12 +40,6 @@ export function DocsSearchBar({compact = false}) {
 
     const params = new URLSearchParams();
     params.set("q", nextQuery);
-    const inferredFilters = filtersFromPath(location.pathname);
-    Object.entries(inferredFilters).forEach(([key, value]) => {
-      if (value && value !== "all") {
-        params.set(key, value);
-      }
-    });
     if (useAi) {
       params.set("ai", "1");
     }
@@ -228,6 +222,7 @@ function SearchFilters({filters, onChange}) {
           <option value="all">All</option>
           <option value="viewer">Viewer</option>
           <option value="conversion">Conversion</option>
+          <option value="metadata">Metadata</option>
         </select>
       </label>
       <label>
@@ -341,21 +336,6 @@ function filtersFromParams(params) {
     },
     {}
   );
-}
-
-function filtersFromPath(pathname) {
-  const parts = pathname.split("/").filter(Boolean);
-  const localeOffset = ["es", "fr", "de"].includes(parts[0]) ? 1 : 0;
-  const platform = parts[localeOffset] || "";
-  const possibleVersion = parts[localeOffset + 1] || "";
-  const hasVersion = /^\d+\.\d+\.\d+$/.test(possibleVersion);
-  const product = parts[localeOffset + (hasVersion ? 2 : 1)] || "";
-
-  return {
-    platform: platform || "all",
-    totalVersion: hasVersion ? possibleVersion : "current",
-    product: product || "all"
-  };
 }
 
 function filterValue(value) {
