@@ -1,5 +1,8 @@
 // @ts-check
 
+const fs = require("fs");
+const path = require("path");
+
 const config = {
   title: "Conholdate.Total Documentation",
   tagline: "Aggregated .NET documentation prototype",
@@ -11,7 +14,8 @@ const config = {
   customFields: {
     docsOwnerSearchApiUrl:
       process.env.DOCS_OWNER_SEARCH_API_URL ||
-      "http://127.0.0.1:3022/api/search"
+      "http://127.0.0.1:3022/api/search",
+    docsRoutes: discoverDocsRoutes(__dirname)
   },
   onBrokenLinks: "warn",
   onBrokenMarkdownLinks: "warn",
@@ -86,32 +90,16 @@ const config = {
       title: "Conholdate.Total Docs",
       items: [
         {
-          type: "docSidebar",
-          docsPluginId: "net",
-          sidebarId: "docsSidebar",
-          position: "left",
-          label: ".NET"
-        },
-        {
-          type: "docSidebar",
-          docsPluginId: "java",
-          sidebarId: "docsSidebar",
-          position: "left",
-          label: "Java"
-        },
-        {
           type: "search",
           position: "left",
           className: "docs-search-navbar"
         },
         {
-          href: "https://www.conholdate.com/products/total/net",
-          label: "Conholdate.Total for .NET",
+          type: "custom-platformDropdown",
           position: "right"
         },
         {
-          type: "docsVersionDropdown",
-          docsPluginId: "net",
+          type: "custom-versionDropdown",
           position: "right",
           dropdownActiveClassDisabled: true
         },
@@ -130,5 +118,65 @@ const config = {
     }
   }
 };
+
+function discoverDocsRoutes(rootDir) {
+  const routes = new Set();
+  discoverCurrentDocsRoutes(rootDir, routes);
+  discoverVersionedDocsRoutes(rootDir, routes);
+  return Array.from(routes).sort();
+}
+
+function discoverCurrentDocsRoutes(rootDir, routes) {
+  fs.readdirSync(rootDir, {withFileTypes: true})
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith("docs-"))
+    .forEach((entry) => {
+      const platform = entry.name.slice("docs-".length);
+      collectMdxRoutes(path.join(rootDir, entry.name), `/${platform}`, routes);
+    });
+}
+
+function discoverVersionedDocsRoutes(rootDir, routes) {
+  fs.readdirSync(rootDir, {withFileTypes: true})
+    .filter((entry) => entry.isDirectory() && entry.name.endsWith("_versioned_docs"))
+    .forEach((entry) => {
+      const platform = entry.name.replace(/_versioned_docs$/, "");
+      const versionedDocsRoot = path.join(rootDir, entry.name);
+      fs.readdirSync(versionedDocsRoot, {withFileTypes: true})
+        .filter((versionEntry) => versionEntry.isDirectory() && versionEntry.name.startsWith("version-"))
+        .forEach((versionEntry) => {
+          const version = versionEntry.name.slice("version-".length);
+          collectMdxRoutes(
+            path.join(versionedDocsRoot, versionEntry.name),
+            `/${platform}/${version}`,
+            routes
+          );
+        });
+    });
+}
+
+function collectMdxRoutes(root, routePrefix, routes, baseRoot = root) {
+  if (!fs.existsSync(root)) {
+    return;
+  }
+
+  fs.readdirSync(root, {withFileTypes: true}).forEach((entry) => {
+    const absolute = path.join(root, entry.name);
+    if (entry.isDirectory()) {
+      collectMdxRoutes(absolute, routePrefix, routes, baseRoot);
+      return;
+    }
+    if (!entry.isFile() || !entry.name.endsWith(".mdx")) {
+      return;
+    }
+
+    const relative = path
+      .relative(baseRoot, absolute)
+      .replace(/\\/g, "/")
+      .replace(/\.mdx$/, "")
+      .replace(/\/index$/, "");
+    const route = `${routePrefix}/${relative}`.replace(/\/+$/, "");
+    routes.add(route || routePrefix);
+  });
+}
 
 module.exports = config;
