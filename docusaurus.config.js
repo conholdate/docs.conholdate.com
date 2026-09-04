@@ -60,6 +60,25 @@ const config = {
         showLastUpdateAuthor: false,
         showLastUpdateTime: false
       }
+    ],
+    [
+      "@docusaurus/plugin-content-docs",
+      {
+        id: "java",
+        path: "docs-java",
+        routeBasePath: "java",
+        sidebarPath: require.resolve("./sidebars-java.js"),
+        lastVersion: "current",
+        versions: {
+          current: {
+            label: "26.7.0",
+            banner: "none",
+            badge: false
+          }
+        },
+        showLastUpdateAuthor: false,
+        showLastUpdateTime: false
+      }
     ]
   ],
   themeConfig: {
@@ -71,7 +90,14 @@ const config = {
           docsPluginId: "net",
           sidebarId: "docsSidebar",
           position: "left",
-          label: "Docs"
+          label: ".NET"
+        },
+        {
+          type: "docSidebar",
+          docsPluginId: "java",
+          sidebarId: "docsSidebar",
+          position: "left",
+          label: "Java"
         },
         {
           type: "search",
