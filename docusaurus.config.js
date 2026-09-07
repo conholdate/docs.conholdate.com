@@ -114,7 +114,7 @@ const config = {
       copyright: `Copyright ${new Date().getFullYear()} Conholdate.`
     },
     prism: {
-      additionalLanguages: ["csharp", "powershell", "bash", "docker"]
+      additionalLanguages: ["csharp", "java", "powershell", "bash", "docker"]
     }
   }
 };
