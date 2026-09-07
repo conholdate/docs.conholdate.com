@@ -1,0 +1,72 @@
+---
+title: "Launch in operating systems other than windows"
+sidebar_label: "Launch in operating systems other than windows"
+sidebar_position: 7
+description: ""
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/getting-started/launch-in-operating-systems-other-than-windows.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "91c8e23111e98a5be7088c0c8f6bdf6d8877674735a76dd082f9ba659ac58b30"
+---
+
+:::info
+GroupDocs.Watermark for .NET is included in Conholdate.Total for .NET.
+:::
+
+## Limitations
+
+1. Because of the lack of Windows fonts in target OS (Android, macOS, Linux, etc), fonts used in documents are substituted with available fonts, this might lead to inaccurate document layout when rendering the document to PNG, JPG, and PDF.
+2. If GroupDocs.Watermark for .NET Standard is intended to be used in a Linux environment, an additional NuGet package should be referenced to make it work correctly with graphics: <a href="https://www.nuget.org/packages/SkiaSharp.NativeAssets.Linux" target="_blank" rel="nofollow noopener noreferrer">SkiaSharp.NativeAssets.Linux</a> for Ubuntu (it also should work on most Debian-based Linux distributions) or <a href="https://www.nuget.org/packages/Goelze.SkiaSharp.NativeAssets.AlpineLinux" target="_blank" rel="nofollow noopener noreferrer">Goelze.SkiaSharp.NativeAssets.AlpineLinux</a> for Alpine Linux.
+3. If the target framework is .NET 6, due to limitations in the System.Drawing.Common library in .NET 6 (see <a href="https://learn.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/6.0/system-drawing-common-windows-only#new-behavior" target="_blank" rel="nofollow noopener noreferrer">Microsoft documentation</a>), you need to add the following setting to the `.csproj` file.
+
+```csharp
+	<ItemGroup>
+		<RuntimeHostConfigurationOption Include="System.Drawing.EnableUnixSupport" Value="true" />
+	</ItemGroup>
+```
+
+## Recommendations
+
+When using GroupDocs.Watermark in a non-Windows environment, the following packages should be installed to improve rendering results and prevent possible runtime errors:
+
+1. libgdiplus - is the Mono library that provides a GDI+-compatible API on non-Windows operating systems.
+2. libc6-dev - package contains the symlinks, headers, and object files needed to compile and link programs which use the standard C library.
+3. ttf-mscorefonts-installer - package with Microsoft compatible fonts.
+
+To install packages on Debian-based Linux distributions use <a href="https://wiki.debian.org/apt-get" target="_blank" rel="nofollow noopener noreferrer">apt-get</a> utility:
+
+1. sudo apt-get install libgdiplus
+2. sudo apt-get install libc6-dev
+3. sudo apt-get install ttf-mscorefonts-installer
+
+4. 
+
+## How to run .net GroupDocs.Watermark in the Docker
+
+Running GroupDocs.Watermark in Docker is straightforward. All you need to do is add the installation of the packages described in the previous paragraph to the docker file. An example beginning of the Dockerfile might look like this:
+
+```Dockerfile
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+WORKDIR /app
+EXPOSE 80
+
+# Add libgdiplus, libc6-dev
+RUN apt-get update && apt-get install -y apt-utils libgdiplus libc6-dev
+
+# Add `contrib` archive area to package sources list
+RUN sed -i'.bak' 's/$/ contrib/' /etc/apt/sources.list
+# Add fonts
+RUN apt-get update; apt-get install -y ttf-mscorefonts-installer fontconfig
+RUN fc-cache -f -v
+
+# etc
+```
+
+**fontconfig:** This library configures and customizes font access.
+
+**ttf-mscorefonts-installer:** This package provides Microsoft TrueType core fonts. It's available in the <a href="https://www.debian.org/doc/debian-policy/ch-archive#s-contrib" target="_blank" rel="nofollow noopener noreferrer">contrib</a> archive area. (Note: Using non-free fonts may have licensing implications, so be sure to check the license terms.)
