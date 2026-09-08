@@ -1,0 +1,114 @@
+---
+title: "Fuzzy search"
+sidebar_label: "Fuzzy search"
+sidebar_position: 6
+description: "This article gives the knowledge about the fuzzy search definition, and its capabilities in GroupDocs.Search."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/searching/fuzzy-search.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "1980a8670591d35b04423d3bd6b41f22e52d8f9038dc2112c16896b1bcf3e3c1"
+---
+
+:::info
+GroupDocs.Search for .NET is included in Conholdate.Total for .NET.
+:::
+
+This page provides a fuzzy search definition, a description of its capabilities in GroupDocs.Search, and fuzzy search C# examples with use of GroupDocs.Search.
+
+## Fuzzy search definition
+
+Fuzzy search is a text search technique based on fuzzy logic that matches even where search queries or the text of documents to search for are written with errors.
+
+## Fuzzy search features
+
+Fuzzy search allows you to search for words that do not exactly match the search query. This type of search can be used, for example, to search for words containing spelling errors in documents. During fuzzy search, the number of possible differences with the search word is determined by the fuzzy search algorithm used. Differences or errors mean insertions, deletions, substitutions and, optionally, transpositions of adjacent characters.
+
+GroupDocs.Search does not use special fuzzy queries. Instead, you can enable fuzzy search in search options for any search query, whether it is a single word, phrase or logical search query. And it becomes a fuzzy query.
+
+The fuzzy search algorithm used is defined in the <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/searchoptions" target="_blank" rel="nofollow noopener noreferrer">SearchOptions</a> class. By default, the algorithm provided by the <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/similaritylevel" target="_blank" rel="nofollow noopener noreferrer">SimilarityLevel</a> class is used with the similarity level value of 0.5. This algorithm uses a linear dependence of the number of possible differences from the search word. To calculate the maximum number of possible differences, the following expression is used:
+
+int maxMistakeCount = (int)((1 - similarityLevel) \* termLength);
+
+where similarityLevel is a parameter of the fuzzy search algorithm; termLength is the length of the searched word.
+
+An example of setting a fuzzy search algorithm of this type is presented below.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+string query = "Einstein";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+SearchOptions options = new SearchOptions();
+options.FuzzySearch.Enabled = true; // Enabling the fuzzy search
+options.FuzzySearch.FuzzyAlgorithm = new SimilarityLevel(0.8); // Creating the fuzzy search algorithm
+// This function specifies 0 as the maximum number of mistakes for words from 1 to 4 characters.
+// It specifies 1 as the maximum number of mistakes for words from 5 to 9 characters.
+// It specifies 2 as the maximum number of mistakes for words from 10 to 14 characters. And so on.
+ 
+// Search in index
+SearchResult result = index.Search(query, options);
+```
+
+The fuzzy search algorithm can also be specified by a table of correspondences between the length of the searched word and the maximum number of possible differences. For this, the algorithm presented by the **<a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/tablediscretefunction" target="_blank" rel="nofollow noopener noreferrer">TableDiscreteFunction</a>** class is used. In this case, the correspondence table can be calculated based on the parameters of a step function. An example of setting a fuzzy search algorithm in the form of a step function is presented below.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+string query = "Einstein";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+SearchOptions options = new SearchOptions();
+options.FuzzySearch.Enabled = true; // Enabling the fuzzy search
+options.FuzzySearch.FuzzyAlgorithm = new TableDiscreteFunction(1, new Step(5, 2), new Step(8, 3)); // Creating the fuzzy search algorithm
+// This function specifies 1 as the maximum number of mistakes for words from 1 to 4 characters.
+// It specifies 2 as the maximum number of mistakes for words from 5 to 7 characters.
+// It specifies 3 as the maximum number of mistakes for words from 8 and more characters.
+ 
+// Search in index
+SearchResult result = index.Search(query, options);
+```
+
+The fuzzy search options object allows you to specify the following options:
+
+*   The <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/fuzzysearchoptions/properties/fuzzyalgorithm" target="_blank" rel="nofollow noopener noreferrer">FuzzyAlgorithm</a> property defines the fuzzy search algorithm. The currently available fuzzy search algorithms are <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/similaritylevel" target="_blank" rel="nofollow noopener noreferrer">SimilarityLevel</a> and <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/tablediscretefunction" target="_blank" rel="nofollow noopener noreferrer">TableDiscreteFunction</a>. The default value is an instance of <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/similaritylevel" target="_blank" rel="nofollow noopener noreferrer">SimilarityLevel</a> class with a similarity level value of 0.5.
+*   The <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/fuzzysearchoptions/properties/onlybestresults" target="_blank" rel="nofollow noopener noreferrer">OnlyBestResults</a> property determines whether to return only the best results. The default value is false, which means that all results will be returned.
+*   The <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/fuzzysearchoptions/properties/onlybestresultsrange" target="_blank" rel="nofollow noopener noreferrer">OnlyBestResultsRange</a> property determines a value of exceeding the number of differences from the best result. The default value is 0.
+*   The <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/fuzzysearchoptions/properties/considertranspositions" target="_blank" rel="nofollow noopener noreferrer">ConsiderTranspositions</a> property determines whether to consider the transposition of adjacent characters as one mistake. The default value is true.
+*   The <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/fuzzysearchoptions/properties/enabled" target="_blank" rel="nofollow noopener noreferrer">Enabled</a> property enables or disables the fuzzy search. The default value is false.
+
+## More resources
+
+### GitHub examples
+
+You may easily run the code from documentation articles and see the features in action in our GitHub examples:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Search for .NET examples</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Search for Java examples</a>
+    
+
+### Free online document search App
+
+Along with full featured .NET library we provide simple, but powerful free Apps.
+
+You are welcome to search over your PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX and more with our free online <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Search App</a>.

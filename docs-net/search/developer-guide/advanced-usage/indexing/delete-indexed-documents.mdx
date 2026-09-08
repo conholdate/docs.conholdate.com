@@ -1,0 +1,97 @@
+---
+title: "Delete indexed documents"
+sidebar_label: "Delete indexed documents"
+sidebar_position: 4
+description: "GroupDocs.Search has the ability to remove individual documents from the index that are indexed from a stream or structure."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/indexing/delete-indexed-documents.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "c8f611948797b34dbbf995f4c1881488834ac7903693c1fe3c6b3587aa29812d"
+---
+
+:::info
+GroupDocs.Search for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+GroupDocs.Search has the ability to remove individual documents from the index that are indexed from a stream or structure. To remove documents indexed by a file system path, see [Deleting indexed paths](/net/search/developer-guide/advanced-usage/indexing/delete-indexed-paths/).
+
+The following example shows how to remove documents from an index by document key.
+
+**C#**
+
+```csharp
+// Implementing document loader
+public class DocumentLoader : IDocumentLoader
+{
+    private readonly string filePath;
+    private readonly string documentKey;
+
+    public DocumentLoader(string filePath)
+    {
+        this.filePath = filePath;
+        documentKey = Path.GetFileName(filePath);
+    }
+
+    public string DocumentKey
+    {
+        get { return documentKey; }
+    }
+
+    public void CloseDocument()
+    {
+    }
+
+    public Document LoadDocument()
+    {
+        string extension = Path.GetExtension(filePath);
+        byte[] buffer = File.ReadAllBytes(filePath);
+        Stream stream = new MemoryStream(buffer);
+        Document document = Document.CreateFromStream(documentKey, DateTime.Now, extension, stream);
+        return document;
+    }
+}
+
+...
+
+string filePath = @"c:\MyDocuments\SomeDocument.pdf";
+string indexFolder = @"c:\MyIndex\";
+
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+
+// Indexing the document from stream
+DocumentLoader documentLoader = new DocumentLoader(filePath);
+Document document = Document.CreateLazy(DocumentSourceKind.Stream, documentLoader.DocumentKey, documentLoader);
+Document[] documents = new Document[] { document };
+index.Add(documents, new IndexingOptions());
+
+// Searching in the index
+SearchResult searchResult = index.Search("Einstein");
+
+// Deleting indexed document from the index
+string[] documentKeys = new string[] { documentLoader.DocumentKey };
+DeleteResult deleteResult = index.Delete(new UpdateOptions(), documentKeys);
+```
+
+## More resources
+
+### GitHub examples
+
+You may easily run the code from documentation articles and see the features in action in our GitHub examples:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Search for .NET examples</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Search for Java examples</a>
+    
+
+### Free online document search App
+
+Along with full featured .NET library we provide simple, but powerful free Apps.
+
+You are welcome to search over your PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX and more with our free online <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Search App</a>.

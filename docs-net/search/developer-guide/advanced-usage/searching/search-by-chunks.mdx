@@ -1,0 +1,73 @@
+---
+title: "Search by chunks"
+sidebar_label: "Search by chunks"
+sidebar_position: 18
+description: "This article gives the knowledge about the ability to perform search by chunks."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/searching/search-by-chunks.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "89b11adda43b75698e3499736c64a3503f73682743c9b2f040c1b90ddc2b6fd2"
+---
+
+:::info
+GroupDocs.Search for .NET is included in Conholdate.Total for .NET.
+:::
+
+The GroupDocs.Search API provides the ability to perform search by chunks. This means that in one call to the <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index/methods/search/index" target="_blank" rel="nofollow noopener noreferrer">Search</a> method of the <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index" target="_blank" rel="nofollow noopener noreferrer">Index</a> class, only in one index segment search is performed. This feature becomes relevant when searching in large indexes containing tens and hundreds of thousands of documents.
+
+When performing search by chunks, the <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index/methods/search/index" target="_blank" rel="nofollow noopener noreferrer">Search</a> method is first called with the <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/searchoptions/properties/ischunksearch" target="_blank" rel="nofollow noopener noreferrer">IsChunkSearch</a> flag set to true in the search options. And then the search in each subsequent segment is performed using the <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index/methods/searchnext/index" target="_blank" rel="nofollow noopener noreferrer">SearchNext</a> method with passing <a href="https://reference.groupdocs.com/net/search/groupdocs.search.results/searchresult/properties/nextchunksearchtoken" target="_blank" rel="nofollow noopener noreferrer">ChunkSearchToken</a> of the next chunk as an argument.
+
+The following example demonstrates the search by chunks.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+string query = "Einstein";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Creating a search options instance
+SearchOptions options = new SearchOptions();
+options.IsChunkSearch = true; // Enabling the search by chunks
+ 
+// Starting the search by chunks
+SearchResult result = index.Search(query, options);
+Console.WriteLine("Document count: " + result.DocumentCount);
+Console.WriteLine("Occurrence count: " + result.OccurrenceCount);
+ 
+// Continuing the search by chunks
+while (result.NextChunkSearchToken != null)
+{
+    result = index.SearchNext(result.NextChunkSearchToken);
+    Console.WriteLine("Document count: " + result.DocumentCount);
+    Console.WriteLine("Occurrence count: " + result.OccurrenceCount);
+}
+```
+
+## More resources
+
+### GitHub examples
+
+You may easily run the code from documentation articles and see the features in action in our GitHub examples:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Search for .NET examples</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Search for Java examples</a>
+    
+
+### Free online document search App
+
+Along with full featured .NET library we provide simple, but powerful free Apps.
+
+You are welcome to search over your PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX and more with our free online <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Search App</a>.

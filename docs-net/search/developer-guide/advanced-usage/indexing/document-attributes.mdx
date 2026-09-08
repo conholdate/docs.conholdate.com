@@ -1,0 +1,104 @@
+---
+title: "Document attributes"
+sidebar_label: "Document attributes"
+sidebar_position: 6
+description: "Document attributes is a special feature designed for marking indexed documents with text labels without the need for re-indexing."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/indexing/document-attributes.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "fb41029def7963798f5acea0ee05889b73d98ef3adc12161500cb58a0388dd1a"
+---
+
+:::info
+GroupDocs.Search for .NET is included in Conholdate.Total for .NET.
+:::
+
+Document attributes is a special feature designed for marking indexed documents with text labels without the need for re-indexing. Added attributes can be further used to filter documents during the search.
+
+To add and delete attributes of indexed documents, use the <a href="https://reference.groupdocs.com/search/net/groupdocs.search/index/methods/changeattributes" target="_blank" rel="nofollow noopener noreferrer">ChangeAttributes</a> method of the <a href="https://reference.groupdocs.com/search/net/groupdocs.search/index" target="_blank" rel="nofollow noopener noreferrer">Index</a> class. This method accepts an <a href="https://reference.groupdocs.com/search/net/groupdocs.search.common/attributechangebatch" target="_blank" rel="nofollow noopener noreferrer">AttributeChangeBatch</a> object containing the required attribute changes as a parameter.
+
+The following example demonstrates how to add and remove attributes from indexed documents.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex";
+string documentFolder = @"c:\MyDocuments";
+  
+// Creating an index
+Index index = new Index(indexFolder);
+  
+// Indexing documents in a document folder
+index.Add(documentFolder);
+  
+// Creating an attribute change container object
+AttributeChangeBatch batch = new AttributeChangeBatch();
+// Adding one attribute to all indexed documents
+batch.AddToAll("public");
+// Removing one attribute from one indexed document
+batch.Remove(@"c:\MyDocuments\KeyPoints.doc", "public");
+// Adding two attributes to one indexed document
+batch.Add(@"c:\MyDocuments\KeyPoints.doc", "main", "key");
+  
+// Applying attribute changes in the index
+index.ChangeAttributes(batch);
+ 
+// Searching in the index
+SearchOptions options = new SearchOptions();
+// Creating a document filter by attribute
+options.SearchDocumentFilter = SearchDocumentFilter.CreateAttribute("main");
+SearchResult result = index.Search("Einstein", options);
+```
+
+Attributes can be associated with documents during indexing using the <a href="https://reference.groupdocs.com/search/net/groupdocs.search.events/eventhub/events/fileindexing" target="_blank" rel="nofollow noopener noreferrer">FileIndexing</a> event. The following example demonstrates this.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex";
+string documentFolder = @"c:\MyDocuments";
+ 
+// Creating an index
+Index index = new Index(indexFolder);
+ 
+// Subscribing to the FileIndexing event for adding attributes
+index.Events.FileIndexing += (sender, args) =>
+{
+    if (args.DocumentFullPath.EndsWith("KeyPoints.doc"))
+    {
+        // Adding two attributes
+        args.Attributes = new string[] { "main", "key" };
+    }
+};
+ 
+// Indexing documents in a document folder
+index.Add(documentFolder);
+ 
+// Searching in the index
+SearchOptions options = new SearchOptions();
+// Creating a document filter by attribute
+options.SearchDocumentFilter = SearchDocumentFilter.CreateAttribute("main");
+SearchResult result = index.Search("Einstein", options);
+```
+
+## More resources
+
+### GitHub examples
+
+You may easily run the code from documentation articles and see the features in action in our GitHub examples:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Search for .NET examples</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Search for Java examples</a>
+    
+
+### Free online document search App
+
+Along with full featured .NET library we provide simple, but powerful free Apps.
+
+You are welcome to search over your PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX and more with our free online <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Search App</a>.

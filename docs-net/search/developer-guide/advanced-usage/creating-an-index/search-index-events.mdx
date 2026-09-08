@@ -1,0 +1,304 @@
+---
+title: "Search index events"
+sidebar_label: "Search index events"
+sidebar_position: 1
+description: "This page contains information about the purpose and use of all index events."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/creating-an-index/search-index-events.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "bf212ba9b39414183e93f66676f0bfced7b3f0be4b8321e31ae74c85275aa870"
+---
+
+:::info
+GroupDocs.Search for .NET is included in Conholdate.Total for .NET.
+:::
+
+This page contains information about the purpose and use of all index events.
+
+## OperationFinished event
+
+The <a href="https://reference.groupdocs.com/net/search/groupdocs.search.events/eventhub/events/operationfinished" target="_blank" rel="nofollow noopener noreferrer">OperationFinished</a> event occurs when an index operation completes - indexing, updating, merging, or optimizing (segment merging). This event can be used to receive notification of the completion of an asynchronous operation. The following example demonstrates the use of the event.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index
+Index index = new Index(indexFolder);
+ 
+// Subscribing to the event
+index.Events.OperationFinished += (sender, args) =>
+{
+    // Writing operation details to the console
+    Console.WriteLine("Operation finished: " + args.OperationType);
+    Console.WriteLine("Message: " + args.Message);
+    Console.WriteLine("Index folder: " + args.IndexFolder);
+    Console.WriteLine("Time: " + args.Time);
+};
+ 
+// Indexing documents from the specified folder
+IndexingOptions options = new IndexingOptions();
+options.IsAsync = true; // Enabling asynchronous indexing mode
+index.Add(documentsFolder, options);
+```
+
+## ErrorOccurred event
+
+The <a href="https://reference.groupdocs.com/net/search/groupdocs.search.events/eventhub/events/erroroccurred" target="_blank" rel="nofollow noopener noreferrer">ErrorOccured</a> event occurs when an error happens in an index. Errors in an index can be caused, for example, by file system errors or unsupported formats of indexed documents. An example of receiving error notifications in the index is presented below.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+string query = "Einstein";
+ 
+// Creating an index
+Index index = new Index(indexFolder);
+ 
+// Subscribing to the event
+index.Events.ErrorOccurred += (sender, args) =>
+{
+    // Writing an error message to the console
+    Console.WriteLine(args.Message);
+};
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Searching in the index
+SearchResult result = index.Search(query);
+```
+
+## OperationProgressChanged event
+
+The <a href="https://reference.groupdocs.com/net/search/groupdocs.search.events/eventhub/events/operationprogresschanged" target="_blank" rel="nofollow noopener noreferrer">OperationProgressChanged</a> event occurs when the progress of an indexing or updating operation changes. The example below demonstrates how to track the progress of an index operation.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index
+Index index = new Index(indexFolder);
+ 
+// Subscribing to the event
+index.Events.OperationProgressChanged += (sender, args) =>
+{
+    Console.WriteLine("Last processed: " + args.LastDocumentPath);
+    Console.WriteLine("Result: " + args.LastDocumentStatus);
+    Console.WriteLine("Processed documents: " + args.ProcessedDocuments);
+    Console.WriteLine("Progress percentage: " + args.ProgressPercentage);
+};
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+```
+
+## OptimizationProgressChanged event
+
+The <a href="https://reference.groupdocs.com/net/search/groupdocs.search.events/eventhub/events/optimizationprogresschanged" target="_blank" rel="nofollow noopener noreferrer">OptimizationProgressChanged</a> event occurs when the progress of an index optimization operation changes. The example below demonstrates how to track the progress of the index optimization operation.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+
+// Opening an index
+Index index = new Index(indexFolder);
+
+// Subscribing to the event
+index.Events.OptimizationProgressChanged += (sender, args) =>
+{
+    Console.WriteLine("Processed segments: " + args.ProcessedSegments);
+    Console.WriteLine("Total segments: " + args.TotalSegments);
+    Console.WriteLine("Progress percentage: " + args.ProgressPercentage);
+};
+
+// Optimizing the index
+index.Optimize();
+```
+
+## PasswordRequired event
+
+The <a href="https://reference.groupdocs.com/net/search/groupdocs.search.events/eventhub/events/passwordrequired" target="_blank" rel="nofollow noopener noreferrer">PasswordRequired</a> event occurs when an index requires a password to open a document. An example of processing this event is presented below.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index
+Index index = new Index(indexFolder);
+ 
+// Subscribing to the event
+index.Events.PasswordRequired += (sender, args) =>
+{
+    if (args.DocumentFullPath.EndsWith("ProtectedDocument.pdf", StringComparison.InvariantCultureIgnoreCase))
+    {
+        args.Password = "123456";
+    }
+};
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+```
+
+## FileIndexing event
+
+The <a href="https://reference.groupdocs.com/net/search/groupdocs.search.events/eventhub/events/fileindexing" target="_blank" rel="nofollow noopener noreferrer">FileIndexing</a> event occurs immediately before the start of indexing a document. This event can be used for
+
+*   Skipping indexing of the current document (see also [Document filtering during indexing](/net/search/developer-guide/advanced-usage/indexing/document-filtering-during-indexing/) page);
+*   Specifying the encoding of the current text document (see also [Text file encoding detection](/net/search/developer-guide/advanced-usage/indexing/text-file-encoding-detection/) page);
+*   Specifying a custom text extractor for the current document (see also [Custom text extractors](/net/search/developer-guide/advanced-usage/indexing/custom-text-extractors/) page);
+*   Setting additional arbitrary fields for the current document..
+
+The following example demonstrates how to add additional fields to documents ending in "Protected.pdf" and how to skip indexing documents containing "important" text in their paths.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index
+Index index = new Index(indexFolder);
+ 
+// Subscribing to the event
+index.Events.FileIndexing += (sender, args) =>
+{
+    if (args.DocumentFullPath.EndsWith("Protected.pdf", StringComparison.InvariantCultureIgnoreCase))
+    {
+        args.AdditionalFields = new DocumentField[]
+        {
+            new DocumentField("Tags", "Protected")
+        };
+    }
+    if (!args.DocumentFullPath.ToLowerInvariant().Contains("important"))
+    {
+        args.SkipIndexing = true;
+    }
+};
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+```
+
+## StatusChanged event
+
+The <a href="https://reference.groupdocs.com/net/search/groupdocs.search.events/eventhub/events/statuschanged" target="_blank" rel="nofollow noopener noreferrer">StatusChanged</a> event occurs when an index status changes. The following example demonstrates how to use this event to notify the completion of an index operation.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index
+Index index = new Index(indexFolder);
+ 
+// Subscribing to the event
+index.Events.StatusChanged += (sender, args) =>
+{
+    if (args.Status != IndexStatus.InProgress)
+    {
+        // A notification of the operation completion should be here
+    }
+};
+ 
+// Setting the flag for asynchronous indexing
+IndexingOptions options = new IndexingOptions();
+options.IsAsync = true;
+ 
+// Asynchronous indexing documents from the specified folder
+// The method terminates before the operation completes
+index.Add(documentsFolder, options);
+```
+
+## SearchPhaseCompleted event
+
+The <a href="https://reference.groupdocs.com/net/search/groupdocs.search.events/eventhub/events/searchphasecompleted" target="_blank" rel="nofollow noopener noreferrer">SearchPhaseCompleted</a> event occurs when a phase (or stage) of a search operation in an index completes. This event is used to study intermediate search results when tuning search queries. Information on the phases of different types of search is presented on the page [Search flow](/net/search/developer-guide/advanced-usage/searching/search-flow/). The following example demonstrates the use of this event.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Subscribing to the event
+index.Events.SearchPhaseCompleted += (sender, args) =>
+{
+    Console.WriteLine("Search phase: " + args.SearchPhase);
+    Console.WriteLine("Words: " + args.Words.Length);
+    for (int i = 0; i < args.Words.Length; i++)
+    {
+        Console.WriteLine("\t" + args.Words[i]);
+    }
+    Console.WriteLine();
+};
+ 
+SearchOptions options = new SearchOptions();
+options.UseSynonymSearch = true;
+options.UseWordFormsSearch = true;
+options.FuzzySearch.Enabled = true;
+options.UseHomophoneSearch = true;
+SearchResult result = index.Search("Einstein", options);
+```
+
+## ImagePreparing event
+
+The <a href="https://reference.groupdocs.com/search/net/groupdocs.search.events/eventhub/events/imagepreparing" target="_blank" rel="nofollow noopener noreferrer">ImagePreparing</a> event occurs immediately before adding indexed image to an index. The event can be used, for example, to save an image separately from its containing document, since it provides an image data stream. The following example demonstrates the use of this event.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+
+// Creating an index
+Index index = new Index(indexFolder);
+
+// Subscribing to the event
+index.Events.ImagePreparing += (sender, args) =>
+{
+    Console.WriteLine("Document: " + args.DocumentKey);
+    Console.WriteLine("Image inner path: " + string.Join("/", args.InnerPath));
+    Console.WriteLine("Image index: " + args.ImageIndex);
+    Console.WriteLine("Image frames: " + args.ImageFrames.Length);
+};
+
+// Indexing files
+index.Add(documentsFolder);
+```
+
+## More resources
+
+### GitHub examples
+
+You may easily run the code from documentation articles and see the features in action in our GitHub examples:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Search for .NET examples</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Search for Java examples</a>
+    
+
+### Free online document search App
+
+Along with full featured .NET library we provide simple, but powerful free Apps.
+
+You are welcome to search over your PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX and more with our free online <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Search App</a>.

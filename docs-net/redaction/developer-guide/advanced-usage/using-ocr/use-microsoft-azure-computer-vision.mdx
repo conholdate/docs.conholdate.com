@@ -1,0 +1,119 @@
+---
+title: "Use Microsoft Azure Computer Vision API"
+sidebar_label: "Use Microsoft Azure Computer Vision API"
+sidebar_position: 5
+description: "This article explains that how to use Microsoft Azure Computer Vision API"
+product: "redaction"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "redaction-net"
+source_path: "net/developer-guide/advanced-usage/using-ocr/use-microsoft-azure-computer-vision.md"
+source_commit: "7f9ba3f7099e7e45c9dcc8d1241caf5c3e6029ec"
+source_sha256: "6a2a5ebfe4db92f0db5122bafca77ce654b018dbfd3dda8e145cbdb763b37395"
+---
+
+:::info
+GroupDocs.Redaction for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+This implementation is based on <a href="https://docs.microsoft.com/en-US/azure/cognitive-services/computer-vision/" target="_blank" rel="nofollow noopener noreferrer">Microsoft Azure Computer Vision API</a>. The service is paid, but you can <a href="https://azure.microsoft.com/free/cognitive-services/" target="_blank" rel="nofollow noopener noreferrer">create a free subscription</a>. Once you've done with subscription, you will have to <a href="https://portal.azure.com/#create/Microsoft.CognitiveServicesComputerVision" target="_blank" rel="nofollow noopener noreferrer">create Computer Vision resource</a> using the free pricing tier (F0) to try the service, and upgrade later to a paid tier for production. As a result, you will get Computer Vision Endpoint and Subscription Key (let's suppose they are stored in the environment variables COMPUTER_VISION_ENDPOINT and COMPUTER_VISION_SUBSCRIPTION_KEY respectively). 
+
+**C#**
+
+```csharp
+using Newtonsoft.Json.Linq;
+
+public class ComputerVisionOcrConnector : IOcrConnector
+{
+    private const string OcrUri = "vision/v2.1/ocr";
+    private readonly string SubscriptionKey;
+    private readonly string Endpoint;
+
+    public ComputerVisionOcrConnector()
+    {
+        Endpoint = Environment.GetEnvironmentVariable("COMPUTER_VISION_ENDPOINT");
+        SubscriptionKey = Environment.GetEnvironmentVariable("COMPUTER_VISION_SUBSCRIPTION_KEY");
+    }
+
+    public string GetServiceUri(bool detectOrientation, string language)
+    {
+        // Request parameters. 
+        // The language parameter doesn't specify a language, so the 
+        // method detects it automatically.
+        // The detectOrientation parameter is set to true, so the method detects and
+        // and corrects text orientation before detecting text.
+
+        // Assemble the URI for the REST API method.
+        return string.Format("{0}{1}?language={2}&detectOrientation={3}", Endpoint, OcrUri,
+            string.IsNullOrEmpty(language) ? "unk" : language, detectOrientation).ToLower();
+    }
+
+    public RecognizedImage Recognize(Stream imageStream)
+    {
+        try
+        {
+            using (WebClient client = new WebClient())
+            {
+                client.Headers[HttpRequestHeader.Accept] = "application/json";
+                // authentication
+                client.Headers.Add("Ocp-Apim-Subscription-Key", SubscriptionKey);
+                // payload
+                BinaryReader binaryReader = new BinaryReader(imageStream);
+                var data = binaryReader.ReadBytes((int)imageStream.Length);
+                client.Headers[HttpRequestHeader.ContentType] = "application/octet-stream";
+                string stringResponse = string.Empty;
+                try
+                {
+                    byte[] result = client.UploadData(GetServiceUri(true, null), data);
+                    stringResponse = Encoding.UTF8.GetString(result);
+                }
+                catch (Exception ex)
+                {
+                    // MS Azure Cognintive services reports 400 Bad requests and other exceptions on small pictures and pictures with no text
+                    Console.WriteLine("Microsoft Azure Cognitive Services consider this image as wrong ({0})", ex.ToString());
+                }
+                if (!string.IsNullOrEmpty(stringResponse))
+                {
+                    return CreateDtoFromResponse(JToken.Parse(stringResponse));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Microsoft Azure Cognitive Services Text Recognition failed: {0}", ex.ToString());
+        }
+        return new RecognizedImage(new List<TextLine>());
+    }
+
+    protected virtual RecognizedImage CreateDtoFromResponse(JToken jToken)
+    {
+        // Parse json response to extract lines and words with the bounding rectangles.
+    }
+
+    ...
+}
+
+```
+The service returns a JSON-serialized with text regions and recognized words, each word with its bounding rectangle.
+
+You can find full implementation and an example of its usage here <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Redaction for .NET examples</a>.
+
+## More resources
+
+### GitHub examples
+
+You may easily run the code above and see the feature in action in our GitHub examples:
+
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Redaction for .NET examples</a>
+    
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Redaction for Java examples</a>
+    
+
+### Free online document redaction App
+
+Along with full featured .NET library we provide simple, but powerful free Apps.
+
+You are welcome to perform redactions for various document formats like PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, Emails and more with our free online <a href="https://products.groupdocs.app/redaction" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Redaction App</a>.

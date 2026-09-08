@@ -1,0 +1,82 @@
+---
+title: "Separate data extraction"
+sidebar_label: "Separate data extraction"
+sidebar_position: 19.5
+description: "This article explains how to separately extract data from documents and add the extracted data to the index."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/indexing/separate-data-extraction.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "781740008ebb9d4e0663f84c00637c8241ced9a496346aca449f6bdb3554d673"
+---
+
+:::info
+GroupDocs.Search for .NET is included in Conholdate.Total for .NET.
+:::
+
+The feature described in this article makes it possible to separate the operations of extracting data from a document and adding the extracted data to the index. The extracted data can be easily serialized and deserialized as needed.
+
+This feature can be useful because the operation of extracting text and other data from documents can be very long for some formats. At the same time, adding data to the index is a rather lightweight operation. And thus, separating these operations can lead to a significant increase in the total time when the index is not busy performing any operations. And the subsequent addition of new data extractors will significantly increase the performance of indexing. In this case, data extractors can even work on separate servers, completely freeing the indexing server from extracting operations.
+
+The <a href="https://reference.groupdocs.com/search/net/groupdocs.search/extractor" target="_blank" rel="nofollow noopener noreferrer">Extractor</a> class is used to extract data from documents. Upon completion of the operation, the <a href="https://reference.groupdocs.com/search/net/groupdocs.search/extractor/methods/extract" target="_blank" rel="nofollow noopener noreferrer">Extract</a> method returns an instance of the <a href="https://reference.groupdocs.com/search/net/groupdocs.search.common/extracteddata" target="_blank" rel="nofollow noopener noreferrer">ExtractedData</a> class, which is used directly to add to the index.
+
+The following example demonstrates how to perform separate data extraction and indexing.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex";
+string documentPath = @"c:\MyDocuments\MyDocument.pdf";
+
+// Extracting data from a document
+Extractor extractor = new Extractor();
+Document document = Document.CreateFromFile(documentPath);
+ExtractionOptions extractionOptions = new ExtractionOptions();
+extractionOptions.UseRawTextExtraction = false;
+ExtractedData extractedData = extractor.Extract(document, extractionOptions);
+
+// Serializing the data
+byte[] array = extractedData.Serialize();
+
+// Deserializing the data
+ExtractedData deserializedData = ExtractedData.Deserialize(array);
+
+// Creating an index
+Index index = new Index(indexFolder);
+
+if (deserializedData.IsExtractionSuccessful)
+{
+    // Indexing the data
+    ExtractedData[] data = new ExtractedData[]
+    {
+        deserializedData
+    };
+    index.Add(data, new IndexingOptions());
+
+    // Searching in the index
+    SearchResult result = index.Search("Einstein");
+}
+```
+
+Note that when indexed documents change and need to be updated in the index, the same code must be executed. That is, data must be extracted separately from the updated documents and then the extracted data must be added to the index.
+
+## More resources
+
+### GitHub examples
+
+You may easily run the code from documentation articles and see the features in action in our GitHub examples:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Search for .NET examples</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Search for Java examples</a>
+    
+
+### Free online document search App
+
+Along with full featured .NET library we provide simple, but powerful free Apps.
+
+You are welcome to search over your PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX and more with our free online <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Search App</a>.

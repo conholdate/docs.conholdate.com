@@ -1,0 +1,92 @@
+---
+title: "Use Aspose.OCR for .NET on-premise API"
+sidebar_label: "Use Aspose.OCR for .NET on-premise API"
+sidebar_position: 4
+description: "This article explains that how to use Aspose.OCR for .NET on-premise API."
+product: "redaction"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "redaction-net"
+source_path: "net/developer-guide/advanced-usage/using-ocr/use-aspose-ocr-on-premise.md"
+source_commit: "7f9ba3f7099e7e45c9dcc8d1241caf5c3e6029ec"
+source_sha256: "cf87bb60104fc71bb0d8d2b088246ddd3db538bde55ad41fcbf22f572f364918"
+---
+
+:::info
+GroupDocs.Redaction for .NET is included in Conholdate.Total for .NET.
+:::
+
+This implementation is based on <a href="https://products.aspose.com/ocr/net/" target="_blank" rel="nofollow noopener noreferrer">Aspose.OCR for .NET on-premise API</a>. Although it requires a valid license file, you can always request a temporal license for a month to evaluate.
+
+**C#**
+```csharp
+    using GroupDocs.Redaction.Integration.Ocr;
+
+    public class AsposeOCRStandaloneConnector : IOcrConnector
+    {
+        public AsposeOCRStandaloneConnector(string licenseFile)
+        {
+            var lic = new Aspose.OCR.License();
+            lic.SetLicense(licenseFile);
+        }
+
+        public RecognizedImage Recognize(Stream imageStream)
+        {
+            try
+            {
+                using (MemoryStream memStream = new MemoryStream())
+                {
+                    imageStream.CopyTo(memStream);
+                    var api = new Aspose.OCR.AsposeOcr();
+                    var rectangles = api.GetRectangles(memStream, Aspose.OCR.AreasType.LINES, false);
+                    var result = api.RecognizeImage(memStream, new Aspose.OCR.RecognitionSettings()
+                    {
+                        Language = Aspose.OCR.Language.Eng,
+                        RecognitionAreas = rectangles
+                    });
+                    return CreateDtoFromResponse(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Aspose.OCR for Cloud Recognition failed: {0}", ex.ToString());
+            }
+            return new RecognizedImage(new List<TextLine>());
+        }
+
+        protected virtual RecognizedImage CreateDtoFromResponse(Aspose.OCR.RecognitionResult result)
+        {
+            List<TextLine> lines = new List<TextLine>();
+            for (int i = 0; i < result.RecognitionAreasText.Count; i++)
+            {
+                var fragments = RegularTextLine.SplitToFragments(result.RecognitionAreasText[i].Trim('\r', '\n'), result.RecognitionAreasRectangles[i]);
+                lines.Add(new TextLine(fragments));
+            }
+            return new RecognizedImage(lines);
+        }
+    }
+
+```
+
+First, we identify rectangle areas of text using GetRectangles() method with Aspose.OCR.AreasType.LINES option. With this option, you will get a rectangle for every line of text, but you will have to split it to words.
+
+You can find full implementation and an example of its usage here <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Redaction for .NET examples</a>.
+
+## More resources
+
+### GitHub examples
+
+You may easily run the code above and see the feature in action in our GitHub examples:
+
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Redaction for .NET examples</a>
+    
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Redaction for Java examples</a>
+    
+
+### Free online document redaction App
+
+Along with full featured .NET library we provide simple, but powerful free Apps.
+
+You are welcome to perform redactions for various document formats like PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, Emails and more with our free online <a href="https://products.groupdocs.app/redaction" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Redaction App</a>.

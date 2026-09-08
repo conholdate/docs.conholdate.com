@@ -1,0 +1,90 @@
+---
+title: "Working with attributes"
+sidebar_label: "Working with attributes"
+sidebar_position: 80
+description: "This page contains information about working with attributes in the search network."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/scaling/working-with-attributes.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "588dcac7c117a6627eedc2ccb56950d1babf28333f14e575d69053207ad39804"
+---
+
+:::info
+GroupDocs.Search for .NET is included in Conholdate.Total for .NET.
+:::
+
+Text attributes of documents are changed without the need to re-index documents in the search network.
+
+To change document attributes, use the <a href="https://reference.groupdocs.com/search/net/groupdocs.search.scaling/indexer/changeattributes/" target="_blank" rel="nofollow noopener noreferrer">ChangeAttributes</a> method of the <a href="https://reference.groupdocs.com/search/net/groupdocs.search.scaling/indexer/" target="_blank" rel="nofollow noopener noreferrer">Indexer</a> class.
+
+The asynchronous operation flag is available as an option. You can track the completion of the operation by subscribing to the <a href="https://reference.groupdocs.com/search/net/groupdocs.search.scaling.events/nodeeventhub/attributechangescompleted/" target="_blank" rel="nofollow noopener noreferrer">AttributeChangesCompleted</a> event.
+
+The following code example demonstrates changing document attributes on the search network.
+
+**C#**
+
+```csharp
+Console.WriteLine("Adding attribute: " + attribute);
+
+Indexer indexer = node.Indexer;
+
+AttributeChangeBatch batch = new AttributeChangeBatch();
+batch.Add(documentKey, attribute);
+ChangeAttributesOptions options = new ChangeAttributesOptions();
+indexer.ChangeAttributes(batch, options);
+```
+
+To get all the attributes of a document, use the <a href="https://reference.groupdocs.com/search/net/groupdocs.search.scaling/indexer/getattributes/" target="_blank" rel="nofollow noopener noreferrer">GetAttributes</a> method of the <a href="https://reference.groupdocs.com/search/net/groupdocs.search.scaling/indexer/" target="_blank" rel="nofollow noopener noreferrer">Indexer</a> class. You must pass the document key as a parameter.
+
+The following code example demonstrates retrieving document attributes from the search network.
+
+**C#**
+
+```csharp
+Searcher searcher = node.Searcher;
+Indexer indexer = node.Indexer;
+
+int[] shardIndices = node.GetShardIndices();
+Console.WriteLine();
+for (int i = 0; i < shardIndices.Length; i++)
+{
+    int shardIndex = shardIndices[i];
+    NetworkDocumentInfo[] infos = searcher.GetIndexedDocuments(shardIndex);
+    for (int j = 0; j < infos.Length; j++)
+    {
+        NetworkDocumentInfo info = infos[j];
+        int nodeIndex = node.GetNodeIndex(info.ShardIndex);
+        Console.WriteLine(nodeIndex + ": " + info.ShardIndex + ": " +
+            HasErrors(info) + ": " + info.DocumentInfo.FilePath);
+        string[] attributes = indexer.GetAttributes(info.DocumentInfo.FilePath);
+        for (int k = 0; k < attributes.Length; k++)
+        {
+            Console.WriteLine("\t\t" + attributes[k]);
+        }
+    }
+}
+```
+
+More information about working with text attributes of documents in the article <a href="https://docs.groupdocs.com/search/net/document-attributes/" target="_blank" rel="nofollow noopener noreferrer">Document attributes</a>.
+
+## More resources
+
+### GitHub examples
+
+You may easily run the code from documentation articles and see the features in action in our GitHub examples:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Search for .NET examples</a>
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Search for Java examples</a>
+
+
+### Free online document search App
+
+Along with full featured .NET library we provide simple, but powerful free Apps.
+
+You are welcome to search over your PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX and more with our free online <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Search App</a>.

@@ -1,0 +1,91 @@
+---
+title: "Custom text segmenter"
+sidebar_label: "Custom text segmenter"
+sidebar_position: 3
+description: "GroupDocs.Search provides the ability to set up custom text segmenting."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/indexing/custom-text-segmenter.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "43c8cae0146d30fdb4d960e04df52ff6b2a98e64ce2210ede27a96b88a7b09bc"
+---
+
+:::info
+GroupDocs.Search for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+Some languages, in particular hieroglyphic languages, typically require special tools to split text into words.
+This is necessary due to the lack of spaces between words, polysemantic phrases, set expressions, and complex lexical rules.
+
+Currently, the GroupDocs.Search library does not contain such special algorithms for splitting Chinese, Japanese, and Korean text into words. However, it provides the ability to use external custom algorithms for this. To connect an external text segmentation library, you must implement the <a href="https://reference.groupdocs.com/search/net/groupdocs.search.common/iwordsplitter/" target="_blank" rel="nofollow noopener noreferrer">IWordSplitter</a> interface and pass an object implementing this interface to the <a href="https://reference.groupdocs.com/search/net/groupdocs.search.events/fileindexingeventargs/wordsplitter/" target="_blank" rel="nofollow noopener noreferrer">WordSplitter</a> property of the <a href="https://reference.groupdocs.com/search/net/groupdocs.search.events/eventhub/fileindexing/" target="_blank" rel="nofollow noopener noreferrer">FileIndexing</a> event arguments.
+
+The code example below demonstrates how to use the external library <a href="https://www.nuget.org/packages/jieba.NET/" target="_blank" rel="nofollow noopener noreferrer">Jieba.NET</a> for Chinese text segmentation.
+
+**C#**
+
+```csharp
+// Implementing custom word splitter
+public class JiebaWordSplitter : IWordSplitter
+{
+    private readonly JiebaSegmenter segmenter;
+
+    public JiebaWordSplitter()
+    {
+        segmenter = new JiebaSegmenter();
+    }
+
+    public IEnumerable<string> Split(string text)
+    {
+        IEnumerable<string> segments = segmenter.Cut(text, cutAll: false);
+        return segments;
+    }
+}
+
+...
+
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+
+// Using Jieba segmenter to break text into words
+JiebaWordSplitter jiebaWordSplitter = new JiebaWordSplitter();
+index.Events.FileIndexing += (s, e) =>
+{
+    if (e.DocumentFullPath.EndsWith("Chinese.txt"))
+    {
+        // We know that the text in this document is in Chinese
+        e.WordSplitter = jiebaWordSplitter;
+    }
+};
+
+// Indexing documents
+index.Add(documentsFolder);
+
+// Searching in the index
+string query = "考虑"; // Consider
+SearchResult result = index.Search(query);
+```
+
+## More resources
+
+### GitHub examples
+
+You may easily run the code from documentation articles and see the features in action in our GitHub examples:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Search for .NET examples</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Search for Java examples</a>
+    
+
+### Free online document search App
+
+Along with full featured .NET library we provide simple, but powerful free Apps.
+
+You are welcome to search over your PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX and more with our free online <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Search App</a>.
