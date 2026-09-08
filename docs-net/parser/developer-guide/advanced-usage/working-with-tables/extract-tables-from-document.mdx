@@ -1,0 +1,165 @@
+---
+title: "Extract tables from document"
+sidebar_label: "Extract tables from document"
+sidebar_position: 4
+description: "Learn how to extract tables from documents including Excel spreadsheets, Word documents, and PDFs using GroupDocs.Parser for .NET. Complete guide with code examples for extract tables from Excel C# scenarios."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/working-with-tables/extract-tables-from-document.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "f96c4922af87cc42e9309eb2439f091a92a2736e95b79be7364f841cd382a714"
+---
+
+:::info
+GroupDocs.Parser for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+GroupDocs.Parser provides the functionality to extract tables from documents including **Excel spreadsheets (XLS, XLSX)**, Word documents, PDFs, and other supported formats using the <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/methods/gettables" target="_blank" rel="nofollow noopener noreferrer">GetTables(PageTableAreaOptions)</a> method.
+
+## Extract Tables from Excel C#
+
+To **extract tables from Excel C#** applications, GroupDocs.Parser supports extracting structured table data from Excel spreadsheets. This is especially useful for processing data-rich Excel files programmatically.
+
+```csharp
+IEnumerable<PageTableArea> GetTables(PageTableAreaOptions options);
+```
+
+This method returns a collection of <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.data/pagetablearea" target="_blank" rel="nofollow noopener noreferrer">PageTableArea</a> object:
+
+| Member | Description |
+| ------------------------------------------------------------ | ----------------------------------------------- |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagearea/properties/rectangle" target="_blank" rel="nofollow noopener noreferrer">Rectangle</a> | The rectangular area that bounds text area. |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagearea/properties/page" target="_blank" rel="nofollow noopener noreferrer">Page</a> | The page information (page index and page size) |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetablearea/properties/rowcount" target="_blank" rel="nofollow noopener noreferrer">RowCount</a> | The total number of the table rows. |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetablearea/properties/columncount" target="_blank" rel="nofollow noopener noreferrer">ColumnCount</a> | The total number of the table columns. |
+| PageTableAreaCell <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetablearea/properties/item" target="_blank" rel="nofollow noopener noreferrer">Item</a> | The table cell by row and column indexes. |
+| double <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetablearea/methods/getrowheight" target="_blank" rel="nofollow noopener noreferrer">GetRowHeight(int)</a> | The the row height. |
+| double <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetablearea/methods/getcolumnwidth" target="_blank" rel="nofollow noopener noreferrer">GetColumnWidth(int)</a> | Returns the column width. |
+
+<a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/methods/gettables" target="_blank" rel="nofollow noopener noreferrer">GetTables(PageTableAreaOptions)</a> accepts <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/pagetableareaoptions" target="_blank" rel="nofollow noopener noreferrer">PageTableAreaOptions</a> object that contains <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.templates/templatetablelayout" target="_blank" rel="nofollow noopener noreferrer">TemplateTableLayout</a> object with table layout (see [this article](/net/parser/developer-guide/advanced-usage/working-with-templates/) for more details).
+
+### Basic Steps
+
+Here are the basic steps to extract tables from documents:
+
+1. Instantiate <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> object for the document (Excel, Word, PDF, etc.);
+2. Check if the document supports **table extraction** using `Features.Tables` property;
+3. Call <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/methods/gettables" target="_blank" rel="nofollow noopener noreferrer">GetTables(PageTableAreaOptions)</a> method and obtain collection of <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.data/pagetablearea" target="_blank" rel="nofollow noopener noreferrer">PageTableArea</a> objects;
+4. Iterate through the collection and access table cells.
+
+### Example: Extract Tables from Excel Spreadsheet
+
+```csharp
+using GroupDocs.Parser;
+using GroupDocs.Parser.Options;
+using GroupDocs.Parser.Data;
+using GroupDocs.Parser.Templates;
+
+// Excel file path
+string excelPath = "sample.xlsx";
+
+using (Parser parser = new Parser(excelPath))
+{
+    // Check if table extraction is supported for Excel
+    if (!parser.Features.Tables)
+    {
+        Console.WriteLine("Table extraction is not supported for this Excel file.");
+        return;
+    }
+    
+    // Extract all tables from the Excel spreadsheet
+    // Pass null to extract tables automatically
+    IEnumerable<PageTableArea> tables = parser.GetTables();
+    
+    int tableIndex = 0;
+    foreach (PageTableArea table in tables)
+    {
+        Console.WriteLine($"\n=== Table {++tableIndex} ===");
+        Console.WriteLine($"Rows: {table.RowCount}, Columns: {table.ColumnCount}");
+        
+        // Iterate over rows
+        for (int row = 0; row < table.RowCount; row++)
+        {
+            // Iterate over columns
+            for (int column = 0; column < table.ColumnCount; column++)
+            {
+                // Get the table cell
+                PageTableAreaCell cell = table[row, column];
+                if (cell != null)
+                {
+                    // Print the cell text
+                    Console.Write($"{cell.Text}\t");
+                }
+            }
+            Console.WriteLine();
+        }
+    }
+}
+```
+
+### Example: Extract Tables with Custom Layout
+
+The following example shows how to extract tables from documents when you know the exact table structure (columns and rows positions):
+
+```csharp
+// Create an instance of Parser class
+using (Parser parser = new Parser(filePath))
+{
+    // Check if the document supports table extraction
+    if (!parser.Features.Tables)
+    {
+        Console.WriteLine("Document isn't supports tables extraction.");
+        return;
+    }
+    // Create the layout of tables
+    TemplateTableLayout layout = new TemplateTableLayout(
+        new double[] { 50, 95, 275, 415, 485, 545 },
+        new double[] { 325, 340, 365, 395 });
+    // Create the options for table extraction
+    PageTableAreaOptions options = new PageTableAreaOptions(layout);
+    // Extract tables from the document
+    IEnumerable<PageTableArea> tables = parser.GetTables(options);
+    // Iterate over tables
+    foreach (PageTableArea t in tables)
+    {
+        // Iterate over rows
+        for (int row = 0; row < t.RowCount; row++)
+        {
+            // Iterate over columns
+            for (int column = 0; column < t.ColumnCount; column++)
+            {
+                // Get the table cell
+                PageTableAreaCell cell = t[row, column];
+                if (cell != null)
+                {
+                    // Print the table cell text
+                    Console.Write(cell.Text);
+                    Console.Write(" | ");
+                }
+            }
+            Console.WriteLine();
+        }
+        Console.WriteLine();
+    }
+}
+```
+
+## More resources
+
+### GitHub examples
+
+You may easily run the code above and see the feature in action in our GitHub examples:
+
+- <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Parser for .NET examples</a>
+- <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Parser for Java examples</a>
+
+### Free online image extractor App
+
+Along with full featured .NET library we provide simple, but powerfull free APPs.
+
+You are welcome to extract images from PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, Emails and more with our free online <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">GroupDocs Parser App</a>.

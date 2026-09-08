@@ -1,0 +1,185 @@
+---
+title: "Extract text areas"
+sidebar_label: "Extract text areas"
+sidebar_position: 7
+description: "Learn how to extract text areas with coordinates and formatting information from documents using GroupDocs.Parser for .NET. Extract text with position data, rectangles, and text styles in C#."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/working-with-text/extract-text-areas.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "92ba6c5b2ef3d274de395bb546524b5afd6e5433c2d5de5eca63f0b1030e3db5"
+---
+
+:::info
+GroupDocs.Parser for .NET is included in Conholdate.Total for .NET.
+:::
+
+GroupDocs.Parser provides the functionality to extract text areas from documents by the following methods:
+
+```csharp
+IEnumerable<PageTextArea> GetTextAreas();
+IEnumerable<PageTextArea> GetTextAreas(PageTextAreaOptions options);
+IEnumerable<PageTextArea> GetTextAreas(int pageIndex);
+IEnumerable<PageTextArea> GetTextAreas(int pageIndex, PageTextAreaOptions options);
+```
+
+The methods return a collection of <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetextarea" target="_blank" rel="nofollow noopener noreferrer">PageTextArea</a> objects:
+
+| Member | Description |
+| --- | --- |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagearea/properties/page" target="_blank" rel="nofollow noopener noreferrer">Page</a> | The page that contains the text area. |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagearea/properties/rectangle" target="_blank" rel="nofollow noopener noreferrer">Rectangle</a> | The rectangular area on the page that contains the text area. |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetextarea/properties/text" target="_blank" rel="nofollow noopener noreferrer">Text</a> | The value of the text area. |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetextarea/properties/baseline" target="_blank" rel="nofollow noopener noreferrer">BaseLine</a> | The base line of the text area. |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetextarea/properties/textstyle" target="_blank" rel="nofollow noopener noreferrer">TextStyle</a> | The text style of the text area. |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetextarea/properties/areas" target="_blank" rel="nofollow noopener noreferrer">Areas</a> | The collection of child text areas. |
+
+Text area represents a rectangular page area with a text. Text area can be simple or composite. The simple text area contains only a text and <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetextarea/properties/areas" target="_blank" rel="nofollow noopener noreferrer">Areas</a> property is always an empty collection (not null). The composite text area doesn't have its own text. Text property is calculated by its children texts which are contained in <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetextarea/properties/areas" target="_blank" rel="nofollow noopener noreferrer">Areas</a> property.
+
+## Extract text areas
+
+Here are the steps to extract text areas from the whole document:
+
+*   Instantiate <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> object for the initial document;
+*   Call <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettextareas" target="_blank" rel="nofollow noopener noreferrer">GetTextAreas</a> method and obtain collection of <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetextarea" target="_blank" rel="nofollow noopener noreferrer">PageTextArea</a> objects;
+*   Check if *collection* isn't *null* (text areas extraction is supported for the document);
+*   Iterate through the collection and get rectangles and text.
+
+The following example shows how to extract all text areas from the whole document:
+
+```csharp
+// Create an instance of Parser class
+using(Parser parser = new Parser(filePath))
+{
+    // Extract text areas
+    IEnumerable<PageTextArea> areas = parser.GetTextAreas();
+    // Check if text areas extraction is supported
+    if(areas == null)
+    {
+        Console.WriteLine("Page text areas extraction isn't supported");
+        return;
+    }
+
+    // Iterate over page text areas
+    foreach(PageTextArea a in areas)
+    {
+        // Print a page index, rectangle and text area value:
+        Console.WriteLine(string.Format("Page: {0}, R: {1}, Text: {2}", a.Page.Index, a.Rectangle, a.Text));
+    }
+}
+```
+
+## Extract text areas from a document page
+
+Here are the steps to extract text areas from a document page:
+
+*   Instantiate <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> object for the initial document;
+*   Call <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/features/properties/textareas" target="_blank" rel="nofollow noopener noreferrer">Features.TextAreas</a> property to check if text areas extraction is supported for the document;
+*   Call <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettextareas/methods/2" target="_blank" rel="nofollow noopener noreferrer">GetTextAreas(int)</a> method with the page index and obtain collection of <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetextarea" target="_blank" rel="nofollow noopener noreferrer">PageTextArea</a> objects;
+*   Check if *collection* isn't *null* (text areas extraction is supported for the document);
+*   Iterate through the collection and get rectangles and text.
+
+The following example shows how to extract text areas from a document page:
+
+```csharp
+// Create an instance of Parser class
+using(Parser parser = new Parser(filePath))
+{
+    // Check if the document supports text areas extraction
+    if(!parser.Features.TextAreas)
+    {
+        Console.WriteLine("Document isn't supports text areas extraction.");
+        return;
+    }
+
+    // Get the document info
+    IDocumentInfo documentInfo = parser.GetDocumentInfo();
+    // Check if the document has pages
+    if(documentInfo.PageCount == 0)
+    {
+        Console.WriteLine("Document hasn't pages.");
+        return;
+    }
+
+    // Iterate over pages
+    for(int pageIndex = 0; pageIndex < documentInfo.PageCount; pageIndex++)
+    {
+        // Print a page number 
+        Console.WriteLine(string.Format("Page {0}/{1}", pageIndex + 1, documentInfo.PageCount));
+
+        // Iterate over page text areas
+        // We ignore null-checking as we have checked text areas extraction feature support earlier
+        foreach(PageTextArea a in parser.GetTextAreas(pageIndex))
+        {
+            // Print a rectangle and text area value:
+            Console.WriteLine(string.Format("R: {0}, Text: {1}", a.Rectangle, a.Text));
+        }
+    }
+}
+```
+
+## Extract text areas with options
+
+<a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/pagetextareaoptions" target="_blank" rel="nofollow noopener noreferrer">PageTextAreaOptions</a> parameter is used to customize text areas extraction process. This class has the following members:
+
+| Member | Description |
+| --- | --- |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/pageareaoptions/properties/rectangle" target="_blank" rel="nofollow noopener noreferrer">Rectangle</a> | The rectangular area that contains a text area. |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/pagetextareaoptions/properties/expression" target="_blank" rel="nofollow noopener noreferrer">Expression</a> | The regular expression. |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/pagetextareaoptions/properties/matchcase" target="_blank" rel="nofollow noopener noreferrer">MatchCase</a> | The value that indicates whether a text case isn't ignored. |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/pagetextareaoptions/properties/unitesegments" target="_blank" rel="nofollow noopener noreferrer">UniteSegments</a> | The value that indicates whether segments are united. |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/pagetextareaoptions/properties/ignoreformatting" target="_blank" rel="nofollow noopener noreferrer">IgnoreFormatting</a> | The value that indicates whether text formatting is ignored. |
+
+Here are the steps to extract text areas from the upper-left corner:
+
+*   Instantiate <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> object for the initial document;
+*   Instantiate <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/pagetextareaoptions" target="_blank" rel="nofollow noopener noreferrer">PageTextAreaOptions</a> with the rectangular area;
+*   Call <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettextareas/methods/3" target="_blank" rel="nofollow noopener noreferrer">GetTextAreas(int, PageTextAreaOptions)</a> method and obtain collection of <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetextarea" target="_blank" rel="nofollow noopener noreferrer">PageTextArea</a> objects;
+*   Check if *collection* isn't *null* (text areas extraction is supported for the document);
+*   Iterate through the collection and get rectangles and text.
+
+The following example shows how to extract only text areas with digits from the upper-left corner:
+
+```csharp
+// Create an instance of Parser class
+using(Parser parser = new Parser(filePath))
+{
+    // Create the options which are used for text area extraction
+    PageTextAreaOptions options = new PageTextAreaOptions("[0-9]+", new Rectangle(new Point(0, 0), new Size(300, 100)));
+
+    // Extract text areas which contain only digits from the upper-left corner of a page:
+    IEnumerable<PageTextArea> areas = parser.GetTextAreas(options);
+    // Check if text areas extraction is supported
+    if(areas == null)
+    {
+        Console.WriteLine("Page text areas extraction isn't supported");
+        return;
+    }
+
+    // Iterate over page text areas
+    foreach(PageTextArea a in areas)
+    {
+        // Print a page index, rectangle and text area value:
+        Console.WriteLine(string.Format("Page: {0}, R: {1}, Text: {2}", a.Page.Index, a.Rectangle, a.Text));
+    }
+}
+```
+
+## More resources
+
+### GitHub examples
+
+You may easily run the code above and see the feature in action in our GitHub examples:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Parser for .NET examples</a>    
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Parser for Java examples</a>    
+
+### Free online document parser App
+
+Along with full featured .NET library we provide simple, but powerful free Apps.
+
+You are welcome to parse documents and extract data from PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, Emails and more with our free online <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

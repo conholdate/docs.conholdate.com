@@ -1,0 +1,166 @@
+---
+title: "OCR Usage Basics"
+sidebar_label: "OCR Usage Basics"
+sidebar_position: 1
+description: "This article explains how to use OCR."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/using-ocr/ocr-usage-basics.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "2b438a728176e1bbbb7fcec7c3b083612995053be3fca1e1a654638e1c395e74"
+---
+
+:::info
+GroupDocs.Parser for .NET is included in Conholdate.Total for .NET.
+:::
+
+GroupDocs.Parser for .NET enables text recognition (OCR) in image files and PDF files composed of images.
+
+It should be noted that not all languages ​​represented by the <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/language/" target="_blank" rel="nofollow noopener noreferrer">Language</a> class are currently supported for recognition without implicitly downloading additional resources from the internet. However, if internet access is available, all necessary resources will be downloaded implicitly when selecting any recognition language. Currently supported languages ​​without additional downloads: English, Chinese, Japanese, Korean, Arabic.
+
+<a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/gettext#gettext_1" target="_blank" rel="nofollow noopener noreferrer">GetText</a> and <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/gettextareas#gettextareas_1" target="_blank" rel="nofollow noopener noreferrer">GetTextAreas</a> methods from <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/" target="_blank" rel="nofollow noopener noreferrer">Parser</a> class are used to extract text from images.
+
+To extract text from image files or non-text PDF documents GetText method is used:
+
+* Instantiate <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/" target="_blank" rel="nofollow noopener noreferrer">Parser</a> object;
+* Instantiate <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/textoptions/" target="_blank" rel="nofollow noopener noreferrer">TextOptions</a> object with useOcr = true;
+* Call <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/gettext#gettext_1" target="_blank" rel="nofollow noopener noreferrer">GetText</a>(TextOptions) method with TextOptions parameter and obtain TextReader object;
+* Check if the reader isn't null (text extraction is supported for the document);
+* Read text from the reader.
+
+The following example shows how to extract text from an image file:
+
+```C#
+// Create an instance of Parser class
+using (Parser parser = new Parser(Constants.SampleScan))
+{
+    // Set OCR options
+    TextOptions options = new TextOptions(false, true);
+    options.OcrOptions = new OcrOptions();
+    options.OcrOptions.Language = Language.Jpn;
+    options.OcrOptions.PagePreviewOptions = new PagePreviewOptions();
+    options.OcrOptions.PagePreviewOptions.Dpi = 144;
+    // Extract text using OCR
+    using (TextReader reader = parser.GetText(options))
+    {
+        // Print text or 'not supported' message
+        Console.WriteLine(reader == null ? "Text extraction isn't supported" : reader.ReadToEnd());
+    }
+}
+```
+
+To extract text areas from image files or non-text PDF documents GetTextAreas method is used:
+
+* Instantiate <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/" target="_blank" rel="nofollow noopener noreferrer">Parser</a> object;
+* Instantiate <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/pagetextareaoptions" target="_blank" rel="nofollow noopener noreferrer">PageTextAreaOptions</a> object with useOcr = true;
+* Call <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/gettextareas/#gettextareas_1" target="_blank" rel="nofollow noopener noreferrer">GetTextAreas</a>(PageTextAreaOptions) method and obtain the collection of <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.data/pagetextarea" target="_blank" rel="nofollow noopener noreferrer">PageTextArea</a> objects;
+* Check if the collection isn't null (text areas extraction is supported for the document);
+* Iterate through the collection and get rectangles and texts.
+
+The following example shows how to extract text areas from the image file:
+
+```C#
+// Create an instance of Parser class
+using (Parser parser = new Parser(Constants.SampleScan))
+{
+    // Create an instance of PageTextAreaOptions to use OCR
+    PageTextAreaOptions options = new PageTextAreaOptions(true);
+  
+    // Extract text areas
+    IEnumerable<PageTextArea> areas = parser.GetTextAreas(options);
+    
+    // Check if text areas extraction is supported
+    if (areas == null)
+    {
+        Console.WriteLine("Text areas extraction isn't supported");
+        return;
+    }
+
+    // Iterate over text areas
+    foreach (PageTextArea a in areas)
+    {
+        // Print text, position and size for each text area
+        Console.WriteLine(a.Text);
+        Console.WriteLine("\tPosition: ({0}; {1})", a.Rectangle.Left, a.Rectangle.Top);
+        Console.WriteLine("\tSize: ({0}; {1})", a.Rectangle.Size.Width, a.Rectangle.Size.Height);
+    }
+}
+```
+
+<a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/textoptions/" target="_blank" rel="nofollow noopener noreferrer">TextOptions</a> and <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/pagetextareaoptions" target="_blank" rel="nofollow noopener noreferrer">PageTextAreaOptions</a> classes have the property OcrOptions. OcrOptions class has the following members:
+
+| Member | Description |
+| --- | --- |
+| Rectangle | Is used to pass a rectangular area to restrict the area of the text recognition. |
+| Handler | An instance of <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/ocreventhandler" target="_blank" rel="nofollow noopener noreferrer">OcrEventHandler</a> class to handle any warnings which occur while the text recognition. |
+
+The following sections describe how to use this property.
+
+## How to restrict the area of the text recognition
+
+To restrict an area of the image for the text recognition <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/ocroptions" target="_blank" rel="nofollow noopener noreferrer">OcrOptions</a> class is used. Set <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/ocroptions/rectangle" target="_blank" rel="nofollow noopener noreferrer">Rectangle</a> property to restrict the rectangular area for the text recognition.
+
+The following example shows how to restrict the text recognition by the rectangular area:
+
+```C#
+// Create an instance of Parser class
+using (Parser parser = new Parser(Constants.SampleScan))
+{
+    // Create an instance of OcrOptions to set a rectangle
+    OcrOptions ocrOptions = new OcrOptions(new Data.Rectangle(0, 0, 400, 200));
+
+    // Create an instance of TextOptions to use OCR
+    TextOptions options = new TextOptions(false, true, ocrOptions);
+    // Extract text using OCR
+    using (TextReader reader = parser.GetText(options))
+    {
+        // Print text or 'not supported' message
+        Console.WriteLine(reader == null ? "Text extraction isn't supported" : reader.ReadToEnd());
+    }
+}
+```
+
+## How to handle warnings
+
+To restrict an area of the image for the text recognition <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/ocroptions" target="_blank" rel="nofollow noopener noreferrer">OcrOptions</a> class is used. Set <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/ocroptions/handler" target="_blank" rel="nofollow noopener noreferrer">Handler</a> property to handle warning messages. <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/ocreventhandler/haswarnings" target="_blank" rel="nofollow noopener noreferrer">HasWarnings</a> property of <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/ocreventhandler" target="_blank" rel="nofollow noopener noreferrer">OcrEventHandler</a> class is used to indicate if any warnings occur. Use <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/ocreventhandler/warnings" target="_blank" rel="nofollow noopener noreferrer">Warnings</a> to get all warnings or <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/ocreventhandler/getwarnings" target="_blank" rel="nofollow noopener noreferrer">GetWarnings</a> method for warnings for the page. the empty list returns if no warning occurs during the text recognition.
+
+The following example shows how to handle warning messages:
+
+```C#
+// Create an instance of Parser class
+using (Parser parser = new Parser(Constants.SampleScan))
+{
+    // Create an instance of OcrEventHandler to handle warnings
+    OcrEventHandler handler = new OcrEventHandler();
+
+    // Create an instance of OcrOptions to set a handler
+    OcrOptions ocrOptions = new OcrOptions(handler);
+
+    // Create an instance of TextOptions to use OCR
+    TextOptions options = new TextOptions(false, true, ocrOptions);
+    // Extract text using OCR
+    using (TextReader reader = parser.GetText(options))
+    {
+        // Print text or 'not supported' message
+        Console.WriteLine(reader == null ? "Text extraction isn't supported" : reader.ReadToEnd());
+    }
+
+    if (handler.HasWarnings)
+    {
+        Console.WriteLine("The following warnings occur while the text recognition:");
+
+        foreach (string w in handler.Warnings)
+        {
+            Console.WriteLine("\\t* " + w);
+        }
+    }
+    else
+    {
+        Console.WriteLine("the text recognition was performed without any warning.");
+    }
+}
+```

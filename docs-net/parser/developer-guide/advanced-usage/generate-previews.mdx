@@ -1,0 +1,132 @@
+---
+title: "Generate previews"
+sidebar_label: "Generate previews"
+sidebar_position: 105
+description: "This article provides learning contents about how to generate page previews of documents in .NET using GroupDocs.Parser API"
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/generate-previews.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "c10acc96c33531a9d5c81d6ee88d3b9f5f0ae2feb95a9bac3279e9ab4c63468f"
+---
+
+:::info
+GroupDocs.Parser for .NET is included in Conholdate.Total for .NET.
+:::
+
+GroupDocs.Parser provides the functionality to generate document page previews by <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/methods/generatepreview" target="_blank" rel="nofollow noopener noreferrer">GeneratePreview(PreviewOptions)</a> method:
+
+```csharp
+void GeneratePreview(PreviewOptions previewOptions);
+```
+
+<a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> class is used to set requirements and stream delegates for preview generation.
+
+Here are the steps to generate document page previews:
+
+* Prepare <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> object;
+* Instantiate <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> object;
+* Call <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/methods/generatepreview" target="_blank" rel="nofollow noopener noreferrer">GeneratePreview(PreviewOptions)</a> method.
+
+The following example shows how to generate document page previews:
+
+```csharp
+// Create an instance of Parser class to generate document page previews
+using (Parser parser = new Parser(Constants.SamplePdfWithToc))
+{
+    // Create preview options
+    PreviewOptions previewOptions = new PreviewOptions(pageNumber => File.Create(GetOutputPath($"preview_{pageNumber}.png")));
+    // Set PNG as an output image format
+    previewOptions.PreviewFormat = PreviewFormats.PNG;
+    // Set DPI for the output image
+    previewOptions.Dpi = 72;
+
+    // Generate previews
+    parser.GeneratePreview(previewOptions);
+}            
+
+private static string GetOutputPath(string fileName)
+{
+    // Create the output directory if necessary
+    if (!Directory.Exists(Constants.OutputPath))
+    {
+        Directory.CreateDirectory(Constants.OutputPath);
+    }
+
+    return Path.Combine(Constants.OutputPath, fileName);
+}
+```
+
+
+:::info
+Spreadsheets are rendered by tiles. See the example bellow.
+:::
+
+
+Here are the steps to generate spreadsheets page previews:
+
+* Prepare <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> object;
+* Instantiate <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> object;
+* Call <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/methods/generatepreview" target="_blank" rel="nofollow noopener noreferrer">GeneratePreview(PreviewOptions)</a> method.
+
+The following example shows how to generate spreadsheet page previews:
+
+```csharp
+// Create an instance of Parser class to generate spreadsheet page previews
+using (Parser parser = new Parser(Constants.SampleXlsx))
+{
+    PageRenderInfo renderInfo = null;
+
+    // Create preview options
+    PreviewOptions previewOptions = new PreviewOptions(pageNumber => File.Create(GetOutputPath(renderInfo, pageNumber)));
+    // Set delegate to obtain the render info
+    previewOptions.PreviewPageRender = info => renderInfo = info;
+    // Set PNG as an output image format
+    previewOptions.PreviewFormat = PreviewFormats.PNG;
+    // Set DPI for the output image
+    previewOptions.Dpi = 72;
+
+    // Generate previews
+    parser.GeneratePreview(previewOptions);
+}
+
+private static string GetOutputPath(PageRenderInfo renderInfo, int pageNumber)
+{
+    // Set the output directory. If the render info is set, then sheets are rendered on its own directory
+    string outputDirectory = renderInfo == null 
+        ? Constants.OutputPath 
+        : Path.Combine(Constants.OutputPath, $"preview_{renderInfo.PageNumber}");
+
+    // Create the output directory if necessary
+    if (!Directory.Exists(outputDirectory))
+    {
+        Directory.CreateDirectory(outputDirectory);
+    }
+
+    // Set the file name. If the render info is set, then tile name is {Row}x{Column}.png
+    string fileName = renderInfo == null
+        ? $"preview_{pageNumber}.png"
+        : $"{renderInfo.GetRow(pageNumber)}x{renderInfo.GetColumn(pageNumber)}.png";
+
+    return Path.Combine(outputDirectory, fileName);
+}
+```
+
+## More resources
+
+### GitHub examples
+
+You may easily run the code above and see the feature in action in our GitHub examples:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Parser for .NET examples</a>    
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Parser for Java examples</a>    
+
+### Free online document parser App
+
+Along with full featured .NET library we provide simple, but powerful free Apps.
+
+You are welcome to parse documents and extract data from PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, Emails and more with our free online <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

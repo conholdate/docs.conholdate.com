@@ -1,0 +1,241 @@
+---
+title: "Extract text from Microsoft Office Excel spreadsheets"
+sidebar_label: "Extract text from Microsoft Office Excel spreadsheets"
+sidebar_position: 1
+description: "Learn how to extract text from Excel spreadsheets (.xls, .xlsx) using GroupDocs.Parser for .NET. Includes examples for whole document extraction, sheet-by-sheet processing, raw mode extraction, and formatted text output."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/extract-data-from-various-formats/extract-data-from-microsoft-office-excel-spreadsheets/extract-text-from-microsoft-office-excel-spreadsheets.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "62b1dd93b26e7652e34da8c4399c0534fe175922614dd01e7cef1fd6ed940cf8"
+---
+
+:::info
+GroupDocs.Parser for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Overview
+
+This guide demonstrates how to extract text content from Microsoft Office Excel spreadsheets (.xls, .xlsx) using the GroupDocs.Parser for .NET API. You'll learn different text extraction methods suitable for various document processing scenarios, from simple Excel text retrieval to advanced sheet-by-sheet parsing operations.
+
+## Extraction Methods Comparison
+
+| Method | Use Case | Performance | Output Quality |
+| -------- | ---------- | ------------- | ---------------- |
+| **Whole Document** | Extract all text at once | Fast | Standard |
+| **Sheet-by-Sheet** | Process individual worksheets | Medium | Standard |
+| **Raw Mode** | High-speed bulk processing | Fastest | Lower formatting accuracy |
+| **Formatted Text** | Preserve formatting (HTML/Markdown) | Slower | Highest |
+
+## Method 1: Extract Text from Entire Spreadsheet
+
+**When to use:** When you need all text content from the Excel workbook and don't need to distinguish between different worksheets for your document parsing workflow.
+
+To extract text from Microsoft Office Excel spreadsheets using the .NET parser library, the <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> method is used. This text extraction API method retrieves content from the entire document.
+
+### Steps:
+1. Instantiate <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> object for the initial spreadsheet
+2. Call <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> method and obtain <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">TextReader</a> object
+3. Read text from the reader
+
+
+:::warning
+<a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> method returns *null* value if text extraction isn't supported for the document. For example, text extraction isn't supported for Zip archive. Therefore, for Zip archive <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> method returns *null*. For empty Microsoft Office Excel spreadsheets <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> method returns an empty <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">TextReader</a> object (<a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader.readtoend?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">reader.ReadToEnd</a> method returns an empty string).
+:::
+
+
+**Example:**
+```csharp
+// Create an instance of Parser class
+using(Parser parser = new Parser(filePath))
+{
+    // Extract a text into the reader
+    using(TextReader reader = parser.GetText())
+    {
+        // Print a text from the spreadsheet
+        Console.WriteLine(reader.ReadToEnd());
+    }
+}
+```
+
+## Method 2: Extract Text from Individual Sheets
+
+**When to use:** When you need to process each Excel worksheet separately for your C# spreadsheet parser application, maintain sheet organization, or perform sheet-specific data extraction operations.
+
+This Excel parsing method uses <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/2" target="_blank" rel="nofollow noopener noreferrer">GetText(pageIndex)</a> to extract text from specific sheets. Each worksheet is treated as a separate page in the document parsing process.
+
+### Steps:
+1. Instantiate <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> object for the initial spreadsheet
+2. Call <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">GetDocumentInfo</a> method and obtain <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo" target="_blank" rel="nofollow noopener noreferrer">IDocumentInfo</a> object with <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo/properties/pagecount" target="_blank" rel="nofollow noopener noreferrer">page count</a>
+3. Call <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/2" target="_blank" rel="nofollow noopener noreferrer">GetText(pageIndex)</a> method with the sheet index and obtain <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">TextReader</a> object
+4. Read text from the reader
+
+**Example:**
+```csharp
+// Create an instance of Parser class
+using(Parser parser = new Parser(filePath))
+{
+    // Get the document info
+    IDocumentInfo documentInfo = parser.GetDocumentInfo();
+   
+    // Iterate over sheets
+    for(int p = 0; p < documentInfo.PageCount; p++)
+    {
+        // Print a sheet number 
+        Console.WriteLine(string.Format("Page {0}/{1}", p + 1, documentInfo.PageCount));
+   
+        // Extract a text into the reader
+        using(TextReader reader = parser.GetText(p))
+        {
+            // Print a text from the spreadsheet sheet
+            Console.WriteLine(reader.ReadToEnd());
+        }
+    }
+}
+```
+
+## Method 3: High-Speed Raw Text Extraction
+
+**When to use:** When processing large Excel files or multiple spreadsheets where parsing speed is more important than formatting accuracy. Ideal for Excel data mining, content indexing, or bulk document processing scenarios in enterprise applications.
+
+Raw mode increases text extraction performance by sacrificing formatting accuracy in the .NET parser. Use <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/1" target="_blank" rel="nofollow noopener noreferrer">GetText(TextOptions)</a> and <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/3" target="_blank" rel="nofollow noopener noreferrer">GetText(pageIndex, TextOptions)</a> methods for high-speed raw mode extraction.
+
+
+:::warning
+Some spreadsheets may have different sheet numbers in raw and accurate modes. Use <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo/properties/rawpagecount" target="_blank" rel="nofollow noopener noreferrer">IDocumentInfo.RawPageCount</a> instead of <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo/properties/pagecount" target="_blank" rel="nofollow noopener noreferrer">IDocumentInfo.PageCount</a> in raw mode.
+:::
+
+
+### Steps:
+1. Instantiate <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> object for the initial spreadsheet
+2. Instantiate <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/textoptions" target="_blank" rel="nofollow noopener noreferrer">TextOptions</a> object with *true* parameter
+3. Call <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">GetDocumentInfo</a> method
+4. Use <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo/properties/rawpagecount" target="_blank" rel="nofollow noopener noreferrer">RawPageCount</a> instead of <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo/properties/pagecount" target="_blank" rel="nofollow noopener noreferrer">PageCount</a> to avoid extra calculations
+5. Call <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/3" target="_blank" rel="nofollow noopener noreferrer">GetText(pageIndex, TextOptions)</a> method with the sheet index and obtain <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">TextReader</a> object
+6. Read text from the reader
+
+**Example:**
+```csharp
+// Create an instance of Parser class
+using (Parser parser = new Parser(filePath))
+{
+    // Get the document info
+    IDocumentInfo documentInfo = parser.GetDocumentInfo();
+    // Check if the document has pages
+    if (documentInfo == null || documentInfo.RawPageCount == 0)
+    {
+        Console.WriteLine("Document hasn't pages.");
+        return;
+    }
+    // Iterate over sheets
+    for (int p = 0; p < documentInfo.RawPageCount; p++)
+    {
+        // Print a sheet number 
+        Console.WriteLine(string.Format("Page {0}/{1}", p + 1, documentInfo.RawPageCount));
+        // Extract a text into the reader
+        using (TextReader reader = parser.GetText(p, new TextOptions(true)))
+        {
+            // Print a text from the spreadsheet sheet
+            Console.WriteLine(reader.ReadToEnd());
+        }
+    }
+}
+```
+
+## Method 4: Extract Formatted Text (HTML)
+
+**When to use:** When you need to preserve the visual structure and formatting of Excel spreadsheet data using the .NET document parser, or when integrating extracted content into web applications or formatted reports.
+
+The GroupDocs.Parser text extraction library allows extracting text from Microsoft Office Excel spreadsheets as HTML, Markdown, and formatted plain text. For more details, see [Extract Formatted Text](/net/parser/developer-guide/advanced-usage/working-with-text/working-with-formatted-text/extract-formatted-text-from-document/).
+
+### Steps:
+1. Instantiate <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> object for the initial spreadsheet
+2. Call <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getformattedtext" target="_blank" rel="nofollow noopener noreferrer">GetFormattedText</a> method and obtain <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">TextReader</a> object
+3. Read text from the reader
+
+**Example:**
+```csharp
+// Create an instance of Parser class
+using (Parser parser = new Parser(filePath))
+{
+    // Extract a formatted text into the reader
+    using (TextReader reader = parser.GetFormattedText(new FormattedTextOptions(FormattedTextMode.Html)))
+    {
+        // Print a formatted text from the sheet
+        Console.WriteLine(reader.ReadToEnd());
+    }
+}
+```
+
+## Supported Excel Formats
+
+- **.xls** - Microsoft Excel 97-2003 Workbook
+- **.xlsx** - Microsoft Excel Open XML Workbook
+
+## Common Use Cases
+
+### Enterprise Document Processing
+- **Excel Data Mining**: Extract text for search indexing and content analysis using C# parser methods
+- **Spreadsheet Report Generation**: Convert Excel workbook data to text-based reports
+- **Content Migration**: Move spreadsheet data between different document management systems
+
+### Business Intelligence & Analytics
+- **Text Analytics on Excel Files**: Analyze comments, notes, and text data within .xls/.xlsx spreadsheets
+- **Compliance Document Processing**: Extract text content for regulatory reporting from Excel documents  
+- **Audit Trails**: Document text content changes over time in spreadsheet parser workflows
+
+### Integration Scenarios
+- **Enterprise Search Systems**: Index Excel spreadsheet content for full-text search capabilities
+- **Automated Data Pipelines**: Extract text as part of automated document processing workflows
+- **Content Management Systems**: Process uploaded Excel files automatically using the .NET parsing API
+
+## Performance Considerations
+
+### File Size Impact
+- **Small files** (&lt; 1MB): All methods perform similarly
+- **Medium files** (1-10MB): Raw mode provides noticeable speed improvement
+- **Large files** (&gt; 10MB): Raw mode recommended for bulk processing
+
+### Memory Usage
+- Sheet-by-sheet processing uses less memory than whole document extraction
+- Raw mode is more memory-efficient for large files
+- Consider processing sheets individually for very large workbooks
+
+## Troubleshooting
+
+### Common Issues
+
+**Null TextReader Response**
+- Verify the file format is supported (.xls, .xlsx)
+- Check if the file is corrupted or password-protected
+- Ensure the file path is correct and accessible
+
+**Empty Text Output**
+- Confirm the spreadsheet contains text data (not just numbers/formulas)
+- Check if the sheets contain visible content
+- Verify the file isn't completely empty
+
+**Performance Issues**
+- Use raw mode for large files or bulk processing
+- Process sheets individually instead of extracting the entire document
+- Consider file size limitations in your environment
+
+## More resources
+
+### GitHub examples
+
+You may easily run the code above and see the feature in action in our GitHub examples:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Parser for .NET examples</a>    
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Parser for Java examples</a>    
+
+### Free online document parser App
+
+Along with full featured .NET library we provide simple, but powerful free Apps.
+
+You are welcome to parse documents and extract data from PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, Emails and more with our free online <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.
