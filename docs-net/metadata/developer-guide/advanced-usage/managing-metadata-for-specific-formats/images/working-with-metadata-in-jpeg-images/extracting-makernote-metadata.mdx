@@ -1,0 +1,151 @@
+---
+title: "Extracting MakerNote Metadata"
+sidebar_label: "Extracting MakerNote Metadata"
+sidebar_position: 1
+description: ""
+product: "metadata"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "metadata-net"
+source_path: "net/developer-guide/advanced-usage/managing-metadata-for-specific-formats/images/working-with-metadata-in-jpeg-images/extracting-makernote-metadata.md"
+source_commit: "63b86dac442b8f3b48df2f3a352c0da95426b1cc"
+source_sha256: "793628d4bad06a604beec0f07664e726aa8e8bdee2027060f65db36cb69cb2ac"
+---
+
+:::info
+GroupDocs.Metadata for .NET is included in Conholdate.Total for .NET.
+:::
+
+### What is MakerNote?
+
+MakerNote metadata refers to image information that is written by digital cameras of different manufacturers. Usually, MakerNote metadata properties contain camera settings and some other conditions under which the shot was taken. Most manufacturers store MakerNote properties in a proprietary binary format derived from EXIF. GroupDocs.Metadata allows extracting MakerNote metadata saved by the following manufacturers:
+
+*   Canon
+*   Nikon
+*   Panasonic
+*   Sony
+
+### Read all MakerNote Properties in the Form of TIFF/EXIF Tags
+
+Utilizing the GroupDocs.Metadata API the user is able to read all metadata properties regardless of the exact MakerNote format.
+
+1.  [Load](/net/metadata/developer-guide/advanced-usage/loading-files/) a raw image file that contains MakerNote metadata
+2.  Extract the MakerNote package using the <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.image/jpegrootpackage/properties/makernotepackage" target="_blank" rel="nofollow noopener noreferrer">MakerNotePackage</a> property
+3.  Iterate through the EXIF tags 
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.CanonJpeg))
+{
+	var root = metadata.GetRootPackage<JpegRootPackage>();
+	if (root.MakerNotePackage != null)
+	{
+		foreach (var tag in root.MakerNotePackage.ToList())
+		{
+			// Please note that tag ids used by camera manufacturers may intersect with the ids defined in the TIFF/EXIF specification
+			Console.WriteLine("{0} = {1}", (int) tag.TagID, tag.Value);
+		}
+	}
+}
+```
+
+To help you with interpreting extracted tags we implemented classes representing specific MakerNote metadata packages. Please cast the return value of the <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.image/jpegrootpackage/properties/makernotepackage" target="_blank" rel="nofollow noopener noreferrer">MakerNotePackage</a> property to one of the classes listed below to get more format-specific capabilities:
+
+*   <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.exif.makernote/canonmakernotepackage" target="_blank" rel="nofollow noopener noreferrer">CanonMakerNotePackage</a>
+*   <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.exif.makernote/nikonmakernotepackage" target="_blank" rel="nofollow noopener noreferrer">NikonMakerNotePackage</a>
+*   <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.exif.makernote/panasonicmakernotepackage" target="_blank" rel="nofollow noopener noreferrer">PanasonicMakerNotePackage</a>
+*   <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.exif.makernote/sonymakernotepackage" target="_blank" rel="nofollow noopener noreferrer">SonyMakerNotePackage</a>
+
+### Read Canon MakerNote Properties
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.CanonJpeg))
+{
+	var root = metadata.GetRootPackage<JpegRootPackage>();
+	var makerNote = (CanonMakerNotePackage)root.MakerNotePackage;
+	if (makerNote != null)
+	{
+		Console.WriteLine(makerNote.CanonFirmwareVersion);
+		Console.WriteLine(makerNote.CanonImageType);
+		Console.WriteLine(makerNote.OwnerName);
+		Console.WriteLine(makerNote.CanonModelID);
+
+		// ...
+
+		if (makerNote.CameraSettings != null)
+		{
+			Console.WriteLine(makerNote.CameraSettings.AFPoint);
+			Console.WriteLine(makerNote.CameraSettings.CameraIso);
+			Console.WriteLine(makerNote.CameraSettings.Contrast);
+			Console.WriteLine(makerNote.CameraSettings.DigitalZoom);
+
+			// ...
+		}
+	}
+}
+```
+
+### Read Nikon MakerNote Properties
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.NikonJpeg))
+{
+	var root = metadata.GetRootPackage<JpegRootPackage>();
+	var makerNote = (NikonMakerNotePackage) root.MakerNotePackage;
+	if (makerNote != null)
+	{
+		Console.WriteLine(makerNote.ColorMode);
+		Console.WriteLine(makerNote.FlashSetting);
+		Console.WriteLine(makerNote.FlashType);
+		Console.WriteLine(makerNote.FocusMode);
+		Console.WriteLine(makerNote.Quality);
+		Console.WriteLine(makerNote.Sharpness);
+
+		// ...
+	}
+}
+```
+
+### Read Panasonic MakerNote Properties
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.PanasonicJpeg))
+{
+	var root = metadata.GetRootPackage<JpegRootPackage>();
+	var makerNote = (PanasonicMakerNotePackage) root.MakerNotePackage;
+
+	if (makerNote != null)
+	{
+		Console.WriteLine(makerNote.AccessorySerialNumber);
+		Console.WriteLine(makerNote.AccessoryType);
+		Console.WriteLine(makerNote.MacroMode);
+		Console.WriteLine(makerNote.LensSerialNumber);
+		Console.WriteLine(makerNote.LensType);
+
+		// ...
+	}
+}
+```
+
+### Read Sony MakerNote Properties
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Image.Jpeg.MakerNote.MakerNote.MakerNote.MakerNoteReadSonyProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.SonyJpeg))
+{
+	var root = metadata.GetRootPackage<JpegRootPackage>();
+	var makerNote = (SonyMakerNotePackage)root.MakerNotePackage;
+	if (makerNote != null)
+	{
+		Console.WriteLine(makerNote.CreativeStyle);
+		Console.WriteLine(makerNote.ColorMode);
+		Console.WriteLine(makerNote.JpegQuality);
+		Console.WriteLine(makerNote.Brightness);
+		Console.WriteLine(makerNote.Sharpness);
+
+		// ...
+	}
+}
+```
