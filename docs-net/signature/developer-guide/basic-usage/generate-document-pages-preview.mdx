@@ -1,0 +1,181 @@
+---
+title: "Generate document pages preview"
+sidebar_label: "Generate document pages preview"
+sidebar_position: 6
+description: "This topic explains how to get document pages preview as images with various options by GroupDocs.Signature API."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/basic-usage/generate-document-pages-preview.md"
+source_commit: "0c3c217010a3d6a2e7ef62d7ad8ef26f94d99418"
+source_sha256: "1b7edb0de08d5a7b39a3fd427662fbc55249dbb690ae3a2b2d9969e10713b055"
+---
+
+:::info
+GroupDocs.Signature for .NET is included in Conholdate.Total for .NET.
+:::
+
+## Overview
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> provides <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> class to specify different options to manage document pages preview generation process. The feature also supports archives previewing.
+  
+Here are the steps to generate document preview with GroupDocs.Signature:
+
+* Create new instance of <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> class and pass source document path as a constructor parameter.
+* Instantiate the <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> object with:
+* delegate for each page stream creation (see event handler <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/createpagestream" target="_blank" rel="nofollow noopener noreferrer">CreatePageStream</a>);
+* image preview format - PNG / JPG / BMP,
+* page numbers to process;
+* custom size of preview images (if needed).
+
+:::info
+Stream that were created by CreatePageStreamdelegate will be disposed automatically once after generation of preview image. If you need to implement custom image preview stream disposing you have to pass additional argument ReleaseStream to clean up resources.
+:::
+
+* Call GeneratePreview method of <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> class instance and pass <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> to it.
+
+## CreatePageStream delegate implementation
+
+GroupDocs.Signature expects <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/createpagestream" target="_blank" rel="nofollow noopener noreferrer">CreatePageStream</a> delegate to obtain each page stream for image preview generation process
+
+```csharp
+private static Stream CreatePageStream(PreviewPageData pageData)
+{
+    string imageName = "image-" + pageData.PageNumber + ".jpg";
+    string imageFilePath = Path.Combine("GeneratePreviewFolder", imageName);
+    string folder = Path.GetDirectoryName(imageFilePath);
+    if(!Directory.Exists(folder))
+    {
+        Directory.CreateDirectory(folder);
+    }
+    return new System.IO.FileStream(imageFilePath, FileMode.Create);
+}
+```
+
+## ReleasePageStream delegate implementation
+
+```csharp
+private static void ReleasePageStream(PreviewPageData pageData, Stream pageStream)
+{
+     pageStream.Dispose();
+     string imageName = "image-" + pageData.PageNumber + ".jpg";
+     string imageFilePath = Path.Combine("GeneratePreviewFolder", imageName);
+     Console.WriteLine("Image file {0} is ready for preview", imageFilePath);
+}
+```
+
+## Generate document preview from file on local disk
+
+```csharp
+public static void GetPreview()
+{
+    using (Signature signature = new Signature("sample.pdf"))
+    {
+        // create preview options object
+        PreviewOptions previewOption = new PreviewOptions(GeneratePreview.CreatePageStream)
+        {
+            PreviewFormat = PreviewOptions.PreviewFormats.JPEG,
+        };
+        // generate preview
+        signature.GeneratePreview(previewOption);
+    }
+}
+
+private static Stream CreatePageStream(PreviewPageData pageData)
+{
+    string imageName = "image-" + pageData.PageNumber + ".jpg";
+    string imageFilePath = Path.Combine("GeneratePreviewFolder", imageName);
+    var folder = Path.GetDirectoryName(imageFilePath);
+    if(!Directory.Exists(folder))
+    {
+        Directory.CreateDirectory(folder);
+    }
+    return new System.IO.FileStream(imageFilePath, FileMode.Create);
+}
+```
+
+## Generate document preview from stream with custom stream releasing delegate
+
+```csharp
+public static void GetPreview()
+{
+  using (var stream = File.OpenRead("sample.pdf"))
+  {
+    using (Signature signature = new Signature("sample.pdf"))
+    {
+        // create preview options object
+        PreviewOptions previewOption = new PreviewOptions(GeneratePreview.CreatePageStream)
+        {
+            PreviewFormat = PreviewOptions.PreviewFormats.JPEG,
+        };
+        // generate preview
+        signature.GeneratePreview(previewOption);
+    }
+  }
+}
+
+private static Stream CreatePageStream(PreviewPageData pageData)
+{
+    string imageName = "image-" + pageData.PageNumber + ".jpg";
+    string imageFilePath = Path.Combine("GeneratePreviewFolder", imageName);
+    var folder = Path.GetDirectoryName(imageFilePath);
+    if(!Directory.Exists(folder))
+    {
+        Directory.CreateDirectory(folder);
+    }
+    return new System.IO.FileStream(imageFilePath, FileMode.Create);
+}
+
+private static void ReleasePageStream(PreviewPageData pageData, Stream pageStream)
+{        
+    pageStream.Dispose();
+    string imageName = "image-" + pageData.PageNumber + ".jpg";
+    string imageFilePath = Path.Combine("GeneratePreviewFolder", imageName);
+    Console.WriteLine("Image file {0} is ready for preview", imageFilePath);
+}
+```
+
+## Creating a document preview with custom Resolution
+
+```csharp
+// The path to the documents
+string filePath = "sample.pdf";
+using (Signature signature = new Signature(filePath))
+{
+    int resolution = 96;
+    // create preview options object
+    // You can reuse CreatePageStream and ReleasePageStream methods from the previous example
+    PreviewOptions previewOption = new PreviewOptions(CreatePageStream, ReleasePageStream, resolution)
+    {
+        PreviewFormat = PreviewOptions.PreviewFormats.JPEG
+    };
+    // generate preview
+    signature.GeneratePreview(previewOption);
+}
+```
+
+### Advanced Usage Topics
+
+To learn more about document eSign features, please refer to the [advanced usage section](/net/signature/developer-guide/advanced-usage/).
+
+## More resources
+
+### GitHub Examples
+
+You may easily run the code above and see the feature in action in our GitHub examples:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Signature for .NET examples, plugins, and showcase</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Signature for Java examples, plugins, and showcase</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Document Signature for .NET MVC UI Example</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Document Signature for .NET App WebForms UI Example</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Document Signature for Java App Dropwizard UI Example</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Document Signature for Java Spring UI Example</a>
+
+### Free Online Apps
+
+Along with the full-featured .NET library, we provide simple but powerful free online apps.
+
+To sign PDF, Word, Excel, PowerPoint, and other documents you can use the online apps from the **<a href="https://products.groupdocs.app/signature/family" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Signature App Product Family</a>**.

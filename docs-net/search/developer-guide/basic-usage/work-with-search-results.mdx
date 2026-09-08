@@ -1,0 +1,137 @@
+---
+title: "Work with search results"
+sidebar_label: "Work with search results"
+sidebar_position: 3
+description: ""
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/basic-usage/work-with-search-results.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "b5e27d8507d507ee06c9d34d3025a7044875132fdc6119f0d239e02d319e2c40"
+---
+
+:::info
+GroupDocs.Search for .NET is included in Conholdate.Total for .NET.
+:::
+
+Working with search results consists in obtaining information from objects of search results and highlighting occurrences in the text of documents.
+
+## Obtain search result information
+
+When a search is complete, the <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index/methods/search/index" target="_blank" rel="nofollow noopener noreferrer">Search</a> method returns an object of type <a href="https://reference.groupdocs.com/net/search/groupdocs.search.results/searchresult" target="_blank" rel="nofollow noopener noreferrer">SearchResult</a>. This page describes the information available in an object of type <a href="https://reference.groupdocs.com/net/search/groupdocs.search.results/searchresult" target="_blank" rel="nofollow noopener noreferrer">SearchResult</a>.
+
+From the root object of the search result, information is available on the number of documents found, the number of occurrences of the words and phrases found, as well as detailed information on each individual document. Information about an individual document found is represented by an object of the class <a href="https://reference.groupdocs.com/net/search/groupdocs.search.results/founddocument" target="_blank" rel="nofollow noopener noreferrer">FoundDocument</a>.
+
+From the object of the class <a href="https://reference.groupdocs.com/net/search/groupdocs.search.results/founddocument" target="_blank" rel="nofollow noopener noreferrer">FoundDocument</a>, information is available on the full path to the document, the number of occurrences, the words and phrases found, as well as detailed information on each field of the document. Information about the document field is represented by an object of the class <a href="https://reference.groupdocs.com/net/search/groupdocs.search.results/founddocumentfield" target="_blank" rel="nofollow noopener noreferrer">FoundDocumentField</a>.
+
+From the object of the class <a href="https://reference.groupdocs.com/net/search/groupdocs.search.results/founddocumentfield" target="_blank" rel="nofollow noopener noreferrer">FoundDocumentField</a>, information is available on the name of the document field, the number of occurrences, the words and phrases found, and the number of occurrences of each word and phrase.
+
+Below is a code example that writes to the console the detailed information contained in an object of the class <a href="https://reference.groupdocs.com/net/search/groupdocs.search.results/searchresult" target="_blank" rel="nofollow noopener noreferrer">SearchResult</a> about each document, document field, word, phrase and the number of their occurrences in the document fields.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentFolder = @"c:\MyDocuments\";
+ 
+// Creating an index
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentFolder);
+ 
+// Creating search options
+SearchOptions options = new SearchOptions();
+options.FuzzySearch.Enabled = true; // Enabling the fuzzy search
+options.FuzzySearch.FuzzyAlgorithm = new TableDiscreteFunction(3); // Setting the maximum number of differences to 3
+ 
+// Search for documents containing the word 'Einstein' or the phrase 'Theory of Relativity'
+SearchResult result = index.Search("Einstein OR \"Theory of Relativity\"", options);
+ 
+// Printing the result
+Console.WriteLine("Documents: " + result.DocumentCount);
+Console.WriteLine("Total occurrences: " + result.OccurrenceCount);
+for (int i = 0; i < result.DocumentCount; i++)
+{
+    FoundDocument document = result.GetFoundDocument(i);
+    Console.WriteLine("\tDocument: " + document.DocumentInfo.FilePath);
+    Console.WriteLine("\tOccurrences: " + document.OccurrenceCount);
+    for (int j = 0; j < document.FoundFields.Length; j++)
+    {
+        FoundDocumentField field = document.FoundFields[j];
+        Console.WriteLine("\t\tField: " + field.FieldName);
+        Console.WriteLine("\t\tOccurrences: " + document.OccurrenceCount);
+        // Printing found terms
+        if (field.Terms != null)
+        {
+            for (int k = 0; k < field.Terms.Length; k++)
+            {
+                Console.WriteLine("\t\t\t" + field.Terms[k].PadRight(20) + field.TermsOccurrences[k]);
+            }
+        }
+        // Printing found phrases
+        if (field.TermSequences != null)
+        {
+            for (int k = 0; k < field.TermSequences.Length; k++)
+            {
+                string sequence = string.Join(" ", field.TermSequences[k]);
+                Console.WriteLine("\t\t\t" + sequence.PadRight(30) + field.TermSequencesOccurrences[k]);
+            }
+        }
+    }
+}
+```
+
+## Highlight search results
+
+At the end of a search, it is usually necessary to visualize the results by highlighting the words found in the text. You can highlight search results either in the text of an entire document, or in separate segments. Detailed information about highlighting search results can be found on the page [Highlighting search results](/net/search/developer-guide/advanced-usage/searching/highlighting-search-results/). Below is an example of highlighting search results in the text of an entire document.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentFolder = @"c:\MyDocuments\";
+ 
+// Creating an index
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentFolder);
+ 
+// Search for the word 'eternity'
+SearchResult result = index.Search("eternity");
+ 
+// Highlighting occurrences in text
+if (result.DocumentCount > 0)
+{
+    FoundDocument document = result.GetFoundDocument(0); // Getting the first found document
+    OutputAdapter outputAdapter = new FileOutputAdapter(@"c:\Highlighted.html"); // Creating an output adapter to the file
+    Highlighter highlighter = new HtmlHighlighter(outputAdapter); // Creating the highlighter object
+    index.Highlight(document, highlighter); // Generating HTML formatted text with highlighted occurrences
+}
+```
+
+## More resources
+
+### Advanced usage topics
+
+To learn more about search features and get familiar how to enhance your search solution, please refer to the [advanced usage section](/net/search/developer-guide/advanced-usage/).
+
+### GitHub examples
+
+You may easily run the code from documentation articles and see the features in action in our GitHub examples:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Search for .NET examples</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Search for Java examples</a>
+    
+
+### Free online document search App
+
+Along with full featured .NET library we provide simple, but powerful free Apps.
+
+You are welcome to search over your PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX and more with our free online <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Search App</a>.

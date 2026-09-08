@@ -1,0 +1,132 @@
+---
+title: "Redaction basics"
+sidebar_label: "Redaction basics"
+sidebar_position: 4
+description: "This article shows that how C# developers can apply metadata, image, annotation and text redaction in their documents. Wide range of document formats is supported, such as, PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX and others."
+product: "redaction"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "redaction-net"
+source_path: "net/developer-guide/basic-usage/redaction-basics.md"
+source_commit: "7f9ba3f7099e7e45c9dcc8d1241caf5c3e6029ec"
+source_sha256: "37cf8179c26bb47c3c4eb30c6f2d50ab65016773ffdcf450310a1f05bd9427f8"
+---
+
+:::info
+GroupDocs.Redaction for .NET is included in Conholdate.Total for .NET.
+:::
+
+GroupDocs.Redaction supports an effective set of document redaction features. It allows to apply redactions for [text](/net/redaction/developer-guide/basic-usage/text-redactions/), [metadata](/net/redaction/developer-guide/basic-usage/metadata-redactions/), [annotations](/net/redaction/developer-guide/basic-usage/annotation-redactions/), [images](/net/redaction/developer-guide/basic-usage/image-redactions/).
+
+Wide range of document formats is supported, such as: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX and others. See full list of supported formats at [supported document formats](/net/redaction/getting-started/supported-document-formats/) article
+
+## Redaction types
+
+GroupDocs.Redaction comes with the following redaction types:
+
+| Type | Description | Classes |
+| --- | --- | --- |
+| [Text](/net/redaction/developer-guide/basic-usage/text-redactions/) | Replaces or hides with color block a portion of text within document body | <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/exactphraseredaction" target="_blank" rel="nofollow noopener noreferrer">ExactPhraseRedaction</a>, <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/regexredaction" target="_blank" rel="nofollow noopener noreferrer">RegexRedaction</a> |
+| [Metadata](/net/redaction/developer-guide/basic-usage/metadata-redactions/) | Replace metadata values with empty ones or redacts metadata texts | <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/erasemetadataredaction" target="_blank" rel="nofollow noopener noreferrer">EraseMetadataRedaction</a>, <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/metadatasearchredaction" target="_blank" rel="nofollow noopener noreferrer">MetadataSearchRedaction</a> |
+| [Annotations](/net/redaction/developer-guide/basic-usage/annotation-redactions/) | Deletes annotations from document or redacts its texts | <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/deleteannotationredaction" target="_blank" rel="nofollow noopener noreferrer">DeleteAnnotationRedaction</a>, <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/annotationredaction" target="_blank" rel="nofollow noopener noreferrer">AnnotationRedaction</a> |
+| [Images](/net/redaction/developer-guide/basic-usage/image-redactions/) | Replaces specific area of an image with a colored box | <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/imagearearedaction" target="_blank" rel="nofollow noopener noreferrer">ImageAreaRedaction</a> |
+| [Pages](/net/redaction/developer-guide/basic-usage/remove-page-redactions/) | Removes specific range of pages (slides, worksheets, etc.) | <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/removepageredaction" target="_blank" rel="nofollow noopener noreferrer">RemovePageRedaction</a> |
+
+## Apply redaction
+
+Applying redaction to a document is done through <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactor/apply/methods/1" target="_blank" rel="nofollow noopener noreferrer">Redactor.Apply</a> method. As a result, you receive <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactorchangelog" target="_blank" rel="nofollow noopener noreferrer">RedactorChangeLog</a> instance, containing a log entry for each redaction applied. The entry contains reference to <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redaction" target="_blank" rel="nofollow noopener noreferrer">Redacton</a> instance including its options, status of the operation (see below) and textual descriptions when applicable. If at least one redaction failed, you will see <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactionstatus" target="_blank" rel="nofollow noopener noreferrer">Status == RedactionStatus.Failed</a>:
+
+**C#**
+
+```csharp
+using (Redactor redactor = new Redactor("sample.docx"))
+{
+   RedactorChangeLog result = redactor.Apply(new ExactPhraseRedaction("John Doe", new ReplacementOptions("[personal]")));
+   if (result.Status != RedactionStatus.Failed)
+   {
+      redactor.Save();
+   };
+}
+```
+
+All possible statuses of the <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactionstatus" target="_blank" rel="nofollow noopener noreferrer">RedactionStatus</a> enumeration are listed in this table:
+
+| Status | Description | Possible reasons |
+| --- | --- | --- |
+| *Applied* | Redaction was fully and successfully applied | All operations within redaction process were successfully applied |
+| *PartiallyApplied* | Redaction was applied only to a part of its matches | 1) Trial limitations for replacements were exceeded2) At least one change was rejected by user |
+| *Skipped* | Redaction was skipped (not applied) | 1) Trial limitations for redactions were exceeded2) Redaction cannot be applied to this type of document3) All replacements were rejected by user and no changes were made |
+| *Failed* | Redaction failed with exception | An exception occurred in process of redaction |
+
+For detailed information you have to iterate through redaction log entries in <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactorchangelog/properties/redactionlog" target="_blank" rel="nofollow noopener noreferrer">RedactorChangeLog.RedactionLog</a> and check for <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactionresult/properties/errormessage" target="_blank" rel="nofollow noopener noreferrer">ErrorMessage</a> property of any items with status other than *Applied*:
+
+**C#**
+
+```csharp
+RedactorChangeLog summary = redactor.Apply( ... );
+if (summary.Status != RedactionStatus.Applied)
+{
+	for (int i = 0; i < summary.RedactionLog.Count; i++)
+	{
+		RedactorLogEntry logEntry = summary.RedactionLog[i];
+    	if (logEntry.Result.Status != RedactionStatus.Applied)
+        {
+			Console.WriteLine("{0} status is {1}, details: {2}", 
+				logEntry.Redaction.GetType().Name, 
+				logEntry.Result.Status, 
+				logEntry.Result.ErrorMessage);
+		}
+	}
+}
+```
+
+## Apply multiple redactions
+
+You can apply as much redactions as you need in a single call to <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactor/apply/methods/1" target="_blank" rel="nofollow noopener noreferrer">Redactor.Apply</a> method, since its overload accepts an array of redactions and redaction policy. In this case, redactions will be applied in the same order as they appear in the array. As an alternative to specifying redaction sets in your code, you can create an XML file with redaction policy, as described [here](/net/redaction/developer-guide/basic-usage/redaction-basics/).
+
+**C#**
+
+```csharp
+using (Redactor redactor = new Redactor("sample.docx"))
+{
+   var redactionList = new Redaction[] 
+   {
+      new ExactPhraseRedaction("John Doe", new ReplacementOptions("[Client]")),
+      new RegexRedaction("Redaction", new ReplacementOptions("[Product]")),
+      //new RegexRedaction("\\d{2}\\s*\\d{2}[^\\d]*\\d{6}", new ReplacementOptions(System.Drawing.Color.Blue)),
+      // Use GroupDocs.Redaction.Options.Drawing types instead of System.Drawing, which is scheduled for removal in future versions.
+      new RegexRedaction("\\d{2}\\s*\\d{2}[^\\d]*\\d{6}", new ReplacementOptions(GroupDocs.Redaction.Options.Drawing.Color.Blue)),
+      new DeleteAnnotationRedaction(),
+      new EraseMetadataRedaction(MetadataFilters.All)
+   }; 
+   RedactorChangeLog result = redactor.Apply(redactionList);
+   // false, if at least one redaction failed
+   if (result.Status != RedactionStatus.Failed)
+   {
+      redactor.Save();
+   };
+}
+```
+
+## More resources
+
+### Advanced usage topics
+
+To learn more about document redaction features, please refer to the [advanced usage section](/net/redaction/developer-guide/advanced-usage/).
+
+### GitHub examples
+
+You may easily run the code above and see the feature in action in our GitHub examples:
+
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Redaction for .NET examples</a>
+    
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Redaction for Java examples</a>
+    
+
+### Free online document redaction App
+
+Along with full featured .NET library we provide simple, but powerful free Apps.
+
+You are welcome to perform redactions for various document formats like PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, Emails and more with our free online <a href="https://products.groupdocs.app/redaction" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Redaction App</a>.

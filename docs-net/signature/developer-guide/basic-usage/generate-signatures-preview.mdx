@@ -1,0 +1,342 @@
+---
+title: "Generate signature preview"
+sidebar_label: "Generate signature preview"
+sidebar_position: 7
+description: "This topic explains how to get document signature preview in c#"
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/basic-usage/generate-signatures-preview.md"
+source_commit: "0c3c217010a3d6a2e7ef62d7ad8ef26f94d99418"
+source_sha256: "ebe435e3a5614e44acd648b4311daaa6084fe2ae4eb116bd810e841362fb20e0"
+---
+
+:::info
+GroupDocs.Signature for .NET is included in Conholdate.Total for .NET.
+:::
+
+## Overview
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/previewsignatureoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewSignatureOptions</a> class to specify different options to manage signatures preview generation process.  
+  
+Here are the steps how to generate signature preview with GroupDocs.Signature:
+
+* Instantiate the required <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/signoptions" target="_blank" rel="nofollow noopener noreferrer">SignOptions</a> object with the settings you want to generate the preview
+* Instantiate the <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/previewsignatureoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewSignatureOptions</a> object with:
+* delegate for signature stream creation (see event handler <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/createsignaturestream" target="_blank" rel="nofollow noopener noreferrer">CreateSignatureStream</a>);
+* image preview format - PNG / JPG / BMP,
+* unique signature identifier.
+
+
+:::info
+Stream that were created by <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/createsignaturestream" target="_blank" rel="nofollow noopener noreferrer">CreateSignatureStream</a> delegate will be disposed automatically once after generation of preview image. If you need to implement custom image preview stream disposing you have to pass additional argument <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/releasesignaturestream" target="_blank" rel="nofollow noopener noreferrer">ReleaseSignatureStream</a> to clean up resources.
+:::
+
+* Call the static method <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/generatesignaturepreview" target="_blank" rel="nofollow noopener noreferrer">GenerateSignaturePreview</a> method of <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> and pass <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/previewsignatureoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewSignatureOptions</a> to it.
+
+## Generate signature preview
+
+This example demonstrates how to generate a preview image for a QR Code signature using GroupDocs.Signature with default sizes.
+
+```csharp
+public static void GetPreview()
+{
+    // Create QR code sign options
+    QrCodeSignOptions signOptions = new QrCodeSignOptions
+    {
+        EncodeType = QrCodeTypes.QR,
+        Data = new GroupDocs.Signature.Domain.Extensions.Address
+        {
+            Street = "221B Baker Street",
+            City = "London",
+            State = "NW",
+            ZIP = "NW16XE",
+            Country = "England"
+        },
+        HorizontalAlignment = HorizontalAlignment.Left,
+        VerticalAlignment = VerticalAlignment.Center,
+        Margin = new Padding(10)
+    };
+
+    // Create signature preview options
+    PreviewSignatureOptions previewOption = new PreviewSignatureOptions(
+        signOptions, 
+        CreateSignatureStream, 
+        ReleaseSignatureStream
+    )
+    {
+        SignatureId = Guid.NewGuid().ToString(),
+        PreviewFormat = PreviewSignatureOptions.PreviewFormats.JPEG
+    };
+
+    // Generate signature preview
+    Signature.GenerateSignaturePreview(previewOption);
+}
+
+private static Stream CreateSignatureStream(PreviewSignatureOptions previewOptions)
+{
+    string imageFilePath = 
+        $"signature-{previewOptions.SignatureId}-" +
+        $"{previewOptions.SignOptions.GetType().Name}.jpg";
+
+    return new FileStream(imageFilePath, FileMode.Create);
+}
+
+private static void ReleaseSignatureStream(PreviewSignatureOptions previewOptions, 
+    Stream signatureStream)
+{
+    signatureStream.Dispose();
+    Console.WriteLine(
+        $"Signature {previewOptions.SignatureId}-" +
+        $"{previewOptions.SignOptions.GetType().Name} is ready for preview"
+    );
+}
+```
+
+##  Adaptive rendering for QR Code signature previews
+
+
+:::info
+If the specified width and height are not appropriate for generating a readable QR Code preview, the system will automatically use default size values. These defaults are chosen as the nearest optimal dimensions to ensure the QR Code remains clear and scannable.
+:::
+
+
+This example demonstrates how to generate a preview image for a QR Code signature using GroupDocs.Signature. You'll see how to configure the QR Code's appearance, including size, color, and text alignment, and how to generate and save the preview image stream.
+
+```csharp
+public static void GetPreview()
+{
+    // Initialize QR Code signing options
+    QrCodeSignOptions qrSignOptions = new QrCodeSignOptions("GROUP DOCS", QrCodeTypes.QR)
+    {
+        Width = 250,                          // Width of the QR code
+        Height = 270,                         // Height of the QR code
+        ForeColor = Color.Red,                // Color of the QR code
+        CodeTextAlignment = CodeTextAlignment.Below, // Text alignment relative to the QR code
+        Text = "GROUP DOCS"                   // Text displayed below the QR code
+    };
+
+    // Configure preview generation options for the QR code signature
+    PreviewSignatureOptions previewOptions = new PreviewSignatureOptions(
+        qrSignOptions,
+        CreateSignatureStream,   // Delegate to create the stream
+        ReleaseSignatureStream   // Delegate to release the stream
+    )
+    {
+        SignatureId = Guid.NewGuid().ToString(),  // Unique identifier for the preview
+        PreviewFormat = PreviewSignatureOptions.PreviewFormats.PNG  // Output format of preview
+    };
+
+    // Generate the signature preview image
+    Signature.GenerateSignaturePreview(previewOptions);
+}
+
+private static Stream CreateSignatureStream(PreviewSignatureOptions previewOptions)
+{
+    string imageFilePath = 
+        $"signature-{previewOptions.SignatureId}-" +
+        $"{previewOptions.SignOptions.GetType().Name}.jpg";
+
+    return new FileStream(imageFilePath, FileMode.Create);
+}
+
+private static void ReleaseSignatureStream(PreviewSignatureOptions previewOptions, 
+    Stream signatureStream)
+{
+    signatureStream.Dispose();
+    Console.WriteLine(
+        $"Signature {previewOptions.SignatureId}-" +
+        $"{previewOptions.SignOptions.GetType().Name} is ready for preview"
+    );
+}
+```
+
+##  Adaptive rendering for Barcode signature previews
+
+
+:::info
+When the width and height provided for the Barcode preview are not suitable, the preview generation will fall back to default size values. These defaults are selected to produce a barcode image that is readable and properly rendered.
+:::
+
+
+This section shows how to create a preview for a Barcode signature. The example covers setting barcode properties such as type, size, and color, as well as generating the preview image with a custom stream handler.
+
+```csharp
+public static void GetPreview()
+{
+    // Initialize QR Code signing options
+    BarcodeSignOptions signOptions = new BarcodeSignOptions("GROUP DOCS", BarcodeTypes.MaxiCode)
+    {
+        Width = 400,                          // Width of the Barcode code
+        Height = 400,                         // Height of the Barcode code
+        ForeColor = Color.Red,                // Color of the Barcode code
+        CodeTextAlignment = CodeTextAlignment.Below, // Text alignment relative to the Barcode code
+        Text = "GROUP DOCS"                   // Text displayed below the Barcode code
+    };
+
+    // Configure preview generation options for the QR code signature
+    PreviewSignatureOptions previewOptions = new PreviewSignatureOptions(
+        qrSignOptions,
+        CreateSignatureStream,   // Delegate to create the stream
+        ReleaseSignatureStream   // Delegate to release the stream
+    )
+    {
+        SignatureId = Guid.NewGuid().ToString(),  // Unique identifier for the preview
+        PreviewFormat = PreviewSignatureOptions.PreviewFormats.PNG  // Output format of preview
+    };
+
+    // Generate the signature preview image
+    Signature.GenerateSignaturePreview(previewOptions);
+}
+
+private static Stream CreateSignatureStream(PreviewSignatureOptions previewOptions)
+{
+    string imageFilePath = 
+        $"signature-{previewOptions.SignatureId}-" +
+        $"{previewOptions.SignOptions.GetType().Name}.jpg";
+
+    return new FileStream(imageFilePath, FileMode.Create);
+}
+
+private static void ReleaseSignatureStream(PreviewSignatureOptions previewOptions, 
+    Stream signatureStream)
+{
+    signatureStream.Dispose();
+    Console.WriteLine(
+        $"Signature {previewOptions.SignatureId}-" +
+        $"{previewOptions.SignOptions.GetType().Name} is ready for preview"
+    );
+}
+```
+
+## Rotate Barcode and QR Code previews
+
+This example demonstrates how to apply rotation to Barcode and QR Code signature previews. Rotation can help fit signatures into specific layout requirements or create visual effects.
+
+```csharp
+public static void GetPreview()
+{
+    // Initialize Barcode signing options
+    BarcodeSignOptions barcodeSignOptions = new BarcodeSignOptions("GROUP DOCS", BarcodeTypes.MaxiCode)
+    {
+        Width = 400,                               // Width of the barcode
+        Height = 400,                              // Height of the barcode
+        ForeColor = Color.Red,                     // Foreground color of the barcode
+        CodeTextAlignment = CodeTextAlignment.Below,  // Position of the text relative to the barcode
+        Text = "GROUP DOCS",                       // Text displayed with the barcode
+        RotationAngle = 45                         // Rotate the barcode by 45 degrees
+    };
+
+    // Configure preview generation options for the QR code signature
+    PreviewSignatureOptions previewOptions = new PreviewSignatureOptions(
+        qrSignOptions,
+        CreateSignatureStream,   // Delegate to create the stream
+        ReleaseSignatureStream   // Delegate to release the stream
+    )
+    {
+        SignatureId = Guid.NewGuid().ToString(),  // Unique identifier for the preview
+        PreviewFormat = PreviewSignatureOptions.PreviewFormats.PNG  // Output format of preview
+    };
+
+    // Generate the signature preview image
+    Signature.GenerateSignaturePreview(previewOptions);
+}
+
+private static Stream CreateSignatureStream(PreviewSignatureOptions previewOptions)
+{
+    string imageFilePath = 
+        $"signature-{previewOptions.SignatureId}-" +
+        $"{previewOptions.SignOptions.GetType().Name}.jpg";
+
+    return new FileStream(imageFilePath, FileMode.Create);
+}
+
+private static void ReleaseSignatureStream(PreviewSignatureOptions previewOptions, 
+    Stream signatureStream)
+{
+    signatureStream.Dispose();
+    Console.WriteLine(
+        $"Signature {previewOptions.SignatureId}-" +
+        $"{previewOptions.SignOptions.GetType().Name} is ready for preview"
+    );
+}
+```
+
+## Transparency for Barcode/QR previews
+
+This snippet shows how to set the transparency level of Barcode or QR Code previews, allowing you to customize the signature's visual blending with the underlying document.
+
+```csharp
+public static void GetPreview()
+{
+    // Initialize barcode signing options with Codabar type
+    BarcodeSignOptions barcodeSignOptions = new BarcodeSignOptions("GROUP DOCS", BarcodeTypes.Codabar)
+    {
+        Width = 400,                               // Width of the barcode preview
+        Height = 400,                              // Height of the barcode preview
+        ForeColor = Color.Red,                     // Foreground color of the barcode bars
+        CodeTextAlignment = CodeTextAlignment.Below,  // Position text below the barcode
+        Text = "GROUP DOCS",                       // Text displayed with the barcode
+        Transparency = 0.5                         // Set barcode background transparency (50%)
+    };
+
+    // Configure preview generation options for the QR code signature
+    PreviewSignatureOptions previewOptions = new PreviewSignatureOptions(
+        qrSignOptions,
+        CreateSignatureStream,   // Delegate to create the stream
+        ReleaseSignatureStream   // Delegate to release the stream
+    )
+    {
+        SignatureId = Guid.NewGuid().ToString(),  // Unique identifier for the preview
+        PreviewFormat = PreviewSignatureOptions.PreviewFormats.PNG  // Output format of preview
+    };
+
+    // Generate the signature preview image
+    Signature.GenerateSignaturePreview(previewOptions);
+}
+
+private static Stream CreateSignatureStream(PreviewSignatureOptions previewOptions)
+{
+    string imageFilePath = 
+        $"signature-{previewOptions.SignatureId}-" +
+        $"{previewOptions.SignOptions.GetType().Name}.jpg";
+
+    return new FileStream(imageFilePath, FileMode.Create);
+}
+
+private static void ReleaseSignatureStream(PreviewSignatureOptions previewOptions, 
+    Stream signatureStream)
+{
+    signatureStream.Dispose();
+    Console.WriteLine(
+        $"Signature {previewOptions.SignatureId}-" +
+        $"{previewOptions.SignOptions.GetType().Name} is ready for preview"
+    );
+}
+```
+
+### Advanced Usage Topics
+
+To learn more about document eSign features, please refer to the [advanced usage section](/net/signature/developer-guide/advanced-usage/).
+
+## More resources
+
+### GitHub Examples
+
+You may easily run the code above and see the feature in action in our GitHub examples:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Signature for .NET examples, plugins, and showcase</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Signature for Java examples, plugins, and showcase</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Document Signature for .NET MVC UI Example</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Document Signature for .NET App WebForms UI Example</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Document Signature for Java App Dropwizard UI Example</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Document Signature for Java Spring UI Example</a>
+
+### Free Online Apps
+
+Along with the full-featured .NET library, we provide simple but powerful free online apps.
+
+To sign PDF, Word, Excel, PowerPoint, and other documents you can use the online apps from the **<a href="https://products.groupdocs.app/signature/family" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Signature App Product Family</a>**.

@@ -1,0 +1,89 @@
+---
+title: "Clear watermarks"
+sidebar_label: "Clear watermarks"
+sidebar_position: 6
+description: "This article shows how to clear existing text or image watermarks."
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/basic-usage/clear.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "666ed632ff3cf467e704a0c7b2c403cfabebae71ceef6bb19dc99535a7d6462d"
+---
+
+:::info
+GroupDocs.Watermark for .NET is included in Conholdate.Total for .NET.
+:::
+
+Removing existing watermarks is another powerful feature of the GroupDocs.Watermark library. It allows searching and then removing text or image watermarks from a wide range of supported documents. Removing watermarks is possible for some of the supported formats. To learn whether it is available for your format, check [Supported formats](/net/watermark/getting-started/supported-document-formats/).
+
+
+:::info
+Updating of watermarks is not allowed in evaluation mode. Please set up a license as described in [Licensing and evaluation](/net/watermark/getting-started/evaluation-limitations-and-licensing/).
+:::
+
+
+## Deleting text watermarks
+
+To search and remove text watermarks:
+1. <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark/watermarker/constructors/4" target="_blank" rel="nofollow noopener noreferrer">Create</a> an instance of the `Watermarker` class for a local file or file stream;
+2. Specify the sought-after text of the watermark. To define criteria use the instance of the <a href="https://reference.groupdocs.com/watermark/net/groupdocs.watermark.search.searchcriteria/textsearchcriteria/" target="_blank" rel="nofollow noopener noreferrer">TextSearchCriteria</a> class. In this example, we will search for a particular string match.
+3. Call the <a href="https://reference.groupdocs.com/watermark/net/groupdocs.watermark/watermarker/search/#search_1" target="_blank" rel="nofollow noopener noreferrer">Search</a> method of the `Watermarker` class to perform the search and obtain a collection of all possible watermarks that meet the search criteria.
+4. Use the <a href="https://reference.groupdocs.com/watermark/net/groupdocs.watermark.common/removeonlylistbase-1/clear/" target="_blank" rel="nofollow noopener noreferrer">Clear</a> method of the `PossibleWatermarkCollection` class to remove all found watermarks.
+5. Call the <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.watermarker/save/methods/4" target="_blank" rel="nofollow noopener noreferrer">Save</a> method to store the document in a new location.
+
+```csharp
+using GroupDocs.Watermark;
+using GroupDocs.Watermark.Search.SearchCriteria;
+using GroupDocs.Watermark.Search;
+
+using (Watermarker watermarker = new Watermarker("C:\\Docs\\watermarked-sample.docx"))
+{
+    // Search watermark matching a particular text
+    TextSearchCriteria searchCriteria = new TextSearchCriteria("Contract Draft", false);
+    PossibleWatermarkCollection possibleWatermarks = watermarker.Search(searchCriteria);    
+    // Clear all found watermarks
+    possibleWatermarks.Clear();
+    // Save document
+    watermarker.Save("C:\\Docs\\clean-sample.docx");
+}
+```
+Run the program. All found occurrences of "Contract Draft" in watermarks will be removed.
+![Cleaning text watermarks](/net/watermark/images/watermarking/clean-text.png)
+
+## Deleting image watermarks
+
+To search and remove image watermarks within the document:
+1. <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark/watermarker/constructors/4" target="_blank" rel="nofollow noopener noreferrer">Create</a> an instance of the `Watermarker` class for a local file or file stream;
+2. Specify the sought-after image of the watermarks. To define criteria use the instance of the <a href="https://reference.groupdocs.com/watermark/net/groupdocs.watermark.search.searchcriteria/imagesearchcriteria/" target="_blank" rel="nofollow noopener noreferrer">ImageSearchCriteria</a> class.
+3. (Optionally.) Specify the maximum allowed difference between the images using the <a href="https://reference.groupdocs.com/watermark/net/groupdocs.watermark.search.searchcriteria/imagesearchcriteria/maxdifference/" target="_blank" rel="nofollow noopener noreferrer">MaxDifference</a> property. Too strict threshold may fail to detect all needed images, while a very lenient threshold could match dissimilar images.
+4. Call the <a href="https://reference.groupdocs.com/watermark/net/groupdocs.watermark/watermarker/search/#search_1" target="_blank" rel="nofollow noopener noreferrer">Search</a> method of the `Watermarker` class to perform the search and obtain a collection of all possible watermarks that meet the search criteria.
+5. Use the <a href="https://reference.groupdocs.com/watermark/net/groupdocs.watermark.common/removeonlylistbase-1/clear/" target="_blank" rel="nofollow noopener noreferrer">Clear</a> method of the `PossibleWatermarkCollection` class to remove all found watermarks.
+6. Call the <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.watermarker/save/methods/4" target="_blank" rel="nofollow noopener noreferrer">Save</a> method to store the document in a new location.
+
+```csharp
+using GroupDocs.Watermark;
+using GroupDocs.Watermark.Search.SearchCriteria;
+using GroupDocs.Watermark.Search;
+
+using (Watermarker watermarker = new Watermarker("watermarked-sample.docx"))
+{
+    // Initialize criteria with the image    
+    ImageSearchCriteria imageSearchCriteria = new ImageDctHashSearchCriteria("logo.png");
+    //Set maximum allowed difference between images
+    imageSearchCriteria.MaxDifference = 0.9;
+    PossibleWatermarkCollection possibleWatermarks = watermarker.Search(imageSearchCriteria);
+    // Clear all found watermarks
+    possibleWatermarks.Clear();
+    // Save document
+    watermarker.Save("clean-sample.docx");
+}
+
+```
+Run the program. All found occurrences of image watermarks will be deleted.
+
+![Cleaning image watermarks](/net/watermark/images/watermarking/clean-image.png)
+
