@@ -1,0 +1,75 @@
+---
+title: "Load document from Amazon S3 Storage"
+sidebar_label: "Load document from Amazon S3 Storage"
+sidebar_key: "net-annotation-loading-loading-documents-from-different-sources-load-document-from-amazon-s3-storage"
+sidebar_position: 5
+description: "The page describes how to load PDF, Word, Excel, PowerPoint documents from Amazon S3 storage when using GroupDocs.Annotation for .NET."
+product: "annotation"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "annotation-net"
+source_path: "net/advanced-usage/loading/loading-documents-from-different-sources/load-document-from-amazon-s3-storage.md"
+source_commit: "fd3052cd673ad3cf5db70dca8c414bc586551cb3"
+source_sha256: "dfa734f67a39953023ab5f9a6e4aca3c8f9c9896522a94e94e1b5a78752a9a1a"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Annotation for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+The following code snippet shows how to load a document from Amazon S3 Storage:
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+string key = "sample.pdf";
+using (Annotator annotator = new Annotator(DownloadFile(key)))
+{
+	AreaAnnotation area = new AreaAnnotation()
+	{
+		Box = new Rectangle(100, 100, 100, 100),
+		BackgroundColor = 65535,
+	};
+	annotator.Add(area);
+	annotator.Save("result.pdf");
+}
+
+private static Stream DownloadFile(string key)
+{
+	AmazonS3Client client = new AmazonS3Client();
+	string bucketName = "my-bucket";
+	GetObjectRequest request = new GetObjectRequest
+	{
+		Key = key,
+		BucketName = bucketName
+	};
+	using (GetObjectResponse response = client.GetObject(request))
+	{
+		MemoryStream stream = new MemoryStream();
+		response.ResponseStream.CopyTo(stream);
+		stream.Position = 0;
+		return stream;
+	}
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+
+:::info
+NOTE: Packages AWSSDK.S3 version 3.3.104.30 and AWSSDK.Core version 3.3.103.42 should be referenced
+:::

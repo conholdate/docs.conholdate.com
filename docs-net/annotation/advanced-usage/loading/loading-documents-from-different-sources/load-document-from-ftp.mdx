@@ -1,0 +1,74 @@
+---
+title: "Load document from FTP"
+sidebar_label: "Load document from FTP"
+sidebar_key: "net-annotation-loading-loading-documents-from-different-sources-load-document-from-ftp"
+sidebar_position: 4
+description: "The page describes how to load PDF, Word, Excel, PowerPoint documents from FTP using GroupDocs.Annotation for .NET."
+product: "annotation"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "annotation-net"
+source_path: "net/advanced-usage/loading/loading-documents-from-different-sources/load-document-from-ftp.md"
+source_commit: "fd3052cd673ad3cf5db70dca8c414bc586551cb3"
+source_sha256: "28cef31970925a2f56416dbbf094614ef3ba6e806d6763aff84f800a50a8ab2f"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Annotation for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+The following code snippet shows how to annotate document from FTP:
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using (Annotator annotator = new Annotator(GetFileFromFtp("sample.pdf")))
+{
+	AreaAnnotation area = new AreaAnnotation()
+	{
+		Box = new Rectangle(100, 100, 100, 100),
+		BackgroundColor = 65535,
+	};
+	annotator.Add(area);
+	annotator.Save("result.pdf");
+}
+
+private static Stream GetFileFromFtp(string filePath)
+{
+	Uri uri = new Uri(filePath);
+	FtpWebRequest request = CreateRequest(uri);
+	using (WebResponse response = request.GetResponse())
+                return GetFileStream(response);
+}
+
+private static FtpWebRequest CreateRequest(Uri uri)
+{
+	FtpWebRequest request = (FtpWebRequest)WebRequest.Create(uri);
+	request.Method = WebRequestMethods.Ftp.DownloadFile;
+		return request;
+}
+
+private static Stream GetFileStream(WebResponse response)
+{
+	MemoryStream fileStream = new MemoryStream();
+	using (Stream responseStream = response.GetResponseStream())
+		responseStream.CopyTo(fileStream);
+		fileStream.Position = 0;
+		return fileStream;
+}
+```
+
+</TabItem>
+
+
+</Tabs>

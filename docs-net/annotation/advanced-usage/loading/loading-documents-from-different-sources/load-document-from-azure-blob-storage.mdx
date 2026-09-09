@@ -1,0 +1,82 @@
+---
+title: "Load document from Azure Blob Storage"
+sidebar_label: "Load document from Azure Blob Storage"
+sidebar_key: "net-annotation-loading-loading-documents-from-different-sources-load-document-from-azure-blob-storage"
+sidebar_position: 6
+description: "The page describes how to load PDF, Word, Excel, PowerPoint documents from Azure Blob storage when using GroupDocs.Annotation for .NET."
+product: "annotation"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "annotation-net"
+source_path: "net/advanced-usage/loading/loading-documents-from-different-sources/load-document-from-azure-blob-storage.md"
+source_commit: "fd3052cd673ad3cf5db70dca8c414bc586551cb3"
+source_sha256: "6fe55d72a815429e0727cbdb67a61ad10ff2cdbd805eeb75b3b7b4d7099374f2"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Annotation for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+The following code snippet shows how to load a document from Azure Blob Storage.
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+string blobName = "sample.pdf";
+using (Annotator annotator = new Annotator(DownloadFile(blobName)))
+{
+	AreaAnnotation area = new AreaAnnotation()
+	{
+		Box = new Rectangle(100, 100, 100, 100),
+		BackgroundColor = 65535,
+	};
+	annotator.Add(area);
+	annotator.Save("result.pdf");
+}
+
+public static Stream DownloadFile(string blobName)
+{
+	CloudBlobContainer container = GetContainer();
+	CloudBlob blob = container.GetBlobReference(blobName);
+	MemoryStream memoryStream = new MemoryStream();
+	blob.DownloadToStream(memoryStream);
+	memoryStream.Position = 0;
+	return memoryStream;
+}
+
+private static CloudBlobContainer GetContainer()
+{
+	string accountName = "***";
+	string accountKey = "***";
+	string endpoint = $"https://{accountName}.blob.core.windows.net/";
+	string containerName = "***";
+	StorageCredentials storageCredentials = new StorageCredentials(accountName, accountKey);
+	CloudStorageAccount cloudStorageAccount = new CloudStorageAccount(
+		storageCredentials, new Uri(endpoint), null, null, null);
+	CloudBlobClient cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
+	CloudBlobContainer container = cloudBlobClient.GetContainerReference(containerName);
+	container.CreateIfNotExists();
+	return container;
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+
+:::info
+NOTE: Package WindowsAzure.Storage version 9.3.3 should be referenced
+:::

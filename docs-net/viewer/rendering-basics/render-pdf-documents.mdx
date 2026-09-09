@@ -1,0 +1,1299 @@
+---
+title: "Render PDF documents as HTML and image files"
+sidebar_label: "Render PDF documents"
+sidebar_key: "net-viewer-render-pdf-documents"
+sidebar_position: 2
+description: "This topic describes how to use the GroupDocs.Viewer .NET API (C#) to convert PDF files to HTML, PNG, and JPEG formats."
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "viewer-net"
+source_path: "net/rendering-basics/render-pdf-documents.md"
+source_commit: "270bea1e2528043f99c68ff8a72edc20b3816a48"
+source_sha256: "f3f547abc6ab4db143090146ff392b76d6445611f1559a0034f204b0553bafee"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET is included in Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/viewer/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Viewer for .NET</a> allows you to render your PDF files in HTML, PNG, and JPEG formats. Use this library to implement a simple PDF viewer within your .NET application (web or desktop).
+
+Create a <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer" target="_blank" rel="nofollow noopener noreferrer">Viewer</a> class instance to get started with the GroupDocs.Viewer API. Pass a document you want to view to the class constructor. You can load the document from a file or stream. Call one of the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/methods/view/index" target="_blank" rel="nofollow noopener noreferrer">Viewer.View</a> method overloads to convert the document to HTML or image format. These methods allow you to render the entire document or specific pages.
+
+<a href="https://products.groupdocs.app/viewer/pdf" target="_blank" rel="nofollow noopener noreferrer">View PDF files online</a> <a href="https://github.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET" target="_blank" rel="nofollow noopener noreferrer">View demos and examples on GitHub</a>
+
+## Supported Page Layout file formats
+
+GroupDocs.Viewer supports the following PDF and Page Layout file formats:
+
+* <a href="https://docs.fileformat.com/pdf/" target="_blank" rel="nofollow noopener noreferrer">Portable Document Format</a> (.PDF)
+* <a href="https://docs.fileformat.com/page-description-language/xps/" target="_blank" rel="nofollow noopener noreferrer">Microsoft XML Paper Specification</a> (.XPS)
+* <a href="https://docs.fileformat.com/page-description-language/oxps/" target="_blank" rel="nofollow noopener noreferrer">Open XML Paper Specification</a> (.OXPS)
+* <a href="https://docs.fileformat.com/page-description-language/tex/" target="_blank" rel="nofollow noopener noreferrer">LaTeX Source Document</a> (.TEX)
+* <a href="https://www.zhihuilib.com/en/article/detail/2/12" target="_blank" rel="nofollow noopener noreferrer">Open Fixed-layout Document</a> (.OFD)
+
+GroupDocs.Viewer can detect the document format automatically based on information in the file header.
+
+## Render PDF files as HTML
+
+Create an <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions" target="_blank" rel="nofollow noopener noreferrer">HtmlViewOptions</a> class instance and pass it to the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/methods/view/index" target="_blank" rel="nofollow noopener noreferrer">Viewer.View</a> method to convert a PDF file to HTML. The `HtmlViewOptions` class properties allow you to control the conversion process. For instance, you can embed all external resources in the generated HTML file, minify the output file, and optimize it for printing. Refer to the following documentation section for details: [Rendering to HTML](/net/viewer/developer-guide/rendering-documents/rendering-to-html/).
+
+
+### Create an HTML file with embedded resources
+
+To save all elements of an HTML page (including text, graphics, and stylesheets) into a single file, call the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/methods/forembeddedresources/index" target="_blank" rel="nofollow noopener noreferrer">HtmlViewOptions.ForEmbeddedResources</a> method and specify the output file name.
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("resume.pdf"))
+{
+    // Create an HTML file for each PDF page.
+    // {0} is replaced with the current page number in the file name.
+    var viewOptions = HtmlViewOptions.ForEmbeddedResources("page_{0}.html");
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("resume.pdf")
+            ' Create an HTML file for each PDF page.
+            ' {0} is replaced with the current page number in the file name.
+            Dim viewOptions = HtmlViewOptions.ForEmbeddedResources("page_{0}.html")
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+The following image demonstrates the result:
+
+![Render a PDF file to HTML](/net/viewer/images/rendering-basics/render-pdf-documents/render-pdf-to-html.png)
+
+### Create an HTML file with external resources
+
+If you want to store an HTML file and additional resource files (such as fonts, images, and stylesheets) separately, call the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/methods/forexternalresources/index" target="_blank" rel="nofollow noopener noreferrer">HtmlViewOptions.ForExternalResources</a> method and pass the following parameters:
+
+  * The output file path format
+  * The path format for the folder with external resources
+  * The resource URL format
+
+
+<Tabs groupId="example2">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("resume.pdf"))
+{
+    // Create an HTML file for each PDF page.
+    // Specify the HTML file names and location of external resources.
+    // {0} and {1} are replaced with the current page number and resource name, respectively.
+    var viewOptions = HtmlViewOptions.ForExternalResources("page_{0}.html", "page_{0}/resource_{0}_{1}", "page_{0}/resource_{0}_{1}");
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("resume.pdf")
+            ' Create an HTML file for each PDF page.
+            ' Specify the HTML file names and location of external resources.
+            ' {0} and {1} are replaced with the current page number and resource name, respectively.
+            Dim viewOptions = HtmlViewOptions.ForExternalResources("page_{0}.html", "page_{0}/resource_{0}_{1}", "page_{0}/resource_{0}_{1}")
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+The image below demonstrates the result. External resources are placed in a separate folder.
+
+![Place HTML resources in a separate folder](/net/viewer/images/rendering-basics/render-pdf-documents/render-to-html-external-resources.png)
+
+### Create HTML with fixed layout
+
+By default, PDF and EPUB documents are rendered to HTML with fixed layout to ensure that the output HTML looks the same as a source document. Rendering to fixed layout means that all the HTML elements are absolutely positioned to the container element. And container element has a fixed size so browser window resizing won't have an effect on the position and size of elements in a document.
+
+The following image demonstrates PDF document rendered HTML with fixed layout:
+
+![Create HTML with fixed layout](/net/viewer/images/rendering-basics/render-pdf-documents/render-pdf-to-html-with-fixed-layout.png)
+
+### Create HTML with fluid layout
+
+When rendering to HTML with fluid layout HTML document doesn't have a fixed size. In case you resize a browser window the document content tries to fit into it. To create HTML with fluid layout set <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pdfoptions/fixedlayout/" target="_blank" rel="nofollow noopener noreferrer">PdfOptions.FixedLayout</a> property to `false`. 
+
+
+<Tabs groupId="example3">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("Letter.pdf"))
+{
+    // Create an HTML file for each PDF page.
+    // {0} is replaced with the current page number in the file name.
+    var viewOptions = HtmlViewOptions.ForEmbeddedResources("page_{0}.html");
+    // Disable fixed layout.
+    viewOptions.PdfOptions.FixedLayout = false;
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("Letter.pdf")
+            ' Create an HTML file for each PDF page.
+            ' {0} is replaced with the current page number in the file name.
+            Dim viewOptions = HtmlViewOptions.ForEmbeddedResources("page_{0}.html")
+            ' Disable fixed layout.
+            viewOptions.PdfOptions.FixedLayout = False
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+
+:::info
+When rendering PDF and EPUB documents to HTML with a fluid layout all the graphic content such as images are ignored.
+:::
+
+
+The following image demonstrates the result:
+
+![Create HTML with fluid layout](/net/viewer/images/rendering-basics/render-pdf-documents/render-pdf-to-html-with-fluid-layout.png)
+
+### Adjust image quality in the output HTML file
+
+The <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/pdfoptions/properties/imagequality" target="_blank" rel="nofollow noopener noreferrer">HtmlViewOptions.PdfOptions.ImageQuality</a> option allows you to specify the quality of images in the output HTML file. You can set this property to one of the following values:
+
+* <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/imagequality" target="_blank" rel="nofollow noopener noreferrer">ImageQuality.Low</a> --- The image resolution is low (96 DPI), and the image size is small. Use this value to increase the conversion performance.
+* <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/imagequality" target="_blank" rel="nofollow noopener noreferrer">ImageQuality.Medium</a> --- The image resolution is medium (192 DPI), and the image size is larger compared to the low quality images.
+* <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/imagequality" target="_blank" rel="nofollow noopener noreferrer">ImageQuality.High</a> --- The image resolution is high (300 DPI), and the image size is big. Use of this value may decrease the conversion performance.
+
+The following code snippet shows how to set the medium image quality when rendering a PDF document to HTML:
+
+
+<Tabs groupId="example4">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("resume.pdf"))
+{
+    // Create an HTML file for each document page.
+    // {0} is replaced with the current page number in the file name.
+    var viewOptions = HtmlViewOptions.ForEmbeddedResources("page_{0}.html");
+    // Set image quality to medium.
+    viewOptions.PdfOptions.ImageQuality = ImageQuality.Medium;
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("resume.pdf")
+            ' Create an HTML file for each document page.
+            ' {0} is replaced with the current page number in the file name.
+            Dim viewOptions = HtmlViewOptions.ForEmbeddedResources("page_{0}.html")
+            ' Set image quality to medium.
+            viewOptions.PdfOptions.ImageQuality = ImageQuality.Medium
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+### Render text as an image
+
+GroupDocs.Viewer supports the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pdfoptions/properties/rendertextasimage" target="_blank" rel="nofollow noopener noreferrer">HtmlViewOptions.PdfOptions.RenderTextAsImage</a> option that allows you to render text as an image when you convert a PDF file to HTML. In this case, the layout of the output HTML file closely mirrors the layout of the source PDF document.
+
+The following code snippet shows how to enable this option in code:
+
+
+<Tabs groupId="example5">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("resume.pdf"))
+{
+    // Create an HTML file for each document page.
+    // {0} is replaced with the current page number in the file name.
+    var viewOptions = HtmlViewOptions.ForEmbeddedResources("text-as-image_{0}.html");
+    // Enable rendering text as image.
+    viewOptions.PdfOptions.RenderTextAsImage = true;
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("resume.pdf")
+            ' Create an HTML file for each document page.
+            ' {0} is replaced with the current page number in the file name.
+            Dim viewOptions = HtmlViewOptions.ForEmbeddedResources("text-as-image_{0}.html")
+            ' Enable rendering text as image.
+            viewOptions.PdfOptions.RenderTextAsImage = True
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+The image below illustrates the result. PDF content is exported to HTML as an image, so users cannot select or copy document text.  
+
+![Render PDF content as an image in the output HTML file](/net/viewer/images/rendering-basics/render-pdf-documents/render-pdf-to-html-as-image.png)
+
+### Enable multi-layer rendering
+
+When you convert a PDF file to HTML, GroupDocs.Viewer creates an HTML document with a single layer (the `z-index` is not specified for document elements). This helps increase performance and reduce the output file size. If you convert a PDF document with multiple layers and want to improve the position of document elements in the output HTML file, activate the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/pdfoptions/properties/enablelayeredrendering" target="_blank" rel="nofollow noopener noreferrer">HtmlViewOptions.PdfOptions.EnableLayeredRendering</a> property to render text and graphics in the HTML file according to their z-order in the source PDF document.
+
+The following code snippet shows how to enable the multi-layer rendering:
+
+
+<Tabs groupId="example6">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("sample.pdf"))
+{
+    // Create an HTML file for each document page.
+    // {0} is replaced with the current page number in the file name.
+    var viewOptions = HtmlViewOptions.ForEmbeddedResources("page_{0}.html");
+    // Enable the multi-layer rendering.
+    viewOptions.PdfOptions.EnableLayeredRendering = true;
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("sample.pdf")
+            ' Create an HTML file for each document page.
+            ' {0} is replaced with the current page number in the file name.
+            Dim viewOptions = HtmlViewOptions.ForEmbeddedResources("page_{0}.html")
+            ' Enable the multi-layer rendering.
+            viewOptions.PdfOptions.EnableLayeredRendering = True
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+## Render PDF files as images
+
+### Convert PDF files to PNG
+
+Create a <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pngviewoptions" target="_blank" rel="nofollow noopener noreferrer">PngViewOptions</a> class instance and pass it to the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/methods/view/index" target="_blank" rel="nofollow noopener noreferrer">Viewer.View</a> method to convert a PDF file to PNG. Use the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pngviewoptions/properties/height" target="_blank" rel="nofollow noopener noreferrer">PngViewOptions.Height</a> and <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pngviewoptions/properties/width" target="_blank" rel="nofollow noopener noreferrer">PngViewOptions.Width</a> properties to specify the output image size in pixels.
+
+
+<Tabs groupId="example7">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("resume.pdf"))
+{
+    // Create a PNG image for each PDF page.
+    // {0} is replaced with the current page number in the image name.
+    var viewOptions = new PngViewOptions("output_{0}.png");
+    // Set width and height.
+    viewOptions.Width = 800;
+    viewOptions.Height = 900;
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("resume.pdf")
+            ' Create a PNG image for each PDF page.
+            ' {0} is replaced with the current page number in the image name.
+            Dim viewOptions = New PngViewOptions("output_{0}.png")
+            ' Set width and height.
+            viewOptions.Width = 800
+            viewOptions.Height = 900
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+The following image demonstrates the result:
+
+![Render a PDF file to PNG](/net/viewer/images/rendering-basics/render-pdf-documents/render-pdf-to-png.png)
+
+### Convert PDF files to JPEG
+
+Create a <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/jpgviewoptions" target="_blank" rel="nofollow noopener noreferrer">JpgViewOptions</a> class instance and pass it to the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/methods/view/index" target="_blank" rel="nofollow noopener noreferrer">Viewer.View</a> method to convert a PDF file to JPEG. Use the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/jpgviewoptions/properties/height" target="_blank" rel="nofollow noopener noreferrer">JpgViewOptions.Height</a> and <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/jpgviewoptions/properties/width" target="_blank" rel="nofollow noopener noreferrer">JpgViewOptions.Width</a> properties to specify the output image size in pixels.
+
+
+<Tabs groupId="example8">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("resume.pdf"))
+{
+    // Create a JPEG image for each PDF page.
+    // {0} is replaced with the current page number in the image name.
+    var viewOptions = new JpgViewOptions("output_{0}.jpg");
+    // Set width and height.
+    viewOptions.Width = 800;
+    viewOptions.Height = 900;
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("resume.pdf")
+            ' Create a JPEG image for each PDF page.
+            ' {0} is replaced with the current page number in the image name.
+            Dim viewOptions = New JpgViewOptions("output_{0}.jpg")
+            ' Set width and height.
+            viewOptions.Width = 800
+            viewOptions.Height = 900
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+### Preserve the size of document pages
+
+When you render PDF documents as images, GroupDocs.Viewer calculates the optimal image size to achieve better rendering quality. If you want the generated images to be the same size as pages in the source PDF document, enable the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/pdfoptions/properties/renderoriginalpagesize" target="_blank" rel="nofollow noopener noreferrer">PdfOptions.RenderOriginalPageSize</a> property for the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pngviewoptions" target="_blank" rel="nofollow noopener noreferrer">PngViewOptions</a> or <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/jpgviewoptions" target="_blank" rel="nofollow noopener noreferrer">JpgViewOptions</a> class (depending on the output image format).
+
+
+<Tabs groupId="example9">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("resume.pdf"))
+{
+    // Create a PNG image for each PDF page.
+    // {0} is replaced with the current page number in the image name.
+    var viewOptions = new PngViewOptions("output_{0}.png");
+    // Preserve the size of document pages.
+    viewOptions.PdfOptions.RenderOriginalPageSize = true;
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("resume.pdf")
+            ' Create a PNG image for each PDF page.
+            ' {0} is replaced with the current page number in the image name.
+            Dim viewOptions = New PngViewOptions("output_{0}.png")
+            ' Preserve the size of document pages.
+            viewOptions.PdfOptions.RenderOriginalPageSize = True
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+### Enable font hinting
+
+To adjust the display of outline fonts when you convert PDF documents to PNG or JPEG, activate the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/pdfoptions/properties/enablefonthinting" target="_blank" rel="nofollow noopener noreferrer">PdfOptions.EnableFontHinting</a> option, as shown below:
+
+
+<Tabs groupId="example10">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("resume.pdf"))
+{
+    // Create a PNG image for each PDF page.
+    // {0} is replaced with the current page number in the image name.
+    var viewOptions = new PngViewOptions("output_{0}.png");
+    //Enable font hinting
+    viewOptions.PdfOptions.EnableFontHinting = true;
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("resume.pdf")
+            ' Create a PNG image for each PDF page.
+            ' {0} is replaced with the current page number in the image name.
+            Dim viewOptions = New PngViewOptions("output_{0}.png")
+            'Enable font hinting
+            viewOptions.PdfOptions.EnableFontHinting = True
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+Refer to the following article for more information on font hinting: <a href="https://en.wikipedia.org/wiki/Font_hinting" target="_blank" rel="nofollow noopener noreferrer">Font hinting</a>.
+
+## Disable character grouping
+
+When you render PDF files in other formats, GroupDocs.Viewer groups individual characters into words to improve rendering performance. If your document contains hieroglyphic or special symbols, you may need to disable character grouping to generate a more precise layout. To do this, use the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/pdfoptions/properties/disablecharsgrouping" target="_blank" rel="nofollow noopener noreferrer">PdfOptions.DisableCharsGrouping</a> option, as shown below:
+
+
+<Tabs groupId="example11">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("sample.pdf"))
+{
+    // Create an HTML file for each document page.
+    // {0} is replaced with the current page number in the file name.
+    var viewOptions = HtmlViewOptions.ForEmbeddedResources("page_{0}.html");
+    // Disable character grouping
+    viewOptions.PdfOptions.DisableCharsGrouping = true;
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("sample.pdf")
+            ' Create an HTML file for each document page.
+            ' {0} is replaced with the current page number in the file name.
+            Dim viewOptions = HtmlViewOptions.ForEmbeddedResources("page_{0}.html")
+            ' Disable character grouping
+            viewOptions.PdfOptions.DisableCharsGrouping = True
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+## Render text comments
+
+Enable the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/baseviewoptions/properties/rendercomments" target="_blank" rel="nofollow noopener noreferrer">ViewOptions.RenderComments</a> option for a target view to display textual annotations (such as text comments, sticky notes, text boxes and callouts) in the output HTML, PNG, or JPEG files.
+
+The code example below renders a PDF file with text comments as an image.
+
+
+<Tabs groupId="example12">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("resume_commented.pdf"))
+{
+    // Create a PNG image for each PDF page.
+    // {0} is replaced with the current page number in the image name.
+    var viewOptions = new PngViewOptions("output_{0}.png");
+    // Enable comments rendering.
+    viewOptions.RenderComments = true;
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("resume_commented.pdf")
+            ' Create a PNG image for each PDF page.
+            ' {0} is replaced with the current page number in the image name.
+            Dim viewOptions = New PngViewOptions("output_{0}.png")
+            ' Enable comments rendering.
+            viewOptions.RenderComments = True
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+The following image illustrates the result:
+
+![Render PDF comments to PNG](/net/viewer/images/rendering-basics/render-pdf-documents/render-pdf-comments.png)
+
+## Get information about a PDF file
+
+Follow the steps below to obtain information about a PDF file (the number of pages, page size, and printing permissions): 
+
+1. Create a <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/viewinfooptions" target="_blank" rel="nofollow noopener noreferrer">ViewInfoOptions</a> instance for a specific view.
+2. Call the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer/viewer/methods/getviewinfo" target="_blank" rel="nofollow noopener noreferrer">Viewer.GetViewInfo</a> method, pass the `ViewInfoOptions` instance to this method as a parameter, and cast the returned object to the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.results/pdfviewinfo" target="_blank" rel="nofollow noopener noreferrer">PdfViewInfo</a> type.
+3. Use the `PdfViewInfo` class properties to retrieve document-specific information.
+
+
+<Tabs groupId="example13">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+using GroupDocs.Viewer.Results;
+// ...
+
+using (var viewer = new Viewer("resume.pdf"))
+{
+    var viewInfoOptions = ViewInfoOptions.ForHtmlView();
+    var viewInfo = viewer.GetViewInfo(viewInfoOptions) as PdfViewInfo;
+
+    // Display information about the PDF document.
+    Console.WriteLine($"File type: {viewInfo.FileType}");
+    Console.WriteLine($"The number of pages: {viewInfo.Pages.Count}");
+    Console.WriteLine($"Is printing allowed: {viewInfo.PrintingAllowed}");
+    
+    // Display information about all document pages.
+    Console.WriteLine("Page information:");
+    foreach (Page page in viewInfo.Pages)
+    {
+        // The Page.ToString method is overriden to display the following page information: 
+        // "Page {Number} ({visibility}) {Width}x{Height}px with {Lines.Count} line(s)."
+        Console.WriteLine(page);
+    }
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+Imports GroupDocs.Viewer.Results
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("resume.pdf")
+            Dim viewInfoOptions = ViewInfoOptions.ForHtmlView()
+            Dim viewInfo = TryCast(viewer.GetViewInfo(viewInfoOptions), PdfViewInfo)
+        
+            ' Display information about the PDF document.
+            Console.WriteLine($"File type: {viewInfo.FileType}")
+            Console.WriteLine($"The number of pages: {viewInfo.Pages.Count}")
+            Console.WriteLine($"Is printing allowed: {viewInfo.PrintingAllowed}")
+        
+            ' Display information about all document pages.
+            Console.WriteLine("Page information:")
+            For Each page As Page In viewInfo.Pages
+                ' The Page.ToString method is overriden to display the following page information: 
+                ' "Page {Number} ({visibility}) {Width}x{Height}px with {Lines.Count} line(s)."
+                Console.WriteLine(page)
+            Next
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+The following image shows a sample console output:
+
+![Get information about a PDF file](/net/viewer/images/rendering-basics/render-pdf-documents/retrieve-pdf-file-information.png)
+
+### Extract text from a PDF file
+
+Set the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/viewinfooptions/properties/extracttext" target="_blank" rel="nofollow noopener noreferrer">ViewInfoOptions.ExtractText</a> property to `true` to enable PDF text extraction. Use the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.results/viewinfo/properties/pages" target="_blank" rel="nofollow noopener noreferrer">PdfViewInfo.Pages</a> property to obtain the list of all document pages, and iterate through the collection of lines on each page (<a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.results/page/properties/lines" target="_blank" rel="nofollow noopener noreferrer">Page.Lines</a>) to retrieve text for each line.
+
+
+<Tabs groupId="example14">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+using GroupDocs.Viewer.Results;
+// ...
+
+using (var viewer = new Viewer("resume.pdf"))
+{
+    var viewInfoOptions = ViewInfoOptions.ForHtmlView();
+    viewInfoOptions.ExtractText = true;
+    var viewInfo = viewer.GetViewInfo(viewInfoOptions) as PdfViewInfo;
+    
+    // Retrieve text from the PDF file.
+    Console.WriteLine("Extracted document text:");
+    foreach (Page page in viewInfo.Pages)
+        foreach (Line line in page.Lines)
+        {
+            Console.WriteLine(line.Value);
+        }
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+Imports GroupDocs.Viewer.Results
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("resume.pdf")
+            Dim viewInfoOptions = ViewInfoOptions.ForHtmlView()
+            viewInfoOptions.ExtractText = True
+            Dim viewInfo = TryCast(viewer.GetViewInfo(viewInfoOptions), PdfViewInfo)
+        
+            ' Retrieve text from the PDF file.
+            Console.WriteLine("Extracted document text:")
+            For Each page As Page In viewInfo.Pages
+                For Each line As Line In page.Lines
+                    Console.WriteLine(line.Value)
+                Next
+            Next
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+![Extract and display PDF text](/net/viewer/images/rendering-basics/render-pdf-documents/extract-pdf-text.png)
+
+## Skip font license verification when rendering XPS and OXPS files
+
+If an XPS or OXPS file contains a font that cannot be embedded due to licensing restrictions, GroupDocs.Viewer throws an exception at runtime. If you have a license for this font, enable the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pdfoptions/disablefontlicenseverifications" target="_blank" rel="nofollow noopener noreferrer">PdfOptions.DisableFontLicenseVerifications</a> option to skip font license verification.
+
+
+<Tabs groupId="example15">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (Viewer viewer = new Viewer("resume.oxps"))
+{
+    HtmlViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources();
+    viewOptions.PdfOptions.DisableFontLicenseVerifications = true;
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer As Viewer = New Viewer("resume.oxps")
+            Dim viewOptions As HtmlViewOptions = HtmlViewOptions.ForEmbeddedResources()
+            viewOptions.PdfOptions.DisableFontLicenseVerifications = True
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+## Enclose images in SVG when rendering PDF and Page Layout files
+
+By default, when rendering to the PDF and Page Layout file formats, all images are combined into a single PNG file, which serves as the background for the output HTML document.
+
+The <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pdfoptions/wrapimagesinsvg" target="_blank" rel="nofollow noopener noreferrer">PdfOptions.WrapImagesInSvg</a> option allows you to wrap each image in the output HTML document with an SVG tag to improve output quality.
+
+This option is available when rendering PDF and Page Layout file formats to HTML with embedded or external resources. 
+
+
+<Tabs groupId="example16">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (Viewer viewer = new Viewer("resume.pdf"))
+{
+    HtmlViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources();
+    viewOptions.PdfOptions.WrapImagesInSvg = true;
+
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer As Viewer = New Viewer("resume.pdf")
+            Dim viewOptions As HtmlViewOptions = HtmlViewOptions.ForEmbeddedResources()
+            viewOptions.PdfOptions.WrapImagesInSvg = True
+        
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+The following image shows the rendering [resume.pdf](/net/viewer/images/rendering-basics/render-pdf-documents/resume.pdf) with the disabled (left) and enabled (right) `WrapImagesInSvg` option:
+
+![Images as background vs embedded in SVG](/net/viewer/images/rendering-basics/render-pdf-documents/wrap-images-in-svg.png)
+
+## Disable copy protection
+
+When rendering PDF files with protection against copying text and images to HTML, GroupDocs.Viewer adds an `inert` HTML attribute to the HTML `<body>` tag.
+
+Use <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pdfoptions/disablecopyprotection" target="_blank" rel="nofollow noopener noreferrer">PdfOptions.DisableCopyProtection</a> to turn off copy protection. When `DisableCopyProtection` is set to `true`, the `inert` HTML attribute won't be added to the HTML `<body>` tag in any case.
+
+
+:::info
+This option was added in GroupDocs.Viewer for .NET 24.4. Previous versions of GroupDocs.Viewer for .NET ignores PDF copy protection and does not add `inert` HTML attribute to HTML `<body>` tag.
+:::
+
+
+This option is supported when rendering PDF files to HTML with embedded or external resources. 
+
+
+<Tabs groupId="example17">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (Viewer viewer = new Viewer("protected-resume.pdf"))
+{
+    HtmlViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources();
+    viewOptions.PdfOptions.DisableCopyProtection = true;
+
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer As Viewer = New Viewer("protected-resume.pdf")
+            Dim viewOptions As HtmlViewOptions = HtmlViewOptions.ForEmbeddedResources()
+            viewOptions.PdfOptions.DisableCopyProtection = True
+        
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+The following image shows the rendering of [protected-resume.pdf](/net/viewer/images/rendering-basics/render-pdf-documents/protected-resume.pdf) with copy protection on the left and with with `DisableCopyProtection` option set to `true` on the right:
+
+![Render with or without copy protection](/net/viewer/images/rendering-basics/render-pdf-documents/render-with-and-without-copy-protection.png)
+
+## Repairing corrupted PDF documents
+
+By default GroupDocs.Viewer cannot process the PDF documents with corrupted structure or content - it throws an exception when trying to open such files. However, starting from the version <a href="https://releases.groupdocs.com/viewer/net/release-notes/2024/groupdocs-viewer-for-net-24-5-release-notes/" target="_blank" rel="nofollow noopener noreferrer">24.5</a> GroupDocs.Viewer can try to repair the structural corruptions in PDF documents. By default this feature is disabled. To enable it, need to use the newly added `TryRepair` boolean property of the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">`LoadOptions`</a> class by setting its value to `true`.
+
+When enabled, this feature addresses the following issues in a PDF document:
+
+* Broken references within the document (incorrect object offsets in the Cross-reference list).
+* Missing critical elements like root object, page object, or page content.
+* Circular references (Form X-object referencing itself).
+
+Here is a source code sample:
+
+
+<Tabs groupId="example18">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+LoadOptions loadOptions = new LoadOptions();
+loadOptions.TryRepair = true;
+
+PngViewOptions viewOptions = new PngViewOptions();
+
+using (Viewer viewer = new Viewer("resume.pdf", loadOptions))
+{    
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Dim loadOptions As New LoadOptions()
+        loadOptions.TryRepair = True
+
+        Dim viewOptions As New PngViewOptions()
+
+        Using viewer As New Viewer("resume.pdf", loadOptions)
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+## Render OFD documents
+
+Starting from the <a href="https://releases.groupdocs.com/viewer/net/release-notes/2024/groupdocs-viewer-for-net-24-12-release-notes/" target="_blank" rel="nofollow noopener noreferrer">version 24.12</a>, the GroupDocs.Viewer started to support the <a href="https://www.zhihuilib.com/en/article/detail/2/12" target="_blank" rel="nofollow noopener noreferrer">OFD</a> (Open Fixed-layout Document) format, defined by GB/T 33190-2016 aims to replace PDF in Chinese public institutions. For processing _all_ the documents of this format the GroupDocs.Viewer requires that font <a href="https://learn.microsoft.com/en-us/typography/font-list/simsun" target="_blank" rel="nofollow noopener noreferrer">SimSun.ttf</a> must be installed on the operating system. When using Microsoft Windows this should not be the problem, because the SimSun is preinstalled in all the Windows versions and editions starting from the _Windows 7_ (for example, _Windows 7_ has preinstalled SimSun version <a href="https://learn.microsoft.com/en-us/typography/fonts/windows_7_font_list" target="_blank" rel="nofollow noopener noreferrer">5.03</a>, while _Windows 10_ - SimSun version <a href="https://learn.microsoft.com/en-us/typography/fonts/windows_10_font_list" target="_blank" rel="nofollow noopener noreferrer">5.16</a>). But on the Linux SimSun is usually not installed, and when trying to process such a file on Linux, a `GroupDocsViewerException : Could not load file. File is corrupted or damaged. - Font SimSun was not found` exception will be thrown.
+
+In order to view and save arbitrary OFD file on Linux, the SimSun.ttf font should be loaded to the GroupDocs.Viewer using the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.fonts/folderfontsource/" target="_blank" rel="nofollow noopener noreferrer">`FolderFontSource`</a> class and <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.fonts/fontsettings/setfontsources/" target="_blank" rel="nofollow noopener noreferrer">`FontSettings.SetFontSources`</a> method, and this should be done _before_ instantiating a <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/" target="_blank" rel="nofollow noopener noreferrer">`Viewer`</a> class with OFD file. Article <a href="https://docs.groupdocs.com/viewer/net/set-custom-fonts/" target="_blank" rel="nofollow noopener noreferrer">"Set custom fonts"</a> describes setting a custom font in detail, but a short example of setting a SimSun and saving OFD to HTML on Linux is below:
+
+
+<Tabs groupId="example19">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+using GroupDocs.Viewer.Fonts;
+// ...
+
+//Put a SimSun.ttf to folder
+string SimSunFolderPath = "full-valid-path\folder-with-SimSun-inside";
+FolderFontSource fontSource = new FolderFontSource(SimSunFolderPath, SearchOption.TopFolderOnly);
+FontSettings.SetFontSources(fontSource);
+
+using (Viewer viewer = new Viewer("input.ofd"))
+{
+    HtmlViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources();
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+Imports GroupDocs.Viewer.Fonts
+' ...
+
+' Put a SimSun.ttf to folder
+Dim SimSunFolderPath As String = "full-valid-path\folder-with-SimSun-inside"
+Dim fontSource As FolderFontSource = New FolderFontSource(SimSunFolderPath, SearchOption.TopFolderOnly)
+FontSettings.SetFontSources(fontSource)
+
+Using viewer As Viewer = New Viewer("input.ofd")
+	Dim viewOptions As HtmlViewOptions = HtmlViewOptions.ForEmbeddedResources()
+	viewer.View(viewOptions)
+End Using
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+## Render popup annotations
+
+PDF documents may contain specific annotation, which are represented as **popups**, also called the balloon hints, which are by default hidden, but appear when the user hovers the mouse cursor over them and/or clicks them. Another annotation type, called **highlight annotations**, highlight some portion of text or some area on the page, but at the same time can have binded comments, which, again, are hidden by default, but appear when clicking on highlight. Before the <a href="https://releases.groupdocs.com/viewer/net/release-notes/2026/groupdocs-viewer-for-net-26-8-release-notes/" target="_blank" rel="nofollow noopener noreferrer">version 26.8</a> of GroupDocs.Viewer it was not possible to view such annotation types, regardless of the selected output format, the only way to see them was to open the original PDF document in some desktop PDF viewer like Adobe Reader or Foxit Reader. But there was no possibility to preserve these annotations when rendering PDF to HTML or raster image formats.
+
+In the GroupDocs.Viewer version 26.8 this has been changed. Popup annotations are still hidden by default (so the well-known and usual behavior of GroupDocs.Viewer is untouched), but they can be enabled. From the very beginning the GroupDocs.Viewer has a boolean property <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/baseviewoptions/rendernotes/" target="_blank" rel="nofollow noopener noreferrer">`RenderNotes`</a>, which is located in the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/baseviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`BaseViewOptions`</a> abstract class and thus is available for all 4 rendering options: PDF, HTML, PNG, and JPEG. Initially the `RenderNotes` property was related only to the Presentation (PPT, PPTX, PPTM, …) and Microsoft project (MPP, MPT, MPX) formats families, and when rendering the PDF documents, this property had no effect. In GroupDocs.Viewer version 26.8 things have changed: now this property has relation to the PDF format and is responsible for enabling popup annotations: when it is disabled by default (`false` value), popup annotations are hidden. But when enabled (`true`), the popup annotations are present for output HTML and raster image formats.
+
+Source code sample below shows loading PDF file and rendering it to HTML with embedded resources, PNG and JPEG with enabled popup annotations.
+
+
+<Tabs groupId="example_RenderNotes">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+// Preparing output options
+PngViewOptions pngOpt = new PngViewOptions();
+JpgViewOptions jpegOpt = new JpgViewOptions();
+HtmlViewOptions htmlEmbeddedOpt = HtmlViewOptions.ForEmbeddedResources();
+
+// Enabling "RenderNotes" for all options
+pngOpt.RenderNotes = jpegOpt.RenderNotes = htmlEmbeddedOpt.RenderNotes = true;
+
+// Loading sample PDF file
+using (Viewer viewer = new Viewer("sample.pdf"))
+{
+    // Rendering to output formats
+    viewer.View(pngOpt);
+    viewer.View(jpegOpt);
+    viewer.View(htmlEmbeddedOpt);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+' Preparing output options
+Dim pngOpt As PngViewOptions = New PngViewOptions()
+Dim jpegOpt As JpgViewOptions = New JpgViewOptions()
+Dim htmlEmbeddedOpt As HtmlViewOptions = HtmlViewOptions.ForEmbeddedResources()
+
+' Enabling "RenderNotes" for all options
+pngOpt.RenderNotes = jpegOpt.RenderNotes = htmlEmbeddedOpt.RenderNotes = True
+
+' Loading sample PDF file
+Using viewer As New Viewer("sample.pdf")
+    ' Rendering to output formats
+    viewer.View(pngOpt)
+    viewer.View(jpegOpt)
+    viewer.View(htmlEmbeddedOpt)
+End Using
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+One important note to mention. The <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pdfoptions/" target="_blank" rel="nofollow noopener noreferrer">`PdfOptions`</a> class has a boolean property <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pdfoptions/enablelayeredrendering/" target="_blank" rel="nofollow noopener noreferrer">`EnableLayeredRendering`</a>, which works when rendering PDF to HTML format and is disabled (`false`) by default. This means that by default all objects like text and graphics are present in output HTML as a single layer. However, when <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/baseviewoptions/rendernotes/" target="_blank" rel="nofollow noopener noreferrer">`RenderNotes`</a> property is enabled and user renders PDF to HTML, the internal value of `EnableLayeredRendering` will be set to `true`, so layered rendering will be applied even if `EnableLayeredRendering` is set to `false` forcibly.

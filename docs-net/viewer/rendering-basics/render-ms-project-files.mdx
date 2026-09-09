@@ -1,0 +1,673 @@
+---
+title: "Render Project documents as HTML, PDF, and image files"
+sidebar_label: "Render Project files"
+sidebar_key: "net-viewer-render-ms-project-files"
+sidebar_position: 7
+description: "This topic describes how to use the GroupDocs.Viewer .NET API (C#) to convert Microsoft Project files to HTML, PDF, PNG, and JPEG formats."
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "viewer-net"
+source_path: "net/rendering-basics/render-ms-project-files.md"
+source_commit: "270bea1e2528043f99c68ff8a72edc20b3816a48"
+source_sha256: "4de256b804292f4cb149590e0e25f9e99b2cc00cb93a8ad76fd24cf7eda1fddc"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET is included in Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/viewer/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Viewer for .NET</a> allows you to render Project files in HTML, PDF, PNG, and JPEG formats. You do not need to use Microsoft Project or other project management software to load and view Project files within your .NET application (web or desktop). 
+
+To start using the GroupDocs.Viewer API, create a <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer" target="_blank" rel="nofollow noopener noreferrer">Viewer</a> class instance. Pass a document you want to view to the class constructor. You can load the document from a file or stream. Call one of the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/methods/view/index" target="_blank" rel="nofollow noopener noreferrer">Viewer.View</a> method overloads to convert the document to HTML, PDF, or image format. These methods allow you to render the entire document or specific pages.
+
+<a href="https://products.groupdocs.app/viewer/project" target="_blank" rel="nofollow noopener noreferrer">View Project files online</a> <a href="https://github.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET" target="_blank" rel="nofollow noopener noreferrer">View demos and examples on GitHub</a>
+
+## Supported Project Management file formats
+
+GroupDocs.Viewer supports the following Project Management file formats:
+
+* <a href="https://docs.fileformat.com/project-management/mpp" target="_blank" rel="nofollow noopener noreferrer">Microsoft Project</a> (.MPP)
+* <a href="https://docs.fileformat.com/project-management/mpt" target="_blank" rel="nofollow noopener noreferrer">Microsoft Project Template</a> (.MPT)
+* <a href="https://docs.fileformat.com/project-management/mpx" target="_blank" rel="nofollow noopener noreferrer">Microsoft Project Exchange File</a> (.MPX)
+
+GroupDocs.Viewer can detect the document format automatically based on information in the file header.
+
+
+:::info
+Family of the Project Management file formats (MPP, MPT, and MPX) currently are not supported by the `net6.0` runtime (<a href="https://www.nuget.org/packages/GroupDocs.Viewer.Net60" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Viewer.Net60</a>). They are supported on Windows with `net462` and `net6.0-windows`.
+:::
+
+
+## Render Project files as HTML
+
+Create an <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions" target="_blank" rel="nofollow noopener noreferrer">HtmlViewOptions</a> class instance and pass it to the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/methods/view/index" target="_blank" rel="nofollow noopener noreferrer">Viewer.View</a> method to convert a Project file to HTML. The `HtmlViewOptions` class properties allow you to control the conversion process. For instance, you can embed all external resources in the generated HTML file, minify the output file, and optimize it for printing. Refer to the following documentation section for details: [Rendering to HTML](/net/viewer/developer-guide/rendering-documents/rendering-to-html/). 
+
+### Create an HTML file with embedded resources
+
+To save all elements of an HTML page (including text, graphics, and stylesheets) into a single file, call the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/methods/forembeddedresources/index" target="_blank" rel="nofollow noopener noreferrer">HtmlViewOptions.ForEmbeddedResources</a> method and specify the output file name.
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("SoftwareDevelopmentPlan.mpp"))
+{
+    // Render the project's active view as HTML.
+    // {0} is replaced with the current page number in the output file names.
+    var viewOptions = HtmlViewOptions.ForEmbeddedResources("page_{0}.html");
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("SoftwareDevelopmentPlan.mpp")
+            ' Render the project's active view as HTML.
+            ' {0} is replaced with the current page number in the output file names.
+            Dim viewOptions = HtmlViewOptions.ForEmbeddedResources("page_{0}.html")
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+The following image demonstrates the result:
+
+![Render a Project file to HTML](/net/viewer/images/rendering-basics/render-ms-project-files/render-project-to-html-embedded-resources.png)
+
+### Create an HTML file with external resources
+
+If you want to store an HTML file and additional resource files (such as fonts, images, and stylesheets) separately, call the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/methods/forexternalresources/index" target="_blank" rel="nofollow noopener noreferrer">HtmlViewOptions.ForExternalResources</a> method and pass the following parameters:
+
+  * The output file path format
+  * The path format for the folder with external resources
+  * The resource URL format
+
+
+<Tabs groupId="example2">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("SoftwareDevelopmentPlan.mpp"))
+{
+    // Render the project's active view as HTML.
+    // Specify the HTML file names and location of external resources.
+    // {0} and {1} are replaced with the page number and resource name, respectively.
+    var viewOptions = HtmlViewOptions.ForExternalResources("page_{0}.html", "page_{0}/resource_{0}_{1}", "page_{0}/resource_{0}_{1}");
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("SoftwareDevelopmentPlan.mpp")
+            ' Render the project's active view as HTML.
+            ' Specify the HTML file names and location of external resources.
+            ' {0} and {1} are replaced with the page number and resource name, respectively.
+            Dim viewOptions = HtmlViewOptions.ForExternalResources("page_{0}.html", "page_{0}/resource_{0}_{1}", "page_{0}/resource_{0}_{1}")
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+The image below demonstrates the result. External resources are placed in a separate folder.
+
+![Place HTML resources in a separate folder](/net/viewer/images/rendering-basics/render-ms-project-files/render-project-to-html-external-resources.png)
+
+## Render Project files as PDF
+
+Create a <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pdfviewoptions" target="_blank" rel="nofollow noopener noreferrer">PdfViewOptions</a> class instance and pass it to the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/methods/view/index" target="_blank" rel="nofollow noopener noreferrer">Viewer.View</a> method to convert a Project file to PDF. The `PdfViewOptions` class properties allow you to control the conversion process. For instance, you can protect the output PDF file, reorder its pages, and specify the quality of document images. Refer to the following documentation section for details: [Rendering to PDF](/net/viewer/developer-guide/rendering-documents/rendering-to-pdf/).
+
+
+<Tabs groupId="example3">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("SoftwareDevelopmentPlan.mpp"))
+{
+    // Create a PDF file for the project's active view.
+    var viewOptions = new PdfViewOptions("output.pdf");
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("SoftwareDevelopmentPlan.mpp")
+            ' Create a PDF file for the project's active view.
+            Dim viewOptions = New PdfViewOptions("output.pdf")
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+The following image demonstrates the result:
+
+![Render a Project file to PDF](/net/viewer/images/rendering-basics/render-ms-project-files/render-project-to-pdf.png)
+
+## Render Project files as PNG
+
+Create a <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pngviewoptions" target="_blank" rel="nofollow noopener noreferrer">PngViewOptions</a> class instance and pass it to the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/methods/view/index" target="_blank" rel="nofollow noopener noreferrer">Viewer.View</a> method to convert a Project file to PNG. Use the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pngviewoptions/properties/height" target="_blank" rel="nofollow noopener noreferrer">PngViewOptions.Height</a> and <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pngviewoptions/properties/width" target="_blank" rel="nofollow noopener noreferrer">PngViewOptions.Width</a> properties to specify the output image size in pixels.
+
+
+<Tabs groupId="example4">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("SoftwareDevelopmentPlan.mpp"))
+{
+    // Render the project's active view as PNG.
+    // {0} is replaced with the current page number in the output file names.
+    var viewOptions = new PngViewOptions("output_{0}.png");
+    // Set width and height.
+    viewOptions.Width = 1600;
+    viewOptions.Height = 650;
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("SoftwareDevelopmentPlan.mpp")
+            ' Render the project's active view as PNG.
+            ' {0} is replaced with the current page number in the output file names.
+            Dim viewOptions = New PngViewOptions("output_{0}.png")
+            ' Set width and height.
+            viewOptions.Width = 1600
+            viewOptions.Height = 650
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+The following image demonstrates the result:
+
+![Render a Project file to PNG](/net/viewer/images/rendering-basics/render-ms-project-files/render-project-to-png-image.png)
+
+## Render Project files as JPEG
+
+Create a <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/jpgviewoptions" target="_blank" rel="nofollow noopener noreferrer">JpgViewOptions</a> class instance and pass it to the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/methods/view/index" target="_blank" rel="nofollow noopener noreferrer">Viewer.View</a> method to convert a Project file to JPEG. Use the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/jpgviewoptions/properties/height" target="_blank" rel="nofollow noopener noreferrer">JpgViewOptions.Height</a> and <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/jpgviewoptions/properties/width" target="_blank" rel="nofollow noopener noreferrer">JpgViewOptions.Width</a> properties to specify the output image size in pixels.
+
+
+<Tabs groupId="example5">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("SoftwareDevelopmentPlan.mpp"))
+{
+    // Render the project's active view as JPEG.
+    // {0} is replaced with the current page number in the output file names.
+    var viewOptions = new JpgViewOptions("output_{0}.jpg");
+    // Set width and height.
+    viewOptions.Width = 1600;
+    viewOptions.Height = 650;
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("SoftwareDevelopmentPlan.mpp")
+            ' Render the project's active view as JPEG.
+            ' {0} is replaced with the current page number in the output file names.
+            Dim viewOptions = New JpgViewOptions("output_{0}.jpg")
+            ' Set width and height.
+            viewOptions.Width = 1600
+            viewOptions.Height = 650
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+## Get information about a Project file
+
+Follow the steps below to obtain information about a Project file (the file format, the number of pages, the project's start and end dates): 
+
+1. Create a <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/viewinfooptions" target="_blank" rel="nofollow noopener noreferrer">ViewInfoOptions</a> instance for a specific view.
+2. Call the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer/viewer/methods/getviewinfo" target="_blank" rel="nofollow noopener noreferrer">Viewer.GetViewInfo</a> method, pass the `ViewInfoOptions` instance to this method as a parameter, and cast the returned object to the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.results/projectmanagementviewinfo" target="_blank" rel="nofollow noopener noreferrer">ProjectManagementViewInfo</a> type.
+3. Use the `ProjectManagementViewInfo` class properties to retrieve information about the Project file.
+
+
+<Tabs groupId="example6">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+using GroupDocs.Viewer.Results;
+// ...
+
+using (var viewer = new Viewer("SoftwareDevelopmentPlan.mpp"))
+{
+    var viewInfoOptions = ViewInfoOptions.ForHtmlView();
+    var viewInfo = viewer.GetViewInfo(viewInfoOptions) as ProjectManagementViewInfo;
+
+    if (viewInfo != null)
+    {
+        // Display information about the Project file.
+        Console.WriteLine($"File type: {viewInfo.FileType}");
+        Console.WriteLine($"The number of pages: {viewInfo.Pages.Count}");
+        Console.WriteLine($"Project start date: {viewInfo.StartDate}");
+        Console.WriteLine($"Project end date: {viewInfo.EndDate}");
+    }
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+Imports GroupDocs.Viewer.Results
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("SoftwareDevelopmentPlan.mpp")
+            Dim viewInfoOptions = ViewInfoOptions.ForHtmlView()
+            Dim viewInfo = TryCast(viewer.GetViewInfo(viewInfoOptions), ProjectManagementViewInfo)
+        
+            If viewInfo IsNot Nothing Then
+                ' Display information about the Project file.
+                Console.WriteLine($"File type: {viewInfo.FileType}")
+                Console.WriteLine($"The number of pages: {viewInfo.Pages.Count}")
+                Console.WriteLine($"Project start date: {viewInfo.StartDate}")
+                Console.WriteLine($"Project end date: {viewInfo.EndDate}")
+            End If
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+The following image shows a sample console output:
+
+![Get information about a Project file](/net/viewer/images/rendering-basics/render-ms-project-files/retrieve-project-file-information.png)
+
+## Specify the output page size
+
+GroupDocs.Viewer allows you to specify page size for the output file when you convert your Project document to HTML, PDF, or image format. Assign a <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pagesize" target="_blank" rel="nofollow noopener noreferrer">PageSize</a> enumeration member to the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/projectmanagementoptions/properties/pagesize" target="_blank" rel="nofollow noopener noreferrer">ProjectManagementOptions.PageSize</a> property to select one of the predefined page sizes (Letter, Ledger, A0, A1, A2, A3, or A4). You can access this property for the following classes (depending on the output file format):
+
+* <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/htmlviewoptions" target="_blank" rel="nofollow noopener noreferrer">HtmlViewOptions</a> 
+* <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/pdfviewoptions" target="_blank" rel="nofollow noopener noreferrer">PdfViewOptions</a>
+* <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/pngviewoptions" target="_blank" rel="nofollow noopener noreferrer">PngViewOptions</a>
+* <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/jpgviewoptions" target="_blank" rel="nofollow noopener noreferrer">JpgViewOptions</a>
+
+The following example specifies page size for the output PDF file:
+
+
+<Tabs groupId="example7">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("SoftwareDevelopmentPlan.mpp"))
+{
+    // Convert the document to PDF.
+    var viewOptions = new PdfViewOptions("output.pdf");
+    // Specify the page size.
+    viewOptions.ProjectManagementOptions.PageSize = PageSize.A3;
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("SoftwareDevelopmentPlan.mpp")
+            ' Convert the document to PDF.
+            Dim viewOptions = New PdfViewOptions("output.pdf")
+            ' Specify the page size.
+            viewOptions.ProjectManagementOptions.PageSize = PageSize.A3
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+
+## Adjust the time unit
+
+When rendering a Project file, GroupDocs.Viewer selects the smallest time unit on a timescale based on the total length of the project. You can adjust the timescale to show smaller or greater time units (from days to months). To do this, set the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/projectmanagementoptions/properties/timeunit" target="_blank" rel="nofollow noopener noreferrer">ViewOptions.ProjectManagementOptions.TimeUnit</a> property for a target view to one of the following <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/timeunit" target="_blank" rel="nofollow noopener noreferrer">TimeUnit</a> enumeration members:
+
+* `Days` displays days on the timescale.
+* `ThirdsOfMonths` displays the Beginning/Middle/End (B/M/E) of each month on the timescale.
+* `Months` displays months on the timescale.
+* `Unspecified` means that the timescale unit is not specified.
+
+The following code sample demonstrates how to specify the timescale unit when rendering a Project file to HTML:
+
+
+<Tabs groupId="example8">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("SoftwareDevelopmentPlan.mpp"))
+{
+    // Convert the document to HTML.
+    // {0} is replaced with the current page number in the file name.
+    var viewOptions = HtmlViewOptions.ForEmbeddedResources("output_{0}.html");
+    // Specify the time unit.
+    viewOptions.ProjectManagementOptions.TimeUnit = TimeUnit.ThirdsOfMonths;
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("SoftwareDevelopmentPlan.mpp")
+            ' Convert the document to HTML.
+            ' {0} is replaced with the current page number in the file name.
+            Dim viewOptions = HtmlViewOptions.ForEmbeddedResources("output_{0}.html")
+            ' Specify the time unit.
+            viewOptions.ProjectManagementOptions.TimeUnit = TimeUnit.ThirdsOfMonths
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+The image below illustrates the result.
+
+![Render a Project with the timescale unit set to thirds of months](/net/viewer/images/rendering-basics/render-ms-project-files/render-project-with-custom-time-unit.png)
+
+## Render specific dates
+
+With GroupDocs.Viewer, you can render only a portion of the project's timeline when you convert your Project file to HTML, PDF, or image format. Set the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/projectmanagementoptions/properties/startdate" target="_blank" rel="nofollow noopener noreferrer">ViewOptions.ProjectManagementOptions.StartDate</a> and <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/projectmanagementoptions/properties/enddate" target="_blank" rel="nofollow noopener noreferrer">ViewOptions.ProjectManagementOptions.EndDate</a> properties for a target view to specify a date range the timeline should display. If you set only the `StartDate` property, the timeline displays information for tasks from the specified date to the project's finish date. If you set only the `EndDate` property, the timeline contains dates from the project's start date to the specified date.
+
+The example below demonstrates how to convert a Project file to PDF and set the timeline date range.
+
+
+<Tabs groupId="example9">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using System;
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("SoftwareDevelopmentPlan.mpp"))
+{
+    // Convert the document to PDF.
+    var viewOptions = new PdfViewOptions("output.pdf");
+    // Specify the date range.
+    viewOptions.ProjectManagementOptions.StartDate = new DateTime(2022, 08, 01);
+    viewOptions.ProjectManagementOptions.EndDate = new DateTime(2022, 09, 01);
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports System
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("SoftwareDevelopmentPlan.mpp")
+            ' Convert the document to PDF.
+            Dim viewOptions = New PdfViewOptions("output.pdf")
+            ' Specify the date range.
+            viewOptions.ProjectManagementOptions.StartDate = New DateTime(2022, 08, 01)
+            viewOptions.ProjectManagementOptions.EndDate = New DateTime(2022, 09, 01)
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+The following image illustrates the result:
+
+![Render tasks for a specific date range](/net/viewer/images/rendering-basics/render-ms-project-files/render-tasks-between-two-dates.png)
+
+## Render notes
+
+Microsoft Project allows you to add notes to tasks, resources, and assignments.
+
+![Speaker notes in Microsoft PowerPoint](/net/viewer/images/rendering-basics/render-ms-project-files/project-task-notes.png)
+
+If you need to display these notes in the output HTML, PDF, or image files, enable the <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/baseviewoptions/properties/rendernotes" target="_blank" rel="nofollow noopener noreferrer">ViewOptions.RenderNotes</a> property for a target view.
+
+The following code sample converts a Project file with task notes to PDF:
+
+
+<Tabs groupId="example10">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (var viewer = new Viewer("SoftwareDevelopmentPlan.mpp"))
+{
+    // Convert the document to PDF.
+    var viewOptions = new PdfViewOptions("output.pdf");
+    // Enable notes rendering.
+    viewOptions.RenderNotes = true;
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Using viewer = New Viewer("SoftwareDevelopmentPlan.mpp")
+            ' Convert the document to PDF.
+            Dim viewOptions = New PdfViewOptions("output.pdf")
+            ' Enable notes rendering.
+            viewOptions.RenderNotes = True
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+The image below demonstrates the result. Notes are rendered on a separate page.
+
+![Render a Project file with task notes](/net/viewer/images/rendering-basics/render-ms-project-files/render-task-notes-to-pdf.png)
