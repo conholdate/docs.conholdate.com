@@ -1,0 +1,97 @@
+---
+title: "How to edit CSV file"
+sidebar_label: "How to edit CSV file"
+sidebar_key: "net-editor-edit-document-how-to-edit-csv-file"
+sidebar_position: 50
+description: "This guide demonstrates how to edit CSV, TSV, comma-separated value and other text files with different settings and many other powerful features of GroupDocs.Editor for .NET."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/how-to-edit-csv-file.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "4a233c9362f7751e56028f1c99ca9e3635b3973f49c9cda08e1438800fd752a8"
+---
+
+:::info
+GroupDocs.Editor for .NET is included in Conholdate.Total for .NET.
+:::
+
+&gt; This demonstration shows and explains all necessary moments and options regarding processing DSV spreadsheets (Delimiter-separated values) like CSV and others
+
+## Introduction
+
+DSV (Delimiter-Separated Values) files are specific form of text-based spreadsheets with delimiters (separators). Due of their nature the <a href="https://products.groupdocs.com/editor/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Editor**</a> processes this class of documents separately from usual binary spreadsheets. In counterpart to usual spreadsheets, DSV documents due to their textual nature have only single tab (worksheet) and cannot be encoded. But any non-empty string may be treated as separator, so user always need to specify it explicitly.
+
+The most common types of DSV are:
+
+1. CSV (Comma-Separated value)
+2. TSV (Tab-Separated value)
+3. Semicolon-separated value
+4. Whitespace-separated value
+5. ...and any other
+
+GroupDocs.Editor supports DSV with any separator, which can be character or a set of characters (string).
+
+## Loading CSV file for edit
+
+Unlike WordProcessing and Spreadsheet documents, DSV documents are loaded into the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a> class without any loading options. They are simple text files by their nature, so it is nothing to adjust:
+
+```csharp
+string inputCsvPath = "C://input/spreadsheet.csv";
+Editor editor = new Editor(inputCsvPath);
+```
+
+## Edit CSV file
+
+In order to open any DSV document for edit, user must use <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/delimitedtexteditoptions" target="_blank" rel="nofollow noopener noreferrer">DelimitedTextEditOptions</a> class, which single constructor has one mandatory parameter - string separator (delimiter), that should not be NULL or empty string. There are also several optional properties. Two properties - <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/delimitedtexteditoptions/convertdatetimedata" target="_blank" rel="nofollow noopener noreferrer">ConvertDateTimeData</a> and <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/delimitedtexteditoptions/convertnumericdata" target="_blank" rel="nofollow noopener noreferrer">ConvertNumericData</a> - are boolean flags, which indicate how to treat numbers. GroupDocs.Editor can recognize digits within cells and treat them as numbers or date-time values. By default this recognition is disabled, but user can turn it on. Next property - <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/delimitedtexteditoptions/treatconsecutivedelimitersasone" target="_blank" rel="nofollow noopener noreferrer">TreatConsecutiveDelimitersAsOne</a>, - is also a boolean flag, which determines how the consecutive delimiters should be treated - as several (default - false) or as a single one (true).
+
+Last property - <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/delimitedtexteditoptions/optimizememoryusage" target="_blank" rel="nofollow noopener noreferrer">OptimizeMemoryUsage</a>, - is also a boolean flag, but with completely different purpose. By default GroupDocs.Editor algorithms are tuned for maximum performance for reducing the latency time; memory consumption has lower priority. However in some rare cases user may need to load and open very huge DSV, several hundreds of MiBs or even close to GiB. In such cases GroupDocs.Editor (.NET Framework in fact) may throw an OutOfMemoryException. For coping with such use-cases the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/delimitedtexteditoptions/optimizememoryusage" target="_blank" rel="nofollow noopener noreferrer">OptimizeMemoryUsage</a> flag was introduced. By enabling it user switches GroupDocs.Editor to use another processing algorithms, which consume relatively low amount of memory at the cost of lower performance.
+
+Example below demonstrates using the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/delimitedtexteditoptions" target="_blank" rel="nofollow noopener noreferrer">DelimitedTextEditOptions</a> for editing CSV document, where comma character is a delimiter:
+
+```csharp
+DelimitedTextEditOptions editOptions = new DelimitedTextEditOptions(",");
+editOptions.ConvertDateTimeData = false;
+editOptions.ConvertNumericData = true;
+editOptions.TreatConsecutiveDelimitersAsOne = true;
+editOptions.OptimizeMemoryUsage = true;
+
+EditableDocument document = editor.Edit(editOptions);
+```
+
+## Save CSV file after editing
+
+After being edited, input DSV can be saved back to DSV (not necessary with the same separator) or to any supportable Spreadsheet document. In order to save document to DSV format user must use the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/delimitedtextsaveoptions" target="_blank" rel="nofollow noopener noreferrer">DelimitedTextSaveOptions</a> class, which, like the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/delimitedtexteditoptions" target="_blank" rel="nofollow noopener noreferrer">DelimitedTextEditOptions</a>, has one constructor with mandatory string parameter - separator (delimiter), that should not be NULL or empty string.
+
+There are also other properties:
+
+1. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/delimitedtextsaveoptions/encoding" target="_blank" rel="nofollow noopener noreferrer">Encoding</a>. Allows to specify the encoding of generated DSV. By default, if not specified, is UTF8.
+2. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/delimitedtextsaveoptions/trimleadingblankrowandcolumn" target="_blank" rel="nofollow noopener noreferrer">TrimLeadingBlankRowAndColumn</a>. Boolean flag, that indicates whether leading blank rows and columns should be trimmed like what MS Excel does.
+3. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/delimitedtextsaveoptions/keepseparatorsforblankrow" target="_blank" rel="nofollow noopener noreferrer">KeepSeparatorsForBlankRow</a>. Boolean flag, that indicates whether separators should be output for blank row. Default value is false which means the content for blank row will be empty.
+
+Example below demonstrates loading CSV, opening it to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> instance, and saving to TSV and XLSM.
+
+```csharp
+string inputCsvPath = "C://input/spreadsheet.csv";
+Editor editor = new Editor(inputCsvPath);
+
+DelimitedTextEditOptions editOptions = new DelimitedTextEditOptions(",");
+EditableDocument document = editor.Edit(editOptions);
+
+DelimitedTextSaveOptions tsvSaveOptions = new DelimitedTextSaveOptions("\t");
+tsvSaveOptions.TrimLeadingBlankRowAndColumn = true;
+tsvSaveOptions.KeepSeparatorsForBlankRow = false;
+
+SpreadsheetSaveOptions xlsmSaveOptions = new SpreadsheetSaveOptions(SpreadsheetFormats.Xlsm);
+
+string tsvSavePath = "C://output/spreadsheet.tsv";
+string xlsmSavePath = "C://output/spreadsheet.xlsm";
+
+editor.Save(document, tsvSavePath, tsvSaveOptions);
+editor.Save(document, xlsmSavePath, xlsmSaveOptions);
+```
+
+In this example output "'spreadsheet.tsv" will have a UTF-8 encoding.

@@ -1,0 +1,41 @@
+---
+title: "Working with HTML resources"
+sidebar_label: "Working with HTML resources"
+sidebar_key: "net-editor-working-with-html-resources"
+sidebar_position: 90
+description: "This article describes capabilities of GroupDocs.Editor while working with HTML resources, which are an integral part of HTML document"
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/working-with-html-resources.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "de13eff79bc9fc2455e6966e4011ef2457ec538eecd5ee6a7a3c9ef2fdf01123"
+---
+
+:::info
+GroupDocs.Editor for .NET is included in Conholdate.Total for .NET.
+:::
+
+&gt; This article describes capabilities of GroupDocs.Editor while working with HTML resources, which are an integral part of HTML document
+
+
+## What HTML resources are?
+Almost all existing document formats (except of plain TXT and some others) contain a concept of _resources_. This usually includes images, specific fonts (which are not installed in operating system) and so on - depending on specific document format. In order to edit documents in browser, the GroupDocs.Editor must convert them to HTML and only then send to the client-side WYSIWYG-editor. In this case GroupDocs.Editor must work with HTML resources, which may be divided onto three groups: _images_, _stylesheets_ and _fonts_.
+
+In context of public API of the GroupDocs.Editor the work with all resources is located inside the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.HtmlCss.Resources`</a> namespace. There is a public interface - <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/ihtmlresource" target="_blank" rel="nofollow noopener noreferrer">`IHtmlResource`</a>, which is common for all existing HTML resources. There are also three sub-namespaces - each one for a distinct resource type:
+
+1. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images/index" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.HtmlCss.Resources.Images`</a> - contains all supportable image formats, including raster (like JPEG, PNG and GIF) and vector (SVG and WMF/EMF). The <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images" target="_blank" rel="nofollow noopener noreferrer">`Images`</a> namespace itself contains several auxiliary types and interfaces, and also two sub-namespaces: <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.raster" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Editor.HtmlCss.Resources.Images.Raster</a> and <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Editor.HtmlCss.Resources.Images.Vector</a>. Each of these two sub-namespaces contains specific classes for specific image formats.
+2. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.fonts" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.HtmlCss.Resources.Fonts`</a> - contains classes, which represent each supportable font formats: WOFF, WOFF2, TTF, OTF, and EOT.
+3. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.textual" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.HtmlCss.Resources.Textual`</a> - contains classes, which represent all supportable textual formats: CSS and XML.
+4. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.audio" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.HtmlCss.Resources.Audio`</a> - contains classes, which represent all supportable audio formats. This namespace was added in version 21.10 and initially it supports only MP3 audio format, so there is only one class for representing it: <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.audio/mp3audio" target="_blank" rel="nofollow noopener noreferrer">Mp3Audio</a>.
+
+## Detecting the exact HTML resource format automatically
+
+Lets imagine a situation, when a customer edited a document in WYSIWYG-editor, obtained edited HTML markup with HTML resources (images, one or multiple stylesheets, and fonts, and even possible some audio files), and want to create an instance of <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> class using a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/frommarkup" target="_blank" rel="nofollow noopener noreferrer">`FromMarkup`</a> method, which obtains on input a string with HTML markup and a <code>IEnumerable&lt;<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/ihtmlresource" target="_blank" rel="nofollow noopener noreferrer">IHtmlResource</a>&gt;</code>, which in fact usually is a collection of HTML resources. But how should he obtain a set of <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/ihtmlresource" target="_blank" rel="nofollow noopener noreferrer">IHtmlResource</a> instances, taking into account that all resources are represented as a set of files (in better case) or even as a set of byte streams? For such case GroupDocs.Editor contains a special utility class <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/resourcetypedetector" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Editor.HtmlCss.Resources.ResourceTypeDetector</a>. This static class was introduced in the version 21.3 and contains only two static methods:
+
+1. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/resourcetypedetector/detecttypefromfilename" target="_blank" rel="nofollow noopener noreferrer">**DetectTypeFromFilename**</a> - obtains a filename with extension (or a pure extension) on input and tries to associate it with the most appropriate resource format. If successful, returns a type, which describes this format, in a form of a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/iresourcetype" target="_blank" rel="nofollow noopener noreferrer">IResourceType</a> inheritor. If format cannot be properly recognized, returns a NULL value. So, if user has a filename of a resource, and using this method, he can determine a format. But what to do, if there are no filenames with extension or even files, and resources are represented by byte streams? Of filenames are meaningless, have no extension, or their extensions are aforehand incorrect? For such cases the next method is suitable.
+
+2. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/resourcetypedetector/trydetectresource" target="_blank" rel="nofollow noopener noreferrer">**TryDetectResource**</a> - obtains on input a byte stream (<a href="http://msdn2.microsoft.com/en-us/library/8f86tw9e" target="_blank" rel="nofollow noopener noreferrer">System.IO.Stream</a>), filename and optionally an assumptive format, parses and recognizes input data and returns an inheritor of <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/ihtmlresource" target="_blank" rel="nofollow noopener noreferrer">'IHtmlResource'</a> interface on success or NULL value on failure. This method analyzes a content of input byte stream in any case and returns a valid format even if filename extension and assumptive format are both incorrect; such miscase will only worsen a performance. On another hand, correct filename extension and/or assumptive format do increase a performance. Anyway, input stream should be a completely valid: it must not be a NULL value or a Stream.Null instance, it should be readable and seekable, should not be disposed and its position should be valid.

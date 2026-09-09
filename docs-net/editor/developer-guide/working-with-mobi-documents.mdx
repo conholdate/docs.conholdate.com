@@ -1,0 +1,122 @@
+---
+title: "How to edit Mobi file"
+sidebar_label: "How to edit Mobi file"
+sidebar_key: "net-editor-working-with-mobi-documents"
+sidebar_position: 58
+description: "This article demonstrates how to edit Mobi files using C# programming language."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/working-with-mobi-documents.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "7b2e0eb1040a88cb6b44be82eabae3f16a5dafe82e9c38a5661f7d75742122c7"
+---
+
+:::info
+GroupDocs.Editor for .NET is included in Conholdate.Total for .NET.
+:::
+
+## Introduction
+
+Mobi format is an E-Book format, developed by the French company MobiPocket and is based on XML. E-Books in this format can contain text with rich formatting, images, and different annotations like bookmarks, notes, highlights, corrections and so on. Mobi books can have a DRM protection.
+
+Starting from the <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-20-7-release-notes/" target="_blank" rel="nofollow noopener noreferrer">version 20.7</a>, the GroupDocs.Editor for .NET is able to open (load) Mobi documents for editing. However, on that moment a saving _into_ Mobi was not available, so users were forced to choose some other format (the most likely AZW3 or ePub) in order to save edited Mobi document.
+
+Starting from the <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-22-7-release-notes/" target="_blank" rel="nofollow noopener noreferrer">version 22.7</a> the GroupDocs.Editor is able to edit the e-books in <a href="https://docs.fileformat.com/ebook/azw3/" target="_blank" rel="nofollow noopener noreferrer">AZW3 format</a>, also known as Kindle Format 8 (KF8), whech may be considered as a successor to the Mobi. Unlike the MOBI, the AZW3 are supported on import (since version 22.7) and export (since version 22.9).
+
+Starting from the <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-23-4-release-notes/" target="_blank" rel="nofollow noopener noreferrer">version 23.4</a> the GroupDocs.Editor for .NET is able to save (export) documents in the Mobi format, so from this version it can be said that Mobi is fully supported: on import, export and auto-detection.
+
+## Loading Mobi file for edit
+
+Despite of a distinct format, which doesn't belong to any of existing format families, Mobi has no dedicated loading options. So for loading it into the instance of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> class, users should simply specify a path to the Mobi file or a stream with its content in the constructor:
+
+```csharp
+string inputMobiPath = "C://input/book.mobi";
+Editor editorFromPath = new Editor(inputMobiPath);
+  
+FileStream inputMobiStream = File.OpenRead("C://input/book.mobi");
+Editor editorFromStream = new Editor(inputMobiStream);
+```
+
+There is no loading options, because Mobi has nothing to tune-up during loading, - it cannot have a password protection, and can be processed only in one way.
+
+## Editing Mobi file
+
+Because Mobi belongs to the e-Book format family, it utilize common edit options for all e-Book formats - an <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebookeditoptions" target="_blank" rel="nofollow noopener noreferrer">`EbookEditOptions`</a>. This class may be described as a truncated version of a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions" target="_blank" rel="nofollow noopener noreferrer">`WordProcessingEditOptions`</a> class, because <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebookeditoptions" target="_blank" rel="nofollow noopener noreferrer">`EbookEditOptions`</a> contains a subset of options from <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions" target="_blank" rel="nofollow noopener noreferrer">`WordProcessingEditOptions`</a> - <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebookeditoptions/enablepagination" target="_blank" rel="nofollow noopener noreferrer">`EnablePagination`</a> and <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebookeditoptions/enablelanguageinformation" target="_blank" rel="nofollow noopener noreferrer">`EnableLanguageInformation`</a> and, as in the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions" target="_blank" rel="nofollow noopener noreferrer">`WordProcessingEditOptions`</a>, they are disabled (`false`) by default:
+
+```csharp
+public bool EnablePagination { get; set; }
+  
+public bool EnableLanguageInformation { get; set; }
+```
+
+They have exactly the same meaning as their "siblings" from <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions" target="_blank" rel="nofollow noopener noreferrer">`WordProcessingEditOptions`</a>. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebookeditoptions/enablepagination" target="_blank" rel="nofollow noopener noreferrer">`EnablePagination`</a> allows to switch between float and paginal mode in the resultant HTML document. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebookeditoptions/enablelanguageinformation" target="_blank" rel="nofollow noopener noreferrer">`EnableLanguageInformation`</a> allows to enable exporting language information in HTML. This is very useful for books, which have parts of text, written on different languages.
+
+Example of usage is below (let's assume that <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> instance with loaded Mobi document is already created):
+
+```csharp
+Options.EbookEditOptions editOptions = new Options.EbookEditOptions();
+editOptions.EnablePagination = true;
+editOptions.EnableLanguageInformation = true;
+using (EditableDocument opened = editor.Edit(editOptions))
+{
+    //save it or pass to the WYSIWYG-editor
+}
+```
+
+
+:::info
+The <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebookeditoptions" target="_blank" rel="nofollow noopener noreferrer">`EbookEditOptions`</a> class was firstly introduced in the GroupDocs.Editor for .NET <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-22-9-release-notes/" target="_blank" rel="nofollow noopener noreferrer">version 22.9</a>. However, prior this version, there was a class `MobiEditOptions`, which was designed especially for the Mobi format. In the 22.9 version of GroupDocs.Editor for .NET this `MobiEditOptions` class was removed in favor to the more generalized <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebookeditoptions" target="_blank" rel="nofollow noopener noreferrer">`EbookEditOptions`</a>, so when updating from the 22.7 or older versions to the 22.9 or newer, please update the class name accordingly. All class members in these both classes are identical.
+:::
+
+
+## Save Mobi file after edit
+
+Starting from the <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-20-7-release-notes/" target="_blank" rel="nofollow noopener noreferrer">version 20.7</a>, and before the <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-23-4-release-notes/" target="_blank" rel="nofollow noopener noreferrer">version 23.4</a>, the GroupDocs.Editor for .NET was able only to load and edit the Mobi documents, but not to save (export) in the Mobi format. In other words, it was able to open and edit the Mobi document, and then save the edited document in some other format, but not in the Mobi. And in version 23.4 the export in the Mobi format was finally implemented.
+
+For all the format families the saving procedure is the same - it is required to obtain a content of the edited document on the server-side, create an instance of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> from it, and then pass it to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/save" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Editor.Save()`</a> instance method. And because the Mobi format belongs to the e-Book formats family, in order to save the document in the Mobi format a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebooksaveoptions" target="_blank" rel="nofollow noopener noreferrer">`EbookSaveOptions`</a> class is required.
+
+This class has a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebooksaveoptions/ebooksaveoptions/" target="_blank" rel="nofollow noopener noreferrer">mandatory constructor with a single parameter</a> - a desired <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/ebookformats/" target="_blank" rel="nofollow noopener noreferrer">e-Book format</a>. For the Mobi it should be a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/ebookformats/mobi/" target="_blank" rel="nofollow noopener noreferrer">`EBookFormats.Mobi`</a>. All other parameters in the EbookSaveOptions class are in fact optional, but nevertheless described below:
+
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebooksaveoptions/splitheadinglevel/" target="_blank" rel="nofollow noopener noreferrer">`SplitHeadingLevel`</a> of the `System.Int32` type controls an internal structure of the generated Mobi file: whether its internal content is divided onto packages and if yes, then how. This parameter exists because a content of the Mobi file is stored in the packages, usually, a package per chapter. And some users may want to control the policy of distribution of the content into the packages. By default its parameter is "`2`" - the most optimal.
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebooksaveoptions/exportdocumentproperties/" target="_blank" rel="nofollow noopener noreferrer">`ExportDocumentProperties`</a> of the `System.Boolean` type also has a relation to the internal structure of the Mobi file - it decides whether to embed the built-in and custom document properties inside the resultant Mobi file (`true`) or not (`false`). By default is `false` - do not embed.
+
+Concluding: in order to save the edited document in the Mobi format, the user should create an instance of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebooksaveoptions" target="_blank" rel="nofollow noopener noreferrer">`EbookSaveOptions`</a> class with <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/ebookformats/mobi/" target="_blank" rel="nofollow noopener noreferrer">`EBookFormats.Mobi`</a> argument in the constructor parameter, and then pass this instance to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/save" target="_blank" rel="nofollow noopener noreferrer">`Editor.Save()`</a> method along with other arguments.
+
+The code example below demonstrates the full roundtrip: opening a Mobi document, editing it, and saving the edited version to the Mobi format.
+
+```csharp
+//Create an Editor instance and load an input Mobi file
+Editor editor = new Editor("Input.mobi");
+
+//Create edit options
+Options.EbookEditOptions editOptions = new EbookEditOptions();
+
+//Edit the Mobi document and obtain
+EditableDocument doc = editor.Edit(editOptions);
+
+//Send EditableDocument to the client-side, edit it there, and obtain an edited version
+
+//Create Mobi save options
+Options.EbookSaveOptions saveOptions = new EbookSaveOptions(Formats.EBookFormats.Mobi);
+saveOptions.ExportDocumentProperties = true;//Tune save options
+
+//Save the edited document in a Mobi format
+editor.Save(doc, "Output.mobi", saveOptions);
+
+//Dispose document and Editor instances
+doc.Dispose();
+editor.Dispose();
+```
+
+## Detecting Mobi file
+
+As for documents of all supporting types, Mobi documents can be detected using a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`GetDocumentInfo()`</a> method of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> class. In case when a valid Mobi document was loaded into the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> instance, a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`GetDocumentInfo()`</a> will return an instance of a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/ebookdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`Metadata.EbookDocumentInfo`</a> class, which inherits from <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`IDocumentInfo`</a> interface, which, in turn, defines 4 properties: `Format`, `PageCount`, `Size`, and `IsEncrypted`.
+
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/ebookdocumentinfo/format" target="_blank" rel="nofollow noopener noreferrer">`Format`</a> property returns a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/ebookformats" target="_blank" rel="nofollow noopener noreferrer">`Formats.EBookFormats`</a> struct, which for the files with a `*.mobi` extension can have a `Mobi` or `Azw3` value.
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/ebookdocumentinfo/pagecount" target="_blank" rel="nofollow noopener noreferrer">`PageCount`</a> property returns an **approximate** number of pages in case of MOBI or AZW3 or a number of chapters in case of ePub. For the Mobi, it is approximate, because Mobi format internally is a set of HTML documents (chapters), which are not separated on pages and even have no strict page dimensions, which allows to split content on page blocks and thus calculate the number of pages. This decision was made by Mobi format designers intentionally to allows variable page size (and count) on different devices - from FullHD displays to smartphones. So, for returning a page count for a Mobi document, GroupDocs.Editor assumes standard A4 page size in a portrait orientation, splits existing document content on such "papers", and then calculates its count. So the returning number should be treated very carefully and approximately, users should not rely on it.
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/ebookdocumentinfo/size" target="_blank" rel="nofollow noopener noreferrer">`Size`</a> property returns a number of bytes of a Mobi document.
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/ebookdocumentinfo/isencrypted" target="_blank" rel="nofollow noopener noreferrer">`IsEncrypted`</a> property always returns a `false` value, because Mobi documents cannot be encrypted with password, like PDF or Office Open XML.

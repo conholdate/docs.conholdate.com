@@ -1,0 +1,181 @@
+---
+title: "Deleting worksheets from spreadsheet"
+sidebar_label: "Deleting worksheets from spreadsheet"
+sidebar_key: "net-editor-edit-document-edit-excel-deleting-worksheets-from-spreadsheet"
+sidebar_position: 3
+description: "This article describes the new feature of the GroupDocs.Editor for .NET version 25.11 - deleting (removing) one or many worksheets from the loaded and edited spreadsheet (workbook) during its saving to the output format"
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-excel/deleting-worksheets-from-spreadsheet.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "067d2ccf68f3260727a10bce27d78c341196aa73c6534fefcedaaf25b9957cd0"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Editor for .NET is included in Conholdate.Total for .NET.
+:::
+
+A **spreadsheet**, also known as a **workbook** - is a <a href="https://docs.fileformat.com/spreadsheet/" target="_blank" rel="nofollow noopener noreferrer">family of the document formats</a>, designed to work with tabular data. <a href="https://docs.fileformat.com/spreadsheet/xls/" target="_blank" rel="nofollow noopener noreferrer">XLS</a>, <a href="https://docs.fileformat.com/spreadsheet/xlsx/" target="_blank" rel="nofollow noopener noreferrer">XLSX</a>, <a href="https://docs.fileformat.com/spreadsheet/ods/" target="_blank" rel="nofollow noopener noreferrer">ODS</a>, <a href="https://docs.fileformat.com/spreadsheet/csv/" target="_blank" rel="nofollow noopener noreferrer">CSV</a> formats are the most common examples of such document formats, while Microsoft Excel, LibreOffice Calc, Apache OpenOffice Calc are examples of table processors - programs, which allow the creation and editing of such documents. GroupDocs.Editor has an ability to edit existing spreadsheet documents from its beginning, and starting from the <a href="https://releases.groupdocs.com/editor/net/release-notes/2024/groupdocs-editor-for-net-24-6-release-notes/" target="_blank" rel="nofollow noopener noreferrer">version 24.6</a> it has obtained an ability not only to edit already existing spreadsheets, but also to create new spreadsheets from scratch. And starting from the <a href="https://releases.groupdocs.com/editor/net/release-notes/2025/groupdocs-editor-for-net-25-11-release-notes/" target="_blank" rel="nofollow noopener noreferrer">version 25.11</a> the GroupDocs.Editor has obtained a feature to delete worksheets from the edited spreadsheet during saving.
+
+Need to keep in mind that not every spreadsheet may have the worksheets. For example, text-based separator-delimited formats like <a href="https://docs.fileformat.com/spreadsheet/csv/" target="_blank" rel="nofollow noopener noreferrer">CSV</a> and <a href="https://docs.fileformat.com/spreadsheet/tsv/" target="_blank" rel="nofollow noopener noreferrer">TSV</a> are basically the text files, they have no worksheets, so the worksheet cannot be removed from them. But almost all of the binary spreadsheet formats like XLS, XLSX and ODS do have them.
+
+In GroupDocs.Editor the user edits one worksheet at a time - the spreadsheet <a href="https://docs.groupdocs.com/editor/net/load-document/" target="_blank" rel="nofollow noopener noreferrer">is loaded</a> to the constructor of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> class, then worksheet is specified by its number in the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheeteditoptions" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetEditOptions`</a>, and then document is converted to the editable form, represented by the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> class. Straight and simple. However, when the content of the worksheet was edited by the user and passed back to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> class, there are two options:
+
+1. Users can save the edited content of the worksheet as a new spreadsheet with this single worksheet inside. This is the default behaviour that was present in the GroupDocs.Editor from its beginning.
+2. Users can save the edited worksheet by inserting it to the original spreadsheet. This was made possible starting from the <a href="https://releases.groupdocs.com/editor/net/release-notes/2020/groupdocs-editor-for-net-20-10-release-notes/" target="_blank" rel="nofollow noopener noreferrer">version 20.10</a> and is described in a <a href="https://docs.groupdocs.com/editor/net/inserting-edited-worksheet-into-existing-spreadsheet/" target="_blank" rel="nofollow noopener noreferrer">separate article</a>. This second option also has two sub-options:
+    1. The edited worksheet can *replace* the original worksheet in the input spreadsheet. For instance, in the loaded spreadsheet with 3 worksheets the user has chosen the 2nd one for edit; this worksheet was edited and then inserted back to the input spreadsheet, replacing the original 2nd worksheet onto the edited one.
+    2. The edited worksheet can be inserted into the input spreadsheet to stay *together* with the original one. For instance, in the loaded spreadsheet with 3 worksheets the user has chosen the 2nd one for edit; this worksheet was edited and then inserted back to the input spreadsheet, so now the spreadsheet contains 4 worksheets: the first, fourth, and two versions of the second (original and edited).
+
+Starting from the version 25.11, when the 2nd option (inserting edited worksheet into the original spreadsheet), users also can delete particular worksheet(s) from it. A new property was added to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetSaveOptions`</a> class - <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumberstodelete/" target="_blank" rel="nofollow noopener noreferrer">`WorksheetNumbersToDelete`</a> of `int[]` type. By default it has a `null` value, which means that no worksheets should be removed. However, when it has one or more valid worksheet numbers, the worksheets with these numbers are removed while calling the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/save" target="_blank" rel="nofollow noopener noreferrer">`Editor.Save()`</a> method.
+
+Need to mention that the worksheet numbers in a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumberstodelete/" target="_blank" rel="nofollow noopener noreferrer">`WorksheetNumbersToDelete`</a> property are 1-based. For instance, for removing the first and fourth worksheets the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumberstodelete/" target="_blank" rel="nofollow noopener noreferrer">`WorksheetNumbersToDelete`</a> property should have a `new int[2] {1, 4}` value.
+
+With the new worksheet removal feature the GroupDocs.Editor performs the next algorithm during saving the spreadsheet:
+
+1. User edits a content of the worksheet in the WYSIWYG-editor, passes the edited content to the instance of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> class <a href="https://docs.groupdocs.com/editor/net/create-editabledocument-from-file-or-markup/" target="_blank" rel="nofollow noopener noreferrer">using one of its static methods</a>, creates and adjusts the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetSaveOptions`</a>, and passes the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> instance, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetSaveOptions`</a> instance, and output stream or file path for writing to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/save" target="_blank" rel="nofollow noopener noreferrer">`Editor.Save()`</a> method.
+2. If the value of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumber" target="_blank" rel="nofollow noopener noreferrer">`WorksheetNumber`</a> property in the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetSaveOptions`</a> instance is set to the default value `0`, the GroupDocs.Editor generates a new spreadsheet with one worksheet. The <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumberstodelete/" target="_blank" rel="nofollow noopener noreferrer">`WorksheetNumbersToDelete`</a> property is ignored regardless of its value.
+3. If the value of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumber" target="_blank" rel="nofollow noopener noreferrer">`WorksheetNumber`</a> property in the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetSaveOptions`</a> instance has some non-zero value, the GroupDocs.Editor treats it as a command to insert the edited worksheet into the original spreadsheet.
+4. Depending on the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/insertasnewworksheet/" target="_blank" rel="nofollow noopener noreferrer">`InsertAsNewWorksheet`</a> property, the GroupDocs.Editor replaces old worksheet, specified by the value of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumber" target="_blank" rel="nofollow noopener noreferrer">`WorksheetNumber`</a> property, on the new one, taken from the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> instance, or puts the new worksheet to be placed among existing worksheets without replacing any of them.
+5. Finally, when all worksheet insertions and rearrangements are finished, the GroupDocs.Editor reads the value of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumberstodelete/" target="_blank" rel="nofollow noopener noreferrer">`WorksheetNumbersToDelete`</a> property, iterates over all numbers and removes specified worksheets from the spreadsheet.
+6. The final spreadsheet, with updated and deleted worksheets, is written to the output stream or file.
+
+Example below shows full roundtrip of input XLSX file: spreadsheet with 3 worksheets inside is loaded, its second worksheet is converted to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a>, then HTML-markup is emitted from the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> instance, modified, and then edited HTML-markup is converted back to the another <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> instance. From this point two instances of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetSaveOptions`</a> class are created - one is intended for generating a first version of an output spreadsheet with a new worksheet and without deletion and finally it has 4 worksheets in total (3 original + 1 edited). The second <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetSaveOptions`</a> instance has the WorksheetNumbersToDelete property set to remove the first and last worksheets, so the 2nd version of an output spreadsheet will have 2 worksheets in total (1 original + 1 edited).
+
+Input XLSX as well as two versions of the output XLSX files may be downloaded here:
+
+- [Input3Worksheets.xlsx](/net/editor/sample-files/Input3Worksheets.xlsx)
+- [Output4Worksheets-without-delete.xlsx](/net/editor/sample-files/Output4Worksheets-without-delete.xlsx)
+- [Output2Worksheets-with-delete.xlsx](/net/editor/sample-files/Output2Worksheets-with-delete.xlsx)
+
+
+<Tabs groupId="DeleteWorksheetsFromLoadedAndEditedSpreadsheet">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Editor;
+using GroupDocs.Editor.Formats;
+using GroupDocs.Editor.Options;
+// ...
+
+// Load input spreadsheet to the Editor and specify loading options
+using (Editor editor = new Editor("Input3Worksheets.xlsx", new SpreadsheetLoadOptions()))
+{
+    // Prepare edit options and set 2nd worksheet to edit
+    SpreadsheetEditOptions editOptions = new SpreadsheetEditOptions();
+    editOptions.WorksheetIndex = 1;//2nd worksheet to edit, here WorksheetIndex is 0-based due to historical reasons
+
+    //generate EditableDocument with original content of 2nd worksheet
+    using (EditableDocument worksheet2OpenedForEdit = editor.Edit(editOptions))
+    {
+        // Get the HTML-markup from the EditableDocument with original content
+        string originalHtmlContentOf2ndWorksheet = worksheet2OpenedForEdit.GetEmbeddedHtml();
+        
+        //emulate HTML content editing in WYSIWYG-editor in browser or somewhere else
+        string editedHtmlContentOf2ndWorksheet = originalHtmlContentOf2ndWorksheet.Replace("2nd row", "Edited 2nd row at 1st column");
+
+        //generate EditableDocument with edited content of 2nd worksheet
+        using (EditableDocument worksheet2AfterEdit = EditableDocument.FromMarkup(editedHtmlContentOf2ndWorksheet))
+        {
+            //prepare save options without deletions
+            SpreadsheetSaveOptions saveOptionsWithoutDelete = new SpreadsheetSaveOptions(SpreadsheetFormats.Xlsx);
+            // let it be the 2nd worksheet...
+            saveOptionsWithoutDelete.WorksheetNumber = 2;//here WorksheetNumber is 1-based
+            //... and we also save the original 2nd worksheet, which is pushed to the 3rd position
+            saveOptionsWithoutDelete.InsertAsNewWorksheet = true;
+
+            // So now the spreadsheet must have 4 worksheets, not 3. Save it to file
+            editor.Save(worksheet2AfterEdit, "Output4Worksheets-without-delete.xlsx", saveOptionsWithoutDelete);
+
+            // Create another save options, with deletions at this time
+            SpreadsheetSaveOptions saveOptionsWithDelete = new SpreadsheetSaveOptions(SpreadsheetFormats.Xlsx);
+            // let the new worksheet will be 2nd for now, but after deleting it will became the 1st later
+            saveOptionsWithDelete.WorksheetNumber = 2;
+
+            //... and we also save the original 2nd worksheet, which will be next sibling to the newly inserted
+            saveOptionsWithDelete.InsertAsNewWorksheet = true;
+
+            // delete the 1st and last worksheet
+            saveOptionsWithDelete.WorksheetNumbersToDelete = new int[2]
+            {
+                1,//1st worksheet
+                4//last worksheet is 4, not 3, because we inserted the edited 2nd worksheet as the new worksheet instance, without rewriting the original 2nd worksheet
+            };
+            // Save it again to distinct file. Output XLSX should have 2 worksheets now.
+            editor.Save(worksheet2AfterEdit, "Output2Worksheets-with-delete.xlsx", saveOptionsWithDelete);
+        }
+    }
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Editor
+Imports GroupDocs.Editor.Formats
+Imports GroupDocs.Editor.Options
+' ...
+
+' Load input spreadsheet to the Editor and specify loading options
+Using editor As New Editor("Input3Worksheets.xlsx", New SpreadsheetLoadOptions())
+    ' Prepare edit options and set 2nd worksheet to edit
+    Dim editOptions As New SpreadsheetEditOptions()
+    editOptions.WorksheetIndex = 1 '2nd worksheet to edit, here WorksheetIndex is 0-based due to historical reasons
+
+    ' generate EditableDocument with original content of 2nd worksheet
+    Using worksheet2OpenedForEdit As EditableDocument = editor.Edit(editOptions)
+        ' Get the HTML-markup from the EditableDocument with original content
+        Dim originalHtmlContentOf2ndWorksheet As String = worksheet2OpenedForEdit.GetEmbeddedHtml()
+
+        ' emulate HTML content editing in WYSIWYG-editor in browser or somewhere else
+        Dim editedHtmlContentOf2ndWorksheet As String = originalHtmlContentOf2ndWorksheet.Replace("2nd row", "Edited 2nd row at 1st column")
+
+        ' generate EditableDocument with edited content of 2nd worksheet
+        Using worksheet2AfterEdit As EditableDocument = EditableDocument.FromMarkup(editedHtmlContentOf2ndWorksheet)
+            ' prepare save options without deletions
+            Dim saveOptionsWithoutDelete As New SpreadsheetSaveOptions(SpreadsheetFormats.Xlsx)
+
+            ' let it be the 2nd worksheet...
+            saveOptionsWithoutDelete.WorksheetNumber = 2 'here WorksheetNumber is 1-based
+            '... and we also save the original 2nd worksheet, which is pushed to the 3rd position
+            saveOptionsWithoutDelete.InsertAsNewWorksheet = True
+
+            ' So now the spreadsheet must have 4 worksheets, not 3. Save it to file
+            editor.Save(worksheet2AfterEdit, "Output4Worksheets-without-delete.xlsx", saveOptionsWithoutDelete)
+
+            ' Create another save options, with deletions at this time
+            Dim saveOptionsWithDelete As New SpreadsheetSaveOptions(SpreadsheetFormats.Xlsx)
+            ' let the new worksheet will be 2nd for now, but after deleting it will became the 1st later
+            saveOptionsWithDelete.WorksheetNumber = 2
+            '... and we also save the original 2nd worksheet, which will be next sibling to the newly inserted
+            saveOptionsWithDelete.InsertAsNewWorksheet = True
+
+            ' delete the 1st and last worksheet
+            saveOptionsWithDelete.WorksheetNumbersToDelete = New Int32(1) {
+                1, '1st worksheet
+                4 'last worksheet is 4, not 3, because we inserted the edited 2nd worksheet as the new worksheet instance, without rewriting the original 2nd worksheet
+            }
+            ' Save it again to distinct file. Output XLSX should have 2 worksheets now.
+            editor.Save(worksheet2AfterEdit, "Output2Worksheets-with-delete.xlsx", saveOptionsWithDelete)
+        End Using
+    End Using
+End Using
+```
+
+</TabItem>
+
+
+</Tabs>
+
+

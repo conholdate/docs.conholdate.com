@@ -1,0 +1,84 @@
+---
+title: "Extracting document metainfo"
+sidebar_label: "Extracting document metainfo"
+sidebar_key: "net-editor-extracting-document-metainfo"
+sidebar_position: 10
+description: "Following this guide you will learn how to obtain basic document metadata like pages count, size, file type before editing it with GroupDocs.Editor for .NET API."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/extracting-document-metainfo.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "0fb134400859595a20266cec5b3ac34fce86dc6854d73533b98ea7ca324efd58"
+---
+
+:::info
+GroupDocs.Editor for .NET is included in Conholdate.Total for .NET.
+:::
+
+&gt; This demonstration shows and explains usage of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">GetDocumentInfo</a> method, that extracts meta info from the document.
+
+## Introduction
+
+In some situations it is required to grab meta info from the document before actually editing it. For example, user wants to edit last tab of the multi-tabbed spreadsheet, but he doesn't know, how many tabs the document contains. Ir it is unclear for the user, is the document password-protected or not. For such situations <a href="https://products.groupdocs.com/editor/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Editor**</a> provides a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">GetDocumentInfo</a> method, that returns detailed meta info (metadata) about the specified document.
+
+## Using the method
+
+In order to grab the meta info from the document, it should firstly be loaded into the `Editor` class. Then <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">GetDocumentInfo</a>() should be called. This method obtains one parameter - password as a string. If document is encoded and user knows the password, he can specify it here. For other cases the null or empty string can be passed. Code example below demonstrates the usage:
+
+```csharp
+Editor editor = new Editor("C://input/document.docx");
+IDocumentInfo infoDocxWithoutPassword = editorDocx.GetDocumentInfo(null);
+IDocumentInfo infoDocxWithPassword = editorDocx.GetDocumentInfo("password"); 
+```
+
+There can be several scenarios here regarding whether document is encoded or not, and did user specified a password:
+
+1. If password is specified, but document is not password-protected, or the document format doesn't support encoding at all, the password will be ignored.
+2. If document is password-protected, but password is not specified, the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/passwordrequiredexception" target="_blank" rel="nofollow noopener noreferrer">PasswordRequiredException</a> will be thrown while calling <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">GetDocumentInfo</a>().
+3. If document is password-protected,and password is specified, but is incorrect, the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/incorrectpasswordexception" target="_blank" rel="nofollow noopener noreferrer">IncorrectPasswordException</a> will be thrown while calling <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">GetDocumentInfo()</a>.
+
+## Explaining resulting type
+
+<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">GetDocumentInfo</a>() method returns a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo" target="_blank" rel="nofollow noopener noreferrer">IDocumentInfo</a>. This is interface, that stores meta info about one particular document and contains the next properties:
+
+1. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo/pagecount" target="_blank" rel="nofollow noopener noreferrer">PageCount</a>. This is a positive number, that returns page count for WordProcessing, PDF and XPS documents, tabs (worksheets) count for Spreadsheets, slides count for Presentations and a number `1` for pageless documents like XML or TXT.
+2. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo/size" target="_blank" rel="nofollow noopener noreferrer">Size</a>. Document size in bytes.
+3. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo/isencrypted" target="_blank" rel="nofollow noopener noreferrer">IsEncrypted</a>. A boolean flag that indicates whether document is encrypted with the password or not. If document is of type, that doesn't support encryption at all, like CSV or XML, this property always returns `false`.
+4. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo/format" target="_blank" rel="nofollow noopener noreferrer">Format</a>. Returns info about the format itself.
+
+There are eight inheritors of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo" target="_blank" rel="nofollow noopener noreferrer">IDocumentInfo</a> interface, all are structs:
+
+1. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/wordprocessingdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">WordProcessingDocumentInfo</a> - common for all WordProcessing family formats.
+2. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/spreadsheetdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetDocumentInfo</a> - common for all Spreadsheet family formats.
+3. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/presentationdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">PresentationDocumentInfo</a> - common for all Presentation family formats.
+4. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/textualdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">TextualDocumentInfo</a> - common for all textual types, including all DSV (like CSV and TSV), XML, HTML, and plain text.
+5. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/fixedlayoutdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">FixedLayoutDocumentInfo</a> - common for all documents with a fixed-layout format, this includes only PDF and XPS.
+6. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/emaildocumentinfo" target="_blank" rel="nofollow noopener noreferrer">EmailDocumentInfo</a> - common for all Email family formats, like EML, MSG, VCF, PST, MBOX and others.
+7. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/ebookdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">EbookDocumentInfo</a> - common for all eBook family formats like MOBI and ePub.
+8. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/markdowndocumentinfo" target="_blank" rel="nofollow noopener noreferrer">MarkdownDocumentInfo</a> - special struct, that is dedicated especially for the Markdown (MD) textual format.
+
+
+One important thing to note: if <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">GetDocumentInfo()</a> returns `NULL` value instead of some of <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo" target="_blank" rel="nofollow noopener noreferrer">IDocumentInfo</a> inheritors, this means that specified document is not supported by the GroupDocs.Editor and thus cannot be opened for editing or saved.
+
+## Explaining document format
+
+<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo" target="_blank" rel="nofollow noopener noreferrer">IDocumentInfo</a> interface contains a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo/format" target="_blank" rel="nofollow noopener noreferrer">`Format` property</a> of <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/idocumentformat" target="_blank" rel="nofollow noopener noreferrer">IDocumentFormat</a> type. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/idocumentformat" target="_blank" rel="nofollow noopener noreferrer">IDocumentFormat</a> is an interface, that is common for all format descriptors. It is designed for indicating one particular document format and stores format name, extension, MIME-code, and has equality operators.
+
+Each inheritor of <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/idocumentformat" target="_blank" rel="nofollow noopener noreferrer">IDocumentFormat</a> interface delivers three properties, all of a <a href="https://docs.microsoft.com/en-us/dotnet/api/system.string?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">System.String</a> type: 
+1. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/idocumentformat/name" target="_blank" rel="nofollow noopener noreferrer">Name</a>, that provides name of the format.
+2. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/idocumentformat/extension" target="_blank" rel="nofollow noopener noreferrer">Extension</a>, that provides a format extension.
+3. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/idocumentformat/mime" target="_blank" rel="nofollow noopener noreferrer">Mime</a>, that provides a MIME-code for a particular format
+
+<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/idocumentformat" target="_blank" rel="nofollow noopener noreferrer">`IDocumentFormat` interface</a> has seven inheritors, all of them are structs:
+1. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/wordprocessingformats" target="_blank" rel="nofollow noopener noreferrer">WordProcessingFormats</a> - holds all formats from WordProcessing family.
+2. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/spreadsheetformats" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetFormats</a> - holds all formats from Spreadsheet family.
+3. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/spreadsheetformats" target="_blank" rel="nofollow noopener noreferrer">PresentationFormats</a> - holds all formats from Presentation family.
+4. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/textualformats" target="_blank" rel="nofollow noopener noreferrer">TextualFormats</a> - holds all formats with text-based nature.
+5. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/fixedlayoutformats" target="_blank" rel="nofollow noopener noreferrer">FixedLayoutFormats</a> - holds all formats from the fixed-layout format family. This includes only PDF and XPS.
+6. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/ebookformats" target="_blank" rel="nofollow noopener noreferrer">EBookFormats</a> - holds all eBool (Electronic book) formats like Mobi and ePub.
+7. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/emailformats" target="_blank" rel="nofollow noopener noreferrer">EmailFormats</a> - holds all email (electronic mail) formats like EML and MSG.
+

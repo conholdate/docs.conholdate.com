@@ -1,0 +1,168 @@
+---
+title: "Convert videos"
+sidebar_label: "Videos"
+sidebar_key: "net-conversion-video"
+sidebar_position: 150
+description: "In this article, you will learn how to convert a video file to another video format with GroupDocs.Conversion for .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/basic-usage/convert/video.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "ef2014fef880e4c40a2d43cd769e61046c068e784cd8056268c0da5eef36efcb"
+---
+
+:::info
+GroupDocs.Conversion for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## About video file formats
+
+Everyone is familiar with videos that we daily watch on media devices such as Televisions, Cinema screens, and social media channels such as Facebook, Twitter, YouTube, and many others. But have you ever wondered how these videos are stored and the formats in which these can be uploaded for viewing? What is the best file format for your video to be hosted on different storage media? Video file formats comprise many different video types for storing videos and to be used for various purposes. Popular video file formats that you may have come across include AVI, MOV, WMV, M4V, and MP4.
+
+## Supported video file conversions
+
+<!-- Missing include: /net/conversion/_includes/supported-conversions/video/ -->
+
+## Convert to another video format
+
+With <a href="https://products.groupdocs.com/conversion/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Conversion</a> you can easily convert your video file into another video file format.  
+
+To allow video conversions GroupDocs.Conversion provides an extension point to offload actual video conversion to the video processing library, but at the same time gives you the simplicity of conversion setup. The extension point is the <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.integration.video/ivideoconnector" target="_blank" rel="nofollow noopener noreferrer">IVideoConnector</a> interface. 
+
+At first, you must decide which video processing library you will use. Different libraries have different setup processes.
+
+In our example, we will use the FFMPEG library. We recommend using <a href="https://chocolatey.org/" target="_blank" rel="nofollow noopener noreferrer">Chocolatey</a> to install <a href="https://ffmpeg.org/" target="_blank" rel="nofollow noopener noreferrer">FFMPG</a> and all needed dependencies. 
+To install FFMPEG with Chocolatey, run the following console command:
+```shell
+choco install ffmpeg
+```
+
+Once the video processing library is installed, you must implement the <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.integration.video/ivideoconnector" target="_blank" rel="nofollow noopener noreferrer">IVideoConnector</a> interface. For this implementation, the <a href="https://www.nuget.org/packages/FFMpegCore" target="_blank" rel="nofollow noopener noreferrer">FFMpegCore</a>](https://www.nuget.org/packages/FFMpegCore) NuGet package must be installed in your project. The following snippet provides a sample implementation:
+
+```csharp
+public class VideoConnector : IVideoConnector
+{
+    private readonly Dictionary<VideoFileType, Action<FFMpegArgumentOptions>> _optionsMap = new();
+    public VideoConnector()
+    {
+        _optionsMap.Add(VideoFileType.Avi, SetAviConvertOptions);
+        _optionsMap.Add(VideoFileType.Flv, SetFlvConvertOptions);
+        _optionsMap.Add(VideoFileType.Mkv, SetMkvConvertOptions);
+        _optionsMap.Add(VideoFileType.Mp4, SetMp4ConvertOptions);
+        _optionsMap.Add(VideoFileType.Wmv, SetWmvConvertOptions);
+        _optionsMap.Add(VideoFileType.Mov, SetMovConvertOptions);
+        _optionsMap.Add(VideoFileType.Webm, SetWebmConvertOptions);
+    }
+
+    public Stream ConvertVideo(Stream sourceStream, VideoConvertOptions convertOptions)
+    { 
+        var resultStream = new MemoryStream();
+
+        var arguments = FFMpegArguments
+            .FromPipeInput(new StreamPipeSource(sourceStream))
+            .OutputToPipe(new StreamPipeSink(resultStream), options =>
+            {
+                if (_optionsMap.ContainsKey(convertOptions.Format))
+                {
+                    _optionsMap[convertOptions.Format].Invoke(options);
+                }
+                else
+                {
+                    throw new InvalidOperationException(
+                        $"Conversion to {convertOptions.Format.Extension} is not supported at the moment");
+                }
+            });
+        arguments.ProcessSynchronously();
+            
+        return resultStream;
+    }
+
+    private void SetAviConvertOptions(FFMpegArgumentOptions options)
+    {
+        options.ForceFormat("avi");
+    }
+
+    private void SetFlvConvertOptions(FFMpegArgumentOptions options)
+    {
+        options.ForceFormat("flv");
+    }
+
+    private void SetMkvConvertOptions(FFMpegArgumentOptions options)
+    {
+        options.ForceFormat("matroska");
+    }
+
+    private void SetMp4ConvertOptions(FFMpegArgumentOptions options)
+    {
+        options.ForceFormat("mp4");
+        options.WithCustomArgument("-movflags empty_moov");
+    }
+
+    private void SetWmvConvertOptions(FFMpegArgumentOptions options)
+    {
+        options.ForceFormat("asf");
+    }
+
+    private void SetMovConvertOptions(FFMpegArgumentOptions options)
+    {
+        options.ForceFormat("mov");
+        options.WithCustomArgument("-movflags empty_moov");
+    }
+
+    private void SetWebmConvertOptions(FFMpegArgumentOptions options)
+    {
+        options.ForceFormat("webm");
+    }
+
+}
+```
+
+Once the `IVideoConnector` interface is implemented, the AVI to MP4 conversion code snippet looks like this:
+
+```csharp
+// Load the source AVI file
+VideoLoadOptions loadOptions = new VideoLoadOptions();
+loadOptions.SetVideoConnector(new VideoConnector());
+using (Converter converter = new Converter("sample.avi", (LoadContext loadContext) => loadOptions))
+{
+    // Set the convert options for MP4 format
+    VideoConvertOptions options = new VideoConvertOptions {
+        Format = VideoFileType.Mp4
+    };
+    // Convert to MP4 format
+    converter.Convert("converted.mp4", options);
+}
+```
+
+Put it simply - you install the video processing library, implement the `IVideoConnector` interface which links the `GroupDocs.Conversion` with video processing library, load a video file into the `Converter` class providing the `IVideoConnector` instance, select the desired output format and **GroupDocs.Conversion** does all the rest.  
+
+
+:::info
+Refer to the <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert" target="_blank" rel="nofollow noopener noreferrer">API reference</a> for more conversion options and customizations.
+:::
+
+
+## Extract audio track
+Extracting an audio track from a video is similar to converting video, however, you need to set the <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert/videoconvertoptions/extractaudioonly/" target="_blank" rel="nofollow noopener noreferrer">ExtractAudioOnly</a> property to `true` and specify the desired output format in the <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert/videoconvertoptions/audioformat/" target="_blank" rel="nofollow noopener noreferrer">AudioFormat</a> property:
+
+```csharp
+// Load the source AVI file
+VideoLoadOptions loadOptions = new VideoLoadOptions();
+loadOptions.SetVideoConnector(new VideoConnector());
+using (Converter converter = new Converter("sample_with_audio.avi", (LoadContext loadContext) => loadOptions))
+{
+    // Set the convert options
+    VideoConvertOptions options = new VideoConvertOptions
+    {
+        ExtractAudioOnly = true,
+        AudioFormat = AudioFileType.Ogg
+    };
+    // Convert to audio file
+    converter.Convert("extracted_audio.ogg", options);
+}
+```

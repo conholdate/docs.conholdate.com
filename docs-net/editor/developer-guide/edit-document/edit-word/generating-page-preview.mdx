@@ -1,0 +1,73 @@
+---
+title: "Generating page preview for WordProcessing document"
+sidebar_label: "Generating page preview for WordProcessing document"
+sidebar_key: "net-editor-edit-document-edit-word-generating-page-preview"
+sidebar_position: 16
+description: "This article describes how to generate a preview for any page for the existing WordProcessing document in SVG format using the GroupDocs.Editor"
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-word/generating-page-preview.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "46700ef1edff494d7f389e3793c17c08fa2e10a2060abf11242378f1bc5cbfb9"
+---
+
+:::info
+GroupDocs.Editor for .NET is included in Conholdate.Total for .NET.
+:::
+
+Starting from the <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-23-5-release-notes/" target="_blank" rel="nofollow noopener noreferrer">version 23.5</a> the GroupDocs.Editor for .NET allows to generate a preview for arbitrary page in the loaded WordProcessing document, like DOC, DOCX, DOCM, RTF, ODT etc. The preview is generated in the SVG format, which is a vector graphics format and is supported in the numerous image viewers and also by any modern browser.
+
+Using this feature the users can view and inspect any document of the imported WordProcessing document without actually editing it. This preview cannot be edited by the GroupDocs.Editor itself, it can be only obtained in SVG format and saved as usual - to the byte stream or file.
+
+This feature is working regardless of the licensing mode of the GroupDocs.Editor for .NET: it works the same for both trial and licensed mode, there are no trial limitations for this feature. While generating the pages preview, the GroupDocs.Editor doesn't write off the consumed bytes or credits.
+
+With this feature was introduced, the GroupDocs.Editor for .NET finally supports generating a preview for all three major office format families: WordProcessing, <a href="https://docs.groupdocs.com/editor/net/generating-worksheets-preview-for-spreadsheet/" target="_blank" rel="nofollow noopener noreferrer">Spreadsheet</a> and <a href="https://docs.groupdocs.com/editor/net/generating-slides-preview-for-presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a>.
+
+For generating the pages preview for a particular WordProcessing document the user must perform the next steps:
+
+- Load a desired WordProcesing file to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> class.
+- Call the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`GetDocumentInfo()`</a> method and specify a password for the loaded document in case if this document is protected with a password.
+- Because the loaded file has a format from the WordProcessing family (like DOCX, RTF, etc), then the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`GetDocumentInfo()`</a> method must return the instance of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/wordprocessingdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Metadata.WordProcessingDocumentInfo`</a> struct, casted to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`IDocumentInfo`</a> interface. Cast it back from <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`IDocumentInfo`</a> to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/wordprocessingdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`WordProcessingDocumentInfo`</a> type.
+- In the obtained struct <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/wordprocessingdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`WordProcessingDocumentInfo`</a> invoke a new instance method <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/wordprocessingdocumentinfo/generatepreview/" target="_blank" rel="nofollow noopener noreferrer">`GeneratePreview(int pageIndex)`</a> and in this method specify a zero-based _index_ (do not confuse with the page _numbers_, which are 1-based) of the desired page. If the specified index is lesser than 0 or exceeds the number of pages within a given document, then the <a href="https://learn.microsoft.com/en-us/dotnet/api/system.ArgumentOutOfRangeException?view=net-7.0" target="_blank" rel="nofollow noopener noreferrer">System.ArgumentOutOfRangeException</a> exception will be thrown.
+- The <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/wordprocessingdocumentinfo/generatepreview/" target="_blank" rel="nofollow noopener noreferrer">`GeneratePreview(int pageIndex)`</a> method returns a page preview as an SVG vector image, that is encapsulated in the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a> public class from the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.HtmlCss.Resources.Images.Vector`</a> namespace. This class has all necessary methods and properties to obtain the content of an SVG image in any desired form, save it to disk, stream and so on.
+
+The code sample below shows opening an unprotected WordProcessing DOCX file, obtaining a number of all pages inside this DOCX file, and then generating the previews for every page in a loop. Then these previews are saved to the disk. Please note that the GroupDocs.Editor is working in the trial mode, but page preview is generated for all the pages, and no trial copyright marks are present on these previews.
+
+```csharp
+// Obtain a valid full path to the WordProcessing file
+string inputPath = "SampleDoc.docx";
+
+// Load WordProcessing file to the Editor constructor
+using (GroupDocs.Editor.Editor editor = new Editor(inputPath))
+{
+	// Get document info for this file
+	IDocumentInfo infoUncasted = editor.GetDocumentInfo(null);
+
+	//Make sure it is really a WordProcessing of DOCX format
+	Assert.AreEqual(Formats.WordProcessingFormats.Docx, infoUncasted.Format);
+
+	// Cast this document info to the WordProcessingDocumentInfo type
+	WordProcessingDocumentInfo infoWordProcessing = (WordProcessingDocumentInfo)infoUncasted;
+
+	// Get the number of all pages
+	int pagesCount = infoWordProcessing.PageCount;	
+
+	//Iterate through all pages and generate the preview on every iteration
+	for (int pageIndex = 0; pageIndex < pagesCount; pageIndex++)
+	{
+		// Generate one preview as SVG image by page index
+		SvgImage oneSvgPreview = infoWordProcessing.GeneratePreview(pageIndex);
+
+		// Save SVG preview to the file
+		oneSvgPreview.Save(Path.Combine(outputFolder, oneSvgPreview.FilenameWithExtension));
+	}
+}
+```
+
+All WordProcessing formats are able to store the raster images. So when the specific page of some loaded document has one or more raster images, and for this page the SVG preview is generated, this/these raster image(s) will be embedded inside SVG in base64 format using the <a href="https://en.wikipedia.org/wiki/Data_URI_scheme" target="_blank" rel="nofollow noopener noreferrer">data URI scheme</a>.
+
+Concluding, the new page preview feature is by its essence a new public method in the existing <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/wordprocessingdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`WordProcessingDocumentInfo`</a> struct, that obtains a page index and returns an instance of <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a> class. If the end-user needs to obtain a preview of the page in a raster format, but not in the vector, he can use the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/savetopng/" target="_blank" rel="nofollow noopener noreferrer">`SaveToPng`</a> method in the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a> class - this method converts the SVG content of the current <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a> to the PNG format and saves it to the specified <a href="https://learn.microsoft.com/en-us/dotnet/api/system.IO.Stream?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`System.IO.Stream`</a>.

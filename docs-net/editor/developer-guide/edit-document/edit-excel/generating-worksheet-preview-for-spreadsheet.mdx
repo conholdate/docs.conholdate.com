@@ -1,0 +1,68 @@
+---
+title: "Generating worksheets (tabs) preview for spreadsheet"
+sidebar_label: "Generating worksheets (tabs) preview for spreadsheet"
+sidebar_key: "net-editor-edit-document-edit-excel-generating-worksheet-preview-for-spreadsheet"
+sidebar_position: 2
+description: "This article describes how to generate a preview for any worksheet (tab) for the existing Excel spreadsheet in SVG format"
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-excel/generating-worksheet-preview-for-spreadsheet.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "c479d0b40e63abd880702d75e236616d6ecd95089da1bc41e9a3e9d04526af5a"
+---
+
+:::info
+GroupDocs.Editor for .NET is included in Conholdate.Total for .NET.
+:::
+
+Starting from <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-23-4-release-notes/" target="_blank" rel="nofollow noopener noreferrer">version 23.4</a>, the GroupDocs.Editor for .NET allows to generate a preview for any worksheet (a.k.a. _tab_) in the spreadsheet (a.k.a. _workbook_) document in SVG format. With this feature the end-users are able to view and inspect the content of the spreadsheet without actually sending it for edit. This generated worksheet preview cannot be edited using the GroupDocs.Editor for .NET itself, but it can be saved and then viewed in any desktop or online image viewer as well in the browser (because any modern browser actually supports viewing of SVG format).
+
+This feature is working regardless of the licensing mode of the GroupDocs.Editor for .NET: it works the same for both trial and licensed mode, there are no trial limitations for this feature. While generating the worksheets preview, the GroupDocs.Editor doesn't write off the consumed bytes or credits.
+
+Excel spreadsheets may have the so-called _hidden worksheets_, - GroupDocs.Editor for .NET generates an SVG preview for them too.
+
+For generating the worksheets preview for a particular spreadsheet document the user must perform the next steps:
+
+- Load a desired spreadsheet file to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> class.
+- Call the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`GetDocumentInfo()`</a> method and specify a password of a loaded spreadsheet in case if this spreadsheet is protected with a password.
+- In the obtained struct <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/spreadsheetdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Metadata.SpreadsheetDocumentInfo`</a> invoke a new instance method <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/spreadsheetdocumentinfo/generatepreview/" target="_blank" rel="nofollow noopener noreferrer">`GeneratePreview(int worksheetIndex)`</a> and in this method specify a zero-based _index_ (do not confuse with the worksheet _numbers_, which are 1-based) of the desired worksheet. If the specified index is lesser than 0 or exceeds the number of worksheets within a given spreadsheet, then the <a href="https://learn.microsoft.com/en-us/dotnet/api/system.ArgumentOutOfRangeException?view=net-7.0" target="_blank" rel="nofollow noopener noreferrer">System.ArgumentOutOfRangeException</a> exception will be thrown.
+- The <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/spreadsheetdocumentinfo/generatepreview/" target="_blank" rel="nofollow noopener noreferrer">`GeneratePreview(int worksheetIndex)`</a> method returns a worksheet preview as an SVG vector image, that is encapsulated in the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a> public class from the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.HtmlCss.Resources.Images.Vector`</a> namespace. This class has all necessary methods and properties to obtain the content of an SVG image in any desired form, save it to disk, stream and so on.
+
+The code sample below shows opening an unprotected spreadsheet file, obtaining a number of all worksheets inside this spreadsheet, and then generating the previews for every worksheet in a loop. Then these previews are saved to the disk.
+
+```csharp
+// Obtain a valid full path to the spreadsheet file
+string inputPath = "Sample.xlsx";
+
+// Load spreadsheet file to the Editor constructor
+using (GroupDocs.Editor.Editor editor = new Editor(inputPath))
+{
+	// Get document info for this file
+	IDocumentInfo infoUncasted = editor.GetDocumentInfo(null);
+
+	//Make sure it is really a Spreadsheet of XLSX format
+	Assert.AreEqual(Formats.SpreadsheetFormats.Xlsx, infoUncasted.Format);
+
+	// Cast this document info to the SpreadsheetDocumentInfo type
+	SpreadsheetDocumentInfo infoSpreadsheet = (SpreadsheetDocumentInfo)infoUncasted;
+
+	// Get the number of all worksheets
+	int worksheetsCount = infoSpreadsheet.PageCount;
+
+	//Iterate through all worksheets and generate the preview on every iteration
+	for (int worksheetIndex = 0; worksheetIndex < worksheetsCount; worksheetIndex++)
+	{
+		// Generate one preview as SVG image by worksheet index
+		SvgImage oneSvgPreview = infoSpreadsheet.GeneratePreview(worksheetIndex);
+
+		// Save SVG preview to the file
+		oneSvgPreview.Save(Path.Combine(outputFolder, oneSvgPreview.FilenameWithExtension));
+	}
+}
+```
+
+Concluding, the new worksheets preview feature is by its essence a new public method in the existing <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/spreadsheetdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Metadata.SpreadsheetDocumentInfo`</a> struct, that obtains a worksheet index and returns an instance of <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a> class. If the end-user needs to obtain a preview of the worksheet in a raster format, but not in the vector, he can use the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/savetopng/" target="_blank" rel="nofollow noopener noreferrer">`SaveToPng`</a> method in the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a> class - this method converts the SVG content of the current <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a> to the PNG format and saves it to the specified <a href="https://learn.microsoft.com/en-us/dotnet/api/system.IO.Stream?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`System.IO.Stream`</a>.

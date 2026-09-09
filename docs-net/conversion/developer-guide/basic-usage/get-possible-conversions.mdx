@@ -1,0 +1,86 @@
+---
+title: "Get possible conversions"
+sidebar_label: "Get possible conversions"
+sidebar_key: "net-conversion-get-possible-conversions"
+sidebar_position: 1
+description: "This article explains how to obtain supported conversions when convert documents with GroupDocs.Conversion within your .NET applications."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/basic-usage/get-possible-conversions.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "14bb41d8f416046413266491721a7f3ee077162d931325e67bf10f6548c77e12"
+---
+
+:::info
+GroupDocs.Conversion for .NET is included in Conholdate.Total for .NET.
+:::
+
+There are multiple target formats available when converting documents with **<a href="https://products.groupdocs.com/conversion/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Conversion</a>** and you can always refer to [supported file formats](/net/conversion/getting-started/supported-document-formats/) documentation for more details.
+
+But what about getting possible conversions programmatically? For example, it could allow end-users to select the target format for a specific document or to display the complete list of supported formats. 
+Fortunately GroupDocs.Conversion API provides several ways to achieve this, so please check the available options below.
+
+## Get possible conversions for a specific document
+
+When you need to know possible conversions for a provided source document you can do this by following the below steps:
+
+1.   Create an instance of the <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter" target="_blank" rel="nofollow noopener noreferrer">Converter</a> class by passing the source document path as the constructor's parameter.
+2.   Call the <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter/getpossibleconversions" target="_blank" rel="nofollow noopener noreferrer">GetPossibleConversions</a> method of the <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter" target="_blank" rel="nofollow noopener noreferrer">Converter</a> object.
+
+The method will return the <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/possibleconversions" target="_blank" rel="nofollow noopener noreferrer">PossibleConversions</a> collection with a complete list of possible conversions for the source document type.
+
+The following code snippet shows how to get possible conversions of the source document:
+
+```csharp
+using (Converter converter = new Converter("sample.docx"))
+{
+    PossibleConversions conversions = converter.GetPossibleConversions();
+    Console.WriteLine("The source document is of type {0} and could be converted to:", conversions.Source.Extension);
+
+    foreach (var conversion in conversions.All)
+    {
+        Console.WriteLine("\t {0} as {1} conversion.",
+            conversion.Format,
+            conversion.IsPrimary ? "primary" : "secondary");
+    }    
+}
+```
+
+Or you can use a [fluent syntax](/net/conversion/developer-guide/basic-usage/fluent-syntax/)
+
+```csharp
+PossibleConversions conversions = FluentConverter.Load("sample.docx").GetPossibleConversions();
+Console.WriteLine("The source document is of type {0} and could be converted to:", conversions.Source.Extension);
+
+foreach (var conversion in conversions.All)
+{
+     Console.WriteLine("\t {0} as {1} conversion.",
+        conversion.Format,
+        conversion.IsPrimary ? "primary" : "secondary");
+}    
+
+```
+
+## Get all available conversions 
+
+If it is required to programmatically obtain a collection of all supported conversions it is as easy as calling a static <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter/getallpossibleconversions" target="_blank" rel="nofollow noopener noreferrer">GetAllPossibleConversions</a> method of the <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter" target="_blank" rel="nofollow noopener noreferrer">Converter</a> class.
+
+The following code snippet shows how to get all possible conversions:
+
+```csharp
+var allPossibleConversions = Converter.GetAllPossibleConversions();
+foreach (var possibleConversions in allPossibleConversions)
+{
+    Console.WriteLine($"Source format: {possibleConversions.Source.Description}");
+    foreach (var conversion in possibleConversions.All)
+    {
+        Console.WriteLine("\t...can be converted to {0} format as {1} conversion.",
+            conversion.Format,
+            conversion.IsPrimary ? "primary" : "secondary");        
+    }
+}
+```

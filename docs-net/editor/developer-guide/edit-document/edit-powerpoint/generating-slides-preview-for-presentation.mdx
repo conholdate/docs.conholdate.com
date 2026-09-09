@@ -1,0 +1,64 @@
+---
+title: "Generating slides preview for presentation"
+sidebar_label: "Generating slides preview for presentation"
+sidebar_key: "net-editor-edit-document-edit-powerpoint-generating-slides-preview-for-presentation"
+sidebar_position: 4
+description: "This article describes how to generate a preview for any slide for the existing PowerPoint presentation in SVG format"
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-powerpoint/generating-slides-preview-for-presentation.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "18af75ace12a4d56338fa6bebb0e0683b51cff3abcc68efc8e4a7bd1907a88c5"
+---
+
+:::info
+GroupDocs.Editor for .NET is included in Conholdate.Total for .NET.
+:::
+
+Starting from <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-22-11-release-notes/" target="_blank" rel="nofollow noopener noreferrer">version 22.11</a>, the GroupDocs.Editor for .NET allows generating the preview for any slide in the presentation document in SVG format. This feature allows the end-user to view and inspect the content of the presentation without actually sending it for edit. This generated slide preview cannot be edited, but it can be viewed in any desktop or online image viewer as well in the browser (because any modern browser actually supports SVG format).
+
+This feature allows end-users to generate a preview for any slide within the presentation regardless of the licensing mode of the GroupDocs.Editor for .NET: it works the same for both trial and licensed mode, there are no trial limitations for this feature. While generating the slides preview, the GroupDocs.Editor doesn't write off the consumed bytes or credits.
+
+For generating the slides preview the new instance method <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/presentationdocumentinfo/generatepreview/" target="_blank" rel="nofollow noopener noreferrer">`GeneratePreview(int slideIndex)`</a> from the struct <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/presentationdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Metadata.PresentationDocumentInfo`</a> should be used, and slide is specified by its zero-based _index_ (do not confuse with the slide _numbers_, which are 1-based). If the specified index is lesser than 0 or exceeds the number of slides within a given presentation, then the <a href="https://learn.microsoft.com/en-us/dotnet/api/system.ArgumentOutOfRangeException?view=net-7.0" target="_blank" rel="nofollow noopener noreferrer">System.ArgumentOutOfRangeException</a> exception will be thrown. Slide previews can be generated for both encoded and unencoded presentations; for encoded the end-user must specify a valid password in the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`GetDocumentInfo`</a> method.
+
+The <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/presentationdocumentinfo/generatepreview/" target="_blank" rel="nofollow noopener noreferrer">`GeneratePreview(int slideIndex)`</a> method returns a slide preview as an SVG vector image, that is encapsulated in the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a> public class from the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.HtmlCss.Resources.Images.Vector`</a> namespace. This class has all necessary methods and properties to obtain the content of an SVG image in any desired form, save it to disk and so on.
+
+The code sample below shows opening an unprotected presentation file and generating the previews for every slide. Then these previews are saved to the disk.
+
+```csharp
+// Obtain a valid full path to the presentation file
+string inputPath = "Sample.pptx";
+
+// Load file to the Editor constructor
+using (GroupDocs.Editor.Editor editor = new Editor(inputPath))
+{
+	// Get document info for this file
+	IDocumentInfo infoUncasted = editor.GetDocumentInfo(null);
+
+	// Cast this document info to the PresentationDocumentInfo type
+	PresentationDocumentInfo infoSlides = (PresentationDocumentInfo)infoUncasted;
+
+	// Get the number of all slides
+	int slidesCount = infoSlides.PageCount;
+
+	//Iterate through all slides and generate the preview on every iteration
+	for (int i = 0; i < slidesCount; i++)
+	{
+		// Generate one preview as SVG image by slide index
+		SvgImage oneSvgPreview = infoSlides.GeneratePreview(i);
+
+		// Save it to the file
+		oneSvgPreview.Save(Path.Combine(outputFolder, oneSvgPreview.FilenameWithExtension));
+	}
+}
+```
+
+Concluding, the new slides preview feature is by its essence a new public method in the existing <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/presentationdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Metadata.PresentationDocumentInfo`</a> struct, that obtains a slide index and returns an instance of <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a> class. If the end-user needs to obtain a preview of the slide in a raster format, but not in the vector, he can use the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/savetopng/" target="_blank" rel="nofollow noopener noreferrer">`SaveToPng`</a> method in the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a> class - this method converts the SVG content of the current <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a> to the PNG format and saves it to the specified <a href="https://learn.microsoft.com/en-us/dotnet/api/system.IO.Stream?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`System.IO.Stream`</a>.
+
+
+
+

@@ -1,0 +1,91 @@
+---
+title: "Edit PowerPoint Presentations"
+sidebar_label: "Edit PowerPoint Presentations"
+sidebar_key: "net-editor-edit-document-edit-powerpoint-index"
+sidebar_position: 47
+description: "This guide demonstrates how to edit PPT, PPTX, PPTM, PPSX, PPSM, POTX, POTM presentations with different settings and many other powerful features of GroupDocs.Editor for .NET."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-powerpoint/_index.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "d9a2db5d4e6c674520293482a58648c772c96f90e1e3cdae446e97db9eea4df3"
+---
+
+:::info
+GroupDocs.Editor for .NET is included in Conholdate.Total for .NET.
+:::
+
+&gt; This example demonstrates standard open-edit-save cycle with Presentation documents, using different options on every step.
+
+## Introduction
+
+Presentation documents are presented by many formats: PPT, PPTX, PPTM, PPS(X/M), POT(X/M) and other, which are supported by GroupDocs.Editor as a separate format family among all others. Same like for all other family formats, Presentation family has its own load, edit and save options. Presentation format has significant distinction from the WordProcessing and all textual formats, and at the same time big similarity with Spreadsheet formats, - it has no pages, but instead of pages it has slides (like Spreadsheet has tabs). Like tabs in Spreadsheets, slides in Presentations are completely separate one from each other and has no valid representation in HTML markup, so the only way to edit slides is to edit them separately, one slide per one editing procedure.
+
+As a result, a Presentation document with multiple slides is loaded into the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a> class. Then, in order to open document for editing by calling an <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a>.<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit" target="_blank" rel="nofollow noopener noreferrer">Edit</a> method, user should select desired slide for editing by specifying its index in the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationeditoptions" target="_blank" rel="nofollow noopener noreferrer">PresentationEditOptions</a>. As a result, user will obtain an instance of <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> class, that holds that edited slide. For editing another slide, user should perform another call of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a>.<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit" target="_blank" rel="nofollow noopener noreferrer">Edit</a> method with another slide index, and obtain a new instance of <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> class. Finally, when saving edited slides back to Presentation format, user should save every <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> instance separately.
+
+Like all Office OOXML formats, Presentation documents can be encrypted with password. GroupDocs.Editor supports opening password-protected Presentation documents (password should be specified in the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationloadoptions" target="_blank" rel="nofollow noopener noreferrer">PresentationLoadOptions</a>) and creating password-protected documents (password should be specified in the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationsaveoptions" target="_blank" rel="nofollow noopener noreferrer">PresentationSaveOptions</a>).
+
+## Loading Presentation for editing
+
+First step for edit a document is to load it. In order to load presentation to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a> class, user should use the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationloadoptions" target="_blank" rel="nofollow noopener noreferrer">PresentationLoadOptions</a> class. It is not necessary in some general cases - even without <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationloadoptions" target="_blank" rel="nofollow noopener noreferrer">PresentationLoadOptions</a> the GroupDocs.Editor is able to recognize presentation format and apply appropriate default load options automatically. But when presentation is encoded, the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationloadoptions" target="_blank" rel="nofollow noopener noreferrer">PresentationLoadOptions</a> is the only way to set a password and load the document properly.
+
+If document is encoded, but password is not set in the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationloadoptions" target="_blank" rel="nofollow noopener noreferrer">PresentationLoadOptions</a>, or <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationloadoptions" target="_blank" rel="nofollow noopener noreferrer">PresentationLoadOptions</a> is not specified at all, then <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/passwordrequiredexception" target="_blank" rel="nofollow noopener noreferrer">PasswordRequiredException</a> exception will be thrown. If password is set, but is incorrect, then <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/incorrectpasswordexception" target="_blank" rel="nofollow noopener noreferrer">IncorrectPasswordException</a> will be thrown. If password is set, but the document is not encoded, then password will be ignored.
+
+Below is an example of loading a presentation document from file path with load options and password.
+
+```csharp
+string inputPptxPath = "C://input/presentation.pptx";
+PresentationLoadOptions loadOptions = new PresentationLoadOptions();
+loadOptions.Password = "password";
+Editor editor = new Editor(inputPptxPath, loadOptions);
+```
+
+## Edit PowerPoint presentation 
+
+For opening Presentation document for edit a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationeditoptions" target="_blank" rel="nofollow noopener noreferrer">PresentationEditOptions</a> class should be used. It has two properties: <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationeditoptions/slidenumber" target="_blank" rel="nofollow noopener noreferrer">SlideNumber</a> of Integer type, and a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationeditoptions/showhiddenslides" target="_blank" rel="nofollow noopener noreferrer">ShowHiddenSlides</a>, that is a boolean flag.
+
+<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationeditoptions/slidenumber" target="_blank" rel="nofollow noopener noreferrer">SlideNumber</a> is a zero-based index of a slide, that allows to specify and select one particular slide from a presentation to edit. If lesser then 0, the first slide will be selected (same as *SlideNumber = 0*). If greater then amount of all slides in presentation, the last slide will be selected. If input presentation contains only single slide, this option will be ignored, and this single slide will be edited. By default is 0, that implies first slide for edit.
+
+<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationeditoptions/showhiddenslides" target="_blank" rel="nofollow noopener noreferrer">ShowHiddenSlides</a> is a boolean flag, which specifies whether the hidden slides should be included or not. Default is *false* - hidden slides are not shown and exception will be thrown while trying to edit them. So, if input Presentation has 5 slides, where 2nd is hidden, user has specified *SlideNumber = 1* (2nd slide) and simultaneously *ShowHiddenSlides  = false*, the `InvalidOperationException` will be thrown. From this short example it can be seen, that the indexes of the hidden slides are not flopped in but instead are _denied_ - when trying to access them, the `InvalidOperationException` occurs.
+
+If parameterless overload of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a>.<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit" target="_blank" rel="nofollow noopener noreferrer">Edit</a> method is used, the default <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationeditoptions" target="_blank" rel="nofollow noopener noreferrer">PresentationEditOptions</a> instance will be used: first slide and disabled <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationeditoptions/showhiddenslides" target="_blank" rel="nofollow noopener noreferrer">ShowHiddenSlides</a>.
+
+Code example below demonstrates all options, described above. Let's assume, that Presentation document with at least 3 slides is already loaded into the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a> class.
+
+```csharp
+//parameterless overload is used => default PresentationEditOptions is applied, which means 1st slide
+EditableDocument firstSlide = editor.Edit();
+
+PresentationEditOptions editOptions2 = new PresentationEditOptions();
+editOptions2.SlideNumber = 1; //index is 0-based, so this is 2nd slide
+EditableDocument secondSlide = editor.Edit(editOptions2);
+
+PresentationEditOptions editOptions3 = new PresentationEditOptions();
+editOptions3.SlideNumber = 2; //index is 0-based, so this is 3rd slide
+editOptions3.ShowHiddenSlides = true; //if 3rd slide is hidden, it will be opened anyway
+EditableDocument thirdSlide = editor.Edit(editOptions3);
+```
+
+## Save Presentation after edit
+
+<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationsaveoptions" target="_blank" rel="nofollow noopener noreferrer">PresentationSaveOptions</a> class is designed for saving the edited Presentation documents. This class has one <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationsaveoptions/#constructors" target="_blank" rel="nofollow noopener noreferrer">constructor</a>, which has one parameter - a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/presentationformats" target="_blank" rel="nofollow noopener noreferrer">Presentation format</a>, in which the output document should be saved. This output format is represented by the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/presentationformats" target="_blank" rel="nofollow noopener noreferrer">PresentationFormats</a> struct. After creating an instance, output format can be obtained or modified later, through the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationsaveoptions/outputformat" target="_blank" rel="nofollow noopener noreferrer">OutputFormat</a> property. This is the only parameter, which is necessary for saving the document: all others are optional and may be omitted.
+
+Along with format, user is able to specify a password through the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationsaveoptions/password" target="_blank" rel="nofollow noopener noreferrer">Password</a> string property - in this case output document will be encoded and protected with this password. By default password is not set, which implies that output document will be unprotected. This is shown in example below, where it is supposed that a user has an <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> instance with edited slide.
+
+```csharp
+PresentationSaveOptions saveOptions = new PresentationSaveOptions(PresentationFormats.Pptm);
+saveOptions.Password = "new password";
+
+EditableDocument afterEdit = /* obtain it from somewhere */;
+FileStream outputStream = /* obtain it from somewhere */;
+
+//saving edited slide to specified stream in PPTM format and with password encoding
+editor.Save(afterEdit, outputStream, saveOptions);
+
+```
+
+Starting from version 20.4, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationsaveoptions" target="_blank" rel="nofollow noopener noreferrer">PresentationSaveOptions</a> class contains two new properties - <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationsaveoptions/slidenumber" target="_blank" rel="nofollow noopener noreferrer">SlideNumber</a> and <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationsaveoptions/insertasnewslide" target="_blank" rel="nofollow noopener noreferrer">InsertAsNewSlide</a>, - which are highly coupled together. These properties allow to insert edited slide into existing presentation instead of creating new presentation with single edited slide, which remains the default behavior. They are explained in detail in [separate article](/net/editor/developer-guide/edit-document/edit-powerpoint/inserting-edited-slide-into-existing-presentation/).

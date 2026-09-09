@@ -1,0 +1,219 @@
+---
+title: "Get document info"
+sidebar_label: "Get document info"
+sidebar_key: "net-conversion-get-document-info"
+sidebar_position: 2
+description: "This article explains how to detect the document's file type and calculate the number of pages when converting a file with GroupDocs.Conversion for .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/basic-usage/get-document-info.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "8e69962b198965b12c8148673b80ce35e1a8da8bc721a4724c03f331df986ed1"
+---
+
+:::info
+GroupDocs.Conversion for .NET is included in Conholdate.Total for .NET.
+:::
+
+GroupDocs.Conversion provides a standard way of obtaining information about the source document. It works regardless of how the document was loaded: from a disk, a stream, or cloud storage.
+
+To get document information, use the <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter/getdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">Converter.GetDocumentInfo()</a> method. It returns a <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/documentinfo/" target="_blank" rel="nofollow noopener noreferrer">DocumentInfo</a> object with common information common for every supported document - format, creation date, size, and page count. 
+
+To iterate through the document information properties, use the `PropertyNames` and `Item` enumerators. The following code snippet shows how to list all the available document information properties:
+
+```csharp
+using (Converter converter = new Converter("sample.txt"))
+{
+    IDocumentInfo info = converter.GetDocumentInfo();
+    
+    foreach (var propertyName in info.PropertyNames)
+    {
+        Console.WriteLine(propertyName + ": "+ info[propertyName]);
+    }
+}
+```
+Depending on the format type, the resulting `DocumentInfo` object also contains some additional information:
+
+* <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/pdfdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">PDF documents</a> - title, table of contents, author, whether it is encrypted and so on;
+* <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/wordprocessingdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">Wordprocessing documents</a> - title, table of contents, author, lines count, words count, whether it is password protected and so on;
+* <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/projectmanagementdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">Project management documents</a> - project start and end dates, number of tasks;
+* <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/imagedocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">Images</a> - width, height, bits per pixel;
+* <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/presentationdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">Presentations</a> - title, author, whether it is password protected;
+* <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/spreadsheetdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">Spreadsheets</a> - title, author, worksheets count, whether it is password protected;
+* <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/caddocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">CAD drawings</a> - width, height, collections of layouts and layers;
+* <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/emaildocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">Emails</a> - number and names of attachments, whether it is encrypted, whether it is signed, whether its body is in HTML format;
+
+See the <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/" target="_blank" rel="nofollow noopener noreferrer">API reference</a> for a complete list of format-specific document metadata.
+
+The samples below show how to obtain document info for various formats.
+
+### PDF documents
+
+```csharp
+using (Converter converter = new Converter("sample-toc.pdf"))
+{
+    IDocumentInfo info = converter.GetDocumentInfo();
+    PdfDocumentInfo docInfo = (PdfDocumentInfo) info;
+
+    Console.WriteLine("Author: {0}", docInfo.Author);
+    Console.WriteLine("Creation date: {0}", docInfo.CreationDate);
+    Console.WriteLine("Title: {0}", docInfo.Title);
+    Console.WriteLine("Version: {0}", docInfo.Version);
+    Console.WriteLine("Pages count: {0}", docInfo.PagesCount);
+    Console.WriteLine("Width: {0}", docInfo.Width);
+    Console.WriteLine("Height: {0}", docInfo.Height);
+    Console.WriteLine("Is landscaped: {0}", docInfo.IsLandscape);
+    Console.WriteLine("Is Encrypted: {0}", docInfo.IsEncrypted);
+    foreach (var tocItem in docInfo.TableOfContents)
+    {
+        Console.WriteLine($"{tocItem.Title}: {tocItem.Page}");
+    }
+}
+```
+
+### Wordprocessing documents
+
+```csharp
+using (Converter converter = new Converter("sample.doc"))
+{
+    IDocumentInfo info = converter.GetDocumentInfo();
+    WordProcessingDocumentInfo docInfo = (WordProcessingDocumentInfo) info;
+
+    Console.WriteLine("Author: {0}", docInfo.Author);
+    Console.WriteLine("Creation date: {0}", docInfo.CreationDate);
+    Console.WriteLine("Format: {0}", docInfo.Format);
+    Console.WriteLine("Is Password Protected: {0}", docInfo.IsPasswordProtected);
+    Console.WriteLine("Lines: {0}", docInfo.Lines);
+    Console.WriteLine("Pages count: {0}", docInfo.PagesCount);
+    Console.WriteLine("Size: {0}", docInfo.Size);
+    Console.WriteLine("Title: {0}", docInfo.Title);               
+    Console.WriteLine("Words: {0}", docInfo.Words);
+    foreach (var tocItem in docInfo.TableOfContents)
+    {
+        Console.WriteLine($"{tocItem.Title}: {tocItem.Page}");
+    }
+}
+```
+
+### Project management documents
+
+```csharp
+using (Converter converter = new Converter("foobar.mpp"))
+{
+    IDocumentInfo info = converter.GetDocumentInfo();
+    ProjectManagementDocumentInfo docInfo = (ProjectManagementDocumentInfo) info;
+
+    Console.WriteLine("Creation date: {0}", docInfo.CreationDate);
+    Console.WriteLine("Start date: {0}", docInfo.StartDate);
+    Console.WriteLine("End date: {0}", docInfo.EndDate);
+    Console.WriteLine("Format: {0}", docInfo.Format);
+    Console.WriteLine("Size: {0}", docInfo.Size);
+    Console.WriteLine("Tasks count: {0}", docInfo.TasksCount);        
+}
+```
+
+### Images
+
+```csharp
+using (Converter converter = new Converter("image.png"))
+{
+    IDocumentInfo info = converter.GetDocumentInfo();
+    ImageDocumentInfo docInfo = (ImageDocumentInfo) info;
+
+    Console.WriteLine("Bits per pixel: {0}", docInfo.BitsPerPixel);
+    Console.WriteLine("Creation date: {0}", docInfo.CreationDate);
+    Console.WriteLine("Format: {0}", docInfo.Format);
+    Console.WriteLine("Height: {0}", docInfo.Height);
+    Console.WriteLine("Width: {0}", docInfo.Width);    
+    Console.WriteLine("Size: {0}", docInfo.Size);
+}
+```
+
+### Presentations
+
+```csharp
+using (Converter converter = new Converter("presentation.ppt"))
+{
+    IDocumentInfo info = converter.GetDocumentInfo();
+    PresentationDocumentInfo docInfo = (PresentationDocumentInfo) info;
+
+    Console.WriteLine("Author: {0}", docInfo.Author);
+    Console.WriteLine("Creation date: {0}", docInfo.CreationDate);
+    Console.WriteLine("Format: {0}", docInfo.Format);
+    Console.WriteLine("Is Password Protected: {0}", docInfo.IsPasswordProtected);    
+    Console.WriteLine("Pages count: {0}", docInfo.PagesCount);
+    Console.WriteLine("Size: {0}", docInfo.Size);
+    Console.WriteLine("Title: {0}", docInfo.Title);               
+}
+```
+
+### Spreadsheets
+
+```csharp
+using (Converter converter = new Converter("table.xlsx"))
+{
+    IDocumentInfo info = converter.GetDocumentInfo();
+    SpreadsheetDocumentInfo docInfo = (SpreadsheetDocumentInfo) info;
+
+    Console.WriteLine("Author: {0}", docInfo.Author);
+    Console.WriteLine("Creation date: {0}", docInfo.CreationDate);
+    Console.WriteLine("Format: {0}", docInfo.Format);
+    Console.WriteLine("Is Password Protected: {0}", docInfo.IsPasswordProtected);    
+    Console.WriteLine("Pages count: {0}", docInfo.PagesCount);
+    Console.WriteLine("Size: {0}", docInfo.Size);
+    Console.WriteLine("Title: {0}", docInfo.Title);
+    Console.WriteLine("Worksheets Count : {0}", docInfo.WorksheetsCount);
+}
+```
+### CAD drawings
+
+```csharp
+using (Converter converter = new Converter("sample.dwg"))
+{
+    IDocumentInfo info = converter.GetDocumentInfo();
+    CadDocumentInfo docInfo = (CadDocumentInfo) info;
+
+    Console.WriteLine("Creation date: {0}", docInfo.CreationDate);
+    Console.WriteLine("Format: {0}", docInfo.Format);
+    Console.WriteLine("Height: {0}", docInfo.Height);
+    Console.WriteLine("Width: {0}", docInfo.Width);
+    Console.WriteLine("Size: {0}", docInfo.Size);
+    
+    foreach (var layout in docInfo.Layouts)
+    {
+        Console.WriteLine($"Layout: {layout}");
+    }
+
+    foreach (var layer in docInfo.Layers)
+    {
+        Console.WriteLine($"Layer: {layer}");
+    }
+}
+```
+
+### Emails
+
+```csharp
+using (Converter converter = new Converter("sample.msg"))
+{
+    IDocumentInfo info = converter.GetDocumentInfo();
+    EmailDocumentInfo docInfo = (EmailDocumentInfo) info;
+
+    Console.WriteLine("Creation date: {0}", docInfo.CreationDate);
+    Console.WriteLine("Format: {0}", docInfo.Format);
+    Console.WriteLine("Is Encrypted: {0}", docInfo.IsEncrypted);
+    Console.WriteLine("Is body in HTML: {0}", docInfo.IsHtml);
+    Console.WriteLine("Is Signed: {0}", docInfo.IsSigned);
+    Console.WriteLine("Size: {0}", docInfo.Size);
+    Console.WriteLine("Attachments Count: {0}", docInfo.AttachmentsCount);
+    foreach (var attachmentName in docInfo.AttachmentsNames)
+    {
+        Console.WriteLine($"Attachment Name: {attachmentName}");
+    }
+
+}
+```

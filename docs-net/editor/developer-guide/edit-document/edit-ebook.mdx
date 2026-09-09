@@ -1,0 +1,234 @@
+---
+title: "How to edit e-Book file"
+sidebar_label: "How to edit e-Book file"
+sidebar_key: "net-editor-edit-document-edit-ebook"
+sidebar_position: 56
+description: "This article demonstrates how to edit e-Book files using C# programming language."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-ebook.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "577871115ae2f766fc005c1f4beb115ac48a18cad9bcd67d2e9e33d5fd421596"
+---
+
+:::info
+GroupDocs.Editor for .NET is included in Conholdate.Total for .NET.
+:::
+
+## Introduction
+
+For the <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-22-9-release-notes/" target="_blank" rel="nofollow noopener noreferrer">version 22.9</a>, the GroupDocs.Editor for .NET supports 3 formats from the e-Book family: 
+
+1. <a href="https://docs.fileformat.com/ebook/mobi/" target="_blank" rel="nofollow noopener noreferrer">MOBI</a> (MobiPocket),
+2. <a href="https://docs.fileformat.com/ebook/azw3/" target="_blank" rel="nofollow noopener noreferrer">AZW3</a>, also known as Kindle Format 8 (KF8),
+3. <a href="https://docs.fileformat.com/ebook/epub/" target="_blank" rel="nofollow noopener noreferrer">ePub</a> (Electronic Publication).
+
+As for the 22.9 version, the AZW3 and ePub formats are supported on both import (load) and export (save), while MOBI is supported only on import (support of MOBI on export was scheduled for the next release).
+
+Starting from the version <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-23-4-release-notes/" target="_blank" rel="nofollow noopener noreferrer">23.4</a>, the MOBI format is fully supported on export.
+
+## Load e-Book files for edit
+
+GroupDocs.Editor for .NET doesn't contain loading options nor for the whole e-Book formats family neither for the specific e-Book formats - users should specify e-Books through file path or byte stream without any loading options at all. 
+
+Code example below shows loading of 3 different e-Books in different formats into the 3 different istances of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> class from different sources:
+
+```csharp
+string mobiPath = "path/to/A-Room-with-a-View-morrison.mobi");
+string azw3Path = "path/to/Around the World in 28 Languages.azw3";
+string epubPath = "path/to/Alices Adventures in Wonderland.epub";
+
+GroupDocs.Editor.Editor editorMobi = new Editor(mobiPath);
+
+FileStream azw3Stream = File.OpenRead(azw3Path);
+GroupDocs.Editor.Editor editorAzw3 = new Editor(azw3Stream);
+
+byte[] epubBytes = File.ReadAllBytes(epubPath);
+MemoryStream epubStream = new MemoryStream(epubBytes);
+GroupDocs.Editor.Editor editorEpub = new Editor(epubStream);
+
+
+// ...
+// Don't forget to dispose Editors when work is done
+editorMobi.Dispose();
+editorAzw3.Dispose();
+editorEpub.Dispose();
+```
+
+## Edit e-Book files
+
+There is a common edit options for the whole e-Book formats family - a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebookeditoptions" target="_blank" rel="nofollow noopener noreferrer">`EbookEditOptions`</a> class. The content of this class resembles the content of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions" target="_blank" rel="nofollow noopener noreferrer">`WordProcessingEditOptions`</a> class, because <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebookeditoptions" target="_blank" rel="nofollow noopener noreferrer">`EbookEditOptions`</a> contains a subset of options from <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions" target="_blank" rel="nofollow noopener noreferrer">`WordProcessingEditOptions`</a> - <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebookeditoptions/enablepagination" target="_blank" rel="nofollow noopener noreferrer">`EnablePagination`</a> and <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebookeditoptions/enablelanguageinformation" target="_blank" rel="nofollow noopener noreferrer">`EnableLanguageInformation`</a> and, as in the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions" target="_blank" rel="nofollow noopener noreferrer">`WordProcessingEditOptions`</a>, they are disabled (`false`) by default.
+
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebookeditoptions/enablepagination" target="_blank" rel="nofollow noopener noreferrer">`EnablePagination`</a> - allows to enable or disable pagination in the resultant HTML document. By default is disabled (`false`). This option controls how exactly the content of the e-Book will be converted to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> representation while edited - in the _float_ (`false`) or in the _paged_ (`true`) mode. At the end, this options affects on the structure and representation of the HTML/CSS document, that the end-user edits in the WYSIWYG-editor.
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebookeditoptions/enablelanguageinformation" target="_blank" rel="nofollow noopener noreferrer">`EnableLanguageInformation`</a> - allows to export (`true`) or do not export (`false`) the language information to the resultant HTML markup. By default is disabled (`false`). This is useful when an e-Book contains text on different languages, and you want to preserve this language-specific metainformation while editing document in the WYSIWYG-editor.
+
+Like for all supported document formats and options, in order to edit the document, user should firstly load it to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> class (this step was reviewed in the section above) and then call an <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit/#edit" target="_blank" rel="nofollow noopener noreferrer">`Edit(IEditOptions)`</a> method. Like for all supported document formats, the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebookeditoptions" target="_blank" rel="nofollow noopener noreferrer">`EbookEditOptions`</a> are optional and user may call a parameterless <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit" target="_blank" rel="nofollow noopener noreferrer">`Edit()`</a> method - in this case the default <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebookeditoptions" target="_blank" rel="nofollow noopener noreferrer">`EbookEditOptions`</a> will be implicitly applied.
+
+Code example below demonstrates a loading of a single ePub file to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> instance and then editing it twice with two different edit options (default and custom) and generating two different <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> instances from an input single ePub file. Then two different HTML markup pieces are generated from these two <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> instances.
+
+```csharp
+string epubPath = "path/to/Alices Adventures in Wonderland.epub";
+
+GroupDocs.Editor.Editor editorEpub = new Editor(epubPath);
+
+Options.EbookEditOptions defaultEditOptions = new Options.EbookEditOptions();
+
+Options.EbookEditOptions customEditOptions = new Options.EbookEditOptions();
+customEditOptions.EnablePagination = true;
+customEditOptions.EnableLanguageInformation = true;
+
+EditableDocument defaultEdited = editorEpub.Edit(defaultEditOptions);
+EditableDocument customEdited = editorEpub.Edit(customEditOptions);
+
+string embeddedHtmlDefaultEdited = defaultEdited.GetEmbeddedHtml();
+string embeddedHtmlCustomEdited = customEdited.GetEmbeddedHtml();
+
+// ...
+// Don't forget to dispose Editor and EditableDocuments when work is done
+defaultEdited.Dispose();
+customEdited.Dispose();
+editorEpub.Dispose();
+```
+
+## Save e-Book files after edit
+
+
+:::info
+This section describes the saving of e-book files in the GroupDocs.Editor version 23.4 and newer. In using older versions, this description is invalid and source code is not working.
+:::
+
+
+Starting from the version 23.4 the GroupDocs.Editor for .NET has obtained an ability to save e-books in all 3 supported formats: MOBI, AZW3, and ePub. Saving of the e-books is performed like for all other formats. When e-book content was edited by the client in the WYSIWYG-editor and was sent back to the server-side, it should be passed to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a>, and then this instance should be passed to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/save" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Editor.Save()`</a> method.
+
+The <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/save" target="_blank" rel="nofollow noopener noreferrer">`Editor.Save()`</a> method obtains an instance of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/isaveoptions/" target="_blank" rel="nofollow noopener noreferrer">`ISaveOptions`</a> interface, and for saving in some of the e-book formats the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebooksaveoptions" target="_blank" rel="nofollow noopener noreferrer">`EbookSaveOptions`</a> class should be used. This class is common for all supported e-book formats within e-book family: MOBI, AZW3 and ePub. It has one constructor with a mandatory parameter - a desired output format, into which the resultant document will be stored. This specific format should be specified as one of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/ebookformats/" target="_blank" rel="nofollow noopener noreferrer">`Formats.EBookFormats`</a> value: <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/ebookformats/mobi/" target="_blank" rel="nofollow noopener noreferrer">`Mobi`</a>, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/ebookformats/azw3/" target="_blank" rel="nofollow noopener noreferrer">`Azw3`</a>, or <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/ebookformats/epub/" target="_blank" rel="nofollow noopener noreferrer">`Epub`</a>. Once the instance was created, this format can be obtained and changed using the `OutputFormat` property.
+
+The <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebooksaveoptions" target="_blank" rel="nofollow noopener noreferrer">`EbookSaveOptions`</a> class has also two another properties: `SplitHeadingLevel` and `ExportDocumentProperties`.
+
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebooksaveoptions/splitheadinglevel/" target="_blank" rel="nofollow noopener noreferrer">`SplitHeadingLevel`</a> of the `System.Int32` type controls how (if so) to split the content of e-book onto packages in the resultant file. It doesn't affect the representation of a file, opened in any e-Book reader; rather, it is about an internal structure of the e-Book file. If you dont bother about internal structure of the e-book file, you may leave this property to has the default value (`2`). Setting it to `0` will disable splitting, so all content of the e-Book will be incorporarted into a single package inside the resultant file.
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebooksaveoptions/exportdocumentproperties/" target="_blank" rel="nofollow noopener noreferrer">`ExportDocumentProperties`</a> of the `System.Boolean` type controls whether to export built-in and custom document properties inside the resultant e-Book file. If you have no plans to reconvert the resultant e-book to some other format, you may leave it intact - the default `false` value disables the exporting of the document properties, so the resultant document will be a little bit smaller in size.
+
+Code example below demonstrates a loading of a single ePub file to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> instance, editing it with default options, and saving to the ePub, AZW3, and Mobi with different options for each one.
+
+```csharp
+string epubPath = Path.Combine(Common.TestHelper.EpubFolder, "Alices Adventures in Wonderland.epub");
+
+string epubOutputPath = "Output_ePub.epub";
+string azw3OutputPath = "Output_AZW3.azw3";
+string mobiOutputPath = "Output_Mobi.azw3";
+
+GroupDocs.Editor.Editor editor = new Editor(epubPath);
+
+//edit with default EbookEditOptions
+EditableDocument edited = editor.Edit();
+
+Options.EbookSaveOptions epubSaveOptions = new Options.EbookSaveOptions(Formats.EBookFormats.Epub);
+epubSaveOptions.ExportDocumentProperties = true;
+epubSaveOptions.SplitHeadingLevel = 5;
+
+Options.EbookSaveOptions azw3SaveOptions = new Options.EbookSaveOptions(Formats.EBookFormats.Azw3);
+azw3SaveOptions.SplitHeadingLevel = 1;
+
+Options.EbookSaveOptions mobiSaveOptions = new Options.EbookSaveOptions(Formats.EBookFormats.Mobi);
+
+editor.Save(edited, epubOutputPath, epubSaveOptions);
+editor.Save(edited, azw3OutputPath, azw3SaveOptions);
+editor.Save(edited, mobiOutputPath, mobiSaveOptions);
+
+// ...
+// Don't forget to dispose Editor and EditableDocument when work is done
+edited.Dispose();
+editor.Dispose();
+```
+
+### Saving e-Book files before version 23.4
+
+
+:::info
+This section describes the saving of e-book files in the GroupDocs.Editor versions 22.9 - 23.2. From the version 23.4 (inclusive) and newer this description is invalid and source code is not working.
+:::
+
+
+Starting from the version 22.9 and before the version 23.4 the GroupDocs.Editor for .NET was able to save e-books only in AZW3 and ePub formats, while MOBI was not supported on the export. Due to this fact and unlike other format families and unlike a single <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebookeditoptions" target="_blank" rel="nofollow noopener noreferrer">`EbookEditOptions`</a> class, which is common for all e-Book formats, there was no single options class for saving into different e-Book formats at that moment. And because the GroupDocs.Editor for .NET has supported saving into AZW3 and ePub, there were distinct save options classes for each of these two formats:
+
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/epubsaveoptions" target="_blank" rel="nofollow noopener noreferrer">`EpubSaveOptions`</a> - for saving into ePub format
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/azw3saveoptions" target="_blank" rel="nofollow noopener noreferrer">`Azw3SaveOptions`</a> - for saving into AZW3 format
+
+These classes had one common property - a `SplitHeadingLevel` of the `System.Int32` type. This property controls how (if so) to split the content of AZW3 or ePub e-book onto packages in the resultant file. It doesn't affect the representation of a file, opened in any e-Book reader; rather, it is about an internal structure of the e-Book file. If you dont bother about internal structure of the ePub or AZW3 file, you may leave this property to has the default value.
+
+<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/epubsaveoptions" target="_blank" rel="nofollow noopener noreferrer">`EpubSaveOptions`</a> also has an `ExportDocumentProperties` boolean property - it controls whether to export built-in and custom document properties inside the resultant IDPF ePub e-Book. If you have no plans to reconvert the resultant ePub to some other format, you may leave it intact - the default `false` value disables the exporting of the document properties, so the resultant document will be a little bit smaller in size.
+
+Code example below demonstrates a loading of a single ePub file to the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> instance, editing it with default options, and saving to the ePub and AZW3 with different options for each one.
+
+```csharp
+string epubPath = "path/to/Alices Adventures in Wonderland.epub";
+string epubOutputPath = "Output_ePub.epub";
+string azw3OutputPath = "Output_AZW3.azw3";
+
+GroupDocs.Editor.Editor editor = new Editor(epubPath);
+
+//edit with default EbookEditOptions
+EditableDocument edited = editor.Edit();
+
+Options.EpubSaveOptions epubSaveOptions = new Options.EpubSaveOptions();
+epubSaveOptions.ExportDocumentProperties = true;
+epubSaveOptions.SplitHeadingLevel = 5;
+
+Options.Azw3SaveOptions azw3SaveOptions = new Options.Azw3SaveOptions();
+azw3SaveOptions.SplitHeadingLevel = 1;
+
+editor.Save(edited, epubOutputPath, epubSaveOptions);
+editor.Save(edited, azw3OutputPath, azw3SaveOptions);
+
+// ...
+// Don't forget to dispose Editor and EditableDocument when work is done
+edited.Dispose();
+editor.Dispose();
+```
+
+## Extracting metainfo from e-Book files
+
+Like for all supported formats, the GroupDocs.Editor for .NET provides an ability to detected the document metainfo for all supported e-Book formats by using a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`GetDocumentInfo()`</a> method of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> class. In case when a valid e-Book was loaded into the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> instance, a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`GetDocumentInfo()`</a> will return an instance of a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/ebookdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`Metadata.EbookDocumentInfo`</a> class, which inherits from <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`IDocumentInfo`</a> interface, which, in turn, defines 4 properties: <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo/format" target="_blank" rel="nofollow noopener noreferrer">`Format`</a>, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo/pagecount" target="_blank" rel="nofollow noopener noreferrer">`PageCount`</a>, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo/size" target="_blank" rel="nofollow noopener noreferrer">`Size`</a>, and <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo/isencrypted" target="_blank" rel="nofollow noopener noreferrer">`IsEncrypted`</a>.
+
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/ebookdocumentinfo/format" target="_blank" rel="nofollow noopener noreferrer">`Format`</a> property returns a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/ebookformats" target="_blank" rel="nofollow noopener noreferrer">`Formats.EBookFormats`</a> struct, which for the e-Books can be a `Mobi`, `Azw3`, or `Epub` value.
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/ebookdocumentinfo/pagecount" target="_blank" rel="nofollow noopener noreferrer">`PageCount`</a> property returns an **approximate** number of pages in case of MOBI or AZW3 or a number of chapters in case of ePub. For the Mobi and AZW3, it is approximate, because Mobi/AZW3 format internally is a set of HTML documents (chapters), which are not separated on pages and even have no strict page dimensions, which allows to split content on page blocks and thus calculate the number of pages. This decision was made by Mobi/AZW3 format designers intentionally to allows variable page size (and count) on different devices - from FullHD displays to smartphones. So, for returning a page count for a Mobi/AZW3 document, GroupDocs.Editor assumes standard A4 page size in a portrait orientation, splits existing document content on such "papers", and then calculates its count. So the returning number should be treated very carefully and approximately, users should not rely on it.
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/ebookdocumentinfo/size" target="_blank" rel="nofollow noopener noreferrer">`Size`</a> property returns a number of bytes of e-Book file.
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/ebookdocumentinfo/isencrypted" target="_blank" rel="nofollow noopener noreferrer">`IsEncrypted`</a> property always returns a `false` value, because e-Books cannot be encrypted with password, like PDF or Office Open XML.
+
+Code example below demonstrates a loading of 3 different e-Books in different formats (Mobi, AZW3 and ePub) into the 3 different istances of the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> class and then extracting information about them and checking it with NUnit.
+
+```csharp
+string mobiPath = "Ebook.mobi");
+string azw3Path = "Ebook.azw3";
+string epubPath = "Ebook.epub";
+
+GroupDocs.Editor.Editor editorMobi = new Editor(mobiPath);
+GroupDocs.Editor.Editor editorAzw3 = new Editor(azw3Path);
+GroupDocs.Editor.Editor editorEpub = new Editor(epubPath);
+
+GroupDocs.Editor.Metadata.IDocumentInfo mobiInfo = editorMobi.GetDocumentInfo(null);
+GroupDocs.Editor.Metadata.IDocumentInfo azw3Info = editorAzw3.GetDocumentInfo(null);
+GroupDocs.Editor.Metadata.IDocumentInfo epubInfo = editorEpub.GetDocumentInfo(null);
+
+Assert.AreEqual(Formats.EBookFormats.Mobi, mobiInfo.Format);
+Assert.AreEqual(Formats.EBookFormats.Azw3, azw3Info.Format);
+Assert.AreEqual(Formats.EBookFormats.Epub, epubInfo.Format);
+
+// ...
+// Don't forget to dispose Editors when work is done
+editorMobi.Dispose();
+editorAzw3.Dispose();
+editorEpub.Dispose();
+```
+
+
+
+
+
+
+
+
+

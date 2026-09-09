@@ -1,0 +1,92 @@
+---
+title: "Edit TXT"
+sidebar_label: "Edit text files"
+sidebar_key: "net-editor-edit-document-edit-txt"
+sidebar_position: 60
+description: "This guide demonstrates how to edit plain text files with encoding, lists recognition, pagination and other powerful features of GroupDocs.Editor for .NET"
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-txt.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "896cf9b34fa450226d16e16bea9db9bfb017f7cd5dfa6bce17fd82b61fa4bf86"
+---
+
+:::info
+GroupDocs.Editor for .NET is included in Conholdate.Total for .NET.
+:::
+
+&gt; This demonstration shows how to load, open for editing and save text documents, explains edit and save options and their destination.
+
+## How to edit TXT file?
+
+Textual documents are simple Plain Text flat files (TXT), that contain no images, pages, paragraphs, lists, tables and so on. However, users can create some primitive formatting like lists with leading markers, left indents with whitespaces, tables with pseudo-graphics, paragraphs with line breaks, and so on. <a href="https://products.groupdocs.com/editor/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Editor**</a> can recognize some of these structures. Other non-obvious feature, that GroupDocs.Editor provide, is ability to save edited TXT document not only back to TXT, but also to WordProcessing.
+
+## Loading text file for edit
+
+Unlike WordProcessing and Spreadsheet documents, DSV documents are loaded into the `Editor` class without any loading options. They are simple text files by their nature, so it is nothing to adjust:
+
+```csharp
+string inputTxtPath = "C://input/file.txt";
+Editor editor = new Editor(inputTxtPath);
+```
+
+## Edit text file
+
+In order to open a text document for edit by creating the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> instance it is required to use the <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/texteditoptions" target="_blank" rel="nofollow noopener noreferrer">TextEditOptions</a> class. This class has several options (properties), that are described below:
+
+1. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/texteditoptions/encoding" target="_blank" rel="nofollow noopener noreferrer">Encoding</a> - allows to set character encoding of the input text document. By default, if not specified, is UTF8.
+2. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/texteditoptions/recognizelists" target="_blank" rel="nofollow noopener noreferrer">RecognizeLists</a> - boolean flag, that indicates how exactly numbered list items are recognized. If this option is set to false (default value), lists recognition algorithm detects list paragraphs, when list numbers ends with either dot, right bracket or bullet symbols (such as "•", "\*", "-" or "o"). If this option is set to true, whitespaces are also used as list number delimiters: list recognition algorithm for Arabic style numbering (1., 1.1.2.) uses both whitespaces and dot (".") symbols.
+3. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/texteditoptions/leadingspaces" target="_blank" rel="nofollow noopener noreferrer">LeadingSpaces</a> - enum flag, that indicates how consecutive leading spaces should be handled: convert to left indent (default value), preserve as consecutive spaces, or trim.
+4. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/texteditoptions/trailingspaces" target="_blank" rel="nofollow noopener noreferrer">TrailingSpaces</a> - enum flag, that indicates how consecutive trailing spaces should be handled: truncated (default value), or trim.
+5. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/texteditoptions/enablepagination" target="_blank" rel="nofollow noopener noreferrer">EnablePagination</a> - boolean flag, that allows to enable paged view of the document. In their nature all text documents are pageless, however, GroupDocs.Editor allows to split them on pages, like MS Word does.
+6. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/texteditoptions/direction" target="_blank" rel="nofollow noopener noreferrer">Direction</a> - enum flag, which allows to specify the direction of text flow in the input plain text document. By default is Left-to-Right.
+
+Source code below demonstrates using this option class and opening input text document for editing. Then, when <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> instance is ready, example below demonstrates, how to emit HTML markup from it, edit it and create new <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> instance from edited content:
+
+```csharp
+TextEditOptions editOptions = new TextEditOptions();
+editOptions.Encoding = System.Text.Encoding.UTF8;
+editOptions.RecognizeLists = true;
+editOptions.LeadingSpaces = TextLeadingSpacesOptions.ConvertToIndent;
+editOptions.TrailingSpaces = TextTrailingSpacesOptions.Trim;
+editOptions.Direction = TextDirection.Auto;
+
+EditableDocument beforeEdit = editor.Edit(editOptions); // Create EditableDocument instance
+
+string originalTextContent = beforeEdit.GetContent(); // Get HTML content
+string updatedTextContent = originalTextContent.Replace("text", "EDITED text"); // Edit content
+List<IHtmlResource> allResources = beforeEdit.AllResources; // Get resources (only one stylesheet actually in this case)
+
+//Finally, create new EditableDocument
+EditableDocument afterEdit = EditableDocument.FromMarkup(updatedTextContent, allResources);
+```
+
+## Save text file after edit
+
+After being edited, text document can be saved back as TXT or as WordProcessing. For saving back to TXT format user must use a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/textsaveoptions" target="_blank" rel="nofollow noopener noreferrer">TextSaveOptions</a> class, that have three properties, described below:
+
+1. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/textsaveoptions/encoding" target="_blank" rel="nofollow noopener noreferrer">Encoding</a> - character encoding of the text document, which will be applied for its saving. By default, if not specified, is UTF8.
+2. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/textsaveoptions/addbidimarks" target="_blank" rel="nofollow noopener noreferrer">AddBidiMarks</a> - boolean flag, that determines whether to add bi-directional marks before each BiDi run when saving in plain text format.
+3. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/textsaveoptions/addbidimarks" target="_blank" rel="nofollow noopener noreferrer">PreserveTableLayout</a> - boolean flag, that specifies whether the GroupDocs.Editor should try to preserve layout of tables when saving in the plain text format. The default value is false.
+
+Source code below shows how to save  <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> to both TXt and WordProcessing formats:
+
+```csharp
+TextSaveOptions txtSaveOptions = new TextSaveOptions();
+txtSaveOptions.AddBidiMarks = true;
+txtSaveOptions.PreserveTableLayout = true;
+
+WordProcessingSaveOptions wordSaveOptions = new WordProcessingSaveOptions(WordProcessingFormats.Docm);
+
+string outputTxtPath = "C:\output\document.txt";
+string outputWordPath = "C:\output\document.docm";
+
+editor.Save(afterEdit, outputTxtPath, txtSaveOptions);
+editor.Save(afterEdit, outputWordPath, wordSaveOptions);
+```
+
+As a result, after running this example user will have two versions of the edited document: in TXT and DOCM formats.
