@@ -1,0 +1,114 @@
+---
+title: "Specify file type for comparison manually"
+sidebar_label: "Specify file type for comparison manually"
+sidebar_key: "net-comparison-loading-specify-file-type-manually"
+sidebar_position: 6
+description: "Specify a document file type manually in GroupDocs.Comparison for .NET via LoadOptions.FileType to skip auto-detection and speed up loading of large files."
+product: "comparison"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "comparison-net"
+source_path: "net/advanced-usage/loading/specify-file-type-manually.md"
+source_commit: "7624b4308e90feb1963a8dfe447bff38010a8a60"
+source_sha256: "08766be8ec68b1c5fcb2104eb2d1cfa17add034bee352033de622be244da28b0"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Comparison for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+<a href="https://products.groupdocs.com/comparison/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Comparison</a> lets you specify the document file type explicitly via <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.options/loadoptions/filetype/" target="_blank" rel="nofollow noopener noreferrer">LoadOptions.FileType</a> instead of relying on automatic format detection.
+
+## Why specify the file type
+
+When no file type is provided, GroupDocs.Comparison inspects the file's contents to determine its format. This detection is reliable but adds processing time, which can be noticeable for **large files**.
+
+If you already know the format - for example, because the input is constrained by your application - passing it explicitly skips detection and lets the library go straight to loading. For high-throughput pipelines or batch jobs over large documents, this can produce a measurable speedup.
+
+## Specify the file type explicitly
+
+Use this approach when the document format is known at compile time.
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Comparison;
+using GroupDocs.Comparison.Options;
+// ...
+
+LoadOptions loadOptions = new LoadOptions
+{
+    FileType = FileType.DOCX
+};
+
+using (Comparer comparer = new Comparer("source.docx", loadOptions))
+{
+    comparer.Add("target.docx", loadOptions);
+    comparer.Compare("result.docx");
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+## Derive the file type from a file path
+
+When the file path is available and its extension is reliable, use <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/filetype/" target="_blank" rel="nofollow noopener noreferrer">FileType.FromFileNameOrExtension</a> to resolve the `FileType` from the extension. This still skips content-based auto-detection, but keeps the calling code generic.
+
+
+<Tabs groupId="example2">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Comparison;
+using GroupDocs.Comparison.Options;
+using GroupDocs.Comparison.Result;
+// ...
+
+string sourcePath = "source.docx";
+string targetPath = "target.docx";
+
+LoadOptions sourceLoadOptions = new LoadOptions
+{
+    FileType = FileType.FromFileNameOrExtension(sourcePath)
+};
+
+LoadOptions targetLoadOptions = new LoadOptions
+{
+    FileType = FileType.FromFileNameOrExtension(targetPath)
+};
+
+using (Comparer comparer = new Comparer(sourcePath, sourceLoadOptions))
+{
+    comparer.Add(targetPath, targetLoadOptions);
+    comparer.Compare("result.docx");
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+## See also
+
+- <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.options/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">LoadOptions API reference</a>
+- [Supported document formats](/net/comparison/getting-started/supported-document-formats/)
+- [Load password-protected documents](/net/comparison/advanced-usage/loading/load-password-protected-documents/)
+- [Load custom fonts](/net/comparison/advanced-usage/loading/load-custom-fonts/)

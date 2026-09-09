@@ -1,0 +1,163 @@
+---
+title: "Accept or Reject Word revisions (RevisionHandler)"
+sidebar_label: "Accept or Reject Word revisions (RevisionHandler)"
+sidebar_key: "net-comparison-accept-or-reject-revisions"
+sidebar_position: 5
+description: "Accept or reject native Word track-changes revisions in a DOCX file using RevisionHandler and ApplyRevisionChanges — without running a full document comparison."
+product: "comparison"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "comparison-net"
+source_path: "net/advanced-usage/accept-or-reject-revisions.md"
+source_commit: "7624b4308e90feb1963a8dfe447bff38010a8a60"
+source_sha256: "2ded76a912a5b2191003fd381754c9d759dcaa8e1022426abfea16335e6c8160"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Comparison for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+<a href="https://products.groupdocs.com/comparison/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Comparison</a> allows you to get revisions from a Docx file format, process, and save the processing result.
+To take revisions from a document, accept / reject revisions, and write the processing result to the output file, follow these steps:
+
+1.  Instantiate the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.words.revision/revisionhandler" target="_blank" rel="nofollow noopener noreferrer">RevisionHandler</a> object. Specify the source document path or stream.
+2.  Call the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.words.revision/revisionhandler/methods/getrevisions" target="_blank" rel="nofollow noopener noreferrer">GetRevisions</a> method to get the revision list.
+3.  Set the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.words.revision/revisioninfo/properties/action" target="_blank" rel="nofollow noopener noreferrer">Action</a> property of the object to be changed to the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.words.revision/revisionaction" target="_blank" rel="nofollow noopener noreferrer">RevisionAction.Accept</a> or <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.words.revision/revisionaction" target="_blank" rel="nofollow noopener noreferrer">RevisionAction.Reject</a> value.
+4.  Call the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.words.revision/revisionhandler/methods/applyrevisionchanges/index" target="_blank" rel="nofollow noopener noreferrer">ApplyRevisionChanges</a> method. Specify the created instance of the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.words.revision/applyrevisionoptions" target="_blank" rel="nofollow noopener noreferrer">ApplyRevisionOptions</a> class and path or stream of the output document, collecting changes in the revisions.
+
+You can process all changes together within one action.To handle all changes at once, follow these steps:
+
+1.  Instantiate the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.words.revision/revisionhandler" target="_blank" rel="nofollow noopener noreferrer">RevisionHandler</a> object. Specify the source document path or stream.
+2.  Call the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.words.revision/revisionhandler/methods/applyrevisionchanges/index" target="_blank" rel="nofollow noopener noreferrer">ApplyRevisionChanges</a> method. Specify the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.words.revision/applyrevisionoptions" target="_blank" rel="nofollow noopener noreferrer">ApplyRevisionOptions</a> object and one of the (<a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.words.revision/revisionaction" target="_blank" rel="nofollow noopener noreferrer">RevisionAction.Accept</a>, <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.words.revision/revisionaction" target="_blank" rel="nofollow noopener noreferrer">RevisionAction.Reject</a> or <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.words.revision/revisionaction" target="_blank" rel="nofollow noopener noreferrer">RevisionAction.None</a>) values.
+
+The main properties of the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.words.revision/applyrevisionoptions" target="_blank" rel="nofollow noopener noreferrer">ApplyRevisionOptions</a> class are as follows:
+
+*   <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.words.revision/applyrevisionoptions/properties/changes" target="_blank" rel="nofollow noopener noreferrer">Changes</a> is a list of revision changes that need to be applied to the final document
+*   <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.words.revision/applyrevisionoptions/fields/commonhandler" target="_blank" rel="nofollow noopener noreferrer">CommonHandler</a> allows you to define one action to handle all revision
+
+If you do not specify the path or file to the output document for the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.words.revision/revisionhandler/methods/applyrevisionchanges" target="_blank" rel="nofollow noopener noreferrer">ApplyRevisionChanges</a> method, the source file is rewritten.
+
+The following code snippets show how to get revisions from a document, accept / reject detected revisions and save changes to the output document:
+
+## Accept or Reject revisions from local disk
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Comparison;
+using GroupDocs.Comparison.Options;
+using System.Collections.Generic;
+using GroupDocs.Comparison.Words.Revision;
+// ...
+
+using (RevisionHandler revisionHandler = new RevisionHandler(
+    pathRevision + "Document_with_revision.docx"))
+{
+    List<RevisionInfo> revisionList = revisionHandler.GetRevisions();
+    foreach (RevisionInfo revision in revisionList)
+    {
+        if (revision.Type == RevisionType.Insertion) revision.Action = RevisionAction.Accept;
+    }
+    revisionHandler.ApplyRevisionChanges(pathRevision + "result.docx", new ApplyRevisionOptions() 
+    { 
+        Changes = revisionList 
+    });
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+## Accept or Reject revisions from stream
+
+
+<Tabs groupId="example2">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Comparison;
+using GroupDocs.Comparison.Options;
+using System.Collections.Generic;
+using GroupDocs.Comparison.Words.Revision;
+// ...
+
+using (RevisionHandler revisionHandler = new RevisionHandler(
+    File.OpenRead("Document_with_revision.docx")))
+{
+    List<RevisionInfo> revisionList = revisionHandler.GetRevisions();
+    foreach (RevisionInfo revision in revisionList)
+    {
+        if (revision.Type == RevisionType.Insertion) revision.Action = RevisionAction.Accept;
+    }
+    revisionHandler.ApplyRevisionChanges(pathRevision + "result.docx", new ApplyRevisionOptions() 
+    { 
+        Changes = revisionList 
+    });
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+## Accept or Reject all revisions
+
+
+<Tabs groupId="example3">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Comparison;
+using GroupDocs.Comparison.Options;
+using System.Collections.Generic;
+using GroupDocs.Comparison.Words.Revision;
+// ...
+
+using (RevisionHandler revisionHandler = new RevisionHandler(
+    pathRevision + "Document_with_revision.docx"))
+{
+    revisionHandler.ApplyRevisionChanges(pathRevision + "result.docx", new ApplyRevisionOptions() 
+    { 
+        CommonHandler = RevisionAction.Accept 
+    });
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+## Result of revision processing
+
+Below are the source and output files based on the code presented earlier.
+
+| Source file | Result file |
+| --------------------------------------------- | ---------------------------------------------------- |
+| ![](/net/comparison/images/revision-file.png) | ![](/net/comparison/images/result-revision-file.png) |
+
+## See also
+
+- [Accept or reject detected changes](/net/comparison/advanced-usage/comparison/accept-or-reject-detected-changes/)
+- [Word compare options](/net/comparison/advanced-usage/comparison/word-compare-options/)
+- [Setting author of changes](/net/comparison/advanced-usage/comparison/setting-author-of-changes/)

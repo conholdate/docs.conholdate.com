@@ -1,0 +1,192 @@
+---
+title: "Compare documents"
+sidebar_label: "Compare documents"
+sidebar_key: "net-comparison-compare-documents"
+sidebar_position: 3
+description: "Compare two documents in C# with GroupDocs.Comparison for .NET. Covers the basic Comparer workflow, file and stream inputs, default highlight colours, and the CompareOptions class for customizing the result."
+product: "comparison"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "comparison-net"
+source_path: "net/comparison-basic/compare-documents.md"
+source_commit: "7624b4308e90feb1963a8dfe447bff38010a8a60"
+source_sha256: "2a0a93c3d9e57455dbcbcc4243cb3e9259fb19ab061248f2c079936c096acd08"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Comparison for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+
+<a href="https://products.groupdocs.com/comparison/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Comparison</a> detects changes in text (paragraphs, words, characters), tables, images, and shapes across a wide range of formats - Word, PDF, Excel, PowerPoint, HTML, AutoCAD, Visio, Outlook, OpenDocument, images, and more. The full list is available on the [Supported document formats](/net/comparison/getting-started/supported-document-formats/) page.
+
+By default, GroupDocs.Comparison highlights detected changes with the following colours:
+
+*   Inserted - <font color="blue">**blue**</font>
+*   Deleted - <font color="red">**red**</font>
+*   Style changed - <font color="green">**green**</font>
+
+These are the defaults - you can override colours, fonts, and other styling via the `InsertedItemStyle`, `DeletedItemStyle`, and `ChangedItemStyle` properties. See [Customize changes styles](/net/comparison/advanced-usage/comparison/customize-changes-styles/) for details.
+
+## Basic comparison workflow
+
+To compare two documents, follow these steps:
+
+1.  Instantiate the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer" target="_blank" rel="nofollow noopener noreferrer">Comparer</a> object with the source document path or stream.
+2.  Call the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer/methods/add/index" target="_blank" rel="nofollow noopener noreferrer">Add</a> method and specify the target document path or stream.
+3.  Call the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer/methods/compare/index" target="_blank" rel="nofollow noopener noreferrer">Compare</a> method.
+
+### Compare local documents
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Comparison;
+// ...
+
+using (Comparer comparer = new Comparer("source.docx"))
+{
+    comparer.Add("target.docx");
+    comparer.Compare("result.docx");
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+The output file is as follows:
+
+![](/net/comparison/images/compare-documents.png)
+
+### Compare documents from stream
+
+
+<Tabs groupId="example2">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Comparison;
+using System.IO;
+// ...
+
+using (Comparer comparer = new Comparer(File.OpenRead("source.docx")))
+{
+    comparer.Add(File.OpenRead("target.docx"));
+    comparer.Compare(File.Create("result.docx"));
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+## Customize comparison with options
+
+To control how the comparison is performed and how the result is rendered, pass a <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.options/compareoptions" target="_blank" rel="nofollow noopener noreferrer">CompareOptions</a> object to the `Compare` method. These options work with any supported document format:
+
+
+<Tabs groupId="example-options">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Comparison;
+using GroupDocs.Comparison.Options;
+// ...
+
+using (Comparer comparer = new Comparer("source.docx"))
+{
+    comparer.Add("target.docx");
+
+    CompareOptions options = new CompareOptions
+    {
+        DetectStyleChanges = true,
+        GenerateSummaryPage = true,
+        ShowDeletedContent = true,
+        ShowInsertedContent = true
+    };
+
+    comparer.Compare("result.docx", options);
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+For format-specific behaviour, GroupDocs.Comparison provides dedicated subclasses of `CompareOptions`:
+
+- <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.options/wordcompareoptions/" target="_blank" rel="nofollow noopener noreferrer">WordCompareOptions</a> - Word-specific settings such as `DisplayMode` (Revisions / Highlight), header/footer comparison, and bookmark comparison. See [Word document comparison options](/net/comparison/advanced-usage/comparison/word-compare-options/).
+- <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.options/pdfcompareoptions/" target="_blank" rel="nofollow noopener noreferrer">PdfCompareOptions</a> - PDF-specific settings such as `DisplayMode` (Inline / SideBySide / Interleaved), page-range filtering, and PDF annotation author name.
+
+Using a format-specific subclass is recommended when comparing a known document type - it makes Word-only or PDF-only settings discoverable and prevents you from passing irrelevant options.
+
+## Configure loading with LoadOptions
+
+While `CompareOptions` controls how documents are compared, <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.options/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">LoadOptions</a> controls how the source and target files are loaded into the `Comparer`. It is passed to the `Comparer` constructor and to `Add`, before any comparison runs.
+
+
+<Tabs groupId="example-loadoptions">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Comparison;
+using GroupDocs.Comparison.Options;
+// ...
+
+LoadOptions loadOptions = new LoadOptions
+{
+    FileType = FileType.DOCX
+};
+
+using (Comparer comparer = new Comparer("source.docx", loadOptions))
+{
+    comparer.Add("target.docx", loadOptions);
+    comparer.Compare("result.docx");
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+Common `LoadOptions` properties:
+
+- `Password` - open a password-protected source or target document. See [Load password-protected documents](/net/comparison/advanced-usage/loading/load-password-protected-documents/).
+- `FileType` - specify the document format explicitly and skip auto-detection (faster for large files). See [Specify file type for comparison manually](/net/comparison/advanced-usage/loading/specify-file-type-manually/).
+- `FontDirectories` - provide custom font directories used while rendering the result. See [Load custom fonts](/net/comparison/advanced-usage/loading/load-custom-fonts/).
+
+## Next steps
+
+Once the basic comparison works, common follow-up tasks include:
+
+- [Customize changes styles](/net/comparison/advanced-usage/comparison/customize-changes-styles/) - change highlight colours, fonts, and formatting.
+- [Adjusting comparison sensitivity](/net/comparison/advanced-usage/comparison/adjusting-comparison-sensitivity/) - tune how granular the comparison should be.
+- [Get list of changes](/net/comparison/advanced-usage/comparison/get-list-of-changes/) - retrieve detected differences as a structured collection.
+- [Accept or reject detected changes](/net/comparison/advanced-usage/comparison/accept-or-reject-detected-changes/) - apply changes selectively.
+- [Compare multiple documents](/net/comparison/advanced-usage/comparison/compare-multiple-documents/) - compare more than two files in a single pass.
+- [Load password-protected documents](/net/comparison/advanced-usage/loading/load-password-protected-documents/) - provide passwords for protected source or target files.

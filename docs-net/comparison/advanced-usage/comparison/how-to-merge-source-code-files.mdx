@@ -1,0 +1,101 @@
+---
+title: "How to merge source code files"
+sidebar_label: "How to merge source code files"
+sidebar_key: "net-comparison-comparison-how-to-merge-source-code-files"
+sidebar_position: 8
+description: "This article explains how to control file merging in GroupDocs.Comparison for .NET."
+product: "comparison"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "comparison-net"
+source_path: "net/advanced-usage/comparison/how-to-merge-source-code-files.md"
+source_commit: "7624b4308e90feb1963a8dfe447bff38010a8a60"
+source_sha256: "37152f3ef08277d52f6a1ac5a2f0e8756a4dffe0f299ec5d080e33479ec071d9"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Comparison for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+---
+
+<a href="https://products.groupdocs.com/comparison/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Comparison</a> allows you to merge source code files by using the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/changeinfo/properties/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction</a> properties:
+
+- <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction.Accept</a> accepts the found changes and adds them to the file without highlighting
+- <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction.Reject</a> rejects the found changes and removes them from the output file
+
+To apply/reject changes to output file, follow these steps:
+
+1.  Instantiate the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer" target="_blank" rel="nofollow noopener noreferrer">Comparer</a> object. Specify the source document path or stream.
+2.  Call the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer/methods/add/index" target="_blank" rel="nofollow noopener noreferrer">Add</a> method. Specify the target document path or stream.
+3.  Call the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer/methods/compare/index" target="_blank" rel="nofollow noopener noreferrer">Compare</a> method.
+4.  Call the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer/methods/getchanges/index" target="_blank" rel="nofollow noopener noreferrer">GetChanges</a> method to get changes list.
+5.  Set the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/changeinfo/properties/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction</a> of the appropriate change object to the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction.Accept</a> or <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction.Reject</a> value;
+6.  Call the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer/methods/applychanges/index" target="_blank" rel="nofollow noopener noreferrer">ApplyChanges</a> method. Specify the collection of changes.
+
+For example, you need to compare and merge several versions of source code files and to accept or discard changes made by different persons.
+
+![](/net/comparison/images/how-to-merge-source-code-file-source.png)
+![](/net/comparison/images/how-to-merge-source-code-file-target.png)
+
+The differences show that two methods are in the **source.cs** file: `AddNumbers` and `Sum`.
+
+If you do not use the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/changeinfo/properties/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction</a> property, all changes are committed to the output file, and these methods are removed. If you need to control the merging of files, the <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/changeinfo/properties/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction</a> property helps you.
+
+The following code snippet shows how to merge two source code files:
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Comparison;
+using GroupDocs.Comparison.Result;
+using GroupDocs.Comparison.Options;
+using System.IO;
+// ...
+
+using (Comparer comparer = new Comparer("source.docx"))
+{
+    comparer.Add("target.docx");
+    comparer.Compare("result.docx");
+
+    ChangeInfo[] changes = comparer.GetChanges();
+    for (int i = 0; i < 10; i++)
+    {
+        changes[i].ComparisonAction = ComparisonAction.Accept;
+    }
+
+    for (int i = 10; i < changes.Length; i++)
+    {
+    	changes[i].ComparisonAction = ComparisonAction.Reject;
+    }
+
+    comparer.ApplyChanges(File.Create("result.docx"), new ApplyChangeOptions { Changes = changes });
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+
+As a result, you get a merged source code file where the deleted elements are marked in <font color="red">**red**</font>, the added - in <font color="blue">**blue**</font>, and the modified - in <font color="green">**green**</font>.
+
+Also you  receive an HTML file in HTML  with changed places in the code.
+
+| Result source code file | Result HTML file |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| ![](/net/comparison/images/how-to-merge-source-code-file-result-CS.png) | ![](/net/comparison/images/how-to-merge-source-code-file-result-HTML.png) |
+
+As you can see from the resulting files, only one of the two methods was removed.
