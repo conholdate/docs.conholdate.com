@@ -1,0 +1,390 @@
+---
+title: "Add watermarks to spreadsheet documents"
+sidebar_label: "To spreadsheets"
+sidebar_key: "net-watermark-adding-watermarks-add-watermarks-to-spreadsheet-documents-index"
+sidebar_position: 8
+description: "GroupDocs.Watermark provides an easy way to add watermark to the worksheets of any Excel document."
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-spreadsheet-documents/_index.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "fad95c62f633bbdb33a3a00d9b3faad5f3724c06e38c105bfa8cd7257345c13e"
+---
+
+:::info
+GroupDocs.Watermark for .NET is included in Conholdate.Total for .NET.
+:::
+
+## Adding watermark to a particular worksheet
+
+GroupDocs.Watermark provides an easy way to add watermark to the worksheets of any Excel document. Adding watermark to a particular Excel worksheet using GroupDocs.Watermark consists of following steps.
+
+1. Load the document
+2. Create and initialize watermark object
+3. Set watermark properties
+4. Create a <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.spreadsheet/spreadsheetwatermarkshapeoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetWatermarkShapeOptions</a> class and set the <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.spreadsheet/spreadsheetwatermarkshapeoptions/properties/worksheetindex" target="_blank" rel="nofollow noopener noreferrer">WorksheetIndex</a> property
+5. Add watermark to the worksheet
+6. Save the document
+
+Following code shows how to add watermark to a particular worksheet.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetAddWatermarkToWorksheet**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    // Add text watermark to the first worksheet
+    TextWatermark textWatermark = new TextWatermark("Test watermark", new Font("Arial", 8));
+    SpreadsheetWatermarkShapeOptions textWatermarkOptions = new SpreadsheetWatermarkShapeOptions();
+    textWatermarkOptions.WorksheetIndex = 0;
+    watermarker.Add(textWatermark, textWatermarkOptions);
+
+    // Add image watermark to the second worksheet
+    using (ImageWatermark imageWatermark = new ImageWatermark("logo.jpg"))
+    {
+        SpreadsheetWatermarkShapeOptions imageWatermarkOptions = new SpreadsheetWatermarkShapeOptions();
+        imageWatermarkOptions.WorksheetIndex = 1;
+        watermarker.Add(imageWatermark, imageWatermarkOptions);
+    }
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+## Getting size of content area
+
+If for some reasons you want to use absolute sizing and positioning, you may also need to get the <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetworksheet/properties/contentareawidth" target="_blank" rel="nofollow noopener noreferrer">width</a> and the <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetworksheet/properties/contentareaheight" target="_blank" rel="nofollow noopener noreferrer">height</a> of the content area (range of cells which contains data).
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetGetContentAreaDimensions**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+
+    // Get the size of content area
+    Console.WriteLine(content.Worksheets[0].ContentAreaHeight);
+    Console.WriteLine(content.Worksheets[0].ContentAreaWidth);
+
+    // Get the size of particular cell
+    Console.WriteLine(content.Worksheets[0].GetColumnWidth(0));
+    Console.WriteLine(content.Worksheets[0].GetRowHeight(0));
+}
+```
+
+## Adding watermark to the images from a particular worksheet
+
+Using GroupDocs.Watermark, you can add watermark to the images that belong to a particular worksheet using the <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents/contentpart/methods/findimages" target="_blank" rel="nofollow noopener noreferrer">FindImages()</a> method of the <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetworksheet" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetWorksheet</a> class.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetAddWatermarkToWorksheetImages**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    TextWatermark watermark = new TextWatermark("Protected image", new Font("Arial", 8));
+    watermark.HorizontalAlignment = HorizontalAlignment.Center;
+    watermark.VerticalAlignment = VerticalAlignment.Center;
+    watermark.RotateAngle = 45;
+    watermark.SizingType = SizingType.ScaleToParentDimensions;
+    watermark.ScaleFactor = 1;
+
+    // Get all images from the first worksheet
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    WatermarkableImageCollection images = content.Worksheets[0].FindImages();
+
+    // Add watermark to all found images
+    foreach (WatermarkableImage image in images)
+    {
+        image.Add(watermark);
+    }
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+## Different types of watermark in excel documents
+
+### Shapes
+
+When you're calling <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.watermarker/add/methods/1" target="_blank" rel="nofollow noopener noreferrer">Add</a> method of <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark/watermarker" target="_blank" rel="nofollow noopener noreferrer">Watermarker</a> class with <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.spreadsheet/spreadsheetwatermarkshapeoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetWatermarkShapeOptions</a> parameter, simple shape is added to an Excel document. Besides <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.spreadsheet/spreadsheetwatermarkshapeoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetWatermarkShapeOptions</a> there is <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.spreadsheet/spreadsheetwatermarkmodernwordartoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetWatermarkModernWordArtOptions</a> type which is used only with <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.watermarks/textwatermark" target="_blank" rel="nofollow noopener noreferrer">TextWatermark</a>. Both options add watermark to an Excel document as a shape, however, there are some differences. When <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.watermarks/textwatermark" target="_blank" rel="nofollow noopener noreferrer">TextWatermark</a> is added with <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.spreadsheet/spreadsheetwatermarkshapeoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetWatermarkShapeOptions</a> there options, it looks and behaves like WordArt object added in Excel'2003, and <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.spreadsheet/spreadsheetwatermarkmodernwordartoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetWatermarkModernWordArtOptions</a> option adds text watermark that looks and behaves like Excel'2013 WordArt object.
+
+The code sample below shows how to add modern WordArt watermark to Excel document worksheet.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetAddModernWordArdWatermark**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    TextWatermark textWatermark = new TextWatermark("Test watermark", new Font("Arial", 8));
+    SpreadsheetWatermarkModernWordArtOptions options = new SpreadsheetWatermarkModernWordArtOptions();
+    options.WorksheetIndex = 0;
+
+    watermarker.Add(textWatermark, options);
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+### Shape additional options
+
+The API also provides the feature to set some additional options (<a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.spreadsheet/spreadsheetwatermarkbaseoptions/properties/name" target="_blank" rel="nofollow noopener noreferrer">Name</a>, <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.spreadsheet/spreadsheetwatermarkbaseoptions/properties/alternativetext" target="_blank" rel="nofollow noopener noreferrer">AlternativeText</a> and <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.spreadsheet/spreadsheetwatermarkbaseoptions/properties/islocked" target="_blank" rel="nofollow noopener noreferrer">IsLocked</a>) when adding shape watermark to Excel worksheet (as shown in the below sample).
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetAddWatermarkUsingShapeSettings**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    TextWatermark watermark = new TextWatermark("Test watermark", new Font("Segoe UI", 19));
+    SpreadsheetWatermarkShapeOptions options = new SpreadsheetWatermarkShapeOptions();
+
+    // Set the shape name
+    options.Name = "Shape 1";
+
+    // Set the descriptive (alternative) text that will be associated with the shape
+    options.AlternativeText = "Test watermark";
+
+    // Editing of the shape in Excel is forbidden
+    options.IsLocked = true;
+
+    watermarker.Add(watermark, options);
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+### Text effects
+
+You can also apply <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.spreadsheet/spreadsheettexteffects" target="_blank" rel="nofollow noopener noreferrer">text effects</a> when adding shape watermark in Excel worksheet as shown in below code sample.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetAddWatermarkWithTextEffects**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    TextWatermark watermark = new TextWatermark("Test watermark", new Font("Segoe UI", 19));
+
+    SpreadsheetTextEffects effects = new SpreadsheetTextEffects();
+    effects.LineFormat.Enabled = true;
+    effects.LineFormat.Color = Color.Red;
+    effects.LineFormat.DashStyle = OfficeDashStyle.DashDotDot;
+    effects.LineFormat.LineStyle = OfficeLineStyle.Triple;
+    effects.LineFormat.Weight = 1;
+
+    SpreadsheetWatermarkShapeOptions options = new SpreadsheetWatermarkShapeOptions();
+    options.Effects = effects;
+
+    watermarker.Add(watermark, options);
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+### Image effects
+
+The API also allows you to apply <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.spreadsheet/spreadsheetimageeffects" target="_blank" rel="nofollow noopener noreferrer">image effects</a> to the shape watermark using below code sample.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetAddWatermarkWithImageEffects**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    using (ImageWatermark watermark = new ImageWatermark("logo.png"))
+    {
+        SpreadsheetImageEffects effects = new SpreadsheetImageEffects();
+        effects.Brightness = 0.7;
+        effects.Contrast = 0.6;
+        effects.ChromaKey = Color.Red;
+        effects.BorderLineFormat.Enabled = true;
+        effects.BorderLineFormat.Weight = 1;
+
+        SpreadsheetWatermarkShapeOptions options = new SpreadsheetWatermarkShapeOptions();
+        options.Effects = effects;
+
+        watermarker.Add(watermark, options);
+    }
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+### Worksheet backgrounds
+
+<a href="https://support.office.com/en-us/article/Add-a-watermark-in-Excel-a372182a-d733-484e-825c-18ddf3edf009?ui=en-US&rs=en-US&ad=US&fromAR=1" target="_blank" rel="nofollow noopener noreferrer">Microsoft Office documentation</a> says that Excel does not support adding of watermarks, however, it offers some workarounds. <a href="https://support.office.com/en-us/article/Add-a-watermark-in-Excel-a372182a-d733-484e-825c-18ddf3edf009?ui=en-US&rs=en-US&ad=US&fromAR=1#odh_background" target="_blank" rel="nofollow noopener noreferrer">One of them</a> is using worksheet background images as watermarks.
+
+Use the following code sample to add <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.spreadsheet/spreadsheetbackgroundwatermarkoptions" target="_blank" rel="nofollow noopener noreferrer">background watermark</a> to all worksheets of Excel document.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetAddWatermarkAsBackground**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    using (ImageWatermark watermark = new ImageWatermark("logo.gif"))
+    {
+        SpreadsheetBackgroundWatermarkOptions options = new SpreadsheetBackgroundWatermarkOptions();
+        watermarker.Add(watermark, options);
+    }
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+
+:::info
+Backgrounds are viewable in Normal View in the worksheet and are invisible in Page Layout mode. The image is automatically tiled on the background of the worksheet. Excel formats don't support background image customization. Using properties of image watermark (size, rotation etc) will cause image redrawing. This may lead to the decrease in performance.
+:::
+
+
+### Worksheet background image size
+
+You can also define the size (<a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.spreadsheet/spreadsheetbackgroundwatermarkoptions/properties/backgroundwidth" target="_blank" rel="nofollow noopener noreferrer">width</a> and <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.spreadsheet/spreadsheetbackgroundwatermarkoptions/properties/backgroundheight" target="_blank" rel="nofollow noopener noreferrer">height</a>) of the background image on which your watermark will be drawn. This feature allows you to mimic watermark relative size and position.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetAddWatermarkAsBackgroundWithRelativeSizeAndPosition**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    using (ImageWatermark watermark = new ImageWatermark("logo.gif"))
+    {
+        watermark.HorizontalAlignment = HorizontalAlignment.Center;
+        watermark.VerticalAlignment = VerticalAlignment.Center;
+        watermark.RotateAngle = 90;
+        watermark.SizingType = SizingType.ScaleToParentDimensions;
+        watermark.ScaleFactor = 0.5;
+
+        SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+        SpreadsheetBackgroundWatermarkOptions options = new SpreadsheetBackgroundWatermarkOptions();
+        options.BackgroundWidth = content.Worksheets[0].ContentAreaWidthPx; /* set background width */
+        options.BackgroundHeight = content.Worksheets[0].ContentAreaHeightPx; /* set background height */
+
+        watermarker.Add(watermark, options);
+    }
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+
+:::warning
+This method assumes that watermark absolute coordinates and size are measured in pixels (if they are assigned).
+:::
+
+
+### <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.watermarks/textwatermark" target="_blank" rel="nofollow noopener noreferrer">TextWatermark</a> as background
+
+Excel does not support text backgrounds but you still can pass <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.watermarks/textwatermark" target="_blank" rel="nofollow noopener noreferrer">TextWatermark</a> instance with the <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.spreadsheet/spreadsheetbackgroundwatermarkoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetBackgroundWatermarkOptions</a> option. The text will be converted to image preserving formatting. The following code sample demonstrates this feature.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetAddTextWatermarkAsBackground**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    TextWatermark watermark = new TextWatermark("Test watermark", new Font("Segoe UI", 19));
+    watermark.HorizontalAlignment = HorizontalAlignment.Center;
+    watermark.VerticalAlignment = VerticalAlignment.Center;
+    watermark.RotateAngle = 45;
+    watermark.SizingType = SizingType.ScaleToParentDimensions;
+    watermark.ScaleFactor = 0.5;
+    watermark.Opacity = 0.5;
+
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+
+    SpreadsheetBackgroundWatermarkOptions options = new SpreadsheetBackgroundWatermarkOptions();
+    options.BackgroundWidth = content.Worksheets[0].ContentAreaWidthPx; /* set background width */
+    options.BackgroundHeight = content.Worksheets[0].ContentAreaHeightPx; /* set background height */
+
+    watermarker.Add(watermark, options);
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+### Header and footer image watermark
+
+Another way to mimic watermark in Excel is to <a href="https://support.office.com/en-us/article/Add-a-watermark-in-Excel-a372182a-d733-484e-825c-18ddf3edf009?ui=en-US&rs=en-US&ad=US&fromAR=1" target="_blank" rel="nofollow noopener noreferrer">use Headers and Footers</a>. You can <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.spreadsheet/spreadsheetwatermarkheaderfooteroptions" target="_blank" rel="nofollow noopener noreferrer">add</a> watermark to worksheet's header or footer using below code sample.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetAddImageWatermarkIntoHeaderFooter**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    using (ImageWatermark watermark = new ImageWatermark("logo.png"))
+    {
+        watermark.VerticalAlignment = VerticalAlignment.Top;
+        watermark.HorizontalAlignment = HorizontalAlignment.Center;
+        watermark.SizingType = SizingType.ScaleToParentDimensions;
+        watermark.ScaleFactor = 1;
+
+        SpreadsheetWatermarkHeaderFooterOptions options = new SpreadsheetWatermarkHeaderFooterOptions();
+        options.WorksheetIndex = 0;
+
+        watermarker.Add(watermark, options);
+    }
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+### Header and footer text watermark
+
+You can also add <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.watermarks/textwatermark" target="_blank" rel="nofollow noopener noreferrer">text watermark</a> in header or footer as shown in the below code sample.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetAddTextWatermarkIntoHeaderFooter**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    TextWatermark watermark = new TextWatermark("Test watermark", new Font("Segoe UI", 19, FontStyle.Bold));
+    watermark.ForegroundColor = Color.Red;
+    watermark.BackgroundColor = Color.Aqua;
+    watermark.VerticalAlignment = VerticalAlignment.Top;
+    watermark.HorizontalAlignment = HorizontalAlignment.Center;
+
+    SpreadsheetWatermarkHeaderFooterOptions options = new SpreadsheetWatermarkHeaderFooterOptions();
+    options.WorksheetIndex = 0;
+
+    watermarker.Add(watermark, options);
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+
+:::warning
+You'll see the watermark in Excel only when you're in Page Layout view or Print Preview.
+:::
+
+:::warning
+Excel Headersand footers are not designed for watermarking, so, some features don't work for header and footer watermarks.
+:::
+
+
+## Advanced use cases
+
+* [Shapes in spreadsheet document](/net/watermark/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-spreadsheet-documents/shapes-in-spreadsheet-document/ "Shapes in spreadsheet document")
+* [Working with spreadsheet document attachments](/net/watermark/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-spreadsheet-documents/working-with-spreadsheet-document-attachments/ "Working with spreadsheet document attachments")
+* [Working with worksheet backgrounds](/net/watermark/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-spreadsheet-documents/working-with-worksheet-backgrounds/ "Working with worksheet backgrounds")
+* [Working with worksheet headers and footers](/net/watermark/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-spreadsheet-documents/working-with-worksheet-headers-and-footers/ "Working with worksheet headers and footers")
+

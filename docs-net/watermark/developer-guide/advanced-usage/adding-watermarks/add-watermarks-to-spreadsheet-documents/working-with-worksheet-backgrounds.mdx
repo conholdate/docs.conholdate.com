@@ -1,0 +1,117 @@
+---
+title: "Working with worksheet backgrounds"
+sidebar_label: "Working with backgrounds"
+sidebar_key: "net-watermark-adding-watermarks-add-watermarks-to-spreadsheet-documents-working-with-worksheet-backgrounds"
+sidebar_position: 3
+description: "This article explains how to work with worksheet backgrounds while using GroupDocs watermarking API"
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-spreadsheet-documents/working-with-worksheet-backgrounds.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "282e418d35e670b96c1bc47dd25f1053f646c12f95ccaff5c9d12158f1c0ca0b"
+---
+
+:::info
+GroupDocs.Watermark for .NET is included in Conholdate.Total for .NET.
+:::
+
+## Extracting information about all worksheet backgrounds in an excel document
+
+The API allows you to extract <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetworksheet/properties/backgroundimage" target="_blank" rel="nofollow noopener noreferrer">information</a> about all the worksheet backgrounds in an Excel document as shown in the following code sample.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetGetInformationOfWorksheetBackgrounds**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    foreach (SpreadsheetWorksheet worksheet in content.Worksheets)
+    {
+        if (worksheet.BackgroundImage != null)
+        {
+            Console.WriteLine(worksheet.BackgroundImage.Width);
+            Console.WriteLine(worksheet.BackgroundImage.Height);
+            Console.WriteLine(worksheet.BackgroundImage.GetBytes().Length);
+        }
+    }
+}
+```
+
+## Removing a particular background
+
+Following code sample can be used to remove the <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetworksheet/properties/backgroundimage" target="_blank" rel="nofollow noopener noreferrer">background</a> of a particular worksheet.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetRemoveWorksheetBackground**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    content.Worksheets[0].BackgroundImage = null;
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+## Adding watermark to all backgrounds in an excel worksheet
+
+You can <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.image/watermarkableimage/methods/add" target="_blank" rel="nofollow noopener noreferrer">add</a> watermark to the background images that belong to an Excel document as shown in the below code sample.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetAddWatermarkToBackgroundImages**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    // Initialize image or text watermark
+    TextWatermark watermark = new TextWatermark("Protected image", new Font("Arial", 8));
+    watermark.HorizontalAlignment = HorizontalAlignment.Center;
+    watermark.VerticalAlignment = VerticalAlignment.Center;
+    watermark.RotateAngle = 45;
+    watermark.SizingType = SizingType.ScaleToParentDimensions;
+    watermark.ScaleFactor = 1;
+
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    foreach (SpreadsheetWorksheet worksheet in content.Worksheets)
+    {
+        if (worksheet.BackgroundImage != null)
+        {
+            // Add watermark to the image
+            worksheet.BackgroundImage.Add(watermark);
+        }
+    }
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+## Settings background image for charts
+
+GroupDocs.Watermark for .NET also allows you to set the <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetchart/properties/imagefillformat" target="_blank" rel="nofollow noopener noreferrer">background image</a> for a chart inside an Excel document. Following code sample shows how to achieve this functionality.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetSetBackgroundImageForChart**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    content.Worksheets[0].Charts[0].ImageFillFormat.BackgroundImage = 
+        new SpreadsheetWatermarkableImage(File.ReadAllBytes("test.png"));
+    content.Worksheets[0].Charts[0].ImageFillFormat.Transparency = 0.5;
+    content.Worksheets[0].Charts[0].ImageFillFormat.TileAsTexture = true;
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+

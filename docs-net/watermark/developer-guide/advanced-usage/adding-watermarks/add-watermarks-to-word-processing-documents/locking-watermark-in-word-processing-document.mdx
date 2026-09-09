@@ -1,0 +1,111 @@
+---
+title: "Locking watermark in word processing document"
+sidebar_label: "Locking watermark in word processing document"
+sidebar_key: "net-watermark-adding-watermarks-add-watermarks-to-word-processing-documents-locking-watermark-in-word-processing-document"
+sidebar_position: 2
+description: "This article explains how to lock the watermarks in a Word document to restrict the editing."
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-word-processing-documents/locking-watermark-in-word-processing-document.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "3c037a2d16ddaf608aaf1b0363740a2f23b1a94bb14b8a09773c8a00573a9db9"
+---
+
+:::info
+GroupDocs.Watermark for .NET is included in Conholdate.Total for .NET.
+:::
+
+There might be the case when you need to lock the watermarks in a Word document to restrict the editing. To deal with such cases, GroupDocs.Watermark provides 5 variants of locking Word document when adding watermark.
+
+* **AllowOnlyRevisions**: user can only add revision marks to the document.
+* **AllowOnlyComments**: user can only modify comments in the document.
+* **AllowOnlyFormFields**: the document is split into one-page sections and locked section with watermark is added between each two adjacent document sections.
+* **ReadOnly**: the entire document is read-only.
+* **ReadOnlyWithEditableContent**: the document is read-only, but all the content except the watermark is marked as editable.
+
+*<a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarkbaseoptions/properties/locktype" target="_blank" rel="nofollow noopener noreferrer">LockType</a>* property has been added to *<a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarkbaseoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingWatermarkBaseOptions</a>* class (and all descendants) to set any of the above-mentioned lock types. *<a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessinglocktype" target="_blank" rel="nofollow noopener noreferrer">*WordProcessing*LockType</a>* enum in <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/" target="_blank" rel="nofollow noopener noreferrer">*GroupDocs.Watermark.Options.WordProcessing*</a> namespace is used to define the lock type. The following code samples show how to lock watermark in different scenarios.
+
+## Adding watermark to all pages
+
+This example uses <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarkpagesoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingWatermarkPagesOptions</a> with empty <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarkpagesoptions/properties/pagenumbers" target="_blank" rel="nofollow noopener noreferrer">PageNumbers</a>.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToWordProcessing.WordProcessingAddLockedWatermarkToAllPages**
+
+```csharp
+WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.docx"
+using (Watermarker watermarker = new Watermarker("document.docx", loadOptions))
+{
+    TextWatermark watermark = new TextWatermark("Watermark text", new Font("Arial", 19));
+    watermark.ForegroundColor = Color.Red;
+
+    WordProcessingWatermarkPagesOptions options = new WordProcessingWatermarkPagesOptions();
+    options.IsLocked = true;
+    options.LockType = WordProcessingLockType.AllowOnlyFormFields;
+
+    // To protect with password
+    //options.Password = "7654321";
+
+    watermarker.Add(watermark, options);
+    watermarker.Save("document.docx");
+}
+```
+
+## Adding watermark to particular pages
+
+This example uses <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarkpagesoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingWatermarkPagesOptions</a> with <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarkpagesoptions/properties/pagenumbers" target="_blank" rel="nofollow noopener noreferrer">PageNumbers</a> containing numbers of two pages.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToWordProcessing.WordProcessingAddLockedWatermarkToParticularPages**
+
+```csharp
+WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.docx"
+using (Watermarker watermarker = new Watermarker("document.docx", loadOptions))
+{
+    TextWatermark watermark = new TextWatermark("Watermark text", new Font("Arial", 19));
+    watermark.ForegroundColor = Color.Red;
+
+    WordProcessingWatermarkPagesOptions options = new WordProcessingWatermarkPagesOptions();
+    options.PageNumbers = new int[] { 1, 3 };
+    options.IsLocked = true;
+    options.LockType = WordProcessingLockType.AllowOnlyComments;
+
+    // To protect with password
+    //options.Password = "7654321";
+
+    watermarker.Add(watermark, options);
+    watermarker.Save("document.docx");
+}
+```
+
+## Adding watermark to a section
+
+This example uses <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarksectionoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingWatermarkSectionOptions</a> with <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarksectionoptions/properties/sectionindex" target="_blank" rel="nofollow noopener noreferrer">SectionIndex</a>.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToWordProcessing.WordProcessingAddLockedWatermarkToSection**
+
+```csharp
+WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.docx"
+using (Watermarker watermarker = new Watermarker("document.docx", loadOptions))
+{
+    TextWatermark watermark = new TextWatermark("Watermark text", new Font("Arial", 19));
+    watermark.ForegroundColor = Color.Red;
+
+    WordProcessingWatermarkSectionOptions options = new WordProcessingWatermarkSectionOptions();
+    options.SectionIndex = 0;
+    options.IsLocked = true;
+    options.LockType = WordProcessingLockType.ReadOnlyWithEditableContent;
+
+    // To protect with password
+    //options.Password = "7654321";
+
+    watermarker.Add(watermark, options);
+    watermarker.Save("document.docx");
+}
+```
+

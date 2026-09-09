@@ -1,0 +1,88 @@
+---
+title: "Email attachments"
+sidebar_label: "Email attachments"
+sidebar_key: "net-watermark-adding-watermarks-add-watermarks-to-email-attachments-email-attachments"
+sidebar_position: 1
+description: "This article shows how to get the information about the attachments."
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-email-attachments/email-attachments.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "b7241bf7ec835516d3631fb68e53956fbc938bbb7975639c4c748b148043c50b"
+---
+
+:::info
+GroupDocs.Watermark for .NET is included in Conholdate.Total for .NET.
+:::
+
+## Extracting all attachments from email message
+
+GroupDocs.Watermark allows you to get the information about the <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.email/emailcontent/properties/attachments" target="_blank" rel="nofollow noopener noreferrer">attachments</a> in an email message. Below is the code snippet for extracting attachments from Email.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToEmailAttachments.EmailExtractAllAttachments**
+
+```csharp
+EmailLoadOptions loadOptions = new EmailLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\message.msg"
+using (Watermarker watermarker = new Watermarker("message.msg", loadOptions))
+{
+    EmailContent content = watermarker.GetContent<EmailContent>();
+    foreach (EmailAttachment attachment in content.Attachments)
+    {
+        Console.WriteLine("Name: {0}", attachment.Name);
+        Console.WriteLine("File format: {0}", attachment.GetDocumentInfo().FileType);
+        File.WriteAllBytes(Path.Combine("SampleFiles\Output", attachment.Name), attachment.Content);
+    }
+}
+```
+
+## Removing particular attachment from email message
+
+Using GroupDocs.Watermark, you can <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.common.removeonlylistbase/1/methods/removeat" target="_blank" rel="nofollow noopener noreferrer">remove</a> any particular attachment from an email message. Below is the code for removing specific attachment:
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToEmailAttachments.EmailRemoveAttachment**
+
+```csharp
+EmailLoadOptions loadOptions = new EmailLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\message.msg"
+using (Watermarker watermarker = new Watermarker("message.msg", loadOptions))
+{
+    EmailContent content = watermarker.GetContent<EmailContent>();
+    for (int i = content.Attachments.Count - 1; i >= 0; i--)
+    {
+        EmailAttachment attachment = content.Attachments[i];
+
+        // Remove all attached files with a particular name and format
+        if (attachment.Name.Contains("sample") && attachment.GetDocumentInfo().FileType == FileType.DOCX)
+        {
+            content.Attachments.RemoveAt(i);
+        }
+    }
+
+    // Save changes
+    watermarker.Save("message.msg");
+}
+```
+
+## Adding attachment to email message
+
+You can also <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.email/emailattachmentcollection/methods/add" target="_blank" rel="nofollow noopener noreferrer">add</a> attachments to the email messages using GroupDocs.Watermark. Following is the code sample for adding an attachment:
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToEmailAttachments.EmailAddAttachment**
+
+```csharp
+EmailLoadOptions loadOptions = new EmailLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\message.msg"
+using (Watermarker watermarker = new Watermarker("message.msg", loadOptions))
+{
+    EmailContent content = watermarker.GetContent<EmailContent>();
+    content.Attachments.Add(File.ReadAllBytes("sample.msg"), "sample.msg");
+
+    // Save changes
+    watermarker.Save("message.msg");
+}
+```

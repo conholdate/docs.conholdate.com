@@ -1,0 +1,100 @@
+---
+title: "Removing found watermarks"
+sidebar_label: "Removing found watermarks"
+sidebar_key: "net-watermark-searching-and-modifying-watermarks-removing-found-watermarks"
+sidebar_position: 3
+description: "This article explains how to remove found watermarks while using GroupDocs. Watermarks API."
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/advanced-usage/searching-and-modifying-watermarks/removing-found-watermarks.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "4c79dac0fe06f6c1f2d371a176ac98428d4f79d91c0f425e3daad873b8252f47"
+---
+
+:::info
+GroupDocs.Watermark for .NET is included in Conholdate.Total for .NET.
+:::
+
+## Remove watermark
+
+GroupDocs.Watermark API enables you to easily <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark/watermarker/methods/search" target="_blank" rel="nofollow noopener noreferrer">find</a> and remove a particular <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.search/possiblewatermark" target="_blank" rel="nofollow noopener noreferrer">watermark</a> from a document. Following code serves this purpose.
+
+**AdvancedUsage.SearchAndRemoveWatermarks.RemoveWatermark**
+
+```csharp
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf"))
+{
+    PossibleWatermarkCollection possibleWatermarks = watermarker.Search();
+
+    // Remove possible watermark at the specified index from the document.
+    possibleWatermarks.RemoveAt(0);
+
+    // Remove specified possible watermark from the document.
+    possibleWatermarks.Remove(possibleWatermarks[0]);
+
+    watermarker.Save("document.pdf");
+}
+```
+
+## Remove watermark with particular text formatting
+
+GroupDocs.Watermark also enables you to search and remove the watermarks on the basis of some particular <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.search.searchcriteria/textformattingsearchcriteria" target="_blank" rel="nofollow noopener noreferrer">text formatting</a>. You can provide a search criterion containing <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.search.searchcriteria/textformattingsearchcriteria/properties/fontname" target="_blank" rel="nofollow noopener noreferrer">font name</a>, size, <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.search.searchcriteria/textformattingsearchcriteria/properties/foregroundcolorrange" target="_blank" rel="nofollow noopener noreferrer">color</a> etc and the API will find the watermarks with matching properties. Following code snippet shows how to search and remove watermarks with a particular text formatting.
+
+**AdvancedUsage.SearchAndRemoveWatermarks.RemoveWatermarkWithParticularTextFormatting**
+
+```csharp
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf"))
+{
+    TextFormattingSearchCriteria criteria = new TextFormattingSearchCriteria();
+    criteria.ForegroundColorRange = new ColorRange();
+    criteria.ForegroundColorRange.MinHue = -5;
+    criteria.ForegroundColorRange.MaxHue = 10;
+    criteria.ForegroundColorRange.MinBrightness = 0.01f;
+    criteria.ForegroundColorRange.MaxBrightness = 0.99f;
+    criteria.BackgroundColorRange = new ColorRange();
+    criteria.BackgroundColorRange.IsEmpty = true;
+    criteria.FontName = "Arial";
+    criteria.MinFontSize = 19;
+    criteria.MaxFontSize = 42;
+    criteria.FontBold = true;
+
+    PossibleWatermarkCollection watermarks = watermarker.Search(criteria);
+    watermarks.Clear();
+
+    watermarker.Save("document.pdf");
+}
+```
+
+## Remove hyperlink watermarks
+
+GroupDocs.Watermark API allows you to search and remove <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.search/hyperlinkpossiblewatermark" target="_blank" rel="nofollow noopener noreferrer">hyperlinks</a> in a document of any supported format. Following code sample shows how to find and remove hyperlinks with a particular URL from a document.
+
+**AdvancedUsage.SearchAndRemoveWatermarks.RemoveHyperlinksWithParticularUrl**
+
+```csharp
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf"))
+{
+    PossibleWatermarkCollection watermarks = watermarker.Search(new TextSearchCriteria(new Regex(@"someurl\.com")));
+    for (int i = watermarks.Count - 1; i >= 0; i--)
+    {
+        // Ensure that only hyperlinks will be removed.
+        if (watermarks[i] is HyperlinkPossibleWatermark)
+        {
+            // Output the full url of the hyperlink
+            Console.WriteLine(watermarks[i].Text);
+
+            // Remove hyperlink from the document
+            watermarks.RemoveAt(i);
+        }
+    }
+
+    watermarker.Save("document.pdf");
+}
+```
