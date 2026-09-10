@@ -1,0 +1,76 @@
+---
+title: "How to build in docker"
+sidebar_label: "How to build in docker"
+sidebar_key: "net-conversion-known-issues-build-in-docker"
+sidebar_position: 7
+description: "This is a guide about build an web api which uses GroupDocs.Conversion for .NET in a docker container"
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/troubleshooting/known-issues/build-in-docker.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "780e28ae0612d1037c97e6d9ef6de70fbd928107285695ea3532cf7fe45f57bd"
+---
+
+:::info
+GroupDocs.Conversion for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Build web API project with GroupDocs.Conversion in Docker
+
+To build an web API which is using GroupDocs.Conversion for .NET in docker container use this sample Docker file:
+
+```docker
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+RUN apt-get update && apt-get install -y ffmpeg libgdiplus
+
+RUN sed -i'.bak' 's/$/ contrib/' /etc/apt/sources.list
+RUN apt-get update; apt-get install -y ttf-mscorefonts-installer fontconfig
+RUN fc-cache -f -v
+
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+COPY ["YourApi/YourApi.csproj", "TestApi/"]
+RUN dotnet restore "YourApi/YourApi.csproj"
+COPY . .
+WORKDIR "/src/YourApi"
+RUN dotnet build "YourApi.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "YourApi.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "YourApi.dll"]
+```
+
+As you can see the process is the same as building a regular web API project in docker. The main difference is the installation of needed libraries which allows GroupDocs.Conversion for .NET to work properly in a docker container:
+
+```docker
+RUN apt-get update && apt-get install -y ffmpeg libgdiplus
+
+RUN sed -i'.bak' 's/$/ contrib/' /etc/apt/sources.list
+RUN apt-get update; apt-get install -y ttf-mscorefonts-installer fontconfig
+RUN fc-cache -f -v
+```
+
+Also please do not forget to add runtimeconfig.template.json file next to your project file with the following content:
+
+```json
+{
+    "configProperties": {
+        "System.Drawing.EnableUnixSupport": true
+    }
+}
+```
+
+This will prevent exception "The type initializer for `gdip` throws exception". To learn more about this <a href="https://docs.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/6.0/system-drawing-common-windows-only" target="_blank" rel="nofollow noopener noreferrer">read here</a>.

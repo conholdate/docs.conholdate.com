@@ -1,0 +1,78 @@
+---
+title: "How to build in docker Alpine Linux"
+sidebar_label: "How to build in docker Alpine Linux"
+sidebar_key: "net-conversion-known-issues-build-in-docker-alpine-linux"
+sidebar_position: 8
+description: "This is a guide about build an web api which uses GroupDocs.Conversion for .NET in a docker container with Alpine Linux"
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/troubleshooting/known-issues/build-in-docker-alpine-linux.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "d3577b670f2a3c6c56d9612362951c92fbe7c8d9a3009643f196d85114fcdec1"
+---
+
+:::info
+GroupDocs.Conversion for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Build web API project with GroupDocs.Conversion in Docker
+
+To build an web API which is using GroupDocs.Conversion for .NET in docker container with Alpine Linux use this sample Docker file:
+
+```docker
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine AS base
+WORKDIR /app
+EXPOSE 80
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
+RUN apk add --no-cache icu-libs krb5-libs libgcc libintl libssl1.1 libstdc++ zlib
+RUN apk add --no-cache ffmpeg libgdiplus
+
+RUN apk add --no-cache msttcorefonts-installer fontconfig
+RUN update-ms-fonts && fc-cache fc-cache -f
+
+FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS build
+WORKDIR /src
+COPY ["YourApi/YourApi.csproj", "TestApi/"]
+RUN dotnet restore "YourApi/YourApi.csproj"
+COPY . .
+WORKDIR "/src/YourApi"
+RUN dotnet build "YourApi.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "YourApi.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "YourApi.dll"]
+```
+
+As you can see the process is the same as building a regular web API project in docker. The main difference is the installation of needed libraries which allows GroupDocs.Conversion for .NET to work properly in a docker container:
+
+```docker
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
+RUN apk add --no-cache icu-libs krb5-libs libgcc libintl libssl1.1 libstdc++ zlib
+RUN apk add --no-cache ffmpeg libgdiplus
+
+RUN apk add --no-cache msttcorefonts-installer fontconfig
+RUN update-ms-fonts && fc-cache fc-cache -f
+```
+
+Also please do not forget to add runtimeconfig.template.json file next to your project file with the following content:
+
+```json
+{
+    "configProperties": {
+        "System.Drawing.EnableUnixSupport": true
+    }
+}
+```
+
+This will prevent exception "The type initializer for `gdip` throws exception". To learn more about this <a href="https://docs.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/6.0/system-drawing-common-windows-only" target="_blank" rel="nofollow noopener noreferrer">read here</a>.
