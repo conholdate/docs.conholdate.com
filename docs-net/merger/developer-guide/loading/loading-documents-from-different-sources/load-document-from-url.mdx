@@ -1,0 +1,58 @@
+---
+title: "Load document from URL"
+sidebar_label: "Load document from URL"
+sidebar_key: "net-merger-loading-loading-documents-from-different-sources-load-document-from-url"
+sidebar_position: 3
+description: "This article explains how to load PDF, Word, Excel, PowerPoint documents from URL when using GroupDocs.Merger for .NET."
+product: "merger"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "merger-net"
+source_path: "net/developer-guide/loading/loading-documents-from-different-sources/load-document-from-url.md"
+source_commit: "a94e0e4d7474596613a34f623effd20176c5227b"
+source_sha256: "0f1b87fe82f0f0b81919563083070dfada0791f71a44ed8ef1bcc1ba43d0cda2"
+---
+
+:::info
+GroupDocs.Merger for .NET is included in Conholdate.Total for .NET.
+:::
+
+Following example demonstrates how to load document from URL.
+
+```csharp
+ 		public static void Run()
+        {
+            string url = "https://github.com/groupdocs-merger/GroupDocs.Merger-for-.NET/blob/master/Examples/Resources/SampleFiles/Pdf/example.pdf?raw=true";
+            
+            using (Stream stream = GetRemoteFile(url))
+            {
+                using (Merger merger = new Merger(stream))
+                {
+                    Console.WriteLine($"Document loaded from URL successfully.");
+                }
+            }
+        }
+
+        private static Stream GetRemoteFile(string url)
+        {
+            //ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+               | SecurityProtocolType.Tls11
+               | SecurityProtocolType.Tls12
+               | SecurityProtocolType.Ssl3;
+            WebRequest request = WebRequest.Create(url);
+            using (WebResponse response = request.GetResponse())
+                return GetFileStream(response);
+        }
+
+        private static Stream GetFileStream(WebResponse response)
+        {
+            MemoryStream fileStream = new MemoryStream();
+            using (Stream responseStream = response.GetResponseStream())
+                responseStream.CopyTo(fileStream);
+            fileStream.Position = 0;
+            return fileStream;
+        }
+```

@@ -1,0 +1,129 @@
+---
+title: "Generate document pages preview"
+sidebar_label: "Generate document pages preview"
+sidebar_key: "net-merger-generate-document-pages-preview"
+sidebar_position: 7
+description: "Following this guide you will learn how to generate PDF, Word (DOC, DOCX), Excel(XLS, XLSX), PowerPoint(PPT, PPTX) documents thumbnails and preview document pages using GroupDocs.Merger for .NET API."
+product: "merger"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "merger-net"
+source_path: "net/developer-guide/generate-document-pages-preview.md"
+source_commit: "a94e0e4d7474596613a34f623effd20176c5227b"
+source_sha256: "6924e69897e1d226e8fef09ab220feb4257082b60b9f0dce4b8f90023ce7077a"
+---
+
+:::info
+GroupDocs.Merger for .NET is included in Conholdate.Total for .NET.
+:::
+
+**<a href="https://products.groupdocs.com/merger/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Merger</a>** provides <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> class to specify different options to manage preview of document pages.  
+  
+Here are the steps to generate document preview with GroupDocs.Merger:
+*   Create new instance of <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger" target="_blank" rel="nofollow noopener noreferrer">Merger</a> class and pass source document path as a constructor parameter.    
+*   Instantiate the <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> object with:    
+    *   delegate for each page stream creation (see event handler <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.common/createpagestream" target="_blank" rel="nofollow noopener noreferrer">CreatePageStream</a>);         
+    *   image preview format - PNG / JPG / BMP;        
+    *   page numbers to process;        
+    *   custom size of preview images (if needed).           
+
+:::info
+Stream that were created by <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.common/createpagestream" target="_blank" rel="nofollow noopener noreferrer">CreatePageStream</a> delegate will be disposed automatically once after generation of preview image. If you need to implement custom image preview stream disposing you have to pass additional argument <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.common/releasepagestream" target="_blank" rel="nofollow noopener noreferrer">ReleasePageStream</a> to clean up resources.
+:::
+     
+*   Call <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger/generatepreview" target="_blank" rel="nofollow noopener noreferrer">GeneratePreview</a> method of <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger" target="_blank" rel="nofollow noopener noreferrer">Merger</a> class instance and pass <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> to it.
+    
+
+## CreatePageStream delegate implementation
+
+GroupDocs.Merger expects <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.common/createpagestream" target="_blank" rel="nofollow noopener noreferrer">CreatePageStream</a> delegate to obtain each page stream for image preview generation process
+
+```csharp
+private static Stream CreatePageStream(int pageNumber)
+{
+    string imageFilePath = Path.Combine("GeneratePreviewFolder", "image-" + pageNumber.ToString() + ".jpg");
+    var folder = Path.GetDirectoryName(imageFilePath);
+    if(!Directory.Exists(folder))
+    {
+        Directory.CreateDirectory(folder);
+    }
+    return new System.IO.FileStream(imageFilePath, FileMode.Create);
+}
+```
+
+## ReleasePageStream delegate implementation
+
+```csharp
+private static void ReleasePageStream(int pageNumber, Stream pageStream)
+{
+     pageStream.Dispose();
+     string imageFilePath = Path.Combine("GeneratePreviewFolder", "image-" + pageNumber.ToString() + ".jpg");
+     Console.WriteLine("Image file {0} is ready for preview", imageFilePath);
+}
+```
+
+## Generate document preview from file on local disk
+
+```csharp
+public static void GetPreview()
+{   
+    string filePath = @"c:\sample.xlsx";
+    using (Merger merger = new Merger(filePath))
+    {
+        IPreviewOptions previewOption = new PreviewOptions(CreatePageStream, PreviewMode.JPEG);
+        merger.GeneratePreview(previewOption);
+    }
+}
+ 
+private static Stream CreatePageStream(int pageNumber)
+{
+    string imageFilePath = Path.Combine("GeneratePreviewFolder", "image-" + pageNumber.ToString() + ".jpg");
+    var folder = Path.GetDirectoryName(imageFilePath);
+    if(!Directory.Exists(folder))
+    {
+        Directory.CreateDirectory(folder);
+    }
+    return new System.IO.FileStream(imageFilePath, FileMode.Create);
+}
+```
+
+## Generate document preview from stream with custom stream releasing delegate
+
+```csharp
+public static void GetPreview()
+{
+    string filePath = @"c:\sample.xlsx";
+    using (Merger merger = new Merger(filePath))
+    {
+        IPreviewOptions previewOption = new PreviewOptions(CreatePageStream, ReleasePageStream, PreviewMode.JPEG);
+        merger.GeneratePreview(previewOption);
+    }
+}
+ 
+private static Stream CreatePageStream(int pageNumber)
+{
+    string imageFilePath = Path.Combine("GeneratePreviewFolder", "image-" + pageNumber.ToString() + ".jpg");
+    var folder = Path.GetDirectoryName(imageFilePath);
+    if(!Directory.Exists(folder))
+    {
+        Directory.CreateDirectory(folder);
+    }
+    return new System.IO.FileStream(imageFilePath, FileMode.Create);
+}
+
+private static void ReleasePageStream(int pageNumber, Stream pageStream)
+{
+     pageStream.Dispose();
+     string imageFilePath = Path.Combine("GeneratePreviewFolder", "image-" + pageNumber.ToString() + ".jpg");
+     Console.WriteLine("Image file {0} is ready for preview", imageFilePath);
+}
+```
+
+
+:::info
+NOTE: Stream that was created over <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.common/createpagestream" target="_blank" rel="nofollow noopener noreferrer">CreatePageStream</a> delegate will be disposed automatically once after generation of preview image. If you need to implement custom image preview stream disposing you have to pass additional argument <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.common/releasepagestream" target="_blank" rel="nofollow noopener noreferrer">ReleasePageStream</a> to clean up resources.
+:::
+
+

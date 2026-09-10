@@ -1,0 +1,166 @@
+---
+title: "Merge pages in the arbitrary order"
+sidebar_label: "Merge pages in the arbitrary order"
+sidebar_key: "net-merger-merge-merge-pages-in-arbitrary-order"
+sidebar_position: 120
+description: "This article explains how to merge arbitrary pages from different documents into a single PDF, DOCX, Excel or PowerPoint document using GroupDocs.Merger for .NET."
+product: "merger"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "merger-net"
+source_path: "net/developer-guide/merge/merge-pages-in-arbitrary-order.md"
+source_commit: "a94e0e4d7474596613a34f623effd20176c5227b"
+source_sha256: "8ef3e6404c59f6f8498c1c662e2105e95fe56b480540e1e474fcd13be7421d53"
+---
+
+:::info
+GroupDocs.Merger for .NET is included in Conholdate.Total for .NET.
+:::
+
+With **<a href="https://products.groupdocs.com/merger/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Merger</a>** you can combine different pages from multiple source documents into a single document. 
+
+* To merge the entire first document along with specific pages from the second and subsequent documents, you can make use of the <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.options/pagejoinoptions/" target="_blank" rel="nofollow noopener noreferrer">PageJoinOptions</a> object, which is explained in detail in the [Merge pages from various documents](/net/merger/developer-guide/merge/merge-pages-from-various-documents/) section.
+
+* To merge arbitrary pages from all the source documents, you can use the <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.builders/pagebuilder/" target="_blank" rel="nofollow noopener noreferrer">PageBuilder</a> object, which is explained on this page.
+
+
+Using the <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.builders/pagebuilder/" target="_blank" rel="nofollow noopener noreferrer">PageBuilder</a> object, you can define the specific order in which the pages from the source documents will be combined. For instance, you can merge the 3rd page from Document A with the 5th page from Document B and then with the 2nd page from Document A.
+
+To start using the `PageBuilder` class, you need to create an instance of it. You can then use the `AddPage` method to append a single page, or the `AddPageRange` method to append a range of pages. Once you have added all the pages in the required order, you can apply them to the documents by calling the `Merger.ApplyPageBuilder` method.
+
+
+## Specifying the required pages by their number
+
+The `AddPage` method allows several ways to define the page to be added.
+The easiest way is to pass the `IPageInfo` object that describes the page's source document and its number. 
+
+Here are the steps to combine several pages from various documents specifying the pages by their numbers:
+
+*   Create a <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger" target="_blank" rel="nofollow noopener noreferrer">Merger</a> object and provide the path or stream of the source file.
+*   Use the <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger/join/#join_3" target="_blank" rel="nofollow noopener noreferrer">Join</a> to add another source document. Repeat this step for each document you want to merge.
+*   Create a <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.builders/pagebuilder/" target="_blank" rel="nofollow noopener noreferrer">PageBuilder</a> object by calling the `Merger.CreatePageBuilder` method.
+*   Call the <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.builders/pagebuilder/addpage" target="_blank" rel="nofollow noopener noreferrer">AddPage</a> method and pass the `IPageInfo` object describing the appropriate page. Note that the `IPageInfo` object uses zero-based notation for both source documents and page numbers.  Repeat this step for every page you want to add.
+*   Use the <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger/applypagebuilder" target="_blank" rel="nofollow noopener noreferrer">ApplyPageBuilder</a> method to apply the specified order of pages to the merged document.
+*   Save the resulting document by calling the <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger/save/#save_1" target="_blank" rel="nofollow noopener noreferrer">Save</a> method and providing a file path.
+
+
+```csharp
+string filePath = @"c:\sample1.docx";
+string filePath2 = @"c:\sample2.docx";
+string filePathOut = @"c:\output\result.docx";
+
+using (Merger merger = new Merger(filePath))
+{
+    merger.Join(filePath2);
+
+    PageBuilder pageBuilder = merger.CreatePageBuilder();
+    // Add page 1 from the first document
+    pageBuilder.AddPage(pageBuilder.Documents[0].Pages[0]);
+    // Add page 3 from the second document
+    pageBuilder.AddPage(pageBuilder.Documents[1].Pages[2]);
+    // Add page 4 from the first document 
+    pageBuilder.AddPage(pageBuilder.Documents[0].Pages[3]);
+    // Add page 2 from the second document
+    pageBuilder.AddPage(pageBuilder.Documents[1].Pages[1]);
+    // Add page 1 from the second document
+    pageBuilder.AddPage(pageBuilder.Documents[1].Pages[0]);
+    // Add page 6 from the first document 
+    pageBuilder.AddPage(pageBuilder.Documents[0].Pages[5]);
+
+    // Apply the page order
+    merger.ApplyPageBuilder(pageBuilder);
+
+    merger.Save(filePathOut);
+}
+```
+
+## Specifying the required pages by their index
+
+When adding many pages, specifying them by number is not optimal since in that case each call of the `AddPage` method invokes loading of document information. To improve performance, you can skip loading the document information and specify pages by their index instead.
+
+To combine several pages from various documents specifying the pages by their index:
+
+*   Create a <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger" target="_blank" rel="nofollow noopener noreferrer">Merger</a> object and provide the path or stream of the source file.
+*   Use the <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger/join/#join_3" target="_blank" rel="nofollow noopener noreferrer">Join</a> to add another source document. Repeat this step for each document you want to merge.
+*   Create a <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.options/pagebuilderoptions/" target="_blank" rel="nofollow noopener noreferrer">PageBuilderOptions</a> object and set the `LoadDocumentInfo` property to `false`.
+*   Create a <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.builders/pagebuilder/" target="_blank" rel="nofollow noopener noreferrer">PageBuilder</a> object by calling the `Merger.CreatePageBuilder` method and pass the `PageBuilderOptions` to it.
+*   Call the <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.builders/pagebuilder/addpage" target="_blank" rel="nofollow noopener noreferrer">AddPage</a> method and pass the source document index and the index number of the needed page. Repeat this step for every page you want to add.
+*   Call the <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger/applypagebuilder" target="_blank" rel="nofollow noopener noreferrer">ApplyPageBuilder</a> method to apply the specified order of pages to the merged document.
+*   Save the resulting document by calling the <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger/save/#save_1" target="_blank" rel="nofollow noopener noreferrer">Save</a> method and providing a file path.
+
+```csharp
+string filePath = @"c:\sample1.docx";
+string filePath2 = @"c:\sample2.docx";
+string filePathOut = @"c:\output\result.docx";
+
+using (Merger merger = new Merger(filePath))
+{
+    merger.Join(filePath2);
+
+    PageBuilderOptions pageBuilderOptions = new PageBuilderOptions();
+    pageBuilderOptions.LoadDocumentInfo = false;
+
+    PageBuilder pageBuilder = merger.CreatePageBuilder(pageBuilderOptions);
+    // Add page 1 from the first document
+    pageBuilder.AddPage(pageBuilder.Documents[0].Index, 1);
+    // Add page 3 from the second document
+    pageBuilder.AddPage(pageBuilder.Documents[1].Index, 3);
+    // Add page 4 from the first document 
+    pageBuilder.AddPage(pageBuilder.Documents[0].Index, 4);
+    // Add page 2 from the second document
+    pageBuilder.AddPage(pageBuilder.Documents[1].Index, 2);
+    // Add page 1 from the second document
+    pageBuilder.AddPage(pageBuilder.Documents[1].Index, 1);
+    // Add page 6 from the first document 
+    pageBuilder.AddPage(pageBuilder.Documents[0].Index, 6);
+    
+    // Apply the page order
+    merger.ApplyPageBuilder(pageBuilder);
+
+    merger.Save(filePathOut);
+}
+```
+## Specifying the range of the required pages
+
+When you need to add multiple pages at once, you can use the `AddPageRange` method. It accepts an array of `IPageInfo` objects, each describing the appropriate page.
+
+Here are the steps to combine several pages from various documents specifying them as a range:
+
+*   Create a <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger" target="_blank" rel="nofollow noopener noreferrer">Merger</a> object and provide the path or stream of the source file.
+*   Use the <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger/join/#join_3" target="_blank" rel="nofollow noopener noreferrer">Join</a> to add another source document. Repeat this step for each document you want to merge.
+*   Create a <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.builders/pagebuilder/" target="_blank" rel="nofollow noopener noreferrer">PageBuilder</a> object by calling the `Merger.CreatePageBuilder` method.
+*   Call the <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.builders/pagebuilder/addpagerange" target="_blank" rel="nofollow noopener noreferrer">AddPageRange</a> method and pass an array of `IPageInfo` objects describing the appropriate pages. Please note that `IPageInfo` objects use zero-based notation for source documents and page numbers.
+*   Use the <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger/applypagebuilder" target="_blank" rel="nofollow noopener noreferrer">ApplyPageBuilder</a> method to apply the specified order of pages to the merged document.
+*   Save the resulting document by calling the <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger/save/#save_1" target="_blank" rel="nofollow noopener noreferrer">Save</a> method and providing a file path.
+
+
+```csharp
+string filePath = @"c:\sample1.docx";
+string filePath2 = @"c:\sample2.docx";
+string filePathOut = @"c:\output\result.docx";
+
+using (Merger merger = new Merger(filePath))
+{
+    merger.Join(filePath2);
+
+    PageBuilder pageBuilder = merger.CreatePageBuilder();
+    // Specify a range of pages
+    IPageInfo[] range = new IPageInfo[] {
+                    pageBuilder.Documents[0].Pages[0], // Page 1 from the first document
+                    pageBuilder.Documents[1].Pages[2], // Page 3 from the second document
+                    pageBuilder.Documents[0].Pages[3], // Page 4 from the first document
+                    pageBuilder.Documents[1].Pages[1], // Page 2 from the second document
+                    pageBuilder.Documents[1].Pages[0], // Page 1 from the second document
+                    pageBuilder.Documents[0].Pages[5], // Page 6 from the first document                    
+                };
+    // Append a range of pages
+    pageBuilder.AddPageRange(range);
+
+    // Apply the page order
+    merger.ApplyPageBuilder(pageBuilder);
+
+    merger.Save(filePathOut);
+}
+```
