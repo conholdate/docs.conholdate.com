@@ -39,12 +39,12 @@ Fire **once per conversion run**, regardless of how many documents or pages the 
 | Handler | Signature | When it fires |
 | --------- | ----------- | --------------- |
 | `OnConversionStarted` | `Action` | Once, when the conversion pipeline starts |
-| `OnConversionProgress` | `Action&lt;byte&gt;` | While the pipeline is running, with the current progress percentage (0-100) |
+| `OnConversionProgress` | `Action<byte>` | While the pipeline is running, with the current progress percentage (0-100) |
 | `OnConversionCompleted` | `Action` | Once at the end of the pipeline, regardless of success or failure |
 
 
 :::warning[Name reuse - read before upgrading]
-The `OnConversionCompleted` name is **reused with new semantics** in v26.6. The pre-v26.6 fluent chain method `.OnConversionCompleted(Action&lt;ConvertedContext&gt;)` (per-document) is now `OnDocumentConverted` on the aggregator. The new `ConversionEvents.OnConversionCompleted` is a lifecycle handler - its signature is `Action` (no parameters) and it fires once at pipeline end. If you copy a v26.5-and-earlier example expecting per-document context, switch to `OnDocumentConverted`.
+The `OnConversionCompleted` name is **reused with new semantics** in v26.6. The pre-v26.6 fluent chain method `.OnConversionCompleted(Action<ConvertedContext>)` (per-document) is now `OnDocumentConverted` on the aggregator. The new `ConversionEvents.OnConversionCompleted` is a lifecycle handler - its signature is `Action` (no parameters) and it fires once at pipeline end. If you copy a v26.5-and-earlier example expecting per-document context, switch to `OnDocumentConverted`.
 :::
 
 
@@ -54,11 +54,11 @@ Fire **once per produced item** - each converted document, each converted page, 
 
 | Handler | Signature | When it fires |
 | --------- | ----------- | --------------- |
-| `OnDocumentConverted` | `Action&lt;ConvertedContext&gt;` | After each document conversion completes successfully |
-| `OnDocumentFailed` | `Action&lt;ConvertContext, Exception&gt;` | When a document conversion throws |
-| `OnPageConverted` | `Action&lt;ConvertedPageContext&gt;` | After each page is converted in page-by-page conversions |
-| `OnPageFailed` | `Action&lt;ConvertContext, Exception&gt;` | When a single page fails during page-by-page conversion |
-| `OnCompressionCompleted` | `Action&lt;Stream&gt;` | After contents have been converted and packaged into a compressed archive (see [Extract and Convert Archive Contents](/net/conversion/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-contents-of-rar-or-zip-document-to-different-formats-and-compress/)) |
+| `OnDocumentConverted` | `Action<ConvertedContext>` | After each document conversion completes successfully |
+| `OnDocumentFailed` | `Action<ConvertContext, Exception>` | When a document conversion throws |
+| `OnPageConverted` | `Action<ConvertedPageContext>` | After each page is converted in page-by-page conversions |
+| `OnPageFailed` | `Action<ConvertContext, Exception>` | When a single page fails during page-by-page conversion |
+| `OnCompressionCompleted` | `Action<Stream>` | After contents have been converted and packaged into a compressed archive (see [Extract and Convert Archive Contents](/net/conversion/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-contents-of-rar-or-zip-document-to-different-formats-and-compress/)) |
 
 See [Context Objects - Complete Guide](/net/conversion/developer-guide/basic-usage/context-objects-complete-guide/) for the properties exposed by `ConvertedContext`, `ConvertContext`, and `ConvertedPageContext`.
 
@@ -68,7 +68,7 @@ Report a condition detected while processing the source document, rather than th
 
 | Handler | Signature | When it fires |
 | --------- | ----------- | --------------- |
-| `OnFontSubstituted` | `Action&lt;FontSubstitutionContext&gt;` | Once per distinct missing font in a source document, when that font is substituted during conversion |
+| `OnFontSubstituted` | `Action<FontSubstitutionContext>` | Once per distinct missing font in a source document, when that font is substituted during conversion |
 
 See [Font substitution notifications](#font-substitution-notifications) below for the full handler reference.
 
@@ -141,7 +141,7 @@ using (var converter = new Converter("source.docx", () => new ConverterSettings(
 }
 ```
 
-`Convert(...)` overloads that accept an `Action&lt;ConvertedContext&gt;` register a **per-call** result handler that wins over the global `OnDocumentConverted` for that single call:
+`Convert(...)` overloads that accept an `Action<ConvertedContext>` register a **per-call** result handler that wins over the global `OnDocumentConverted` for that single call:
 
 ```csharp
 using (var converter = new Converter("source.docx", () => new ConverterSettings(), () => events))
