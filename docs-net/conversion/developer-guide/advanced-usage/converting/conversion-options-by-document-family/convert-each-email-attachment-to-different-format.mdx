@@ -1,0 +1,67 @@
+---
+title: "Convert each email attachment to different format"
+sidebar_label: "Convert each email attachment to different format"
+sidebar_key: "net-conversion-converting-conversion-options-by-document-family-convert-each-email-attachment-to-different-format"
+sidebar_position: 2
+description: "Follow this guide and learn how to convert email attachments to different format based on attachment type using GroupDocs.Conversion for .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-each-email-attachment-to-different-format.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "3d9bca757b869b42ad0fa3ace09a8c3a7b876cb878ab2ab9548d41f77d07c370"
+---
+
+:::info
+GroupDocs.Conversion for .NET is included in Conholdate.Total for .NET.
+:::
+
+GroupDocs.Conversion provides a flexible API to control the conversion of documents that contains other documents.
+
+The following code snippet shows how to convert each attachment to a different format based on the attachment type:
+
+```csharp
+var index = 1;
+LoadOptions LoadOptionsProvider(LoadContext loadContext)
+{
+    if (loadContext.SourceFormat == EmailFileType.Eml)
+    {
+        return new EmailLoadOptions
+        {
+            ConvertOwned = true,
+            ConvertOwner = true,
+            Depth = 2
+        };
+    }
+    return null;
+}
+
+Stream ConvertedStreamProvider(SaveContext saveContext)
+{
+    string outputFile = $"converted-{index++}.{saveContext.TargetFormat.Extension}";
+    return new FileStream(outputFile, FileMode.Create);
+}
+
+ConvertOptions ConvertOptionsProvider(ConvertContext convertContext)
+{
+    if (convertContext.SourceFormat == EmailFileType.Eml)
+    {
+        return new WordProcessingConvertOptions();
+    }
+
+    if (convertContext.SourceFormat == WordProcessingFileType.Txt)
+    {
+        return new PdfConvertOptions();
+    }
+    return new ImageConvertOptions();
+}
+
+using (var converter = new Converter("sample_with_attachments.eml", LoadOptionsProvider))
+{
+    converter.Convert(ConvertedStreamProvider, ConvertOptionsProvider);
+}
+
+```

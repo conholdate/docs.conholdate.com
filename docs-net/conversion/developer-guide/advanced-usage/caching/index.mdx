@@ -1,0 +1,51 @@
+---
+title: "Caching"
+sidebar_label: "Caching"
+sidebar_key: "net-conversion-caching-index"
+sidebar_position: 2
+description: "Learn this article and check how to improve conversion speed and performance when convert document with GroupDocs.Conversion for .NET API."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/caching/_index.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "62fdc4e9e21bbbb7e281c3b23c7cfde5f4b6af6b2137d36efd5f86df6cb20bc1"
+---
+
+:::info
+GroupDocs.Conversion for .NET is included in Conholdate.Total for .NET.
+:::
+
+In some cases document conversion may be a time-consuming operation (dependent on source document content, structure and complexity). For such situations caching can be a solution - converted document is stored into cache (for example at the local drive) and in a case of repetitive conversions of the document, **<a href="https://products.groupdocs.com/conversion/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Conversion</a>** uses cached representation. 
+
+To enable caching, follow these steps:
+
+1.   Instantiate desired cache object (for example <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.caching/filecache" target="_blank" rel="nofollow noopener noreferrer">FileCache</a> will store converted document results at the local drive)
+2.   Pass <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/convertersettings" target="_blank" rel="nofollow noopener noreferrer">ConverterSettings</a> object factory to constructor of a <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter" target="_blank" rel="nofollow noopener noreferrer">Converter</a> class
+3.   Call <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter/convert/#convert_3" target="_blank" rel="nofollow noopener noreferrer">Convert</a> method of <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter" target="_blank" rel="nofollow noopener noreferrer">Converter</a> class
+
+Here is a code that demonstrates how to enable caching for GroupDocs.Conversion.
+
+```csharp
+string cachePath = "c:\output\cache";
+FileCache cache = new FileCache(cachePath);
+Func<ConverterSettings> settingsFactory = () => new ConverterSettings
+{
+    Cache = cache
+};
+using (Converter converter = new Converter("sample.docx", settingsFactory))
+{
+    PdfConvertOptions options = new PdfConvertOptions();
+    Stopwatch stopWatch = Stopwatch.StartNew();
+    converter.Convert("converted.pdf", options);
+    stopWatch.Stop();
+    Console.WriteLine("Time taken on first call to Convert method {0} (ms).", stopWatch.ElapsedMilliseconds);
+    stopWatch.Restart();
+    converter.Convert("converted-1.pdf", options);
+    stopWatch.Stop();
+    Console.WriteLine("Time taken on second call to Convert method {0} (ms).", stopWatch.ElapsedMilliseconds);
+}
+```

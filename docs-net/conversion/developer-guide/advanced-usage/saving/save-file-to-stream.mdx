@@ -1,0 +1,73 @@
+---
+title: "Save file to stream"
+sidebar_label: "Save file to stream"
+sidebar_key: "net-conversion-saving-save-file-to-stream"
+sidebar_position: 4
+description: "This article demonstrates how to convert a file and save it as a stream using GroupDocs.Conversion for .NET API."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/saving/save-file-to-stream.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "0547a7f5d68a652c18eadd21f75fe4b53707845d907105728619ee33e0132b76"
+---
+
+:::info
+GroupDocs.Conversion for .NET is included in Conholdate.Total for .NET.
+:::
+
+To save the conversion results to a stream, follow these steps:
+
+1.   Specify the method to obtain the stream where the converted file will be sent.
+2.   Pass the method's name as the `document` parameter to the <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter/convert/" target="_blank" rel="nofollow noopener noreferrer">Convert()</a> method implementations. 
+
+The `document` parameter could be of `Func&lt;Stream&gt;`, `Func&lt;FileType, Stream&gt;`, `Func&lt;int, Stream&gt;`, or `Func&lt;int, FileType, Stream&gt;` type.
+
+The following code snippet shows how to save a file to a stream:
+
+```csharp
+public static void Run()
+{
+    Func<SaveContext, Stream> getOutputStream = saveContext => GetFileStream($"c:\\files\\converted.{saveContext.TargetFormat.Extension}");
+
+    using (Converter converter = new Converter("c:\\files\\sample.docx"))
+    {
+        PdfConvertOptions options = new PdfConvertOptions();
+        // Pass the output stream as parameter
+        converter.Convert(getOutputStream, options);
+    }
+
+    Console.WriteLine($"\nSource file converted successfully.\nSent file to stream.");
+}
+
+// Obtain the stream for the conversion output
+public static Stream GetFileStream(string outFile)
+{
+    return new FileStream(outFile, FileMode.OpenOrCreate);
+}
+```
+
+You can also use the <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.fluent/iconversionto/convertto/#convertto" target="_blank" rel="nofollow noopener noreferrer">ConvertTo(Func&lt;Stream&gt; convertedStreamProvider)</a> [fluent syntax](/net/conversion/developer-guide/basic-usage/fluent-syntax/) method to save a file to a stream:
+
+```csharp
+public static void Run()
+{
+    Func<SaveContext, Stream> getOutputStream = saveContext => GetFileStream($"c:\\files\\converted.{saveContext.TargetFormat.Extension}");
+
+    FluentConverter
+        // Specify source file location
+        .Load("c:\\files\\sample.docx")
+        // Pass the output stream as parameter
+        .ConvertTo(getOutputStream)
+        .Convert();
+}
+
+// Obtain the stream for the conversion output
+public static Stream GetFileStream(string outFile)
+{
+    return new FileStream(outFile, FileMode.OpenOrCreate);
+}
+```

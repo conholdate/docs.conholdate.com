@@ -1,0 +1,62 @@
+---
+title: "Convert PST or OST documents to different formats"
+sidebar_label: "Convert PST or OST documents to different formats"
+sidebar_key: "net-conversion-converting-conversion-options-by-document-family-convert-contents-of-pst-or-ost-document-to-different-formats"
+sidebar_position: 1
+description: "Follow this guide and learn how to convert contents of PST/OST documents to different format based on content type using GroupDocs.Conversion for .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-contents-of-pst-or-ost-document-to-different-formats.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "5702c317bec6d72d96426d177e0e66be6cf4e4fdf1871b881bcdd3ea5ba61f65"
+---
+
+:::info
+GroupDocs.Conversion for .NET is included in Conholdate.Total for .NET.
+:::
+
+GroupDocs.Conversion provides a flexible API to control the conversion of documents that contain other documents. 
+
+The following code snippet shows how to convert each constituent
+ file of the Outlook Offline Data File (OST) to a different format based on its content type:
+
+```csharp
+var index = 1;
+LoadOptions LoadOptionsProvider(LoadContext loadContext)
+{
+    if (loadContext.SourceFormat == EmailFileType.Ost)
+    {
+        return new PersonalStorageLoadOptions
+        {
+            Folder = @"Root - Mailbox",
+            Depth = 2
+        };
+    }
+    return null;
+}
+
+Stream ConvertedStreamProvider(SaveContext saveContext)
+{
+    string outputFile = $"converted-{index++}.{saveContext.TargetFormat.Extension}";
+    return new FileStream(outputFile, FileMode.Create);
+}
+
+ConvertOptions ConvertOptionsProvider(ConvertContext convertContext)
+{
+    if (convertContext.SourceFormat == EmailFileType.Msg)
+    {
+        return new PdfConvertOptions();
+    }
+    return new WordProcessingConvertOptions();
+}
+
+using (var converter = new Converter("sample.ost", LoadOptionsProvider))
+{
+    converter.Convert(ConvertedStreamProvider, ConvertOptionsProvider);
+}
+
+```

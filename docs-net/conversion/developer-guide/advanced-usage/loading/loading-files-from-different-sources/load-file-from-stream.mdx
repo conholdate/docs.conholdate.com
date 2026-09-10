@@ -1,0 +1,91 @@
+---
+title: "Load file from stream"
+sidebar_label: "Load file from stream"
+sidebar_key: "net-conversion-loading-loading-files-from-different-sources-load-file-from-stream"
+sidebar_position: 2
+description: "This article demonstrates how to convert file presented as a stream using GroupDocs.Conversion for .NET API."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/loading/loading-files-from-different-sources/load-file-from-stream.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "0f931e08d1129c3f1f55608e88441a0c59d03b5f3ae90f2aea5eb7b438e24ac2"
+---
+
+:::info
+GroupDocs.Conversion for .NET is included in Conholdate.Total for .NET.
+:::
+
+There might be a case when your file is not physically located on the disk. Instead, you have the file in the form of a stream. In this case, to avoid the overhead of saving the stream as a file on disk, <a href="https://products.groupdocs.com/conversion/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Conversion**</a> enables you to convert the file streams directly.
+
+To load a file from a stream, follow these steps:
+
+1.  Specify the method to obtain the file stream.
+2.  Pass the method's name to the <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter" target="_blank" rel="nofollow noopener noreferrer">Converter</a> class constructor.
+
+The following code snippet serves this purpose:
+
+```csharp
+public static void Run()
+{
+    // Pass the source stream as parameter
+    using (Converter converter = new Converter(GetFileStream)) 
+    {
+        PdfConvertOptions options = new PdfConvertOptions();
+        converter.Convert("converted.pdf", options);
+    }
+}
+
+// Obtain the stream for the source file
+private static Stream GetFileStream() => File.OpenRead("sample.docx");
+```
+The snippet above uses the `FileStream` class instance. Similarly, you can use any other type of stream. Just make sure that the source stream contains any of the [supported file formats](/net/conversion/getting-started/supported-document-formats/). For example, the following code loads a file using the `MemoryStream` class instance:
+
+```csharp
+public static void Run()
+{
+    // Pass the source stream as parameter
+    using (Converter converter = new Converter(GetMemoryStream)) 
+    {
+        PdfConvertOptions options = new PdfConvertOptions();
+        converter.Convert("converted.pdf", options);
+    }
+}
+
+// Obtain the stream for the source file
+private static Stream GetMemoryStream()
+{
+    MemoryStream memStream = new MemoryStream();
+
+    using (FileStream fStream = File.Open("sample.docx", FileMode.Open))
+    {
+        fStream.CopyTo(memStream);
+    }
+    return memStream;
+}
+```
+
+## Get information about files from a stream
+When loading files from a stream, you may not know beforehand the exact types of files you are receiving. However, to find out this and other information about the source file, you can use the <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter/getdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">Converter.GetDocumentInfo()</a> method, as described in the [Getting document info](/net/conversion/developer-guide/basic-usage/get-document-info/) article.
+
+The following code displays the format of the source file loaded from a stream:
+```csharp
+public static void Run()
+{
+    // Pass the source stream as parameter
+    using (Converter converter = new Converter(GetFileStream)) 
+    {
+        IDocumentInfo docInfo = converter.GetDocumentInfo();
+        Console.WriteLine("Source file format: {0}", docInfo.Format);
+
+        PdfConvertOptions options = new PdfConvertOptions();
+        converter.Convert("converted.pdf", options);
+    }
+}
+
+// Obtain the stream for the source file
+private static Stream GetFileStream() => File.OpenRead("sample.docx");
+```

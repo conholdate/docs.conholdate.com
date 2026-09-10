@@ -1,0 +1,98 @@
+---
+title: "Load personal storage PST or OST with options"
+sidebar_label: "Load personal storage PST or OST with options"
+sidebar_key: "net-conversion-loading-load-options-for-different-document-types-load-personal-storage-pst-or-ost-with-options"
+sidebar_position: 7
+description: "Learn this article and check how to load and convert PST/OST documents with advanced options using GroupDocs.Conversion for .NET API."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/loading/load-options-for-different-document-types/load-personal-storage-pst-or-ost-with-options.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "061428c3f76e301c69c0081c5dc1138694a6e38c8d3187ab50678ba079594468"
+---
+
+:::info
+GroupDocs.Conversion for .NET is included in Conholdate.Total for .NET.
+:::
+
+GroupDocs.Conversion provides <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/personalstorageloadoptions" target="_blank" rel="nofollow noopener noreferrer">PersonalStorageLoadOptions</a> to give you control over how the source personal storage (PST/OST) document will be processed. The following options could be set:
+| Option | Description |
+| -------- | ------------- |
+| **<a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/personalstorageloadoptions/convertowned" target="_blank" rel="nofollow noopener noreferrer">ConvertOwned</a>** | Controls whether owned documents of the document container must be converted. |
+| **<a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/personalstorageloadoptions/convertowner" target="_blank" rel="nofollow noopener noreferrer">ConvertOwner</a>** | Controls whether the document container itself must be converted. If this property is true the document container will be the first converted document. |
+| **<a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/personalstorageloadoptions/depth" target="_blank" rel="nofollow noopener noreferrer">Depth</a>** | Controls how many levels in depth to perform the conversion. |
+| **<a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/personalstorageloadoptions/folder" target="_blank" rel="nofollow noopener noreferrer">Folder</a>** | A folder to be processed. Default is Inbox. |
+
+### Get folders from personal storage
+
+The following code snippet shows how to get folders within the personal storage document:
+
+```csharp
+using (Converter converter = new Converter("sample.pst"))
+{
+    var documentInfo = converter.GetDocumentInfo();
+    var ostInfo = (PersonalStorageDocumentInfo) documentInfo;
+    Console.WriteLine(ostInfo.RootFolderName);
+    foreach (var folder in ostInfo.Folders)
+    {
+        Console.WriteLine(folder);
+    }
+}
+```
+
+### Convert each personal storage content to different formats
+
+The following code snippet shows how to convert each personal storage content to a different format based on the content type:
+
+*   JPG attachments will be converted to PNG
+*   DOCX attachments will be converted to PDF
+*   Emails and all other types will be converted to HTML
+
+```csharp
+using (Converter converter = new Converter("sample.pst", (LoadContext loadContext) =>
+       {
+           if (loadContext.SourceFormat == EmailFileType.Ost)
+           {
+               return new PersonalStorageLoadOptions
+               {
+                   Folder = "Inbox",
+               };
+           }
+           if (loadContext.SourceFormat == EmailFileType.Msg)
+           {
+               return new EmailLoadOptions
+               {
+                   ConvertOwner = true,
+                   ConvertOwned = true,
+                   Depth = 2
+               };
+           }
+           return null;
+       }))
+{
+    int index = 0;
+    converter.Convert((SaveContext saveContext) =>
+    {
+        string fileName = $"converted_{++index}.{saveContext.TargetFormat.Extension}";
+        return new FileStream(fileName, FileMode.Create);
+    }, (ConvertContext convertContext) =>
+    {
+        if (convertContext.SourceFormat == ImageFileType.Jpg)
+        {
+            return new ImageConvertOptions
+            {
+                Format = ImageFileType.Png
+            };
+        }
+        if (convertContext.SourceFormat == WordProcessingFileType.Docx)
+        {
+            return new PdfConvertOptions();
+        }
+        return new WebConvertOptions();
+    });
+}
+```

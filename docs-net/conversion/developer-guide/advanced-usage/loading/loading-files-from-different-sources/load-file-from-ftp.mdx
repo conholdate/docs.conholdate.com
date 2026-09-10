@@ -1,0 +1,59 @@
+---
+title: "Load file from FTP"
+sidebar_label: "Load file from FTP"
+sidebar_key: "net-conversion-loading-loading-files-from-different-sources-load-file-from-ftp"
+sidebar_position: 4
+description: "This article demonstrates how to convert file stored in FTP storage using GroupDocs.Conversion for .NET API."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/loading/loading-files-from-different-sources/load-file-from-ftp.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "9cda1400d36c911747266bc619f3f608911447dafd2b451973b8e5ab92dd256b"
+---
+
+:::info
+GroupDocs.Conversion for .NET is included in Conholdate.Total for .NET.
+:::
+
+The following code snippet shows how to convert a file from FTP:
+
+```csharp
+public static void Run()
+{
+    string outputFile = Path.Combine(@"c:\output", "converted.pdf");
+    string filePath = "ftp://localhost/sample.doc";
+    using (Converter converter = new Converter(() => GetFileFromFtp(filePath)))
+    {
+        PdfConvertOptions options = new PdfConvertOptions();
+        converter.Convert(outputFile, options);
+    }
+}
+
+private static Stream GetFileFromFtp(string filePath)
+{
+    Uri uri = new Uri(filePath);
+    FtpWebRequest request = CreateRequest(uri);
+    using (WebResponse response = request.GetResponse())
+        return GetFileStream(response);
+}
+
+private static FtpWebRequest CreateRequest(Uri uri)
+{
+    FtpWebRequest request = (FtpWebRequest)WebRequest.Create(uri);
+    request.Method = WebRequestMethods.Ftp.DownloadFile;
+    return request;
+}
+
+private static Stream GetFileStream(WebResponse response)
+{
+    MemoryStream fileStream = new MemoryStream();
+    using (Stream responseStream = response.GetResponseStream())
+        responseStream.CopyTo(fileStream);
+    fileStream.Position = 0;
+    return fileStream;
+}
+```

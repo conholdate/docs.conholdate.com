@@ -1,0 +1,53 @@
+---
+title: "Load file from Amazon S3 storage"
+sidebar_label: "Load file from Amazon S3 storage"
+sidebar_key: "net-conversion-loading-loading-files-from-different-sources-load-file-from-amazon-s3-storage"
+sidebar_position: 5
+description: "This article demonstrates how to convert file stored in Amazon S3 storage using GroupDocs.Conversion for .NET API."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/loading/loading-files-from-different-sources/load-file-from-amazon-s3-storage.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "cebb81af0c266b13559ba6cba936792b12d6a8e6963c7dd7a96f9dd7662a84bc"
+---
+
+:::info
+GroupDocs.Conversion for .NET is included in Conholdate.Total for .NET.
+:::
+
+The following code snippet shows how to convert a file from Amazon S3 Storage:
+
+```csharp
+public static void Run()
+{
+    string key = "sample.docx";
+    string outputFile = Path.Combine(@"c:\output" , "converted.pdf");
+    using (Converter converter = new Converter(() => DownloadFile(key)))
+    {
+        PdfConvertOptions options = new PdfConvertOptions();
+        converter.Convert(outputFile, options);
+    }
+}
+        
+public static Stream DownloadFile(string key)
+{
+    AmazonS3Client client = new AmazonS3Client();
+    string bucketName = "my-bucket";
+    GetObjectRequest request = new GetObjectRequest
+    {
+        Key = key,
+        BucketName = bucketName
+    };
+    using (GetObjectResponse response = client.GetObject(request))
+    {
+        MemoryStream stream = new MemoryStream();
+        response.ResponseStream.CopyTo(stream);
+        stream.Position = 0;
+        return stream;
+    }
+}
+```

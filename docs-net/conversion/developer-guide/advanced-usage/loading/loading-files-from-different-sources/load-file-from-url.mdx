@@ -1,0 +1,51 @@
+---
+title: "Load file from URL"
+sidebar_label: "Load file from URL"
+sidebar_key: "net-conversion-loading-loading-files-from-different-sources-load-file-from-url"
+sidebar_position: 3
+description: "This article explains how to load PDF, Word, Excel, PowerPoint documents from URL when using GroupDocs.Conversion for .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/loading/loading-files-from-different-sources/load-file-from-url.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "89a7b9068ebbd70a876a94f515ba961831fded5a04515745499d100117689048"
+---
+
+:::info
+GroupDocs.Conversion for .NET is included in Conholdate.Total for .NET.
+:::
+
+The following code snippet shows how to convert a file from an URL:
+
+```csharp
+public static void Run()
+{
+    string url = "https://github.com/groupdocs-conversion/GroupDocs.Conversion-for-.NET/blob/master/Examples/Resources/SampleFiles/sample.docx?raw=true";
+    string outputFile = Path.Combine(@"c:\output", "converted.pdf");
+    using (Converter converter = new Converter(() => GetRemoteFile(url)))
+    {
+        PdfConvertOptions options = new PdfConvertOptions();
+        converter.Convert(outputFile, options);
+    }
+}
+        
+private static Stream GetRemoteFile(string url)
+{
+    WebRequest request = WebRequest.Create(url);
+    using (WebResponse response = request.GetResponse())
+        return GetFileStream(response);
+}
+
+private static Stream GetFileStream(WebResponse response)
+{
+    MemoryStream fileStream = new MemoryStream();
+    using (Stream responseStream = response.GetResponseStream())
+        responseStream.CopyTo(fileStream);
+    fileStream.Position = 0;
+    return fileStream;
+}
+```
