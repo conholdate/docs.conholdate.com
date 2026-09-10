@@ -1,0 +1,173 @@
+---
+title: "Sign Documents with PKCS#11 in .NET"
+sidebar_label: "Sign Documents with PKCS#11 in .NET"
+sidebar_key: "net-signature-esign-with-digital-certificates-signing-pdf-with-pkcs11-standard"
+sidebar_position: 1
+description: "Learn how to sign PDF and other documents in .NET using PKCS#11 hardware tokens, USB dongles, or smart cards with GroupDocs.Signature. A free electronic signature API version is available for evaluation with limited features."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/use-cases/eSign with digital certificates/signing-pdf-with-pkcs11-standard.md"
+source_commit: "0c3c217010a3d6a2e7ef62d7ad8ef26f94d99418"
+source_sha256: "23c9752c3af8d4debcc1ea6435d4e8858264db2da3d4e2663b885e14583b094b"
+---
+
+:::info
+GroupDocs.Signature for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+
+:::info
+💡For the **complete working code** and detailed explanations, please refer to the <a href="https://github.com/groupdocs-signature/esign-documents-with-pkcs11-using-groupdocs-signature-dotnet" target="_blank" rel="nofollow noopener noreferrer">full repository here</a>.  
+This repository contains all source files, helper classes, and configuration examples to implement PKCS#11 digital signing in your .NET applications.
+:::
+
+
+
+This article demonstrates how to sign documents with **PKCS#11 hardware tokens** (HSMs, smart cards, USB tokens) using **GroupDocs.Signature for .NET**.\
+The sample project integrates the <a href="https://github.com/Pkcs11Interop/Pkcs11Interop" target="_blank" rel="nofollow noopener noreferrer">Pkcs11Interop</a> library, which provides a .NET interface for PKCS#11 devices.
+
+PKCS#11 devices can include **hardware security modules (HSMs)**, **smart cards**, and **USB dongles**.  
+USB dongles are often used in corporate environments as a portable way to securely store private keys.  
+With GroupDocs.Signature for .NET, you can use a dongle in the same way as other PKCS#11 tokens to apply digital signatures to your documents.
+
+
+&gt; 💡 Use this approach when you need to securely sign documents with a private key stored in hardware rather than in a local file.
+
+## Prerequisites
+
+Before proceeding, make sure you have:
+
+-   **GroupDocs.Signature for .NET** installed. <a href="https://releases.groupdocs.com/signature/net/" target="_blank" rel="nofollow noopener noreferrer">Get a free trial</a>.
+-   A PKCS#11--compatible device (HSM, smart card, or token).
+-   <a href="https://github.com/Pkcs11Interop/Pkcs11Interop" target="_blank" rel="nofollow noopener noreferrer">Pkcs11Interop</a> library.
+-   .NET 6.0 or later (the sample also supports .NET Framework 4.6.2).
+
+
+## Installation
+
+Clone or download the <a href="https://github.com/groupdocs-signature/esign-documents-with-pkcs11-using-groupdocs-signature-dotnet" target="_blank" rel="nofollow noopener noreferrer">sample repository</a>.
+
+``` bash
+git clone https://github.com/groupdocs-signature/esign-documents-with-pkcs11-using-groupdocs-signature-dotnet.git
+```
+
+Restore dependencies with NuGet:
+
+``` bash
+dotnet restore
+```
+
+## Repository Structure
+
+The project includes:
+
+    GroupDocs.Signature-for-.NET-PKCS11-Sample
+     ├── GroupDocs.Signature-for-.NET-PKCS11-Sample.csproj
+     ├── Helpers.cs              # Utility functions for PKCS#11
+     ├── Pkcs11DigitalSigner.cs  # Integration with GroupDocs.Signature
+     ├── Program.cs              # Main entry point
+     └── Settings.cs             # PKCS#11 configuration
+    
+
+## Usage Example
+
+Below is a simplified version of the sample code. For the full implementation, see the <a href="https://github.com/groupdocs-signature/esign-documents-with-pkcs11-using-groupdocs-signature-dotnet" target="_blank" rel="nofollow noopener noreferrer">repository</a>.
+
+### Configure PKCS#11 settings
+
+`Settings.cs` defines the PKCS#11 library path, token PIN, and certificate subject:
+
+``` csharp
+public static class Settings
+{
+    public static string Pkcs11LibraryPath = "<PKCS11_LIBRARY_PATH>";
+    public static string TokenPin = "<TOKEN_PIN>";
+    public static string CertificateSubject = "<CERT_SUBJECT>";
+}
+```
+
+### Initialize PKCS#11 signer
+
+`Pkcs11DigitalSigner.cs` integrates PKCS#11 with GroupDocs.Signature:
+
+``` csharp
+public class Pkcs11DigitalSigner
+{
+    public X509Certificate2 GetCertificateFromPkcs11()
+    {
+        // Load certificate directly from token
+        // Uses Settings.Pkcs11LibraryPath and Settings.TokenPin
+    }
+}
+```
+
+### Sign a document
+
+`Program.cs` shows how to sign using GroupDocs.Signature.
+
+This example demonstrates two flows:\
+1. **Directly from PKCS#11 device**\
+2. **From Windows certificate store**
+
+``` csharp
+using GroupDocs.Signature;
+using GroupDocs.Signature.Options;
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        string filePath = "sample.pdf";
+        string outputPath = "signed.pdf";
+
+        // (1) Sign using PKCS#11 device
+        var pkcs11Signer = new Pkcs11DigitalSigner();
+        var certificate = pkcs11Signer.GetCertificateFromPkcs11();
+
+        using (var signature = new Signature(filePath))
+        {
+            var options = new DigitalSignOptions(certificate)
+            {
+                Comments = "Signed with PKCS#11 device",
+                SignTime = DateTime.Now
+            };
+
+            signature.Sign(outputPath, options);
+        }
+
+        // (2) Sign using certificate from Windows store
+        // var windowsCert = Helpers.GetCertificateFromWindowsStore(Settings.CertificateSubject);
+        // (sign in the same way with windowsCert)
+    }
+}
+```
+
+## Notes
+
+-   Replace `<PKCS11_LIBRARY_PATH>`, `<TOKEN_PIN>`, and `<CERT_SUBJECT>` with your actual values.
+-   Both PKCS#11 and Windows certificate store flows are supported. Choose the one that matches your infrastructure.
+-   For detailed helper methods and advanced scenarios, see the <a href="https://github.com/groupdocs-signature/esign-documents-with-pkcs11-using-groupdocs-signature-dotnet" target="_blank" rel="nofollow noopener noreferrer">full repository</a>.
+
+
+
+:::warning
+**Early Implementation Notice**  
+ This solution is currently provided as an early implementation for using PKCS#11 digital signature dongles with GroupDocs.Signature.  
+ While it enables document signing with hardware tokens, we strongly recommend performing additional testing in your own environment to ensure it meets your compliance and security requirements.
+ We would greatly appreciate your feedback, test results, and suggestions for improvements.  
+ Your input will help us refine this functionality and explore new ideas to make it more robust and user-friendly.
+:::
+
+
+## See Also
+
+-   <a href="https://docs.groupdocs.com/signature/net/sign-document-with-digital-signature-advanced/" target="_blank" rel="nofollow noopener noreferrer">Digital Signatures in GroupDocs.Signature</a>
+-   <a href="https://blog.groupdocs.com/signature/iterative-digital-signing/" target="_blank" rel="nofollow noopener noreferrer">Iterative Digital Signing</a>
+-   <a href="https://blog.groupdocs.com/signature/custom-hash-sign-with-azure-key-vault/" target="_blank" rel="nofollow noopener noreferrer">Custom Hash Signing with Azure Key Vault</a>
+
