@@ -1,0 +1,546 @@
+---
+title: "Renderizar archivos de archivo como HTML, PDF y archivos de imagen"
+sidebar_label: "Renderizar archivos de archivo"
+sidebar_key: "net-viewer-index"
+sidebar_position: 18
+description: "Este tema describe cómo utilizar la API de .NET (C#) GroupDocs.Viewer para mostrar una lista de contenido archivado en formatos HTML, PDF, PNG y JPEG, así como para extraer archivos arbitrarios del archivo."
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "viewer-net"
+source_path: "net/rendering-basics/render-archives/_index.md"
+source_commit: "270bea1e2528043f99c68ff8a72edc20b3816a48"
+source_sha256: "c7926c20664b2572dfab737844c5df750c029d820b9a7917cb99711e33fe0283"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "afbd3ef3135ba845e4d9d005d8d13be1620f636cbdf69e89cfc60a8a8c4ad3b9"
+translation_updated_at: "2026-09-14T11:05:15.202Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET se incluye en Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/viewer/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Viewer for .NET</a> permite visualizar la lista de contenidos de archivos de archivo y representarlos en formatos HTML, PDF, PNG y JPEG. Asimismo, permite extraer cualquier archivo arbitrario del archivo. No requiere el uso de ningún archivador de terceros y/o software de compresión para mostrar el contenido de archivos de archivo dentro de una aplicación .NET (web o de escritorio).
+
+Mostrar la lista de contenidos de archivos de archivo en GroupDocs.Viewer es similar a otros formatos. Debe crear una instancia de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer" target="_blank" rel="nofollow noopener noreferrer">`Viewer`</a> y especificar un documento de archivo en su constructor <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/viewer/#constructor_12" target="_blank" rel="nofollow noopener noreferrer">como una ruta al archivo o un flujo de bytes</a>. Opcionalmente, puede pasar opciones de carga, donde se puede especificar una contraseña para abrir un documento de archivo codificado. Luego debe seleccionar el formato de salida deseado en el que se representará el contenido del archivo: HTML (<a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`HtmlViewOptions`</a>), PDF (<a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pdfviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`PdfViewOptions`</a>), PNG (<a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pngviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`PngViewOptions`</a>) o JPEG (<a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/jpgviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`JpgViewOptions`</a>). Finalmente, invoque el método de instancia <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/view/#view" target="_blank" rel="nofollow noopener noreferrer">`Viewer.View()`</a> para obtener un resultado.
+
+GroupDocs.Viewer for .NET ha tenido soporte para formatos de archivo desde sus inicios. Sin embargo, a partir de la <a href="https://releases.groupdocs.com/viewer/net/release-notes/2024/groupdocs-viewer-for-net-24-10-release-notes/#new-archive-converter" target="_blank" rel="nofollow noopener noreferrer">versión 24.10</a>, el módulo de procesamiento de archivos se rediseñó por completo. En resumen, se modificó por completo la forma de mostrar la lista de entradas del archivo, así como su representación final. Además, se mejoró drásticamente el rendimiento. Las opciones públicas permanecen iguales; el único cambio en la API pública es la `ItemsPerPage` propiedad de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/archiveoptions/" target="_blank" rel="nofollow noopener noreferrer">`ArchiveOptions`</a>, que ahora se marca como obsoleta, ya que ya no tiene efecto. Este artículo explica y muestra el nuevo módulo de procesamiento de archivos. Si utiliza versiones anteriores de GroupDocs.Viewer anteriores a la 24.10, puede encontrar la versión anterior de este artículo [aquí](/net/viewer/rendering-basics/render-archives/old-archive-rendering/).
+
+<a href="https://products.groupdocs.app/viewer/archive" target="_blank" rel="nofollow noopener noreferrer">Ver archivos de archivo en línea</a> <a href="https://github.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ver demos y ejemplos en GitHub</a>
+
+## Formatos de archivo de archivo y archivos comprimidos admitidos {#supported-archive-and-compressed-file-formats}
+
+GroupDocs.Viewer admite los siguientes formatos de archivo de archivo:
+
+* <a href="https://docs.fileformat.com/compression/7z" target="_blank" rel="nofollow noopener noreferrer">.7Z (archivo comprimido 7-Zip)</a>
+* <a href="https://docs.fileformat.com/compression/bz2" target="_blank" rel="nofollow noopener noreferrer">.BZ2 (archivo comprimido Bzip2)</a>
+* <a href="https://docs.fileformat.com/compression/gz" target="_blank" rel="nofollow noopener noreferrer">.GZ (archivo comprimido Gnu Zipped)</a>
+* <a href="https://docs.fileformat.com/compression/rar" target="_blank" rel="nofollow noopener noreferrer">.RAR (archivo comprimido WinRAR)</a>
+* <a href="https://docs.fileformat.com/compression/tar" target="_blank" rel="nofollow noopener noreferrer">.TAR (archivo consolidado de archivos Unix)</a>
+* <a href="https://docs.fileformat.com/compression/tgz/" target="_blank" rel="nofollow noopener noreferrer">.TGZ / .TAR.GZ (archivo Tar comprimido con Gzip)</a>
+* <a href="https://docs.fileformat.com/compression/xz/" target="_blank" rel="nofollow noopener noreferrer">.TXZ / .TAR.XZ (archivo Tar comprimido con XZ)</a>
+* <a href="https://docs.fileformat.com/compression/xz/" target="_blank" rel="nofollow noopener noreferrer">.XZ (archivo comprimido XZ)</a>
+* <a href="https://docs.fileformat.com/compression/zip" target="_blank" rel="nofollow noopener noreferrer">.ZIP (archivo comprimido ZIP)</a>
+* <a href="https://docs.fileformat.com/compression/zst/" target="_blank" rel="nofollow noopener noreferrer">.ZST / .TAR.ZST / .TZST (Zstandard)</a>
+* <a href="https://docs.fileformat.com/compression/iso/" target="_blank" rel="nofollow noopener noreferrer">.ISO (imagen de disco óptico ISO-9660)</a>
+* <a href="https://docs.fileformat.com/compression/lzh/" target="_blank" rel="nofollow noopener noreferrer">.LHA / .LZH (formato de archivo de archivo)</a>
+* <a href="https://en.wikipedia.org/wiki/Cabinet_(file_format" target="_blank" rel="nofollow noopener noreferrer">.CAB (Cabinet)</a>)
+* <a href="https://docs.fileformat.com/disc-and-media/wim/" target="_blank" rel="nofollow noopener noreferrer">.WIM (archivo de formato de imagen de Windows)</a>
+
+GroupDocs.Viewer puede detectar automáticamente el formato de archivo de archivo basándose en la información del encabezado del archivo.
+
+## Carga de archivos {#loading-archives}
+
+La primera etapa del procesamiento de documentos mediante GroupDocs.Viewer es la carga del documento, y los archivos no son una excepción. La forma más sencilla consiste en pasar la ruta absoluta o relativa del archivo de archivo al <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/#constructors" target="_blank" rel="nofollow noopener noreferrer">constructor</a> de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer" target="_blank" rel="nofollow noopener noreferrer">`Viewer`</a>. Si el documento de archivo se representa como un <a href="https://learn.microsoft.com/en-us/dotnet/api/system.io.stream" target="_blank" rel="nofollow noopener noreferrer">flujo</a>, este flujo también puede especificarse en la sobrecarga del constructor de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer" target="_blank" rel="nofollow noopener noreferrer">`Viewer`</a>, pero asegúrese de que este flujo sea legible (<a href="https://learn.microsoft.com/en-us/dotnet/api/system.io.stream.canread" target="_blank" rel="nofollow noopener noreferrer">`CanRead`</a>) y que su posición apunte al lugar correcto. Finalmente, si el archivo está codificado y protegido con contraseña, y conoce esta contraseña, debe especificarla en <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">`LoadOptions`</a>; de lo contrario, se lanzará una excepción <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.exceptions/groupdocsviewerexception/" target="_blank" rel="nofollow noopener noreferrer">`GroupDocsViewerException`</a>.
+
+El siguiente ejemplo de código muestra la carga de dos archivos de archivo en dos instancias del visor: el primer archivo se especifica mediante una ruta, mientras que el segundo se especifica mediante un flujo y con opciones de carga que incluyen una contraseña.
+
+<Tabs groupId="Loading">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+string inputArchivePath = "Archive.zip";
+using (Viewer viewer1 = new Viewer(inputArchivePath))
+{
+    // view it
+}
+
+FileStream inputArchiveStream = File.OpenRead(inputArchivePath);
+
+LoadOptions loadOptions = new LoadOptions();
+loadOptions.Password = "password";
+
+using (Viewer viewer2 = new Viewer(inputArchiveStream, loadOptions))
+{
+    // view it
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Dim inputArchivePath As String = "Archive.zip"
+Using viewer1 As New Viewer(inputArchivePath)
+    'view it
+End Using
+
+Dim inputArchiveStream As FileStream = File.OpenRead(inputArchivePath)
+
+Dim loadOptions As LoadOptions = New LoadOptions()
+loadOptions.Password = "password"
+
+Using viewer2 As New Viewer(inputArchiveStream, loadOptions)
+    'view it
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+## Representación {#representation}
+  
+Después de cargar el documento archivado y crear una instancia de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer" target="_blank" rel="nofollow noopener noreferrer">`Viewer`</a>, esta puede visualizarse mediante un método de instancia de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/view/#view" target="_blank" rel="nofollow noopener noreferrer">`Viewer.View()`</a>. La “visualización” implica mostrar una lista del contenido almacenado en un archivo, en el formato de salida deseado. En general, se trata de una vista en árbol, con carpetas y archivos almacenados dentro de estas carpetas, ordenados por defecto según el orden basado en Windows. Esto significa que, dentro de una carpeta, primero se ubican todas las subcarpetas, ordenadas en orden <a href="https://en.wikipedia.org/wiki/Lexicographic_order" target="_blank" rel="nofollow noopener noreferrer">lexicográfico</a>, seguidas por los archivos, también ordenados lexicográficamente. Sin embargo, GroupDocs.Viewer no implementa un orden lexicográfico “puro”, sino un orden “natural” similar al de Windows, donde “archivo10.txt” se ubica _después_ de “archivo9.txt”, y no antes.
+
+Al igual que con todos los formatos admitidos, GroupDocs.Viewer admite 4 formatos de salida para la representación: HTML, PDF, PNG y JPEG.
+
+### Renderizar archivos de archivo como HTML {#render-archive-files-as-html}
+  
+Para guardar los documentos (incluidos los archivos) en formato HTML, GroupDocs.Viewer proporciona la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`HtmlViewOptions`</a>. Existen dos formas de crear una instancia de esta clase: utilizando ya sea los métodos estáticos <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/forembeddedresources/#forembeddedresources" target="_blank" rel="nofollow noopener noreferrer">`ForEmbeddedResources`</a> o <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/forexternalresources/#forexternalresources" target="_blank" rel="nofollow noopener noreferrer">`ForExternalResources`</a>. Por lo general, cuando se utiliza el primer método (<a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/forembeddedresources/#forembeddedresources" target="_blank" rel="nofollow noopener noreferrer">`ForEmbeddedResources`</a>), todos los recursos (hojas de estilo, imágenes rasterizadas y vectoriales, y fuentes) se almacenan dentro del marcado HTML en codificación base64. Cuando se utiliza el segundo método (<a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/forexternalresources/#forexternalresources" target="_blank" rel="nofollow noopener noreferrer">`ForExternalResources`</a>), el marcado HTML solo contiene referencias a los recursos, los cuales se almacenan externamente.
+
+En el contexto de los documentos archivados y su renderizado en formato HTML, el documento HTML resultante, que contiene una lista de archivos y carpetas dentro del archivo, solo incluye hojas de estilo e iconos que representan la carpeta o el formato del archivo específico, como gráficos vectoriales escalables (SVG). Cuando se guarda con recursos incrustados, la hoja de estilo se coloca en el elemento `STYLE` dentro de la sección `HTML` -> `HEAD`, mientras que las imágenes SVG se ubican dentro de esta hoja de estilo en codificación base64. Cuando se guarda con recursos externos, la hoja de estilo también se coloca en el elemento `STYLE` dentro de la sección `HTML` -> `HEAD`, pero contiene referencias a las imágenes SVG que se almacenan por separado. Cabe mencionar que el documento HTML solo contiene los iconos SVG necesarios para representar los formatos de los archivos efectivamente presentes en el archivo. Por ejemplo, si un archivo específico no contiene archivos PDF, no habrá ningún icono SVG que represente el formato PDF en los recursos HTML.
+
+Por defecto, GroupDocs.Viewer genera resultados HTML paginados: los documentos de entrada se dividen en páginas, y cada página se representa mediante un documento HTML independiente. También existe una propiedad booleana (bandera) <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/rendertosinglepage/" target="_blank" rel="nofollow noopener noreferrer">`HtmlViewOptions.RenderToSinglePage`</a> en la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`HtmlViewOptions`</a>: cuando está habilitada, GroupDocs.Viewer genera un único documento HTML para todo el documento de entrada, incluidas todas sus páginas. Sin embargo, los archivos son intrínsecamente sin páginas: almacenan archivos y carpetas y no tienen el concepto de “páginas”, como ocurre con los documentos PDF, por ejemplo. Por lo tanto, para cualquier documento archivado de entrada, GroupDocs.Viewer genera únicamente un único documento HTML de salida, sin importar el valor de la bandera booleana <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/rendertosinglepage/" target="_blank" rel="nofollow noopener noreferrer">`RenderToSinglePage`</a>.
+
+El siguiente ejemplo de código muestra el renderizado del mismo archivo de entrada archivado en dos documentos HTML similares: el primero con recursos incrustados y el segundo con recursos externos.
+
+<Tabs groupId="RenderToHTML">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+HtmlViewOptions htmlEmbeddedOptions = HtmlViewOptions.ForEmbeddedResources("Embedded.html");
+HtmlViewOptions htmlExternalOptions = HtmlViewOptions.ForExternalResources("External.html", "External_files/resource-{1}", "External_files/resource-{1}");
+
+using (Viewer viewer = new Viewer("Archive.zip"))
+{
+    viewer.View(htmlEmbeddedOptions);
+    viewer.View(htmlExternalOptions);
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Dim htmlEmbeddedOptions As HtmlViewOptions = HtmlViewOptions.ForEmbeddedResources("Embedded.html")
+Dim htmlExternalOptions As HtmlViewOptions = HtmlViewOptions.ForExternalResources("External.html",
+                        "External_files/resource-{1}", "External_files/resource-{1}")
+Using viewer As New Viewer("Archive.zip")
+    viewer.View(htmlEmbeddedOptions)
+    viewer.View(htmlExternalOptions)
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+Después de ejecutar este ejemplo de código, se crearán dos archivos HTML en la carpeta de salida: «Embedded.html» y «External.html». Para el segundo, se generará una carpeta adicional de recursos llamada «External_files» que contendrá archivos SVG. El documento HTML principal se vinculará a estos iconos SVG mediante URIs relativas como «External_files/resource-g.svg», «External_files/resource-g1.svg», «External_files/resource-g2.svg», y así sucesivamente.
+
+La captura de pantalla siguiente muestra cómo se ve el documento HTML de salida en un navegador web, para un archivo con una gran cantidad de archivos y carpetas, y un nivel profundo de anidamiento, cuando GroupDocs.Viewer funciona en modo con licencia. Tenga en cuenta que GroupDocs.Viewer muestra los metadatos de los archivos: su tamaño en bytes y la fecha de modificación. La fecha de modificación no se muestra para todos los formatos de archivo, sino únicamente para aquellos que lo admiten.
+
+![Generate HTML view for input archive](/net/viewer/images/rendering-basics/render-archive-files/Archive-to-HTML.png)
+
+También tenga en cuenta que, para los documentos archivados, el modo de renderizado HTML ofrece la mejor calidad entre todos los demás y también presenta el mejor rendimiento.
+
+### Renderizar archivos archivados como PDF {#render-archive-files-as-pdf}
+  
+El formato PDF, por naturaleza, está organizado en páginas; por lo tanto, la lista de archivos y carpetas del archivo se divide en páginas al renderizarse en formato PDF. El número de páginas en este PDF de salida no se puede especificar y depende únicamente de la cantidad de entradas (archivos y carpetas) presentes en el archivo de entrada.
+
+La clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pdfviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`PdfViewOptions`</a> debe utilizarse para renderizar documentos archivados como PDF. Todas las operaciones estándar relacionadas con PDF, como proteger, agregar marcas de agua, reordenar páginas y ajustar la calidad y el tamaño de las imágenes, pueden aplicarse al documento PDF de salida y se describen en el artículo "[Renderizar como PDF](/net/viewer/developer-guide/rendering-documents/rendering-to-pdf/)" y sus subartículos.
+
+El siguiente ejemplo de código muestra cómo mostrar la lista del contenido de un archivo archivado específico en formato PDF.
+
+<Tabs groupId="RenderToPDF">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+PdfViewOptions pdfOptions = new PdfViewOptions("Output.pdf");
+
+using (Viewer viewer = new Viewer("Archive.zip"))
+{
+    viewer.View(pdfOptions);
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Dim pdfOptions As PdfViewOptions = New PdfViewOptions("Output.pdf")
+Using viewer As New Viewer("Archive.zip")
+    viewer.View(pdfOptions)
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+La captura de pantalla a continuación muestra cómo se ve el PDF de salida en un lector de PDF para un archivo con una gran cantidad de archivos y carpetas y un nivel de anidamiento profundo, cuando GroupDocs.Viewer funciona en modo con licencia. Observe cómo la lista de entradas se divide en varias páginas.
+
+![Generate paginated PDF view for input archive](/net/viewer/images/rendering-basics/render-archive-files/Archive-to-PDF.png)
+
+### Renderizar archivos de archivo como imágenes PNG y JPEG {#render-archive-files-as-png-and-jpeg-images}
+  
+<a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pngviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`PngViewOptions`</a> y <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/jpgviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`JpgViewOptions`</a> son responsables de guardar los archivos en los formatos de imagen rasterizada PNG y JPEG, respectivamente. Al igual que en el caso del PDF, si la lista del contenido del archivo no cabe en el área de una sola imagen, esta se paginará y distribuirá en varias imágenes.  
+
+El tamaño de las imágenes de salida se calculará automáticamente según el archivo específico y su contenido, pero es posible modificar el tamaño de la imagen utilizando las propiedades `Width`, `Height`, `MaxWidth` y `MaxHeight` de las clases <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pngviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`PngViewOptions`</a> y <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/jpgviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`JpgViewOptions`</a>. El artículo "[Renderizar a PNG o JPEG](/net/viewer/developer-guide/rendering-documents/rendering-to-png-or-jpeg/)" describe con detalle la configuración y el posprocesamiento de las imágenes PNG y JPEG.  
+
+Dado que una única imagen PNG o JPEG puede contener solo una "página", para archivos con un número significativo de carpetas y archivos se crearán varias "páginas" y, por lo tanto, se generarán varias imágenes. Los constructores de las clases <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pngviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`PngViewOptions`</a> y <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/jpgviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`JpgViewOptions`</a> ofrecen sobrecargas que permiten especificar una cadena de plantilla para los archivos de imagen de salida, y GroupDocs.Viewer rellena esta plantilla al guardar con un número de página secuencial que comienza en "1".  
+
+El siguiente ejemplo de código muestra el renderizado del mismo archivo de entrada en dos carpetas de imágenes: una carpeta llamada "PNG" contiene imágenes de página en formato PNG, mientras que otra carpeta llamada "JPEG" las contiene en formato JPEG. Para ambos formatos se generarán la misma cantidad de "imágenes de página".
+
+<Tabs groupId="RenderToPNGJPEG">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+string pngFolderPath = Directory.CreateDirectory("PNG").FullName;
+string jpegFolderPath = Directory.CreateDirectory("JPEG").FullName;
+
+PngViewOptions pngOptions = new PngViewOptions(Path.Combine(pngFolderPath, "page-{0}.png"));
+JpgViewOptions jpegOptions = new JpgViewOptions(Path.Combine(jpegFolderPath, "page-{0}.jpeg"));
+
+using (Viewer viewer = new Viewer("Archive.zip"))
+{
+    viewer.View(pngOptions);
+    viewer.View(jpegOptions);
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Dim pngFolderPath As String = Directory.CreateDirectory("PNG").FullName
+Dim jpegFolderPath As String = Directory.CreateDirectory("JPEG").FullName
+
+Dim pngOptions As PngViewOptions = New PngViewOptions(Path.Combine(pngFolderPath, "page-{0}.png"))
+Dim jpegOptions As PngViewOptions = New PngViewOptions(Path.Combine(jpegFolderPath, "page-{0}.jpeg"))
+
+Using viewer As New Viewer("Archive.zip")
+    viewer.View(pngOptions)
+    viewer.View(jpegOptions)
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+## Configuración de las opciones de archivo {#tuning-the-archive-options}
+  
+Todas las 4 clases de opciones — <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`HtmlViewOptions`</a>, <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pdfviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`PdfViewOptions`</a>, <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pngviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`PngViewOptions`</a> y <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/jpgviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`JpgViewOptions`</a> — contienen una propiedad <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/baseviewoptions/archiveoptions/" target="_blank" rel="nofollow noopener noreferrer">`ArchiveOptions`</a> del tipo <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/archiveoptions/" target="_blank" rel="nofollow noopener noreferrer">`ArchiveOptions`</a>. Esta clase tiene dos propiedades, que permiten a los usuarios modificar la representación de la lista de contenido del archivo y se describen a continuación.
+
+### Representar una carpeta específica {#render-a-specific-folder}
+  
+De forma predeterminada, GroupDocs.Viewer muestra todo el contenido del archivo: todas las carpetas, subcarpetas y archivos, sin importar su nivel de anidamiento, hasta el final. Sin embargo, en algunos casos es necesario mostrar solo una parte de la lista de contenido del archivo, por ejemplo, únicamente el contenido de una carpeta específica (incluidas sus subcarpetas), la cual se encuentra dentro del archivo dado.
+
+La propiedad <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/archiveoptions/folder/" target="_blank" rel="nofollow noopener noreferrer">`Folder`</a>, de tipo <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" target="_blank" rel="nofollow noopener noreferrer">`System.String`</a>, permite realizar esta acción. Recibe el nombre de una carpeta o una ruta relativa ubicada dentro del archivo dado y, si el archivo realmente contiene dicha carpeta, solo se mostrará su contenido. De lo contrario, si no se encuentra ninguna carpeta con ese nombre o ruta en el archivo, se mostrará todo el contenido del archivo, como de costumbre.
+
+### Especificar el nombre del documento del archivo {#specify-the-archive-document-name}
+  
+Cuando GroupDocs.Viewer representa la lista de contenido del archivo, muestra el nombre del documento del archivo en la parte superior del documento de salida, como nodo raíz para todas las carpetas y archivos dentro del archivo. Cuando el documento del archivo se especifica como un archivo, su nombre de archivo se utilizará como nombre del documento del archivo. Si el documento del archivo se especifica como un flujo, se utilizará un nombre de plantilla estándar.
+
+Con la propiedad <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/archiveoptions/filename/" target="_blank" rel="nofollow noopener noreferrer">`FileName`</a> del tipo <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/archiveoptions/" target="_blank" rel="nofollow noopener noreferrer">`ArchiveOptions`</a> es posible especificar explícitamente el nombre del documento del archivo que se mostrará. Simplemente cree una instancia de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/filename/" target="_blank" rel="nofollow noopener noreferrer">`FileName`</a>, especifique el nombre deseado del archivo en su constructor y asigne esta instancia a la propiedad <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/archiveoptions/filename/" target="_blank" rel="nofollow noopener noreferrer">`ArchiveOptions.FileName`</a>.
+
+### Ejemplo {#example}
+  
+El siguiente ejemplo de código muestra el uso simultáneo de la propiedad <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/archiveoptions/folder/" target="_blank" rel="nofollow noopener noreferrer">`Folder`</a> y la propiedad <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/archiveoptions/filename/" target="_blank" rel="nofollow noopener noreferrer">`FileName`</a> para el mismo archivo de archivo cargado. La representación se realiza en formato HTML con recursos incrustados. Se supone que se ha establecido una licencia válida.
+
+<Tabs groupId="RenderToHTMLWithOptions">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+HtmlViewOptions htmlEmbeddedOptions = HtmlViewOptions.ForEmbeddedResources("FolderAndFileName.html");
+htmlEmbeddedOptions.ArchiveOptions.Folder = "Markdown/Html";
+htmlEmbeddedOptions.ArchiveOptions.FileName = new FileName("The '/Markdown/Html/' subfolder with all its content is displayed");
+
+using (Viewer viewer = new Viewer("Archive.zip"))
+{
+    viewer.View(htmlEmbeddedOptions);
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Dim htmlEmbeddedOptions As HtmlViewOptions = HtmlViewOptions.ForEmbeddedResources("FolderAndFileName.html")
+htmlEmbeddedOptions.ArchiveOptions.Folder = "Markdown/Html"
+htmlEmbeddedOptions.ArchiveOptions.FileName =
+    New FileName("The '/Markdown/Html/' subfolder with all its content is displayed")
+
+Using viewer As New Viewer("Archive.zip")
+    viewer.View(htmlEmbeddedOptions)
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+Aunque el ejemplo de código anterior muestra el uso de las propiedades `<a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/archiveoptions/folder/" target="_blank" rel="nofollow noopener noreferrer">`Folder`</a>` y `<a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/archiveoptions/filename/" target="_blank" rel="nofollow noopener noreferrer">`FileName`</a>` al mostrar el contenido del archivo en formato HTML, estas propiedades funcionan de la misma manera al mostrar el contenido del archivo en todos los demás formatos: PDF, PNG y JPEG.
+
+La captura de pantalla siguiente muestra el resultado del ejemplo de código anterior.
+
+![Generate HTML view with custom archive options](/net/viewer/images/rendering-basics/render-archive-files/Archive-to-HTML-with-options.png)
+
+## Extracción de archivos de archivos comprimidos {#extracting-files-from-archives}
+  
+Si bien mostrar una lista de archivos y carpetas dentro de los archivos comprimidos es el objetivo principal del GroupDocs.Viewer, también permite extraer archivos de los archivos comprimidos según sus rutas. En la terminología del GroupDocs.Viewer, los archivos dentro de los archivos comprimidos se denominan «adjuntos».
+
+En general, la extracción de un adjunto (archivo) específico de un documento de archivo comprimido dado se realiza en los siguientes pasos:
+
+1. Cree una instancia de <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer" target="_blank" rel="nofollow noopener noreferrer">`Viewer`</a> y cargue el documento de archivo comprimido en su constructor. Utilice <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">`LoadOptions`</a> si es necesario.  
+2. Obtenga una lista de todos los adjuntos (archivos) almacenados dentro del archivo, llamando al método sin parámetros <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/getattachments/#getattachments_1" target="_blank" rel="nofollow noopener noreferrer">`Viewer.GetAttachments()`</a> o a su sobrecarga cancelable.  
+3. Busque y seleccione una instancia particular de <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.results/attachment/" target="_blank" rel="nofollow noopener noreferrer">`Attachment`</a> de la lista, que desee guardar.  
+4. Prepare un flujo de destino en el que desee escribir el adjunto. Asegúrese de que este flujo no sea nulo, sea escribible (<a href="https://learn.microsoft.com/en-us/dotnet/api/system.io.stream.canwrite" target="_blank" rel="nofollow noopener noreferrer">`CanWrite`</a>) y permita la búsqueda (<a href="https://learn.microsoft.com/en-us/dotnet/api/system.io.stream.canseek" target="_blank" rel="nofollow noopener noreferrer">`CanSeek`</a>).  
+5. Escriba el adjunto previamente seleccionado en el flujo preparado mediante el método <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/saveattachment/#saveattachment" target="_blank" rel="nofollow noopener noreferrer">`Viewer.SaveAttachment(Attachment, System.IO.Stream)`</a> o su sobrecarga cancelable.  
+6. Alternativamente, si desea extraer y guardar todos los archivos del archivo comprimido dado, simplemente recorra la lista de adjuntos y llame al método <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/saveattachment/#saveattachment" target="_blank" rel="nofollow noopener noreferrer">`Viewer.SaveAttachment()`</a> para cada adjunto en un paso.
+
+Tenga en cuenta que extraer archivos del archivo comprimido y ver su contenido son operaciones distintas, que no dependen entre sí: puede representar la lista del contenido del archivo sin extraer los archivos, y viceversa.
+
+Asimismo, técnicamente el paso #2 no es necesario: si conoce el nombre completo exacto (lo que incluye su ruta relativa) del archivo que desea extraer, no es necesario obtener la lista de todos los adjuntos, ya que la instancia de la clase Attachment se puede crear manualmente y pasarse directamente al método <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/saveattachment/#saveattachment" target="_blank" rel="nofollow noopener noreferrer">`Viewer.SaveAttachment()`</a>.
+
+El ejemplo de código siguiente muestra todas las operaciones descritas con los adjuntos.
+
+<Tabs groupId="ExtractingFiles">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+using GroupDocs.Viewer.Results;
+// ...
+
+using (Viewer viewer = new Viewer("Archive.zip"))
+{
+    IList<Attachment> allAttachments = viewer.GetAttachments();
+    
+    //Iterate over all attachments and save them
+    foreach (Attachment attachment in allAttachments)
+    {
+        Console.WriteLine("- {0} - {1} - {2} bytes", attachment.FilePath, attachment.FileType, attachment.Size);
+		MemoryStream destination = new MemoryStream();
+        viewer.SaveAttachment(attachment, destination);
+    }
+
+    //Create one Attachment manually and save it
+    Attachment oneAttachment = new Attachment("/Images/PNG/Watermark.png", "/Images/PNG/Watermark.png");
+    using (FileStream extractedFile = File.Create("Watermark.png"))
+    {
+        viewer.SaveAttachment(oneAttachment, extractedFile);
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+Imports GroupDocs.Viewer.Results
+' ...
+
+Using viewer As New Viewer("Archive.zip")
+    Dim allAttachments As IList(Of Attachment) = viewer.GetAttachments()
+
+    'Iterate over all attachments and save them
+    For Each attachment As Attachment In allAttachments
+        Console.WriteLine("- {0} - {1} - {2} bytes", attachment.FilePath, attachment.FileType, attachment.Size)
+        Dim destination As MemoryStream = New MemoryStream()
+        viewer.SaveAttachment(attachment, destination)
+    Next attachment
+
+    'Create one Attachment manually and save it
+    Dim oneAttachment As Attachment = New Attachment("/Images/PNG/Watermark.png", "/Images/PNG/Watermark.png")
+    Using extractedFile As FileStream = File.Create("Watermark.png")
+        viewer.SaveAttachment(oneAttachment, extractedFile)
+    End Using
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+## Recuperación de información sobre archivos  {#retrieving-information-about-archives}
+  
+Al igual que con todos los demás formatos admitidos, GroupDocs.Viewer admite la obtención de información de vista para documentos archivados. Esto significa que, para el archivo cargado, GroupDocs.Viewer puede recuperar metadatos como el formato exacto, si está protegido con contraseña o no, la lista de carpetas dentro del archivo y el número de páginas que GroupDcos.Viewer generará si se selecciona la conversión a PDF, PNG o JPEG. Puede encontrar más información sobre la recuperación de información de documentos en general en el artículo correspondiente [article](/net/viewer/developer-guide/retrieving-document-information/).
+
+Para recuperar los metadatos de un archivo específico, se debe invocar el método <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/getviewinfo/#getviewinfo" target="_blank" rel="nofollow noopener noreferrer">`Viewer.GetViewInfo()`</a>. Este método devuelve una instancia de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/viewinfooptions/" target="_blank" rel="nofollow noopener noreferrer">`ViewInfoOptions`</a>, la cual puede crearse a partir de opciones propias o a partir de opciones de vista existentes. GroupDocs.Viewer construye los metadatos del archivo según el <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/viewinfooptions/" target="_blank" rel="nofollow noopener noreferrer">`ViewInfoOptions`</a> pasado y sus configuraciones específicas. Por ejemplo, para las opciones de información basadas en HTML, el número de <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.results/viewinfo/pages/" target="_blank" rel="nofollow noopener noreferrer">`Pages`</a> devueltos siempre es "1" (debido a que la visualización en formato HTML no está paginada), mientras que para PDF, PNG y JPEG se devolverá un número específico de páginas, dependiendo de la cantidad de archivos y carpetas dentro del archivo.
+
+En el contexto de archivos, el método <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/getviewinfo/#getviewinfo" target="_blank" rel="nofollow noopener noreferrer">`Viewer.GetViewInfo()`</a> devuelve una instancia de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.results/archiveviewinfo/" target="_blank" rel="nofollow noopener noreferrer">`ArchiveViewInfo`</a>, la cual es heredera directa de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.results/viewinfo/" target="_blank" rel="nofollow noopener noreferrer">`ViewInfo`</a>. Además de las propiedades presentes en <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.results/viewinfo/" target="_blank" rel="nofollow noopener noreferrer">`ViewInfo`</a>, <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.results/archiveviewinfo/" target="_blank" rel="nofollow noopener noreferrer">`ArchiveViewInfo`</a> proporciona una propiedad <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.results/archiveviewinfo/folders/" target="_blank" rel="nofollow noopener noreferrer">`Folders`</a> de tipo `List<System.String>`, la cual contiene la lista de todas las carpetas almacenadas en el archivo. Tenga en cuenta que GroupDocs.Viewer crea una nueva `List` con los nombres de las carpetas cada vez que se invoca el método <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/getviewinfo/#getviewinfo" target="_blank" rel="nofollow noopener noreferrer">`Viewer.GetViewInfo()`</a>. Asimismo, la propiedad <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.results/archiveviewinfo/folders/" target="_blank" rel="nofollow noopener noreferrer">`ArchiveViewInfo.Folders`</a> no considera el valor de la propiedad <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/archiveoptions/folder/" target="_blank" rel="nofollow noopener noreferrer">`ArchiveOptions.Folder`</a>, incluso si <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/viewinfooptions/" target="_blank" rel="nofollow noopener noreferrer">`ViewInfoOptions`</a> se creó a partir de dicha opción; por lo tanto, <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.results/archiveviewinfo/folders/" target="_blank" rel="nofollow noopener noreferrer">`ArchiveViewInfo.Folders`</a> siempre devuelve una lista completa de carpetas dentro del archivo.
+
+En resumen: para obtener <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.results/archiveviewinfo/" target="_blank" rel="nofollow noopener noreferrer">`ArchiveViewInfo`</a>, simplemente cargue el documento archivado en <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer" target="_blank" rel="nofollow noopener noreferrer">`Viewer`</a> <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/#constructors" target="_blank" rel="nofollow noopener noreferrer">constructor</a>, cree la <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/viewinfooptions/" target="_blank" rel="nofollow noopener noreferrer">`ViewInfoOptions`</a> correspondiente, invoque <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/getviewinfo/#getviewinfo" target="_blank" rel="nofollow noopener noreferrer">`Viewer.GetViewInfo()`</a> y realice una conversión explícita de la instancia <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.results/viewinfo/" target="_blank" rel="nofollow noopener noreferrer">`ViewInfo`</a> devuelta al tipo <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.results/archiveviewinfo/" target="_blank" rel="nofollow noopener noreferrer">`ArchiveViewInfo`</a>.
+
+El siguiente ejemplo de código demuestra toda la información descrita.
+
+<Tabs groupId="GetViewInfo">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+using GroupDocs.Viewer.Results;
+// ...
+
+ViewInfoOptions viewInfoOptions = ViewInfoOptions.ForPdfView();
+
+using (Viewer viewer = new Viewer("Archive.zip"))
+{
+    GroupDocs.Viewer.Results.FileInfo fileInfo = viewer.GetFileInfo();
+    Console.WriteLine("Encrypted: {0}", fileInfo.Encrypted ? "yes" : "no");
+
+    ArchiveViewInfo viewInfo = (ArchiveViewInfo)viewer.GetViewInfo(viewInfoOptions);
+
+    Console.WriteLine("Archive format: {0}", viewInfo.FileType);
+    Console.WriteLine("Number of pages when saving to PDF: {0}", viewInfo.Pages.Count);
+
+    Console.WriteLine("List of all pages with their metadata, when rendering to PDF:");
+    foreach (Page page in viewInfo.Pages)
+    {
+        Console.WriteLine(" - Page #{0} - {1}x{2}px", page.Number, page.Width, page.Height);
+    }
+
+    Console.WriteLine("List of folders in the archive document:");
+    foreach (string folder in viewInfo.Folders)
+    {
+        Console.WriteLine(" - {0}", folder);
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+Imports GroupDocs.Viewer.Results
+' ...
+
+Dim viewInfoOptions As ViewInfoOptions = ViewInfoOptions.ForPdfView()
+
+Using viewer As New Viewer("Archive.zip")
+    Dim fileInfo As GroupDocs.Viewer.Results.FileInfo = viewer.GetFileInfo()
+    Console.WriteLine("Encrypted: {0}", If(fileInfo.Encrypted, "yes", "no"))
+
+    Dim viewInfo As ArchiveViewInfo = DirectCast(viewer.GetViewInfo(viewInfoOptions), ArchiveViewInfo)
+
+    Console.WriteLine("Archive format: {0}", viewInfo.FileType)
+    Console.WriteLine("Number of pages when saving to PDF: {0}", viewInfo.Pages.Count)
+
+    Console.WriteLine("List of all pages with their metadata, when rendering to PDF:")
+    For Each page As Page In viewInfo.Pages
+        Console.WriteLine(" - Page #{0} - {1}x{2}px", page.Number, page.Width, page.Height)
+    Next page
+
+    Console.WriteLine("List of folders in the archive document:")
+    For Each folder As String In viewInfo.Folders
+        Console.WriteLine(" - {0}", folder)
+    Next folder
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+## Funcionalidades adicionales  {#additional-features}
+  
+A pesar de que el nuevo módulo de procesamiento de archivos archivados se introdujo en la versión GroupDocs.Viewer 24.10, se mejora continuamente con nuevas funcionalidades y mejoras.
+
+En primer lugar, añadimos constantemente soporte para nuevos formatos de archivo archivado. En la <a href="https://releases.groupdocs.com/viewer/net/release-notes/2025/groupdocs-viewer-for-net-25-1-release-notes/#lha-support" target="_blank" rel="nofollow noopener noreferrer">versión 25.1</a> se añadió el soporte para el formato de archivo LHA/LZH. En la <a href="https://releases.groupdocs.com/viewer/net/release-notes/2025/groupdocs-viewer-for-net-25-2-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 25.2</a> se añadió el soporte para el formato de archivo Cabinet (CAB), y en la <a href="https://releases.groupdocs.com/viewer/net/release-notes/2025/groupdocs-viewer-for-net-25-3-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 25.3</a> se añadió el soporte para el formato Windows Imaging (WIM).
+
+Asimismo, la versión 25.2 introdujo una mejora: ahora la fecha de última modificación también se muestra para las entradas de los archivos archivados CAB, ISO y TAR.
+
+Pero la funcionalidad más destacada que surgió se presentó en la versión 25.3: a partir de esta versión, el GroupDocs.Viewer permite listar el contenido de archivos archivados anidados —es decir, archivos archivados dentro de otros archivos archivados—, y este nivel de anidamiento es ilimitado. Esto significa que un archivo archivado puede contener otro archivo archivado interno, y este, a su vez, puede contener otros sub-archivos archivados, y así sucesivamente… si estos sub-archivos no están protegidos con contraseña, el GroupDocs.Viewer los abrirá y explorará su contenido. La captura de pantalla siguiente muestra un ejemplo de este tipo de archivo archivado, renderizado con el GroupDocs.Viewer.
+
+![Listing nested archives inside outer archive](/net/viewer/images/rendering-basics/render-archive-files/Nested-archives-example.png)
+
+El archivo de muestra “all-formats.zip”, mostrado en una captura de pantalla, en realidad no contiene _carpetas_ “sample.tar” y “sample.zip”: son en realidad _archivos_, es decir, archivos internos dentro de un archivo externo. Sin embargo, GroupDocs.Viewer los ha abierto y listado su contenido, mostrándolos como si fueran carpetas. Es necesario mencionar que el procesamiento de archivos anidados no requiere ninguna acción adicional ni configuración en la API pública: está habilitado de forma predeterminada.
+
+## Conclusión {#conclusion}
+  
+Antes de la versión 24.10, los documentos archivados eran admitidos por GroupDocs.Viewer de una manera específica, sin mostrar la jerarquía en árbol, sino únicamente mediante una vista paginada que mostraba una sola carpeta por página. El rendimiento tampoco era tan bueno como podría haber sido, especialmente en archivos grandes.
+
+A partir de la versión 24.10, se ha reemplazado completamente el mecanismo anterior de procesamiento de archivos por uno completamente nuevo. Actualmente, la lista de contenidos de los archivos se representa tal como se almacenan realmente las entradas del archivo, en una vista sin páginas y con estructura en árbol, donde la separación en páginas solo se aplica a formatos paginados como PDF, PNG y JPEG, y esta división en páginas ya no depende de carpetas específicas. Además, el rendimiento se ha mejorado drásticamente, especialmente al representar archivos en HTML.
+
+Este nuevo mecanismo de procesamiento de archivos se mejora continuamente en cada versión, incorporando nuevas correcciones de errores, características y mejoras.

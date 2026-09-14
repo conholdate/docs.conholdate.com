@@ -1,0 +1,424 @@
+---
+title: "Dividir una hoja de cálculo en páginas"
+sidebar_label: "Dividir una hoja de cálculo en páginas"
+sidebar_key: "net-viewer-split-worksheet-into-pages"
+sidebar_position: 2
+description: "Este tema describe cómo usar la API de .NET (C#) GroupDocs.Viewer para dividir hojas de cálculo en páginas al representar archivos de hojas de cálculo en formatos HTML, PDF e imágenes."
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "viewer-net"
+source_path: "net/rendering-basics/render-spreadsheets/split-worksheet-into-pages.md"
+source_commit: "270bea1e2528043f99c68ff8a72edc20b3816a48"
+source_sha256: "e66239bd0d09199222e85129bfc9c23ceda5ece2de89e2ecea093bb489c44f04"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "7a30fc4bcbd00672900d87cc38101ab8898ba33b26dc5a2cc93a171636885383"
+translation_updated_at: "2026-09-14T11:34:02.442Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET se incluye en Conholdate.Total for .NET.
+:::
+
+**Hoja de cálculo**, también conocida como *libro de trabajo* (*workbook*), es básicamente un conjunto de *hojas de cálculo* (*worksheets*), representadas como pestañas en la mayoría de los programas de procesamiento de tablas, como Microsoft Excel. Algunos formatos de hojas de cálculo pueden tener únicamente una única hoja de cálculo; esto incluye, por ejemplo, todos los formatos delimitados por separadores basados en texto (<a href="https://docs.fileformat.com/spreadsheet/csv/" target="_blank" rel="nofollow noopener noreferrer">CSV</a>, <a href="https://docs.fileformat.com/spreadsheet/tsv/" target="_blank" rel="nofollow noopener noreferrer">TSV</a>, etc.).
+
+El tamaño (dimensiones) de una hoja de cálculo puede ser grande, e incluso muy grande. Por ejemplo, el formato <a href="https://docs.fileformat.com/spreadsheet/xls/" target="_blank" rel="nofollow noopener noreferrer">XLS</a>, ya obsoleto, admite <a href="https://superuser.com/questions/366468/what-is-the-maximum-allowed-rows-in-a-microsoft-excel-xls-or-xlsx" target="_blank" rel="nofollow noopener noreferrer">un máximo de 256 columnas y 65536 filas</a>. El formato más reciente <a href="https://docs.fileformat.com/spreadsheet/xlsx/" target="_blank" rel="nofollow noopener noreferrer">XLSX (Office Open XML Workbook)</a> y Microsoft Excel <a href="https://support.microsoft.com/en-us/office/excel-specifications-and-limits-1672b34d-7043-467e-8e27-269d656771c3" target="_blank" rel="nofollow noopener noreferrer">admiten hasta 16384 columnas y 1048576 filas</a>.
+
+Por otro lado, el principio del GroupDocs.Viewer consiste en representar (convertir) los formatos de documentos de entrada (incluidos los documentos de hojas de cálculo) en páginas, donde una página puede definirse como un área rectangular de tamaño relativamente pequeño, comparable al área de una pantalla o a una hoja de papel A4. En este contexto, un tamaño potencialmente enorme de hoja de cálculo entra en conflicto con el tamaño relativamente pequeño de la página. ¿Cómo mostrar una hoja de cálculo con 1 millón de filas en una sola página? Quizás dividiéndola en varias páginas, pero en ese caso, ¿cómo hacerlo? Esta pregunta no tiene una única respuesta directa; existen distintas formas de resolverlo, y este artículo explica todas las opciones disponibles mediante el GroupDocs.Viewer.
+
+## Representar una hoja de cálculo en una sola página {#render-a-worksheet-on-one-page}
+  
+La forma más sencilla consiste en representar el contenido completo de la hoja de cálculo en una sola página, ajustando el tamaño de la página para que quepa todo el conjunto de filas y columnas. Esta opción es adecuada cuando ya se sabe de antemano que la hoja de cálculo tiene un tamaño reducido. Sin embargo, si la hoja de cálculo es realmente grande, este enfoque puede producir resultados muy deficientes. En particular, al representar en formato HTML, el documento HTML resultante puede llegar a ser enorme, de decenas o incluso cientos de <a href="https://en.wikipedia.org/wiki/Byte#Multiple-byte_units" target="_blank" rel="nofollow noopener noreferrer">MiB</a>, lo que podría causar problemas al visualizar archivos tan grandes en navegadores web. Al representar en formato JPEG, las cosas pueden empeorar aún más si el ancho o la altura superan el límite máximo de 65535 píxeles. Por lo tanto, utilice este modo con cautela.
+
+Para mostrar una hoja de cálculo completa en una sola página, invoque el método estático <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/spreadsheetoptions/foronepagepersheet/" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetOptions.ForOnePagePerSheet`</a>, que devuelve una instancia de <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/spreadsheetoptions/" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetOptions`</a>, ya configurada para este propósito. A continuación, asigne esta instancia a la propiedad <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/baseviewoptions/properties/spreadsheetoptions" target="_blank" rel="nofollow noopener noreferrer">`ViewOptions.SpreadsheetOptions`</a> y visualice la hoja de cálculo utilizando esta instancia de opciones de visualización.
+
+El siguiente ejemplo toma una hoja de cálculo como entrada y la convierte en un archivo PDF resultante, donde cada hoja de cálculo del archivo XLSX de entrada se representa en una sola página del PDF de salida.
+
+<Tabs groupId="RenderAWorksheetOnOnePage">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+// Create PDF view options for rendering to PDF
+PdfViewOptions viewOptions = new PdfViewOptions("output.pdf");
+
+// Create spreadsheet options to render each worksheet to one page
+viewOptions.SpreadsheetOptions = SpreadsheetOptions.ForOnePagePerSheet();
+
+// Create a Viewer instance and specify the input XLSX
+using (Viewer viewer = new Viewer("Products.xlsx"))
+{
+    // Render the XLSX to PDF
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+' Create PDF view options for rendering to PDF
+Dim viewOptions As New PdfViewOptions("output.pdf")
+
+' Create spreadsheet options to render each worksheet to one page
+viewOptions.SpreadsheetOptions = SpreadsheetOptions.ForOnePagePerSheet()
+
+' Create a Viewer instance and specify the input XLSX
+Using viewer As New Viewer("Products.xlsx")
+    ' Render the XLSX to PDF
+    viewer.View(viewOptions)
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+La captura de pantalla a continuación ilustra el resultado. El archivo PDF de salida contiene una página (porque el XLSX de entrada tiene una hoja de cálculo) que muestra todos los datos de la hoja de cálculo.
+
+![Fit sheet on one page](/net/viewer/images/rendering-basics/render-spreadsheets/render-on-one-page.png)
+
+## Dividir hoja de cálculo mediante saltos de página {#split-worksheet-by-page-breaks}
+  
+Microsoft Excel agrega automáticamente saltos de página basándose en el tamaño del papel y la configuración de página, como la orientación y los márgenes. Si cambias a la pestaña _"Vista"_ y activas el modo _"Vista de salto de página"_, podrás ver líneas azules que dividen toda el área de la hoja de cálculo en fragmentos rectangulares, cada uno etiquetado como "Página 1", "Página 2", etc. Así es como Microsoft Excel "sugiere" dividir una hoja de cálculo en páginas.
+
+En la imagen siguiente, el salto de página vertical se inserta tras la columna "**E**", y el salto de página horizontal se encuentra bajo la fila "**30**". Si vas a la pestaña _"Diseño de página"_ y luego modificas los valores de las opciones _"Orientación"_ y/o _"Tamaño"_, podrás observar cómo Microsoft Excel recalcula dinámicamente las áreas de página.
+
+![Preview page breaks in Microsoft Excel](/net/viewer/images/rendering-basics/render-spreadsheets/excel-page-break-preview.png)
+
+Para lograr el mismo comportamiento con GroupDocs.Viewer, invoque el método estático <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/spreadsheetoptions/forrenderingbypagebreaks/" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetOptions.ForRenderingByPageBreaks`</a> y luego asigne su valor a la propiedad <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/baseviewoptions/properties/spreadsheetoptions" target="_blank" rel="nofollow noopener noreferrer">`ViewOptions.SpreadsheetOptions`</a>, como se muestra en el primer ejemplo. El siguiente ejemplo de código ilustra esto:
+
+<Tabs groupId="SplitWorksheetByPageBreaks">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+// Create PDF view options for rendering to PDF
+PdfViewOptions viewOptions = new PdfViewOptions("output.pdf");
+
+// Create spreadsheet options to split worksheet onto pages by page breaks
+viewOptions.SpreadsheetOptions = SpreadsheetOptions.ForRenderingByPageBreaks();
+
+// Create a Viewer instance and specify the input XLSX
+using (Viewer viewer = new Viewer("Products.xlsx"))
+{
+    // Render the XLSX to PDF
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+' Create PDF view options for rendering to PDF
+Dim viewOptions As New PdfViewOptions("output.pdf")
+
+' Create spreadsheet options to split worksheet onto pages by page breaks
+viewOptions.SpreadsheetOptions = SpreadsheetOptions.ForRenderingByPageBreaks()
+
+' Create a Viewer instance and specify the input XLSX
+Using viewer As New Viewer("Products.xlsx")
+    ' Render the XLSX to PDF
+    viewer.View(viewOptions)
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+La imagen a continuación ilustra el resultado: puedes compararla con una captura de pantalla anterior y notar que el contenido de la hoja de cálculo se divide exactamente como sugiere Microsoft Excel.
+
+![Render a worksheet to PDF based on page breaks](/net/viewer/images/rendering-basics/render-spreadsheets/render-by-page-breaks.png)
+
+## Renderizar solo el área de impresión  {#render-only-print-area}
+
+Junto con los saltos de página, Microsoft Excel tiene un concepto llamado «Área de impresión». El Área de impresión es, en realidad, uno o más rangos de celdas en una hoja de cálculo, los cuales están designados para imprimirse, mientras que cualquier contenido fuera del Área de impresión no se imprimirá en absoluto. Para agregar un rango de celdas al Área de impresión, vaya a la pestaña «Diseño de página», haga clic en el botón _«Área de impresión»_ y luego haga clic en el elemento _«Establecer área de impresión»_ (consulte la captura de pantalla a continuación). Para agregar otro rango de celdas al Área de impresión, seleccione este nuevo rango, haga clic en el botón _«Área de impresión»_ y luego haga clic en el elemento _«Agregar al área de impresión»_ en este momento. En el modo «Vista de saltos de página», puede ver todos los rangos de celdas que forman parte del Área de impresión.
+
+![Specify a print area in Microsoft Excel](/net/viewer/images/rendering-basics/render-spreadsheets/excel-set-print-area.png)
+
+GroupDocs.Viewer también admite esta opción: en ese caso, cada rango de celdas dentro del área de impresión se colocará en una página separada. Para lograr esto, invoque el método estático <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/spreadsheetoptions/methods/forrenderingprintarea" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetOptions.ForRenderingPrintArea`</a> y asigne la instancia <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/spreadsheetoptions/" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetOptions`</a> devuelta a la propiedad <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/baseviewoptions/properties/spreadsheetoptions" target="_blank" rel="nofollow noopener noreferrer">`ViewOptions.SpreadsheetOptions`</a>. El siguiente ejemplo muestra cómo hacerlo.
+
+<Tabs groupId="RenderOnlyPrintArea">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+// Create PDF view options for rendering to PDF
+PdfViewOptions viewOptions = new PdfViewOptions("output.pdf");
+
+// Create spreadsheet options to render a Print Area only
+viewOptions.SpreadsheetOptions = SpreadsheetOptions.ForRenderingPrintArea();
+
+// Create a Viewer instance and specify the input XLSX
+using (Viewer viewer = new Viewer("Invoice.xlsx"))
+{
+    // Render the XLSX to PDF
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+' Create PDF view options for rendering to PDF
+Dim viewOptions As New PdfViewOptions("output.pdf")
+
+' Create spreadsheet options to render a Print Area only
+viewOptions.SpreadsheetOptions = SpreadsheetOptions.ForRenderingPrintArea()
+
+' Create a Viewer instance and specify the input XLSX
+Using viewer As New Viewer("Invoice.xlsx")
+    ' Render the XLSX to PDF
+    viewer.View(viewOptions)
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+La imagen a continuación ilustra el resultado.
+
+![Render the print area to PDF](/net/viewer/images/rendering-basics/render-spreadsheets/render-print-area.png)
+
+## Renderizar área de impresión y dividir por saltos de página  {#render-print-area-and-split-by-page-breaks}
+  
+GroupDocs.Viewer tiene una característica única: combinar el Área de Impresión y los saltos de página en un único modo. En este caso, GroupDocs.Viewer considera todos los rangos de celdas del Área de Impresión y los saltos de página en la hoja de cálculo y los aplica simultáneamente para dividir la hoja de cálculo en páginas.  
+
+Para lograrlo, invoque el método estático <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/spreadsheetoptions/methods/forrenderingprintareaandpagebreaks" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetOptions.ForRenderingPrintAreaAndPageBreaks`</a> y asigne la instancia <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/spreadsheetoptions/" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetOptions`</a> devuelta a la propiedad <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/baseviewoptions/properties/spreadsheetoptions" target="_blank" rel="nofollow noopener noreferrer">`ViewOptions.SpreadsheetOptions`</a>.  
+
+En la captura de pantalla siguiente, la línea roja muestra el Área de Impresión y la línea azul muestra los saltos de página.
+
+![Specify page breaks and a print area in Microsoft Excel](/net/viewer/images/rendering-basics/render-spreadsheets/page-breake-vs-print-area.png)
+
+El siguiente ejemplo renderiza la hoja de cálculo de Microsoft Excel utilizando los saltos de página y las áreas de impresión mostrados en la captura de pantalla anterior para PDF:
+
+<Tabs groupId="RenderPrintAreaAndSplitByPageBreaks">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+// Create PDF view options for rendering to PDF
+PdfViewOptions viewOptions = new PdfViewOptions("Financial Sample.pdf");
+
+// Render a Print Area and split by page breaks
+viewOptions.SpreadsheetOptions = SpreadsheetOptions.ForRenderingPrintAreaAndPageBreaks();
+
+// Create a Viewer instance and specify the input XLSX
+using (Viewer viewer = new Viewer("Products.xlsx"))
+{
+    // Render the XLSX to PDF
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+' Create PDF view options for rendering to PDF
+Dim viewOptions As New PdfViewOptions("Financial Sample.pdf")
+
+' Render a Print Area and split by page breaks
+viewOptions.SpreadsheetOptions = SpreadsheetOptions.ForRenderingPrintAreaAndPageBreaks()
+
+' Create a Viewer instance and specify the input XLSX
+Using viewer As New Viewer("Products.xlsx")
+    ' Render the XLSX to PDF
+    viewer.View(viewOptions)
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+La captura de pantalla a continuación ilustra el resultado:
+
+![Render page breaks and a print area to PDF](/net/viewer/images/rendering-basics/render-spreadsheets/pdf-result.png)
+
+## Dividir hoja de cálculo en páginas manualmente por filas y columnas  {#split-worksheet-into-pages-manually-by-rows-and-columns}
+  
+A veces, ninguno de los métodos de división descritos anteriormente es aceptable, o la hoja de cálculo tiene un formato que no admite saltos de página ni áreas de impresión, por ejemplo, un archivo CSV basado en texto. Para tales casos, GroupDocs.Viewer permite especificar manualmente el número de filas y/o el número de columnas que deben aparecer en cada página. En resumen, la diferencia entre dividir únicamente por filas y dividir tanto por filas como por columnas se ilustra en la captura de pantalla siguiente.
+
+![Split by rows only vs. split by rows and columns](/net/viewer/sample-files/split-worksheets-into-pages/split-by-rows-and-split-by-rows-and-columns.png)
+
+### Dividir hoja de cálculo en páginas únicamente por filas {#split-worksheet-into-pages-only-by-rows}
+  
+Cuando una hoja de cálculo es alta pero estrecha, es decir, tiene una cantidad moderada de columnas pero una gran cantidad de filas, es ideal dividir dicha hoja de cálculo horizontalmente, por filas. En este caso, el usuario debe especificar un número de filas por página única en el método estático <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/spreadsheetoptions/forsplitsheetintopages/#forsplitsheetintopages" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetOptions.ForSplitSheetIntoPages(int countRowsPerPage)`</a>, y luego proceder como de costumbre. El número de filas por página debe ser estrictamente mayor que cero. A continuación se muestra un ejemplo de código que especifica 15 filas por página. Este ejemplo de código utiliza el archivo `two-pages.xlsx`, que se puede descargar [aquí](/net/viewer/sample-files/split-worksheets-into-pages/two-pages.xlsx).
+
+<Tabs groupId="SplitWorksheetIntoPagesOnlyByRows">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+// Create PDF view options for rendering to PDF
+PdfViewOptions viewOptions = new PdfViewOptions("output.pdf");
+
+// Specify number of rows for every page
+int rowsPerPage = 15;
+
+// Create spreadsheet options to split worksheet by number of rows
+viewOptions.SpreadsheetOptions = SpreadsheetOptions.ForSplitSheetIntoPages(rowsPerPage);
+
+// Create a Viewer instance and specify the input XLSX
+using (Viewer viewer = new Viewer("two-pages.xlsx"))
+{
+    // Render the XLSX to PDF
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+' Create PDF view options for rendering to PDF
+Dim viewOptions As New PdfViewOptions("output.pdf")
+
+' Specify number of rows for every page
+Dim rowsPerPage As Int32 = 15
+
+' Create spreadsheet options to split worksheet by number of rows
+viewOptions.SpreadsheetOptions = SpreadsheetOptions.ForSplitSheetIntoPages(rowsPerPage)
+
+' Create a Viewer instance and specify the input XLSX
+Using viewer As New Viewer("two-pages.xlsx")
+    ' Render the XLSX to PDF
+    viewer.View(viewOptions)
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+La captura de pantalla a continuación muestra la hoja de cálculo XLSX original, dividida condicionalmente en fragmentos de 15 filas cada uno, y el archivo PDF de salida generado por GroupDocs.Viewer.
+
+![Break a worksheet into two pages](/net/viewer/images/rendering-basics/render-spreadsheets/render-two-pages.png)
+
+### Dividir hoja de cálculo en páginas por filas y columnas {#split-worksheet-into-pages-by-rows-and-columns}
+  
+Cuando una hoja de cálculo es alta y ancha, es decir, tiene una gran cantidad de columnas y filas, es necesario dividir dicha hoja de cálculo horizontal y verticalmente simultáneamente. El método estático <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/spreadsheetoptions/forsplitsheetintopages/#forsplitsheetintopages" target="_blank" rel="nofollow noopener noreferrer">`ForSplitSheetIntoPages`</a> mencionado anteriormente tiene una sobrecarga que acepta dos argumentos: el número de filas y el número de columnas: <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/spreadsheetoptions/forsplitsheetintopages/#forsplitsheetintopages_1" target="_blank" rel="nofollow noopener noreferrer">`ForSplitSheetIntoPages(int countRowsPerPage, int countColumnsPerPage)`</a>. El número de filas y columnas por página debe ser estrictamente mayor que cero. El siguiente ejemplo demuestra cómo dividir las hojas de cálculo en páginas con 15 filas y 7 columnas cada una. Este ejemplo de código utiliza el archivo `four-pages.xlsx`, que se puede descargar [aquí](/net/viewer/sample-files/split-worksheets-into-pages/four-pages.xlsx).
+
+<Tabs groupId="SplitWorksheetIntoPagesByRowsAndColumns">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+// Create PDF view options for rendering to PDF
+PdfViewOptions viewOptions = new PdfViewOptions("output.pdf");
+
+// Specify number of rows and columns for every page
+int rowsPerPage = 15;
+int columnsPerPage = 7;
+
+// Create spreadsheet options to split worksheet by number of rows and columns
+viewOptions.SpreadsheetOptions = SpreadsheetOptions.ForSplitSheetIntoPages(rowsPerPage, columnsPerPage);
+
+// Create a Viewer instance and specify the input XLSX
+using (Viewer viewer = new Viewer("four-pages.xlsx"))
+{
+    // Render the XLSX to PDF
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+' Create PDF view options for rendering to PDF
+Dim viewOptions As New PdfViewOptions("output.pdf")
+
+' Specify number of rows and columns for every page
+Dim rowsPerPage As Int32 = 15
+Dim columnsPerPage As Int32 = 7
+
+' Create spreadsheet options to split worksheet by number of rows and columns
+viewOptions.SpreadsheetOptions = SpreadsheetOptions.ForSplitSheetIntoPages(rowsPerPage, columnsPerPage)
+
+' Create a Viewer instance and specify the input XLSX
+Using viewer As New Viewer("four-pages.xlsx")
+    ' Render the XLSX to PDF
+    viewer.View(viewOptions)
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+La captura de pantalla a continuación muestra la hoja de cálculo XLSX original, dividida condicionalmente en fragmentos de 15 filas y 7 columnas (A-G y H-N) cada uno, y el archivo PDF de salida generado por GroupDocs.Viewer.
+
+![Break a worksheet into four pages](/net/viewer/images/rendering-basics/render-spreadsheets/render-four-pages.png)
+
+## Conclusión {#conclusion}
+  
+Este artículo demuestra que GroupDocs.Viewer ofrece distintas formas de dividir una hoja de cálculo en páginas, con el fin de satisfacer la mayor variedad posible de casos de uso. Tenga en cuenta que todas estas funcionalidades se incorporaron gradualmente, pieza a pieza, en GroupDocs.Viewer; por lo tanto, si está utilizando una versión obsoleta de la biblioteca, publicada antes del año 2023, es posible que algunas de las características descritas no estén disponibles. Asimismo, tenga en cuenta que estamos abiertos a nuevas sugerencias e ideas sobre cómo dividir una hoja de cálculo en páginas, por lo que le invitamos a compartir sus reflexiones en nuestro <a href="https://forum.conholdate.com/" target="_blank">foro</a>.

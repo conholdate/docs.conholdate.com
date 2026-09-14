@@ -1,0 +1,278 @@
+---
+title: "Cómo integrar GroupDocs.Viewer en una aplicación web ASP.NET Core"
+sidebar_label: "Cómo integrar GroupDocs.Viewer en una aplicación web ASP.NET Core"
+sidebar_key: "net-viewer-how-to-integrate-groupdocs-viewer-in-asp-net-core-web-app"
+sidebar_position: 1
+description: "Esta guía recorre el proceso de integración de GroupDocs.Viewer.UI en una aplicación web ASP.NET Core."
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "viewer-net"
+source_path: "net/showcases/how-to-integrate-groupdocs-viewer-in-asp-net-core-web-app.md"
+source_commit: "270bea1e2528043f99c68ff8a72edc20b3816a48"
+source_sha256: "69579bf1ba0d88ccc6b4b0a95ee4798041695dfc2135cd08b332c3bd1e588a86"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "77d9bfccc52a018adc2a4bb31ccd1ad080c5795a9777c6b859d5b2e8f0842812"
+translation_updated_at: "2026-09-14T10:56:21.274Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET se incluye en Conholdate.Total for .NET.
+:::
+
+Esta página describe cómo desarrollar una aplicación web sencilla de ASP.NET Core que utiliza GroupDocs.Viewer for .NET como motor de renderizado. La página explica cómo crear una aplicación y agregar los paquetes necesarios mediante la terminal, pero también puede realizar lo mismo con Visual Studio. La siguiente imagen muestra el diagrama simplificado de la aplicación:
+
+![Simplified diagram of the web application that we're going to build](/net/viewer/images/showcases/how-to-integrate-groupdocs-viewer-ui-in-asp-net-core-web-app/simplified-app-diagram.png)
+
+También puede encontrar esta aplicación de ejemplo en el repositorio de proyectos <a href="https://github.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET/tree/master/Demos/ASP.NET%20Core" target="_blank" rel="nofollow noopener noreferrer">demo</a> en GitHub.
+
+## Requisitos previos {#prerequisites}
+  
+Para compilar la aplicación desde cero, descargue el SDK de .NET o .NET Core 3.1 en <a href="https://dotnet.microsoft.com/download" target="_blank" rel="nofollow noopener noreferrer">https://dotnet.microsoft.com/download</a> y luego instálelo.
+
+## Crear una aplicación {#create-an-application}
+  
+Cree una aplicación web ejecutando el comando de <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/" target="_blank" rel="nofollow noopener noreferrer">.NET CLI</a> en el directorio denominado `my-viewer-app`:
+
+<Tabs groupId="example1">
+
+<TabItem value="shell" label="Shell" default>
+
+```sh
+dotnet new web
+```
+
+</TabItem>
+
+</Tabs>
+
+Verifique que se hayan creado los archivos del proyecto y de configuración.
+
+## Instalar paquetes  {#install-packages}
+  
+Agregue los paquetes necesarios utilizando la herramienta de la CLI de .NET. Para ello, ejecute los siguientes comandos en el directorio `my-viewer-app`:
+
+<Tabs groupId="example2">
+
+<TabItem value="shell" label="Shell" default>
+
+```sh
+dotnet add package GroupDocs.Viewer.UI
+dotnet add package GroupDocs.Viewer.UI.SelfHost.Api
+dotnet add package GroupDocs.Viewer.UI.Api.Local.Storage
+dotnet add package GroupDocs.Viewer.UI.Api.Local.Cache
+```
+
+</TabItem>
+
+</Tabs>
+
+Estos comandos agregan los siguientes paquetes a la aplicación:
+
+* GroupDocs.Viewer.UI contiene un middleware que sirve la aplicación cliente en el punto de conexión /viewer que configura en el siguiente paso.
+* GroupDocs.Viewer.UI.SelfHost.Api contiene un middleware con un motor de renderizado basado en GroupDocs.Viewer for .NET. Lo configura en el punto de conexión /viewer-api.
+* GroupDocs.Viewer.UI.Api.Local.Storage contiene una implementación para el almacenamiento mediante un disco local para leer y escribir archivos cargados mediante la interfaz de usuario.
+* GroupDocs.Viewer.UI.Api.Local.Cache contiene una implementación para el almacenamiento en caché. La caché almacena los archivos de salida generados por el motor de renderizado, como las páginas HTML renderizadas.
+
+## Configurar middleware {#configure-middleware}
+  
+Abra el archivo `Startup.cs` y agregue las siguientes líneas al método `ConfigureServices`:
+
+<Tabs groupId="example3">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+services
+    .AddGroupDocsViewerUI();
+
+services
+    .AddControllers()
+    .AddGroupDocsViewerSelfHostApi()
+    .AddLocalStorage("./Files")
+    .AddLocalCache("./Cache");
+```
+
+</TabItem>
+
+</Tabs>
+
+Agregue las siguientes líneas al método `Configure` para registrar los puntos de conexión de la interfaz de usuario y de la API:
+
+<Tabs groupId="example4">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+app
+    .UseRouting()
+    .UseEndpoints(endpoints =>
+    {
+        endpoints.MapGroupDocsViewerUI(options =>
+        {
+            options.UIPath = "/viewer";
+            options.APIEndpoint = "/viewer-api";
+        });
+        endpoints.MapGroupDocsViewerApi(options =>
+        {
+            options.ApiPath = "/viewer-api";
+        });
+    });
+```
+
+</TabItem>
+
+</Tabs>
+
+Este código registra el middleware `/viewer`, que sirve los archivos de la aplicación cliente, y el middleware `/viewer-api`, que renderiza el contenido para la aplicación cliente.
+
+El archivo `Startup.cs` es el siguiente:
+
+<Tabs groupId="example5">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace my_viewer_app
+{
+    public class Startup
+    {
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services
+                .AddGroupDocsViewerUI();
+
+            services
+                .AddControllers()
+                .AddGroupDocsViewerSelfHostApi()
+                .AddLocalStorage("./Files")
+                .AddLocalCache("./Cache");
+        }
+
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            app
+                .UseRouting()
+                .UseEndpoints(endpoints =>
+                {
+                    endpoints.MapGroupDocsViewerUI(options =>
+                    {
+                        options.UIPath = "/viewer";
+                        options.APIEndpoint = "/viewer-api";
+                    });
+
+                    endpoints.MapGroupDocsViewerApi(options =>
+                    {
+                        options.ApiPath = "/viewer-api";
+                    });
+                });
+        }
+    }
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+Si utiliza el estilo de programa <a href="https://docs.microsoft.com/en-us/dotnet/core/tutorials/top-level-templates" target="_blank" rel="nofollow noopener noreferrer">nuevo</a> con declaraciones de nivel superior, directivas `using` globales y directivas `using` implícitas, el `Startup.cs` es el siguiente:
+
+<Tabs groupId="example6">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+        .AddGroupDocsViewerUI();
+
+builder.Services
+        .AddControllers()
+        .AddGroupDocsViewerSelfHostApi()
+        .AddLocalStorage("./Files")
+        .AddLocalCache("./Cache");
+
+var app = builder.Build();
+
+app
+    .UseRouting()
+    .UseEndpoints(endpoints =>
+    {
+        endpoints.MapGroupDocsViewerUI(options =>
+        {
+            options.UIPath = "/viewer";
+            options.APIEndpoint = "/viewer-api";
+        });
+        endpoints.MapGroupDocsViewerApi(options =>
+        {
+            options.ApiPath = "/viewer-api";
+        });
+    });
+
+app.Run();
+```
+
+</TabItem>
+
+</Tabs>
+
+## Crear carpetas para archivos y caché {#create-folders-for-files-and-cache}
+  
+En un disco local, cree carpetas para archivos y caché ejecutando los siguientes comandos:
+
+<Tabs groupId="example7">
+
+<TabItem value="shell" label="Shell" default>
+
+```sh
+mkdir Files
+mkdir Cache
+```
+
+</TabItem>
+
+</Tabs>
+
+## Ejecutar la aplicación  {#run-the-application}
+  
+Para ejecutar la aplicación, ejecute el comando `dotnet run` en el directorio `my-viewer-app`. La salida debería ser la siguiente:  
+
+```verilog
+Building...
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: https://localhost:7153
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5081
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\my-viewer-app
+```
+
+En el navegador, abra uno de los puntos de conexión enumerados en la salida anterior y agregue la ruta `/viewer` para ver la aplicación del visor en funcionamiento:
+
+![GroupDocs.Viewer.Ui in ASP.NET Core Web application](/net/viewer/images/showcases/how-to-integrate-groupdocs-viewer-ui-in-asp-net-core-web-app/groupdocs-viewer-ui-asp-net-core-web-app.png)
+
+Para cargar archivos, haga clic en el icono de carpeta o copie sus archivos en el directorio `Files`. También puede especificar la ruta al directorio en el método de extensión `AddLocalStorage`.
+
+## Recursos {#resources}
+  
+* <a href="https://github.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET-UI" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Viewer.UI paquete de repositorio</a>  
+* <a href="https://github.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Viewer for .NET Demos y ejemplos</a>  
+* <a href="https://products.conholdate.app/viewer" target="_blank">GroupDocs.Viewer Aplicación en línea</a>
