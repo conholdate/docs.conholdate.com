@@ -1,0 +1,367 @@
+---
+title: "Renderizar documentos XML como archivos HTML, PDF, PNG y JPEG"
+sidebar_label: "Renderizar documentos XML"
+sidebar_key: "net-viewer-tab"
+sidebar_position: 10
+description: "Este tema describe cómo usar la API de .NET (C#) GroupDocs.Viewer para convertir documentos XML a HTML (con y sin paginación), documentos PDF y formatos de mapa de bits PNG y JPEG."
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "viewer-net"
+source_path: "net/rendering-basics/render-xml-documents.md/"
+source_commit: "270bea1e2528043f99c68ff8a72edc20b3816a48"
+source_sha256: "0ee9353f6e4a4baf9420a453a0487ae7884f002c2712028d7cd0fa72a164f6ce"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "7953221133cf0611e473489b2d034a1a23b6b87778c2f3bcd960e722ab2a8096"
+translation_updated_at: "2026-09-14T14:10:57.762Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET se incluye en Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/viewer/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Viewer for .NET</a> comenzó a admitir el formato XML hace mucho tiempo, pero los documentos XML se trataban como texto sin formato, por lo que no resultaban tan útiles como podrían haberlo sido. A partir de la <a href="https://releases.groupdocs.com/viewer/net/release-notes/2024/groupdocs-viewer-for-net-24-8-release-notes/#new-xml-converter" target="_blank" rel="nofollow noopener noreferrer">versión 24.8</a>, se implementó un módulo completamente nuevo para el procesamiento de XML, y ahora los documentos XML se procesan de forma distinta, ya no como documentos de texto sin formato. Este artículo explica este nuevo módulo de procesamiento de XML.
+
+## Apertura del documento XML {#opening-the-xml-document}
+  
+En primer lugar, cabe destacar que el nuevo módulo de procesamiento de XML no ha modificado en absoluto la API pública: no se han añadido ni modificado nuevas opciones, clases, propiedades ni métodos. Para procesar correctamente un documento XML de entrada mediante el nuevo módulo de procesamiento de XML, es necesario o bien especificar una instancia de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">`LoadOptions`</a> con <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/filetype/xml/" target="_blank" rel="nofollow noopener noreferrer">`FileType.XML`</a> en su <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/loadoptions/loadoptions/#constructor_1" target="_blank" rel="nofollow noopener noreferrer">constructor</a>, o bien pasar directamente el documento XML como nombre de archivo con la extensión `*.xml`. El siguiente ejemplo de código muestra todas las formas posibles:
+
+<Tabs groupId="Loading example">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+// 1. Specify by filename
+string inputXmlDocument = "Sample.xml";
+using (Viewer viewer = new Viewer(inputXmlDocument))
+{
+    // do some work...
+}
+
+//2. Specify by filename and FileStream
+string inputXmlPath = "path/Sample.xml";
+using (FileStream inputXmlFileStream = File.OpenRead(inputXmlPath))
+using (Viewer viewer = new Viewer(inputXmlFileStream))
+{
+    // do some work...
+}
+
+// 3. Specify by load options
+MemoryStream xmlContent = new MemoryStream();
+// fill MemoryStream with content of XML document
+GroupDocs.Viewer.Options.LoadOptions loadOptions = new LoadOptions(FileType.XML);
+using (Viewer viewer = new Viewer(xmlContent, loadOptions))
+{
+    // do some work...
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+' 1. Specify by filename
+Dim inputXmlDocument As String = "Sample.xml"
+Using viewer As New Viewer(inputXmlDocument)
+    'do some work...
+End Using
+
+' 2. Specify by filename and FileStream
+Dim inputXmlPath As String = "path/Sample.xml"
+Using inputXmlFileStream As FileStream = File.OpenRead(inputXmlPath),
+    viewer As New Viewer(inputXmlFileStream)
+    'do some work...
+End Using
+
+' 3. Specify by load options
+Dim xmlContent As MemoryStream = New MemoryStream
+' fill MemoryStream with content of XML document
+Dim loadOptions As GroupDocs.Viewer.Options.LoadOptions = New LoadOptions(FileType.XML)
+Using viewer As New Viewer(xmlContent, loadOptions)
+    'do some work...
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+Si la instancia de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/" target="_blank" rel="nofollow noopener noreferrer">`Viewer`</a> se inicializa mediante uno de los métodos descritos anteriormente, se utilizará el nuevo módulo de procesamiento XML.
+
+De forma predeterminada, todos los documentos XML deben incluir una <a href="https://developer.mozilla.org/en-US/docs/Web/XML/XML_introduction#xml_declaration" target="_blank" rel="nofollow noopener noreferrer">declaración XML</a>, ubicada al principio del documento XML y que almacena la codificación del contenido subsiguiente, por ejemplo:
+
+`<?xml version="1.1" encoding="UTF-8" ?>`
+
+De forma predeterminada, GroupDocs.Viewer la utiliza. Sin embargo, existe la posibilidad de anular esta codificación de caracteres si es necesario. Para ello, se debe establecer la propiedad <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/loadoptions/encoding/" target="_blank" rel="nofollow noopener noreferrer">`LoadOptions.Encoding`</a> durante la inicialización de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/" target="_blank" rel="nofollow noopener noreferrer">`Viewer`</a>, como se muestra a continuación:
+
+<Tabs groupId="Custom encoding example">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+LoadOptions loadOpts = new LoadOptions(FileType.XML);
+loadOpts.Encoding = System.Text.Encoding.ASCII;
+using (Viewer viewer = new Viewer(xmlContent, loadOpts))
+{
+    // do some work...
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Dim loadOpts As LoadOptions = New LoadOptions(FileType.XML)
+loadOpts.Encoding = System.Text.Encoding.ASCII
+Using viewer As New Viewer(xmlContent, loadOpts)
+    'do some work...
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+El resto de este artículo explica las características de este nuevo módulo de procesamiento XML.
+
+### Detección de XML {#xml-detection}
+  
+Todos los documentos XML, sin excepciones, pueden ser amenazados (interpretados) como documentos de texto plano (TXT). GroupDocs.Viewer permite a los usuarios especificar explícitamente el formato del documento cargado mediante la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">`LoadOptions`</a> y su propiedad <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/loadoptions/filetype/" target="_blank" rel="nofollow noopener noreferrer">`FileType`</a>. Sin embargo, cuando la instancia <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">`LoadOptions`</a> no se especifica en el constructor <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer" target="_blank" rel="nofollow noopener noreferrer">`Viewer`</a>, GroupDocs.Viewer intenta detectar automáticamente el formato del documento cargado. En primer lugar, GroupDocs.Viewer intenta reconocer la extensión del nombre de archivo, si el documento se especifica mediante la ruta del archivo o <a href="https://learn.microsoft.com/en-us/dotnet/api/system.io.filestream" target="_blank" rel="nofollow noopener noreferrer">`FileStream`</a>. Y si se reconoce la extensión, el documento cargado se procesará según ella.
+
+Este algoritmo también tiene una desventaja: si la extensión del archivo es incorrecta, por ejemplo, el archivo cargado es en realidad de formato PDF, pero tiene la extensión ".docx", su procesamiento fallará y se lanzará una excepción. En el contexto del procesamiento de documentos, todo es aún más complejo, ya que el procesador XML actual puede manejar correctamente archivos de texto plano puros, incluso sin una sola etiqueta XML dentro. Pero esto es altamente ineficiente: la calidad resultante con dichos archivos de texto plano, procesados como XML por el procesador XML, será la misma que si se hubieran procesado mediante un procesador de texto, pero el rendimiento será significativamente peor.
+
+A partir de la <a href="https://releases.groupdocs.com/viewer/net/release-notes/2025/groupdocs-viewer-for-net-25-3-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 25.3</a>, si el documento se carga en la instancia <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer" target="_blank" rel="nofollow noopener noreferrer">`Viewer`</a> mediante la ruta del archivo o <a href="https://learn.microsoft.com/en-us/dotnet/api/system.io.filestream" target="_blank" rel="nofollow noopener noreferrer">`FileStream`</a>, y no se especifica ninguna <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">`LoadOptions`</a> con <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/loadoptions/filetype/" target="_blank" rel="nofollow noopener noreferrer">`FileType`</a>, y la extensión es ".xml", GroupDocs.Viewer verifica adicionalmente si el documento cargado es realmente XML. Si lo es, se procesará como XML; pero si no contiene ni siquiera una sola etiqueta XML, se procesará como texto plano.
+
+## Representación {#representation}
+  
+La tarea principal del nuevo módulo de procesamiento XML es representar el marcado XML obtenido del usuario en una vista estructurada, con formato y jerárquica, resaltando cada entidad distinta de esta estructura XML. Para GroupDocs.Viewer no importa qué tan amigable para el usuario sea la representación del marcado XML en el documento original: puede estar dividido por saltos de línea en líneas separadas para cada elemento, o todo el documento puede almacenarse en una única línea de texto; puede tener sangrías o no, lo cual no importa. GroupDocs.Viewer analiza el documento XML de entrada y crea un Modelo de Objetos de Documento (DOM) jerárquico, y luego lo serializa en HTML, PDF, PNG o JPEG según las opciones del usuario.
+
+En particular, al serializar, GroupDocs.Viewer coloca cada elemento (nodo) XML en una nueva línea, con una sangría a la izquierda que indica la anidación de un determinado elemento. Cada entidad del documento XML —elemento XML, atributo, su valor, nodo de texto, comentario XML, sección CDATA— tiene su propio resaltado: estilo de fuente, tipo, color, tamaño, etc. Todas las comillas utilizadas para delimitar los valores de los atributos se unifican.
+
+La captura de pantalla siguiente muestra este escenario. A la izquierda se muestra un [documento XML de ejemplo](/net/viewer/sample-files/render-xml-documents/books-single-line.xml), donde todo el contenido se almacena en una única línea, sin sangrías, saltos de línea, tabulaciones horizontales ni espacios en blanco adicionales. A la derecha se muestra el archivo HTML resultante generado por GroupDocs.Viewer. Allí puede verse una vista estructurada con saltos de línea y sangrías correctos, el resaltado adecuado de cada entidad XML y el reconocimiento de direcciones URI y de correo electrónico.
+
+![Generate HTML view for input XML](/net/viewer/images/rendering-basics/render-xml-documents/XML-to-HTML.png)
+
+## Corregir estructura XML incorrecta  {#fix-incorrect-xml-structure}
+  
+El Consorcio World Wide Web (W3C) ha definido claramente qué constituye un documento XML válido y qué no. El término "<a href="https://developer.mozilla.org/en-US/docs/Web/XML/XML_introduction#correct_xml_valid_and_well-formed" target="_blank" rel="nofollow noopener noreferrer">documento bien formado</a>" define a aquellos documentos XML que "se ajustan a las reglas sintácticas especificadas por la especificación XML 1.0, en el sentido de que deben satisfacer tanto las estructuras físicas como las lógicas" (<a href="http://www.csdservices.com/articles/csdservices" target="_blank" rel="nofollow noopener noreferrer">ref</a>). En particular, un documento XML válido debe contener únicamente caracteres válidos, sus etiquetas de apertura y cierre deben coincidir, abrirse y cerrarse correctamente, los elementos deben estar correctamente anidados, etc. Por desgracia, no todos los documentos XML existentes están bien formados, y a veces surge la necesidad de visualizarlos. Muchos visores de marcado XML suelen ser incapaces de mostrar correctamente documentos XML inválidos.
+
+GroupDocs.Viewer, con su nuevo módulo de procesamiento XML, es capaz de analizar, procesar, formatear, resaltar y visualizar correctamente incluso documentos XML severamente distorsionados. A continuación se presenta una lista parcial de los distintos daños en la estructura XML que GroupDocs.Viewer puede corregir y procesar:
+
+- Caracteres inválidos o ilegales, incluidos los caracteres `<` y `&` en ubicaciones incorrectas.  
+- Etiquetas de apertura que no se cierran.  
+- Etiquetas de cierre que no tienen su correspondiente etiqueta de apertura.  
+- Etiquetas entrelazadas (superpuestas).  
+- Etiquetas de apertura y cierre con mayúsculas/minúsculas no coincidentes.  
+- Marcado truncado (cortado al final).  
+- Nombres de atributos sin valores.  
+- Valores de atributos no entrecomillados (sin comillas de cierre).  
+- Valores de atributos entrecomillados parcialmente, con solo comillas de apertura o solo comillas de cierre.  
+- Valores de atributos que contienen comillas redundantes en su interior.
+
+GroupDocs.Viewer detecta y corrige todos estos problemas, y aún más, en el marcado XML, y también los registra en el archivo de registro (log).
+
+La captura de pantalla siguiente demuestra esto en acción. El [archivo XML de ejemplo "InvalidXml.xml"](/net/viewer/sample-files/render-xml-documents/InvalidXml.xml) contiene todos los daños descritos anteriormente. La mayoría de las aplicaciones más populares para visualizar y editar XML no pueden formatear ni resaltar este archivo correctamente. Sin embargo, con el nuevo módulo de procesamiento XML, GroupDocs.Viewer corrige su estructura y lo muestra de forma absolutamente correcta.
+
+![Generate HTML view for input XML](/net/viewer/images/rendering-basics/render-xml-documents/XML-fixed.png)
+
+## Reconocimiento de URI y direcciones de correo electrónico {#recognition-of-uris-and-email-addresses}
+  
+Mientras procesa la marca XML, GroupDocs.Viewer busca en el contenido XML cualquier URI válido; si se encuentra, los representa como enlaces externos en el formato HTML resultante mediante el elemento <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a" target="_blank" rel="nofollow noopener noreferrer">A</a>. GroupDocs.Viewer busca URI en los siguientes lugares: nodos de texto, secciones CDATA, comentarios XML y valores de atributos, definiciones DocType.
+
+En cuanto a las direcciones de correo electrónico, GroupDocs.Viewer solo las busca en los valores de atributos y, si se encuentran, las representa mediante el esquema <a href="https://en.wikipedia.org/wiki/Mailto" target="_blank" rel="nofollow noopener noreferrer">mailto</a> y el elemento <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a" target="_blank" rel="nofollow noopener noreferrer">A</a>.
+
+Si el documento XML se guarda en formato PDF (y no en HTML), las URI y las direcciones de correo electrónico también serán interactivas. Sin embargo, si el formato de salida es PNG o JPEG, la salida será una imagen rasterizada sin ningún enlace interactivo, por supuesto.
+
+## Guardado en formato HTML {#saving-to-html-format}
+  
+Para guardar los documentos en formato HTML, GroupDocs.Viewer proporciona la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`HtmlViewOptions`</a>. Existen dos formas de crear una instancia de esta clase: mediante los métodos estáticos <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/forexternalresources/#forexternalresources" target="_blank" rel="nofollow noopener noreferrer">`ForExternalResources`</a> o <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/forembeddedresources/#forembeddedresources" target="_blank" rel="nofollow noopener noreferrer">`ForEmbeddedResources`</a>. El primer método está diseñado para guardar el documento HTML de modo que todos sus recursos (hojas de estilo, imágenes, fuentes, etc.) se almacenen por separado, mientras que el segundo método almacena todos los recursos del documento HTML dentro de su propio contenido: las hojas de estilo se guardan dentro de elementos STYLE, los gráficos SVG se incrustan directamente en la marca HTML y el resto de recursos (principalmente imágenes rasterizadas y fuentes) se almacenan según el <a href="https://en.wikipedia.org/wiki/Data_URI_scheme" target="_blank" rel="nofollow noopener noreferrer">esquema de URI de datos</a> y se convierten al formato <a href="https://en.wikipedia.org/wiki/Base64" target="_blank" rel="nofollow noopener noreferrer">base64</a>.
+
+Sin embargo, en el contexto de los documentos XML, la forma de crear la instancia de <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`HtmlViewOptions`</a> no es relevante, ya que los documentos XML no pueden tener recursos que se almacenen externamente o se incrusten. Por lo tanto, al guardar documentos XML en HTML, puede crear la instancia de <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`HtmlViewOptions`</a> de ambas formas: el resultado será idéntico y no se generarán recursos externos.
+
+Otro aspecto importante es que, por su naturaleza, el formato XML no tiene páginas: se trata de una estructura jerárquica en la que algunos elementos se anidan dentro de otros, sin que exista nada similar a las páginas. Por lo tanto, la mejor forma de representarlos en formato HTML es generar un documento HTML de una sola página, de modo que todo el contenido XML se represente en un único documento HTML. Para lograrlo, es necesario establecer la opción <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/rendertosinglepage/" target="_blank" rel="nofollow noopener noreferrer">`HtmlViewOptions.RenderToSinglePage`</a> en `true`. De forma predeterminada, esta opción tiene el valor `false`, por lo que el documento HTML resultante será paginado (dividido en varios fragmentos).
+
+El siguiente ejemplo de código muestra el procesamiento de un archivo XML de entrada a HTML mediante ambos métodos:
+
+<Tabs groupId="Saving to HTML example">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+HtmlViewOptions paginatedHtmlOptions = HtmlViewOptions.ForEmbeddedResources("page-{0}.html");
+HtmlViewOptions singleHtmlOptions = HtmlViewOptions.ForEmbeddedResources("single-page.html");
+singleHtmlOptions.RenderToSinglePage = true;
+
+string inputXmlDocument = "Sample.xml";
+using (Viewer viewer = new Viewer(inputXmlDocument))
+{
+    viewer.View(paginatedHtmlOptions);
+    viewer.View(singleHtmlOptions);
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Dim paginatedHtmlOptions As HtmlViewOptions = HtmlViewOptions.ForEmbeddedResources("page-{0}.html")
+Dim singleHtmlOptions As HtmlViewOptions = HtmlViewOptions.ForEmbeddedResources("single-page.html")
+singleHtmlOptions.RenderToSinglePage = True
+
+Dim inputXmlDocument As String = "Sample.xml"
+Using viewer As New Viewer(inputXmlDocument)
+    viewer.View(paginatedHtmlOptions)
+    viewer.View(singleHtmlOptions)
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+Todas las demás opciones, que están presentes en la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`HtmlViewOptions`</a>, no tienen efecto al guardar XML en HTML, excepto la bandera <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/htmlviewoptions/rendertosinglepage/" target="_blank" rel="nofollow noopener noreferrer">`RenderToSinglePage`</a>.
+
+## Guardar en formato PDF {#saving-to-pdf-format}
+  
+El formato PDF, por naturaleza, tiene páginas; por lo tanto, si el contenido XML, debido a su gran tamaño, no cabe en una única página PDF, se paginará. A diferencia de HTML, PNG o JPEG, GroupDocs.Viewer genera únicamente un único archivo PDF para un único documento XML de entrada, con una o más páginas. La clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pdfviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`PdfViewOptions`</a> es la responsable de guardar XML en PDF, y el ejemplo siguiente lo demuestra:
+
+<Tabs groupId="Saving to PDF example">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+PdfViewOptions pdfOptions = new PdfViewOptions("output.pdf");
+string inputXmlDocument = "Sample.xml";
+using (Viewer viewer = new Viewer(inputXmlDocument))
+{
+    viewer.View(pdfOptions);
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Dim pdfOptions As PdfViewOptions = New PdfViewOptions("output.pdf")
+Dim inputXmlDocument As String = "Sample.xml"
+Using viewer As New Viewer(inputXmlDocument)
+    viewer.View(pdfOptions)
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+En cuanto a la versión 24.8, todas las opciones que están presentes en la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pdfviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`PdfViewOptions`</a> no tienen efecto al guardar XML como PDF.
+
+## Guardado en formatos de imagen raster PNG y JPEG  {#saving-to-raster-png-and-jpeg-formats}
+  
+<a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pngviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`PngViewOptions`</a> y <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/jpgviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`JpgViewOptions`</a> se encargan de guardar XML en los formatos de imagen raster PNG y JPEG. Al igual que en el caso de PDF, si el contenido XML no cabe en el área de una sola imagen, se paginará y distribuirá en varias imágenes.
+
+El tamaño de las imágenes de salida se calculará automáticamente según el contenido XML; sin embargo, a partir de la versión 24.8 no es posible establecer el tamaño de forma forzada, y las propiedades `Width`, `Height`, `MaxWidth` y `MaxHeight` de las clases <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pngviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`PngViewOptions`</a> y <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/jpgviewoptions/" target="_blank" rel="nofollow noopener noreferrer">`JpgViewOptions`</a> no tienen efecto al guardar XML como PNG o JPEG.
+
+Existe la posibilidad de establecer la calidad de la imagen JPEG de salida mediante la propiedad de instancia <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/jpgviewoptions/quality/" target="_blank" rel="nofollow noopener noreferrer">`JpgViewOptions.Quality`</a>, cuyo valor predeterminado es `90`.
+
+El ejemplo siguiente muestra cómo guardar el XML de entrada como PNG y JPEG de salida:
+
+<Tabs groupId="Saving to PNG and JPEG example">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+PngViewOptions pngOptions = new PngViewOptions("page-{0}.png");
+JpgViewOptions jpegOptions = new JpgViewOptions("page-{0}.jpeg");
+jpegOptions.Quality = 80; // setting output JPEG quality explicitly
+
+string inputXmlDocument = "Sample.xml";
+using (Viewer viewer = new Viewer(inputXmlDocument))
+{
+    viewer.View(pngOptions);
+    viewer.View(jpegOptions);
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Dim pngOptions As PngViewOptions = New PngViewOptions("page-{0}.png")
+Dim jpegOptions As JpgViewOptions = New JpgViewOptions("page-{0}.jpeg")
+jpegOptions.Quality = 80 ' setting output JPEG quality explicitly
+
+Dim inputXmlDocument As String = "Sample.xml"
+Using viewer As New Viewer(inputXmlDocument)
+    viewer.View(pngOptions)
+    viewer.View(jpegOptions)
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+## Recuperación de información sobre la vista XML {#retrieving-information-about-xml-view}
+  
+Al igual que con todos los demás formatos admitidos, GroupDocs.Viewer admite la devolución de información sobre documentos XML específicos. Al igual que con todos los demás formatos, para hacerlo debe invocar el método de instancia <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/getviewinfo/" target="_blank" rel="nofollow noopener noreferrer">`GetViewInfo`</a> de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/" target="_blank" rel="nofollow noopener noreferrer">`Viewer`</a>, el cual devuelve una instancia de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.results/viewinfo/" target="_blank" rel="nofollow noopener noreferrer">`ViewInfo`</a>. Esta instancia de <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.results/viewinfo/" target="_blank" rel="nofollow noopener noreferrer">`ViewInfo`</a> contiene toda la información sobre la vista, según <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/viewinfooptions/" target="_blank" rel="nofollow noopener noreferrer">`ViewInfoOptions`</a>, pasada al método <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/getviewinfo/" target="_blank" rel="nofollow noopener noreferrer">`GetViewInfo`</a>.
+
+El ejemplo siguiente muestra cómo obtener <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.results/viewinfo/" target="_blank" rel="nofollow noopener noreferrer">`ViewInfo`</a> para un único documento XML en los formatos HTML, PDF y PNG.
+
+<Tabs groupId="Retrieving information about XML view example">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+ViewInfoOptions viewInfoOptionsHtmlSingle = ViewInfoOptions.ForHtmlView(true);
+ViewInfoOptions viewInfoOptionsPdf = ViewInfoOptions.ForPdfView();
+ViewInfoOptions viewInfoOptionsPng = ViewInfoOptions.ForPngView();
+
+string inputXmlDocument = "Sample.xml";
+using (Viewer viewer = new Viewer(inputXmlDocument))
+{
+    ViewInfo resultHtmlSingle = viewer.GetViewInfo(viewInfoOptionsHtmlSingle);
+    ViewInfo resultPdf = viewer.GetViewInfo(viewInfoOptionsPdf);
+    ViewInfo resultPng = viewer.GetViewInfo(viewInfoOptionsPng);
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Dim viewInfoOptionsHtmlSingle As ViewInfoOptions = ViewInfoOptions.ForHtmlView(True)
+Dim viewInfoOptionsPdf As ViewInfoOptions = ViewInfoOptions.ForPdfView()
+Dim viewInfoOptionsPng As ViewInfoOptions = ViewInfoOptions.ForPngView()
+
+Dim inputXmlDocument As String = "Sample.xml"
+Using viewer As New Viewer(inputXmlDocument)
+    Dim resultHtmlSingle As ViewInfo = viewer.GetViewInfo(viewInfoOptionsHtmlSingle)
+    Dim resultPdf As ViewInfo = viewer.GetViewInfo(viewInfoOptionsPdf)
+    Dim resultPng As ViewInfo = viewer.GetViewInfo(viewInfoOptionsPng)
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+## Conclusión {#conclusion}
+  
+Antes del lanzamiento de la versión 24.8, el formato XML era compatible con el GroupDocs.Viewer, pero los archivos XML se trataban como texto sin formato, sin ninguna característica específica de XML, como el formateo estructural, el resaltado, la paginación adecuada, etc.
+
+A partir de la versión 24.8, el nuevo módulo dedicado de procesamiento de XML convierte el soporte de XML en una característica verdaderamente potente y útil, y la capacidad de reparar y mostrar incluso documentos XML severamente corruptos permite utilizar el GroupDocs.Viewer para visualizar documentos XML en aquellos casos en los que todos los demás competidores fallan.

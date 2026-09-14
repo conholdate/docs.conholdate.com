@@ -1,9 +1,9 @@
 ---
-title: "Implement thread-safe cache for GroupDocs.Viewer"
-sidebar_label: "Implement thread-safe cache for GroupDocs.Viewer"
+title: "Implementar caché segura para subprocesos en GroupDocs.Viewer"
+sidebar_label: "Implementar caché segura para subprocesos en GroupDocs.Viewer"
 sidebar_key: "net-viewer-implement-thread-safe-cache-for-groupdocs-viewer"
 sidebar_position: 2
-description: "This article explains how to make cache thread safe with GroupDocs.Viewer within your .NET applications."
+description: "Este artículo explica cómo hacer que la memoria caché sea segura para subprocesos con GroupDocs.Viewer en sus aplicaciones de .NET."
 product: "viewer"
 platform: "net"
 total_version: "current"
@@ -13,35 +13,40 @@ source_repo: "viewer-net"
 source_path: "net/developer-guide/caching-results/implement-thread-safe-cache-for-groupdocs-viewer.md"
 source_commit: "270bea1e2528043f99c68ff8a72edc20b3816a48"
 source_sha256: "86cd25bff22daa18daaf06a154b682f3d884e9dacc88de54e448e5fabf2e854b"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "8ba37c64e5b50e3fba97b0cec93f477f4b71b57a2f2fa13985c9f03475a652d2"
+translation_updated_at: "2026-09-14T15:27:35.206Z"
+translation_status: "ai-draft"
 ---
 
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 
 :::info
-GroupDocs.Viewer for .NET is included in Conholdate.Total for .NET.
+GroupDocs.Viewer for .NET se incluye en Conholdate.Total for .NET.
 :::
 
-This page describes how to develop a thread-sage cache using the <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/lock-statement" target="_blank" rel="nofollow noopener noreferrer">C# lock</a> statement and the <a href="https://docs.microsoft.com/en-us/dotnet/api/system.collections.concurrent.concurrentdictionary-2" target="_blank" rel="nofollow noopener noreferrer">ConcurrentDictionary&lt;,&gt;</a> class.
+Esta página describe cómo desarrollar una memoria caché segura para subprocesos utilizando la instrucción <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/lock-statement" target="_blank" rel="nofollow noopener noreferrer">C# lock</a> y la clase <a href="https://docs.microsoft.com/en-us/dotnet/api/system.collections.concurrent.concurrentdictionary-2" target="_blank" rel="nofollow noopener noreferrer">ConcurrentDictionary&lt;,&gt;</a>.
 
-## Introduction
+## Introducción {#introduction}
+  
+Un método es seguro para subprocesos si varios subprocesos pueden invocarlo sin comprometer su funcionalidad. Lograr la seguridad para subprocesos es una tarea compleja, por lo que las clases de propósito general generalmente no son seguras para subprocesos. La forma más común de lograr la seguridad para subprocesos es bloquear el recurso para su uso exclusivo por un único subproceso en cualquier momento dado.
 
-A method is thread-safe if multiple threads can call it without breaking the functionality. Achieving thread safety is a complex task, so general-purpose classes are usually not thread-safe. The most common way to achieve thread safety is to lock the resource for exclusive use by a single thread at any given time.
+## Problema {#issue}
+  
+Debe desarrollar una aplicación web en la que múltiples usuarios puedan ver simultáneamente el mismo archivo. La aplicación web utiliza GroupDocs.Viewer en el lado del servidor. Debe garantizar que múltiples subprocesos puedan leer y escribir de forma segura en la memoria caché.
 
-## Issue
-
-You need to develop a web application where multiple users can simultaneously view the same file. The web application uses GroupDocs.Viewer on the server side. You have to ensure that multiple threads can safely read and write to the cache.
-
-In GroupDocs.Viewer, you can use caching to improve the performance if the same document is processed multiple times ([read more about caching here](
+En GroupDocs.Viewer, puede utilizar la memoria caché para mejorar el rendimiento si el mismo documento se procesa varias veces ([lea más sobre la memoria caché aquí](
     /net/viewer/developer-guide/caching-results/).) The <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.caching/filecache" target="_blank" rel="nofollow noopener noreferrer">FileCache</a> class is an implementation of the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.caching/icache" target="_blank" rel="nofollow noopener noreferrer">ICache</a> interface that uses a local disk to store the cache files. The FileCache is not thread safe, so you need to make it so.
 
-## Solution
-
-The FileCache class uses a local disk to read and write output files. You need to implement thread safe reading and writing to disk. To do this, use the list to store the key or the file ID and associated object you need to lock. The simplest way is to use the <a href="https://docs.microsoft.com/en-us/dotnet/api/system.collections.concurrent.concurrentdictionary-2" target="_blank" rel="nofollow noopener noreferrer">ConcurrentDictionary&lt;,&gt; class</a> of the <a href="https://docs.microsoft.com/en-us/dotnet/standard/collections/thread-safe/" target="_blank" rel="nofollow noopener noreferrer">.NET Framework 4.0</a>. The ConcurrentDictionary is a thread safe implementation of a dictionary of key-value pairs. Implement the ThreadSafeCache class that wraps around not thread safe class that implements the ICache interface.
-
+## Solución {#solution}
+  
+La clase FileCache utiliza un disco local para leer y escribir archivos de salida. Debe implementar lectura y escritura seguras para subprocesos en el disco. Para ello, utilice una lista para almacenar la clave o el identificador del archivo y el objeto asociado que necesita bloquear. La forma más sencilla es utilizar la clase <a href="https://docs.microsoft.com/en-us/dotnet/api/system.collections.concurrent.concurrentdictionary-2" target="_blank" rel="nofollow noopener noreferrer">ConcurrentDictionary&lt;,&gt;</a> del <a href="https://docs.microsoft.com/en-us/dotnet/standard/collections/thread-safe/" target="_blank" rel="nofollow noopener noreferrer">.NET Framework 4.0</a>. ConcurrentDictionary es una implementación segura para subprocesos de un diccionario de pares clave-valor. Implemente la clase ThreadSafeCache, que envuelve una clase no segura para subprocesos que implementa la interfaz ICache.
 
 <Tabs groupId="example1">
-
 
 <TabItem value="c" label="C#" default>
 
@@ -88,7 +93,6 @@ internal class ThreadSafeCache : ICache
 
 </TabItem>
 
-
 <TabItem value="vb-net" label="VB.NET">
 
 ```vb
@@ -128,15 +132,11 @@ End Class
 
 </TabItem>
 
-
 </Tabs>
 
-
-All the ThreadSafeCache class methods use locks to make calls thread safe. The ConcurrentDictionaryKeyLockerStore class uses ConcurrentDictionary to create the locker object or to retrieve it if it already exists. It also creates a unique key that identifies a cached file.
-
+Todos los métodos de la clase `ThreadSafeCache` utilizan bloqueos para hacer que las llamadas sean seguras en entornos multiproceso. La clase `ConcurrentDictionaryKeyLockerStore` utiliza `ConcurrentDictionary` para crear el objeto de bloqueo o recuperarlo si ya existe. Además, crea una clave única que identifica un archivo en caché.
 
 <Tabs groupId="example2">
-
 
 <TabItem value="c" label="C#" default>
 
@@ -175,7 +175,6 @@ class ConcurrentDictionaryKeyLockerStore : IKeyLockerStore
 
 </TabItem>
 
-
 <TabItem value="vb-net" label="VB.NET">
 
 ```vb
@@ -209,15 +208,11 @@ End Class
 
 </TabItem>
 
-
 </Tabs>
 
-
-## Result
-
+## Result {#result}
 
 <Tabs groupId="example3">
-
 
 <TabItem value="c" label="C#" default>
 
@@ -350,7 +345,6 @@ namespace ThreadSaveCacheExample
 
 </TabItem>
 
-
 <TabItem value="vb-net" label="VB.NET">
 
 ```vb
@@ -463,6 +457,4 @@ End Class
 
 </TabItem>
 
-
 </Tabs>
-
