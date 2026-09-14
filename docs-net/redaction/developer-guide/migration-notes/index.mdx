@@ -1,0 +1,77 @@
+---
+title: "Migration Notes"
+sidebar_label: "Migration Notes"
+sidebar_key: "net-redaction-tab"
+sidebar_position: 3
+description: ""
+product: "redaction"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "redaction-net"
+source_path: "net/developer-guide/migration-notes.md/"
+source_commit: "7f9ba3f7099e7e45c9dcc8d1241caf5c3e6029ec"
+source_sha256: "72a01bbaffd3c9d2b9bcd12c790d363080c96d5aaf03304264569e28ee0a803a"
+---
+
+:::info
+GroupDocs.Redaction for .NET is included in Conholdate.Total for .NET.
+:::
+
+### Why To Migrate?
+
+  
+Here are the key reasons to use the new updated API provided by GroupDocs.Redaction for .NET since version 19.9:
+
+*   **Redactor** class introduced as a **single entry point** to manage the document redaction process (instead of **Document**class from previous versions).
+    
+*   Methods **RedactWith()** of the **Document** class were replaced with similar **Apply()** methods in **Redactor** class.
+    
+*   Method **Document.Save(Stream, SaveOptions)** was replaced with **Redactor.Save(Stream, RasterizationOptions)**.
+*   Constructor **LoadOptions(DocumentFormatConfiguration)** was removed.  
+    
+*   Exception and option classes were put in separate namespaces.   
+    
+*   **RedactionSummary** was renamed into **RedactorChangeLog**, **RedactionLogEntry** into **RedactorLogEntry**, **MetadataFilter** into **MetadataFilters**.  
+    
+*   Obsolete members were removed from Public API.
+    
+*   Added a number of new exception classes and base exception class for GroupDocs.Redaction exceptions.  
+    
+
+### How To Migrate?
+
+The following example demonstrates how to redact Microsoft Office Word document and dumping statuses of applied redactions using old and new API:  
+
+**Old coding style**
+
+```csharp
+using (Document doc = Redactor.Load(@"Documents/Doc/sample.docx"))
+{
+    // Here we can use document instance to perform redactions
+	RedactionSummary summary = doc.RedactWith(new ExactPhraseRedaction("John Doe", new ReplacementOptions("[personal]")));
+	foreach (RedactionLogEntry entry in summary.RedactionLog)
+	{
+		Console.WriteLine(entry.Status.ToString());
+	}
+    doc.Save();
+}
+```
+
+**New coding style**
+
+```csharp
+using (Redactor redactor = new Redactor(@"Documents/Doc/sample.docx"))
+{
+    // Here we can use document instance to perform redactions
+    RedactorChangeLog result = redactor.Apply(new ExactPhraseRedaction("John Doe", new ReplacementOptions("[personal]")));
+	foreach (RedactorLogEntry entry in result.RedactionLog)
+	{
+		Console.WriteLine(entry.Status.ToString());
+	}
+	redactor.Save();
+}
+```
+
+For more code examples and specific use cases please refer to our [Developer Guide](/net/redaction/developer-guide/) documentation or <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GitHub</a> samples and showcases.
