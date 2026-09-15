@@ -1,0 +1,156 @@
+---
+title: "Cómo migrar a GroupDocs.Viewer 19.8 o superior"
+sidebar_label: "Cómo migrar a GroupDocs.Viewer 19.8 o superior"
+sidebar_key: "net-viewer-tab"
+sidebar_position: 4
+description: "Este artículo contiene información sobre la migración desde la API heredada a GroupDocs.Viewer 19.8 o superior."
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "viewer-net"
+source_path: "net/developer-guide/troubleshooting/how-to-migrate-to-groupdocs.viewer-19.8-or-higher.md/"
+source_commit: "270bea1e2528043f99c68ff8a72edc20b3816a48"
+source_sha256: "2ab32b90d0831e2daef1bac5e563a7d6e7eef5cf34d79e628878eed9781aff29"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "9d78e7ae616d601ea78b0379ee2d284b941073b992e52f5c82b825f26dbaf547"
+translation_updated_at: "2026-09-15T07:48:57.172Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET se incluye en Conholdate.Total for .NET.
+:::
+
+Esta página describe la migración a la versión 19.8 o posterior desde la versión anterior.
+
+## Por qué migrar {#why-to-migrate}
+  
+Las principales razones para utilizar la versión 19.8 o posterior son las siguientes:  
+* La clase `Viewer` constituye un único punto de entrada para gestionar el proceso de renderizado del documento en cualquier formato de archivo admitido, en lugar de las clases `ViewerHtmlHandler` / `ViewerImageHandler` de las versiones anteriores.  
+* La velocidad de renderizado se ha mejorado significativamente al guardar la página renderizada a medida que se renderiza, y no cuando todas las páginas han sido renderizadas.  
+* La arquitectura del producto ha sido rediseñada desde cero para reducir el uso de memoria entre un 10 % y un 400 %, dependiendo del tipo de documento.  
+* Las opciones de renderizado de documentos se han simplificado, por lo que puede instanciar fácilmente la clase de opciones adecuada y controlar los procesos de renderizado y guardado del documento.  
+
+## Cómo migrar {#how-to-migrate}
+  
+A continuación se presenta una breve comparación sobre cómo mostrar un documento en formato HTML utilizando las versiones antiguas y las nuevas.  
+
+El siguiente fragmento de código muestra el estilo de codificación anterior:
+
+<Tabs groupId="example1">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+//Get Configurations
+ViewerConfig config = Utilities.GetConfigurations();
+
+// Create html handler
+ViewerHtmlHandler htmlHandler = new ViewerHtmlHandler(config);
+
+// Guid implies that unique document name 
+string guid = "sample.docx";
+
+//Instantiate the HtmlOptions object
+HtmlOptions options = new HtmlOptions();
+
+//to get html representations of pages with embedded resources
+options.IsResourcesEmbedded = true;
+
+// Set password if document is password protected. 
+if(!String.IsNullOrEmpty(DocumentPassword))
+   options.Password = DocumentPassword;
+            
+//Get document pages in html form
+List<PageHtml> pages = htmlHandler.GetPages(guid, options);
+
+foreach (PageHtml page in pages)
+{
+    //Save each page at disk
+    Utilities.SaveAsHtml(page.PageNumber + "_" + DocumentName, page.HtmlContent);
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+'Get Configurations
+Dim config As ViewerConfig = Utilities.GetConfigurations()
+
+' Create html handler
+Dim htmlHandler As ViewerHtmlHandler = New ViewerHtmlHandler(config)
+
+' Guid implies that unique document name 
+Dim guid As String = "sample.docx"
+
+'Instantiate the HtmlOptions object
+Dim options As HtmlOptions = New HtmlOptions()
+
+'to get html representations of pages with embedded resources
+options.IsResourcesEmbedded = True
+
+' Set password if document is password protected. 
+If Not [String].IsNullOrEmpty(DocumentPassword) Then options.Password = DocumentPassword
+
+'Get document pages in html form
+Dim pages As List(Of PageHtml) = htmlHandler.GetPages(guid, options)
+
+For Each page As PageHtml In pages
+    'Save each page at disk
+    Utilities.SaveAsHtml(page.PageNumber.ToString() & "_" + DocumentName, page.HtmlContent)
+Next
+```
+
+</TabItem>
+
+</Tabs>
+
+El siguiente fragmento de código muestra el nuevo estilo de codificación:
+
+<Tabs groupId="example2">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+using (Viewer viewer = new Viewer("sample.docx"))
+{
+   HtmlViewOptions options = HtmlViewOptions.ForEmbeddedResources();
+   viewer.View(options);
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+Module Program
+    Sub Main(args As String())
+        Using viewer As Viewer = New Viewer("sample.docx")
+            Dim options As HtmlViewOptions = HtmlViewOptions.ForEmbeddedResources()
+            viewer.View(options)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+</Tabs>

@@ -1,0 +1,133 @@
+---
+title: "Obtener todas las fuentes utilizadas en el documento cargado"
+sidebar_label: "Obtener todas las fuentes utilizadas en el documento cargado"
+sidebar_key: "net-viewer-tab"
+sidebar_position: 7
+description: "Obtención de metadatos y contenido binario de todas las fuentes utilizadas en el documento, cargadas en GroupDocs.Viewer for .NET"
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "viewer-net"
+source_path: "net/developer-guide/getting-used-fonts.md/"
+source_commit: "270bea1e2528043f99c68ff8a72edc20b3816a48"
+source_sha256: "7c05787fbc3bf44b74ff0087f5c6ff17a136ec8d90bd27a7fa4b87360221fa4e"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "ecdb9cc9ad9059aa4bee9d0daa4d387d16705ec2d8c58975e228558672497658"
+translation_updated_at: "2026-09-15T05:50:53.358Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET se incluye en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Viewer dispone de una funcionalidad para recopilar y devolver todas las fuentes utilizadas dentro del documento, las cuales se han cargado en la instancia de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer" target="_blank" rel="nofollow noopener noreferrer">`Viewer`</a>. Estas fuentes se devuelven como un array, donde cada elemento representa una única fuente junto con sus metadatos y contenido binario. GroupDocs.Viewer puede devolver tanto las fuentes incrustadas dentro del documento (almacenadas en el propio archivo del documento) como las fuentes del sistema, que se almacenan en la carpeta del sistema del sistema operativo y están _utilizadas_ en el contenido textual del documento. Es necesario mencionar que algunos documentos de determinados formatos pueden contener fuentes que se hacen referencia a ellas o incluso se almacenan dentro del documento, pero que no se aplican al texto contenido en el documento; GroupDocs.Viewer intenta detectar y excluir dichas fuentes de la lista devuelta.
+
+Asimismo, es necesario señalar que GroupDocs.Viewer solo puede extraer y devolver fuentes de aquellos formatos de documento que _pueden_ _contener_ fuentes. Por ejemplo, los formatos PDF, DOCX, XLSX, PPTX y otros formatos de documento similares admiten y utilizan fuentes para representar su contenido textual, por lo que GroupDocs.Viewer puede encontrar y devolver estas fuentes. Sin embargo, formatos como texto sin formato (TXT), imágenes rasterizadas (como PNG y JPEG), archivos comprimidos y otros similares no admiten fuentes. En caso de que se cargue uno de estos documentos en GroupDocs.Viewer y el usuario intente obtener la lista de fuentes, se devolverá un array vacío.
+
+Para obtener las fuentes utilizadas en un documento determinado, dicho documento debe cargarse en una instancia de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer" target="_blank" rel="nofollow noopener noreferrer">`Viewer`</a> mediante uno de sus constructores. Tras cargar el documento, se debe invocar el método de instancia <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/getallfonts/" target="_blank" rel="nofollow noopener noreferrer">`GetAllFonts()`</a>. Este método devuelve una lista con todas las fuentes utilizadas como un array de tipo `IFontInfo[]`, donde `IFontInfo` es una interfaz que describe una fuente con sus metadatos y contenido binario. Como ya se indicó anteriormente, si un documento determinado no utiliza ninguna fuente o, debido a su formato, no puede utilizar ninguna fuente (por ejemplo, archivos comprimidos o imágenes rasterizadas), se devolverá un array vacío.
+
+El fragmento de código breve que se muestra a continuación demuestra cómo cargar un documento DOCX en la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer" target="_blank" rel="nofollow noopener noreferrer">`Viewer`</a>, obtener una lista con todas las fuentes utilizadas y, a continuación, recorrer dicha lista y mostrar la información correspondiente a cada fuente.
+
+<Tabs groupId="Loading">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+// ...
+
+const string filename = "sample.docx";
+string inputPath = "\full\path\" + filename;
+
+using (Viewer viewer = new Viewer(inputPath))
+{
+    Fonts.IFontInfo[] allFonts = viewer.GetAllFonts();
+    Console.WriteLine("{0} fonts found in the '{1}' document", allFonts.Length, filename);
+    foreach (Fonts.IFontInfo font in allFonts)
+    {
+        Console.WriteLine("Font '{0}' of {1} style has {2} bytes and is of {3} format",
+            font.FamilyName,
+            font.Style,
+            font.Content.Length,
+            font.Format);
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+' ...
+
+Const filename As String = "sample.docx"
+Dim inputPath As String = "\full\path\" & filename
+
+Using viewer As New Viewer(inputPath)
+    Dim allFonts As Fonts.IFontInfo() = viewer.GetAllFonts()
+    Console.WriteLine("{0} fonts found in the '{1}' document", allFonts.Count, filename)
+    For Each font As Fonts.IFontInfo In allFonts
+        Console.WriteLine("Font '{0}' of {1} style has {2} bytes and is of {3} format",
+            font.FamilyName,
+            font.Style,
+            font.Content.Length,
+            font.Format)
+    Next
+End Using
+```
+
+</TabItem>
+
+</Tabs>
+
+Para el documento DOCX de muestra dado, hay la siguiente salida en la consola:
+
+```
+3 fonts found in the 'sample.docx' document
+Font 'Sancreek' of Regular style has 47612 bytes and is of 'OpenType' format
+Font 'Trade Winds' of Regular style has 84588 bytes and is of 'OpenType' format
+Font 'Arial' of Regular style has 1036584 bytes and is of 'TrueType' format
+```
+
+## Explicación de IFontInfo {#explaining-ifontinfo}
+
+GroupDocs.Viewer permite extraer fuentes de 4 familias de formatos principales: PDF, Procesamiento de Texto (WordProcessing), Hojas de Cálculo (Spreadsheet) y Presentaciones (Presentation), y cada una de ellas tiene un concepto ligeramente distinto de las fuentes. Por ejemplo, el contenido de la fuente puede estar incrustado dentro del documento PDF, de Procesamiento de Texto y de Presentación, pero no en la Hoja de Cálculo. Las fuentes de Procesamiento de Texto y Hoja de Cálculo proporcionan un número que representa un conjunto de caracteres, mientras que las de PDF y Presentación no lo hacen. Las fuentes de Procesamiento de Texto pueden tener nombres alternativos de fuente. Además, la sustitución de fuentes solo existe para los documentos de Procesamiento de Texto. Como resultado, cada familia de formatos tiene su propio tipo relacionado con las fuentes:
+
+1. Procesamiento de Texto: `WordProcessingFontInfo` y `WordProcessingSubstitutedFontInfo`.  
+2. Hoja de Cálculo: `SpreadsheetFontInfo`.  
+3. Presentación: `PresentationFontInfo`.  
+4. PDF: `PdfFontInfo`.  
+
+La interfaz `IFontInfo` declara el conjunto mínimo de propiedades comunes a todos los tipos de fuente:
+
+- <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.fonts/IFontInfo/FamilyName/" target="_blank" rel="nofollow noopener noreferrer">`FamilyName`</a> de tipo <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" target="_blank" rel="nofollow noopener noreferrer">`System.String`</a>: nombre único de la familia de fuentes (sin incluir el nombre del estilo de fuente); nunca es nulo ni una cadena vacía.  
+- <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.fonts/IFontInfo/style/" target="_blank" rel="nofollow noopener noreferrer">`Style`</a> de tipo <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.fonts/fontstyles/" target="_blank" rel="nofollow noopener noreferrer">`FontStyles`</a>: estilo de la fuente dada. Puede ser uno de los siguientes valores: `Regular` (predeterminado), `Bold`, `Italic` y `BoldItalic`. La estructura <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.fonts/fontstyles/" target="_blank" rel="nofollow noopener noreferrer">`FontStyles`</a> representa todos los estilos de fuente posibles y proporciona propiedades convenientes para trabajar con ellos.  
+- <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.fonts/IFontInfo/content/" target="_blank" rel="nofollow noopener noreferrer">`Content`</a> de tipo `byte[]`: matriz de bytes que contiene el contenido completo de la fuente dada. En casos muy raros, puede ser `null` cuando la fuente dada es una fuente del sistema y el entorno de ejecución no puede obtener su contenido. Esto suele ocurrir en Linux.  
+- <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.fonts/IFontInfo/format/" target="_blank" rel="nofollow noopener noreferrer">`Format`</a> del tipo enumerado <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.fonts/fontformat/" target="_blank" rel="nofollow noopener noreferrer">`FontFormat`</a>: indica el formato de la fuente dada. Los formatos actualmente admitidos son: formato de fuente TrueType (TTF), formato de fuente OpenType (OTF), formato de colección de fuentes TrueType (TTC) y formato de fuente OpenType incrustada (EOT). Si GroupDocs.Viewer no puede obtener el contenido binario de una fuente del sistema (la propiedad `Content` es `null`), esta propiedad puede devolver el valor `FontFormat.Unknown`.
+
+**Nota importante**: Es necesario distinguir entre _familia de fuentes_ y _estilo de fuente_. Por ejemplo, un documento DOCX determinado puede utilizar la familia de fuentes «Arial» tanto para el texto normal como para negrita, cursiva y negrita cursiva. En tal caso, GroupDocs.Viewer devolverá 4 instancias de <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.fonts/WordProcessingFontInfo/" target="_blank" rel="nofollow noopener noreferrer">`WordProcessingFontInfo`</a>; todas ellas tendrán el nombre de familia «Arial», pero distintos <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.fonts/fontstyles/" target="_blank" rel="nofollow noopener noreferrer">estilos</a> («Arial Normal», «Arial Negrita», «Arial Cursiva», «Arial Negrita Cursiva»), y cada una tendrá un contenido binario distinto.
+
+## Explicación de la sustitución de fuentes {#explaining-font-substitution}
+
+Existe un escenario bastante frecuente, aplicable únicamente a la familia de formatos de Procesamiento de Texto, en el que un documento como DOC/DOCX/DOCM se crea en la máquina del autor y utiliza fuentes _únicas_, que no están preinstaladas por defecto en el sistema operativo, pero que fueron instaladas manualmente en la máquina del autor. Posteriormente, este documento se transfiere a una máquina destino donde GroupDocs.Viewer se ejecuta e intenta extraer y devolver las fuentes. El problema es que dichas fuentes únicas originales no están presentes en la máquina destino, y GroupDocs.Viewer no puede obtener su contenido.
+
+En este caso, GroupDocs.Viewer imita el comportamiento de Microsoft Word e inicia el **mecanismo de sustitución de fuentes**. Este mecanismo es, en realidad, un algoritmo que reemplaza las fuentes ausentes por otras disponibles en la máquina destino y que se consideran las más similares a las fuentes faltantes. Las fuentes que no se usaban en el documento original, pero que se seleccionan para reemplazar a las fuentes ausentes, se denominan **sustitutas**. GroupDocs.Viewer proporciona un tipo especial para ellas: la estructura `WordProcessingSubstitutedFontInfo`. Esta estructura contiene el nombre de familia y estilo de la fuente original ausente en la máquina destino, así como el nombre, formato y contenido binario de la fuente sustituta, que sí está presente y se utiliza en su lugar.
+
+## Línea de tiempo {#timeline}
+
+Inicialmente, la funcionalidad de extracción de fuentes se introdujo en la <a href="https://releases.groupdocs.com/viewer/net/release-notes/2025/groupdocs-viewer-for-net-25-3-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 25.3</a>, en la que existía un único tipo universal `UsedFontInfo` para representar cualquier información de fuente.
+
+En la <a href="https://releases.groupdocs.com/viewer/net/release-notes/2025/groupdocs-viewer-for-net-25-6-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 25.6</a>, la extracción de fuentes se mejoró, especialmente para la familia de formatos de Procesamiento de Texto, y la API pública sufrió pequeños cambios (se añadieron nuevas propiedades al tipo `UsedFontInfo`).
+
+En la <a href="https://releases.groupdocs.com/viewer/net/release-notes/2025/groupdocs-viewer-for-net-25-9-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 25.9</a>, la extracción de fuentes se reestructuró y mejoró significativamente, incorporando el soporte para fuentes sustitutas en la familia de formatos de Procesamiento de Texto. Asimismo, la API pública sufrió cambios importantes: ahora cada familia de formatos posee su propio tipo de información de fuente, el cual implementa la interfaz `IFontInfo`.
