@@ -1,0 +1,126 @@
+---
+title: "Cargar desde FTP"
+sidebar_label: "Cargar desde FTP"
+sidebar_key: "net-viewer-load-document-from-ftp"
+sidebar_position: 4
+description: "Este artículo explica cómo cargar un documento desde un almacenamiento FTP con GroupDocs.Viewer en sus aplicaciones .NET."
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "viewer-net"
+source_path: "net/developer-guide/loading-documents/loading-documents-from-different-sources/loading-documents-from-stream/load-document-from-ftp.md"
+source_commit: "270bea1e2528043f99c68ff8a72edc20b3816a48"
+source_sha256: "534817055188e7bf0fef986596014fb1b3625d37c39f344d5fff77b9afc0420d"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "bd2a9ea0569e24e6aae2d2132efacbe65917f4be5e024810bfe962e702a4db85"
+translation_updated_at: "2026-09-15T11:47:52.431Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET se incluye en Conholdate.Total for .NET.
+:::
+
+El siguiente fragmento de código muestra cómo cargar un documento desde FTP:
+
+<Tabs groupId="example1">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using System;
+using System.IO;
+using System.Net;
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+Stream stream = GetFileFromFtp("sample.docx");
+using (Viewer viewer = new Viewer(stream))
+{
+    HtmlViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources();
+    viewer.View(viewOptions);
+}
+
+static Stream GetFileFromFtp(string filePath)
+{
+    Uri uri = new Uri(filePath);
+    FtpWebRequest request = CreateRequest(uri);
+    using (WebResponse response = request.GetResponse())
+        return GetFileStream(response);
+}
+
+static FtpWebRequest CreateRequest(Uri uri)
+{
+    FtpWebRequest request = (FtpWebRequest)WebRequest.Create(uri);
+    request.Method = WebRequestMethods.Ftp.DownloadFile;
+    return request;
+}
+
+static Stream GetFileStream(WebResponse response)
+{
+    MemoryStream fileStream = new MemoryStream();
+    using (Stream responseStream = response.GetResponseStream())
+        responseStream.CopyTo(fileStream);
+    fileStream.Position = 0;
+    return fileStream;
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports System
+Imports System.IO
+Imports System.Net
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Dim stream As Stream = GetFileFromFtp("sample.docx")
+        Using viewer As New Viewer(stream)
+            Dim viewOptions As HtmlViewOptions = HtmlViewOptions.ForEmbeddedResources()
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+
+    Private Function GetFileFromFtp(ByVal filePath As String) As Stream
+        Dim uri As New Uri(filePath)
+        Dim request As FtpWebRequest = CreateRequest(uri)
+        Using response As WebResponse = request.GetResponse()
+            Return GetFileStream(response)
+        End Using
+    End Function
+
+    Private Function CreateRequest(ByVal uri As Uri) As FtpWebRequest
+        Dim request As FtpWebRequest = DirectCast(WebRequest.Create(uri), FtpWebRequest)
+        request.Method = WebRequestMethods.Ftp.DownloadFile
+        Return request
+    End Function
+
+    Private Function GetFileStream(ByVal response As WebResponse) As Stream
+        Dim fileStream As New MemoryStream()
+        Using responseStream As Stream = response.GetResponseStream()
+            responseStream.CopyTo(fileStream)
+        End Using
+        fileStream.Position = 0
+        Return fileStream
+    End Function
+End Module
+```
+
+</TabItem>
+
+</Tabs>

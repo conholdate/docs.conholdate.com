@@ -1,0 +1,143 @@
+---
+title: "Cancelar renderizado"
+sidebar_label: "Cancelar renderizado"
+sidebar_key: "net-viewer-cancel-rendering"
+sidebar_position: 3
+description: "Cancelar o detener el proceso de renderizado con el token de cancelación"
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "viewer-net"
+source_path: "net/developer-guide/rendering-documents/cancel-rendering.md"
+source_commit: "270bea1e2528043f99c68ff8a72edc20b3816a48"
+source_sha256: "7a774358e4e9eb82f7dfa036677743e32c397c50c9b4535e4cc75166a40d25ff"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "c150c232e355975f2455ede188a6a0dd268baff4e9c4778035145e047bbe04a8"
+translation_updated_at: "2026-09-15T12:30:52.174Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET se incluye en Conholdate.Total for .NET.
+:::
+
+Desde la versión 21.7, GroupDocs.Viewer admite la cancelación de tareas mediante el token de cancelación.
+
+Para cancelar una tarea, siga estos pasos:
+
+1. Cree el objeto <a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.cancellationtokensource?view=netstandard-2.0" target="_blank" rel="nofollow noopener noreferrer">CancellationTokenSource</a>.
+2. Cree el objeto <a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.cancellationtoken?view=netstandard-2.0" target="_blank" rel="nofollow noopener noreferrer">CancellationToken</a>.
+3. Cree el objeto Task. Al crearlo, especifique el token de cancelación.
+4. Cancela la tarea.
+
+Puede cancelar tareas utilizando uno de los siguientes métodos:
+
+* Para cancelar la tarea en un tiempo especificado, llame al método <a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.cancellationtokensource.cancelafter?view=netstandard-2.0" target="_blank" rel="nofollow noopener noreferrer">CancelAfter</a>.
+* Para cancelar la tarea en cualquier momento, llame al método <a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.cancellationtokensource.cancel?view=netstandard-2.0" target="_blank" rel="nofollow noopener noreferrer">Cancel</a>.
+
+El siguiente fragmento de código muestra cómo cancelar una tarea:
+
+<Tabs groupId="example1">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Threading;
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+// Create cancellation token source.
+CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+CancellationToken cancellationToken = cancellationTokenSource.Token;
+
+// Create task and pass token
+Task runTask = Task.Run(() =>
+{
+    using (Viewer viewer = new Viewer("sample.docx"))
+    {
+        HtmlViewOptions options = HtmlViewOptions.ForEmbeddedResources();
+        options.RenderComments = true;
+        viewer.View(options, cancellationToken);
+    }
+}, cancellationToken);
+
+// Cancel task after 1000 ms.
+cancellationTokenSource.CancelAfter(1000);
+
+// Also you can call Cancel method at any time
+//cancellationTokenSource.Cancel();
+
+// Wait for the task to cancel.
+Thread.Sleep(2000);
+
+Debug.Assert(runTask.IsCanceled);
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports System.Threading
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        ' Create cancellation token source.
+        Dim cancellationTokenSource As CancellationTokenSource = New CancellationTokenSource()
+        Dim cancellationToken As CancellationToken = cancellationTokenSource.Token
+
+        ' Create task and pass token
+        Dim runTask As Task = Task.Run(Sub()
+                                           Using viewer As Viewer = New Viewer("sample.docx")
+                                               Dim options As HtmlViewOptions = HtmlViewOptions.ForEmbeddedResources()
+                                               options.RenderComments = True
+                                               viewer.View(options, cancellationToken)
+                                           End Using
+                                       End Sub, cancellationToken)
+
+        ' Cancel task after 1000 ms.
+        cancellationTokenSource.CancelAfter(1000)
+
+        ' Also you can call Cancel method at any time
+        'cancellationTokenSource.Cancel();
+
+        ' Wait for the task to cancel.
+        Thread.Sleep(2000)
+
+        Debug.Assert(runTask.IsCanceled)
+    End Sub
+End Module
+```
+
+</TabItem>
+
+</Tabs>
+
+:::info
+Si `runTask.IsCancelled` es `true`, entonces la tarea ha sido cancelada.
+
+Para manejar correctamente la cancelación de tareas, pase un token de cancelación al método `Task.Run`. De lo contrario, `runTask.IsCancelled` no es `true`.
+:::
+
+Los siguientes métodos de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer" target="_blank" rel="nofollow noopener noreferrer">Viewer</a> también admiten cancelación:
+
+* <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.viewer/getattachments/methods/1" target="_blank" rel="nofollow noopener noreferrer">GetAttachments</a>  
+* <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.viewer/saveattachment/methods/1" target="_blank" rel="nofollow noopener noreferrer">SaveAttachment</a>  
+* <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.viewer/view/methods/2" target="_blank" rel="nofollow noopener noreferrer">View</a> con ViewOptions  
+* <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.viewer/view/methods/3" target="_blank" rel="nofollow noopener noreferrer">View</a> con ViewOptions y una matriz de números de página  
+
+También puede consultar el <a href="https://github.com/groupdocs-viewer/GroupDocs.Viewer-for-.NET/blob/master/Examples/GroupDocs.Viewer.Examples.CSharp/AdvancedUsage/Rendering/CommonRenderingOptions/CancelRenderWithCancellationToken.cs" target="_blank" rel="nofollow noopener noreferrer">example</a> en nuestro repositorio público de GitHub.

@@ -1,0 +1,142 @@
+---
+title: "Cargar desde Azure Blob Storage"
+sidebar_label: "Cargar desde Azure Blob Storage"
+sidebar_key: "net-viewer-load-document-from-azure-blob-storage"
+sidebar_position: 6
+description: "Este artículo explica cómo cargar un documento desde Azure Blob Storage con GroupDocs.Viewer en sus aplicaciones .NET."
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "viewer-net"
+source_path: "net/developer-guide/loading-documents/loading-documents-from-different-sources/loading-documents-from-stream/load-document-from-azure-blob-storage.md"
+source_commit: "270bea1e2528043f99c68ff8a72edc20b3816a48"
+source_sha256: "cba2676e300fec121d2ac57386d21770c71b27af8d1988a4f927662e2d8b66f8"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "5648b41110c0b140f144dc77534d056da733dbfa7475c4dab1be6d345daa6b4e"
+translation_updated_at: "2026-09-15T11:47:46.156Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET se incluye en Conholdate.Total for .NET.
+:::
+
+El siguiente fragmento de código muestra cómo cargar un documento desde Azure Blob Storage.
+
+:::info
+Ejecutar este código requiere instalar el paquete NuGet <a href="https://nuget.org/packages/Azure.Storage.Blobs" target="_blank" rel="nofollow noopener noreferrer">Azure.Storage.Blobs</a>.
+:::
+
+<Tabs groupId="example1">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using System.IO;
+using GroupDocs.Viewer.Options;
+using GroupDocs.Viewer;
+using Azure.Storage.Blobs;
+// ...
+
+string blobName = "sample.docx";
+Stream stream = DownloadFile(blobName);
+LoadOptions loadOptions = new LoadOptions(FileType.DOCX);
+
+using (Viewer viewer = new Viewer(stream, loadOptions))
+{
+    HtmlViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources();
+    viewer.View(viewOptions);
+}
+
+static Stream DownloadFile(string blobName)
+{
+    BlobContainerClient containerClient = GetContainerClient();
+
+    // Get a reference to a blob
+    BlobClient blobClient = containerClient.GetBlobClient(blobName);
+    MemoryStream memoryStream = new MemoryStream();
+    blobClient.DownloadTo(memoryStream);
+    memoryStream.Position = 0;
+    return memoryStream;
+}
+
+static BlobContainerClient GetContainerClient()
+{
+    string accountName = "***";
+    string accountKey = "***";
+    string endpointSuffix = "core.windows.net";
+    string containerName = "***";
+
+    string connectionString = $"DefaultEndpointsProtocol=https;AccountName={accountName};AccountKey={accountKey};EndpointSuffix={endpointSuffix}";
+
+    // Create a BlobContainerClient object which will be used to create a container client
+    BlobContainerClient blobContainerClient = new BlobContainerClient(connectionString, containerName);
+
+    return blobContainerClient;
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports System.IO
+Imports GroupDocs.Viewer.Options
+Imports GroupDocs.Viewer
+Imports Azure.Storage.Blobs
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Dim blobName As String = "sample.docx"
+        Dim stream As Stream = DownloadFile(blobName)
+        Dim loadOptions As New LoadOptions(FileType.DOCX)
+
+        Using viewer As New Viewer(stream, loadOptions)
+            Dim viewOptions As HtmlViewOptions = HtmlViewOptions.ForEmbeddedResources()
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+
+    Private Function DownloadFile(ByVal blobName As String) As Stream
+        Dim containerClient As BlobContainerClient = GetContainerClient()
+
+        ' Get a reference to a blob
+        Dim blobClient As BlobClient = containerClient.GetBlobClient(blobName)
+        Dim memoryStream As New MemoryStream()
+        blobClient.DownloadTo(memoryStream)
+        memoryStream.Position = 0
+        Return memoryStream
+    End Function
+
+    Private Function GetContainerClient() As BlobContainerClient
+        Dim accountName As String = "***"
+        Dim accountKey As String = "***"
+        Dim endpointSuffix As String = "core.windows.net"
+        Dim containerName As String = "***"
+
+        Dim connectionString As String =
+                $"DefaultEndpointsProtocol=https;AccountName={accountName};AccountKey={accountKey};EndpointSuffix={ _
+                endpointSuffix}"
+
+        ' Create a BlobContainerClient object which will be used to create a container client
+        Dim blobContainerClient As New BlobContainerClient(connectionString, containerName)
+
+        Return blobContainerClient
+    End Function
+End Module
+
+```
+
+</TabItem>
+
+</Tabs>

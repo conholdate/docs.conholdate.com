@@ -1,0 +1,149 @@
+---
+title: "Mantenga los tokens de marcador de posición que aparecen en la entrada exactamente sin cambios.  
+No agregue tokens de marcador de posición que no estén ya presentes en la entrada.  
+Mantenga las tuberías y el recuento de filas de la tabla de Markdown sin cambios.  
+
+Guarde la salida en un flujo"
+sidebar_label: "Mantenga los tokens de marcador de posición que aparecen en la entrada exactamente sin cambios.  
+No agregue tokens de marcador de posición que no estén ya presentes en la entrada.  
+Mantenga las tuberías y el recuento de filas de la tabla de Markdown sin cambios.  
+
+Guarde la salida en un flujo"
+sidebar_key: "net-viewer-save-output-to-stream"
+sidebar_position: 8
+description: "Este artículo muestra cómo guardar la salida en un flujo al renderizar un documento"
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "viewer-net"
+source_path: "net/developer-guide/rendering-documents/save-output-to-stream.md"
+source_commit: "270bea1e2528043f99c68ff8a72edc20b3816a48"
+source_sha256: "7cbcaa14dd63447fb29682bf888af35c8994abe1c852b530b28fd8442895509d"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "b7da219db3a39d2471332a8417a943d34a8b06bd562e1eb5c782c076f1c52a0e"
+translation_updated_at: "2026-09-15T12:35:38.300Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET se incluye en Conholdate.Total for .NET.
+:::
+
+De forma predeterminada, GroupDocs.Viewer guarda los resultados de salida en el disco local. Además, puede proporcionar los resultados como un flujo.
+
+Para proporcionar los resultados de salida como un flujo, utilice una de las siguientes interfaces:
+
+* <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.interfaces/ifilestreamfactory" target="_blank" rel="nofollow noopener noreferrer">IFileStreamFactory</a> define métodos para instanciar y liberar los flujos de archivo de salida.
+* <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.interfaces/ipagestreamfactory" target="_blank" rel="nofollow noopener noreferrer">IPageStreamFactory</a> define métodos para instanciar y liberar los flujos de página de salida.
+* <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.interfaces/iresourcestreamfactory" target="_blank" rel="nofollow noopener noreferrer">IResourceStreamFactory</a> define los métodos para crear URL de recursos, instanciar y liberar los flujos de recursos HTML de salida.
+
+Utilice estas interfaces de la siguiente manera:
+
+* Al representar a PDF, implemente la interfaz <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.interfaces/ifilestreamfactory" target="_blank" rel="nofollow noopener noreferrer">IFileStreamFactory</a> y pase la implementación al constructor de <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/pdfviewoptions" target="_blank" rel="nofollow noopener noreferrer">PdfViewOptions</a>.
+* Al representar a JPG/PNG o HTML con recursos incrustados, implemente la interfaz <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.interfaces/ipagestreamfactory" target="_blank" rel="nofollow noopener noreferrer">IPageStreamFactory</a> y pase la implementación al constructor de <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/jpgviewoptions" target="_blank" rel="nofollow noopener noreferrer">JpgViewOptions</a>/<a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/pngviewoptions" target="_blank" rel="nofollow noopener noreferrer">PngViewOptions</a> o al método de fábrica <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/htmlviewoptions" target="_blank" rel="nofollow noopener noreferrer">HtmlViewOptions</a> <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options.htmlviewoptions/forembeddedresources/methods/3" target="_blank" rel="nofollow noopener noreferrer">ForEmbeddedResources</a>.
+* Al representar a HTML con recursos externos, implemente las interfaces <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.interfaces/ipagestreamfactory" target="_blank" rel="nofollow noopener noreferrer">IPageStreamFactory</a> y <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.interfaces/iresourcestreamfactory" target="_blank" rel="nofollow noopener noreferrer">IResourceStreamFactory</a> y pase la implementación al constructor de <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/jpgviewoptions" target="_blank" rel="nofollow noopener noreferrer">JpgViewOptions</a>/<a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/pngviewoptions" target="_blank" rel="nofollow noopener noreferrer">PngViewOptions</a> o al método de fábrica <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options/htmlviewoptions" target="_blank" rel="nofollow noopener noreferrer">HtmlViewOptions</a> <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.options.htmlviewoptions/forexternalresources/methods/3" target="_blank" rel="nofollow noopener noreferrer">ForExternalResources</a>.
+
+El siguiente fragmento de código muestra cómo representar a HTML con recursos incrustados y proporcionar el resultado de salida como un flujo. Para ello, solo implementa la interfaz <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.interfaces/ipagestreamfactory" target="_blank" rel="nofollow noopener noreferrer">IPageStreamFactory</a>.
+
+<Tabs groupId="example1">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using System.IO;
+using System.Collections.Generic;
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+using GroupDocs.Viewer.Interfaces;
+// ...
+
+// Create the list to store output pages
+List<MemoryStream> pages = new List<MemoryStream>();
+
+using (Viewer viewer = new Viewer("sample.docx"))
+{
+    MemoryPageStreamFactory pageStreamFactory = new MemoryPageStreamFactory(pages);
+    ViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources(pageStreamFactory);
+    viewer.View(viewOptions);
+}
+
+internal class MemoryPageStreamFactory : IPageStreamFactory
+{
+    private readonly List<MemoryStream> _pages;
+
+    public MemoryPageStreamFactory(List<MemoryStream> pages)
+    {
+        _pages = pages;
+    }
+
+    public Stream CreatePageStream(int pageNumber)
+    {
+        MemoryStream pageStream = new MemoryStream();
+        _pages.Add(pageStream);
+        return pageStream;
+    }
+
+    public void ReleasePageStream(int pageNumber, Stream pageStream)
+    {
+        //Do not release page stream as we'll need to keep the stream open
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports System.IO
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+Imports GroupDocs.Viewer.Interfaces
+' ...
+
+Module Program
+    Sub Main(args As String())
+        ' Create the list to store output pages
+        Dim pages As New List(Of MemoryStream)()
+
+        Using viewer As New Viewer("sample.docx")
+            Dim pageStreamFactory As New MemoryPageStreamFactory(pages)
+            Dim viewOptions As ViewOptions = HtmlViewOptions.ForEmbeddedResources(pageStreamFactory)
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+
+    Class MemoryPageStreamFactory
+        Implements IPageStreamFactory
+
+        Private ReadOnly _pages As List(Of MemoryStream)
+
+        Public Sub New(pages As List(Of MemoryStream))
+            _pages = pages
+        End Sub
+
+        Public Function CreatePageStream(pageNumber As Integer) As Stream Implements IPageStreamFactory.CreatePageStream
+            Dim pageStream As New MemoryStream()
+            _pages.Add(pageStream)
+            Return pageStream
+        End Function
+
+        Public Sub ReleasePageStream(pageNumber As Integer, pageStream As Stream) _
+            Implements IPageStreamFactory.ReleasePageStream
+            'Do not release page stream as we'll need to keep the stream open
+        End Sub
+    End Class
+End Module
+```
+
+</TabItem>
+
+</Tabs>

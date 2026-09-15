@@ -1,0 +1,108 @@
+---
+title: "Optimizar el archivo PDF eliminando los recursos no utilizados"
+sidebar_label: "Optimizar el archivo PDF eliminando los recursos no utilizados"
+sidebar_key: "net-viewer-rendering-to-pdf-optimization-pdf-options-pdf-remove-unused-resources"
+sidebar_position: 10
+description: "Este tema describe cómo optimizar un archivo PDF mediante la API de GroupDocs.Viewer .NET (C#), eliminando los recursos no utilizados (u orfanos) y, por lo tanto, reduciendo el tamaño del archivo."
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "viewer-net"
+source_path: "net/developer-guide/rendering-documents/rendering-to-pdf/optimization-pdf-options/pdf-remove-unused-resources.md"
+source_commit: "270bea1e2528043f99c68ff8a72edc20b3816a48"
+source_sha256: "f1fe2ca51825b2eb43c02bd49f37ec31fff2d1fb69ea76dc50bf9e7820f4b5d9"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "54efaa811a1dba3b065fd07d85a92881533d12d198ce53ac3b7f2232d4494201"
+translation_updated_at: "2026-09-15T12:34:10.943Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET se incluye en Conholdate.Total for .NET.
+:::
+
+En algunos casos, los documentos <a href="https://docs.fileformat.com/pdf/" target="_blank" rel="nofollow noopener noreferrer">PDF</a> pueden contener recursos distintos que no se utilizan, lo que significa que no son accesibles ni visibles al visualizar el documento en cualquier visor de PDF. A partir de la <a href="https://releases.groupdocs.com/viewer/net/release-notes/2024/groupdocs-viewer-for-net-24-6-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 24.6</a>, el GroupDocs.Viewer puede eliminar dichos recursos no utilizados mediante dos nuevas propiedades públicas de tipo booleano: `RemoveUnusedObjects` y `RemoveUnusedStreams`, ambas ubicadas en la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.options/pdfoptimizationoptions/" target="_blank" rel="nofollow noopener noreferrer">`PdfOptimizationOptions`</a>. De forma predeterminada, ambas opciones están deshabilitadas (`false`), por lo que el GroupDocs.Viewer no aplicará esta optimización.
+
+Para explicar estas dos opciones y sus diferencias, necesitamos profundizar un poco en la estructura del PDF.
+
+Un documento PDF está compuesto por objetos PDF. Cada objeto tiene su propio número (ID) y puede pertenecer a uno de los siguientes tipos: nombre, cadena, número, booleano, objeto nulo, diccionario, matriz (que conforman la estructura del documento PDF) y flujo (datos binarios sin procesar). Los objetos pueden ser referenciados desde otros objetos; por ejemplo, un diccionario o una matriz pueden contener referencias a otros objetos. Estas referencias unen todas las partes del documento PDF y forman su estructura. Los objetos de tipo flujo contienen datos binarios, cuyo tamaño puede ser considerable. Por ejemplo, las imágenes o las fuentes se almacenan como objetos de tipo flujo. Tras ciertas manipulaciones sobre el documento, algunos flujos pueden quedar “huérfanos”, es decir, pueden no tener ninguna referencia hacia ellos. Por ejemplo, una imagen antigua puede haber sido reemplazada por una nueva, pero los datos binarios de la imagen antigua no se eliminaron. En otras palabras, el flujo ya no pertenece lógicamente al documento, aunque sigue estando presente físicamente en él. Para eliminar dichos objetos huérfanos existe la propiedad `RemoveUnusedObjects`: esta propiedad localiza los objetos huérfanos en el documento y los elimina, lo que puede ayudar a reducir el tamaño del documento al eliminar dichos objetos encontrados.
+
+Cada página del documento posee su propio diccionario `Resources`, que contiene datos como imágenes, fuentes, etc., utilizados en el contenido de la página. Los recursos se referencian mediante sus nombres en el diccionario; por ejemplo, la página puede contener un operador para dibujar una imagen con el nombre “Imagen12” en una posición determinada de la página. En algunos casos, un recurso puede quedar sin utilizarse; por ejemplo, una imagen puede haberse eliminado del contenido de la página, pero permanecer en los recursos de la página, o bien una página puede haberse extraído del documento, pero sus recursos seguir conteniendo recursos comunes del documento. En este caso, el recurso se convierte en “huérfano”; obsérvese que se trata de una situación distinta de la descrita en la explicación de `RemoveUnusedObject`, ya que el objeto sigue estando referenciado desde el diccionario de recursos de la página, pero el recurso nunca se utiliza en el contenido de la página (su nombre nunca aparece en el contenido de la página). La propiedad `RemoveUnusedStreams`, cuando está habilitada, localiza y elimina estos recursos innecesarios. Dado que, tras este proceso, los objetos de flujo de los recursos eliminados dejan de estar vinculados a la estructura del documento, la opción `RemoveUnusedObjects` se activa automáticamente cuando se utiliza `RemoveUnusedResources`.
+
+A continuación se muestra un ejemplo en el que ambas opciones se aplican al mismo archivo PDF de entrada, de modo que el Visor genera dos archivos PDF de salida, cada uno con una opción distinta aplicada.
+
+<Tabs groupId="Example1">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+// ...
+
+const string filename = "sample.pdf";
+
+PdfViewOptions viewOptions1 = new PdfViewOptions("output1.pdf");
+viewOptions1.PdfOptimizationOptions = new PdfOptimizationOptions();
+viewOptions1.PdfOptimizationOptions.RemoveUnusedObjects = true;
+
+PdfViewOptions viewOptions2 = new PdfViewOptions("output2.pdf");
+viewOptions2.PdfOptimizationOptions = new PdfOptimizationOptions();
+viewOptions2.PdfOptimizationOptions.RemoveUnusedStreams = true;
+
+using (Viewer viewer = new Viewer(filename))
+{
+    viewer.View(viewOptions1);
+    viewer.View(viewOptions2);
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+' ...
+
+Module Program
+    Sub Main(args As String())
+        Const filename As String = "sample.pdf"
+
+        Dim viewOptions1 As PdfViewOptions = New PdfViewOptions("output1.pdf")
+        viewOptions1.PdfOptimizationOptions = New PdfOptimizationOptions()
+        viewOptions1.PdfOptimizationOptions.RemoveUnusedObjects = True
+
+        Dim viewOptions2 As PdfViewOptions = New PdfViewOptions("output2.pdf")
+        viewOptions2.PdfOptimizationOptions = New PdfOptimizationOptions()
+        viewOptions2.PdfOptimizationOptions.RemoveUnusedStreams = True
+
+        Using viewer As New Viewer(filename)
+            viewer.View(viewOptions1)
+            viewer.View(viewOptions2)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+</Tabs>
+
+Como se explica anteriormente, la eficacia de las optimizaciones descritas depende únicamente del archivo PDF específico: si este no contiene objetos ni flujos «huérfanos», dichas optimizaciones no tendrán ningún efecto, y solo incrementarán el tiempo de procesamiento del documento. Sin embargo, en algunos casos pueden reducir significativamente el tamaño del documento, incluso varias veces.
+
+Verificamos tanto `RemoveUnusedObjects` como `RemoveUnusedStreams` en nuestros documentos PDF de muestra internos y medimos su tamaño antes y después de aplicar las optimizaciones. Los resultados se muestran en la siguiente tabla:
+
+| Nombre de archivo | Tamaño original, bytes | `RemoveUnusedObjects`, bytes | `RemoveUnusedStreams`, bytes |
+| ----------- | ------- | -------- | ------- |
+| [Sample1.pdf](/net/viewer/sample-files/developer-guide/rendering-documents/Sample1.pdf) | 131 832 | 2 274 | 131 832 |
+| [Sample2.pdf](/net/viewer/sample-files/developer-guide/rendering-documents/Sample2.pdf) | 131 870 | 131 774 | 2 690 |

@@ -1,0 +1,96 @@
+---
+title: "Establecer fuentes personalizadas"
+sidebar_label: "Establecer fuentes personalizadas"
+sidebar_key: "net-viewer-set-custom-fonts"
+sidebar_position: 6
+description: "Este artículo explica cómo configurar fuentes personalizadas al generar documentos con GroupDocs.Viewer en sus aplicaciones .NET."
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "viewer-net"
+source_path: "net/developer-guide/rendering-documents/set-custom-fonts.md"
+source_commit: "270bea1e2528043f99c68ff8a72edc20b3816a48"
+source_sha256: "df6edaacdd62f378d9cc2e83c25cbe7971d1ffa74a26b7d6365044f23150524a"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "cafa9a838d4a6e38499fb69aabcbcd0bac62896c89d503b355f37ee3e19e48a2"
+translation_updated_at: "2026-09-15T12:36:05.334Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET se incluye en Conholdate.Total for .NET.
+:::
+
+Muchos formatos de documento están estrechamente vinculados a las fuentes tipográficas. Por ejemplo, cuando el usuario agrega algún texto a un documento DOCX, este texto siempre tiene una fuente definida. Algunos formatos de documento suelen almacenar los datos de la fuente incrustados directamente en el archivo del documento, como ocurre con PDF. Sin embargo, otros, como los formatos de la familia Office, suelen depender de las fuentes instaladas en el sistema operativo.
+
+La situación en la que un documento se crea en la _máquina del autor_ y utiliza una fuente determinada “AAA”, y luego se procesa mediante GroupDocs.Viewer en la _máquina del cliente_, donde dicha fuente “AAA” no está instalada, es bastante habitual. En este caso, GroupDocs.Viewer intenta **sustituir esta fuente** aplicando reglas complejas de sustitución tipográfica: analiza los metadatos del documento, los nombres alternativos de la fuente ausente, la configuración del documento, la configuración del sistema operativo, la lista de todas las fuentes disponibles instaladas en el sistema operativo, etc. Finalmente, cuando, por alguna razón, el sistema operativo está “limpio”, es decir, no tiene ninguna fuente instalada, GroupDocs.Viewer sustituirá la fuente ausente por aquella que esté incrustada dentro del ensamblado (DLL) de GroupDocs.Viewer; esta fuente actuará como recurso final en caso de que no haya otras fuentes disponibles. Por ejemplo, para los formatos de la familia WordProcessing, GroupDocs.Viewer almacena internamente la fuente gratuita “Fanwood”.
+
+En este momento, GroupDocs.Viewer realiza la operación de **sustitución de fuentes** de forma **silenciosa durante el procesamiento** del documento (cuando se invoca el método <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/view/#view" target="_blank" rel="nofollow noopener noreferrer">`Viewer.View()`</a>): no se emiten mensajes ni eventos cuando se activa el mecanismo de sustitución de fuentes, ni se indica qué fuente falta, por cuál se sustituye, ni para qué documento concreto. Esta funcionalidad es difícil de implementar, ya que resulta demasiado vaga, imprecisa y ambigua la naturaleza de la notificación que debería emitirse, su formato y cómo podría utilizarse por parte del cliente.
+
+Sin embargo, los usuarios pueden controlar este proceso **antes** de que el documento se procese realmente. Cuando el usuario _sabe_ inicialmente que un documento determinado utiliza una fuente “AAA”, _y además_ _sabe_ que dicha fuente “AAA” no está instalada en la máquina de destino donde se debe procesar el documento, _y_ el usuario dispone del contenido binario de esta fuente “AAA”, puede especificarla **antes** de invocar el método <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer/viewer/view/#view" target="_blank" rel="nofollow noopener noreferrer">`Viewer.View()`</a>.
+
+Para especificar una o varias fuentes personalizadas que no estén instaladas en el sistema operativo de destino, el usuario debe _agregar una o varias fuentes personalizadas (fuentes de origen)_. Una **fuente de origen** es, de hecho, una carpeta donde se encuentra una o varias fuentes. Esta fuente de origen se representa mediante la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.fonts/folderfontsource/" target="_blank" rel="nofollow noopener noreferrer">`FolderFontSource`</a>. Además, la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.fonts/fontsettings/" target="_blank" rel="nofollow noopener noreferrer">`FontSettings`</a> dispone de un método <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.fonts/fontsettings/setfontsources/" target="_blank" rel="nofollow noopener noreferrer">`SetFontSources()`</a> para agregar **fuentes de origen** a GroupDocs.Viewer.
+
+El siguiente fragmento de código demuestra este procedimiento. Supongamos que el documento “sample.docx” utiliza una fuente poco común “AAA.ttf”, que no está instalada en el sistema operativo de destino. A continuación, el usuario coloca el archivo “AAA.ttf” en la carpeta `"C:\custom_fonts"` y crea una instancia de la clase <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.fonts/folderfontsource/" target="_blank" rel="nofollow noopener noreferrer">`FolderFontSource`</a> que apunta a dicha carpeta. Luego, esta instancia se pasa a la clase estática <a href="https://reference.groupdocs.com/viewer/net/groupdocs.viewer.fonts/fontsettings/" target="_blank" rel="nofollow noopener noreferrer">`FontSettings`</a>, y finalmente, el archivo “sample.docx” se procesa al formato HTML. Como resultado, la fuente “AAA” se utilizará en el documento HTML de salida.
+
+<Tabs groupId="example1">
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Options;
+using GroupDocs.Viewer.Fonts;
+// ...
+
+// Specify the font source.
+FolderFontSource fontSource = 
+    new FolderFontSource(@"C:\custom_fonts", SearchOption.TopFolderOnly);
+FontSettings.SetFontSources(fontSource);
+
+using (Viewer viewer = new Viewer("sample.docx"))
+{
+    // Create an HTML file.
+    HtmlViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources();
+    viewer.View(viewOptions);
+}
+```
+
+</TabItem>
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Options
+Imports GroupDocs.Viewer.Fonts
+' ...
+
+Module Program
+    Sub Main(args As String())
+        ' Specify the font source.
+        Dim fontSource As FolderFontSource = New FolderFontSource("C:\custom_fonts", SearchOption.TopFolderOnly)
+        FontSettings.SetFontSources(fontSource)
+    
+        Using viewer As Viewer = New Viewer("sample.docx")
+            ' Create an HTML file.
+            Dim viewOptions As HtmlViewOptions = HtmlViewOptions.ForEmbeddedResources()
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+```
+
+</TabItem>
+
+</Tabs>
+
+Sin embargo, en caso de que el usuario no tenga acceso al contenido binario de la fuente utilizada en el documento y esta no esté instalada en el sistema operativo de destino, el usuario puede **reemplazar** la fuente faltante por una alternativa. El **reemplazo de fuentes** actúa aquí como una **sustitución de fuentes** definida por el usuario, la cual se programa **antes** del procesamiento del documento. Para obtener más información, consulte el [artículo independiente](/net/viewer/developer-guide/rendering-documents/replace-missing-font/).
