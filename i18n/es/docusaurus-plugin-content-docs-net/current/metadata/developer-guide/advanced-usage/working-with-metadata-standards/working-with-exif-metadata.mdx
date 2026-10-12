@@ -1,0 +1,265 @@
+---
+title: "Trabajar con metadatos EXIF"
+sidebar_label: "Trabajar con metadatos EXIF"
+sidebar_position: 1
+description: "Este artículo explica cómo acceder a los metadatos EXIF en un archivo de cualquier formato admitido."
+product: "metadata"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "metadata-net"
+source_path: "net/developer-guide/advanced-usage/working-with-metadata-standards/working-with-exif-metadata.md"
+source_commit: "63b86dac442b8f3b48df2f3a352c0da95426b1cc"
+source_sha256: "c3176d401ac617067401dbcfae719bcc1ce8342ecee2d61e8800755620baf918"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "b10764b01f4293853d8b3bff14c03a8bd545a453c3028cd2cd1801653095705f"
+translation_updated_at: "2026-10-12T03:28:59.057Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Metadata para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## ¿Qué es EXIF? {#what-is-exif}
+  
+Según la <a href="https://www.exif.org/Exif2-2.PDF" target="_blank" rel="nofollow noopener noreferrer">especificación</a>, EXIF (Exchangeable image file format, formato de archivo de imagen intercambiable) es un estándar que especifica los formatos que deben utilizarse para imágenes, sonido y etiquetas en cámaras fotográficas digitales estáticas y en otros sistemas que manejan archivos de imagen y sonido registrados por dichas cámaras. A pesar de la definición y el nombre confusos del formato, EXIF no es más que un estándar de metadatos. De hecho, simplemente define una forma de almacenar propiedades de metadatos en diversos formatos de imagen y audio bien conocidos. La estructura de etiquetas EXIF se toma prestada de los archivos TIFF. La <a href="https://www.exif.org/Exif2-2.PDF" target="_blank" rel="nofollow noopener noreferrer">especificación</a> define un conjunto de etiquetas destinadas a almacenar detalles técnicos, como la geolocalización del lugar donde se tomó una fotografía, el nombre del propietario de la cámara, la configuración de la cámara, etc. 
+
+
+:::info
+Consulte el <a href="https://en.wikipedia.org/wiki/Exif" target="_blank" rel="nofollow noopener noreferrer">siguiente artículo</a> para obtener más información sobre el estándar.
+:::
+
+
+## Lectura de propiedades EXIF básicas {#reading-basic-exif-properties}
+  
+Para acceder a los metadatos EXIF en un archivo de cualquier formato admitido, GroupDocs.Metadata proporciona la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.exif/iexif/properties/exifpackage" target="_blank" rel="nofollow noopener noreferrer">IExif.ExifPackage</a>. A continuación se indican los pasos para leer los metadatos EXIF:  
+
+1.  [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un archivo que contenga metadatos EXIF  
+2.  Extraer el paquete de metadatos EXIF mediante la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.exif/iexif/properties/exifpackage" target="_blank" rel="nofollow noopener noreferrer">IExif.ExifPackage</a>  
+
+El siguiente fragmento de código obtiene las propiedades EXIF de una imagen TIFF y las muestra en pantalla.  
+
+**AdvancedUsage.WorkingWithMetadataStandards.<wbr />Exif.ReadBasicExifProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.TiffWithExif))
+{
+	IExif root = metadata.GetRootPackage() as IExif;
+	if (root != null && root.ExifPackage != null)
+	{
+		Console.WriteLine(root.ExifPackage.Artist);
+		Console.WriteLine(root.ExifPackage.Copyright);
+		Console.WriteLine(root.ExifPackage.ImageDescription);
+		Console.WriteLine(root.ExifPackage.Make);
+		Console.WriteLine(root.ExifPackage.Model);
+		Console.WriteLine(root.ExifPackage.Software);
+		Console.WriteLine(root.ExifPackage.ImageWidth);
+		Console.WriteLine(root.ExifPackage.ImageLength);
+
+		// ...
+
+		Console.WriteLine(root.ExifPackage.ExifIfdPackage.BodySerialNumber);
+		Console.WriteLine(root.ExifPackage.ExifIfdPackage.CameraOwnerName);
+		Console.WriteLine(root.ExifPackage.ExifIfdPackage.UserComment);
+
+		// ...
+
+		Console.WriteLine(root.ExifPackage.GpsPackage.Altitude);
+		Console.WriteLine(root.ExifPackage.GpsPackage.LatitudeRef);
+		Console.WriteLine(root.ExifPackage.GpsPackage.LongitudeRef);
+
+		// ...
+	}
+}
+```
+
+## Lectura de todas las etiquetas EXIF {#reading-all-exif-tags}
+  
+En algunos casos, es necesario leer todas las propiedades EXIF de un archivo, incluidas las personalizadas. Para lograrlo, la API de GroupDocs.Metadata proporciona acceso directo a las etiquetas EXIF extraídas de un archivo.  
+
+1.  [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un archivo que contenga metadatos EXIF  
+2.  Extraer el paquete de metadatos EXIF mediante la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.exif/iexif/properties/exifpackage" target="_blank" rel="nofollow noopener noreferrer">IExif.ExifPackage</a>  
+3.  Recorrer todas las etiquetas EXIF en distintos niveles  
+
+**AdvancedUsage.WorkingWithMetadataStandards.<wbr />Exif.ReadExifTags**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.JpegWithExif))
+{
+	IExif root = metadata.GetRootPackage() as IExif;
+	if (root != null && root.ExifPackage != null)
+	{
+		const string pattern = "{0} = {1}";
+
+		foreach (TiffTag tag in root.ExifPackage.ToList())
+		{
+			Console.WriteLine(pattern, tag.TagID, tag.Value);
+		}
+
+		foreach (TiffTag tag in root.ExifPackage.ExifIfdPackage.ToList())
+		{
+			Console.WriteLine(pattern, tag.TagID, tag.Value);
+		}
+
+		foreach (TiffTag tag in root.ExifPackage.GpsPackage.ToList())
+		{
+			Console.WriteLine(pattern, tag.TagID, tag.Value);
+		}
+	}
+}
+```
+
+## Lectura de una etiqueta EXIF específica  {#reading-a-specific-exif-tag}
+  
+La API de GroupDocs.Metadata también admite la lectura de etiquetas EXIF específicas mediante un operador de índice. Siga los pasos que se indican a continuación para leer una etiqueta EXIF específica.  
+
+1.  [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un archivo que contenga metadatos EXIF  
+2.  Extraer el paquete de metadatos EXIF mediante la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.exif/iexif/properties/exifpackage" target="_blank" rel="nofollow noopener noreferrer">IExif.ExifPackage</a>  
+3.  Obtener una etiqueta específica mediante el <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.exif/exifpackage" target="_blank" rel="nofollow noopener noreferrer">ExifPackage</a> y su <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.exif/exifdictionarybasepackage/properties/item" target="_blank" rel="nofollow noopener noreferrer">indexador</a>  
+
+**AdvancedUsage.WorkingWithMetadataStandards.<wbr />Exif.ReadSpecificExifTag**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.TiffWithExif))
+{
+    IExif root = metadata.GetRootPackage() as IExif;
+    if (root != null && root.ExifPackage != null)
+    {
+        TiffAsciiTag software = (TiffAsciiTag)root.ExifPackage[TiffTagID.Software];
+        if (software != null)
+        {
+            Console.WriteLine("Software: {0}", software.Value);
+        }
+ 
+        TiffUndefinedTag comment = (TiffUndefinedTag)root.ExifPackage.ExifIfdPackage[TiffTagID.UserComment];
+        if (comment != null)
+        {
+            Console.WriteLine("Comment: {0}", comment.InterpretedValue);
+        }
+    }
+}
+```
+
+## Actualización de propiedades EXIF {#updating-exif-properties}
+  
+La API de GroupDocs.Metadata facilita al usuario la actualización de metadatos EXIF de forma sencilla, mediante las propiedades de la clase <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.exif/exifpackage" target="_blank" rel="nofollow noopener noreferrer">ExifPackage</a>. Siga los pasos que se indican a continuación para actualizar los metadatos EXIF en un archivo de cualquier formato admitido.
+
+1.  [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un archivo que contenga metadatos EXIF  
+2.  Extraer el paquete de metadatos EXIF mediante la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.exif/iexif/properties/exifpackage" target="_blank" rel="nofollow noopener noreferrer">IExif.ExifPackage</a>  
+3.  Asignar valores a las propiedades EXIF deseadas  
+4.  [Guardar](/net/metadata/developer-guide/advanced-usage/saving-files/) los cambios  
+
+**AdvancedUsage.WorkingWithMetadataStandards.<wbr />Exif.UpdateExifProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputJpeg))
+{
+	IExif root = metadata.GetRootPackage() as IExif;
+	if (root != null)
+	{
+		// Set the EXIF package if it's missing
+		if (root.ExifPackage == null)
+		{
+			root.ExifPackage = new ExifPackage();
+		}
+
+		root.ExifPackage.Copyright = "Copyright (C) 2011-2019 GroupDocs. All Rights Reserved.";
+		root.ExifPackage.ImageDescription = "test image";
+		root.ExifPackage.Software = "GroupDocs.Metadata";
+
+		// ...
+
+		root.ExifPackage.ExifIfdPackage.BodySerialNumber = "test";
+		root.ExifPackage.ExifIfdPackage.CameraOwnerName = "GroupDocs";
+		root.ExifPackage.ExifIfdPackage.UserComment = "test comment";
+
+		// ...
+
+		metadata.Save(Constants.OutputJpeg);
+	}
+}
+```
+
+## Agregar o actualizar etiquetas EXIF personalizadas {#adding-or-updating-custom-exif-tags}
+  
+La API de GroupDocs.Metadata permite agregar o actualizar etiquetas personalizadas en un paquete EXIF.
+
+1. [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un archivo que contenga metadatos EXIF  
+2. Extraer el paquete de metadatos EXIF mediante la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.exif/iexif/properties/exifpackage" target="_blank" rel="nofollow noopener noreferrer">IExif.ExifPackage</a>  
+3. Establecer el paquete EXIF si no existe  
+4. Agregar cualquier número de etiquetas personalizadas al paquete  
+5. [Guardar](/net/metadata/developer-guide/advanced-usage/saving-files/) los cambios  
+
+**AdvancedUsage.WorkingWithMetadataStandards.<wbr />Exif.SetCustomExifTag**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.TiffWithExif))
+{
+	IExif root = metadata.GetRootPackage() as IExif;
+	if (root != null)
+	{
+		// Set the EXIF package if it's missing
+		if (root.ExifPackage == null)
+		{
+			root.ExifPackage = new ExifPackage();
+		}
+
+		// Add a known property
+		root.ExifPackage.Set(new TiffAsciiTag(TiffTagID.Artist, "test artist"));
+
+		// Add a fully custom property (which is not described in the EXIF specification).
+		// Please note that the chosen ID may intersect with the IDs used by some third party tools.
+		root.ExifPackage.Set(new TiffAsciiTag((TiffTagID)65523, "custom"));
+
+		metadata.Save(Constants.OutputTiff);
+	}
+}
+```
+
+Aquí tienes la lista completa de etiquetas que se pueden agregar a un paquete EXIF:
+
+*   <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.image/tiffasciitag" target="_blank" rel="nofollow noopener noreferrer">TiffAsciiTag</a>  
+*   <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.image/tiffbytetag" target="_blank" rel="nofollow noopener noreferrer">TiffByteTag</a>  
+*   <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.image/tiffdoubletag" target="_blank" rel="nofollow noopener noreferrer">TiffDoubleTag</a>  
+*   <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.image/tifffloattag" target="_blank" rel="nofollow noopener noreferrer">TiffFloatTag</a>  
+*   <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.image/tifflongtag" target="_blank" rel="nofollow noopener noreferrer">TiffLongTag</a>  
+*   <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.image/tiffrationaltag" target="_blank" rel="nofollow noopener noreferrer">TiffRationalTag</a>  
+*   <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.image/tiffsbytetag" target="_blank" rel="nofollow noopener noreferrer">TiffSByteTag</a>  
+*   <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.image/tiffshorttag" target="_blank" rel="nofollow noopener noreferrer">TiffShortTag</a>  
+*   <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.image/tiffslongtag" target="_blank" rel="nofollow noopener noreferrer">TiffSLongTag</a>  
+*   <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.image/tiffsrationaltag" target="_blank" rel="nofollow noopener noreferrer">TiffSRationalTag</a>  
+*   <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.image/tiffsshorttag" target="_blank" rel="nofollow noopener noreferrer">TiffSShortTag</a>  
+*   <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.image/tiffundefinedtag" target="_blank" rel="nofollow noopener noreferrer">TiffUndefinedTag</a>  
+
+## Eliminación de metadatos EXIF {#removing-exif-metadata}
+  
+Para eliminar el paquete EXIF de un archivo, simplemente asigna `null` a la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.exif/iexif/properties/exifpackage" target="_blank" rel="nofollow noopener noreferrer">IExif.ExifPackage</a>. El siguiente ejemplo de código muestra cómo eliminar los metadatos EXIF de un archivo.
+
+**AdvancedUsage.WorkingWithMetadataStandards.<wbr />Exif.RemoveExifMetadata**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.JpegWithExif))
+{
+	IExif root = metadata.GetRootPackage() as IExif;
+	if (root != null)
+	{
+		root.ExifPackage = null;
+		metadata.Save(Constants.OutputJpeg);
+	}
+}
+```
+
+## Más recursos {#more-resources}  
+### Ejemplos en GitHub {#github-examples}  
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:  
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para .NET</a>    
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para Java</a>    
+
+### Aplicación gratuita en línea para la gestión de metadatos de documentos {#free-online-document-metadata-management-app}  
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.  
+Le invitamos a visualizar y editar los metadatos de PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos, imágenes y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/metadata" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Metadata Viewing and Editing App</a>.

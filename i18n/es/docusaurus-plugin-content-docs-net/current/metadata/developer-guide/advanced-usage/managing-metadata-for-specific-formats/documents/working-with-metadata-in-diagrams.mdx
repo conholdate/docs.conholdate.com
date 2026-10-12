@@ -1,0 +1,161 @@
+---
+title: "Trabajar con metadatos en Diagramas"
+sidebar_label: "Trabajar con metadatos en Diagramas"
+sidebar_position: 4
+description: "GroupDocs.Metadata para .NET proporciona funcionalidad que permite trabajar con diferentes tipos de diagramas, como VDX, VSDX, VSX, etc."
+product: "metadata"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "metadata-net"
+source_path: "net/developer-guide/advanced-usage/managing-metadata-for-specific-formats/documents/working-with-metadata-in-diagrams.md"
+source_commit: "63b86dac442b8f3b48df2f3a352c0da95426b1cc"
+source_sha256: "9af9a11c9412cb232aef12d1e144c740425c0b47d2c1db50be36c9d73b663952"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "08c2e7c29bc576ccd30fe7df48f3feb103684dcae01212adcc6f1118d7e0ca20"
+translation_updated_at: "2026-10-12T04:59:19.867Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Metadata para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Metadata para .NET proporciona funcionalidad que permite trabajar con diferentes tipos de diagramas, como VDX, VSDX, VSX, etc. Para obtener la lista completa de formatos de documento admitidos, consulte [Formatos de documento admitidos](/net/metadata/getting-started/supported-document-formats/).
+
+## Detección del tipo exacto de un documento {#detecting-the-exact-type-of-a-document}
+  
+El siguiente ejemplo de código le ayudará a detectar el tipo exacto de un diagrama cargado y extraer información adicional sobre el formato de archivo.
+
+1.  [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un documento PDF  
+2.  Extraer el paquete de metadatos raíz  
+3.  Utilizar la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.document/diagramrootpackage/properties/filetype" target="_blank" rel="nofollow noopener noreferrer">FileType</a> para obtener información sobre el formato de archivo  
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.Diagram.<wbr />DiagramReadFileFormatProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputVdx))
+{
+	var root = metadata.GetRootPackage<DiagramRootPackage>();
+
+	Console.WriteLine(root.FileType.FileFormat);
+	Console.WriteLine(root.FileType.DiagramFormat);
+	Console.WriteLine(root.FileType.MimeType);
+	Console.WriteLine(root.FileType.Extension);
+}
+```
+
+## Lectura de propiedades de metadatos integradas  {#reading-built-in-metadata-properties}
+  
+Para acceder a los metadatos integrados de un diagrama, utilice la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.document.documentrootpackage/1/properties/documentproperties" target="_blank" rel="nofollow noopener noreferrer">DocumentProperties</a> definida en la clase <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.document.documentrootpackage/1" target="_blank" rel="nofollow noopener noreferrer">DocumentRootPackage</a>.
+
+El siguiente fragmento de código extrae las propiedades de metadatos integradas y las muestra en pantalla.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.Diagram.<wbr />DiagramReadBuiltInProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputVsdx))
+{
+	var root = metadata.GetRootPackage<DiagramRootPackage>();
+
+	Console.WriteLine(root.DocumentProperties.Creator);
+	Console.WriteLine(root.DocumentProperties.Company);
+	Console.WriteLine(root.DocumentProperties.Keywords);
+	Console.WriteLine(root.DocumentProperties.Language);
+	Console.WriteLine(root.DocumentProperties.TimeCreated);
+	Console.WriteLine(root.DocumentProperties.Category);
+
+	// ... 
+}
+```
+
+## Lectura de propiedades de metadatos personalizados  {#reading-custom-metadata-properties}
+  
+Si necesita extraer propiedades de metadatos personalizados de un diagrama, siga el ejemplo de código a continuación.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.Diagram.<wbr />DiagramReadCustomProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputVsdx))
+{
+	var root = metadata.GetRootPackage<DiagramRootPackage>();
+
+	var customProperties = root.DocumentProperties.FindProperties(p => !p.Tags.Contains(Tags.Document.BuiltIn));
+	foreach (var property in customProperties)
+	{
+		Console.WriteLine("{0} = {1}", property.Name, property.Value);
+	}
+}
+```
+
+Como puede verse, el ejemplo de código utiliza el motor de búsqueda de GroupDocs.Metadata para recuperar todas las propiedades que no están marcadas con la etiqueta `BuiltIn`. Dado que llamamos al método `<a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.common/metadatapackage/methods/findproperties" target="_blank" rel="nofollow noopener noreferrer">FindProperties</a>` sobre un paquete de metadatos específico (una instancia de la clase `<a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.document/diagrampackage" target="_blank" rel="nofollow noopener noreferrer">DiagramPackage</a>`), el resultado de la búsqueda solo contendrá propiedades de metadatos específicas para documentos de diagramas.
+
+## Lectura de estadísticas del documento  {#reading-document-statistics}
+  
+La mayoría de las aplicaciones ofimáticas pueden mostrar estadísticas de texto simples para los documentos cargados. Estas pueden incluir, por ejemplo, una estimación de la cantidad de palabras, páginas, caracteres, etc. La API de GroupDocs.Metadata ofrece una funcionalidad similar para algunos formatos de documentos. El siguiente ejemplo de código demuestra cómo obtener las estadísticas de texto para un diagrama (actualmente solo está disponible la estadística de recuento de páginas).
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.Diagram.<wbr />DiagramReadDocumentStatistics**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputVdx))
+{
+	var root = metadata.GetRootPackage<DiagramRootPackage>();
+	
+	Console.WriteLine(root.DocumentStatistics.PageCount);
+}
+```
+
+## Actualización de propiedades de metadatos integradas  {#updating-built-in-metadata-properties}
+  
+Actualizar cualquier propiedad integrada de documento es tan sencillo como obtenerlas. El siguiente ejemplo de código demuestra cómo actualizar propiedades de metadatos integradas en un documento de diagrama.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.Diagram.<wbr />DiagramUpdateBuiltInProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputVdx))
+{
+	var root = metadata.GetRootPackage<DiagramRootPackage>();
+
+	root.DocumentProperties.Creator = "test author";
+	root.DocumentProperties.TimeCreated = DateTime.Now;
+	root.DocumentProperties.Company = "GroupDocs";
+	root.DocumentProperties.Category = "test category";
+	root.DocumentProperties.Keywords = "metadata, built-in, update";
+
+	// ... 
+
+	metadata.Save(Constants.OutputVdx);
+}
+```
+
+## Agregar o actualizar propiedades de metadatos personalizados  {#adding-or-updating-custom-metadata-properties}
+  
+La API de GroupDocs.Metadata también permite agregar y actualizar propiedades de metadatos personalizados en un documento de diagrama. Consulte el ejemplo de código a continuación.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.Diagram.<wbr />DiagramUpdateCustomProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputVsdx))
+{
+	var root = metadata.GetRootPackage<DiagramRootPackage>();
+
+	root.DocumentProperties.Set("customProperty1", "some value");
+	root.DocumentProperties.Set("customProperty2", true);
+
+	metadata.Save(Constants.OutputVsdx);
+}
+```
+
+## Más recursos {#more-resources}  
+### Ejemplos en GitHub {#github-examples}  
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:  
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para .NET</a>    
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para Java</a>    
+
+### Aplicación gratuita en línea para la gestión de metadatos de documentos {#free-online-document-metadata-management-app}  
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.  
+Le invitamos a visualizar y editar los metadatos de PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos, imágenes y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/metadata" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Metadata Viewing and Editing App</a>.

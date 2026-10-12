@@ -1,0 +1,73 @@
+---
+title: "Actualización de metadatos"
+sidebar_label: "Actualización de metadatos"
+sidebar_position: 4
+description: "El ejemplo de este artículo demuestra cómo actualizar propiedades de metadatos mediante una combinación de criterios"
+product: "metadata"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "metadata-net"
+source_path: "net/developer-guide/advanced-usage/updating-metadata.md"
+source_commit: "63b86dac442b8f3b48df2f3a352c0da95426b1cc"
+source_sha256: "ef3a21e44f00cfa0f61937cbd432ad56e33d578522019ed81a9530da9d584b37"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "daf3a044b6f590ce64b5af3075a0a3b8ff807a5bda61b2fbae616c4f6db328eb"
+translation_updated_at: "2026-10-12T06:33:22.138Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Metadata para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+El ejemplo a continuación demuestra cómo actualizar propiedades de metadatos existentes mediante una combinación de criterios. Tenga en cuenta que el método <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata/metadata/methods/updateproperties" target="_blank" rel="nofollow noopener noreferrer">UpdateProperties</a> verifica el tipo de todas las propiedades antes de aplicar cualquier cambio. Si una propiedad satisface el predicado pero tiene un tipo distinto del valor pasado, no se actualizará. La comprobación explícita del tipo en el ejemplo se realiza porque utilizamos el valor existente para filtrar las propiedades de metadatos.
+
+1.  [Abrir](/net/metadata/developer-guide/advanced-usage/loading-files/) un archivo que se va a actualizar  
+2.  Especifique un predicado que se utilizará para filtrar las propiedades de metadatos deseadas  
+3.  Especifique un valor que desee asignar a las propiedades seleccionadas  
+4.  Pase el predicado y el nuevo valor al método <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata/metadata/methods/updateproperties" target="_blank" rel="nofollow noopener noreferrer">UpdateProperties</a>  
+5.  Verifique el número real de propiedades actualizadas  
+6.  [Guardar](/net/metadata/developer-guide/advanced-usage/saving-files/) los cambios
+      
+    
+
+**UsoAvanzado.ActualizaciónDeMetadatos**
+
+```csharp
+DateTime today = DateTime.Today;
+DateTime threeDaysAgo = today.AddDays(-3);
+foreach (string file in Directory.GetFiles(Constants.InputPath))
+{
+	using (Metadata metadata = new Metadata(file))
+	{
+		if (metadata.FileFormat != FileFormat.Unknown && !metadata.GetDocumentInfo().IsEncrypted)
+		{
+			Console.WriteLine();
+			Console.WriteLine(file);
+
+			// Update the file creation date/time if the existing value is older than 3 days
+			var affected = metadata.UpdateProperties(p => p.Tags.Contains(Tags.Time.Created) &&
+														  p.Value.Type == MetadataPropertyType.DateTime &&
+														  p.Value.ToStruct<DateTime>() < threeDaysAgo, new PropertyValue(today));
+			Console.WriteLine("Affected properties: {0}", affected);
+
+			metadata.Save(Path.Combine(Constants.OutputPath, "output" + Path.GetExtension(file)));
+		}
+	}
+}
+```
+
+## Más recursos {#more-resources}  
+### Ejemplos en GitHub {#github-examples}  
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:  
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para .NET</a>    
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para Java</a>    
+
+### Aplicación gratuita en línea para la gestión de metadatos de documentos {#free-online-document-metadata-management-app}  
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.  
+Le invitamos a visualizar y editar los metadatos de PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos, imágenes y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/metadata" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Metadata Viewing and Editing App</a>.

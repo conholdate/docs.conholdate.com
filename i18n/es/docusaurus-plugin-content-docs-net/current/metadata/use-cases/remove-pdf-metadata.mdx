@@ -1,0 +1,288 @@
+---
+title: "remove-pdf-metadata"
+sidebar_label: "remove-pdf-metadata"
+sidebar_key: "net-metadata-remove-pdf-metadata"
+sidebar_position: 100
+description: ""
+product: "metadata"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "metadata-net"
+source_path: "net/use-cases/remove-pdf-metadata.md"
+source_commit: "09de6ebe93cf69ca52bec1b24c9ff659da7e5807"
+source_sha256: "b4b06394047b587c8280c579299f34813a9750bd74f58e2924feb586958b1829"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "c18bb9274192737858c8f4b5c5e425f7d89668bc0d3557dd2aef30554be09f54"
+translation_updated_at: "2026-10-12T04:15:40.693Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Metadata para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+﻿```markdown
+---
+id: remove-pdf-metadata
+url: /net/metadata/use-cases/remove-pdf-metadata/
+title: 2 métodos de limpieza de metadatos PDF para .NET: Sanitización frente a eliminación por autor
+weight: 10
+description: "Compare Sanitize() y RemoveProperties para eliminar el autor, el creador y los metadatos XMP de archivos PDF mediante GroupDocs.Metadata para .NET. Incluye código, matriz de decisiones y orientación para verificar tras guardar."
+keywords: eliminar metadatos PDF C#, API de eliminación de metadatos, eliminar autor y XMP de PDF, sanitizar PDF .NET, GroupDocs.Metadata, sanitización de documentos, comparación, rendimiento, mejores prácticas, limpieza de PDF .NET
+productName: GroupDocs.Metadata para .NET
+structuredData:
+```
+    showOrganization: True
+toc: true  
+draft: false  
+---
+
+
+:::info
+Ejemplo completo funcional disponible en GitHub:  
+<a href="https://github.com/groupdocs-metadata/strip-pdf-metadata-dotnet" target="_blank" rel="nofollow noopener noreferrer">https://github.com/groupdocs-metadata/strip-pdf-metadata-dotnet</a>
+:::
+
+
+## Introducción {#introduction}
+  
+La limpieza de metadatos en PDF es un flujo de trabajo de GroupDocs.Metadata para .NET que elimina el diccionario de información de estilo *Author* y los campos XMP de los PDF antes de que salgan de un servicio. El autor, el creador, el productor, las palabras clave y los paquetes XMP a menudo sobreviven a operaciones como “Guardar como” y descargas desde el navegador. Los equipos que comparten contratos necesitan una etapa de limpieza del lado del servidor que pueda demostrar que la identidad de estilo *Author* ha sido eliminada.
+
+Recurrí a este patrón tras descubrir que un socio seguía viendo `Author = Alice Example` en un borrador que creíamos ya había sido limpiado por un limpiador del navegador.
+
+En las canalizaciones reales aparecen dos niveles de intensidad de limpieza: borrar todos los paquetes detectados antes de que el archivo salga de un límite de confianza, o eliminar únicamente los campos etiquetados como personales cuando el título y el asunto deben conservarse. GroupDocs.Metadata para .NET admite ambos enfoques en el mismo objeto `Metadata`.
+
+Esta guía compara **2** métodos principales de limpieza para documentos PDF mediante GroupDocs.Metadata para .NET, además de los pasos de inspección y verificación. Cada método se evalúa según su complejidad, idoneidad y mantenimiento.
+
+## Qué cubre esta guía {#what-this-guide-covers}
+  
+Verá cuándo invocar `Sanitize()` para una eliminación completa, cuándo invocar `RemoveProperties` únicamente para campos de estilo *Author*, cómo establecer una línea de base con `FindProperties`, y cómo verificar el autor y `Person.Creator` tras `Save`.
+
+**Prerrequisitos:**
+- SDK de .NET 8 y acceso a NuGet para GroupDocs.Metadata 26.8.0  
+- Un PDF que aún contiene campos de identidad en el diccionario de información y/o XMP
+
+
+:::info
+**Código fuente completo:** Todos los ejemplos están disponibles en nuestro <a href="https://github.com/groupdocs-metadata/strip-pdf-metadata-dotnet" target="_blank" rel="nofollow noopener noreferrer">repositorio de GitHub</a>. Clónalo, ejecútalo y personalízalo según tus necesidades.
+:::
+
+
+## Matriz de Decisión Rápida {#quick-decision-matrix}
+
+| Escenario | Método Recomendado | Razón |
+| ---------- | ------------------ | ----- |
+| El archivo sale de la empresa / del recurso compartido del socio | Sanitizar todos los metadatos | Borra los paquetes Info y XMP en una sola llamada |
+| La búsqueda en el archivo sigue necesitando Título/Asunto | Eliminar metadatos de autor | Mantiene los campos descriptivos, elimina la identidad de la persona |
+| No sabe qué contiene el PDF | Inspeccionar primero | `FindProperties` imprime la línea de base previa |
+| El cumplimiento pregunta: «¿Desapareció el autor?» | Verificar tras guardar | Reabrir y comprobar Autor / Person.Creator |
+| El limpiador del navegador ya se ejecutó una vez | Preferir la API Sanitize | Las herramientas de interfaz gráfica suelen omitir paquetes XMP |
+
+## Resumen Comparativo de Métodos {#method-comparison-overview}
+
+| Método | Complejidad | Rendimiento | Flexibilidad | Ideal Para |
+| -------- | ----------- | ------------- | ------------- | ---------- |
+| **Sanitizar todos los metadatos** | Baja | Pase único rápido | Baja (todo o nada) | Salida / salida no confiable |
+| **Eliminar metadatos de autor** | Media | Pase filtrado rápido | Alta (predicado) | Mantener Título/Asunto, eliminar personas |
+| **Inspeccionar metadatos** | Baja | Solo lectura | Alta (filtros) | Diagnósticos antes/después |
+| **Verificar que el autor haya sido eliminado** | Baja | Solo lectura | Enfocado | Auditoría tras guardar |
+
+## Análisis Detallado de Métodos {#detailed-method-analysis}
+
+### Método 1: Sanitizar todos los metadatos del PDF {#method-1-sanitize-all-pdf-metadata}
+
+**Resumen:** Llama a `Sanitize()` sobre un PDF cargado para borrar los paquetes de metadatos reconocidos, incluidos los campos del diccionario Info y XMP, y luego guarda un nuevo archivo. Úselo cuando no deba quedar rastro alguno de autoría.
+
+#### Cómo Funciona {#how-it-works}
+
+Abra el PDF con `Metadata`, invoque `Sanitize()`, imprima la cantidad de propiedades eliminadas y `Save` en una ruta de salida. La llamada apunta a paquetes detectados, en lugar de pedirle que enumere manualmente cada nombre de campo. Es la herramienta más contundente para la higiene en salidas.
+
+#### Cuándo Usarlo {#when-to-use}
+
+- ![(supported)](/net/metadata/images/check-blue.png) Enlaces de descarga para socios o para el público  
+- ![(supported)](/net/metadata/images/check-blue.png) Intercambio de documentos entre inquilinos  
+- ![(supported)](/net/metadata/images/check-blue.png) Política de salida: “Dejar rastro de autor”  
+
+#### Ventajas y desventajas  {#pros-and-cons}
+  
+**Ventajas:**  
+- Una única llamada cubre los paquetes Info y XMP que la API detecta  
+- Superficie de código reducida; fácil de encapsular en un método de servicio  
+- Devuelve un recuento de eliminaciones que puede registrar  
+
+**Desventajas:**  
+- Elimina campos descriptivos que aún podrían necesitar para archivar  
+- Tras `Save`, el creador/productor del software (Tool.Software Creator/Producer) podría reescribirse mediante el motor PDF  
+- La licencia de evaluación puede bloquear `Save` sin restricciones  
+
+#### Ejemplo de código  {#code-example}
+
+```csharp
+using var metadata = new Metadata(inputPath);
+int removed = metadata.Sanitize();
+Console.WriteLine(removed);
+metadata.Save(outputPath);
+```
+
+#### Notas de rendimiento {#performance-notes}
+  
+Para PDFs de contrato de una sola página, la operación está dominada por la E/S de apertura/guardado. Registre `removed` para que los operadores puedan distinguir entre limpiezas vacías y limpiezas extensas.
+
+---
+
+### Método 2: Eliminar propiedades PDF de tipo autor {#method-2-remove-author-style-pdf-properties}
+  
+**Resumen:** Utiliza `RemoveProperties` con etiquetas de persona/creador y comprobaciones de nombres de autor/creador/producer, de modo que se elimine la identidad, mientras que el Título, Asunto y Palabras clave pueden conservarse.
+
+#### Cómo funciona {#how-it-works-1}
+  
+Construya un predicado que coincida con `Tags.Person.Creator`, `Tags.Person.Editor` y nombres comunes de propiedades de identidad. `RemoveProperties` elimina únicamente las coincidencias. Guarde el resultado y luego inspecciónelo nuevamente para confirmar que los campos descriptivos sobrevivieron.
+
+#### Cuándo usarlo {#when-to-use-1}
+  
+- ![(supported)](/net/metadata/images/check-blue.png) Sistemas de registros que indexan Título/Asunto  
+- ![(supported)](/net/metadata/images/check-blue.png) Redactar personas de los borradores circulantes ![(supported)](/net/metadata/images/check-blue.png) Políticas que prohíben al Autor pero permiten palabras clave
+
+#### Ventajas y desventajas {#pros-and-cons-1}
+  
+**Ventajas:**  
+- Selectiva: conserva los metadatos de archivo de los que depende la búsqueda  
+- El predicado es explícito y puede revisarse durante la revisión del código  
+- Mismo `Metadata` API que Sanitize  
+
+**Desventajas:**  
+- Debe mantenerse el predicado a medida que aparecen nuevos campos de identidad  
+- Las coincidencias de nombre del creador/productor pueden superponerse con las huellas digitales de la herramienta tras guardar  
+
+#### Ejemplo de código {#code-example-1}
+
+```csharp
+using var metadata = new Metadata(inputPath);
+int removed = metadata.RemoveProperties(p =>
+    p.Tags.Contains(Tags.Person.Creator) ||
+    p.Tags.Contains(Tags.Person.Editor) ||
+    string.Equals(p.Name, "Author", StringComparison.OrdinalIgnoreCase) ||
+    string.Equals(p.Name, "Creator", StringComparison.OrdinalIgnoreCase) ||
+    string.Equals(p.Name, "Producer", StringComparison.OrdinalIgnoreCase));
+Console.WriteLine(removed);
+metadata.Save(outputPath);
+```
+
+#### Notas de rendimiento {#performance-notes-1}
+  
+La eliminación filtrada sigue cargando el modelo de metadatos una sola vez. El costo permanece cercano al de *Sanitize* para PDFs pequeños; la ventaja es semántica, no de CPU.
+
+---
+
+### Método 3: Inspeccionar los metadatos del documento PDF {#method-3-inspect-pdf-document-metadata}
+  
+**Descripción general:** Lista de solo lectura de Autor, Creador, Productor, Título, Asunto y Palabras clave, para establecer una línea de base antes y después.
+
+#### Cuándo usarlo {#when-to-use-2}
+  
+- ![(supported)](/net/metadata/images/check-blue.png) Primer paso en cualquier trabajo de limpieza  
+- ![(supported)](/net/metadata/images/check-blue.png) Depuración de tickets «pensábamos que estaba limpio»
+
+#### Ejemplo de código {#code-example-2}
+
+```csharp
+using var metadata = new Metadata(inputPath);
+var properties = metadata.FindProperties(p =>
+    p.Tags.Contains(Tags.Person.Creator) ||
+    p.Tags.Contains(Tags.Tool.Software) ||
+    p.Tags.Contains(Tags.Content.Title) ||
+    p.Tags.Contains(Tags.Content.Subject) ||
+    string.Equals(p.Name, "Author", StringComparison.OrdinalIgnoreCase) ||
+    string.Equals(p.Name, "Creator", StringComparison.OrdinalIgnoreCase) ||
+    string.Equals(p.Name, "Producer", StringComparison.OrdinalIgnoreCase) ||
+    string.Equals(p.Name, "Keywords", StringComparison.OrdinalIgnoreCase));
+
+foreach (var property in properties)
+{
+    Console.WriteLine($"{property.Name} = {property.Value}");
+}
+```
+
+### Método 4: Verificar que los metadatos del autor se hayan eliminado {#method-4-verify-author-metadata-removed}
+  
+**Resumen:** Vuelve a abrir el PDF limpio e imprime `True` cuando no quedan rastros de Autor / `Person.Creator` / `Person.Editor`. Ignora las huellas digitales del creador/productor de la herramienta de software reescritas en `Save`.  
+
+#### Cuándo usarlo {#when-to-use-3}
+  
+- ![(supported)](/net/metadata/images/check-blue.png) Aserción CI tras la limpieza  
+- ![(supported)](/net/metadata/images/check-blue.png) Distinguiendo la eliminación de autores de las marcas de tiempo del motor
+
+#### Ejemplo de código {#code-example-3}
+
+```csharp
+using var metadata = new Metadata(inputPath);
+var leftovers = metadata.FindProperties(p =>
+    p.Tags.Contains(Tags.Person.Creator) ||
+    p.Tags.Contains(Tags.Person.Editor) ||
+    string.Equals(p.Name, "Author", StringComparison.OrdinalIgnoreCase));
+
+Console.WriteLine(!leftovers.Any());
+```
+
+## Comparación de características lado a lado {#side-by-side-feature-comparison}
+
+| Aspecto | Sanitize | Remove author properties |
+| --- | --- | --- |
+| Borra paquetes XMP detectados por la API | Sí | Solo cuando coinciden con el predicado |
+| Mantiene Título / Asunto / Palabras clave | No (normalmente se borran) | Sí (en este predicado de ejemplo) |
+| Mejor ajuste de política | Borrado completo en salida | Redacción de identidad |
+
+## Casos de uso del mundo real {#real-world-use-cases}
+
+### Paquete de contrato de salida {#outbound-contract-pack}
+
+**Desafío:** Legal comparte un PDF de borrador que aún muestra `Author = Alice Example` y Palabras clave marcadas como confidenciales.
+
+**Solución:** Ejecutar inspect, luego `Sanitize()`, y verificar que el autor haya desaparecido antes de cargarlo en el portal del socio.
+
+**Resultado:** Se registra la cantidad eliminada (por ejemplo, 7), y verify imprime `True` para los restos de estilo Author.
+
+### Archivo interno con campos de búsqueda {#internal-archive-with-search-fields}
+
+**Desafío:** Los registros aún necesitan Título y Asunto, pero los nombres de personas no deben permanecer en Author.
+
+**Solución:** `RemovePdfAuthorMetadata` con el predicado enfocado en persona/creador, luego inspect para confirmar que Título/Asunto/Palabras clave permanecen.
+
+**Resultado:** Los campos de estilo Author se eliminan (por ejemplo, 3 eliminaciones), mientras que los campos descriptivos siguen siendo buscables.
+
+## ¿Por qué siguen apareciendo Creator y Producer tras una limpieza exitosa? {#why-do-creator-and-producer-still-appear-after-a-successful-clean}
+
+Vuelva a abrir el PDF limpiado y busque únicamente Author / `Person.Creator` / `Person.Editor`. Los valores residuales de Creator o Producer etiquetados como Tool.Software suelen ser huellas digitales del motor PDF escritas en `Save`, no la identidad original del autor. Considere estas marcas como ruido esperado. Considere la limpieza como fallida únicamente si permanecen restos de estilo Author. Esta distinción mantiene las comprobaciones CI precisas y coincide con lo que los revisores de cumplimiento realmente preguntan tras una eliminación de metadatos en GroupDocs.Metadata para .NET.
+
+## Preguntas frecuentes {#faq}
+
+### ¿Elimina Sanitize también el diccionario Info y los paquetes XMP? {#does-sanitize-remove-xmp-as-well-as-the-info-dictionary}
+
+`Sanitize()` borra los paquetes de metadatos reconocidos detectados en el PDF, incluidos los campos del diccionario Info y XMP cuando están presentes. Siempre realice inspect antes y después en sus propios archivos.
+
+### ¿Puedo conservar Palabras clave mientras elimino Author? {#can-i-keep-keywords-while-removing-author}
+
+Sí. Utilice `RemoveProperties` con un predicado enfocado en persona/creador, como el del ejemplo.
+
+### ¿Qué versión de GroupDocs.Metadata utilizan estos ejemplos? {#which-groupdocs-metadata-version-do-these-samples-use}
+
+GroupDocs.Metadata **26.8.0** en **.NET 8**.
+
+## Conclusión {#conclusion}
+
+Elija **Sanitize** cuando un PDF salga de un límite de confianza y no deba permanecer nada relacionado con identidad. Elija **RemoveProperties** cuando Título y Asunto deban conservarse. Envuelva ambos con inspect y verify enfocado en Author para que los operadores puedan ver evidencia antes y después.
+
+Próximos pasos: clone <a href="https://github.com/groupdocs-metadata/strip-pdf-metadata-dotnet" target="_blank" rel="nofollow noopener noreferrer">strip-pdf-metadata-dotnet</a>, ejecute la aplicación de consola contra `Resources/contract-with-metadata.pdf`, y luego integre los mismos métodos en su servicio de carga.
+
+## Consulte también {#see-also}
+
+- <a href="https://docs.groupdocs.com/metadata/net/removing-metadata/" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Metadata para .NET: eliminar todos los metadatos</a>
+- <a href="https://docs.groupdocs.com/metadata/net/remove-metadata-properties/" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Metadata para .NET: eliminar propiedades específicas</a>
+- <a href="https://blog.groupdocs.com/metadata/remove-pdf-metadata-net/" target="_blank" rel="nofollow noopener noreferrer">Artículo de blog: eliminar metadatos de PDF (.NET)</a>
+- <a href="https://github.com/groupdocs-metadata/strip-pdf-metadata-dotnet" target="_blank" rel="nofollow noopener noreferrer">Repositorio de ejemplos en GitHub</a>
+- <a href="https://reference.groupdocs.com/metadata/net/" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API</a>

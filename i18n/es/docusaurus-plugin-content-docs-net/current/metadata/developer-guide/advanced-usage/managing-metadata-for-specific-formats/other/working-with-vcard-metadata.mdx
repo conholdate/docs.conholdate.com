@@ -1,0 +1,172 @@
+---
+title: "Trabajar con metadatos vCard"
+sidebar_label: "Trabajar con metadatos vCard"
+sidebar_position: 3
+description: ""
+product: "metadata"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "metadata-net"
+source_path: "net/developer-guide/advanced-usage/managing-metadata-for-specific-formats/other/working-with-vcard-metadata.md"
+source_commit: "63b86dac442b8f3b48df2f3a352c0da95426b1cc"
+source_sha256: "8a63b950566486ecc34067f9eaf421bf413691979348e884195c7cc2ea089b5c"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "a1286ee87b57135a2dbba72e860f14d4b35a868e6b87a66213cb5cd92b8bd6bd"
+translation_updated_at: "2026-10-12T05:58:28.476Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Metadata para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## ¿Qué es vCard? {#what-is-vcard}
+  
+vCard, también conocido como VCF (Virtual Contact File, archivo de contacto virtual), es un estándar de formato de archivo para tarjetas de visita electrónicas. Los vCards a menudo se adjuntan a mensajes de correo electrónico, pero también pueden intercambiarse de otras formas. Pueden contener información de nombre y dirección, números de teléfono, direcciones de correo electrónico, URL, logotipos, fotografías e incluso clips de audio.
+
+
+:::info
+Para obtener más información sobre el formato, consulte https://en.wikipedia.org/wiki/VCard
+:::
+
+
+## Obtención de metadatos simples de vCard {#getting-simple-vcard-metadata}
+  
+Para acceder a los metadatos en un archivo vCard, la API de GroupDocs.Metadata proporciona la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.businesscard/vcardrootpackage/properties/vcardpackage" target="_blank" rel="nofollow noopener noreferrer">VCardRootPackage.VCardPackage</a>, la cual contiene la información extraída del archivo. A continuación se indican los pasos para acceder a los metadatos en un archivo vCard:
+
+1.  [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un archivo vCard  
+2.  Obtener el paquete de metadatos raíz  
+3.  Extraer el paquete de metadatos nativo mediante <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.businesscard/vcardrootpackage/properties/vcardpackage" target="_blank" rel="nofollow noopener noreferrer">VCardRootPackage.VCardPackage</a>  
+4.  Leer las propiedades vCard extraídas  
+
+El fragmento de código siguiente obtiene los metadatos de un archivo vCard.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />BusinessCard.VCardReadCardProperties**
+
+```csharp
+public static void Run()
+{
+	using (Metadata metadata = new Metadata(Constants.InputVcf))
+	{
+		var root = metadata.GetRootPackage<VCardRootPackage>();
+
+		foreach (var vCard in root.VCardPackage.Cards)
+		{
+			Console.WriteLine(vCard.IdentificationRecordset.Name);
+			PrintArray(vCard.IdentificationRecordset.FormattedNames);
+			PrintArray(vCard.CommunicationRecordset.Emails);
+			PrintArray(vCard.CommunicationRecordset.Telephones);
+			PrintArray(vCard.DeliveryAddressingRecordset.Addresses);
+
+			// ...
+		}
+	}
+}
+
+private static void PrintArray(string[] values)
+{
+	if (values != null)
+	{
+		foreach (string value in values)
+		{
+			Console.WriteLine(value);
+		}
+	}
+}
+```
+
+## Obtención de metadatos con parámetros descriptivos  {#getting-metadata-with-descriptive-parameters}
+  
+La API de GroupDocs.Metadata también proporciona una forma de obtener metadatos de vCards con parámetros descriptivos. Los pasos se indican a continuación:
+
+1.  [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un archivo vCard  
+2.  Obtener el paquete de metadatos raíz  
+3.  Extraer el paquete de metadatos nativo mediante <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.businesscard/vcardrootpackage/properties/vcardpackage" target="_blank" rel="nofollow noopener noreferrer">VCardRootPackage.VCardPackage</a>  
+4.  Utilizar las propiedades con el sufijo *Record(s)* para obtener los campos de vCard junto con los parámetros descriptivos  
+
+El siguiente fragmento de código muestra cómo extraer los campos de vCard junto con los parámetros descriptivos.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />BusinessCard.VCardReadCardPropertiesWithParameters**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputVcf))
+{
+	var root = metadata.GetRootPackage<VCardRootPackage>();
+	foreach (var vCard in root.VCardPackage.Cards)
+	{
+		if (vCard.IdentificationRecordset.PhotoUriRecords != null)
+		{
+			// Iterate all photos represented by URIs
+			foreach (var photoUriRecord in vCard.IdentificationRecordset.PhotoUriRecords)
+			{
+				// Print the property value
+				Console.WriteLine(photoUriRecord.Value);
+
+				// Print some additional parameters of the property
+				Console.WriteLine(photoUriRecord.ContentType);
+
+				Console.WriteLine(photoUriRecord.MediaTypeParameter);
+				if (photoUriRecord.TypeParameters != null)
+				{
+					foreach (string parameter in photoUriRecord.TypeParameters)
+					{
+						Console.WriteLine(parameter);
+					}
+				}
+
+				Console.WriteLine(photoUriRecord.PrefParameter);
+			}
+		}
+	}
+}
+```
+
+## Filtrado de propiedades vCard  {#filtering-vcard-properties}
+  
+La API de GroupDocs.Metadata proporciona la capacidad de filtrar propiedades vCard para facilitar la búsqueda de la información deseada. El siguiente ejemplo de código muestra cómo utilizar la función de filtrado.  
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />BusinessCard.VCardFilterCardProperties**
+
+```csharp
+public static void Run()
+{
+	using (Metadata metadata = new Metadata(Constants.InputVcf))
+	{
+		var root = metadata.GetRootPackage<VCardRootPackage>();
+		foreach (var vCard in root.VCardPackage.Cards)
+		{
+			// Print most preferred work phone numbers and work emails
+			var filtered = vCard.FilterWorkTags().FilterPreferred();
+
+			PrintArray(filtered.CommunicationRecordset.Telephones);
+			PrintArray(filtered.CommunicationRecordset.Emails);
+		}
+	}
+}
+
+private static void PrintArray(string[] values)
+{
+	if (values != null)
+	{
+		foreach (string value in values)
+		{
+			Console.WriteLine(value);
+		}
+	}
+}
+```
+
+## Más recursos {#more-resources}  
+### Ejemplos en GitHub {#github-examples}  
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:  
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para .NET</a>    
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para Java</a>    
+
+### Aplicación gratuita en línea para la gestión de metadatos de documentos {#free-online-document-metadata-management-app}  
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.  
+Le invitamos a visualizar y editar los metadatos de PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos, imágenes y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/metadata" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita en línea para visualizar y editar metadatos de documentos</a>.

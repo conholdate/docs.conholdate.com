@@ -1,0 +1,291 @@
+---
+title: "Trabajar con metadatos en documentos de procesamiento de texto (WordProcessing)"
+sidebar_label: "Trabajar con metadatos en documentos de procesamiento de texto (WordProcessing)"
+sidebar_position: 1
+description: ""
+product: "metadata"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "metadata-net"
+source_path: "net/developer-guide/advanced-usage/managing-metadata-for-specific-formats/documents/working-with-metadata-in-wordprocessing-documents.md"
+source_commit: "63b86dac442b8f3b48df2f3a352c0da95426b1cc"
+source_sha256: "0d34ea5dec12121c38fc8421b098e430bd3adfab73af12edcbb5fcafa79d8dca"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "66857363a880ce2a9ca04032c7ee65440dd9287e30e53fd4f51cc80f65355479"
+translation_updated_at: "2026-10-12T05:02:45.223Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Metadata para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Metadata para .NET proporciona funcionalidad que permite trabajar con diferentes tipos de documentos de procesamiento de texto, como DOC, DOCX, ODT, etc. Para obtener la lista completa de formatos de documento admitidos, consulte [Formatos de documento admitidos](/net/metadata/getting-started/supported-document-formats/).
+
+## Detección del tipo exacto de un documento {#detecting-the-exact-type-of-a-document}
+  
+El siguiente ejemplo de código le ayudará a detectar el tipo exacto de un documento cargado y extraer información adicional sobre el formato de archivo.
+
+1.  [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un documento de procesamiento de texto  
+2.  Extraer el paquete de metadatos raíz  
+3.  Utilizar la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.document/wordprocessingrootpackage/properties/filetype" target="_blank" rel="nofollow noopener noreferrer">FileType</a> para obtener información sobre el formato de archivo  
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.WordProcessing.<wbr />WordProcessingReadFileFormatProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputDoc))
+{
+	var root = metadata.GetRootPackage<WordProcessingRootPackage>();
+
+	Console.WriteLine(root.FileType.FileFormat);
+	Console.WriteLine(root.FileType.WordProcessingFormat);
+	Console.WriteLine(root.FileType.MimeType);
+	Console.WriteLine(root.FileType.Extension);
+}
+```
+
+## Lectura de propiedades de metadatos integradas  {#reading-built-in-metadata-properties}
+  
+Para acceder a los metadatos integrados de un documento de procesamiento de textos, utilice la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.document.documentrootpackage/1/properties/documentproperties" target="_blank" rel="nofollow noopener noreferrer">DocumentProperties</a> definida en la clase <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.document.documentrootpackage/1" target="_blank" rel="nofollow noopener noreferrer">DocumentRootPackage</a>.  
+
+El siguiente fragmento de código extrae las propiedades de metadatos integradas y las muestra en pantalla.  
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.WordProcessing.<wbr />WordProcessingReadBuiltInProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputDocx))
+{
+	var root = metadata.GetRootPackage<WordProcessingRootPackage>();
+
+	Console.WriteLine(root.DocumentProperties.Author);
+	Console.WriteLine(root.DocumentProperties.CreatedTime);
+	Console.WriteLine(root.DocumentProperties.Company);
+	Console.WriteLine(root.DocumentProperties.Category);
+	Console.WriteLine(root.DocumentProperties.Keywords);
+
+	// ... 
+}
+```
+
+## Lectura de propiedades de metadatos personalizados  {#reading-custom-metadata-properties}
+  
+Si necesita extraer propiedades de metadatos personalizados de un documento de procesamiento de texto, siga el ejemplo de código a continuación.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.WordProcessing.<wbr />WordProcessingReadCustomProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputDoc))
+{
+	var root = metadata.GetRootPackage<WordProcessingRootPackage>();
+	var customProperties = root.DocumentProperties.FindProperties(p => !p.Tags.Contains(Tags.Document.BuiltIn));
+
+	foreach (var property in customProperties)
+	{
+		Console.WriteLine("{0} = {1}", property.Name, property.Value);
+	}
+}
+```
+
+Como puede verse, el ejemplo de código utiliza el motor de búsqueda de GroupDocs.Metadata para recuperar todas las propiedades que no están marcadas con la etiqueta `BuiltIn`. Dado que se llama al método `<a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.common/metadatapackage/methods/findproperties" target="_blank" rel="nofollow noopener noreferrer">FindProperties</a>` sobre un paquete de metadatos específico (una instancia de la clase `<a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.document/wordprocessingpackage" target="_blank" rel="nofollow noopener noreferrer">WordProcessingPackage</a>`), el resultado de la búsqueda solo contendrá propiedades de metadatos específicas para documentos de procesamiento de texto (WordProcessing).
+
+## Inspección de documentos WordProcessing {#inspecting-wordprocessing-documents}
+  
+La función de inspección que se presenta en esta sección no funciona directamente con los metadatos, sino que extrae ciertos datos útiles que, bajo ciertas circunstancias, pueden considerarse como metadatos. Por ejemplo, es posible que desee obtener información sobre las firmas digitales asociadas a un documento, extraer comentarios de usuario del contenido del documento, obtener fragmentos de texto oculto, trabajar con las revisiones del documento, etc. Siga el ejemplo siguiente para aprender cómo hacerlo.
+
+1.  [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un documento WordProcessing  
+2.  Extraer el paquete de metadatos raíz  
+3.  Utilizar la propiedad `<a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.document/wordprocessingrootpackage/properties/inspectionpackage" target="_blank" rel="nofollow noopener noreferrer">InspectionPackage</a>` para inspeccionar el documento  
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.WordProcessing.<wbr />WordProcessingReadInspectionProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputDocx))
+{
+	var root = metadata.GetRootPackage<WordProcessingRootPackage>();
+	if (root.InspectionPackage.Comments != null)
+	{
+		foreach (var comment in root.InspectionPackage.Comments)
+		{
+			Console.WriteLine(comment.Author);
+			Console.WriteLine(comment.CreatedDate);
+			Console.WriteLine(comment.Text);
+			// ... 
+		}
+	}
+
+	if (root.InspectionPackage.DigitalSignatures != null)
+	{
+		foreach (var signature in root.InspectionPackage.DigitalSignatures)
+		{
+			Console.WriteLine(signature.CertificateSubject);
+			Console.WriteLine(signature.Comments);
+			Console.WriteLine(signature.SignTime);
+			// ...
+		}
+	}
+
+	if (root.InspectionPackage.Fields != null)
+	{
+		foreach (var field in root.InspectionPackage.Fields)
+		{
+			Console.WriteLine(field.Code);
+			Console.WriteLine(field.Result);
+		}
+	}
+
+	if (root.InspectionPackage.HiddenText != null)
+	{
+		foreach (var textFragment in root.InspectionPackage.HiddenText)
+		{
+			Console.WriteLine(textFragment);
+		}
+	}
+
+	if (root.InspectionPackage.Revisions != null)
+	{
+		foreach (var revision in root.InspectionPackage.Revisions)
+		{
+			Console.WriteLine(revision.Author);
+			Console.WriteLine(revision.DateTime);
+			Console.WriteLine(revision.RevisionType);
+		}
+	}
+}
+```
+
+## Lectura de estadísticas del documento  {#reading-document-statistics}
+  
+La mayoría de las aplicaciones de oficina pueden mostrar estadísticas de texto simples para los documentos cargados. Estas pueden incluir, por ejemplo, una estimación de la cantidad de palabras, páginas, caracteres, etc. La API de GroupDocs.Metadata ofrece una funcionalidad similar para algunos formatos de documentos. El siguiente ejemplo de código demuestra cómo obtener las estadísticas de texto para un documento de procesamiento de textos.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.WordProcessing.<wbr />WordProcessingReadDocumentStatistics**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputDocx))
+{
+	var root = metadata.GetRootPackage<WordProcessingRootPackage>();
+
+	Console.WriteLine(root.DocumentStatistics.CharacterCount);
+	Console.WriteLine(root.DocumentStatistics.PageCount);
+	Console.WriteLine(root.DocumentStatistics.WordCount);
+}
+```
+
+## Lectura de metadatos Dublin Core {#reading-dublin-core-metadata}
+  
+Los metadatos Dublin Core son un conjunto de propiedades de metadatos específicas destinadas a describir diversos recursos digitales. Puede encontrar más información sobre el estándar Dublin Core en <a href="https://en.wikipedia.org/wiki/Dublin_Core" target="_blank" rel="nofollow noopener noreferrer">https://en.wikipedia.org/wiki/Dublin\_Core</a>. El siguiente ejemplo de código muestra cómo extraer metadatos Dublin Core de un documento de procesamiento de texto mediante la API de GroupDocs.Metadata.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.WordProcessing.<wbr />WordProcessingReadDublinCoreProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputDocx))
+{
+	var root = metadata.GetRootPackage<WordProcessingRootPackage>();
+
+	if (root.DublinCorePackage != null)
+	{
+		Console.WriteLine(root.DublinCorePackage.Format);
+		Console.WriteLine(root.DublinCorePackage.Contributor);
+		Console.WriteLine(root.DublinCorePackage.Coverage);
+		Console.WriteLine(root.DublinCorePackage.Creator);
+		Console.WriteLine(root.DublinCorePackage.Source);
+		Console.WriteLine(root.DublinCorePackage.Description);
+
+		// ...
+	}
+}
+```
+
+Consulte la clase <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.dublincore/dublincorepackage" target="_blank" rel="nofollow noopener noreferrer">DublinCorePackage</a> para obtener más información sobre las propiedades de metadatos Dublin Core admitidas.
+
+## Actualización de propiedades de metadatos integradas  {#updating-built-in-metadata-properties}
+  
+Actualizar cualquier propiedad integrada de documento es tan sencillo como obtenerlas. El siguiente ejemplo de código demuestra cómo actualizar las propiedades de metadatos integradas en un documento de procesamiento de texto.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.WordProcessing.<wbr />WordProcessingUpdateBuiltInProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputDoc))
+{
+	var root = metadata.GetRootPackage<WordProcessingRootPackage>();
+
+	root.DocumentProperties.Author = "test author";
+	root.DocumentProperties.CreatedTime = DateTime.Now;
+	root.DocumentProperties.Company = "GroupDocs";
+	root.DocumentProperties.Category = "test category";
+	root.DocumentProperties.Keywords = "metadata, built-in, update";
+
+	// ... 
+
+	metadata.Save(Constants.OutputDoc);
+}
+```
+
+## Agregar o actualizar propiedades de metadatos personalizados  {#adding-or-updating-custom-metadata-properties}
+  
+La API de GroupDocs.Metadata también permite agregar y actualizar propiedades de metadatos personalizados en un documento de procesamiento de texto. Consulte el ejemplo de código a continuación.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.WordProcessing.<wbr />WordProcessingUpdateCustomProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputDocx))
+{
+	var root = metadata.GetRootPackage<WordProcessingRootPackage>();
+
+	root.DocumentProperties.Set("customProperty1", "some value");
+	root.DocumentProperties.Set("customProperty2", 7);
+
+	metadata.Save(Constants.OutputDocx);
+}
+```
+
+## Actualización de propiedades de inspección  {#updating-inspection-properties}
+  
+Cuando inspecciona un documento, GroupDocs.Metadata para .NET forma un paquete de metadatos que contiene la información extraída. La clase del paquete también proporciona algunos métodos básicos que permiten actualizar (o eliminar) las propiedades extraídas. El siguiente ejemplo de código demuestra cómo eliminar/actualizar las propiedades de inspección en un documento de procesamiento de texto.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.WordProcessing.<wbr />WordProcessingUpdateInspectionProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputDoc))
+{
+	var root = metadata.GetRootPackage<WordProcessingRootPackage>();
+
+	root.InspectionPackage.ClearComments();
+	root.InspectionPackage.AcceptAllRevisions();
+	root.InspectionPackage.ClearFields();
+	root.InspectionPackage.ClearHiddenText();
+
+	metadata.Save(Constants.OutputDoc);
+}
+```
+
+## Actualización de estadísticas del documento {#updating-document-statistics}
+  
+Las estadísticas del documento descritas en [esta sección](/net/metadata/developer-guide/advanced-usage/managing-metadata-for-specific-formats/documents/working-with-metadata-in-wordprocessing-documents/) no solo se calculan para documentos de procesamiento de texto, sino que también pueden guardarse en el paquete de metadatos nativo junto con propiedades de metadatos habituales. El siguiente ejemplo de código demuestra cómo lograrlo.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.WordProcessing.<wbr />WordProcessingUpdateDocumentStatistics**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputDoc))
+{
+	var root = metadata.GetRootPackage<WordProcessingRootPackage>();
+
+	root.UpdateDocumentStatistics();
+
+	metadata.Save(Constants.OutputDoc);
+}
+```
+
+## Más recursos {#more-resources}  
+### Ejemplos en GitHub {#github-examples}  
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:  
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para .NET</a>    
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para Java</a>    
+
+### Aplicación gratuita en línea para la gestión de metadatos de documentos {#free-online-document-metadata-management-app}  
+Junto con la completa biblioteca para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.  
+Le invitamos a visualizar y editar los metadatos de PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos, imágenes y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/metadata" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita en línea para visualizar y editar metadatos de documentos</a>.

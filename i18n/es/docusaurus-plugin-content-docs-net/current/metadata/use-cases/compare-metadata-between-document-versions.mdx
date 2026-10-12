@@ -1,0 +1,406 @@
+---
+title: "Comparar metadatos entre versiones de documentos"
+sidebar_label: "Comparar metadatos entre versiones de documentos"
+sidebar_key: "net-metadata-compare-metadata-between-document-versions"
+sidebar_position: 10
+description: "Guía paso a paso para comparar los metadatos de documentos en .NET utilizando GroupDocs.Metadata, con opciones de exportación y consejos sobre las mejores prácticas."
+product: "metadata"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "metadata-net"
+source_path: "net/use-cases/compare-metadata-between-document-versions.md"
+source_commit: "09de6ebe93cf69ca52bec1b24c9ff659da7e5807"
+source_sha256: "6515022d6f9be9bacd524a860cc76324ebd49510d1ca1451672315f65db7ac62"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "27877818f35b414953f53736c6530b0e1964fd32b936400828d373d1ae36dad5"
+translation_updated_at: "2026-10-12T04:14:20.952Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Metadata para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+
+:::info
+💡 Ejemplo completo funcional disponible en GitHub:  
+<a href="https://github.com/groupdocs-metadata/metadata-diff-between-docs-using-groupdocs-metadata-dotnet" target="_blank" rel="nofollow noopener noreferrer">metadata-diff-between-versions-using-groupdocs-metadata-dotnet</a>
+:::
+
+
+**Comparar metadatos entre versiones de documentos** es una funcionalidad de GroupDocs.Metadata para .NET que extrae, compara y genera informes sobre los cambios de propiedades entre dos revisiones del mismo archivo. La guía que sigue muestra cómo transformar los metadatos en evidencia auditiva accionable, ya sea que necesite un volcado completo de propiedades, una verificación centrada en la propiedad o una instantánea del historial de revisiones.
+
+---
+
+## Escenario empresarial: Auditoría de revisiones de contratos  {#business-scenario-auditing-contract-revisions}
+  
+Los equipos jurídicos suelen recibir múltiples borradores de un contrato durante las negociaciones. Aunque el contenido visible pueda ser idéntico, los metadatos ocultos, como *Autor*, *Empresa* o *NúmeroDeRevisión*, pueden revelar quién editó realmente el archivo y cuándo. Detectar cambios no autorizados es esencial para cumplir con normativas como ISO 27001 y para mantener una cadena de custodia fiable.
+
+En mi caso, enfrenté este problema exacto cuando un cliente me pidió verificar que una serie de archivos PDF de NDA no hubieran sido modificados tras su firma. Al ejecutar el código de comparación descrito en esta guía, identifiqué un único archivo en el que el campo *Autor* cambió de "John Doe" a "Jane Smith" sin una nota de versión correspondiente, lo que motivó una investigación más profunda.
+
+---
+
+## Por qué los metadatos son importantes para el cumplimiento normativo  {#why-metadata-matters-for-compliance}
+  
+Los metadatos constituyen un libro mayor silencioso incrustado en cada archivo de Office, PDF o imagen. Registran fechas de creación, identificadores de usuario y marcas de tiempo de procesamiento, datos que los reguladores pueden solicitar durante una auditoría. Dado que estos datos residen dentro del propio archivo, no pueden modificarse sin reescribir el documento, lo que los convierte en una fuente fiable de verdad —siempre y cuando disponga de una herramienta capaz de leerlos de forma consistente entre distintos formatos.
+
+A partir de marzo de 2024, GroupDocs.Metadata admite **más de 200 tipos de archivo** <a href="https://docs.groupdocs.com/metadata/net/" target="_blank" rel="nofollow noopener noreferrer">Docs</a>, eliminando la necesidad de analizadores específicos por formato y reduciendo el riesgo de omitir propiedades.
+
+---
+
+## Requisitos previos  {#prerequisites}
+  
+- SDK de .NET 6.0 o posterior instalado en su máquina.  
+- Una clave de licencia temporal (válida 30 días) obtenida del portal de GroupDocs [Temp License][TEMP_LICENSE].  
+- Dos versiones del documento que desee comparar, por ejemplo, `contract_v1.docx` y `contract_v2.docx`.
+
+## Instalación  {#installation}
+
+```bash
+# Add the GroupDocs.Metadata NuGet package to your project
+
+dotnet add package GroupDocs.Metadata
+```
+
+## Descripción general del repositorio {#repository-overview}
+  
+El repositorio de ejemplo sigue una estructura limpia y modular:
+
+```
+compare-metadata-between-document-versions/
+│
+├── Methods
+│   ├── CompareMetadataSets.cs          # Full diff implementation
+│   ├── DetectOwnershipChanges.cs       # Ownership‑focused diff
+│   ├── DetectRevisionHistory.cs        # Revision‑history diff
+│   ├── ExportDiffToCsv.cs              # CSV exporter
+│   ├── ExportDiffToJson.cs             # JSON exporter
+│   └── ExtractAllMetadata.cs           # Core extraction helper
+├── resources
+│   ├── document-v1.docx
+│   └── document-v2.docx
+├── CompareMetadataVersions.csproj
+└── Program.cs                         # Orchestrates the workflow
+```
+
+Cada método está deliberadamente reducido (menos de 25 líneas) para que puedas copiarlo y pegarlo directamente en tu propio proyecto sin incluir dependencias innecesarias.
+
+---
+
+## Implementación paso a paso {#step-by-step-implementation}
+
+### 1. Extraer todas las propiedades de metadatos (base) {#1-extract-every-metadata-property-foundation}
+
+El método `ExtractAllMetadata.Run` abre un archivo mediante `MetadataFacade`, enumera todas las propiedades y devuelve un diccionario de pares *nombre → valor*.
+
+```csharp
+var result = new Dictionary<string, string>();
+using (var metadata = new MetadataFacade(documentPath))
+{
+    if (metadata.FileFormat == FileFormat.Unknown)
+    {
+        return result;
+    }
+
+    var properties = metadata.FindProperties(p => p.Name != null);
+    foreach (var property in properties)
+    {
+        var key = property.Name;
+        var value = property.InterpretedValue?.ToString() ?? property.Value?.ToString() ?? string.Empty;
+        result[key] = value;
+    }
+}
+return result;
+```
+
+**Cómo funciona:** `MetadataFacade` abstracta el formato de archivo, `FindProperties` recorre todo el árbol de propiedades y el método normaliza los valores a cadenas para facilitar su comparación.
+
+---
+
+### 2. Diferencia completa de metadatos (auditoría exhaustiva)  {#2-full-metadata-diff-comprehensive-audit}
+  
+Utilice `CompareMetadataSets.Run` para generar un objeto `MetadataDiff` que clasifique las entradas añadidas, eliminadas y modificadas.
+
+```csharp
+var v1 = ExtractAllMetadata.Run(pathV1);
+var v2 = ExtractAllMetadata.Run(pathV2);
+var diff = new MetadataDiff();
+
+foreach (var kvp in v2)
+{
+    if (!v1.ContainsKey(kvp.Key))
+    {
+        diff.Added[kvp.Key] = kvp.Value;
+    }
+    else if (v1[kvp.Key] != kvp.Value)
+    {
+        diff.Changed[kvp.Key] = (v1[kvp.Key], kvp.Value);
+    }
+}
+
+foreach (var kvp in v1)
+{
+    if (!v2.ContainsKey(kvp.Key))
+    {
+        diff.Removed[kvp.Key] = kvp.Value;
+    }
+}
+
+return diff;
+```
+
+**Puntos clave:**  
+- Captura **todas** las propiedades, incluidas las etiquetas personalizadas.  
+- Rendimiento O(n), donde *n* es el número de propiedades.  
+- Ideal para informes regulatorios en los que debe mostrar un registro completo de cambios.  
+
+---
+
+### 3. Diferencial centrado en la propiedad (¿Quién cambió qué?) {#3-ownership-focused-diff-who-changed-what}
+  
+A los auditores legales a menudo solo les interesan los campos relacionados con la identidad. El método `DetectOwnershipChanges.Run` aísla esas etiquetas.
+
+```csharp
+var v1Values = GetOwnershipProperties(pathV1);
+var v2Values = GetOwnershipProperties(pathV2);
+var changes = new Dictionary<string, (string, string)>();
+var allKeys = new HashSet<string>(v1Values.Keys);
+foreach (var key in v2Values.Keys) allKeys.Add(key);
+
+foreach (var key in allKeys)
+{
+    var oldV = v1Values.TryGetValue(key, out var o) ? o : "<missing>";
+    var newV = v2Values.TryGetValue(key, out var n) ? n : "<missing>";
+    if (oldV != newV)
+    {
+        changes[key] = (oldV, newV);
+    }
+}
+
+return changes;
+```
+
+El asistente `GetOwnershipProperties` extrae únicamente las etiquetas *Author*, *LastSavedBy*, *Manager* y *Company*:
+
+```csharp
+var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+using (var metadata = new MetadataFacade(path))
+{
+    if (metadata.FileFormat == FileFormat.Unknown) return dict;
+
+    var props = metadata.FindProperties(p =>
+        p.Tags.Contains(Tags.Person.Creator) ||
+        p.Tags.Contains(Tags.Person.Editor) ||
+        p.Tags.Contains(Tags.Person.Manager) ||
+        p.Tags.Contains(Tags.Corporate.Company));
+
+    foreach (var p in props)
+    {
+        dict[p.Name] = p.InterpretedValue?.ToString() ?? p.Value?.ToString() ?? string.Empty;
+    }
+}
+return dict;
+```
+
+**¿Por qué usarlo?:** La salida es un diccionario conciso de pares *propiedad → (anterior, nuevo)*, ideal para un resumen legal rápido.
+
+---
+
+### 4. Diferencial del historial de revisiones (¿Cuándo se modificó?) {#4-revision-history-diff-when-was-it-modified}
+  
+El método `DetectRevisionHistory.Run` expone contadores basados en el tiempo y de revisiones.
+
+```csharp
+var v1 = GetRevisionProperties(pathV1);
+var v2 = GetRevisionProperties(pathV2);
+var changes = new Dictionary<string, (string, string)>();
+var allKeys = new HashSet<string>(v1.Keys);
+foreach (var k in v2.Keys) allKeys.Add(k);
+
+foreach (var key in allKeys)
+{
+    var oldV = v1.TryGetValue(key, out var o) ? o : "<missing>";
+    var newV = v2.TryGetValue(key, out var n) ? n : "<missing>";
+    if (oldV != newV)
+    {
+        changes[key] = (oldV, newV);
+    }
+}
+
+return changes;
+```
+
+Ayudante que extrae etiquetas relacionadas con la revisión:
+
+```csharp
+var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+using (var metadata = new MetadataFacade(path))
+{
+    if (metadata.FileFormat == FileFormat.Unknown) return dict;
+
+    var props = metadata.FindProperties(p =>
+        p.Tags.Contains(Tags.Time.Modified) ||
+        p.Tags.Contains(Tags.Time.Created) ||
+        p.Tags.Contains(Tags.Time.Printed) ||
+        p.Name != null && (p.Name.Contains("Revision") || p.Name.Contains("EditTime") || p.Name.Contains("EditingTime")));
+
+    foreach (var p in props)
+    {
+        dict[p.Name] = p.InterpretedValue?.ToString() ?? p.Value?.ToString() ?? string.Empty;
+    }
+}
+return dict;
+```
+
+**Cuando brilla:** Los analistas forenses pueden reconstruir una línea de tiempo de ediciones, impresiones y guardados, lo cual suele ser necesario en casos de descubrimiento electrónico.
+
+---
+
+## Exportación del Diff {#exporting-the-diff}
+
+### ¿Cómo puedo exportar el diff de metadatos a CSV? {#how-can-i-export-the-metadata-diff-to-csv}
+
+Exportar a CSV genera un archivo tabular que los auditores pueden abrir directamente en Excel o alimentar a un SIEM. El método `ExportDiffToCsv.Run` recorre las tres colecciones de diff, aplica una función auxiliar de escape para CSV y escribe un archivo de cuatro columnas (`change_type,property,old_value,new_value`). Este formato coincide con las expectativas de importación de la mayoría de las herramientas de cumplimiento.
+
+```csharp
+var sb = new StringBuilder();
+sb.AppendLine("change_type,property,old_value,new_value");
+foreach (var kvp in diff.Added)
+    sb.AppendLine($"added,{CsvEscape(kvp.Key)},,{CsvEscape(kvp.Value)}");
+foreach (var kvp in diff.Removed)
+    sb.AppendLine($"removed,{CsvEscape(kvp.Key)},{CsvEscape(kvp.Value)},");
+foreach (var kvp in diff.Changed)
+    sb.AppendLine($"changed,{CsvEscape(kvp.Key)},{CsvEscape(kvp.Value.OldValue)},{CsvEscape(kvp.Value.NewValue)}");
+File.WriteAllText(outputPath, sb.ToString());
+```
+
+El ayudante `CsvEscape` asegura que las comas, comillas y saltos de línea se envuelvan de forma segura:
+
+```csharp
+if (string.IsNullOrEmpty(s)) return string.Empty;
+if (s.Contains(",") || s.Contains("\"") || s.Contains("\n"))
+{
+    return "\"" + s.Replace("\"", "\"\"") + "\"";
+}
+return s;
+```
+
+### ¿Cómo exporto la diferencia a JSON para su consumo por la API?  {#how-do-i-export-the-diff-to-json-for-api-consumption}
+  
+JSON proporciona una vista jerárquica que los servicios descendentes pueden analizar sin necesidad de asignaciones personalizadas de columnas. El método `ExportDiffToJson.Run` construye un esquema estable con tres objetos de nivel superior: `added`, `removed` y `changed`.
+
+```csharp
+var sb = new StringBuilder();
+sb.AppendLine("{");
+sb.AppendLine("  \"added\": {");
+WriteMap(sb, diff.Added);
+sb.AppendLine("  },");
+sb.AppendLine("  \"removed\": {");
+WriteMap(sb, diff.Removed);
+sb.AppendLine("  },");
+sb.AppendLine("  \"changed\": {");
+var changedItems = 0;
+foreach (var kvp in diff.Changed)
+{
+    var comma = ++changedItems < diff.Changed.Count ? "," : string.Empty;
+    sb.AppendLine($"    \"{Escape(kvp.Key)}\": {{ \"from\": \"{Escape(kvp.Value.OldValue)}\", \"to\": \"{Escape(kvp.Value.NewValue)}\" }}{comma}");
+}
+sb.AppendLine("  }");
+sb.AppendLine("}");
+File.WriteAllText(outputPath, sb.ToString());
+```
+
+Métodos auxiliares utilizados anteriormente:
+
+```csharp
+// Writes a map of key/value pairs without a trailing comma
+var i = 0;
+foreach (var kvp in map)
+{
+    var comma = ++i < map.Count ? "," : string.Empty;
+    sb.AppendLine($"    \"{Escape(kvp.Key)}\": \"{Escape(kvp.Value)}\"{comma}");
+}
+
+// Escapes JSON special characters
+return s?.Replace("\\", "\\\\").Replace("\"", "\\\"") ?? string.Empty;
+```
+
+Ambos exportadores pueden llamarse inmediatamente después de generar el objeto `MetadataDiff`.
+
+---
+
+## Elección de la estrategia de comparación adecuada  {#choosing-the-right-diff-strategy}
+
+| Estrategia | Cuándo usarla | Tamaño de salida | Público típico |
+| ---------- | -------------- | ------------- | ------------------ |
+| **Comparación completa de metadatos** | Auditoría regulatoria completa, validación de migración de datos | Grande (todas las propiedades) | Oficiales de cumplimiento, auditores |
+| **Comparación centrada en propiedad** | Descubrimiento legal, verificación de cadena de custodia | Pequeño (solo etiquetas de identidad) | Abogados, analistas forenses |
+| **Comparación del historial de revisiones** | Forense de actividad, reconstrucción de cronología | Mediano (etiquetas de tiempo y revisión) | Equipos de seguridad, investigadores |
+
+Elija el método que se ajuste a sus requisitos de informe; siempre puede ejecutar primero la comparación completa y luego filtrar el resultado para obtener una visión más específica.
+
+---
+
+## Errores comunes y cómo evitarlos  {#common-pitfalls-how-to-avoid-them}
+
+- **Inicialización de licencia omitida** - Olvidar configurar la licencia antes de la primera llamada a `MetadataFacade` genera una `LicenseException`. Cargue la licencia una sola vez al iniciar la aplicación.
+- **Formato de archivo no admitido** - `MetadataFacade` devuelve `FileFormat.Unknown` para archivos corruptos o propietarios. Evite este problema verificando el formato y registrando una advertencia.
+- **Archivos grandes generan presión de memoria** - El SDK carga todo el árbol de propiedades en memoria. Para archivos > 100 MB, procese los archivos secuencialmente o aumente el límite de memoria del proceso.
+- **Exportación a CSV sin escape** - Los valores de propiedad que contienen comas rompen el formato del CSV. Utilice siempre la función auxiliar `CsvEscape` proporcionada.
+- **Comas finales en JSON** - La concatenación manual de cadenas puede dejar comas sueltas. El método `WriteMap` controla el recuento de elementos para evitar este problema.
+
+---
+
+## Consejos y notas  {#tips-notes}
+
+- Envuelva todo uso de `MetadataFacade` en un bloque `using` para liberar los identificadores de archivo de forma inmediata.
+- Reutilice la función auxiliar `ExtractAllMetadata` en todos los métodos de comparación para mantener el código DRY (Don’t Repeat Yourself).
+- Para procesamiento por lotes, paralelice la etapa de extracción, pero serialice la agregación de comparaciones para evitar condiciones de carrera.
+- Almacene la clave de licencia temporal en una variable de entorno en lugar de codificarla directamente.
+- Combine la salida de comparación con una etapa de verificación de firma digital para lograr no repudio de extremo a extremo.
+
+---
+
+## Preguntas frecuentes  {#frequently-asked-questions}
+
+### P: ¿Puedo comparar PDF protegidos con contraseña sin proporcionar la contraseña?  {#q-can-i-compare-password-protected-pdfs-without-providing-the-password}  
+**R:** No. GroupDocs.Metadata requiere la contraseña correcta para descifrar el archivo antes de leer sus metadatos. Proporcione la contraseña mediante `metadata.LoadOptions.Password` al crear el `MetadataFacade`. Intentar abrir un archivo protegido sin la contraseña genera una `PasswordRequiredException`.
+
+### P: ¿La comparación incluye metadatos personalizados añadidos por aplicaciones de terceros?  {#q-does-the-diff-include-custom-metadata-added-by-third-party-applications}  
+**R:** Sí. El SDK trata las etiquetas personalizadas de la misma forma que las integradas. Siempre que la propiedad esté almacenada en el flujo de metadatos del archivo, `FindProperties` la devolverá y la lógica de comparación capturará cualquier cambio.
+
+### P: ¿Cómo manejo documentos almacenados en almacenamiento en la nube (por ejemplo, Azure Blob)?  {#q-how-do-i-handle-documents-stored-in-cloud-storage-e-g-azure-blob}  
+**R:** Descargue el blob a una ruta local temporal y luego pase esa ruta de archivo local a los métodos de extracción. El SDK funciona con cualquier archivo accesible mediante una ruta del sistema de archivos; no realiza transmisiones directas desde URLs.
+
+### P: ¿Existe alguna forma de limitar la comparación a un conjunto específico de etiquetas?  {#q-is-there-a-way-to-limit-the-diff-to-a-specific-set-of-tags}  
+**R:** Por supuesto. Reemplace el predicado `FindProperties` por una lambda personalizada que verifique `p.Tags.Contains(desiredTag)`. Esto reduce el tiempo de procesamiento y el tamaño de la salida cuando solo le interesan ciertos metadatos.
+
+---
+
+## Conclusión  {#conclusion}
+  
+Al utilizar GroupDocs.Metadata para .NET, puede automatizar la tediosa tarea de comparar metadatos de documentos entre revisiones. Ya sea que necesite un historial completo de auditoría, una verificación de propiedad o una instantánea del historial de revisiones, los métodos de ejemplo proporcionados cubren los escenarios de cumplimiento más comunes. Exporte los resultados a CSV o JSON, intégrelos en su pipeline de CI y mantenga un registro resistente a manipulaciones de cada cambio.
+
+¿Listo para integrar? Revise el código fuente completo en GitHub, adapte los fragmentos a la estructura de su proyecto y comience a generar informes listos para auditoría hoy mismo.
+
+---
+
+## Consulte también  {#see-also}
+
+- [Documentación de GroupDocs.Metadata][DOCS_URL]  
+- [Referencia de la API para .NET][API_REF_URL]  
+- [Solicitud de licencia temporal][TEMP_LICENSE]  
+- [Repositorio de proyectos de ejemplo][EXAMPLES_REPO]  
+- [Categoría de blog sobre GroupDocs.Metadata][BLOG_CATEGORY]  
+
+[DOCS_URL]: https://docs.groupdocs.com/metadata/net/  
+[API_REF_URL]: https://reference.groupdocs.com/metadata/net/  
+[TEMP_LICENSE]: https://purchase.groupdocs.com/temp-license/100216  
+[EXAMPLES_REPO]: https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-.NET  
+[BLOG_CATEGORY]: https://blog.groupdocs.com/categories/groupdocs.metadata-product-family/

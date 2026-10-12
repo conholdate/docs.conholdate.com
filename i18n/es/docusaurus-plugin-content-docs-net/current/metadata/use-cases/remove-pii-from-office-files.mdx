@@ -1,0 +1,264 @@
+---
+title: "Cómo eliminar datos de identificación personal (PII) de documentos de Office en .NET: 4 tutoriales prácticos"
+sidebar_label: "Cómo eliminar PII de documentos de Office en .NET: 4 tutoriales prácticos"
+sidebar_key: "net-metadata-remove-pii-from-office-files"
+sidebar_position: 1
+description: "Aprenda cuatro formas de eliminar datos personales de los metadatos de Word, Excel y PowerPoint utilizando GroupDocs.Metadata para .NET. Tutoriales paso a paso con código, una hoja de trucos de selección y una verificación de aprobación."
+product: "metadata"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "metadata-net"
+source_path: "net/use-cases/remove-pii-from-office-files.md"
+source_commit: "09de6ebe93cf69ca52bec1b24c9ff659da7e5807"
+source_sha256: "008f17a2312cb9b771ddcfcb119e7684b8df2b54ab59e61694f36112ea5ecaed"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "f9cf4d2a2574bf864f0f13862f652eb5959aad86ed9697b5cc34632082e1c015"
+translation_updated_at: "2026-10-12T04:17:11.641Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Metadata para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+
+:::info
+💡 Ejemplo completo funcional disponible en GitHub:  
+<a href="https://github.com/groupdocs-metadata/scrub-office-document-pii-dotnet" target="_blank" rel="nofollow noopener noreferrer">scrub-office-document-pii-dotnet</a>
+:::
+
+
+## Primeros Pasos {#getting-started}
+  
+La eliminación de PII (Información de Identificación Personal) es una funcionalidad de GroupDocs.Metadata para .NET que borra las propiedades que contienen datos de identidad de documentos de Office y, a continuación, vuelve a leer el archivo para informar qué queda. Estos tutoriales recorren cuatro enfoques en el orden en que los adoptaría un proyecto real: borrar los nombres, borrar las familias de campos adyacentes, borrar todo en el límite y verificar el resultado. Cada uno es un predicado sobre `MetadataProperty`, por lo que las diferencias entre ellos son mínimas y no existen razones claras para preferir uno sobre otro.
+
+El proyecto de ejemplo que acompaña a esta página inyecta en un DOCX propiedades de autor, comentarios, revisiones y SharePoint, luego ejecuta los cuatro enfoques, además de un escaneo de verificación, y comprueba todos los resultados.
+
+## Qué Cubre Este Tutorial {#what-this-tutorial-covers}
+  
+Al finalizar, sabrá qué grupos de propiedades existen en un archivo de Office, cómo escribir un predicado de etiqueta y un predicado de nombre, cuándo `Sanitize()` constituye la mejor solución frente a cuatro pasos específicos, y cómo demostrar que un documento está limpio en lugar de asumirlo.
+
+## Requisitos Previos {#prerequisites}
+  
+- SDK de .NET 8.0 o posterior  
+- El paquete NuGet `GroupDocs.Metadata`, versión 26.6.0 en el ejemplo  
+- Un archivo DOCX, XLSX o PPTX que haya pasado por un ciclo real de revisión; un archivo recién creado contiene casi nada que eliminar
+
+## Comprensión del Problema {#understanding-the-problem}
+  
+### Por Qué las Soluciones Nativas Son Insuficientes {#why-native-solutions-fall-short}
+  
+El cuadro de diálogo de propiedades de Windows edita solo un pequeño número de campos en un archivo a la vez. No accede a las partes OOXML personalizadas, no se puede ejecutar mediante scripting en una carpeta completa y no genera ningún registro de los cambios realizados. Office incluye un Inspector de Documentos, pero se ejecuta de forma interactiva y sus resultados no están disponibles para una canalización de compilación. Ninguna de estas opciones responde a la pregunta que plantea un auditor seis meses después: ¿qué propiedades se eliminaron de este archivo y cuándo?
+
+### Cómo GroupDocs.Metadata Resuelve Esto {#how-groupdocs-metadata-solves-this}
+  
+Un único motor de búsqueda de propiedades impulsa todo esto. `RemoveProperties` acepta una expresión lambda sobre `MetadataProperty` y devuelve el número de propiedades eliminadas; `FindProperties` ejecuta la misma expresión lambda en modo de solo lectura. Las propiedades también llevan etiquetas, por lo que `Tags.Person.Creator` identifica campos de estilo autor sin necesidad de codificar explícitamente nombres que varían según el formato. Esta combinación permite limpieza específica, limpieza total y verificación desde una única interfaz de API.
+
+## Tutorial 1: Eliminación de campos de autor y empresa: Lo Básico {#tutorial-1-removing-author-and-company-fields-the-basics}
+  
+### Qué Aprenderá {#what-you-ll-learn}
+  
+Cómo borrar las cuatro propiedades que identifican a personas reales, manteniendo al mismo tiempo los metadatos descriptivos utilizables.
+
+### Paso 1: Configuración e Instalación {#step-1-setup-and-installation}
+  
+Añada el paquete a su proyecto mediante `dotnet add package GroupDocs.Metadata --version 26.6.0` y, si dispone de uno, establezca una ruta de licencia. Sin licencia, la biblioteca se ejecuta en modo de evaluación, lo cual es suficiente para seguir este tutorial. Los fragmentos de código siguientes utilizan el alias `using MetadataFacade = GroupDocs.Metadata.Metadata;` del ejemplo, que evita que el nombre del espacio de nombres y el de la clase coincidan; `Metadata` funciona igualmente bien una vez importado el espacio de nombres.
+
+### Paso 2: Implementación Básica {#step-2-basic-implementation}
+
+```csharp
+using (var metadata = new MetadataFacade(inputPath))
+{
+    if (metadata.FileFormat == FileFormat.Unknown) return 0;
+    var affected = metadata.RemoveProperties(p =>
+        p.Tags.Contains(Tags.Person.Creator) ||
+        p.Tags.Contains(Tags.Person.Editor) ||
+        p.Tags.Contains(Tags.Person.Manager) ||
+        p.Tags.Contains(Tags.Corporate.Company));
+    metadata.Save(outputPath);
+    return affected;
+}
+```
+
+### Antes y después {#before-and-after}
+  
+Antes de la pasada, un informe de tablero revisado normalmente contiene `Author`, `LastSavedBy`, `Manager` y `Company`. Tras ella, esos cuatro desaparecen, mientras `Title`, `Subject` y `Keywords` siguen presentes, lo cual es lo que mantiene funcionando un sistema de registro. El recuento devuelto es el número que debe registrarse.
+
+### Problemas comunes y soluciones {#common-issues-and-solutions}
+  
+Si el recuento devuelve cero en un archivo que sabe que está modificado, verifique primero `FileFormat`: la guarda regresa anticipadamente ante entradas no reconocidas, y esto se ve idéntico a un archivo limpio desde el lado del llamador.
+
+## Tutorial 2: Borrado de familias de campos – Enfoque mejorado {#tutorial-2-clearing-field-families-enhanced-approach}
+  
+### Qué aprenderá {#what-you-ll-learn-1}
+  
+Cómo eliminar grupos que las etiquetas no clasifican, utilizando subcadenas de nombres en lugar de listados explícitos.
+
+### Paso 1: Comprensión del método mejorado {#step-1-understanding-the-enhanced-method}
+  
+Los comentarios, revisiones y campos del servidor son familias más que propiedades individuales. `CommentsCount`, `Reviewer` y `Reviewed` pertenecen al grupo de revisión; `Revision`, `TrackedChange`, `LastPrinted`, `TotalEditingTime` y `EditTime` describen la línea temporal de edición. El emparejamiento por subcadenas cubre una familia entera sin necesidad de enumerar cada variante.
+
+### Paso 2: Implementación {#step-2-implementation}
+
+```csharp
+using (var metadata = new MetadataFacade(inputPath))
+{
+    if (metadata.FileFormat == FileFormat.Unknown) return 0;
+    var affected = metadata.RemoveProperties(p =>
+        p.Name != null && (
+            p.Name.Contains("Revision") ||
+            p.Name.Contains("TrackedChange") ||
+            p.Name.Contains("LastPrinted") ||
+            p.Name.Contains("TotalEditingTime") ||
+            p.Name.Contains("EditTime")));
+    metadata.Save(outputPath);
+    return affected;
+}
+```
+
+### Paso 3: Configuración avanzada  {#step-3-advanced-configuration}
+  
+La misma forma cubre los campos de SharePoint; solo cambia la lista de subcadenas. Los ID de aprobadores, las rutas de flujo de trabajo y los URI de tipos de contenido describen la estructura interna, por lo que esta pasada es relevante para cualquier elemento exportado desde un servidor de documentos:
+
+```csharp
+using (var metadata = new MetadataFacade(inputPath))
+{
+    if (metadata.FileFormat == FileFormat.Unknown) return 0;
+    var affected = metadata.RemoveProperties(p =>
+        p.Name != null && (
+            p.Name.Contains("Server") ||
+            p.Name.Contains("Workflow") ||
+            p.Name.Contains("Approver") ||
+            p.Name.Contains("ContentType") ||
+            p.Name.Contains("Template")));
+    metadata.Save(outputPath);
+    return affected;
+}
+```
+
+### Solución de problemas {#troubleshooting}
+  
+Siempre verifique que `p.Name` no sea nulo antes de llamar a `Contains`. Algunos paquetes exponen entradas sin nombre, y el predicado se ejecuta contra todas las propiedades del archivo, por lo que eventualmente uno de ellos será nulo y llegará al predicado.
+
+## Tutorial 3: Sanitización completa: técnicas avanzadas {#tutorial-3-the-full-sanitize-advanced-techniques}
+  
+### Qué aprenderá {#what-you-ll-learn-2}
+  
+Cuándo una única llamada reemplaza cuatro predicados y qué sacrifica al utilizarla.
+
+### Paso 1: Implementación {#step-1-implementation}
+
+```csharp
+using (var metadata = new MetadataFacade(inputPath))
+{
+    if (metadata.FileFormat == FileFormat.Unknown) return 0;
+    var affected = metadata.Sanitize();
+    metadata.Save(outputPath);
+    return affected;
+}
+```
+
+### Mejores prácticas  {#best-practices}
+  
+`Sanitize()` borra todos los paquetes de metadatos detectados, incluidas las partes personalizadas de OOXML que no son objeto de búsqueda por parte de ningún predicado específico; por esta razón, su recuento es mayor que la suma de los cuatro pasos. Además, también elimina los campos Título y Asunto. Utilícelo en el límite de confianza y mantenga los pasos específicos para documentos que aún estén en uso.  
+
+## Tutorial 4: Verificación del resultado – Solución empresarial  {#tutorial-4-verifying-the-result-enterprise-solution}
+  
+### Qué aprenderá  {#what-you-ll-learn-3}
+  
+Cómo convertir una limpieza en evidencia al leer de nuevo el archivo guardado.  
+
+### Paso 1: Construir el predicado combinado  {#step-1-build-the-combined-predicate}
+
+```csharp
+var report = new LeakReport();
+using (var metadata = new MetadataFacade(path))
+{
+    if (metadata.FileFormat == FileFormat.Unknown) return report;
+    var props = metadata.FindProperties(p =>
+        p.Tags.Contains(Tags.Person.Creator) ||
+        p.Tags.Contains(Tags.Person.Editor) ||
+        p.Tags.Contains(Tags.Person.Manager) ||
+        p.Tags.Contains(Tags.Corporate.Company) ||
+        (p.Name != null && (
+            p.Name.Contains("Comment") ||
+            p.Name.Contains("Reviewer") ||
+            p.Name.Contains("Revision") ||
+            p.Name.Contains("TrackedChange") ||
+            p.Name.Contains("Classification") ||
+            p.Name.Contains("Department") ||
+            p.Name.Contains("Server") ||
+            p.Name.Contains("Workflow"))));
+```
+
+### Paso 2: Clasificar lo que se devolvió  {#step-2-classify-what-came-back}
+  
+Se omiten los valores vacíos y los contadores con valor cero, por lo que un contador que se haya limpiado no se interpreta como una fuga. Las entradas cuyos nombres comienzan con `Comment`, `Revision` o `Inspection` son envoltorios sobre el contenido del cuerpo y se incluyen en una lista separada:
+
+```csharp
+    foreach (var p in props)
+    {
+        var value = p.InterpretedValue?.ToString() ?? p.Value?.ToString() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(value)) continue;
+        if (value == "0" || value == "0.0") continue;
+
+        var entry = $"{p.Name}={value}";
+        var name = p.Name ?? string.Empty;
+        if (name.StartsWith("Comment") || name.StartsWith("Revision"))
+        {
+            report.ContentLevelLeaks.Add(entry);
+        }
+        else
+        {
+            report.MetadataLeaks.Add(entry);
+        }
+    }
+}
+return report;
+```
+
+### Consideraciones de Seguridad {#security-considerations}
+
+`MetadataLeaks` debe estar vacío antes de que un archivo se considere sanitizado. `ContentLevelLeaks` se mantiene informativo: los comentarios de Word y los autores de cambios rastreados viven dentro `word/document.xml`, y una biblioteca de metadatos no edita el contenido del cuerpo del documento. Eliminarlos requiere una biblioteca de edición de contenido, como Aspose.Words, y esa limitación debe incluirse en la documentación de manejo de datos, no en un comentario de código.
+
+## Guía de referencia rápida {#quick-reference-guide}
+
+### ¿Qué método debo elegir? {#which-method-should-i-pick}
+
+Elija según lo que debe sobrevivir. La identidad pasa cuando el archivo permanece en circulación y se siguen necesitando el Título y el Asunto. Las familias de campos pasan cuando el historial de revisiones o los campos del servidor son la parte sensible. `Sanitize()` cuando el archivo cruza el límite de confianza y no es necesario que permanezca ningún metadato. Ejecute el escaneo de verificación después de cualquiera de ellos, cada vez.
+
+| Situación | Método | Mantiene los campos descriptivos |
+| --- | --- | --- |
+| Borrador compartido con un revisor externo | Pase de identidad | Sí |
+| Actas publicadas tras una revisión interna | Pase de comentarios | Sí |
+| Presentación donde el historial de ediciones es confidencial | Pase de revisión | Sí |
+| Exportación desde una biblioteca de SharePoint | Pase del servidor | Sí |
+| Publicación en un portal abierto | `Sanitize()` | No |
+
+## Preguntas frecuentes {#frequently-asked-questions}
+
+**P: ¿Puedo usar varios métodos a la vez?**  
+**R:** Sí, y en un trabajo por lotes deberías hacerlo. Los predicados son lambdas normales, por lo que combinar sus condiciones en una única llamada implica abrir y guardar un solo archivo en lugar de cuatro. Mantenlos separados únicamente cuando el registro de auditoría requiera un recuento distinto por grupo.
+
+**P: ¿Cómo manejo los errores en producción?**  
+**R:** Guard on `FileFormat.Unknown` antes de cada operación, mantenga el `using` bloque para que los manejadores se cierren cuando un guardado lance una excepción, y tratar una lista de fugas de metadatos no vacía como un trabajo fallido en lugar de una advertencia. El ejemplo de `Program.cs` devuelve un código de salida distinto de cero en cualquier aserción fallida.
+
+**P: ¿Cuáles son las implicaciones de rendimiento?**  
+A: La evaluación del predicado es poco costosa; abrir y reescribir el documento domina, por lo que fusionar predicados es más importante que optimizar las reglas. Lo descubrí de la manera más lenta tras escribir una lista de nombres exactos que omitió `CommentsCount` y volver a ejecutar todo el lote para detectarlo.
+
+## Resumen y Próximos Pasos {#summary-and-next-steps}
+
+Cuatro enfoques, un motor de propiedades y un paso de verificación que permite comprobar el resultado. Comience con la pasada de identidad, agregue las pasadas de familia de campos según las exijan sus fuentes de documento y reserve `Sanitize()` para el límite, y ejecute la comprobación de fugas en cada copia guardada. Clone el repositorio y ejecútelo contra uno de sus propios documentos revisados para ver qué grupos de propiedades llevan realmente sus archivos.
+
+## Consulte también {#see-also}
+
+- <a href="https://blog.groupdocs.com/metadata/remove-pii-from-office-files-net/" target="_blank" rel="nofollow noopener noreferrer">Artículo detallado en el blog sobre este proyecto</a> - el caso de negocio y el pipeline completo  
+- <a href="https://docs.groupdocs.com/metadata/net/find-metadata-properties/" target="_blank" rel="nofollow noopener noreferrer">Buscar propiedades de metadatos</a> - referencia para los predicados de búsqueda utilizados en la comprobación de fugas <a href="https://docs.groupdocs.com/metadata/net/remove-metadata-properties/" target="_blank" rel="nofollow noopener noreferrer">Eliminar propiedades de metadatos</a> - eliminación impulsada por predicados entre formatos  
+- <a href="https://docs.groupdocs.com/metadata/net/" target="_blank" rel="nofollow noopener noreferrer">Documentación del producto</a> - primeros pasos y temas avanzados  
+- <a href="https://reference.groupdocs.com/metadata/net/" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API</a> - Detalles completos de la API para GroupDocs.Metadata para .NET

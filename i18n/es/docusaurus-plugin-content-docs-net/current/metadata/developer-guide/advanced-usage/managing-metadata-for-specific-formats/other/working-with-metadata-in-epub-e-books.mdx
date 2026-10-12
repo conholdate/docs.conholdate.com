@@ -1,0 +1,136 @@
+---
+title: "Trabajar con metadatos en libros electrónicos EPUB"
+sidebar_label: "Trabajar con metadatos en libros electrónicos EPUB"
+sidebar_position: 4
+description: ""
+product: "metadata"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "metadata-net"
+source_path: "net/developer-guide/advanced-usage/managing-metadata-for-specific-formats/other/working-with-metadata-in-epub-e-books.md"
+source_commit: "63b86dac442b8f3b48df2f3a352c0da95426b1cc"
+source_sha256: "38f8a5c982f35ad5f96e2d5865c0e352b437492af26b4c1918876d1e263571fd"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "3692431b2de841a4ad2b3a52c9480cd5cde6e48af9e189d5d3e747b7e324b6a5"
+translation_updated_at: "2026-10-12T05:54:54.065Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Metadata para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## ¿Qué es EPUB? {#what-is-epub}
+  
+EPUB es un formato de archivo para libros electrónicos que utiliza la extensión de archivo ".epub". EPUB es compatible con muchos lectores de libros electrónicos, y hay software compatible disponible para la mayoría de los smartphones, tabletas y computadoras. 
+
+
+:::info
+Puede encontrar más información sobre el formato en https://en.wikipedia.org/wiki/EPUB
+:::
+
+
+## Lectura de propiedades específicas del formato EPUB {#reading-epub-format-specific-properties}
+  
+La API de GroupDocs.Metadata admite la extracción de información específica del formato desde archivos EPUB.
+
+A continuación se indican los pasos para leer los metadatos nativos de EPUB:
+
+1.  [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un archivo EPUB  
+2.  Obtener el paquete de metadatos raíz  
+3.  Extraer el paquete de metadatos nativo mediante <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.ebook/epubrootpackage/properties/epubpackage" target="_blank" rel="nofollow noopener noreferrer">EpubRootPackage.EpubPackage</a>  
+4.  Leer las propiedades de metadatos de EPUB  
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Ebook.EpubReadNativeMetadataProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputEpub))
+{
+	var root = metadata.GetRootPackage<EpubRootPackage>();
+
+	Console.WriteLine(root.EpubPackage.Version);
+	Console.WriteLine(root.EpubPackage.UniqueIdentifier);
+	Console.WriteLine(root.EpubPackage.ImageCover != null ? root.EpubPackage.ImageCover.Length : 0);
+	Console.WriteLine(root.EpubPackage.Description);
+	Console.WriteLine(root.EpubPackage.Title);
+
+	// ...
+}
+```
+
+## Actualización de propiedades específicas del formato EPUB {#updating-epub-format-specific-properties}
+  
+La API de GroupDocs.Metadata también admite la actualización de algunas propiedades de metadatos de un archivo EPUB. Consulte el fragmento de código a continuación para aprender cómo hacerlo.
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputEpub))
+{
+    var root = metadata.GetRootPackage<EpubRootPackage>();
+    root.EpubPackage.Creator = "GroupDocs";
+    root.EpubPackage.Description = "test e-book";
+    root.EpubPackage.Format = "EPUB";
+    root.EpubPackage.Date = DateTime.Now.ToString();
+ 
+    // ...
+ 
+    metadata.Save(Constants.OutputEpub);
+}
+```
+
+## Lectura de metadatos Dublin Core {#reading-dublin-core-metadata}
+  
+Los metadatos Dublin Core son un conjunto de propiedades de metadatos destinadas a describir diversos recursos digitales. Puede encontrar más información sobre el estándar Dublin Core en <a href="https://en.wikipedia.org/wiki/Dublin_Core" target="_blank" rel="nofollow noopener noreferrer">https://en.wikipedia.org/wiki/Dublin\_Core</a>. El siguiente ejemplo de código muestra cómo extraer metadatos Dublin Core de un libro electrónico EPUB mediante la API de GroupDocs.Metadata.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Ebook.EpubReadDublinCoreProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputEpub))
+{
+	var root = metadata.GetRootPackage<EpubRootPackage>();
+
+	Console.WriteLine(root.DublinCorePackage.Rights);
+	Console.WriteLine(root.DublinCorePackage.Publisher);
+	Console.WriteLine(root.DublinCorePackage.Title);
+	Console.WriteLine(root.DublinCorePackage.Creator);
+	Console.WriteLine(root.DublinCorePackage.Language);
+	Console.WriteLine(root.DublinCorePackage.Date);
+
+	// ...
+}
+```
+
+## Actualización de metadatos Dublin Core {#updating-dublin-core-metadata}
+  
+La API de GroupDocs.Metadata también permite actualizar las propiedades de metadatos Dublin Core en un archivo EPUB. Consulte el ejemplo de código a continuación.
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputEpub))
+{
+    var root = metadata.GetRootPackage<EpubRootPackage>();
+    root.DublinCorePackage.SetProperties(p => p.Name == "dc:creator", new PropertyValue("GroupDocs"));
+    root.DublinCorePackage.SetProperties(p => p.Name == "dc:description", new PropertyValue("test e-book"));
+    root.DublinCorePackage.SetProperties(p => p.Name == "dc:title", new PropertyValue("test EPUB"));
+    root.DublinCorePackage.SetProperties(p => p.Name == "dc:date", new PropertyValue(DateTime.Now.ToString()));
+  
+    // ...
+  
+    metadata.Save(Constants.OutputEpub);
+}
+```
+
+Consulte la clase <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.dublincore/dublincorepackage" target="_blank" rel="nofollow noopener noreferrer">DublinCorePackage</a> para obtener más información sobre las propiedades de metadatos Dublin Core admitidas.
+
+## Más recursos {#more-resources}
+### Ejemplos en GitHub {#github-examples}
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Metadata para .NET examples</a>    
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-Java" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Metadata para Java examples</a>    
+
+### Aplicación gratuita en línea para gestión de metadatos de documentos {#free-online-document-metadata-management-app}
+Además de la biblioteca completa para .NET, proporcionamos aplicaciones gratuitas sencillas pero potentes.
+Le invitamos a visualizar y editar los metadatos de PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos, imágenes y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/metadata" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Metadata Viewing and Editing App</a>.

@@ -1,0 +1,202 @@
+---
+title: "Trabajar con fuentes OpenType"
+sidebar_label: "Trabajar con fuentes OpenType"
+sidebar_position: 6
+description: ""
+product: "metadata"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "metadata-net"
+source_path: "net/developer-guide/advanced-usage/managing-metadata-for-specific-formats/other/working-with-opentype-fonts.md"
+source_commit: "63b86dac442b8f3b48df2f3a352c0da95426b1cc"
+source_sha256: "4492f79968ba4d782e0bb2e2a64bd60c3a82bc29e523816090d5a37c1f1bb1fd"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "ee60fe72a0f2430a4a8a516cc790092d005494705594a1f93c5db0bd2adebf6f"
+translation_updated_at: "2026-10-12T05:55:35.284Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Metadata para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+OpenType es un formato para fuentes informáticas escalables. Se construyó sobre su predecesor TrueType, conservando la estructura básica de TrueType y agregando muchas estructuras de datos complejas para prescribir el comportamiento tipográfico.
+
+
+:::info
+Puede encontrar más información sobre el formato OpenType aquí: https://en.wikipedia.org/wiki/OpenType.
+:::
+
+
+## Lectura de metadatos de OpenType {#reading-opentype-metadata}
+  
+La API de GroupDocs.Metadata admite la extracción de información específica del formato desde archivos de fuentes OpenType.
+
+A continuación se indican los pasos para leer la cabecera de un archivo OpenType.
+
+1.  [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un archivo de fuente OpenType  
+2.  Obtener el paquete de metadatos raíz  
+3.  Extraer el paquete de metadatos nativo mediante <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.font/opentyperootpackage/properties/opentypepackage" target="_blank" rel="nofollow noopener noreferrer">OpenTypeRootPackage.OpenTypePackage</a>  
+4.  Leer las propiedades de la fuente OpenType  
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Font.OpenTypeReadNativeMetadataProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputTtf))
+{
+	var root = metadata.GetRootPackage<OpenTypeRootPackage>();
+	// Read the OpenType font metadata
+	foreach (var metadataEntry in root.OpenTypePackage.Fonts)
+	{
+		// Display the values of some metadata properties
+		Console.WriteLine(metadataEntry.Created);
+		Console.WriteLine(metadataEntry.DirectionHint);
+		Console.WriteLine(metadataEntry.EmbeddingLicensingRights);
+		Console.WriteLine(metadataEntry.Flags);
+		Console.WriteLine(metadataEntry.FontFamilyName);
+		Console.WriteLine(metadataEntry.FontRevision);
+		Console.WriteLine(metadataEntry.FontSubfamilyName);
+		Console.WriteLine(metadataEntry.FullFontName);
+		Console.WriteLine(metadataEntry.GlyphBounds);
+		Console.WriteLine(metadataEntry.MajorVersion);
+		Console.WriteLine(metadataEntry.MinorVersion);
+		Console.WriteLine(metadataEntry.Modified);
+		Console.WriteLine(metadataEntry.SfntVersion);
+		Console.WriteLine(metadataEntry.Style);
+		Console.WriteLine(metadataEntry.TypographicFamily);
+		Console.WriteLine(metadataEntry.TypographicSubfamily);
+		Console.WriteLine(metadataEntry.Weight);
+		Console.WriteLine(metadataEntry.Width);
+
+		foreach (OpenTypeBaseNameRecord nameRecord in metadataEntry.Names)
+		{
+			Console.WriteLine(nameRecord.NameID);
+			Console.WriteLine(nameRecord.Platform);
+			Console.WriteLine(nameRecord.Value);
+
+			OpenTypeMacintoshNameRecord macintoshNameRecord = nameRecord as OpenTypeMacintoshNameRecord;
+			if (macintoshNameRecord != null)
+			{
+				Console.WriteLine(macintoshNameRecord.Encoding);
+				Console.WriteLine(macintoshNameRecord.Language);
+			}
+			else
+			{
+				OpenTypeUnicodeNameRecord unicodeNameRecord = nameRecord as OpenTypeUnicodeNameRecord;
+				if (unicodeNameRecord != null)
+				{
+					Console.WriteLine(unicodeNameRecord.Encoding);
+				}
+				else
+				{
+					OpenTypeWindowsNameRecord windowsNameRecord = nameRecord as OpenTypeWindowsNameRecord;
+					if (windowsNameRecord != null)
+					{
+						Console.WriteLine(windowsNameRecord.Encoding);
+						Console.WriteLine(windowsNameRecord.Language);
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+## Lectura de firmas digitales {#reading-digital-signatures}
+  
+El fragmento de código a continuación demuestra cómo extraer información sobre las firmas digitales asociadas a una fuente OpenType.
+
+1. [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un archivo de fuente OpenType  
+2. Obtener el paquete de metadatos raíz  
+3. Utilizar la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.font/opentyperootpackage/properties/digitalsignaturepackage" target="_blank" rel="nofollow noopener noreferrer">DigitalSignaturePackage</a> para acceder a todas las firmas digitales asociadas con el archivo  
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Font.OpenTypeReadDigitalSignatureProperties**
+
+```csharp
+public static void Run()
+{
+	using (Metadata metadata = new Metadata(Constants.InputTtf))
+	{
+		var root = metadata.GetRootPackage<OpenTypeRootPackage>();
+		if (root.DigitalSignaturePackage != null)
+		{
+			Console.WriteLine(root.DigitalSignaturePackage.Flags);
+			foreach (var signature in root.DigitalSignaturePackage.Signatures)
+			{
+				Console.WriteLine(signature.SignTime);
+				if (signature.DigestAlgorithms != null)
+				{
+					foreach (var signatureDigestAlgorithm in signature.DigestAlgorithms)
+					{
+						PrintOid(signatureDigestAlgorithm);
+					}
+				}
+				if (signature.EncapsulatedContent != null)
+				{
+					PrintOid(signature.EncapsulatedContent.ContentType);
+					Console.WriteLine(signature.EncapsulatedContent.ContentRawData.Length);
+				}
+				if (signature.Certificates != null)
+				{
+					foreach (var certificate in signature.Certificates)
+					{
+						Console.WriteLine(certificate.NotAfter);
+						Console.WriteLine(certificate.NotBefore);
+						Console.WriteLine(certificate.RawData.Length);
+					}
+				}
+				if (signature.Signers != null)
+				{
+					foreach (var signerInfoEntry in signature.Signers)
+					{
+						Console.WriteLine(signerInfoEntry.SignatureValue);
+						PrintOid(signerInfoEntry.DigestAlgorithm);
+						PrintOid(signerInfoEntry.SignatureAlgorithm);
+						Console.WriteLine(signerInfoEntry.SigningTime);
+						PrintAttributes(signerInfoEntry.SignedAttributes);
+						PrintAttributes(signerInfoEntry.UnsignedAttributes);
+					}
+				}
+			}
+		}
+	}
+}
+
+private static void PrintOid(Oid oid)
+{
+	// Display the property name and value of OID
+	if (oid != null)
+	{
+		Console.WriteLine(oid.FriendlyName);
+		Console.WriteLine(oid.Value);
+	}
+}
+
+private static void PrintAttributes(CmsAttribute[] attributes)
+{
+	//Display the CmsAttributes of an OID
+	if (attributes != null)
+	{
+		foreach (CmsAttribute attribute in attributes)
+		{
+			PrintOid(attribute.Oid);
+			Console.WriteLine(attribute.Value);
+		}
+	}
+}
+```
+
+## Más recursos {#more-resources}  
+### Ejemplos en GitHub {#github-examples}  
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:  
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para .NET</a>    
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para Java</a>    
+
+### Aplicación gratuita en línea para la gestión de metadatos de documentos {#free-online-document-metadata-management-app}  
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.  
+Le invitamos a visualizar y editar los metadatos de PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos, imágenes y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/metadata" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Metadata Viewing and Editing App</a>.

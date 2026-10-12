@@ -1,0 +1,262 @@
+---
+title: "Operaciones de metadatos XMP para archivos PSD y AI: Profundización técnica"
+sidebar_label: "Operaciones de metadatos XMP para archivos PSD y AI: Profundización técnica"
+sidebar_key: "net-metadata-xmp-metadata-in-adobe-psd-and-ai"
+sidebar_position: 1
+description: "Análisis técnico de cinco operaciones de metadatos XMP para archivos PSD de Photoshop e Illustrator AI en .NET: instantánea completa del paquete, lecturas limitadas por esquema y escrituras protegidas de propietarios y palabras clave."
+product: "metadata"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "metadata-net"
+source_path: "net/use-cases/xmp-metadata-in-adobe-psd-and-ai.md"
+source_commit: "09de6ebe93cf69ca52bec1b24c9ff659da7e5807"
+source_sha256: "453e708ab8481447ad32e15721b5196e6ade7bc0fdbb3120bb62f258ba324767"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "b7bfcf4aab3921181ad60a078238c7c967f56d5aa22a332f5aa00ef2040549a9"
+translation_updated_at: "2026-10-12T04:18:13.473Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Metadata para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+
+:::info
+💡 Ejemplo completo funcional disponible en GitHub:  
+<a href="https://github.com/groupdocs-metadata/edit-xmp-in-psd-and-ai-files-using-groupdocs-metadata-dotnet" target="_blank" rel="nofollow noopener noreferrer">edit-xmp-in-psd-and-ai-files-using-groupdocs-metadata-dotnet</a>
+:::
+
+
+## Resumen Ejecutivo {#executive-summary}
+  
+La edición de XMP es una funcionalidad de GroupDocs.Metadata para .NET que permite leer y escribir el paquete de metadatos incrustado en archivos PSD de Photoshop y AI de Adobe Illustrator. El problema técnico no radica en ningún campo individual, sino en que los metadatos XMP constituyen un paquete XML dentro de dos contenedores binarios distintos, distribuido entre esquemas con vocabularios independientes, y los sistemas de producción requieren que se lea durante la ingesta, se verifique en las puertas de licenciamiento y se escriba durante la exportación. Esta guía desglosa las cinco operaciones que necesita una canalización funcional, extraídas de un repositorio ejecutable que valida cada una: una instantánea completa del paquete, dos lecturas limitadas a esquemas específicos, una escritura de propiedad de propiedad que afecta tres capas de propiedades y una escritura de palabras clave para la búsqueda. Cada operación se examina en términos de su forma de integración, su perfil de costos y su comportamiento ante fallos en archivos que no contienen XMP alguno.
+
+
+:::warning
+**Para uso en producción:** ejecute la <a href="https://github.com/groupdocs-metadata/edit-xmp-in-psd-and-ai-files-using-groupdocs-metadata-dotnet" target="_blank" rel="nofollow noopener noreferrer">implementación completa</a> contra muestras de su propia canalización de activos antes del despliegue.
+:::
+
+
+## Qué cubre esta guía  {#what-this-guide-covers}
+  
+Verá cómo una única conversión de `IXmp` sirve tanto para contenedores PSD como AI, por qué las operaciones de escritura crean esquemas ausentes mediante una guarda (guard-create), y cómo la escritura con identidad dual mantiene la coherencia entre lectores conscientes de XMP y lectores no conscientes de XMP. El público objetivo son ingenieros de .NET que integran activos de Adobe en sistemas DAM, de licencias o de búsqueda, así como arquitectos que deciden dónde debe ubicarse el trabajo de metadatos dentro de una canalización de activos.
+
+**Prerrequisitos:**  
+- .NET SDK 8.0 (el repositorio apunta a `net8.0`)  
+- GroupDocs.Metadata 26.6.0 desde NuGet  
+
+## Matriz de comparación de operaciones  {#operation-comparison-matrix}
+  
+| Operación | Dirección | Alcance | Perfil de coste | Modo de fallo en archivos sin XMP |  
+| ----------- | ----------- | ------- | ------------- | ------------------------------- |  
+| **Instantánea completa** | Lectura | Todo | Una apertura, recorrido completo del árbol | Diccionario vacío |  
+| **Lectura Dublin Core** | Lectura | Solo dc:* | Una apertura, un esquema | Diccionario vacío |  
+| **Lectura Photoshop** | Lectura | Solo photoshop:* | Una apertura, ocho getters | Diccionario vacío |  
+| **Escritura de propiedad** | Escritura | Tres capas | Una apertura, un guardado | Crea paquete y esquemas |  
+| **Escritura de palabras clave** | Escritura | dc:subject | Una apertura, un guardado | Crea paquete y esquema |  
+
+## Operación 1: Instantánea completa del paquete  {#operation-1-full-packet-snapshot}
+  
+La lectura fundamental. Convertir el paquete raíz a `IXmp` expone el paquete; el método luego lo itera, recorre siete esquemas con nombre mediante una pequeña ayuda `CollectScheme`, y finaliza con un barrido profundo.
+
+```csharp
+var result = new Dictionary<string, string>();
+using (var metadata = new MetadataFacade(adobeFilePath))
+{
+    var root = metadata.GetRootPackage() as IXmp;
+    if (root?.XmpPackage == null) return result;
+
+    foreach (var property in root.XmpPackage)
+    {
+        var value = property.InterpretedValue?.ToString()
+            ?? property.Value?.ToString() ?? string.Empty;
+        result[property.Name] = value;
+    }
+
+    var schemes = root.XmpPackage.Schemes;
+    CollectScheme(schemes.DublinCore, result);
+    CollectScheme(schemes.XmpBasic, result);
+    CollectScheme(schemes.Photoshop, result);
+    CollectScheme(schemes.CameraRaw, result);
+    CollectScheme(schemes.PagedText, result);
+    CollectScheme(schemes.XmpDynamicMedia, result);
+    CollectScheme(schemes.XmpMediaManagement, result);
+```
+
+```csharp
+    var deepProps = metadata.FindProperties(p => p.Name != null);
+    foreach (var p in deepProps)
+    {
+        var value = p.InterpretedValue?.ToString()
+            ?? p.Value?.ToString() ?? string.Empty;
+        if (!result.ContainsKey(p.Name)) result[p.Name] = value;
+    }
+}
+return result;
+```
+
+Forma de integración: ejecutarla una sola vez durante la ingesta, almacenar el diccionario y permitir que cada pregunta posterior acceda directamente a su base de datos en lugar del archivo. `InterpretedValue` primero significa que las fechas y las enumeraciones llegan en un formato legible. Un único archivo abierto cubre toda la operación, lo cual es la propiedad que hace factible la ingesta masiva. No realicé ninguna medición aquí a propósito; la afirmación honesta es que la apertura del archivo domina cada operación, y es en el agrupamiento donde radican las ganancias.
+
+## ¿Puedo confiar en que la instantánea incluya paquetes específicos del proveedor?  {#can-i-trust-the-snapshot-to-include-vendor-specific-packets}
+  
+Sí, porque la instantánea finaliza con un barrido *FindProperties* sobre todo el árbol. Los siete esquemas nombrados cubren los vocabularios estándar de Adobe, y la última pasada agrega cualquier propiedad que los esquemas hayan omitido, identificada por su nombre calificado. Los paquetes personalizados escritos por complementos o herramientas de activos aparecen en el mismo diccionario, por lo que el código de indexación posterior nunca necesita un caso especial.
+
+## Operación 2: Lectura de Dublin Core  {#operation-2-dublin-core-read}
+  
+La lectura interoperable. Título, Creador, Descripción, Asunto, Derechos, Formato, Identificador, Fuente y Cobertura son los campos `dc:*` sobre los que la mayoría de los sistemas DAM, los índices de búsqueda y las verificaciones de licencias coinciden.
+
+```csharp
+var result = new Dictionary<string, string>();
+using (var metadata = new MetadataFacade(adobeFilePath))
+{
+    var root = metadata.GetRootPackage() as IXmp;
+    var dc = root?.XmpPackage?.Schemes?.DublinCore;
+    if (dc == null) return result;
+
+    foreach (var property in dc)
+    {
+        var key = property.Name;
+        var value = property.InterpretedValue?.ToString()
+            ?? property.Value?.ToString() ?? string.Empty;
+        result[key] = value;
+    }
+}
+return result;
+```
+
+La cadena condicional nula es el detalle operativo: los archivos sin XMP y los archivos cuyo paquete carece del esquema ambos producen un diccionario vacío. En los controladores de solicitud, prefiera esto en lugar de la instantánea; leer nueve campos es más rápido que procesar un árbol completo.
+
+## Operación 3: Lectura del esquema de Photoshop {#operation-3-photoshop-scheme-read}
+  
+La lectura del contexto editorial. ColorMode e IccProfile responden a preguntas relacionadas con el flujo de trabajo de impresión; City, Country, DateCreated, CaptionWriter, Credit y Source impulsan los filtros que Bridge, Lightroom y DAM exponen para los metadatos de psd.
+
+```csharp
+var result = new Dictionary<string, string>();
+using (var metadata = new MetadataFacade(adobeFilePath))
+{
+    var root = metadata.GetRootPackage() as IXmp;
+    var ps = root?.XmpPackage?.Schemes?.Photoshop;
+    if (ps == null) return result;
+
+    result["photoshop:ColorMode"] = ps.ColorMode?.ToString() ?? string.Empty;
+    result["photoshop:IccProfile"] = ps.IccProfile ?? string.Empty;
+    result["photoshop:City"] = ps.City ?? string.Empty;
+    result["photoshop:Country"] = ps.Country ?? string.Empty;
+    result["photoshop:DateCreated"] = ps.DateCreated?.ToString() ?? string.Empty;
+    result["photoshop:CaptionWriter"] = ps.CaptionWriter ?? string.Empty;
+    result["photoshop:Credit"] = ps.Credit ?? string.Empty;
+    result["photoshop:Source"] = ps.Source ?? string.Empty;
+}
+return result;
+```
+
+Las cadenas vacías significan que el campo existe en el estándar pero no en este archivo, una distinción que es relevante cuando los metadatos de Adobe Illustrator provienen escasos de exportaciones recientes.
+
+## Operación 4: Escritura de propiedad de  {#operation-4-ownership-write}
+  
+La escritura de cumplimiento. Modifica tres capas de propiedades, de modo que todos los lectores, ya sean conscientes de XMP o no, vean la misma identidad al final.
+
+```csharp
+using (var metadata = new MetadataFacade(inputPath))
+{
+    var root = metadata.GetRootPackage() as IXmp;
+    if (root == null) return;
+
+    if (root.XmpPackage == null)
+    {
+        root.XmpPackage = new XmpPacketWrapper();
+    }
+    if (root.XmpPackage.Schemes.DublinCore == null)
+    {
+        root.XmpPackage.Schemes.DublinCore = new XmpDublinCorePackage();
+    }
+
+    var dc = root.XmpPackage.Schemes.DublinCore;
+    dc.SetRights(copyright);
+    dc.Set("dc:creator", XmpArray.From(new[] { creator }, XmpArrayType.Ordered));
+```
+
+```csharp
+    if (root.XmpPackage.Schemes.XmpBasic == null)
+    {
+        root.XmpPackage.Schemes.XmpBasic = new XmpBasicPackage();
+    }
+    root.XmpPackage.Schemes.XmpBasic.CreatorTool = creator;
+
+    metadata.SetProperties(p => p.Tags.Contains(Tags.Person.Creator),
+        new PropertyValue(creator));
+
+    metadata.Save(outputPath);
+}
+```
+
+Nota de diseño: la llamada a `SetProperties` con `Tags.Person.Creator` es lo que eleva esta operación de una escritura XMP a una escritura de identidad. Las propiedades que la biblioteca clasifica como campos de creador reciben su valor en cualquier lugar donde el formato las almacene. El patrón guard-create anterior hace que todo el método sea seguro para ejecuciones por lotes en archivos mixtos. Guardar en `outputPath` preserva los originales, y el `Program.cs` del repositorio garantiza que ambas cadenas escritas sobrevivan a una nueva lectura.
+
+## Operación 5: Escritura de palabras clave {#operation-5-keyword-write}
+  
+La escritura de búsqueda. `dc:subject` es el vocabulario de etiquetas que los indexadores DAM leen, escrito aquí como un único array desordenado.
+
+```csharp
+using (var metadata = new MetadataFacade(inputPath))
+{
+    var root = metadata.GetRootPackage() as IXmp;
+    if (root == null) return;
+
+    if (root.XmpPackage == null)
+    {
+        root.XmpPackage = new XmpPacketWrapper();
+    }
+    if (root.XmpPackage.Schemes.DublinCore == null)
+    {
+        root.XmpPackage.Schemes.DublinCore = new XmpDublinCorePackage();
+    }
+
+    root.XmpPackage.Schemes.DublinCore.Set(
+        "dc:subject",
+        XmpArray.From(keywords, XmpArrayType.Unordered));
+    metadata.Save(outputPath);
+}
+```
+
+`XmpArrayType.Unordered` sigue la semántica del indexador: el orden de las palabras clave no tiene significado. La escritura reemplaza la bolsa anterior, por lo que la etiquetado aditivo implica leer, fusionar en C# y escribir.
+
+## Consideraciones operativas {#operational-considerations}
+
+El comportamiento ante errores es deliberadamente permisivo en la lectura; los diccionarios vacíos constituyen datos válidos, no errores, y las canalizaciones deben tratarlos como “ningún metadato presente”. En la escritura, siempre dirija a una ruta de salida independiente en ejecuciones automatizadas, y mantenga una aserción de lectura de retroceso en la canalización, tal como lo hace `Program.cs`, ya que las sorpresas a nivel de contenedor resultan más económicas de detectar en el momento de la escritura que en el de la entrega.
+
+El paralelismo y el procesamiento por lotes se derivan del modelo de costos. Cada operación es una instancia de `Metadata` sobre un solo archivo, y las instancias son independientes, por lo que paralelizar entre archivos constituye la escalabilidad natural; paralelizar dentro de un mismo archivo no aporta beneficios. Almacene en caché la instantánea de ingestión por activo y permita que las puertas lean desde la caché cuando el archivo no haya cambiado, lo que reduce la mayoría del tráfico de puertas a cero aperturas de archivos.
+
+La licencia sigue el modelo habitual: el modo de evaluación reproduce todo lo descrito en esta guía, y una <a href="https://purchase.conholdate.com/temp-license/100216" target="_blank">licencia temporal</a> elimina las limitaciones de evaluación para lotes de producción.
+
+## Preguntas frecuentes {#faq}
+
+**P: ¿Estas operaciones se comportan de forma idéntica en archivos AI?**  
+R: Sí. Ambos contenedores se resuelven mediante la misma conversión `IXmp`, y el repositorio alimenta `sample.ai` junto con `sample.psd` para demostrarlo. La diferencia práctica radica en la población: las exportaciones recientes de Illustrator suelen contener menos esquemas rellenados, los cuales son absorbidos por las guardias y las convenciones de cadenas vacías.
+
+**P: ¿Qué ocurre con los demás esquemas cuando escribo Dublin Core?**  
+R: Se preservan. Los métodos de escritura modifican únicamente los esquemas que tocan, y los datos subyacentes de la capa PSD o AI se mantienen intactos por diseño, lo cual se indica explícitamente en las observaciones del método para el procesamiento por lotes.
+
+**P: ¿Cómo se relaciona esto con EXIF e IPTC en los mismos archivos?**  
+R: XMP es uno de los tres estándares de metadatos que puede contener un archivo PSD. La misma biblioteca lee EXIF e IPTC mediante sus propios paquetes, por lo que un perfil completo del activo suele combinar la instantánea XMP aquí presentada con esas lecturas. La página <a href="https://docs.groupdocs.com/metadata/net/working-with-xmp-metadata/" target="_blank" rel="nofollow noopener noreferrer">Trabajar con metadatos XMP</a> aborda el lado XMP en forma de referencia.
+
+## Conclusión {#conclusion}
+
+Cinco operaciones cubren la superficie de producción: instantánea en la ingestión, lecturas con ámbito en el momento de la solicitud y dos escrituras protegidas en la exportación. El patrón subyacente es constante: una conversión `IXmp`, un acceso al esquema, una lectura o escritura tipada, y el repositorio verifica todo el conjunto en ambos contenedores. Comience con la instantánea; todas las características posteriores reutilizan su salida.
+
+**Próximos pasos:**
+- Ejecute el <a href="https://github.com/groupdocs-metadata/edit-xmp-in-psd-and-ai-files-using-groupdocs-metadata-dotnet" target="_blank" rel="nofollow noopener noreferrer">código fuente completo</a> con sus propias muestras de PSD y AI
+- Revise la <a href="https://reference.groupdocs.com/metadata/net/" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API</a> para acceder a la superficie completa de XMP
+
+## Consulte también {#see-also}
+
+- <a href="https://blog.groupdocs.com/metadata/xmp-metadata-in-adobe-psd-and-ai-net/" target="_blank" rel="nofollow noopener noreferrer">Artículo de blog detallado sobre este proyecto</a> – contexto empresarial y la canalización completa  
+- <a href="https://docs.groupdocs.com/metadata/net/working-with-xmp-metadata/" target="_blank" rel="nofollow noopener noreferrer">Trabajar con metadatos XMP</a> – referencia para leer, actualizar y agregar paquetes XMP  
+- <a href="https://docs.groupdocs.com/metadata/net/" target="_blank" rel="nofollow noopener noreferrer">Documentación del producto</a> – introducción y temas avanzados  
+- <a href="https://reference.groupdocs.com/metadata/net/" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API</a> – detalles completos de la API para GroupDocs.Metadata para .NET

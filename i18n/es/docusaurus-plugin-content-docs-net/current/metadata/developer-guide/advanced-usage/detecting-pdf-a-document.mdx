@@ -1,0 +1,99 @@
+---
+title: "Detección de documentos PDF/A"
+sidebar_label: "Detección de documentos PDF/A"
+sidebar_position: 8
+description: "Este artículo muestra cómo detectar si un archivo PDF cumple con el estándar PDF/A y cómo determinar su nivel de conformidad en una solución de C# .NET mediante GroupDocs.Metadata para .NET."
+product: "metadata"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "metadata-net"
+source_path: "net/developer-guide/advanced-usage/detecting-pdf-a-document.md"
+source_commit: "63b86dac442b8f3b48df2f3a352c0da95426b1cc"
+source_sha256: "4f6fe35de622458c64306e6a0d175ee4a5fde6fa1f33b624248d6730ac7c0db3"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "d6357edb7b96cfeb58e076cabd9f3c8e80e900bde89d9f74ee8abb87ec9fd79f"
+translation_updated_at: "2026-10-12T06:29:35.618Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Metadata para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+PDF/A es una versión estandarizada por ISO del formato PDF, especializada en la preservación digital y el archivado a largo plazo de documentos electrónicos. A diferencia del PDF estándar, PDF/A prohíbe características inadecuadas para el archivado a largo plazo, como el enlace de fuentes y el cifrado, y exige que se incluyan ciertas características, como fuentes incrustadas y perfiles de color.
+
+Existen varios niveles de conformidad definidos en múltiples versiones de PDF/A:
+
+*   **PDF/A-1** (ISO 19005-1): basado en PDF 1.4, con niveles de conformidad **a** (accesible) y **b** (básico)
+*   **PDF/A-2** (ISO 19005-2): basado en PDF 1.7, que añade el nivel de conformidad **u** (Unicode)
+*   **PDF/A-3** (ISO 19005-3): idéntico a PDF/A-2, pero permite incrustar formatos de archivo arbitrarios como adjuntos
+
+Utilizando GroupDocs.Metadata para .NET, puede detectar rápidamente si un documento PDF cargado cumple con un estándar PDF/A y determinar su versión exacta y nivel de conformidad.
+
+## Detección de conformidad con PDF/A {#detecting-pdf-a-conformance}
+  
+Los pasos y el ejemplo de código en C# que se muestran a continuación indican **cómo detectar el tipo PDF/A de un documento PDF en una solución .NET**:
+
+1.  [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un documento PDF  
+2.  Extraer el paquete de metadatos raíz  
+3.  Leer la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.document/pdftypepackage/properties/pdfaversion" target="_blank" rel="nofollow noopener noreferrer">PdfAVersion</a> desde el paquete <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.document/pdfrootpackage/properties/filetype" target="_blank" rel="nofollow noopener noreferrer">FileType</a>  
+
+**AdvancedUsage.DetectingPdfADocument**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputPdf))
+{
+	var root = metadata.GetRootPackage<PdfRootPackage>();
+
+	if (root.FileType.PdfAVersion != PdfAVersion.None)
+	{
+		Console.WriteLine("The document is PDF/A compliant.");
+		Console.WriteLine("PDF/A version: {0}", root.FileType.PdfAVersion);
+	}
+	else
+	{
+		Console.WriteLine("The document is not PDF/A compliant.");
+	}
+}
+```
+
+La propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.document/pdftypepackage/properties/pdfaversion" target="_blank" rel="nofollow noopener noreferrer">PdfAVersion</a> devuelve uno de los valores predefinidos de la enumeración <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.document/pdfaversion" target="_blank" rel="nofollow noopener noreferrer">PdfAVersion</a>, por ejemplo `PdfA1a`, `PdfA1b`, `PdfA2a`, `PdfA2b`, `PdfA2u`, `PdfA3a`, `PdfA3b`, `PdfA3u` o `None` cuando el documento no cumple con ninguna norma PDF/A.
+
+## Detección conjunta del tipo y la versión de PDF/A {#detecting-pdf-a-type-and-version-information-together}
+  
+El siguiente ejemplo de código muestra cómo recuperar información detallada sobre el cumplimiento de PDF/A junto con propiedades generales del formato de archivo PDF.
+
+**AdvancedUsage.DetectingPdfADocumentWithFileFormatInfo**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputPdf))
+{
+	var root = metadata.GetRootPackage<PdfRootPackage>();
+
+	Console.WriteLine("File format : {0}", root.FileType.FileFormat);
+	Console.WriteLine("PDF version : {0}", root.FileType.Version);
+	Console.WriteLine("MIME type   : {0}", root.FileType.MimeType);
+	Console.WriteLine("PDF/A version: {0}", root.FileType.PdfAVersion);
+}
+```
+
+
+:::info
+La información de conformidad con PDF/A se almacena en los metadatos XMP del documento bajo el espacio de nombres `pdfaid`. GroupDocs.Metadata lee esta información automáticamente y la expone mediante la propiedad `PdfAVersion`, por lo que no es necesario analizar manualmente el flujo XMP.
+:::
+
+
+## Más recursos {#more-resources}  
+### Ejemplos en GitHub {#github-examples}  
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:  
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para .NET</a>  
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para Java</a>  
+
+### Aplicación gratuita en línea para la gestión de metadatos de documentos {#free-online-document-metadata-management-app}  
+Junto con la completa biblioteca para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.  
+Le invitamos a visualizar y editar los metadatos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos, imágenes y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/metadata" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita en línea para visualizar y editar metadatos de documentos</a>.

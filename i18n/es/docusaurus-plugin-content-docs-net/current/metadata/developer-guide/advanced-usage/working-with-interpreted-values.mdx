@@ -1,0 +1,100 @@
+---
+title: "Trabajar con valores interpretados"
+sidebar_label: "Trabajar con valores interpretados"
+sidebar_position: 8
+description: "Este artículo contiene un buen ejemplo de bandera numérica o enumeración."
+product: "metadata"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "metadata-net"
+source_path: "net/developer-guide/advanced-usage/working-with-interpreted-values.md"
+source_commit: "63b86dac442b8f3b48df2f3a352c0da95426b1cc"
+source_sha256: "9c0c0f6c1909ab798a00904c5c028f3458ce476bd3ccceb79eddaa91a91b51cf"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "5f322caf347faf968012a7cd00d3d8e5e6f563c33fdb109420633838b46277b6"
+translation_updated_at: "2026-10-12T06:33:47.131Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Metadata para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+A veces no es realmente obvio lo que supuestamente significa una propiedad de metadatos específica. Un buen ejemplo de tal propiedad vaga es una bandera numérica o una enumeración. Por ejemplo, aquí se presenta la descripción de la etiqueta EXIF `ExposureProgram` tomada de la especificación oficial de EXIF:
+
+
+:::info
+La clase del programa utilizado por la cámara para establecer la exposición cuando se toma la foto. Los valores de la etiqueta son los siguientes:
+
+| Valor | Descripción              |
+|-------|--------------------------|
+| 0     | No definido              |
+| 1     | Manual                   |
+| 2     | Programa normal          |
+| 3     | Prioridad de apertura    |
+| 4     | Prioridad de obturador   |
+| 5     | Programa creativo        |
+| 6     | Programa de acción       |
+| 7     | Modo retrato             |
+| 8     | Modo paisaje             |
+:::
+
+
+Como puede verse, todos los modos están representados por valores numéricos. Si no está familiarizado con la especificación, le resultará difícil convertir estos números aislados en algo significativo. Aquí es donde entran en juego los valores interpretados: ofrecen una descripción amigable para el usuario del valor original de la propiedad. El fragmento de código siguiente muestra cómo extraer la propiedad `ExposureProgram` y mostrar tanto su valor original como su valor interpretado.
+
+
+```csharp
+using (Metadata metadata = new Metadata(@"D:\input.heic"))
+{
+    var root = (IExif)metadata.GetRootPackage();
+    if (root.ExifPackage != null)
+    {
+        var property = root.ExifPackage.ExifIfdPackage[TiffTagID.ExposureProgram] as TiffShortTag;
+        if (property != null)
+        {
+            Console.WriteLine(property.TagValue[0]); // 2
+            Console.WriteLine(property.InterpretedValue); // Normal program
+        }
+    }
+}
+```
+
+De una versión a otra, agregamos intérpretes a las propiedades de metadatos extraídas de diversos formatos. Para obtener una lista completa de las propiedades que tienen valores interpretados para un archivo en particular, utilice el siguiente ejemplo:
+
+**AdvancedUsage.WorkingWithInterpretedValues**
+
+```csharp
+foreach (string file in Directory.GetFiles(Constants.InputPath))
+{
+    using (Metadata metadata = new Metadata(file))
+    {
+        if (metadata.FileFormat != FileFormat.Unknown && !metadata.GetDocumentInfo().IsEncrypted)
+        {
+            Console.WriteLine();
+            Console.WriteLine(file);
+            var properties = metadata.FindProperties(p => p.InterpretedValue != null);
+            foreach (var property in properties)
+            {
+                Console.WriteLine(property.Name);
+                Console.WriteLine(property.Value.RawValue);
+                Console.WriteLine(property.InterpretedValue.RawValue);
+            }
+        }
+    }
+}
+```
+
+## Más recursos {#more-resources}  
+### Ejemplos en GitHub {#github-examples}  
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:  
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para .NET</a>    
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para Java</a>    
+
+### Aplicación gratuita en línea para la gestión de metadatos de documentos {#free-online-document-metadata-management-app}  
+Además de la completa biblioteca para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.  
+Le invitamos a visualizar y editar los metadatos de PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos, imágenes y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/metadata" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Metadata Viewing and Editing App</a>.

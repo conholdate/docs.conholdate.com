@@ -1,0 +1,220 @@
+---
+title: "Trabajar con metadatos en Presentaciones"
+sidebar_label: "Trabajar con metadatos en Presentaciones"
+sidebar_position: 3
+description: ""
+product: "metadata"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "metadata-net"
+source_path: "net/developer-guide/advanced-usage/managing-metadata-for-specific-formats/documents/working-with-metadata-in-presentations.md"
+source_commit: "63b86dac442b8f3b48df2f3a352c0da95426b1cc"
+source_sha256: "7ed8cdceb6f7810c0fa19cea1926ae7a45a6395244f278d747a825226ba27d99"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "3713cdb92991fec24b4baf1d1627bfc1addc4e2934913edb03dde002d3243146"
+translation_updated_at: "2026-10-12T05:00:46.949Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Metadata para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Metadata para .NET proporciona funcionalidad que permite trabajar con distintos tipos de presentaciones, como PPT, PPTX, POTM, POTX, etc. Para obtener la lista completa de formatos de presentación admitidos, consulte [Formatos de documento admitidos](/net/metadata/getting-started/supported-document-formats/).
+
+## Detección del tipo exacto de una presentación {#detecting-the-exact-type-of-a-presentation}
+  
+El siguiente ejemplo de código le ayudará a detectar el tipo exacto de una presentación cargada y extraer información adicional sobre el formato del archivo.
+
+1.  [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) una presentación  
+2.  Extraer el paquete de metadatos raíz  
+3.  Utilizar la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.document/presentationrootpackage/properties/filetype" target="_blank" rel="nofollow noopener noreferrer">FileType</a> para obtener información sobre el formato del archivo  
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.Presentation.<wbr />PresentationReadFileFormatProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputPptx))
+{
+	var root = metadata.GetRootPackage<PresentationRootPackage>();
+
+	Console.WriteLine(root.FileType.FileFormat);
+	Console.WriteLine(root.FileType.PresentationFormat);
+	Console.WriteLine(root.FileType.MimeType);
+	Console.WriteLine(root.FileType.Extension);
+}
+```
+
+## Lectura de propiedades de metadatos integradas  {#reading-built-in-metadata-properties}
+  
+Para acceder a los metadatos integrados de una presentación, utilice la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.document.documentrootpackage/1/properties/documentproperties" target="_blank" rel="nofollow noopener noreferrer">DocumentProperties</a> definida en la clase <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.document.documentrootpackage/1" target="_blank" rel="nofollow noopener noreferrer">DocumentRootPackage</a>.
+
+El siguiente fragmento de código extrae las propiedades de metadatos integradas y las muestra en pantalla.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.Presentation.<wbr />PresentationReadBuiltInProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputPpt))
+{
+	var root = metadata.GetRootPackage<PresentationRootPackage>();
+
+	Console.WriteLine(root.DocumentProperties.Author);
+	Console.WriteLine(root.DocumentProperties.CreatedTime);
+	Console.WriteLine(root.DocumentProperties.Company);
+	Console.WriteLine(root.DocumentProperties.Category);
+	Console.WriteLine(root.DocumentProperties.Keywords);
+	Console.WriteLine(root.DocumentProperties.LastPrintedDate);
+	Console.WriteLine(root.DocumentProperties.NameOfApplication);
+
+	// ... 
+}
+```
+
+## Lectura de propiedades de metadatos personalizados  {#reading-custom-metadata-properties}
+  
+Si necesita extraer propiedades de metadatos personalizados de una presentación, siga el ejemplo de código a continuación.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.Presentation.<wbr />PresentationReadCustomProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputPptx))
+{
+	var root = metadata.GetRootPackage<PresentationRootPackage>();
+	var customProperties = root.DocumentProperties.FindProperties(p => !p.Tags.Contains(Tags.Document.BuiltIn));
+
+	foreach (var property in customProperties)
+	{
+		Console.WriteLine("{0} = {1}", property.Name, property.Value);
+	}
+}
+```
+
+Como puede verse, el ejemplo de código utiliza el motor de búsqueda de GroupDocs.Metadata para recuperar todas las propiedades que no están marcadas con la etiqueta `BuiltIn`. Dado que llamamos al método `<a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.common/metadatapackage/methods/findproperties" target="_blank" rel="nofollow noopener noreferrer">FindProperties</a>` sobre un paquete de metadatos específico (una instancia de la clase `<a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.document/presentationpackage" target="_blank" rel="nofollow noopener noreferrer">PresentationPackage</a>`), el resultado de la búsqueda solo contendrá propiedades de metadatos específicas para presentaciones.
+
+## Inspección de presentaciones  {#inspecting-presentations}
+  
+La función de inspección que se presenta en esta sección no funciona directamente con los metadatos, sino que extrae ciertos fragmentos útiles de información que, bajo ciertas circunstancias, pueden considerarse metadatos. Por ejemplo, es posible que desee obtener información sobre diapositivas ocultas presentes en un documento o extraer comentarios de usuario del contenido del documento. Siga el ejemplo siguiente para aprender cómo hacerlo.
+
+1.  [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un documento de presentación  
+2.  Extraer el paquete de metadatos raíz  
+3.  Utilizar la propiedad `<a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.formats.document/presentationrootpackage/properties/inspectionpackage" target="_blank" rel="nofollow noopener noreferrer">InspectionPackage</a>` para inspeccionar el documento  
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.Presentation.<wbr />PresentationReadInspectionProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputPpt))
+{
+	var root = metadata.GetRootPackage<PresentationRootPackage>();
+
+	if (root.InspectionPackage.Comments != null)
+	{
+		foreach (var comment in root.InspectionPackage.Comments)
+		{
+			Console.WriteLine(comment.Author);
+			Console.WriteLine(comment.Text);
+			Console.WriteLine(comment.CreatedTime);
+			Console.WriteLine(comment.SlideNumber);
+		}
+	}
+
+	if (root.InspectionPackage.HiddenSlides != null)
+	{
+		foreach (var slide in root.InspectionPackage.HiddenSlides)
+		{
+			Console.WriteLine(slide.Name);
+			Console.WriteLine(slide.Number);
+			Console.WriteLine(slide.SlideId);
+		}
+	}
+}
+```
+
+## Lectura de estadísticas del documento  {#reading-document-statistics}
+  
+La mayoría de las aplicaciones de oficina pueden mostrar estadísticas simples de texto para los documentos cargados. Estas pueden incluir, por ejemplo, una estimación de la cantidad de palabras, páginas, caracteres, etc. La API de GroupDocs.Metadata ofrece una funcionalidad similar para algunos formatos de documentos. El siguiente ejemplo de código demuestra cómo obtener las estadísticas de texto para una presentación.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.Presentation.<wbr />PresentationReadDocumentStatistics**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputPpt))
+{
+	var root = metadata.GetRootPackage<PresentationRootPackage>();
+
+	Console.WriteLine(root.DocumentStatistics.CharacterCount);
+	Console.WriteLine(root.DocumentStatistics.PageCount);
+	Console.WriteLine(root.DocumentStatistics.WordCount);
+}
+```
+
+## Actualización de propiedades de metadatos integradas  {#updating-built-in-metadata-properties}
+  
+Actualizar cualquier propiedad integrada de documento es tan sencillo como obtenerlas. El siguiente ejemplo de código demuestra cómo actualizar propiedades de metadatos integradas en una presentación.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.Presentation.<wbr />PresentationUpdateBuiltInProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputPptx))
+{
+	var root = metadata.GetRootPackage<PresentationRootPackage>();
+
+	root.DocumentProperties.Author = "test author";
+	root.DocumentProperties.CreatedTime = DateTime.Now;
+	root.DocumentProperties.Company = "GroupDocs";
+	root.DocumentProperties.Category = "test category";
+	root.DocumentProperties.Keywords = "metadata, built-in, update";
+
+	// ... 
+
+	metadata.Save(Constants.OutputPptx);
+}
+```
+
+## Agregar o actualizar propiedades de metadatos personalizados  {#adding-or-updating-custom-metadata-properties}
+  
+La API de GroupDocs.Metadata también permite agregar y actualizar propiedades de metadatos personalizados en una presentación. Consulte el siguiente ejemplo de código.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.Presentation.<wbr />PresentationUpdateCustomProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputPpt))
+{
+	var root = metadata.GetRootPackage<PresentationRootPackage>();
+
+	root.DocumentProperties.Set("customProperty1", "some value");
+	root.DocumentProperties.Set("customProperty2", 123.1);
+
+	metadata.Save(Constants.OutputPpt);
+}
+```
+
+## Actualización de propiedades de inspección  {#updatingj-inspection-properties}
+  
+Cuando inspecciona un documento, GroupDocs.Metadata para .NET forma un paquete de metadatos que contiene la información extraída. La clase del paquete también proporciona algunos métodos básicos que permiten actualizar (o eliminar) las propiedades extraídas. El siguiente ejemplo de código demuestra cómo eliminar las propiedades de inspección de una presentación.
+
+**AdvancedUsage.ManagingMetadataForSpecificFormats.<wbr />Document.Presentation.<wbr />PresentationUpdateInspectionProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputPpt))
+{
+	var root = metadata.GetRootPackage<PresentationRootPackage>();
+
+	root.InspectionPackage.ClearComments();
+	root.InspectionPackage.ClearHiddenSlides();
+
+	metadata.Save(Constants.OutputPpt);
+}
+```
+
+## Más recursos {#more-resources}  
+### Ejemplos en GitHub {#github-examples}  
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:  
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para .NET</a>    
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para Java</a>    
+
+### Aplicación gratuita en línea para gestión de metadatos de documentos {#free-online-document-metadata-management-app}  
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.  
+Le invitamos a visualizar y editar los metadatos de PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos, imágenes y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/metadata" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita en línea para visualización y edición de metadatos de documentos</a>.

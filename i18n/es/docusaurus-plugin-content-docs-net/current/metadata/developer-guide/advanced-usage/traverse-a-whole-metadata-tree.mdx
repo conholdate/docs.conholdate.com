@@ -1,0 +1,91 @@
+---
+title: "Recorrer un árbol de metadatos completo"
+sidebar_label: "Recorrer un árbol de metadatos completo"
+sidebar_position: 6
+description: "Este artículo explica que GroupDocs.Metadata representa cualquier archivo cargado como un árbol compuesto por propiedades de metadatos y paquetes de metadatos anidados. Puede recorrer fácilmente el árbol de metadatos"
+product: "metadata"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "metadata-net"
+source_path: "net/developer-guide/advanced-usage/traverse-a-whole-metadata-tree.md"
+source_commit: "63b86dac442b8f3b48df2f3a352c0da95426b1cc"
+source_sha256: "76966153034b08b61b2d6b35677a1f1a52e5107a836fee2b6502c469f465c42a"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "4a50ee1c95ece3280c4d4156df149641c3dd85f82e45287ebf6ab016a448e0d7"
+translation_updated_at: "2026-10-12T06:33:00.821Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Metadata para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+En algunos casos, es necesario acceder a todas las propiedades extraídas de un documento, video, imagen, etc. GroupDocs.Metadata representa cualquier archivo cargado como un árbol compuesto por propiedades de metadatos y paquetes de metadatos anidados. Puede recorrer fácilmente el árbol de metadatos utilizando el fragmento de código siguiente:
+
+1.  [Load](/net/metadata/developer-guide/advanced-usage/loading-files/) un archivo para examinarlo  
+2.  Obtenga la instancia <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.common/rootmetadatapackage" target="_blank" rel="nofollow noopener noreferrer">RootMetadataPackage</a>, que constituye la raíz de todo el árbol de metadatos extraído del archivo  
+3.  Utilice cualquier algoritmo de su elección para recorrer el árbol.
+
+**AdvancedUsage.TraverseWholeMetadataTree**
+
+```csharp
+public static void Run()
+{
+	using (Metadata metadata = new Metadata(Constants.JpegWithXmp))
+	{
+		DisplayMetadataTree(metadata.GetRootPackage(), 0);
+	}
+}
+
+private static void DisplayMetadataTree(MetadataPackage package, int indent)
+{
+	if (package != null)
+	{
+		var stringMetadataType = package.MetadataType.ToString();
+		Console.WriteLine(stringMetadataType.PadLeft(stringMetadataType.Length + indent));
+		foreach (MetadataProperty property in package)
+		{
+			string stringPropertyRepresentation = string.Format("Name: {0}, Value: {1}", property.Name, property.Value);
+			Console.WriteLine(stringPropertyRepresentation.PadLeft(stringPropertyRepresentation.Length + indent + 1));
+			if (property.Value != null)
+			{
+				switch (property.Value.Type)
+				{
+					case MetadataPropertyType.Metadata:
+						DisplayMetadataTree(property.Value.ToClass<MetadataPackage>(), indent + 2);
+						break;
+					case MetadataPropertyType.MetadataArray:
+						DisplayMetadataTree(property.Value.ToArray<MetadataPackage>(), indent + 2);
+						break;
+				}
+			}
+		}
+	}
+}
+
+private static void DisplayMetadataTree(MetadataPackage[] packages, int indent)
+{
+	if (packages != null)
+	{
+		foreach (var package in packages)
+		{
+			DisplayMetadataTree(package, indent);
+		}
+	}
+}
+```
+
+## Más recursos {#more-resources}  
+### Ejemplos en GitHub {#github-examples}  
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:  
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para .NET</a>    
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para Java</a>    
+
+### Aplicación gratuita en línea para la gestión de metadatos de documentos {#free-online-document-metadata-management-app}  
+Además de la completa biblioteca para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.  
+Le invitamos a visualizar y editar los metadatos de PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos, imágenes y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/metadata" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita en línea para visualización y edición de metadatos de documentos</a>.

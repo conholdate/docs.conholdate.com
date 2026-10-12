@@ -1,0 +1,262 @@
+---
+title: "Trabajar con metadatos IPTC IIM"
+sidebar_label: "Trabajar con metadatos IPTC IIM"
+sidebar_position: 2
+description: "Este artículo muestra cómo acceder a los metadatos IPTC en un archivo de cualquier formato admitido."
+product: "metadata"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "metadata-net"
+source_path: "net/developer-guide/advanced-usage/working-with-metadata-standards/working-with-iptc-iim-metadata.md"
+source_commit: "63b86dac442b8f3b48df2f3a352c0da95426b1cc"
+source_sha256: "ad575a9f6a776be152e03020322ff33addb27112ba1455a333ef3adb8a26ae63"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "32305c1983b79207883ebc0c19f67360dc13316c508e4e67f2b9665be6b80078"
+translation_updated_at: "2026-10-12T03:29:36.633Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Metadata para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## ¿Qué es IPTC IIM? {#what-is-iptc-iim}
+  
+El Modelo de Intercambio de Información de la IPTC (IPTC IIM, por sus siglas en inglés) es un conjunto de propiedades de metadatos que se pueden aplicar a texto, imágenes y otros tipos de medios. La norma también define una estructura de datos compleja que se utiliza para almacenar dichas propiedades. La IPTC IIM fue desarrollada por el Consejo Internacional de Prensa y Telecomunicaciones (IPTC, por sus siglas en inglés) con el fin de agilizar el intercambio internacional de noticias entre periódicos y agencias de noticias. Sin embargo, actualmente también es ampliamente utilizada por fotógrafos aficionados y profesionales. La norma es compatible con numerosos programas de creación y manipulación de imágenes. Los metadatos IPTC IIM pueden incrustarse en diversos formatos de imagen, como JPEG, TIFF, etc.
+
+
+:::info
+Para más información sobre el estándar IPTC IIM, consulte https://www.iptc.org/std/IIM/4.2/specification/IIMV4.2.pdf.
+:::
+
+
+## Lectura de propiedades básicas IPTC IIM  {#reading-basic-iptc-iim-properties}
+  
+Para acceder a los metadatos IPTC en un archivo de cualquier formato admitido, GroupDocs.Metadata proporciona la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.iptc/iiptc/properties/iptcpackage" target="_blank" rel="nofollow noopener noreferrer">IIptc.IptcPackage</a>. A continuación se indican los pasos para leer los metadatos IPTC:
+
+1. [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un archivo que contenga metadatos IPTC  
+2. Extraer el paquete de metadatos IPTC mediante la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.iptc/iiptc/properties/iptcpackage" target="_blank" rel="nofollow noopener noreferrer">IIptc.IptcPackage</a>  
+3. Leer las propiedades de las instancias de las clases <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.iptc/iptcapplicationrecord" target="_blank" rel="nofollow noopener noreferrer">IptcApplicationRecord</a> y <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.iptc/iptcenveloperecord" target="_blank" rel="nofollow noopener noreferrer">IptcEnvelopeRecord</a>  
+
+El siguiente fragmento de código obtiene las propiedades IPTC de una imagen JPEG y las muestra en pantalla.  
+
+**AdvancedUsage.WorkingWithMetadataStandards.<wbr />Iptc.ReadBasicIptcProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.JpegWithIptc))
+{
+	IIptc root = metadata.GetRootPackage() as IIptc;
+	if (root != null && root.IptcPackage != null)
+	{
+		if (root.IptcPackage.EnvelopeRecord != null)
+		{
+			Console.WriteLine(root.IptcPackage.EnvelopeRecord.DateSent);
+			Console.WriteLine(root.IptcPackage.EnvelopeRecord.Destination);
+			Console.WriteLine(root.IptcPackage.EnvelopeRecord.FileFormat);
+			Console.WriteLine(root.IptcPackage.EnvelopeRecord.FileFormatVersion);
+
+			// ...
+		}
+
+		if (root.IptcPackage.ApplicationRecord != null)
+		{
+			Console.WriteLine(root.IptcPackage.ApplicationRecord.Headline);
+			Console.WriteLine(root.IptcPackage.ApplicationRecord.ByLine);
+			Console.WriteLine(root.IptcPackage.ApplicationRecord.ByLineTitle);
+			Console.WriteLine(root.IptcPackage.ApplicationRecord.CaptionAbstract);
+			Console.WriteLine(root.IptcPackage.ApplicationRecord.City);
+			Console.WriteLine(root.IptcPackage.ApplicationRecord.DateCreated);
+			Console.WriteLine(root.IptcPackage.ApplicationRecord.ReleaseDate);
+
+			// ...
+		}
+	}
+}
+```
+
+## Lectura de todos los conjuntos de datos IPTC IIM  {#reading-all-iptc-iim-datasets}
+  
+En algunos casos, es necesario leer todos los conjuntos de datos IPTC (propiedades de metadatos) de un archivo, incluidos los personalizados. Para lograrlo, la API de GroupDocs.Metadata proporciona acceso directo a los conjuntos de datos IPTC extraídos de un archivo.  
+
+1.  [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un archivo que contenga metadatos IPTC  
+2.  Extraer el paquete de metadatos IPTC mediante la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.iptc/iiptc/properties/iptcpackage" target="_blank" rel="nofollow noopener noreferrer">IIptc.IptcPackage</a>  
+3.  Recorrer todos los conjuntos de datos IPTC  
+
+**AdvancedUsage.WorkingWithMetadataStandards.<wbr />Iptc.ReadIptcDataSets**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.PsdWithIptc))
+{
+    IIptc root = metadata.GetRootPackage() as IIptc;
+    if (root != null && root.IptcPackage != null)
+    {
+        foreach (var dataSet in root.IptcPackage.ToDataSetList())
+        {
+            Console.WriteLine(dataSet.RecordNumber);
+            Console.WriteLine(dataSet.DataSetNumber);
+            Console.WriteLine(dataSet.AlternativeName);
+            if (dataSet.Value.Type == MetadataPropertyType.PropertyValueArray)
+            {
+                foreach (var value in dataSet.Value.ToArray<PropertyValue>())
+                {
+                    Console.Write("{0}, ", value);
+                }
+                Console.WriteLine();
+            }
+            else
+            {
+                Console.WriteLine(dataSet.Value);
+            }
+        }
+    }
+}
+```
+
+## Actualización de propiedades IPTC IIM  {#updating-iptc-iim-properties}
+  
+La API de GroupDocs.Metadata facilita al usuario la actualización de metadatos IPTC de forma sencilla, mediante las propiedades de la clase <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.iptc/iptcrecordset" target="_blank" rel="nofollow noopener noreferrer">IptcRecordSet</a>. Siga los pasos que se indican a continuación para actualizar los metadatos IPTC en un archivo de cualquier formato admitido.
+
+1. [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un archivo que contenga metadatos IPTC  
+2. Extraer el paquete de metadatos IPTC mediante la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.iptc/iiptc/properties/iptcpackage" target="_blank" rel="nofollow noopener noreferrer">IIptc.IptcPackage</a>  
+3. Asignar valores a las propiedades IPTC deseadas  
+4. [Guardar](/net/metadata/developer-guide/advanced-usage/saving-files/) los cambios  
+
+**AdvancedUsage.WorkingWithMetadataStandards.<wbr />Iptc.UpdateIptcProperties**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.InputJpeg))
+{
+	IIptc root = metadata.GetRootPackage() as IIptc;
+	if (root != null)
+	{
+		// Set the IPTC package if it's missing
+		if (root.IptcPackage == null)
+		{
+			root.IptcPackage = new IptcRecordSet();
+		}
+
+		if (root.IptcPackage.EnvelopeRecord == null)
+		{
+			root.IptcPackage.EnvelopeRecord = new IptcEnvelopeRecord();
+		}
+		root.IptcPackage.EnvelopeRecord.DateSent = DateTime.Now;
+		root.IptcPackage.EnvelopeRecord.ProductID = Guid.NewGuid().ToString();
+
+		// ...
+
+		if (root.IptcPackage.ApplicationRecord == null)
+		{
+			root.IptcPackage.ApplicationRecord = new IptcApplicationRecord();
+		}
+		root.IptcPackage.ApplicationRecord.ByLine = "GroupDocs";
+		root.IptcPackage.ApplicationRecord.Headline = "test";
+		root.IptcPackage.ApplicationRecord.ByLineTitle = "code sample";
+		root.IptcPackage.ApplicationRecord.ReleaseDate = DateTime.Today;
+
+		// ...
+
+		metadata.Save(Constants.OutputJpeg);
+	}
+}
+```
+
+## Agregar o actualizar conjuntos de datos personalizados IPTC IIM {#adding-or-updating-custom-iptc-iim-datasets}
+  
+La API de GroupDocs.Metadata permite agregar o actualizar conjuntos de datos personalizados en un paquete IPTC.
+
+1. [Cargar](/net/metadata/developer-guide/advanced-usage/loading-files/) un archivo que contenga metadatos IPTC  
+2. Extraer el paquete de metadatos IPTC mediante la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.iptc/iiptc/properties/iptcpackage" target="_blank" rel="nofollow noopener noreferrer">IIptc.IptcPackage</a>  
+3. Establecer el paquete IPTC si no está presente  
+4. Agregar cualquier número de conjuntos de datos personalizados al paquete (consulte la clase <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.iptc/iptcdataset" target="_blank" rel="nofollow noopener noreferrer">IptcDataSet</a> para obtener más información)  
+5. [Guardar](/net/metadata/developer-guide/advanced-usage/saving-files/) los cambios  
+
+**AdvancedUsage.WorkingWithMetadataStandards.<wbr />Iptc.SetCustomIptcDataSet**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.PsdWithIptc))
+{
+	IIptc root = metadata.GetRootPackage() as IIptc;
+	if (root != null)
+	{
+		// Set the IPTC package if it's missing
+		if (root.IptcPackage == null)
+		{
+			root.IptcPackage = new IptcRecordSet();
+		}
+
+		// Add a know property using the DataSet API
+		root.IptcPackage.Set(new IptcDataSet((byte)IptcRecordType.ApplicationRecord, (byte)IptcApplicationRecordDataSet.BylineTitle, "test code sample"));
+
+		// Add a custom IPTC DataSet
+		root.IptcPackage.Set(new IptcDataSet(255, 255, new byte[] { 1, 2, 3 }));
+
+		metadata.Save(Constants.OutputPsd);
+	}
+}
+```
+
+## Agregar conjuntos de datos repetibles de IPTC IIM  {#adding-repeatable-iptc-iim-datasets}
+  
+De acuerdo con la <a href="https://www.iptc.org/std/IIM/4.2/specification/IIMV4.2.pdf" target="_blank" rel="nofollow noopener noreferrer">especificación IPTC IIM</a>, algunos conjuntos de datos pueden agregarse varias veces a un registro. El fragmento de código a continuación demuestra cómo agregar un conjunto de datos repetible a un registro.
+
+**AdvancedUsage.WorkingWithMetadataStandards.<wbr />Iptc.AddRepeatableIptcDataSet**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.PsdWithIptc))
+{
+    IIptc root = (IIptc)metadata.GetRootPackage();
+    // Set the IPTC package if it's missing
+    if (root.IptcPackage == null)
+    {
+        root.IptcPackage = new IptcRecordSet();
+    }
+    root.IptcPackage.Add(new IptcDataSet((byte)IptcRecordType.ApplicationRecord, (byte)IptcApplicationRecordDataSet.Keywords, "keyword 1"));
+    root.IptcPackage.Add(new IptcDataSet((byte)IptcRecordType.ApplicationRecord, (byte)IptcApplicationRecordDataSet.Keywords, "keyword 2"));
+    root.IptcPackage.Add(new IptcDataSet((byte)IptcRecordType.ApplicationRecord, (byte)IptcApplicationRecordDataSet.Keywords, "keyword 3"));
+    metadata.Save(Constants.OutputPsd);
+}
+ 
+// Check the output file
+using (Metadata metadata = new Metadata(Constants.OutputPsd))
+{
+    IIptc root = (IIptc)metadata.GetRootPackage();
+    var keywordsProperty = root.IptcPackage.ApplicationRecord[(byte)IptcApplicationRecordDataSet.Keywords];
+    foreach (var value in keywordsProperty.Value.ToArray<PropertyValue>())
+    {
+        Console.WriteLine(value);
+    }
+}
+```
+
+## Eliminación de metadatos IPTC IIM  {#removing-iptc-iim-metadata}
+  
+Para eliminar el paquete IPTC de un archivo, simplemente asigne `null` a la propiedad <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata.standards.iptc/iiptc/properties/iptcpackage" target="_blank" rel="nofollow noopener noreferrer">IIptc.IptcPackage</a>. El siguiente ejemplo de código muestra cómo eliminar los metadatos IPTC de un archivo.
+
+**AdvancedUsage.WorkingWithMetadataStandards.<wbr />Iptc.RemoveIptcMetadata**
+
+```csharp
+using (Metadata metadata = new Metadata(Constants.JpegWithIptc))
+{
+	IIptc root = metadata.GetRootPackage() as IIptc;
+	if (root != null)
+	{
+		root.IptcPackage = null;
+		metadata.Save(Constants.OutputJpeg);
+	}
+}
+```
+
+## Más recursos {#more-resources}  
+### Ejemplos en GitHub {#github-examples}  
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:  
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para .NET</a>    
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para Java</a>    
+
+### Aplicación gratuita en línea para la gestión de metadatos de documentos {#free-online-document-metadata-management-app}  
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.  
+Le invitamos a visualizar y editar los metadatos de PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos, imágenes y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/metadata" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Metadata Viewing and Editing App</a>.

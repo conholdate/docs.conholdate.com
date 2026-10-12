@@ -1,0 +1,120 @@
+---
+title: "Extrayendo metadatos"
+sidebar_label: "Extrayendo metadatos"
+sidebar_position: 2
+description: "Este artículo muestra cómo extraer propiedades de metadatos de sus archivos en una solución de C# .NET mediante programación con GroupDocs.Metadata para .NET."
+product: "metadata"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "metadata-net"
+source_path: "net/developer-guide/advanced-usage/extracting-metadata.md"
+source_commit: "63b86dac442b8f3b48df2f3a352c0da95426b1cc"
+source_sha256: "695c21036d67af1c955bea430d6d1925c144d7d7216d05f26918431a281039a1"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-09-02-mdx-protection-v3"
+translation_source_sha256: "2f3889c4000033cb2409db2a7e3e951278f947cfbf62c18991a791e52514c252"
+translation_updated_at: "2026-10-12T06:30:51.798Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Metadata para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Mediante GroupDocs.Metadata para .NET, puede extraer fácilmente metadatos de archivos PDF, DOC, PPT, XLS y muchos otros formatos de archivo diferentes en su solución .NET.
+
+GroupDocs.Metadata para .NET admite muchos formatos de archivo. Consulte la lista completa en el artículo [supported file formats](/net/metadata/getting-started/supported-document-formats/).
+
+No es necesario que se preocupe por el formato de archivo exacto ni por los estándares de metadatos con los que puede trabajar. El mismo código funcionará de la misma manera para todos los formatos admitidos.
+
+Las propiedades de metadatos más utilizadas se marcan con etiquetas que permiten buscarlas en todos los archivos admitidos dentro de diversos paquetes de metadatos. Todas las etiquetas definidas en GroupDocs.Metadata se dividen en categorías, lo que facilita encontrar la etiqueta requerida.
+
+En este artículo deseamos demostrar algunos usos avanzados de etiquetas, categorías y otros atributos de las propiedades de metadatos.
+
+Los siguientes pasos y el ejemplo de código en C# a continuación muestran **cómo extraer propiedades de metadatos de sus archivos en una solución .NET**:
+
+1.  [Load](/net/metadata/developer-guide/advanced-usage/loading-files/) un archivo en el que buscar propiedades de metadatos  
+2.  Definir un predicado para examinar todas las propiedades de metadatos extraídas  
+3.  Pasar el predicado al método <a href="https://reference.groupdocs.com/net/metadata/groupdocs.metadata/metadata/methods/findproperties" target="_blank" rel="nofollow noopener noreferrer">FindProperties</a>  
+4.  Recorrer las propiedades encontradas  
+
+### Extracción de propiedades de metadatos por etiqueta {#extracting-metadata-properties-by-tag}
+
+```csharp
+foreach (string file in Directory.GetFiles(Constants.InputPath))
+{
+	using (Metadata metadata = new Metadata(file))
+	{
+		if (metadata.FileFormat != FileFormat.Unknown && !metadata.GetDocumentInfo().IsEncrypted)
+		{
+			// Fetch all metadata properties that fall into a particular category
+			var properties = metadata.FindProperties(p => p.Tags.Any(t => t.Category == Tags.Content));
+			Console.WriteLine("The metadata properties describing some characteristics of the file content: title, keywords, language, etc.");
+			foreach (var property in properties)
+			{
+				Console.WriteLine("{0} = {1}", property.Name, property.Value);
+			}
+		}
+	}
+}
+```
+
+### Extracción de propiedades de metadatos por tipo y valor  {#extracting-metadata-properties-by-type-and-value}
+
+```csharp
+foreach (string file in Directory.GetFiles(Constants.InputPath))
+{
+	using (Metadata metadata = new Metadata(file))
+	{
+		if (metadata.FileFormat != FileFormat.Unknown && !metadata.GetDocumentInfo().IsEncrypted)
+		{
+			// Fetch all properties having a specific type and value
+			var year = DateTime.Today.Year;
+			properties = metadata.FindProperties(p => p.Value.Type == MetadataPropertyType.DateTime &&
+													 p.Value.ToStruct(DateTime.MinValue).Year == year);
+			Console.WriteLine("All datetime properties with the year value equal to the current year");
+			foreach (var property in properties)
+			{
+				Console.WriteLine("{0} = {1}", property.Name, property.Value);
+			}
+		}
+	}
+}
+```
+
+### Extracción de propiedades de metadatos mediante una expresión regex especificada {#extracting-metadata-properties-by-specified-regex-expression}
+
+```csharp
+foreach (string file in Directory.GetFiles(Constants.InputPath))
+{
+	using (Metadata metadata = new Metadata(file))
+	{
+		if (metadata.FileFormat != FileFormat.Unknown && !metadata.GetDocumentInfo().IsEncrypted)
+		{
+			// Fetch all properties whose names match the specified regex
+			const string pattern = "^author|company|(.+date.*)$";
+			Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
+			properties = metadata.FindProperties(p => regex.IsMatch(p.Name));
+			Console.WriteLine("All properties whose names match the following regex: {0}", pattern);
+			foreach (var property in properties)
+			{
+				Console.WriteLine("{0} = {1}", property.Name, property.Value);
+			}
+		}
+	}
+}
+```
+
+## Más recursos {#more-resources}  
+### Ejemplos en GitHub {#github-examples}  
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:  
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para .NET</a>    
+*   <a href="https://github.com/groupdocs-metadata/GroupDocs.Metadata-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Metadata para Java</a>    
+
+### Aplicación gratuita en línea para la gestión de metadatos de documentos {#free-online-document-metadata-management-app}  
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.  
+Le invitamos a visualizar y editar los metadatos de PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos, imágenes y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/metadata" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Metadata Viewing and Editing App</a>.
