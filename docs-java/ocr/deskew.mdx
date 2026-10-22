@@ -1,0 +1,132 @@
+---
+title: "Skew correction"
+sidebar_label: "Skew correction"
+sidebar_key: "java-ocr-deskew"
+sidebar_position: 100
+description: ""
+product: "ocr"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/ocr/java"
+source_path: "ocr/java/deskew.html"
+source_commit: ""
+source_sha256: "0f2f9dab32a45cfbf98990d23b119298c6afae674a4f0adf6f41eec25006b3dd"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/ocr/java/deskew/"
+source_snapshot_sha256: "ad00c06cd3cdea3be637718d5af72c8fb0f01222686f3066277d2b7d8beea151"
+---
+
+:::info
+Aspose.OCR for Java is included in Conholdate.Total for Java.
+:::
+
+
+import "./_remote-markdown.css";
+
+When a page is fed to a flatbed scanner (mechanically or manually) or photographed with a smartphone, it is nearly impossible to achieve perfect alignment. As a result, a slight skew (tilt) inevitably occurs in scanned images or photographs.
+
+Skew angle detection and image straightening is critical to the OCR process as it directly affects the reliability and efficiency of segmentation and text extraction. Aspose.OCR offers automated processing algorithms to correct image tilt (deskew) before proceeding to recognition.
+
+## Detecting skew angles {#detecting-skew-angles}
+
+To find out skew angles for all images in a [batch](/net/ocr/ocrinput/), use <a href="https://reference.aspose.com/ocr/java/com.aspose.ocr/asposeocr/#CalculateSkew-com.aspose.ocr.OcrInput-" target="_blank" rel="nofollow noopener noreferrer">`CalculateSkew`</a> method. It returns a list of `SkewOutput` objects, one per image, with the following properties:
+
+<div className="docs-owner-markdown-table">
+
+| Property | Type | Description |
+| ------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Angle` | `double` | Skew angle in degrees. |
+| `ImageIndex` | `int` | Sequence number of the image on the page. When working with single-page images, this value is always 0. |
+| `Page` | `int` | Page number. When working with single-page images, this value is always 0. |
+| `Source` | `String` | The full path or URL of the source file. If the file is provided as a `BufferedImage` object, an array of pixels, or a Base64 string, this value will be empty. |
+
+</div>
+
+:::info
+
+- Skew angles are calculated for all images in the batch, including those without text.
+- PDF documents can contain more than one image per page. Therefore, the resulting list can contain more `SkewOutput` objects than the number of pages in the document.
+  :::
+
+```java
+AsposeOcr recognitionEngine = new AsposeOcr();
+// Add PDF documents to OcrInput object
+OcrInput input = new OcrInput(InputType.PDF);
+input.Add("source.pdf");
+// Detect skew angles
+ArrayList<SkewOutput> angles = recognitionEngine.CalculateSkew(input);
+angles.forEach((angle) -> {
+	System.out.println("File: " + angle.Source + " | Page: " + angle.Page + " | Image: "+ angle.ImageIndex + " | Angle: " + angle.Angle +"°");
+});
+```
+
+![Skewed image](/java/ocr/images/6515d4e92f5e4048-skew-origin.png)
+
+`> File: "C:\source.pdf" | Page: 0 | Image: 0 | Angle: 5.9°`
+
+## Automatic skew correction {#automatic-skew-correction}
+
+To automatically straighten skewed image before recognition, run the image through <a href="https://reference.aspose.com/ocr/java/com.aspose.ocr/PreprocessingFilter#AutoSkew--" target="_blank" rel="nofollow noopener noreferrer">`AutoSkew`</a> preprocessing filter.
+
+```java
+AsposeOCR api = new AsposeOCR();
+// Apply automatic skew correction
+PreprocessingFilter filters = new PreprocessingFilter();
+filters.add(PreprocessingFilter.AutoSkew());
+// Prepare batch
+OcrInput images = new OcrInput(InputType.SingleImage, filters);
+images.add("image.png");
+// Save processed images to the folder
+ImageProcessing.Save(images, "C:\\images");
+```
+
+![Skewed image](/java/ocr/images/6515d4e92f5e4048-skew-origin.png) ![Deskewed image](/java/ocr/images/8639c4f55f331901-deskew.png)
+
+## Manual skew correction {#manual-skew-correction}
+
+In some cases, automatic skew correction may incorrectly determine the angle of the image. This can happen to significantly rotated images (more than 20% inclination) or poor quality photos with significant perspective distortions.
+
+To deal with such situations, you can rotate the image by the specified degree using <a href="https://reference.aspose.com/ocr/java/com.aspose.ocr/PreprocessingFilter#Rotate-float-" target="_blank" rel="nofollow noopener noreferrer">`Rotate`</a> preprocessing filter. The rotation angle is passed in degrees:
+
+- Negative angle (`-360` to `0`): rotate counterclockwise;
+- Positive angle (`0` to `360`): rotate clockwise.
+
+```java
+AsposeOCR api = new AsposeOCR();
+// Apply manual rotation
+PreprocessingFilter filters = new PreprocessingFilter();
+filters.add(PreprocessingFilter.Rotate(-90));
+// Prepare batch
+OcrInput images = new OcrInput(InputType.SingleImage, filters);
+images.add("image.png");
+// Save processed images to the folder
+ImageProcessing.Save(images, "C:\\images");
+```
+
+## Image regions preprocessing {#image-regions-preprocessing}
+
+Automatic skew correction and manual rotation filters can be applied to specific regions of an image. For example, you can straighten an illustration on a page while leaving the rest of the content unchanged.
+
+:::info
+The original size of an image does not change when its area is rotated. Parts of the rotated area that do not match the original size of the area are cropped.
+
+It is recommended to apply the automatic deskew and manual rotation filters only to square areas.
+:::
+
+To apply a filter to an area, specify its top left corner along with width and height as <a href="https://docs.oracle.com/javase/8/docs/api/java/awt/Rectangle.html" target="_blank" rel="nofollow noopener noreferrer">`Rectangle`</a> object. If the region is omitted, the filter is applied to the entire image.
+
+```java
+Rectangle rectangle = new Rectangle(5, 161, 340, 340);
+PreprocessingFilter filters = new PreprocessingFilter();
+filters.add(PreprocessingFilter.Rotate(90, rectangle));
+```
+
+## Usage scenarios {#usage-scenarios}
+
+- Automatic skew correction is recommended in almost all cases, except for perfectly straight scans.
+- Manual rotation is recommended for:
+  - photos of low quality;
+  - images with a significant angle of inclination.
