@@ -1,0 +1,138 @@
+---
+title: "Corrección de sesgo"
+sidebar_label: "Corrección de sesgo"
+sidebar_key: "java-ocr-deskew"
+sidebar_position: 100
+description: ""
+product: "ocr"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/ocr/java"
+source_path: "ocr/java/deskew.html"
+source_commit: ""
+source_sha256: "0f2f9dab32a45cfbf98990d23b119298c6afae674a4f0adf6f41eec25006b3dd"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/ocr/java/deskew/"
+source_snapshot_sha256: "ad00c06cd3cdea3be637718d5af72c8fb0f01222686f3066277d2b7d8beea151"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-16-mdx-protection-v4"
+translation_source_sha256: "727540af5511fb071024238420185f9b51b8846dca8e09ed0f43bd10ff0fa2e0"
+translation_updated_at: "2026-10-22T05:45:43.263Z"
+translation_status: "ai-draft"
+---
+
+:::info
+Aspose.OCR para Java está incluido en Conholdate.Total para Java.
+:::
+
+import "./_remote-markdown.css";
+
+Cuando una página se introduce en un escáner de cama plana (mecánica o manualmente) o se fotografió con un smartphone, es casi imposible lograr una alineación perfecta. Como resultado, inevitablemente se produce una ligera inclinación (torción) en las imágenes escaneadas o fotografías.
+
+La detección del ángulo de inclinación y la corrección de la imagen son fundamentales para el proceso de OCR, ya que afectan directamente la fiabilidad y eficiencia de la segmentación y la extracción de texto. Aspose.OCR ofrece algoritmos de procesamiento automatizado para corregir la inclinación de la imagen (deskew) antes de proceder al reconocimiento.
+
+## Detección de ángulos de inclinación {#detecting-skew-angles}
+  
+Para determinar los ángulos de inclinación de todas las imágenes de un [lote](/net/ocr/ocrinput/), utilice el método <a href="https://reference.aspose.com/ocr/java/com.aspose.ocr/asposeocr/#CalculateSkew-com.aspose.ocr.OcrInput-" target="_blank" rel="nofollow noopener noreferrer">`CalculateSkew`</a>. Este método devuelve una lista de objetos `SkewOutput`, uno por imagen, con las siguientes propiedades:
+
+<div className="docs-owner-markdown-table">
+
+| Propiedad | Tipo | Descripción |
+| ------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Angle` | `double` | Ángulo de inclinación en grados. |
+| `ImageIndex` | `int` | Número de secuencia de la imagen en la página. Al trabajar con imágenes de una sola página, este valor siempre es 0. |
+| `Page` | `int` | Número de página. Al trabajar con imágenes de una sola página, este valor siempre es 0. |
+| `Source` | `String` | La ruta completa o la URL del archivo de origen. Si el archivo se proporciona como un objeto `BufferedImage`, un array de píxeles o una cadena en Base64, este valor estará vacío. |
+
+</div>
+
+:::info
+
+- Los ángulos de sesgo se calculan para todas las imágenes del lote, incluidas aquellas que no contienen texto.  
+- Los documentos PDF pueden contener más de una imagen por página. Por lo tanto, la lista resultante puede contener más `SkewOutput` objetos que el número de páginas del documento.  
+  :::
+
+```java
+AsposeOcr recognitionEngine = new AsposeOcr();
+// Add PDF documents to OcrInput object
+OcrInput input = new OcrInput(InputType.PDF);
+input.Add("source.pdf");
+// Detect skew angles
+ArrayList<SkewOutput> angles = recognitionEngine.CalculateSkew(input);
+angles.forEach((angle) -> {
+	System.out.println("File: " + angle.Source + " | Page: " + angle.Page + " | Image: "+ angle.ImageIndex + " | Angle: " + angle.Angle +"°");
+});
+```
+
+![Skewed image](/java/ocr/images/6515d4e92f5e4048-skew-origin.png)
+
+`> File: "C:\source.pdf" | Page: 0 | Image: 0 | Angle: 5.9°`
+
+## Corrección automática de distorsión {#automatic-skew-correction}
+  
+Para enderezar automáticamente una imagen distorsionada antes del reconocimiento, pase la imagen a través del filtro de preprocesamiento <a href="https://reference.aspose.com/ocr/java/com.aspose.ocr/PreprocessingFilter#AutoSkew--" target="_blank" rel="nofollow noopener noreferrer">`AutoSkew`</a>.
+
+```java
+AsposeOCR api = new AsposeOCR();
+// Apply automatic skew correction
+PreprocessingFilter filters = new PreprocessingFilter();
+filters.add(PreprocessingFilter.AutoSkew());
+// Prepare batch
+OcrInput images = new OcrInput(InputType.SingleImage, filters);
+images.add("image.png");
+// Save processed images to the folder
+ImageProcessing.Save(images, "C:\\images");
+```
+
+![Skewed image](/java/ocr/images/6515d4e92f5e4048-skew-origin.png) ![Deskewed image](/java/ocr/images/8639c4f55f331901-deskew.png)
+
+## Corrección manual de sesgo {#manual-skew-correction}
+  
+En algunos casos, la corrección automática de sesgo puede determinar incorrectamente el ángulo de la imagen. Esto puede ocurrir con imágenes rotadas significativamente (más de un 20 % de inclinación) o con fotos de baja calidad que presenten distorsiones perspectivas importantes.
+
+Para abordar estas situaciones, puede rotar la imagen en el grado especificado mediante el filtro de preprocesamiento <a href="https://reference.aspose.com/ocr/java/com.aspose.ocr/PreprocessingFilter#Rotate-float-" target="_blank" rel="nofollow noopener noreferrer">`Rotate`</a>. El ángulo de rotación se pasa en grados:
+
+- Ángulo negativo (`-360` a `0`): rotación antihoraria;
+- Ángulo positivo (`0` a `360`): rotación horaria.
+
+```java
+AsposeOCR api = new AsposeOCR();
+// Apply manual rotation
+PreprocessingFilter filters = new PreprocessingFilter();
+filters.add(PreprocessingFilter.Rotate(-90));
+// Prepare batch
+OcrInput images = new OcrInput(InputType.SingleImage, filters);
+images.add("image.png");
+// Save processed images to the folder
+ImageProcessing.Save(images, "C:\\images");
+```
+
+## Preprocesamiento de regiones de imagen {#image-regions-preprocessing}
+  
+Se pueden aplicar filtros de corrección automática de sesgo y rotación manual a regiones específicas de una imagen. Por ejemplo, puedes enderezar una ilustración en una página mientras dejas el resto del contenido sin modificar.
+
+:::info
+El tamaño original de una imagen no cambia cuando su área se rota. Las partes del área rotada que no coinciden con el tamaño original del área se recortan.
+
+Se recomienda aplicar los filtros de corrección automática de inclinación y rotación manual únicamente a áreas cuadradas.
+:::
+
+Para aplicar un filtro a un área, especifique su esquina superior izquierda junto con el ancho y la altura como un objeto <a href="https://docs.oracle.com/javase/8/docs/api/java/awt/Rectangle.html" target="_blank" rel="nofollow noopener noreferrer">`Rectangle`</a>. Si se omite la región, el filtro se aplica a toda la imagen.
+
+```java
+Rectangle rectangle = new Rectangle(5, 161, 340, 340);
+PreprocessingFilter filters = new PreprocessingFilter();
+filters.add(PreprocessingFilter.Rotate(90, rectangle));
+```
+
+## Escenarios de uso {#usage-scenarios}
+  
+- Se recomienda la corrección automática de sesgo en casi todos los casos, excepto para escaneos perfectamente rectos.  
+- Se recomienda la rotación manual para:  
+  - fotos de baja calidad;  
+  - imágenes con un ángulo de inclinación significativo.

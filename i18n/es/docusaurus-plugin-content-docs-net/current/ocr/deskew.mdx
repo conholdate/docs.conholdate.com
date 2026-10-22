@@ -1,0 +1,148 @@
+---
+title: "Corrección de sesgo"
+sidebar_label: "Corrección de sesgo"
+sidebar_key: "net-ocr-deskew"
+sidebar_position: 100
+description: ""
+product: "ocr"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/ocr/net"
+source_path: "ocr/net/deskew.html"
+source_commit: ""
+source_sha256: "627e39f36071f3619f16314eb51ae23c5e87c0df54a608b577efdd7bb8eaac27"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/ocr/net/deskew/"
+source_snapshot_sha256: "520491715cfe47a7f25c2ece9f55f64ec34c70740436e68a7bf3c96024acbbb3"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-16-mdx-protection-v4"
+translation_source_sha256: "af39f22ff57dc79be067e074e2742218b92cc7bc35d0b33ca89d166c581c2e17"
+translation_updated_at: "2026-10-22T05:45:02.282Z"
+translation_status: "ai-draft"
+---
+
+:::info
+Aspose.OCR para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+import "./_remote-markdown.css";
+
+Cuando una página se introduce en un escáner de cama plana (mecánica o manualmente) o se fotografió con un smartphone, es casi imposible lograr una alineación perfecta. Como resultado, inevitablemente se produce una ligera inclinación (torción) en las imágenes escaneadas o fotografías.
+
+La detección del ángulo de inclinación y la corrección de la imagen son fundamentales para el proceso de OCR, ya que afectan directamente la fiabilidad y eficiencia de la segmentación y la extracción de texto. Aspose.OCR ofrece algoritmos de procesamiento automatizado para corregir la inclinación de la imagen (deskew) antes de proceder al reconocimiento.
+
+## Detección de ángulos de inclinación {#detecting-skew-angles}
+  
+Para determinar los ángulos de inclinación de todas las imágenes de un [lote](/net/ocr/ocrinput/), utilice el método <a href="https://reference.aspose.com/ocr/net/aspose.ocr/asposeocr/calculateskew/" target="_blank" rel="nofollow noopener noreferrer">`Aspose.OCR.AsposeOcr.CalculateSkew`</a>. Este método devuelve una lista de objetos <a href="https://reference.aspose.com/ocr/net/aspose.ocr/skewoutput/" target="_blank" rel="nofollow noopener noreferrer">`Aspose.OCR.SkewOutput`</a>, uno por imagen.
+
+<div className="docs-owner-markdown-table">
+
+| Propiedad | Tipo | Descripción |
+| ------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Angle` | `float` | Ángulo de inclinación en grados. |
+| `ImageIndex` | `int` | Número de secuencia de la imagen en la página. Al trabajar con imágenes de una sola página, este valor siempre es 0. |
+| `Page` | `int` | Número de página. Al trabajar con imágenes de una sola página, este valor siempre es 0. |
+| `Source` | `string` | La ruta completa o la URL del archivo de origen. Si el archivo se proporciona como un objeto `MemoryStream`, un array de píxeles o una cadena en Base64, este valor estará vacío. |
+
+</div>
+
+:::info
+
+- Los ángulos de sesgo se calculan para todas las imágenes del lote, incluidas aquellas que no contienen texto.  
+- Los documentos PDF pueden contener más de una imagen por página. Por lo tanto, la lista resultante puede contener más objetos `Aspose.OCR.SkewOutput` que el número de páginas del documento.  
+  :::
+
+```csharp
+Aspose.OCR.AsposeOcr recognitionEngine = new Aspose.OCR.AsposeOcr();
+// Add PDF documents to OcrInput object
+Aspose.OCR.OcrInput input = new Aspose.OCR.OcrInput(InputType.PDF);
+input.Add("source.pdf");
+// Detect skew angles
+List<Aspose.OCR.SkewOutput> angles = recognitionEngine.CalculateSkew(input);
+foreach(Aspose.OCR.SkewOutput angle in angles) Console.WriteLine($"File: {angle.Source} | Page: {angle.Page} | Image: {angle.ImageIndex} | Angle: {angle.Angle}°");
+```
+
+![Skewed image](/net/ocr/images/6515d4e92f5e4048-skew-origin.png)
+
+`> File: "C:\source.pdf" | Page: 0 | Image: 0 | Angle: 5.9°`
+
+## Corrección automática de distorsión {#automatic-skew-correction}
+  
+Para enderezar automáticamente imágenes distorsionadas o rotar imágenes invertidas antes del reconocimiento, procese la imagen mediante el filtro de procesamiento <a href="https://reference.aspose.com/ocr/net/aspose.ocr.models.preprocessingfilters/preprocessingfilter/autoskew/" target="_blank" rel="nofollow noopener noreferrer">`AutoSkew`</a>.
+
+```csharp
+Aspose.OCR.AsposeOcr recognitionEngine = new Aspose.OCR.AsposeOcr();
+// Enable automatic skew correction
+Aspose.OCR.Models.PreprocessingFilters.PreprocessingFilter filters = new Aspose.OCR.Models.PreprocessingFilters.PreprocessingFilter();
+filters.Add(Aspose.OCR.Models.PreprocessingFilters.PreprocessingFilter.AutoSkew());
+// Add an image to OcrInput object and apply processing filters
+Aspose.OCR.OcrInput input = new Aspose.OCR.OcrInput(Aspose.OCR.InputType.SingleImage, filters);
+input.Add("source.png");
+// Save processed image to the folder
+Aspose.OCR.ImageProcessing.Save(input, @"C:\result");
+// Recognize image
+Aspose.OCR.OcrOutput results = recognitionEngine.Recognize(input);
+foreach(Aspose.OCR.RecognitionResult result in results)
+{
+	Console.WriteLine(result.RecognitionText);
+}
+```
+
+![Skewed image](/net/ocr/images/6515d4e92f5e4048-skew-origin.png) ![Deskewed image](/net/ocr/images/8639c4f55f331901-deskew.png)
+
+## Corrección manual de sesgo {#manual-skew-correction}
+  
+En algunos casos extremos, la corrección automática de sesgo puede no detectar el ángulo de la imagen. Esto puede ocurrir con fotografías de baja calidad que presenten una distorsión de perspectiva significativa.
+
+Para abordar tales situaciones, puede rotar la imagen en el grado especificado mediante el filtro de procesamiento de imágenes <a href="https://reference.aspose.com/ocr/net/aspose.ocr.models.preprocessingfilters/preprocessingfilter/rotate/" target="_blank" rel="nofollow noopener noreferrer">`Rotate`</a>. El ángulo de rotación se pasa en grados:
+
+- `-360` a `0`: rotación antihoraria;  
+- `0` a `360`: rotación horaria.
+
+```csharp
+Aspose.OCR.AsposeOcr recognitionEngine = new Aspose.OCR.AsposeOcr();
+// Rotate the image 90 degrees counterclockwise
+Aspose.OCR.Models.PreprocessingFilters.PreprocessingFilter filters = new Aspose.OCR.Models.PreprocessingFilters.PreprocessingFilter();
+filters.Add(Aspose.OCR.Models.PreprocessingFilters.PreprocessingFilter.Rotate(-90));
+// Add an image to OcrInput object and apply processing filters
+Aspose.OCR.OcrInput input = new Aspose.OCR.OcrInput(Aspose.OCR.InputType.SingleImage, filters);
+input.Add("source.png");
+// Save processed image to the folder
+Aspose.OCR.ImageProcessing.Save(input, @"C:\result");
+// Recognize image
+Aspose.OCR.OcrOutput results = recognitionEngine.Recognize(input);
+foreach(Aspose.OCR.RecognitionResult result in results)
+{
+	Console.WriteLine(result.RecognitionText);
+}
+```
+
+## Procesamiento de regiones de imagen {#image-regions-processing}
+  
+Se pueden aplicar filtros de corrección automática de sesgo y rotación manual a regiones específicas de una imagen. Por ejemplo, puedes enderezar una ilustración en una página mientras dejas el resto del contenido sin modificar.
+
+:::info
+El tamaño original de una imagen no cambia cuando su área se rota. Las partes del área rotada que no coinciden con el tamaño original del área se recortan.
+
+Se recomienda aplicar los filtros de corrección automática de inclinación y rotación manual únicamente a áreas cuadradas.
+:::
+
+Para aplicar un filtro a un área, especifique su esquina superior izquierda junto con el ancho y la altura como un objeto <a href="https://reference.aspose.com/drawing/net/system.drawing/rectangle/" target="_blank" rel="nofollow noopener noreferrer">`Aspose.Drawing.Rectangle`</a>. Si se omite la región, el filtro se aplica a toda la imagen.
+
+```csharp
+Aspose.Drawing.Rectangle rectangle = new Aspose.Drawing.Rectangle(5, 161, 340, 340);
+Aspose.OCR.Models.PreprocessingFilters.PreprocessingFilter filters = new Aspose.OCR.Models.PreprocessingFilters.PreprocessingFilter();
+filters.Add(Aspose.OCR.Models.PreprocessingFilters.PreprocessingFilter.Rotate(90, rectangle));
+```
+
+## Escenarios de uso  {#usage-scenarios}
+
+- Se recomienda la corrección automática de sesgo en casi todos los casos, excepto para escaneos perfectamente rectos.
+- Se recomienda la rotación manual para:
+  - fotos de baja calidad;
+  - imágenes con un ángulo de inclinación significativo.
