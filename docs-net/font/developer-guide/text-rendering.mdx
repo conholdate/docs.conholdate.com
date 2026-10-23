@@ -1,0 +1,394 @@
+---
+title: "Text Rendering using Font library | .NET"
+sidebar_label: "Text Rendering using Font library | .NET"
+sidebar_key: "net-font-developer-guide-text-rendering"
+sidebar_position: 100
+description: ""
+product: "font"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/font/net"
+source_path: "font/net/developer-guide/text-rendering.html"
+source_commit: ""
+source_sha256: "7c93abebf536aee686e2a099021a8927a37f2bef5a96d13e3fca40dbe46997fc"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/font/net/developer-guide/text-rendering/"
+source_snapshot_sha256: "d98e0ed1d4c5dee251f86b54e3371c62b7a4e5ab334aaac2e24fccd4e8108261"
+---
+
+:::info
+Aspose.Font for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Overview {#overview}
+
+If you ever wanted to have the feature of rendering text into an image, the article here will teach you how to do it with fonts of any format, supported by Font library using Aspose.Font API Solution. The library allows you to easily convert text into images as well as add text to any image.
+
+## Rendering Text {#rendering-text}
+
+To insert text into an image you will need to use <a href="https://reference.aspose.com/font/net/aspose.font.renderers/renderingutils/drawtext/#drawtext" target="_blank" rel="nofollow noopener noreferrer">*DrawText*</a> Method of the <a href="https://reference.aspose.com/font/net/aspose.font.renderers/renderingutils/" target="_blank" rel="nofollow noopener noreferrer">*RenderingUtils*</a> Class. The example below renders "Hello world" in Verdana and saves the returned PNG stream as `Text.png`.
+
+Set `DataDir` to the directory containing `TTF/verdana.ttf` and `TTF/LatoWeb-Regular.ttf`, and set `OutputDir` to an existing output directory. The examples use `Aspose.Font`, `Aspose.Font.Sources`, `Aspose.Font.Renderers`, `System` and `System.IO`. In the test project, these directories and the license setup are supplied by `BaseTests`.
+
+```java
+// Render text to a PNG image
+
+string fontPath = Path.Combine(DataDir, "TTF", "verdana.ttf");
+Font font = Font.Open(new FontDefinition(FontType.TTF, "ttf", new FileSystemStreamSource(fontPath)));
+string text = "Hello world";
+string outFile = Path.Combine(OutputDir, "Text.png");
+using (Stream image = RenderingUtils.DrawText(font, text, 18))
+{
+    image.Position = 0;
+    using FileStream output = File.Create(outFile);
+    image.CopyTo(output);
+}
+```
+
+<a href="https://gist.github.com/aspose-com-gists/abc3ac84bf867779e253320865e8094c#file-example-drawtext-cs" target="_blank" rel="nofollow noopener noreferrer">Example-DrawText.cs</a> hosted with ❤ by <a href="https://github.com/" target="_blank" rel="nofollow noopener noreferrer">GitHub</a>
+
+:::info
+**The implementation result:**
+
+![Hello world rendered in Verdana](/net/font/images/e2120eadd359716f-verdana-text.png)
+:::
+
+The <a href="https://reference.aspose.com/font/net/aspose.font.renderers/renderingutils/drawtext/#drawtext_1" target="_blank" rel="nofollow noopener noreferrer">*DrawText*</a> Method allows you to set the line spacing and perform automatic word-by-word text wrapping.
+
+In the code example below, we specified the line spacing type <a href="https://reference.aspose.com/font/net/aspose.font.renderers/renderingutils.linespacingtype/" target="_blank" rel="nofollow noopener noreferrer">*LineSpacingType.Pixels*</a> and set it to **10**, and we set the maximum width of the image to **450**.
+
+All text that cannot be displayed correctly in the given range (in our case it is **450**) will be wrapped on a new line.
+
+The example repeats "Hello world" in Verdana so that the text exceeds the 450-pixel width and wraps onto additional lines. The result is saved as `WrappedText.png`:
+
+```java
+// Render wrapped text with pixel line spacing
+
+string fontPath = Path.Combine(DataDir, "TTF", "verdana.ttf");
+Font font = Font.Open(new FontDefinition(FontType.TTF, "ttf", new FileSystemStreamSource(fontPath)));
+string text = "Hello world Hello world Hello world Hello world Hello world Hello world";
+string outFile = Path.Combine(OutputDir, "WrappedText.png");
+using (Stream image = RenderingUtils.DrawText(font, text, 22, RenderingUtils.LineSpacingType.Pixels, 10, 450))
+{
+    image.Position = 0;
+    using FileStream output = File.Create(outFile);
+    image.CopyTo(output);
+}
+```
+
+<a href="https://gist.github.com/aspose-com-gists/abc3ac84bf867779e253320865e8094c#file-example-drawtextwithwrapping-cs" target="_blank" rel="nofollow noopener noreferrer">Example-DrawTextWithWrapping.cs</a> hosted with ❤ by <a href="https://github.com/" target="_blank" rel="nofollow noopener noreferrer">GitHub</a>
+
+:::info
+**The implementation result:**
+
+![Wrapped Hello world text rendered in Verdana](/net/font/images/7ad78736d31b9abb-verdana-text-wrap.png)
+:::
+
+`DrawText()` returns a PNG stream. The examples rewind and copy that stream to a file, then dispose both streams.
+
+The family of functions for the `DrawText()` Method covers standard text or multiline text output. But, in some cases, you may need a customized output of the text, for example, when you want to compress, stretch, rotate the text at an angle, or something else. In this case, you need to customize the output according to your needs.
+
+## Custom text rendering {#custom-text-rendering}
+
+The following examples render glyph outlines using `System.Drawing.Common` on Windows. They use a 960 x 720 canvas at 300 DPI. In addition to the namespaces above, import `Aspose.Font.Glyphs`, `Aspose.Font.Rendering`, `Aspose.Font.RenderingPath`, `System.Drawing`, `System.Drawing.Drawing2D` and `System.Drawing.Imaging`.
+
+To draw [*glyphs*](/net/font/what-is-font/glyph/) within Aspose.Font uses one of `RenderGlyph()` Methods of <a href="https://reference.aspose.com/font/net/aspose.font.renderers/glyphoutlinerenderer/" target="_blank" rel="nofollow noopener noreferrer">*GlyphOutlineRenderer*</a> Class. All these overloaded methods are declared in the <a href="https://reference.aspose.com/font/net/aspose.font.renderers/iglyphrenderer/" target="_blank" rel="nofollow noopener noreferrer">*IGlyphRenderer*</a> Interface.
+
+As a parameter, we must pass to these methods a reference to the font, glyphId or glyph index, and the glyph output coordinates. To transfer the last parameter, a special matrix represented by the Aspose.Font <a href="https://reference.aspose.com/font/net/aspose.font/transformationmatrix/" target="_blank" rel="nofollow noopener noreferrer">*TransformationMatrix*</a> object is used. Below we show how to use objects of the <a href="https://reference.aspose.com/font/net/aspose.font/transformationmatrix/" target="_blank" rel="nofollow noopener noreferrer">*TransformationMatrix*</a> type to pass glyph output coordinates to methods of the `RenderGlyph()` family.
+
+So, to draw a glyph, we need to create an object of the <a href="https://reference.aspose.com/font/net/aspose.font.renderers/glyphoutlinerenderer/" target="_blank" rel="nofollow noopener noreferrer">*GlyphOutlineRenderer*</a> type. But such an object cannot draw a glyph on its own. It requires external functionality, which is described by the <a href="https://reference.aspose.com/font/net/aspose.font.rendering/iglyphoutlinepainter/" target="_blank" rel="nofollow noopener noreferrer">*IGlyphOutlinePainter*</a> Interface. To use the <a href="https://reference.aspose.com/font/net/aspose.font.renderers/glyphoutlinerenderer/" target="_blank" rel="nofollow noopener noreferrer">*GlyphOutlineRenderer*</a> object should be provided with an implementation of the <a href="https://reference.aspose.com/font/net/aspose.font.rendering/iglyphoutlinepainter/" target="_blank" rel="nofollow noopener noreferrer">*IGlyphOutlinePainter*</a>.
+
+Below you can see a simple implementation of this interface. Let's create the *GlyphOutlinePainter* Class which requires an object of <a href="https://learn.microsoft.com/en-us/dotnet/api/system.drawing.drawing2d.graphicspath?view=dotnet-plat-ext-7.0" target="_blank" rel="nofollow noopener noreferrer">*System.Drawing.Drawing2D.GraphicsPath*</a> type for graphic drawing objectives.
+
+The interface implementation is shown below. Add the `CustomDrawText()` overloads and `FontWidthToImageWidth()` method shown later as members of this `GlyphOutlinePainter` class. The example project places these members in a second partial declaration of the same class.
+
+```java
+// Implement a glyph outline painter
+
+public partial class GlyphOutlinePainter : IGlyphOutlinePainter
+{
+    private readonly GraphicsPath path;
+    private PointF currentPoint;
+
+    public GlyphOutlinePainter(GraphicsPath path)
+    {
+        this.path = path;
+    }
+
+    public void MoveTo(MoveTo moveTo)
+    {
+        path.CloseFigure();
+        currentPoint = new PointF((float)moveTo.X, (float)moveTo.Y);
+    }
+
+    public void LineTo(LineTo lineTo)
+    {
+        var next = new PointF((float)lineTo.X, (float)lineTo.Y);
+        path.AddLine(currentPoint, next);
+        currentPoint = next;
+    }
+
+    public void CurveTo(CurveTo curveTo)
+    {
+        var next = new PointF((float)curveTo.X3, (float)curveTo.Y3);
+        path.AddBezier(currentPoint, new PointF((float)curveTo.X1, (float)curveTo.Y1),
+            new PointF((float)curveTo.X2, (float)curveTo.Y2), next);
+        currentPoint = next;
+    }
+
+    public void ClosePath()
+    {
+        path.CloseFigure();
+    }
+}
+```
+
+<a href="https://gist.github.com/aspose-com-gists/abc3ac84bf867779e253320865e8094c#file-example-glyphoutlinepainter-cs" target="_blank" rel="nofollow noopener noreferrer">Example-GlyphOutlinePainter.cs</a> hosted with ❤ by <a href="https://github.com/" target="_blank" rel="nofollow noopener noreferrer">GitHub</a>
+
+After the <a href="https://reference.aspose.com/font/net/aspose.font.rendering/iglyphoutlinepainter/" target="_blank" rel="nofollow noopener noreferrer">*IGlyphOutlinePainter*</a> implementation, we can use objects of its type to render an individual glyph by passing them to the <a href="https://reference.aspose.com/font/net/aspose.font.renderers/glyphoutlinerenderer/" target="_blank" rel="nofollow noopener noreferrer">*GlyphOutlineRenderer*</a> and calling the corresponding overloaded methods of the `RenderGlyph()` family.
+
+In order to render a string of text, we need to get the *glyphId* for each character and then, using an object of <a href="https://reference.aspose.com/font/net/aspose.font.renderers/glyphoutlinerenderer/" target="_blank" rel="nofollow noopener noreferrer">*GlyphOutlineRenderer*</a> type call one of the methods of the `RenderGlyph()` family, passing the coordinates of the corresponding glyph.
+
+Let's take a look at an example of outputting a line of text using the Aspose.Font library. It will be built in the form of the `CustomDrawText()` Method, which accepts parameters - *CustomDrawText*(string text, IFont font, double fontSize, Brush backgroundBrush, Brush textBrush, string outFile).
+
+Create the `CustomDrawText()` Method that draws specified text into the <a href="https://learn.microsoft.com/en-us/dotnet/api/system.drawing.bitmap?view=dotnet-plat-ext-7.0" target="_blank" rel="nofollow noopener noreferrer">*System.Drawing.Bitmap*</a> object and saves resultant bitmap on Disc.
+
+This will include the following steps:
+
+- Iterate all symbols in a text string.
+- Get glyph identifier for every processed symbol - gid.
+- Create an object of *GlyphOutlinePainter* type which is required by the rendering subsystem to draw the current glyph.
+- Create an object of the <a href="https://reference.aspose.com/font/net/aspose.font.renderers/glyphoutlinerenderer/" target="_blank" rel="nofollow noopener noreferrer">*Aspose.Font.Renderers.GlyphOutlineRenderer*</a> type, and pass the just created object of *GlyphOutlinePainter* type into the constructor for <a href="https://reference.aspose.com/font/net/aspose.font.renderers/glyphoutlinerenderer/" target="_blank" rel="nofollow noopener noreferrer">*GlyphOutlineRenderer*</a>. This <a href="https://reference.aspose.com/font/net/aspose.font.renderers/glyphoutlinerenderer/" target="_blank" rel="nofollow noopener noreferrer">*GlyphOutlineRenderer*</a> object is intended to render specified glyphs.
+- Render the current glyph using *GlyphOutlineRenderer.RenderGlyph()*. A *TransformationMatrix* specifies its coordinates, and the *gid* parameter identifies the glyph.
+
+**Auxillary steps for this strategy**
+
+- In horizontal mode, glyph baseline coordinates on the 'Y' axis remain constant; vertical mode advances them for each subsequent glyph.
+- In horizontal mode, the 'X' coordinate advances by the previous glyph width and pair kerning, multiplied by the spacing coefficient.
+- Both 'X' and 'Y' coordinates are passed into the *TransformationMatrix* object used by <a href="https://reference.aspose.com/font/net/aspose.font.renderers/glyphoutlinerenderer/" target="_blank" rel="nofollow noopener noreferrer">*GlyphOutlineRenderer*</a> to draw glyphs.
+- Horizontal advance is calculated for each subsequent glyph; vertical mode keeps the X coordinate fixed.
+- Object of the <a href="https://reference.aspose.com/font/net/aspose.font.renderers/glyphoutlinerenderer/" target="_blank" rel="nofollow noopener noreferrer">*GlyphOutlineRenderer*</a> type draws glyphs with the help of *GlyphOutlinePainter* not into Bitmap directly, but into the <a href="https://learn.microsoft.com/en-us/dotnet/api/system.drawing.drawing2d.graphicspath?view=dotnet-plat-ext-7.0" target="_blank" rel="nofollow noopener noreferrer">*GraphicsPath*</a> object passed into the constructor for *GlyphOutlinePainter*, so we use the object of <a href="https://learn.microsoft.com/en-us/dotnet/api/system.drawing.graphics?view=dotnet-plat-ext-7.0" target="_blank" rel="nofollow noopener noreferrer">*System.Drawing.Graphics*</a> type to draw <a href="https://learn.microsoft.com/en-us/dotnet/api/system.drawing.drawing2d.graphicspath?view=dotnet-plat-ext-7.0" target="_blank" rel="nofollow noopener noreferrer">*GraphicsPath*</a> into Bitmap.
+- The *FontWidthToImageWidth()* method converts glyph width from font units to pixels.
+
+The first overload creates and disposes a bitmap. The second accepts a caller-owned bitmap and supports spacing, coordinates, overlays and vertical output. Add both overloads below to `GlyphOutlinePainter`:
+
+```java
+// Render text with spacing, coordinates, overlays and vertical layout
+
+public static void CustomDrawText(string text, IFont font, double fontSize,
+    Brush backgroundBrush, Brush textBrush, string outFile)
+{
+    using var bitmap = new Bitmap(960, 720);
+    CustomDrawText(text, font, fontSize, backgroundBrush, textBrush, outFile, bitmap);
+}
+
+public static void CustomDrawText(string text, IFont font, double fontSize,
+    Brush backgroundBrush, Brush textBrush, string outFile, Bitmap bitmap,
+    double kerningCoefficient = 1, double coordinateX = 0, double coordinateY = 0, bool topDown = false)
+{
+    const double dpi = 300;
+    double scale = fontSize * dpi / 72;
+    bitmap.SetResolution((float)dpi, (float)dpi);
+    using (Graphics graphics = Graphics.FromImage(bitmap))
+    {
+        // A transparent background preserves an existing image for overlays.
+        graphics.FillRectangle(backgroundBrush, 0, 0, bitmap.Width, bitmap.Height);
+        graphics.SmoothingMode = SmoothingMode.HighQuality;
+        GlyphId? previousGid = null;
+        double glyphXCoordinate = coordinateX;
+        double glyphYCoordinate = coordinateY + scale;
+
+        foreach (char character in text)
+        {
+            GlyphId gid = font.Encoding.DecodeToGid(character);
+            if (gid == null) continue;
+            Glyph glyph = font.GlyphAccessor.GetGlyphById(gid);
+            if (glyph == null) continue;
+
+            if (previousGid != null)
+            {
+                if (topDown)
+                    glyphYCoordinate += scale;
+                else
+                {
+                    double advance = FontWidthToImageWidth(font.Metrics.GetGlyphWidth(previousGid),
+                        glyph.SourceResolution, fontSize, dpi);
+                    double kerning = font.Metrics.GetKerningValue(previousGid, gid)
+                        / (double)glyph.SourceResolution * scale;
+                    // Like the source example, the coefficient scales the whole advance.
+                    glyphXCoordinate += (advance + kerning) * kerningCoefficient;
+                }
+            }
+
+            using var path = new GraphicsPath();
+            var painter = new GlyphOutlinePainter(path);
+            var renderer = new GlyphOutlineRenderer(painter);
+            var matrix = new TransformationMatrix(new double[]
+            {
+                scale, 0, 0, -scale, glyphXCoordinate, glyphYCoordinate
+            });
+            renderer.RenderGlyph(font, gid, matrix);
+            path.FillMode = FillMode.Winding;
+            graphics.FillPath(textBrush, path);
+            previousGid = gid;
+        }
+    }
+    // The caller owns the supplied bitmap and may reuse it for another overlay.
+    bitmap.Save(outFile, ImageFormat.Png);
+}
+```
+
+<a href="https://gist.github.com/aspose-com-gists/abc3ac84bf867779e253320865e8094c#file-example-customdrawtext-cs" target="_blank" rel="nofollow noopener noreferrer">Example-CustomDrawText.cs</a> hosted with ❤ by <a href="https://github.com/" target="_blank" rel="nofollow noopener noreferrer">GitHub</a>
+
+Add this utility method to the same class to convert font width to image width:
+
+```java
+// Convert font units to image pixels
+
+private static double FontWidthToImageWidth(double width, int fontSourceResolution,
+    double fontSize, double dpi = 300)
+{
+    return width / fontSourceResolution * fontSize * dpi / 72;
+}
+```
+
+<a href="https://gist.github.com/aspose-com-gists/abc3ac84bf867779e253320865e8094c#file-example-fontwidthtoimagewidth-cs" target="_blank" rel="nofollow noopener noreferrer">Example-FontWidthToImageWidth.cs</a> hosted with ❤ by <a href="https://github.com/" target="_blank" rel="nofollow noopener noreferrer">GitHub</a>
+
+The next example renders "Hello world" using Verdana with black text on white and Lato with blue text on yellow. It saves `Custom_Verdana.png` and `Custom_Lato.png`:
+
+```java
+// Render two fonts with a custom glyph painter
+
+string verdanaPath = Path.Combine(DataDir, "TTF", "verdana.ttf");
+string latoPath = Path.Combine(DataDir, "TTF", "LatoWeb-Regular.ttf");
+Font verdana = Font.Open(new FontDefinition(FontType.TTF, "ttf", new FileSystemStreamSource(verdanaPath)));
+Font lato = Font.Open(new FontDefinition(FontType.TTF, "ttf", new FileSystemStreamSource(latoPath)));
+string verdanaOutput = Path.Combine(OutputDir, "Custom_Verdana.png");
+string latoOutput = Path.Combine(OutputDir, "Custom_Lato.png");
+GlyphOutlinePainter.CustomDrawText("Hello world", verdana, 24, Brushes.White, Brushes.Black, verdanaOutput);
+GlyphOutlinePainter.CustomDrawText("Hello world", lato, 24, Brushes.Yellow, Brushes.Blue, latoOutput);
+```
+
+<a href="https://gist.github.com/aspose-com-gists/abc3ac84bf867779e253320865e8094c#file-example-rendercustomtext-cs" target="_blank" rel="nofollow noopener noreferrer">Example-RenderCustomText.cs</a> hosted with ❤ by <a href="https://github.com/" target="_blank" rel="nofollow noopener noreferrer">GitHub</a>
+
+:::info
+**The implementation result:**
+
+![Custom rendering of Hello world in Verdana](/net/font/images/94a05399db85f2db-verdana-custom-text.png) *Verdana*
+
+![Custom rendering of Hello world in Lato](/net/font/images/c6a8610262e8663a-lato-custom-text.png) *Lato*
+:::
+
+### Kerning {#kerning}
+
+The helper obtains pair kerning from the font. Setting `kerningCoefficient` to `1.25` increases the entire horizontal advance (the previous glyph width plus pair kerning) by 25%. This example uses Verdana and saves `IncreasedSpacing.png`:
+
+```java
+// Increase the horizontal glyph advance
+
+string fontPath = Path.Combine(DataDir, "TTF", "verdana.ttf");
+Font font = Font.Open(new FontDefinition(FontType.TTF, "ttf", new FileSystemStreamSource(fontPath)));
+string outFile = Path.Combine(OutputDir, "IncreasedSpacing.png");
+using var bitmap = new Bitmap(960, 720);
+GlyphOutlinePainter.CustomDrawText("Hello world", font, 18, Brushes.White, Brushes.Black,
+    outFile, bitmap, kerningCoefficient: 1.25);
+```
+
+<a href="https://gist.github.com/aspose-com-gists/abc3ac84bf867779e253320865e8094c#file-example-renderwithincreasedspacing-cs" target="_blank" rel="nofollow noopener noreferrer">Example-RenderWithIncreasedSpacing.cs</a> hosted with ❤ by <a href="https://github.com/" target="_blank" rel="nofollow noopener noreferrer">GitHub</a>
+
+:::info
+**The implementation result:**
+
+![Verdana text with increased horizontal spacing](/net/font/images/d6bd9842449b04ba-verdana-increased-spacing.png) *Verdana with a spacing coefficient of 1.25*
+:::
+
+### Rendering text by coordinates {#rendering-text-by-coordinates}
+
+Use `coordinateX` and `coordinateY` to position the text. `coordinateY` is the offset above the first baseline; the helper adds `fontSize * 300 / 72` pixels. At 18 points, `coordinateX: 300` and `coordinateY: 225` place the first baseline at (300, 300). The example saves `PositionedText.png`:
+
+```java
+// Position text at explicit coordinates
+
+string fontPath = Path.Combine(DataDir, "TTF", "verdana.ttf");
+Font font = Font.Open(new FontDefinition(FontType.TTF, "ttf", new FileSystemStreamSource(fontPath)));
+string outFile = Path.Combine(OutputDir, "PositionedText.png");
+using var bitmap = new Bitmap(960, 720);
+// At 18 points and 300 DPI the 75-pixel baseline offset makes the baseline Y=300.
+GlyphOutlinePainter.CustomDrawText("Hello world", font, 18, Brushes.White, Brushes.Black,
+    outFile, bitmap, coordinateX: 300, coordinateY: 225);
+```
+
+<a href="https://gist.github.com/aspose-com-gists/abc3ac84bf867779e253320865e8094c#file-example-renderatcoordinates-cs" target="_blank" rel="nofollow noopener noreferrer">Example-RenderAtCoordinates.cs</a> hosted with ❤ by <a href="https://github.com/" target="_blank" rel="nofollow noopener noreferrer">GitHub</a>
+
+:::info
+**The implementation result:**
+
+![Verdana text positioned at baseline coordinates 300, 300](/net/font/images/fdbdc71d85d19a6f-verdana-positioned-text.png) *Verdana, first baseline at X=300 and Y=300*
+:::
+
+### How to add the text to an image {#how-to-add-the-text-to-an-image}
+
+You can add text to an existing image by passing a bitmap and a transparent background brush to the shared helper. The transparent brush preserves the existing pixels.
+
+The bitmap overload of `CustomDrawText()` shown above already supports this scenario. It draws onto the supplied bitmap and saves it as PNG; the caller retains ownership of the bitmap.
+
+The example first creates `OverlayBase.png` in `OutputDir`, then opens that image to add a gray shadow and a brown annotation. It saves `Shadow.png` and `ShadowAnnotated.png` separately; no external input image is required:
+
+```java
+// Add a shadow and annotation to an existing image
+
+string fontPath = Path.Combine(DataDir, "TTF", "verdana.ttf");
+Font font = Font.Open(new FontDefinition(FontType.TTF, "ttf", new FileSystemStreamSource(fontPath)));
+string inputImagePath = Path.Combine(OutputDir, "OverlayBase.png");
+GlyphOutlinePainter.CustomDrawText("Hello world", font, 17, Brushes.White, Brushes.Black, inputImagePath);
+using var bitmap = new Bitmap(inputImagePath);
+string shadowFile = Path.Combine(OutputDir, "Shadow.png");
+GlyphOutlinePainter.CustomDrawText("Hello world", font, 17, Brushes.Transparent, Brushes.Gray,
+    shadowFile, bitmap, coordinateX: -3);
+string annotatedFile = Path.Combine(OutputDir, "ShadowAnnotated.png");
+GlyphOutlinePainter.CustomDrawText("<= Shadow effect", font, 17, Brushes.Transparent, Brushes.Brown,
+    annotatedFile, bitmap, coordinateX: 400);
+```
+
+<a href="https://gist.github.com/aspose-com-gists/abc3ac84bf867779e253320865e8094c#file-example-addtexttoimage-cs" target="_blank" rel="nofollow noopener noreferrer">Example-AddTextToImage.cs</a> hosted with ❤ by <a href="https://github.com/" target="_blank" rel="nofollow noopener noreferrer">GitHub</a>
+
+:::info
+**The implementation result:**
+
+![Verdana text with a gray shadow](/net/font/images/3bc4f0d2e472254b-verdana-shadow.png) *Verdana with a shadow*
+
+![Verdana text with a shadow and a brown annotation](/net/font/images/cbca4e8df012a351-verdana-shadow-annotated.png) *Verdana with a shadow and annotation. The annotation is clipped at the right edge of the 960-pixel canvas.*
+:::
+
+### Outputting the text from top to bottom {#outputting-the-text-from-top-to-bottom}
+
+The same bitmap overload supports vertical output through `topDown: true`. It places the first glyph on the initial baseline and advances subsequent glyphs by `fontSize * 300 / 72` pixels.
+
+The example renders "Top down" in Verdana at X=400 and saves `TopDown.png`. With `coordinateY` left at zero and an 18-point font, the first baseline is at Y=75 pixels:
+
+```java
+// Render text vertically from top to bottom
+
+string fontPath = Path.Combine(DataDir, "TTF", "verdana.ttf");
+Font font = Font.Open(new FontDefinition(FontType.TTF, "ttf", new FileSystemStreamSource(fontPath)));
+string outFile = Path.Combine(OutputDir, "TopDown.png");
+using var bitmap = new Bitmap(960, 720);
+GlyphOutlinePainter.CustomDrawText("Top down", font, 18, Brushes.White, Brushes.Black,
+    outFile, bitmap, coordinateX: 400, topDown: true);
+```
+
+<a href="https://gist.github.com/aspose-com-gists/abc3ac84bf867779e253320865e8094c#file-example-rendertopdown-cs" target="_blank" rel="nofollow noopener noreferrer">Example-RenderTopDown.cs</a> hosted with ❤ by <a href="https://github.com/" target="_blank" rel="nofollow noopener noreferrer">GitHub</a>
+
+:::info
+**The implementation result:**
+
+![Verdana text rendered from top to bottom](/net/font/images/f30cd2663bb3b2e1-verdana-top-down.png) *Verdana, top to bottom*
+:::
+
+### Additional Information {#additional-information}
+
+The helper uses **300 DPI**. The value `scale = fontSize * dpi / 72` converts the font size in points to pixels. `glyphXCoordinate` and `glyphYCoordinate` specify the glyph baseline position. For horizontal text, the next position includes the previous glyph width and the pair kerning returned by the font; `kerningCoefficient` scales their sum.
