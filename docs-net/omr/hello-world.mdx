@@ -1,0 +1,210 @@
+---
+title: "Hello, World!"
+sidebar_label: "Hello, World!"
+sidebar_key: "net-omr-hello-world"
+sidebar_position: 100
+description: ""
+product: "omr"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/omr/net"
+source_path: "omr/net/hello-world.html"
+source_commit: ""
+source_sha256: "6f81a53e4f816f746855b4adfbdae965ac1641611d01bc0d393d8b543c01f6f6"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/omr/net/hello-world/"
+source_snapshot_sha256: "a6c9f7fcb8958d8f575bc3cd8afd0f8be8d78d723a61ff6d765cda43a61541b3"
+---
+
+:::info
+Aspose.OMR for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+In this article, you will learn how to build a bare minimum application for creating and recognizing a simple questionnaire with **Aspose.OMR for .NET**.
+
+:::info
+We assume that you already have a basic knowledge of **Microsoft Visual Studio** and **C#**.
+:::
+
+## You will need {#you-will-need}
+
+- A [compatible](/net/omr/system-requirements/) OS with Microsoft Visual Studio installed. As an individual developer, you can use a free Visual Studio Community Edition.
+- A printer for producing hardcopies (printed forms).
+- A pen, a pencil, or a marker.
+- A modern smartphone with a high-resolution camera.
+- **15 minutes** of spare time.
+
+## Steps to be taken {#steps-to-be-taken}
+
+While our OMR application requires minimal coding, the underlying process is a bit more complex than the typical *Hello World*. Let's look at the necessary steps to be taken.
+
+![Necessary steps to be taken](/net/omr/images/ad2e3b36c6e91e93-steps.png)
+
+1. **Design** the questionnaire.
+2. **Generate** a printable form and recognition pattern files.
+3. **Print** the form.
+4. **Fill** the form.
+5. **Scan** or take a photo of the form.
+6. **Recognize** the form.
+
+## Designing the questionnaire {#designing-the-questionnaire}
+
+Aspose.OMR for .NET not only performs recognition, but also allows you to design OMR forms of any layout and complexity.
+
+The structure and layout of the questionnaire (template source) is defined in a plain-text file that uses a special notation. You can create it with any text editor, including Notepad.
+
+```text
+?text=Hello, World!
+	font_style=bold
+	font_size=24
+	align=center
+
+#How are you doing today?
+	() Pretty good, thanks! () I won't respond until I see my lawyer.
+```
+
+In this article, we won't delve into the <a href="https://docs.aspose.com/omr/txt-markup/" target="_blank" rel="nofollow noopener noreferrer">full syntax</a> of the template. Let's just take a look at its key building blocks:
+
+- The text after `?text=` keyword is rendered as a simple paragraph. You can optionally format it by adding layout attributes (font, style, and the like) on the lines immediately following the text. Each attribute definition must be preceded by a **tab character**.
+- The question text is provided on a new line starting with a hash (`#`). The hash itself is not rendered.
+- The answers are provided on new lines immediately following the question. You can either place all answers on a single line or on several lines by adding line breaks. Each line must begin with a **tab character**.
+
+Save the template source somewhere on you disk under the name **template.txt**. You will need it on the next step.
+
+## Generating a form {#generating-a-form}
+
+Once you have finished with the questionnaire structure and layout, let's build a simple utility that generates a printable form from it.
+
+1. Create a new C# project in Visual Studio. You can use a very basic project template, such as **Console App (.NET framework)**.
+
+2. [Install](/net/omr/installation/) **Aspose.OMR** NuGet package to the project.
+
+3. Copy a form template file (**template.txt**) created on the previous step into **bin\Debug** directory of the project.
+
+4. Create an instance of **Aspose.OMR.Api.OmrEngine** class:
+
+   ```csharp
+   Aspose.OMR.Api.OmrEngine omrEngine = new Aspose.OMR.Api.OmrEngine();
+   ```
+
+5. Generate a form from the template source file:
+
+   ```csharp
+   Aspose.OMR.Generation.GenerationResult generationResult = omrEngine.Generate("template.txt");
+   ```
+
+6. Save the result:
+
+   ```csharp
+   generationResult.Save("", "Hello.OMR");
+   ```
+
+**Full listing:**
+
+```csharp
+namespace HelloOMR
+{
+	internal class Program
+	{
+		static void Main(string[] args)
+		{
+			Aspose.OMR.Api.OmrEngine omrEngine = new Aspose.OMR.Api.OmrEngine();
+			Aspose.OMR.Generation.GenerationResult generationResult = omrEngine.Generate("template.txt");
+			generationResult.Save("", "Hello.OMR");
+		}
+	}
+}
+```
+
+Now run the program. If the template is correct, you should get 2 files in **bin\Debug** directory of the project:
+
+- **Hello.OMR.png**\
+  A printable form in PNG format. Since we have not provided a [license](/net/omr/licensing/), there will be a watermark on the page.\
+  ![Printable form](/net/omr/images/660d9b7d0a1c02f0-print-form.png)
+- **Hello.OMR.omr**\
+  A recognition pattern used by Aspose.OMR recognition engine. **This file is required for recognizing filled forms, make sure you do not accidentally delete it!**
+
+## Answering the questionnaire {#answering-the-questionnaire}
+
+Let's take a break from the computer and get back to the good old pen and paper.
+
+1. Print the form (**Hello.OMR.png**) generated on the previous step.
+2. Mark an answer bubble.
+3. Take a photo of the filled form (the entire sheet with all 4 crop marks) with your smartphone.\
+   ![Filled form - photo](/net/omr/images/db41bdcd98d656ca-filled-form.png)
+
+## Recognizing the questionnaire {#recognizing-the-questionnaire}
+
+Now we are ready for what OMR stands for - optical mark recognition.
+
+1. Create a new C# project in Visual Studio. You can use a very basic project template, such as **Console App (.NET framework)**.
+
+2. [Install](/net/omr/installation/) **Aspose.OMR** NuGet package to the project.
+
+3. Copy the photo of the filled form (for example, **IMG_20220401.jpg**) into **bin\Debug** directory of the project.
+
+4. Copy the previously generated recognition pattern (**Hello.OMR.omr**) into **bin\Debug** directory of the project.
+
+5. Create an instance of **Aspose.OMR.Api.OmrEngine** class:
+
+   ```csharp
+   Aspose.OMR.Api.OmrEngine omrEngine = new Aspose.OMR.Api.OmrEngine();
+   ```
+
+6. Load the recognition pattern from **Hello.OMR.omr** file:
+
+   ```csharp
+   Aspose.OMR.Api.TemplateProcessor templateProcessor = omrEngine.GetTemplateProcessor("Hello.OMR.omr");
+   ```
+
+7. Recognize the photo of the filled form:
+
+   ```csharp
+   Aspose.OMR.Model.RecognitionResult recognitionResult = templateProcessor.Recognize("IMG_20220401.jpg");
+   ```
+
+8. Convert the recognition result to comma-separated values (CSV) format and output it to the console:
+
+   ```csharp
+   string result = recognitionResult.GetCsv();
+   Console.WriteLine(result);
+   ```
+
+**Full listing:**
+
+```csharp
+using System;
+
+namespace HelloOMR
+{
+	internal class Program
+	{
+		static void Main(string[] args)
+		{
+			Aspose.OMR.Api.OmrEngine omrEngine = new Aspose.OMR.Api.OmrEngine();
+			Aspose.OMR.Api.TemplateProcessor templateProcessor = omrEngine.GetTemplateProcessor("Hello.OMR.omr");
+			Aspose.OMR.Model.RecognitionResult recognitionResult = templateProcessor.Recognize("IMG_20220401.jpg");
+			string result = recognitionResult.GetCsv();
+			Console.WriteLine(result);
+			Console.ReadLine();
+		}
+	}
+}
+```
+
+### Recognition result {#recognition-result}
+
+Now run the program. You should see results of the recognition in the console output:
+
+```text
+Element Name,Value,
+Question1,"A"
+```
+
+## What's next? {#whats-next}
+
+Congratulations! You have taken the first steps in optical mark recognition technology. Read the [Developer reference](/net/omr/developer-reference/) and <a href="https://reference.aspose.com/omr/net" target="_blank" rel="nofollow noopener noreferrer">API reference</a> for details on developing advanced OMR forms and applications with Aspose.OMR for .NET.

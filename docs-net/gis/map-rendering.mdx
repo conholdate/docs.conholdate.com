@@ -1,0 +1,166 @@
+---
+title: "Map Rendering to Image SVG, PNG, JPG using GIS C# Library"
+sidebar_label: "Map Rendering to Image SVG, PNG, JPG using GIS C# Library"
+sidebar_key: "net-gis-map-rendering"
+sidebar_position: 100
+description: ""
+product: "gis"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/gis/net"
+source_path: "gis/net/map-rendering.html"
+source_commit: ""
+source_sha256: "78a393a67dda743d38093a24fa9570e21c7a8da1b7d1f34b6ddb1ea21d8749c2"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/gis/net/map-rendering/"
+source_snapshot_sha256: "2b6503d93a7e418f6566413e3e688b43a13ef35ccdde1e8345418e9245149812"
+---
+
+:::info
+Aspose.GIS for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Map Rendering Overview {#map-rendering-overview}
+
+With Aspose.GIS for .NET C# API you can render a map from a Shapefile, FileGDB, GeoJSON, KML or other [supported file formats](/net/gis/supported-file-formats/) to SVG, PNG, JPEG, or BMP.
+
+Here is C# code illustrating how to render a map from a shapefile to SVG using default settings:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-gis/Aspose.GIS-for-.NET
+using (var map = new Map(800, 400))
+{
+    map.Add(VectorLayer.Open(dataDir + "land.shp", Drivers.Shapefile));
+    map.Render(dataDir + "land_out.svg", Renderers.Svg);
+}
+```
+
+Here's the result:
+
+![map rendering](/net/gis/images/6ccf0137c72fab7d-map_rendering.png)
+
+Let's take a closer look at the code.
+
+First, we instantiate a <a href="https://reference.aspose.com/gis/net/aspose.gis.rendering/map" target="_blank" rel="nofollow noopener noreferrer">Map</a> object. It represents a collection of layers from various sources that can be rendered. A Map has a size it's intended to be displayed at. Here we set the map to be 800 pixels wide and 400 pixels tall.
+
+Notice that the Map is enclosed into the using statement. This is necessary because the map keeps track of all resources added to it, and disposes them when we're done with rendering and Map object is disposed.
+
+Next, we add a layer from a file to the map. Each layer is rendered on top of the previous layer, in the order in which they were added to the map. See more details about how to open vector layers [here](/net/gis/working-with-vector-layers/).
+
+Finally, we call <a href="https://reference.aspose.com/gis/net/aspose.gis.rendering.map/render/methods/1" target="_blank" rel="nofollow noopener noreferrer">Map.Render</a> to render the map into a file. We specify a path to where to save the result file and a renderer to use. Class <a href="https://reference.aspose.com/gis/net/aspose.gis.rendering/renderers" target="_blank" rel="nofollow noopener noreferrer">Renderers</a> contains references to all renderers included with Aspose.GIS. For example, you can specify Renderers.Png instead of Renderers.Svg in the example above to render the map into a PNG file
+
+## Advanced Styling {#advanced-styling}
+
+With Aspose.GIS API, you can customize rendering and feature styles in order to achieve the look you want. 
+
+![advanced styling](/net/gis/images/6776558f8033aa62-advanced_styling.png)
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-gis/Aspose.GIS-for-.NET
+using (var map = new Map(800, 476))
+{
+    var baseMapSymbolizer = new SimpleFill { FillColor = Color.Salmon, StrokeWidth = 0.75 };
+    map.Add(VectorLayer.Open(dataDir + "basemap.shp", Drivers.Shapefile), baseMapSymbolizer);
+
+    var citiesSymbolizer = new SimpleMarker() { FillColor = Color.LightBlue };
+    citiesSymbolizer.FeatureBasedConfiguration = (feature, symbolizer) =>
+    {
+        var population = feature.GetValue<int>("population");
+        symbolizer.Size = 10 * population / 1000;
+        if (population < 2500)
+        {
+            symbolizer.FillColor = Color.GreenYellow;
+        }
+    };
+    map.Add(VectorLayer.Open(dataDir + "points.geojson", Drivers.GeoJson), citiesSymbolizer);
+
+    map.Render(dataDir + "cities_out.svg", Renderers.Svg);
+}
+```
+
+## Draw raster in map {#draw-raster-in-map}
+
+With Aspose.GIS for .NET you can render a map from raster formats.
+
+### Render with default settings {#render-with-default-settings}
+
+Here's how to render a map from a GeoTIFF to SVG using default settings:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-gis/Aspose.GIS-for-.NET
+string filesPath = RunExamples.GetDataDir();
+            
+using (var map = new Map(500, 500))
+{
+    var layer = Drivers.GeoTiff.OpenLayer(Path.Combine(filesPath, "raster_float32.tif"));
+    // Conversion to colors is detected automatically.
+    // The maximum and minimum values are calculated and linear interpolation is used.
+    map.Add(layer);
+    map.Render(filesPath + "raster_float32_out.svg", Renderers.Svg);
+}
+```
+
+![default raster](/net/gis/images/251e5ac0b5fa85bb-default_raster.png)
+
+### Render skew rasters {#render-skew-rasters}
+
+With Aspose.GIS you can render a raster with skew raster cells.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-gis/Aspose.GIS-for-.NET
+string filesPath = RunExamples.GetDataDir();
+
+using (var map = new Map(500, 500))
+{
+    // use background color
+    map.BackgroundColor = Color.Azure;
+
+    var layer = Drivers.GeoTiff.OpenLayer(Path.Combine(filesPath, "raster_skew.tif"));
+
+    // Conversion to colors is detected automatically.
+    // The maximum and minimum values are calculated and linear interpolation is used.
+    map.Add(layer);
+
+    map.Render(filesPath + "raster_skew_out.svg", Renderers.Svg);
+}
+```
+
+![skew raster](/net/gis/images/c52af2aecd146c87-skew_raster.png)
+
+### Render in polar spatial reference {#render-in-polar-spatial-reference}
+
+Aspose.GIS lets you using polar spatial references on a map rendering process.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-gis/Aspose.GIS-for-.NET
+string filesPath = RunExamples.GetDataDir();
+
+// make own multi colorizer it works faster than auto-detection
+var colorizer = new MultiBandColor()
+{
+    RedBand = new BandColor() { BandIndex = 0, Min = 0, Max = 255 },
+    GreenBand = new BandColor() { BandIndex = 1, Min = 0, Max = 255 },
+    BlueBand = new BandColor() { BandIndex = 2, Min = 0, Max = 255 }
+};
+
+using (var map = new Map(500, 500))
+{
+    // setup the polar extent and coordinate system (gnomonic spatial reference)
+    map.SpatialReferenceSystem = SpatialReferenceSystem.CreateFromEpsg(102034);
+    map.Extent = new Extent(-180, 60, 180, 90) { SpatialReferenceSystem = SpatialReferenceSystem.Wgs84 };
+    map.BackgroundColor = Color.Azure;
+
+    // open geo-tiff
+    var layer = Drivers.GeoTiff.OpenLayer(Path.Combine(filesPath, "raster_countries.tif"));
+
+    // draw
+    map.Add(layer, colorizer);
+    map.Render(filesPath + "raster_countries_gnomonic_out.png", Renderers.Png);
+}
+```
+
+![gnomonic countries](/net/gis/images/79b24e8667140caa-gnomonic_countries.png)
