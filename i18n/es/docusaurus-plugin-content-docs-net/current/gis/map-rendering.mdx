@@ -1,0 +1,173 @@
+---
+title: "Renderizado de mapas a imágenes SVG, PNG, JPG mediante la biblioteca GIS en C#"
+sidebar_label: "Renderizado de mapas a imágenes SVG, PNG, JPG mediante la biblioteca GIS en C#"
+sidebar_key: "net-gis-map-rendering"
+sidebar_position: 100
+description: ""
+product: "gis"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/gis/net"
+source_path: "gis/net/map-rendering.html"
+source_commit: ""
+source_sha256: "78a393a67dda743d38093a24fa9570e21c7a8da1b7d1f34b6ddb1ea21d8749c2"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/gis/net/map-rendering/"
+source_snapshot_sha256: "2b6503d93a7e418f6566413e3e688b43a13ef35ccdde1e8345418e9245149812"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "4d4e6a3ee80789b6fddc3ae1f3863ca2f18e17bfdf2d4766bf6917d2c407a25b"
+translation_updated_at: "2026-10-28T09:51:46.201Z"
+translation_status: "ai-draft"
+---
+
+:::info
+Aspose.GIS para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Descripción general del renderizado de mapas {#map-rendering-overview}
+  
+Con Aspose.GIS para .NET C# API, puede renderizar un mapa desde un Shapefile, FileGDB, GeoJSON, KML u otros [formatos de archivo compatibles](/net/gis/supported-file-formats/) a SVG, PNG, JPEG o BMP.
+
+A continuación se muestra un código en C# que ilustra cómo renderizar un mapa desde un shapefile a SVG utilizando la configuración predeterminada:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-gis/Aspose.GIS-for-.NET
+using (var map = new Map(800, 400))
+{
+    map.Add(VectorLayer.Open(dataDir + "land.shp", Drivers.Shapefile));
+    map.Render(dataDir + "land_out.svg", Renderers.Svg);
+}
+```
+
+Aquí está el resultado:
+
+![map rendering](/net/gis/images/6ccf0137c72fab7d-map_rendering.png)
+
+Echemos un vistazo más detallado al código.
+
+En primer lugar, instanciamos un objeto <a href="https://reference.aspose.com/gis/net/aspose.gis.rendering/map" target="_blank" rel="nofollow noopener noreferrer">Map</a>. Este objeto representa una colección de capas procedentes de diversas fuentes que pueden representarse. Un mapa tiene un tamaño predeterminado para su visualización; en este caso, lo configuramos con un ancho de 800 píxeles y una altura de 400 píxeles.
+
+Observe que el objeto Map está incluido dentro de una instrucción `using`. Esto es necesario porque el mapa realiza un seguimiento de todos los recursos que se le agregan y los libera cuando finaliza la representación y se desecha el objeto Map.
+
+A continuación, agregamos una capa procedente de un archivo al mapa. Cada capa se representa encima de la capa anterior, en el orden en que se agregaron al mapa. Consulte [aquí](/net/gis/working-with-vector-layers/) para obtener más detalles sobre cómo abrir capas vectoriales.
+
+Por último, llamamos a <a href="https://reference.aspose.com/gis/net/aspose.gis.rendering.map/render/methods/1" target="_blank" rel="nofollow noopener noreferrer">Map.Render</a> para representar el mapa en un archivo. Especificamos la ruta donde guardar el archivo resultante y el renderizador que se utilizará. La clase <a href="https://reference.aspose.com/gis/net/aspose.gis.rendering/renderers" target="_blank" rel="nofollow noopener noreferrer">Renderers</a> contiene referencias a todos los renderizadores incluidos con Aspose.GIS. Por ejemplo, puede especificar `Renderers.Png` en lugar de `Renderers.Svg` en el ejemplo anterior para representar el mapa en un archivo PNG.
+
+## Estilo avanzado {#advanced-styling}
+  
+Con la API de Aspose.GIS, puede personalizar la representación y los estilos de las entidades para lograr el aspecto deseado. 
+
+![advanced styling](/net/gis/images/6776558f8033aa62-advanced_styling.png)
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-gis/Aspose.GIS-for-.NET
+using (var map = new Map(800, 476))
+{
+    var baseMapSymbolizer = new SimpleFill { FillColor = Color.Salmon, StrokeWidth = 0.75 };
+    map.Add(VectorLayer.Open(dataDir + "basemap.shp", Drivers.Shapefile), baseMapSymbolizer);
+
+    var citiesSymbolizer = new SimpleMarker() { FillColor = Color.LightBlue };
+    citiesSymbolizer.FeatureBasedConfiguration = (feature, symbolizer) =>
+    {
+        var population = feature.GetValue<int>("population");
+        symbolizer.Size = 10 * population / 1000;
+        if (population < 2500)
+        {
+            symbolizer.FillColor = Color.GreenYellow;
+        }
+    };
+    map.Add(VectorLayer.Open(dataDir + "points.geojson", Drivers.GeoJson), citiesSymbolizer);
+
+    map.Render(dataDir + "cities_out.svg", Renderers.Svg);
+}
+```
+
+## Dibujar ráster en mapa {#draw-raster-in-map}
+  
+Con Aspose.GIS para .NET, puede representar un mapa a partir de formatos de ráster.
+
+### Representar con configuración predeterminada {#render-with-default-settings}
+  
+A continuación se muestra cómo representar un mapa a partir de un GeoTIFF en formato SVG utilizando la configuración predeterminada:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-gis/Aspose.GIS-for-.NET
+string filesPath = RunExamples.GetDataDir();
+            
+using (var map = new Map(500, 500))
+{
+    var layer = Drivers.GeoTiff.OpenLayer(Path.Combine(filesPath, "raster_float32.tif"));
+    // Conversion to colors is detected automatically.
+    // The maximum and minimum values are calculated and linear interpolation is used.
+    map.Add(layer);
+    map.Render(filesPath + "raster_float32_out.svg", Renderers.Svg);
+}
+```
+
+![default raster](/net/gis/images/251e5ac0b5fa85bb-default_raster.png)
+
+### Renderizar rásteres sesgados  {#render-skew-rasters}
+  
+Con Aspose.GIS, puede renderizar un ráster con celdas de ráster sesgadas.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-gis/Aspose.GIS-for-.NET
+string filesPath = RunExamples.GetDataDir();
+
+using (var map = new Map(500, 500))
+{
+    // use background color
+    map.BackgroundColor = Color.Azure;
+
+    var layer = Drivers.GeoTiff.OpenLayer(Path.Combine(filesPath, "raster_skew.tif"));
+
+    // Conversion to colors is detected automatically.
+    // The maximum and minimum values are calculated and linear interpolation is used.
+    map.Add(layer);
+
+    map.Render(filesPath + "raster_skew_out.svg", Renderers.Svg);
+}
+```
+
+![skew raster](/net/gis/images/c52af2aecd146c87-skew_raster.png)
+
+### Renderizado en referencia espacial polar  {#render-in-polar-spatial-reference}
+  
+Aspose.GIS le permite utilizar referencias espaciales polares en el proceso de renderizado de mapas.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-gis/Aspose.GIS-for-.NET
+string filesPath = RunExamples.GetDataDir();
+
+// make own multi colorizer it works faster than auto-detection
+var colorizer = new MultiBandColor()
+{
+    RedBand = new BandColor() { BandIndex = 0, Min = 0, Max = 255 },
+    GreenBand = new BandColor() { BandIndex = 1, Min = 0, Max = 255 },
+    BlueBand = new BandColor() { BandIndex = 2, Min = 0, Max = 255 }
+};
+
+using (var map = new Map(500, 500))
+{
+    // setup the polar extent and coordinate system (gnomonic spatial reference)
+    map.SpatialReferenceSystem = SpatialReferenceSystem.CreateFromEpsg(102034);
+    map.Extent = new Extent(-180, 60, 180, 90) { SpatialReferenceSystem = SpatialReferenceSystem.Wgs84 };
+    map.BackgroundColor = Color.Azure;
+
+    // open geo-tiff
+    var layer = Drivers.GeoTiff.OpenLayer(Path.Combine(filesPath, "raster_countries.tif"));
+
+    // draw
+    map.Add(layer, colorizer);
+    map.Render(filesPath + "raster_countries_gnomonic_out.png", Renderers.Png);
+}
+```
+
+![gnomonic countries](/net/gis/images/79b24e8667140caa-gnomonic_countries.png)
