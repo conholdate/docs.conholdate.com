@@ -1,0 +1,154 @@
+---
+title: "Añadir nombre de clase a controles de entrada"
+sidebar_label: "Añadir nombre de clase a controles de entrada"
+sidebar_key: "net-editor-edit-document-edit-word-adding-class-name-to-input-controls"
+sidebar_position: 1
+description: "Siga esta guía y aprenda cómo editar documentos de Word que contienen controles de entrada como botones, cuadros de texto, casillas de verificación, cuadros combinados, campos de entrada, listas desplegables, botones de opción, selectores de fecha/hora, etc., utilizando las características de la API de GroupDocs.Editor para .NET."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-word/adding-class-name-to-input-controls.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "99e92a804656741718e5be47588cf23f08dc8653d2da58aeab2c96636225ce4f"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "fc1b83b5152ff42318b96f3b2961b4599480070b35165d106a100c94f2394153"
+translation_updated_at: "2026-11-16T03:58:54.098Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Casi todos los formatos dentro de la familia de formatos de procesamiento de textos, como DOC(X/M), ODT, etc., admiten controles de entrada de distintos tipos. Los documentos de procesamiento de textos pueden contener distintos botones, cuadros de texto, casillas de verificación, cuadros combinados, campos de entrada, listas desplegables, botones de opción, selectores de fecha/hora y mucho más, los cuales están presentes internamente como entidades de etiquetas de documentos estructurados (SDT) o campos («Insertar > Partes rápidas > Propiedad del documento/Campo»). **<a href="https://products.groupdocs.com/editor/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Editor</a>** admite todas estas entidades y las conserva al convertir el documento en la instancia <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>. Finalmente, al generar un documento HTML a partir de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> con el fin de editarlo en un editor HTML WYSIWYG, estos controles de entrada se traducen en las estructuras y elementos HTML más adecuados. Además, cuando el documento de entrada contiene no solo controles de entrada, sino también datos introducidos por el usuario, dichos datos también se conservan y estarán presentes en el documento HTML de salida.
+
+En algunos casos de uso específicos, el usuario final puede requerir no editar todo el contenido del documento, sino únicamente editar y/o recopilar los datos introducidos en los controles de entrada. Para este caso, es necesario identificar de alguna manera todos estos controles de entrada, a fin de recuperarlos y distinguirlos de todos los demás elementos HTML al trabajar del lado del cliente. Para lograr este propósito, GroupDocs.Editor ofrece la posibilidad de establecer un nombre de clase CSS único proporcionado por el usuario para todos estos controles de entrada en el marcado HTML. A partir de la versión 20.2, existe una opción <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions/inputcontrolsclassname/" target="_blank" rel="nofollow noopener noreferrer">`InputControlsClassName`</a> en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingEditOptions</a>. Su aspecto es el siguiente:
+
+```csharp
+public string InputControlsClassName {get; set;}
+```
+
+De forma predeterminada, su valor es NULL: los nombres de clase no se aplican a los elementos HTML. Sin embargo, si el usuario establece un nombre de clase válido, todos los elementos del control de entrada (como INPUT, BUTTON, SELECT, etc.) tendrán un atributo HTML «class» con el nombre de clase especificado. Por ejemplo:
+
+
+<Tabs groupId="Signature">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+WordProcessingEditOptions editOptions = new WordProcessingEditOptions();
+editOptions.InputControlsClassName = "myClass1";
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Dim editOptions As WordProcessingEditOptions = New WordProcessingEditOptions
+editOptions.InputControlsClassName = "myClass1"
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+Finalmente, cuando el atributo «class» con un nombre de clase especificado se aplica a todos los elementos HTML que representan controles de entrada, el código del cliente puede trabajar con ellos, por ejemplo, recorriendo el DOM HTML y recopilando y/o manipulando los datos.
+
+## Ejemplo completo  {#complete-example}
+  
+El siguiente ejemplo de código demuestra la edición de un archivo DOCX de ejemplo llamado «Fields.docx», que contiene 3 controles de entrada: un cuadro de texto, una casilla de verificación y una lista desplegable. Este archivo se edita dos veces: la primera vez con el valor predeterminado de `WordProcessingEditOptions`, en el que no se especifica ningún nombre de clase personalizado, y la segunda vez con un valor personalizado en la propiedad `InputControlsClassName`. Como resultado, se generan dos archivos HTML finales.
+
+
+<Tabs groupId="Complete example">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Editor.Formats;
+using GroupDocs.Editor.Options;
+// ...
+
+Editor editor = new Editor("Fields.docx");
+
+WordProcessingEditOptions optionsWithoutClassName = new WordProcessingEditOptions();
+
+WordProcessingEditOptions optionsWithClassName = new WordProcessingEditOptions();
+optionsWithClassName.InputControlsClassName = "myClass1";
+
+EditableDocument docWithoutClassName = editor.Edit(optionsWithoutClassName);
+EditableDocument docWithClassName = editor.Edit(optionsWithClassName);
+
+System.IO.File.WriteAllText("input-controls-without-custom-classname.html", 
+    docWithoutClassName.GetEmbeddedHtml());
+System.IO.File.WriteAllText("input-controls-with-custom-classname.html", 
+    docWithClassName.GetEmbeddedHtml());
+
+docWithoutClassName.Dispose();
+docWithClassName.Dispose();
+editor.Dispose();
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Editor.Formats
+Imports GroupDocs.Editor.Options
+' ...
+
+Dim editor As Editor = New Editor("Fields.docx")
+
+Dim optionsWithoutClassName As New WordProcessingEditOptions()
+
+Dim optionsWithClassName As New WordProcessingEditOptions()
+With optionsWithClassName
+    .InputControlsClassName = "myClass1"
+End With
+
+Dim docWithoutClassName As EditableDocument = editor.Edit(optionsWithoutClassName)
+Dim docWithClassName As EditableDocument = editor.Edit(optionsWithClassName)
+
+System.IO.File.WriteAllText("input-controls-without-custom-classname.html",
+                            docWithoutClassName.GetEmbeddedHtml())
+System.IO.File.WriteAllText("input-controls-with-custom-classname.html",
+                            docWithClassName.GetEmbeddedHtml())
+
+docWithoutClassName.Dispose()
+docWithClassName.Dispose()
+editor.Dispose()
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+Archivos de referencia para descargar:  
+
+- Entrada: "[Fields.docx](/net/editor/sample-files/Fields.docx)"  
+
+- Salida HTML: "[input-controls-without-custom-classname.html](/net/editor/sample-files/input-controls-without-custom-classname.html)"  
+
+- Salida HTML: "[input-controls-with-custom-classname.html](/net/editor/sample-files/input-controls-with-custom-classname.html)"  
+
+La captura de pantalla siguiente muestra la diferencia en la marcación HTML entre estos dos archivos de salida HTML: sin el atributo a la izquierda y con el atributo `class` y valor `"myClass1"` a la derecha.
+
+![input controls without and with custom classname - side-by-side comparison](/net/editor/images/input-controls-without-with-custom-classname-side-by-side.png)

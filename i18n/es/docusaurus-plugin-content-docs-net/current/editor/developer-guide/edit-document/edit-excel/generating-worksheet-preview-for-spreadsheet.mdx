@@ -1,0 +1,75 @@
+---
+title: "Generación de vista previa de hojas de cálculo (pestañas) para hojas de cálculo"
+sidebar_label: "Generación de vista previa de hojas de cálculo (pestañas) para hojas de cálculo"
+sidebar_key: "net-editor-edit-document-edit-excel-generating-worksheet-preview-for-spreadsheet"
+sidebar_position: 2
+description: "Este artículo describe cómo generar una vista previa para cualquier hoja de cálculo (pestaña) del archivo de Excel existente en formato SVG."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-excel/generating-worksheet-preview-for-spreadsheet.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "c479d0b40e63abd880702d75e236616d6ecd95089da1bc41e9a3e9d04526af5a"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "564a26800e653bf5d606d52fbcbeb8426d126cb15e4d95e62485e9267a05c8ac"
+translation_updated_at: "2026-11-16T03:48:24.766Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+A partir de la versión <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-23-4-release-notes/" target="_blank" rel="nofollow noopener noreferrer">23.4</a> de GroupDocs.Editor para .NET, es posible generar una vista previa en formato SVG para cualquier hoja de cálculo (también conocida como _pestaña_) dentro de un documento de hoja de cálculo (también conocido como _libro_). Gracias a esta funcionalidad, los usuarios finales pueden visualizar e inspeccionar el contenido del documento de hoja de cálculo sin necesidad de enviarlo para su edición. Dicha vista previa generada de la hoja de cálculo no puede editarse mediante GroupDocs.Editor para .NET, pero sí puede guardarse y visualizarse posteriormente en cualquier visor de imágenes de escritorio o en línea, así como directamente en el navegador (puesto que todos los navegadores modernos admiten la visualización del formato SVG).
+
+Esta funcionalidad funciona independientemente del modo de licencia de GroupDocs.Editor para .NET: opera de la misma manera tanto en modo de prueba como en modo con licencia, y no existen limitaciones de prueba para esta característica. Al generar las vistas previas de las hojas de cálculo, GroupDocs.Editor no descuenta los bytes consumidos ni los créditos.
+
+Los libros de Excel pueden contener llamadas _hojas ocultas_, y GroupDocs.Editor para .NET también genera una vista previa en SVG para dichas hojas.
+
+Para generar la vista previa de las hojas de cálculo de un documento específico, el usuario debe realizar los siguientes pasos:  
+
+- Cargar el archivo de hoja de cálculo deseado en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a>.
+- Llamar al método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`GetDocumentInfo()`</a> y especificar la contraseña del libro cargado, en caso de que esté protegido con contraseña.
+- En la estructura <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/spreadsheetdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Metadata.SpreadsheetDocumentInfo`</a> obtenida, invocar el método de instancia <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/spreadsheetdocumentinfo/generatepreview/" target="_blank" rel="nofollow noopener noreferrer">`GeneratePreview(int worksheetIndex)`</a>, especificando en él el _índice_ (no confundir con los _números_ de hoja, que son 1-based) de la hoja deseada, en notación de base cero. Si el índice especificado es menor que 0 o excede el número total de hojas del libro dado, se lanzará la excepción <a href="https://learn.microsoft.com/en-us/dotnet/api/system.ArgumentOutOfRangeException?view=net-7.0" target="_blank" rel="nofollow noopener noreferrer">System.ArgumentOutOfRangeException</a>.
+- El método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/spreadsheetdocumentinfo/generatepreview/" target="_blank" rel="nofollow noopener noreferrer">`GeneratePreview(int worksheetIndex)`</a> devuelve la vista previa de la hoja como una imagen vectorial SVG encapsulada en la clase pública <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a> del espacio de nombres <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.HtmlCss.Resources.Images.Vector`</a>. Esta clase dispone de todos los métodos y propiedades necesarios para obtener el contenido de la imagen SVG en cualquier formato deseado, guardarlo en disco, en un flujo, etc.
+
+El siguiente ejemplo de código muestra cómo abrir un archivo de hoja de cálculo sin contraseña, obtener el número total de hojas presentes en dicha hoja de cálculo y, a continuación, generar las vistas previas de todas las hojas mediante un bucle. Posteriormente, estas vistas previas se guardan en disco.
+
+```csharp
+// Obtain a valid full path to the spreadsheet file
+string inputPath = "Sample.xlsx";
+
+// Load spreadsheet file to the Editor constructor
+using (GroupDocs.Editor.Editor editor = new Editor(inputPath))
+{
+	// Get document info for this file
+	IDocumentInfo infoUncasted = editor.GetDocumentInfo(null);
+
+	//Make sure it is really a Spreadsheet of XLSX format
+	Assert.AreEqual(Formats.SpreadsheetFormats.Xlsx, infoUncasted.Format);
+
+	// Cast this document info to the SpreadsheetDocumentInfo type
+	SpreadsheetDocumentInfo infoSpreadsheet = (SpreadsheetDocumentInfo)infoUncasted;
+
+	// Get the number of all worksheets
+	int worksheetsCount = infoSpreadsheet.PageCount;
+
+	//Iterate through all worksheets and generate the preview on every iteration
+	for (int worksheetIndex = 0; worksheetIndex < worksheetsCount; worksheetIndex++)
+	{
+		// Generate one preview as SVG image by worksheet index
+		SvgImage oneSvgPreview = infoSpreadsheet.GeneratePreview(worksheetIndex);
+
+		// Save SVG preview to the file
+		oneSvgPreview.Save(Path.Combine(outputFolder, oneSvgPreview.FilenameWithExtension));
+	}
+}
+```
+
+En conclusión, la nueva función de vista previa de hojas de cálculo es, en esencia, un nuevo método público dentro de la estructura existente <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/spreadsheetdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Metadata.SpreadsheetDocumentInfo`</a>, que recibe un índice de hoja de cálculo y devuelve una instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a>. Si el usuario final necesita obtener una vista previa de la hoja de cálculo en formato rasterizado y no en formato vectorial, puede utilizar el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/savetopng/" target="_blank" rel="nofollow noopener noreferrer">`SaveToPng`</a> de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a>: este método convierte el contenido SVG de la <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a> actual al formato PNG y lo guarda en el <a href="https://learn.microsoft.com/en-us/dotnet/api/system.IO.Stream?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`System.IO.Stream`</a> especificado.

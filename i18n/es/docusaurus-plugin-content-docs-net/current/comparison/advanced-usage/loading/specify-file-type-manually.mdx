@@ -1,0 +1,121 @@
+---
+title: "Especificar manualmente el tipo de archivo para la comparación"
+sidebar_label: "Especificar manualmente el tipo de archivo para la comparación"
+sidebar_key: "net-comparison-loading-specify-file-type-manually"
+sidebar_position: 6
+description: "Especifique manualmente el tipo de archivo de documento en GroupDocs.Comparison para .NET mediante `LoadOptions.FileType` para omitir la detección automática y acelerar la carga de archivos grandes."
+product: "comparison"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "comparison-net"
+source_path: "net/advanced-usage/loading/specify-file-type-manually.md"
+source_commit: "7624b4308e90feb1963a8dfe447bff38010a8a60"
+source_sha256: "08766be8ec68b1c5fcb2104eb2d1cfa17add034bee352033de622be244da28b0"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "a4c85c9bcf0791d9bd1e1573e98207ab592c33f8781ffa240fa302e605b3f84d"
+translation_updated_at: "2026-11-16T03:50:32.710Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Comparison para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+<a href="https://products.groupdocs.com/comparison/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Comparison</a> le permite especificar explícitamente el tipo de archivo del documento mediante <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.options/loadoptions/filetype/" target="_blank" rel="nofollow noopener noreferrer">LoadOptions.FileType</a>, en lugar de depender de la detección automática del formato.
+
+## ¿Por qué especificar el tipo de archivo? {#why-specify-the-file-type}
+
+Cuando no se proporciona un tipo de archivo, GroupDocs.Comparison examina el contenido del archivo para determinar su formato. Esta detección es fiable, pero añade tiempo de procesamiento, lo cual puede ser notable para **archivos grandes**.
+
+Si ya conoce el formato —por ejemplo, porque la entrada está restringida por su aplicación—, al pasarlo explícitamente se omite la detección y permite que la biblioteca pase directamente a la carga. En pipelines de alto rendimiento o trabajos por lotes con documentos grandes, esto puede generar una mejora de velocidad medible.
+
+## Especificar explícitamente el tipo de archivo {#specify-the-file-type-explicitly}
+
+Utilice este enfoque cuando el formato del documento se conozca en tiempo de compilación.
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Comparison;
+using GroupDocs.Comparison.Options;
+// ...
+
+LoadOptions loadOptions = new LoadOptions
+{
+    FileType = FileType.DOCX
+};
+
+using (Comparer comparer = new Comparer("source.docx", loadOptions))
+{
+    comparer.Add("target.docx", loadOptions);
+    comparer.Compare("result.docx");
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+## Derivar el tipo de archivo a partir de una ruta de archivo  {#derive-the-file-type-from-a-file-path}
+  
+Cuando la ruta de archivo esté disponible y su extensión sea fiable, utilice <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/filetype/" target="_blank" rel="nofollow noopener noreferrer">FileType.FromFileNameOrExtension</a> para resolver el `FileType` a partir de la extensión. Esto sigue omitiendo la detección automática basada en el contenido, pero mantiene el código de llamada genérico.
+
+
+<Tabs groupId="example2">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Comparison;
+using GroupDocs.Comparison.Options;
+using GroupDocs.Comparison.Result;
+// ...
+
+string sourcePath = "source.docx";
+string targetPath = "target.docx";
+
+LoadOptions sourceLoadOptions = new LoadOptions
+{
+    FileType = FileType.FromFileNameOrExtension(sourcePath)
+};
+
+LoadOptions targetLoadOptions = new LoadOptions
+{
+    FileType = FileType.FromFileNameOrExtension(targetPath)
+};
+
+using (Comparer comparer = new Comparer(sourcePath, sourceLoadOptions))
+{
+    comparer.Add(targetPath, targetLoadOptions);
+    comparer.Compare("result.docx");
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+## Consulte también {#see-also}  
+
+- <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.options/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API LoadOptions</a>
+- [Formatos de documento admitidos](/net/comparison/getting-started/supported-document-formats/)
+- [Cargar documentos protegidos con contraseña](/net/comparison/advanced-usage/loading/load-password-protected-documents/)
+- [Cargar fuentes personalizadas](/net/comparison/advanced-usage/loading/load-custom-fonts/)

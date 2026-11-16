@@ -1,0 +1,86 @@
+---
+title: "Exportar estilos durante la edición del documento"
+sidebar_label: "Exportar estilos durante la edición del documento"
+sidebar_key: "net-editor-edit-document-edit-word-styles-export"
+sidebar_position: 10
+description: "Este artículo describe el procedimiento para conservar y exportar todos los estilos integrados y personalizados del documento de procesamiento de texto de origen durante su edición."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-word/styles-export.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "7d7f27ffd45b5d66343e55388058ae19d8c3ba76a65bcb84c38fa8e3508078f6"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "af4e13aca713e44222bbb18320b2b31d15b6500d788b9da55ba217464bd401ea"
+translation_updated_at: "2026-11-16T04:06:33.721Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+La <a href="https://docs.fileformat.com/word-processing/" target="_blank" rel="nofollow noopener noreferrer">familia de formatos de procesamiento de textos</a>, comúnmente representada por los formatos <a href="https://docs.fileformat.com/word-processing/docx/" target="_blank" rel="nofollow noopener noreferrer">Office Open XML</a> y los formatos <a href="https://docs.fileformat.com/word-processing/odt/" target="_blank" rel="nofollow noopener noreferrer">Open Document Format (ODT)</a>, incorpora el concepto de _estilos_. En este contexto, un _estilo_ es un conjunto definido de opciones de formato que puede aplicarse a una porción de texto, párrafos, listas o tablas. Los estilos pueden ser integrados (definidos por el programa de procesamiento de textos, como Microsoft Word) o definidos por el usuario. Cada estilo posee un nombre único y puede derivarse de otro estilo. En Microsoft Word, los estilos suelen ubicarse en el área «Estilos» dentro de la pestaña «Principal»; los usuarios pueden seleccionar un texto o párrafo deseado del documento y luego hacer clic en el estilo preferido para aplicar su formato.
+
+Cada estilo presenta las siguientes características y parámetros:
+
+1. Tiene un nombre único.
+2. Puede ser un estilo de carácter (aplicado al contenido textual dentro de un párrafo), un estilo de párrafo (aplicado a uno o varios párrafos), un estilo de lista (aplicado a los elementos de una lista) o un estilo de tabla (aplicado a toda la tabla).
+3. Puede ser integrado en Microsoft Word o definido por el usuario.
+   * Para los estilos integrados únicamente: puede ser un estilo de encabezado o no.
+4. Puede ser un Estilo Rápido o no; en caso afirmativo, dicho estilo aparece en la galería de Estilos Rápidos de la interfaz de usuario de Microsoft Word.
+5. Puede estar basado en otro estilo o no.
+
+Antes de la <a href="https://releases.groupdocs.com/editor/net/release-notes/2023/groupdocs-editor-for-net-23-8-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 23.8</a>, GroupDocs.Editor no ofrecía soporte para estilos: estos no se exportaban al marcado HTML/CSS durante la edición del documento ni se importaban nuevamente al guardarlo, y no existía la posibilidad para el usuario final de determinar cómo se había formateado originalmente un texto o párrafo específico: ya fuera mediante un formato personalizado o mediante estilos.
+
+A partir de la versión 23.8, GroupDocs.Editor finalmente admite estilos en la exportación. Esta funcionalidad no es una opción configurable, sino que siempre está activa; a partir de dicha versión, el marcado HTML y la hoja de estilos CSS se generan de forma distinta. GroupDocs.Editor exporta los estilos de procesamiento de textos transformándolos en reglas CSS y haciendo referencia a dichas reglas desde el marcado HTML.
+
+A continuación se muestra un ejemplo de marcado CSS que contiene un estilo integrado de Microsoft Word denominado «Título 1»:
+
+```css
+.Heading_1, .Quick-style, .BuiltIn-style, .Heading-style, .Paragraph-style { 
+	-aw-style-name: heading1; 
+	-gd-style-name: 'Heading 1'; 
+	font-family: Cambria; 
+	font-size: 14pt; 
+	font-weight: bold; 
+	font-style: normal; 
+	color: rgb(54, 95, 145); 
+	text-align: left; 
+	margin-top: 24pt; 
+	margin-bottom: 0pt; 
+	line-height: 134.16667%; 
+}
+```
+
+El nombre original del estilo se conserva en la propiedad personalizada `"-gd-style-name"`. Dado que se trata de un estilo integrado, también posee un identificador de estilo en la propiedad personalizada `"-aw-style-name"`. Los selectores de clase dentro del selector agrupado de este bloque de reglas también almacenan los parámetros del estilo:  
+
+- El primer selector de clase es un nombre de estilo único, ajustado para cumplir con los requisitos de “identificador CSS”.
+- El segundo selector de clase indica si se trata de un estilo rápido.
+- El tercer selector de clase indica si se trata de un estilo integrado o de un estilo definido por el usuario.
+- El cuarto selector de clase indica si se trata de un estilo de encabezado integrado.
+- El quinto selector de clase define el tipo de estilo: Carácter, Párrafo, Lista o Tabla.
+
+A continuación se muestra un ejemplo de marcado CSS que contiene un estilo de carácter definido por el usuario llamado `"Подзаголовок Знак"`:
+
+```css
+.Подзаголовок_Знак, .User-style, .Character-style { 
+	-gd-style-name: 'Подзаголовок Знак'; 
+	font-family: Cambria; 
+	font-size: 12pt; 
+	font-weight: normal; 
+	font-style: italic; 
+	color: rgb(79, 129, 189); 
+	letter-spacing: 0.75pt; 
+}
+```
+
+A pesar de que, con esta nueva funcionalidad, el marcado HTML ha sufrido una ligera modificación y el marcado CSS ha experimentado una modificación drástica, la funcionalidad se desarrolló de tal manera que no interfiera ni distorsione la representación del documento en el navegador. Por lo tanto, al abrir y comparar lado a lado en el navegador web los dos documentos editados, donde el de la izquierda se genera con la versión <a href="https://releases.groupdocs.com/editor/net/release-notes/2023/groupdocs-editor-for-net-23-5-release-notes/" target="_blank" rel="nofollow noopener noreferrer">23.5</a> anterior y el de la derecha con la versión 23.8, no habrá ninguna diferencia visual.
+
+En la próxima versión de GroupDocs.Editor, planeamos implementar la importación de estilos al guardar documentos previamente abiertos y editados de nuevo en el formato de procesamiento de textos.

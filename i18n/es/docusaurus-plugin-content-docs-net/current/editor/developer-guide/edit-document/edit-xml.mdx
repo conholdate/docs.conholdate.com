@@ -1,0 +1,317 @@
+---
+title: "Cómo editar un archivo XML"
+sidebar_label: "Cómo editar un archivo XML"
+sidebar_key: "net-editor-edit-document-edit-xml"
+sidebar_position: 54
+description: "Este artículo demuestra cómo editar archivos XML y documentos XML utilizando el lenguaje de programación C#."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-xml.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "931d14dc88845126ed27903d3eb6fdae178c52c6045cb4b2a50caa39125b32a1"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "90dc129173794bfe73bdb6ddfa23cc621974335c38de94f888f21ad1cd221158"
+translation_updated_at: "2026-11-16T04:09:34.493Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+> Este ejemplo demuestra la apertura, edición y guardado de documentos XML, utilizando diferentes opciones y ajustes.
+
+## Introducción {#introduction}
+  
+GroupDocs.Editor ha admitido la importación de documentos en formato <a href="https://docs.fileformat.com/web/xml/" target="_blank" rel="nofollow noopener noreferrer">XML (eXtensible Markup Language)</a> desde hace mucho tiempo. Sin embargo, en la <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-23-2-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 23.2</a>, el mecanismo de procesamiento de XML se rediseñó por completo y se mejoró drásticamente; asimismo, las opciones públicas para editar XML se rediseñaron y ampliaron significativamente, incorporando nuevas clases de subopciones y nuevos tipos públicos.
+
+El presente artículo describe este nuevo mecanismo de procesamiento de XML y es aplicable a GroupDocs.Editor <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-23-2-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 23.2</a> y versiones posteriores.
+
+## Carga de documentos XML {#loading-xml-documents}
+  
+La carga de documentos XML en la clase `GroupDocs.Editor.`<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> es habitual y similar a la de otros formatos. No existen opciones de carga específicas para el formato XML; basta con especificar el archivo mediante su ruta o mediante un <a href="https://docs.microsoft.com/en-us/dotnet/api/system.IO.Stream?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">flujo de bytes</a>.
+
+Si la carga se realiza mediante una ruta de archivo, la extensión del archivo no es relevante; por lo tanto, puede cargar un archivo XML sin importar su extensión, ya sea `*.xml`, `*.csproj`, `*.svg` o cualquier otra extensión: únicamente la estructura interna válida del archivo es lo que importa.
+
+Asimismo, tenga en cuenta que no puede tratar archivos HTML como si fueran XML; únicamente <a href="https://en.wikipedia.org/wiki/XHTML" target="_blank" rel="nofollow noopener noreferrer">XHTML</a> puede considerarse como XML válido.
+
+El siguiente ejemplo de código muestra la carga del mismo documento mediante dos enfoques distintos en dos instancias diferentes de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a>:
+
+```csharp
+const string xmlFilename = "Sample.xml";
+string xmlInputPath = System.IO.Path.Combine("full_folder_path", xmlFilename);
+
+using (FileStream xmlStream = System.IO.File.OpenRead(xmlInputPath))
+using (GroupDocs.Editor.Editor editorFromPath = new Editor(xmlInputPath))//from the path
+using (GroupDocs.Editor.Editor editorFromStream = new Editor(xmlStream))//from the stream
+{
+	//Here two Editor instances can separately work with one file
+}
+```
+
+## Edición de documentos XML {#editing-xml-documents}
+  
+Al igual que ocurre con otras familias de formatos en GroupDocs.Editor, existe una clase especial <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlEditOptions`</a> para editar documentos XML. Como siempre, esta clase no es obligatoria al editar un documento, por lo que puede utilizarse la sobrecarga <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit" target="_blank" rel="nofollow noopener noreferrer">`Editor.Edit()`</a> sin parámetros: GroupDocs.Editor detectará automáticamente el formato y aplicará las opciones predeterminadas. El ejemplo siguiente muestra este caso: se carga un documento XML, se edita y, a continuación, el contenido editado, representado mediante la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a>, puede pasarse a un editor WYSIWYG o a cualquier otro software de edición HTML, o simplemente guardarse en disco, tal como se muestra en el ejemplo.
+
+```csharp
+const string xmlFilename = "Sample.xml";
+string xmlInputPath = System.IO.Path.Combine("full_folder_path", xmlFilename);
+
+string outputPath = System.IO.Path.Combine("output_folder_path", string.Format("{0}.html", Path.GetFileNameWithoutExtension(xmlFilename)));
+
+using (GroupDocs.Editor.Editor editor = new Editor(xmlInputPath))
+{
+	using (EditableDocument edited = editor.Edit())
+	{
+		//Send to WYSIWYG-editor or somewhere else
+		edited.Save(outputPath);
+	}
+}
+```
+
+<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlEditOptions`</a> posee propiedades distintas, algunas de las cuales están agrupadas en “contenedores” (wrappers): clases especiales <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlhighlightoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlHighlightOptions`</a> y <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlformatoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlFormatOptions`</a>, descritas detalladamente a continuación. Sin embargo, las propiedades más útiles e importantes se encuentran directamente dentro de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlEditOptions`</a>.
+
+#### Encoding {#encoding}
+
+<a href="https://learn.microsoft.com/en-us/dotnet/api/system.text.encoding?view=net-7.0" target="_blank" rel="nofollow noopener noreferrer">`System.Text.Encoding`</a> <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/encoding" target="_blank" rel="nofollow noopener noreferrer">`Encoding`</a>
+
+Esta propiedad permite establecer la codificación que se aplicará al abrir un archivo XML de entrada (tenga en cuenta que cualquier archivo XML es, ante todo, un archivo de texto). De forma predeterminada, todos los archivos XML están en UTF-8, por lo que el valor predeterminado de esta opción también es UTF-8.
+
+#### FixIncorrectStructure {#fixincorrectstructure}
+
+<a href="https://learn.microsoft.com/en-us/dotnet/api/system.boolean?view=net-7.0" target="_blank" rel="nofollow noopener noreferrer">`bool`</a> <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/fixincorrectstructure" target="_blank" rel="nofollow noopener noreferrer">`FixIncorrectStructure`</a>
+
+GroupDocs.Editor puede procesar sin error ni excepción cualquier documento XML: corrupto, truncado, con estructura inválida, e incluso puede tratar HTML como XML. No obstante, la representación de dicho documento puede degradarse en estos casos: por ejemplo, es imposible mostrar correctamente la estructura jerárquica anidada si esta está dañada.
+
+Para solucionar este problema, se introduce la marca booleana <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/fixincorrectstructure" target="_blank" rel="nofollow noopener noreferrer">`FixIncorrectStructure`</a>. Si se activa, GroupDocs.Editor escanea el documento XML e intenta corregir su estructura. En concreto, escapa algunos caracteres prohibidos, cierra correctamente las etiquetas no cerradas, abre las etiquetas no abiertas, corrige las etiquetas superpuestas, etc.
+
+Dado que este escaneo y reparación del documento requiere recursos computacionales adicionales y, en general, la mayoría de los documentos XML son válidos, este mecanismo está desactivado de forma predeterminada: <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/fixincorrectstructure" target="_blank" rel="nofollow noopener noreferrer">`FixIncorrectStructure`</a> tiene el valor `false`. Por lo tanto, para activarlo, debe establecer manualmente el valor `true`.
+
+#### RecognizeUris {#recognizeuris}
+
+<a href="https://learn.microsoft.com/en-us/dotnet/api/system.boolean?view=net-7.0" target="_blank" rel="nofollow noopener noreferrer">`bool`</a> <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/recognizeuris" target="_blank" rel="nofollow noopener noreferrer">`RecognizeUris`</a>
+
+Esta propiedad activa el mecanismo de reconocimiento y preparación de URI (direcciones web). De forma predeterminada, este mecanismo está desactivado (`false`) y los URI, si están presentes en los nodos de texto o en los valores de atributo dentro de los documentos XML, se representan como texto normal. Cuando esta propiedad está activada (`true`), GroupDocs.Editor escanea el documento XML en busca de URI válidos y, si los encuentra, los representa como enlaces externos en el formato HTML resultante, mediante el elemento A. GroupDocs.Editor busca URI en: nodos de texto, secciones CDATA, comentarios XML y valores de atributos, definiciones DocType.
+
+#### RecognizeEmails {#recognizeemails}
+
+<a href="https://learn.microsoft.com/en-us/dotnet/api/system.boolean?view=net-7.0" target="_blank" rel="nofollow noopener noreferrer">`bool`</a> <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/recognizeemails" target="_blank" rel="nofollow noopener noreferrer">`RecognizeEmails`</a>
+
+Esta propiedad es muy similar a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/recognizeuris" target="_blank" rel="nofollow noopener noreferrer">`RecognizeUris`</a>: realiza lo mismo, pero esta vez para direcciones de correo electrónico. De forma predeterminada está desactivada, por lo que si una dirección de correo electrónico está presente en el XML de entrada, el HTML de salida la contendrá como texto normal. Sin embargo, si se activa estableciendo `true`, todas las direcciones de correo electrónico válidas se representarán con el esquema <a href="https://en.wikipedia.org/wiki/Mailto" target="_blank" rel="nofollow noopener noreferrer">mailto</a> y el elemento A.
+
+A diferencia de la propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/recognizeuris" target="_blank" rel="nofollow noopener noreferrer">`RecognizeUris`</a>, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/recognizeemails" target="_blank" rel="nofollow noopener noreferrer">`RecognizeEmails`</a>, si se activa, funciona únicamente para valores de atributos.
+
+#### TrimTrailingWhitespaces {#trimtrailingwhitespaces}
+
+<a href="https://learn.microsoft.com/en-us/dotnet/api/system.boolean?view=net-7.0" target="_blank" rel="nofollow noopener noreferrer">`bool`</a> <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/trimtrailingwhitespaces" target="_blank" rel="nofollow noopener noreferrer">`TrimTrailingWhitespaces`</a>
+
+Esta propiedad activa la truncación de los espacios en blanco finales en los nodos de texto: el contenido textual situado entre las etiquetas de apertura y cierre (texto interno de la etiqueta). De forma predeterminada está desactivada (`false`), por lo que los espacios en blanco finales se conservarán. Los saltos de línea también se consideran espacios en blanco. Puede resultar útil cuando el XML de entrada se genera con saltos de línea y tramos vacíos para mejorar su legibilidad.
+
+#### AttributeValuesQuoteType {#attributevaluesquotetype}
+
+<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.serialization/quotetype/" target="_blank" rel="nofollow noopener noreferrer">`QuoteType`</a> <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/attributevaluesquotetype" target="_blank" rel="nofollow noopener noreferrer">`AttributeValuesQuoteType`</a>
+
+<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.serialization/quotetype/" target="_blank" rel="nofollow noopener noreferrer">`QuoteType`</a> es un nuevo tipo introducido en la <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-23-2-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 23.2</a>: se trata de una estructura que representa los dos tipos de comillas permitidas en los valores de atributo en XML: la *comilla simple*, representada por el carácter `U+0027 APOSTROPHE`, y la *comilla doble*, representada por el carácter `U+0022 QUOTATION MARK`.
+
+Con esta opción, los usuarios pueden sobrescribir el tipo de comilla utilizado en el documento XML original y establecer el tipo de comilla deseado que debe aparecer en el HTML resultante. De forma predeterminada se utilizan comillas dobles.
+
+Las dos propiedades siguientes y finales, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/highlightoptions/" target="_blank" rel="nofollow noopener noreferrer">`HighlightOptions`</a> y <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/formatoptions/" target="_blank" rel="nofollow noopener noreferrer">`FormatOptions`</a>, tienen valores compuestos, descritos a continuación. Lo importante es que los usuarios no pueden crear instancias de las clases contenedoras <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlhighlightoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlHighlightOptions`</a> y <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlformatoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlFormatOptions`</a> ni establecer los valores de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/highlightoptions/" target="_blank" rel="nofollow noopener noreferrer">`HighlightOptions`</a> y <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/formatoptions/" target="_blank" rel="nofollow noopener noreferrer">`FormatOptions`</a> (ni siquiera a null). Está previsto que únicamente los miembros de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlhighlightoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlHighlightOptions`</a> y <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlformatoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlFormatOptions`</a> puedan modificarse desde sus valores predeterminados.
+
+### HighlightOptions {#highlightoptions}
+
+La propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/highlightoptions/" target="_blank" rel="nofollow noopener noreferrer">`HighlightOptions`</a> tiene el tipo <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlhighlightoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlHighlightOptions`</a>. Ya existe una instancia creada de `XmlHighlightOptions` establecida en la propiedad `HighlightOptions`, y no se puede modificar su referencia; únicamente se permite modificar los miembros de `XmlHighlightOptions`.
+
+XmlHighlightOptions tiene 6 subpropiedades:
+
+1. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlhighlightoptions/xmltagsfontsettings" target="_blank" rel="nofollow noopener noreferrer">`XmlTagsFontSettings`</a> es responsable de representar la fuente de las etiquetas XML, lo que incluye tanto las etiquetas de apertura como las de cierre, así como los paréntesis angulares con los nombres de etiquetas. De forma predeterminada, se utiliza la fuente "`Calibri`" con un tamaño de `12pt`.  
+
+2. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlhighlightoptions/attributenamesfontsettings" target="_blank" rel="nofollow noopener noreferrer">`AttributeNamesFontSettings`</a> es responsable de representar la fuente de los nombres de atributos. De forma predeterminada, se utiliza la fuente "`Calibri`" con un tamaño de `11pt` y color `red`.  
+
+3. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlhighlightoptions/attributevaluesfontsettings" target="_blank" rel="nofollow noopener noreferrer">`AttributeValuesFontSettings`</a> es responsable de representar la fuente de los valores de atributos. De forma predeterminada, se utiliza la fuente "`Calibri`" con un tamaño de `11pt` y color `blue`.  
+
+4. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlhighlightoptions/innertextfontsettings" target="_blank" rel="nofollow noopener noreferrer">`InnerTextFontSettings`</a> es responsable de representar la fuente de los nodos de texto (texto dentro y entre elementos XML). De forma predeterminada, se utiliza la fuente `Times New Roman` con un tamaño de `11pt` y color `black`.  
+
+5. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlhighlightoptions/htmlcommentsfontsettings" target="_blank" rel="nofollow noopener noreferrer">`HtmlCommentsFontSettings`</a> es responsable de representar la fuente de los comentarios HTML (comentarios XML con la sintaxis de comentarios HTML), incluyendo la pareja de etiquetas de apertura `<!--` y cierre `-->`. De forma predeterminada, se utiliza la fuente `Consolas` con un tamaño de `11pt` y color `green`.  
+
+6. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlhighlightoptions/cdatafontsettings" target="_blank" rel="nofollow noopener noreferrer">`CDataFontSettings`</a> es responsable de representar la fuente de las secciones CDATA, incluyendo la pareja de etiquetas de apertura `<![CDATA[` y cierre `]]>`. De forma predeterminada, se utiliza la fuente `Calibri` con un tamaño de `11pt` y color `coral`.
+
+Todas estas propiedades son de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/webfont/" target="_blank" rel="nofollow noopener noreferrer">`WebFont`</a>: un nuevo tipo público introducido en la <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-23-2-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 23.2</a>. Tiene 6 propiedades públicas, una de las cuales es de tipo <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string?view=net-7.0" target="_blank" rel="nofollow noopener noreferrer">`System.String`</a>, mientras que las otras 5 son estructuras, cada una de las cuales contiene y representa algún aspecto de la fuente. La clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/webfont/" target="_blank" rel="nofollow noopener noreferrer">`WebFont`</a> puede considerarse como un contenedor para las propiedades de fuente, donde de forma predeterminada cada propiedad tiene un valor predeterminado, y los usuarios pueden modificar algunas o todas ellas dentro de los límites definidos.
+
+
+1. Nombre de fuente: propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/webfont/name/" target="_blank" rel="nofollow noopener noreferrer">`Name`</a> de tipo <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string?view=net-7.0" target="_blank" rel="nofollow noopener noreferrer">`System.String`</a>. Se traduce en la declaración CSS `font-family`.  
+
+2. Tamaño de fuente: propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/webfont/size/" target="_blank" rel="nofollow noopener noreferrer">`Size`</a> de tipo <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.css.properties/fontsize/" target="_blank" rel="nofollow noopener noreferrer">`FontSize`</a>. Se traduce en la declaración CSS `font-size`.  
+
+3. Color de fuente: propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/webfont/color/" target="_blank" rel="nofollow noopener noreferrer">`Color`</a> de tipo <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.css.datatypes/argbcolor/" target="_blank" rel="nofollow noopener noreferrer">`ArgbColor`</a>. Se traduce en la declaración CSS `color`.  
+
+4. Grosor de fuente (negrita): propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/webfont/weight/" target="_blank" rel="nofollow noopener noreferrer">`Weight`</a> de tipo <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.css.properties/fontweight/" target="_blank" rel="nofollow noopener noreferrer">`FontWeight`</a>. Se traduce en la declaración CSS `font-weight`.  
+
+5. Estilo de fuente: propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/webfont/style/" target="_blank" rel="nofollow noopener noreferrer">`Style`</a> de tipo <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.css.properties/fontstyle/" target="_blank" rel="nofollow noopener noreferrer">`FontStyle`</a>. Se traduce en la declaración CSS `font-style`.  
+
+6. Línea de decoración de texto: propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/webfont/line/" target="_blank" rel="nofollow noopener noreferrer">`Line`</a> de tipo <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.css.properties/textdecorationlinetype/" target="_blank" rel="nofollow noopener noreferrer">`TextDecorationLineType`</a>. Se traduce en la declaración CSS `text-decoration-line`.
+
+WebFont también dispone de otras funciones públicas: la capacidad de comprobar su igualdad consigo mismo (`System.IEquatable`) y el soporte para clonación profunda (`System.ICloneable`).
+
+<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlhighlightoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlHighlightOptions`</a> también cuenta con dos miembros públicos útiles:  
+
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlhighlightoptions/isdefault" target="_blank" rel="nofollow noopener noreferrer">`IsDefault`</a> propiedad <a href="https://learn.microsoft.com/en-us/dotnet/api/system.boolean?view=net-7.0" target="_blank" rel="nofollow noopener noreferrer">boolean</a>, que indica si la instancia actual tiene un valor predeterminado, es decir, si todas sus propiedades se encuentran en su estado inicial.  
+
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlhighlightoptions/resettodefault" target="_blank" rel="nofollow noopener noreferrer">`ResetToDefault()`</a> método, que restablece todas las propiedades a sus valores iniciales.
+
+El siguiente ejemplo de código muestra la creación de una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlEditOptions`</a> y la configuración de distintas propiedades (pero no todas) dentro de la subpropiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlhighlightoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlHighlightOptions`</a>.
+
+```csharp
+Options.XmlEditOptions editOptions = new XmlEditOptions();
+Assert.IsTrue(editOptions.HighlightOptions.IsDefault);
+Options.XmlHighlightOptions highlightOptions = editOptions.HighlightOptions;
+
+//Setting XML tags font settings
+highlightOptions.XmlTagsFontSettings.Size = HtmlCss.Css.Properties.FontSize.Large;
+highlightOptions.XmlTagsFontSettings.Color = HtmlCss.Css.DataTypes.ArgbColor.KnownColors.CssLevel1.Olive;
+
+//Setting attribute names font settings
+highlightOptions.AttributeNamesFontSettings.Name = "Arial";
+highlightOptions.AttributeNamesFontSettings.Line = HtmlCss.Css.Properties.TextDecorationLineType.Underline;
+highlightOptions.AttributeNamesFontSettings.Weight = HtmlCss.Css.Properties.FontWeight.Lighter;
+
+//Setting attribute values font settings
+highlightOptions.AttributeValuesFontSettings.Line = HtmlCss.Css.Properties.TextDecorationLineType.Underline + HtmlCss.Css.Properties.TextDecorationLineType.Overline;
+highlightOptions.AttributeValuesFontSettings.Style = HtmlCss.Css.Properties.FontStyle.Italic;
+
+//Setting CDATA sections font settings
+highlightOptions.CDataFontSettings.Line = HtmlCss.Css.Properties.TextDecorationLineType.LineThrough;
+highlightOptions.CDataFontSettings.Size = HtmlCss.Css.Properties.FontSize.Smaller;
+
+//Setting HTML comments font settings
+highlightOptions.HtmlCommentsFontSettings.Color = HtmlCss.Css.DataTypes.ArgbColor.KnownColors.CssLevel3.Lightgreen;
+highlightOptions.HtmlCommentsFontSettings.Name = "Courier New";
+
+//Setting text node font settings
+highlightOptions.InnerTextFontSettings.Weight = HtmlCss.Css.Properties.FontWeight.FromNumber(300);
+highlightOptions.InnerTextFontSettings.Size = HtmlCss.Css.Properties.FontSize.XSmall;
+
+//Checking they are not default
+Assert.IsFalse(editOptions.HighlightOptions.IsDefault);
+
+//Resetting to default
+highlightOptions.ResetToDefault();
+
+//Checking they are default again now
+Assert.IsTrue(editOptions.HighlightOptions.IsDefault);
+```
+
+### FormatOptions {#formatoptions}
+  
+La propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/formatoptions/" target="_blank" rel="nofollow noopener noreferrer">`FormatOptions`</a> tiene un tipo de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlformatoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlFormatOptions`</a>. Al igual que con la propiedad `HighlightOptions`, la propiedad `FormatOptions` ya establece una instancia de la clase `XmlFormatOptions`, con todas sus subpropiedades inicializadas con sus valores predeterminados. Asimismo, no es posible modificar la referencia a esta instancia de `XmlFormatOptions`, sino que únicamente se puede obtener mediante su método getter, y tampoco se puede crear una nueva instancia de `XmlFormatOptions`.
+
+La clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlformatoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlFormatOptions`</a> únicamente posee tres subpropiedades:  
+
+1. <a href="https://learn.microsoft.com/en-us/dotnet/api/system.boolean?view=net-7.0" target="_blank" rel="nofollow noopener noreferrer">`bool`</a> <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlformatoptions/eachattributefromnewline/" target="_blank" rel="nofollow noopener noreferrer">`EachAttributeFromNewline`</a>. Los documentos XML suelen contener elementos XML con un conjunto de pares atributo-valor. De forma predeterminada, estos pares se representan en el HTML resultante en una única línea adyacente al nombre del elemento (valor `false`). No obstante, al establecer esta propiedad en `true`, cada par atributo-valor de todos los elementos XML se colocará en una nueva línea independiente en el HTML resultante.  
+
+2. <a href="https://learn.microsoft.com/en-us/dotnet/api/system.boolean?view=net-7.0" target="_blank" rel="nofollow noopener noreferrer">`bool`</a> <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlformatoptions/leaftextnodesonnewline" target="_blank" rel="nofollow noopener noreferrer">`LeafTextNodesOnNewline`</a>. Los documentos XML suelen incluir nodos de texto: fragmentos de contenido textual situados dentro y/o entre elementos XML adyacentes. De forma predeterminada, estos nodos de texto se representan en el HTML resultante junto con otros nodos XML, en la misma línea que ellos (valor `false`). Sin embargo, al establecer esta propiedad en `true`, cada nodo de texto se colocará en una nueva línea con una sangría izquierda mayor.  
+
+3. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.css.datatypes/length/" target="_blank" rel="nofollow noopener noreferrer">`HtmlCss.Css.DataTypes.Length`</a> <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlformatoptions/leftindent" target="_blank" rel="nofollow noopener noreferrer">`LeftIndent`</a>. XML es una estructura jerárquica, y la mayoría de los editores WYSIWYG representan estructuras jerárquicas mediante sangrías izquierdas: cuanto más profundo se encuentre un nodo dentro del árbol (mayor nivel de anidamiento), mayor será la sangría izquierda. GroupDocs.Editor sigue el mismo criterio, y la propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlformatoptions/leftindent" target="_blank" rel="nofollow noopener noreferrer">`LeftIndent`</a> regula la magnitud de la distancia de sangría izquierda por cada nivel. De forma predeterminada, esta distancia es de 10 puntos (valor `pt`). Por lo tanto, el elemento raíz no tendrá ninguna sangría, el primer nivel de anidamiento se desplazará `10pt`, el segundo nivel `20pt`, el tercer nivel `30pt`, y así sucesivamente. Esta longitud se representa mediante el tipo público <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.css.datatypes/length/" target="_blank" rel="nofollow noopener noreferrer">`HtmlCss.Css.DataTypes.Length`</a> y puede modificarse fácilmente al valor deseado. Además, no es necesario especificarla únicamente en puntos, sino también en cualquier unidad de longitud compatible con CSS, como porcentajes, píxeles, centímetros, etc. La sangría izquierda puede desactivarse completamente estableciendo un valor cero sin unidad en esta propiedad, de la siguiente manera: <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.css.datatypes/length/unitlesszero/" target="_blank" rel="nofollow noopener noreferrer">`Length.UnitlessZero`</a>. No obstante, tenga en cuenta que, según la especificación CSS, no están permitidos valores sin unidad distintos de cero, y GroupDocs.Editor también prohíbe dichos valores.
+
+Al igual que en <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlhighlightoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlHighlightOptions`</a>, la propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlformatoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlFormatOptions`</a> dispone de una útil propiedad `boolean`, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlformatoptions/isdefault" target="_blank" rel="nofollow noopener noreferrer">`IsDefault`</a>, que indica si la instancia actual tiene todas sus propiedades configuradas con sus valores iniciales.
+
+El siguiente ejemplo de código muestra la creación de una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlEditOptions`</a> y la configuración de distintas propiedades dentro de la subpropiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmlformatoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlFormatOptions`</a>.
+
+```csharp
+Options.XmlEditOptions editOptions = new XmlEditOptions();
+
+//Checking that options are default for now
+Assert.IsTrue(editOptions.FormatOptions.IsDefault);
+Options.XmlFormatOptions formatOptions = editOptions.FormatOptions;
+
+//Each attribute-value pair must be placed on a new line
+formatOptions.EachAttributeFromNewline = true;
+
+//Text nodes (textual content between and inside XML elements) must be placed on a new line
+formatOptions.LeafTextNodesOnNewline = true;
+
+//Setting a custom text indent using 'Length' data type, which is composed from value with unit
+formatOptions.LeftIndent = HtmlCss.Css.DataTypes.Length.FromValueWithUnit(20, HtmlCss.Css.DataTypes.Length.Unit.Px);
+
+//Checking that options are not default now
+Assert.IsFalse(editOptions.FormatOptions.IsDefault);
+
+//Disabling a left indent at all
+formatOptions.LeftIndent = HtmlCss.Css.DataTypes.Length.UnitlessZero;
+```
+
+## Ejemplo complejo {#complex-example}
+  
+Ahora que se ha descrito en detalle la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlEditOptions`</a>, incluyendo todas sus propiedades y subpropiedades, es momento de reunir todo. El siguiente ejemplo de código muestra cómo abrir un archivo XML a partir de una ruta de archivo, crear y ajustar dos instancias distintas de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions/" target="_blank" rel="nofollow noopener noreferrer">`XmlEditOptions`</a>, y editar un documento dos veces utilizando estas dos clases de opciones distintas para obtener dos representaciones diferentes de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a>. Posteriormente, se guardan estos <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> en dos archivos HTML distintos.
+
+```csharp
+const string xmlFilename = "Sample.xml";
+string xmlInputPath = System.IO.Path.Combine("input_folder_path", xmlFilename);
+
+string outputPath1 = System.IO.Path.Combine("output_folder_path", string.Format("1-{0}.html", Path.GetFileNameWithoutExtension(xmlFilename)));
+string outputPath2 = System.IO.Path.Combine("output_folder_path", string.Format("2-{0}.html", Path.GetFileNameWithoutExtension(xmlFilename)));
+
+Options.XmlEditOptions editOptions1 = new XmlEditOptions();
+editOptions1.RecognizeEmails = true;
+editOptions1.RecognizeUris = true;
+editOptions1.FixIncorrectStructure = true;
+editOptions1.AttributeValuesQuoteType = HtmlCss.Serialization.QuoteType.SingleQuote;
+editOptions1.FormatOptions.LeftIndent = HtmlCss.Css.DataTypes.Length.Parse("20px");
+editOptions1.HighlightOptions.XmlTagsFontSettings.Line = HtmlCss.Css.Properties.TextDecorationLineType.Underline + HtmlCss.Css.Properties.TextDecorationLineType.Overline;
+editOptions1.HighlightOptions.XmlTagsFontSettings.Weight = HtmlCss.Css.Properties.FontWeight.Bold;
+
+Options.XmlEditOptions editOptions2 = new XmlEditOptions();
+editOptions2.TrimTrailingWhitespaces = true;
+editOptions2.AttributeValuesQuoteType = HtmlCss.Serialization.QuoteType.DoubleQuote;
+editOptions2.FormatOptions.LeafTextNodesOnNewline = true;
+editOptions2.HighlightOptions.XmlTagsFontSettings.Size = HtmlCss.Css.Properties.FontSize.XLarge;
+editOptions2.HighlightOptions.HtmlCommentsFontSettings.Line = HtmlCss.Css.Properties.TextDecorationLineType.LineThrough;
+
+using (GroupDocs.Editor.Editor editor = new Editor(xmlInputPath))
+{
+	using (EditableDocument edited1 = editor.Edit(editOptions1))
+	using (EditableDocument edited2 = editor.Edit(editOptions2))
+	{
+		edited1.Save(outputPath1);
+		edited2.Save(outputPath2);
+	}
+}
+```
+
+## Obtención de metainformación del documento {#getting-document-metainfo}
+
+Artículo<a href="https://docs.groupdocs.com/editor/net/extracting-document-metainfo/" target="_blank" rel="nofollow noopener noreferrer">Extrayendo metainformación del documento</a>«describe la <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`GetDocumentInfo()`</a> método, que permite detectar el formato del documento y extraer sus metadatos sin editarlo. El formato XML también es compatible.
+
+Cuando el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`GetDocumentInfo()`</a> se llama el método para el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> instancia de clase, que previamente se creó con un documento XML cargado en el constructor, este método devuelve un <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/textualdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Metadata.TextualDocumentInfo`</a> instancia: es una clase común para todos los formatos de documentos de naturaleza textual, como HTML, XML y TXT.
+
+Como todas <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`IDocumentInfo`</a> implementaciones, la <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/textualdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`TextualDocumentInfo`</a> tiene cuatro propiedades heredadas, pero también una propiedad propia:
+
+1. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/textualdocumentinfo/format/" target="_blank" rel="nofollow noopener noreferrer">`Format`</a> propiedad de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/textualformats/" target="_blank" rel="nofollow noopener noreferrer">`Formats.TextualFormats`</a> tipo. Para documentos XML, siempre es un <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/textualformats/xml/" target="_blank" rel="nofollow noopener noreferrer">`TextualFormats.Xml`</a>.
+2. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/textualdocumentinfo/pagecount" target="_blank" rel="nofollow noopener noreferrer">`PageCount`</a> propiedad de <a href="https://docs.microsoft.com/en-us/dotnet/api/system.int32?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">entero (Int32)</a> tipo. Siempre devuelve 1, ya que los documentos XML no tienen páginas en absoluto.
+3. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/textualdocumentinfo/size" target="_blank" rel="nofollow noopener noreferrer">`Size`</a> propiedad de un tipo entero largo (Int64). Devuelve el tamaño del archivo en bytes, no el número de caracteres.
+4. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/textualdocumentinfo/isencrypted" target="_blank" rel="nofollow noopener noreferrer">`IsEncrypted`</a> propiedad de tipo Booleano. Siempre devuelve `false`, ya que los documentos XML, al igual que cualquier otro documento de texto, no pueden ser cifrados.
+5. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/textualdocumentinfo/encoding" target="_blank" rel="nofollow noopener noreferrer">`Encoding`</a> propiedad del tipo `System.Text.Encoding`. Devuelve la codificación presunta detectada del documento XML.
+
+El ejemplo de código a continuación muestra cómo obtener la metainformación de un archivo XML y verificar sus propiedades.
+
+```csharp
+const string xmlFilename = "Sample.xml";
+string xmlInputPath = System.IO.Path.Combine("input_folder_path", xmlFilename);
+
+using (GroupDocs.Editor.Editor editor = new Editor(xmlInputPath))
+{
+	GroupDocs.Editor.Metadata.IDocumentInfo info = editor.GetDocumentInfo(null);
+	GroupDocs.Editor.Metadata.TextualDocumentInfo xmlInfo = (TextualDocumentInfo)info;
+	Assert.AreEqual(System.Text.Encoding.UTF8, xmlInfo.Encoding);
+	Assert.IsFalse(xmlInfo.IsEncrypted);
+	Assert.AreEqual(1, xmlInfo.PageCount);
+	Assert.AreEqual(GroupDocs.Editor.Formats.TextualFormats.Xml, xmlInfo.Format);
+	Assert.Greater(xmlInfo.Size, 0);
+}
+```

@@ -1,0 +1,53 @@
+---
+title: "Trabajar con recursos HTML"
+sidebar_label: "Trabajar con recursos HTML"
+sidebar_key: "net-editor-working-with-html-resources"
+sidebar_position: 90
+description: "Este artículo describe las capacidades de GroupDocs.Editor al trabajar con recursos HTML, que son una parte integral del documento HTML."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/working-with-html-resources.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "de13eff79bc9fc2455e6966e4011ef2457ec538eecd5ee6a7a3c9ef2fdf01123"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "27bbd1a2e87d8cf2d614b529615c589b6469019d079e77e0e140a38a01e8b171"
+translation_updated_at: "2026-11-16T04:22:19.073Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+> Este artículo describe las capacidades de GroupDocs.Editor al trabajar con recursos HTML, los cuales son una parte integral del documento HTML.
+
+## ¿Qué son los recursos HTML? {#what-html-resources-are}  
+Casi todos los formatos de documento existentes (excepto TXT sin formato y algunos otros) contienen el concepto de _recursos_. Esto normalmente incluye imágenes, fuentes específicas (que no están instaladas en el sistema operativo), entre otros elementos, dependiendo del formato de documento en cuestión. Para editar documentos en el navegador, GroupDocs.Editor debe convertirlos primero a HTML y luego enviarlos al editor WYSIWYG del lado del cliente. En este caso, GroupDocs.Editor debe trabajar con recursos HTML, los cuales pueden dividirse en tres grupos: _imágenes_, _hojas de estilo_ y _fuentes_.
+
+En el contexto de la API pública de GroupDocs.Editor, el trabajo con todos los recursos se encuentra dentro del espacio de nombres <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.HtmlCss.Resources`</a>. Existe una interfaz pública: <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/ihtmlresource" target="_blank" rel="nofollow noopener noreferrer">`IHtmlResource`</a>, la cual es común para todos los recursos HTML existentes. Asimismo, existen tres subespacios de nombres, cada uno dedicado a un tipo específico de recurso:
+
+
+1. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images/index" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.HtmlCss.Resources.Images`</a> – contiene todos los formatos de imagen soportados, incluyendo formatos rasterizados (como JPEG, PNG y GIF) y formatos vectoriales (SVG y WMF/EMF). El propio espacio de nombres <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images" target="_blank" rel="nofollow noopener noreferrer">`Images`</a> contiene varios tipos e interfaces auxiliares, así como dos subespacios de nombres: <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.raster" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Editor.HtmlCss.Resources.Images.Raster</a> y <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Editor.HtmlCss.Resources.Images.Vector</a>. Cada uno de estos dos subespacios contiene clases específicas para formatos de imagen particulares.  
+
+2. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.fonts" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.HtmlCss.Resources.Fonts`</a> – contiene clases que representan cada uno de los formatos de fuente soportados: WOFF, WOFF2, TTF, OTF y EOT.  
+
+3. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.textual" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.HtmlCss.Resources.Textual`</a> – contiene clases que representan todos los formatos de texto soportados: CSS y XML.  
+
+4. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.audio" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.HtmlCss.Resources.Audio`</a> – contiene clases que representan todos los formatos de audio soportados. Este espacio de nombres se agregó en la versión 21.10 y, inicialmente, solo admite el formato de audio MP3; por lo tanto, solo existe una clase para representarlo: <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.audio/mp3audio" target="_blank" rel="nofollow noopener noreferrer">Mp3Audio</a>.
+
+## Detección automática del formato exacto del recurso HTML {#detecting-the-exact-html-resource-format-automatically}
+  
+Imaginemos una situación en la que un usuario edita un documento en un editor WYSIWYG, obtiene el marcado HTML editado junto con sus recursos HTML (imágenes, una o varias hojas de estilo, fuentes e incluso posiblemente algunos archivos de audio), y desea crear una instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> mediante el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/frommarkup" target="_blank" rel="nofollow noopener noreferrer">`FromMarkup`</a>, el cual recibe como entrada una cadena con el marcado HTML y un <code>IEnumerable&lt;<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/ihtmlresource" target="_blank" rel="nofollow noopener noreferrer">IHtmlResource</a>&gt;</code>, que en la práctica suele ser una colección de recursos HTML. Pero, ¿cómo debería obtener un conjunto de instancias <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/ihtmlresource" target="_blank" rel="nofollow noopener noreferrer">IHtmlResource</a>, considerando que todos los recursos están representados como un conjunto de archivos (en el mejor de los casos) o incluso como un conjunto de secuencias de bytes? Para este caso, GroupDocs.Editor incluye una clase utilitaria especial: <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/resourcetypedetector" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Editor.HtmlCss.Resources.ResourceTypeDetector</a>. Esta clase estática se introdujo en la versión 21.3 y contiene únicamente dos métodos estáticos:
+
+
+1. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/resourcetypedetector/detecttypefromfilename" target="_blank" rel="nofollow noopener noreferrer">**DetectTypeFromFilename**</a> – recibe como entrada un nombre de archivo con extensión (o una extensión pura) e intenta asociarlo con el formato de recurso más adecuado. Si tiene éxito, devuelve un tipo que describe dicho formato, en forma de un heredero de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/iresourcetype" target="_blank" rel="nofollow noopener noreferrer">IResourceType</a>. Si el formato no puede reconocerse adecuadamente, devuelve un valor NULL. Por lo tanto, si el usuario dispone del nombre de archivo de un recurso, puede utilizar este método para determinar su formato. Pero, ¿qué hacer si no existen nombres de archivo con extensión, ni siquiera archivos, y los recursos están representados únicamente por secuencias de bytes? ¿Y si los nombres de archivo carecen de sentido, no tienen extensión o su extensión es previamente incorrecta? Para estos casos, resulta útil el siguiente método.
+
+
+2. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/resourcetypedetector/trydetectresource" target="_blank" rel="nofollow noopener noreferrer">**TryDetectResource**</a> – recibe como entrada una secuencia de bytes (<a href="http://msdn2.microsoft.com/en-us/library/8f86tw9e" target="_blank" rel="nofollow noopener noreferrer">System.IO.Stream</a>), un nombre de archivo y, opcionalmente, un formato supuesto; analiza y reconoce los datos de entrada, y devuelve un heredero de la interfaz <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/ihtmlresource" target="_blank" rel="nofollow noopener noreferrer">'IHtmlResource'</a> en caso de éxito, o un valor NULL en caso de error. Este método analiza el contenido de la secuencia de bytes de entrada en cualquier caso, y devuelve un formato válido incluso si tanto la extensión del nombre de archivo como el formato supuesto son incorrectos; en tal caso, solo se verá afectada negativamente la eficiencia del proceso. Por otro lado, una extensión de nombre de archivo correcta y/o un formato supuesto adecuado sí pueden mejorar el rendimiento. En cualquier caso, la secuencia de entrada debe ser completamente válida: no debe ser NULL ni una instancia de Stream.Null, debe ser legible y buscable, no debe estar descartada y su posición debe ser válida.

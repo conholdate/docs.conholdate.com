@@ -1,0 +1,297 @@
+---
+title: "Guardar documento"
+sidebar_label: "Guardar documento"
+sidebar_key: "net-editor-save-document"
+sidebar_position: 8
+description: "Este artículo demuestra cómo guardar documentos de texto editados, hojas de cálculo y presentaciones con la API de GroupDocs.Editor para .NET."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/save-document.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "627b2d3d24582bb14891a4ef7f6f44f47da28d05650179d2ae2a21211219a034"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "8819e37785a84f069adc5716fff393f0d13ed7f0d6b686e8688d576d5acb151f"
+translation_updated_at: "2026-11-16T04:21:10.833Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+> Este artículo describe cómo obtener el contenido de un documento editado desde el cliente, procesarlo y guardarlo en un documento resultante en algún formato especificado.
+
+En resumen, el proceso fundamental de edición de documentos —donde el usuario escribe texto en las páginas del documento, inserta imágenes, realiza correcciones, elimina palabras o párrafos, o mueve partes del documento de una ubicación a otra— se lleva a cabo en un software de terceros con interfaz gráfica (GUI), fuera de GroupDocs.Editor. Este software puede ser, por ejemplo (sin limitarse a estos):  
+
+- un editor HTML WYSIWYG basado en la web, que normalmente es una aplicación puramente del lado del cliente, escrita en JavaScript y ejecutada en el navegador. Por ejemplo, puede tratarse de TinyMCE o CKEditor;  
+
+- una aplicación de escritorio (como WinForms o WPF);  
+
+- una aplicación móvil que se ejecuta en Android o iOS.
+
+El requisito fundamental para esta aplicación es poder abrir, visualizar y editar contenido HTML. Por su parte, GroupDocs.Editor acepta diversos formatos de documentos (procesamiento de textos, hojas de cálculo, presentaciones y muchos más) y los prepara para su edición en aplicaciones externas, convirtiéndolos en marcado HTML y colocándolo dentro del contenedor <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>. Por lo tanto, al invocar el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a>.<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit" target="_blank" rel="nofollow noopener noreferrer">Edit()</a>, se genera un <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> que contiene el **contenido original**.
+
+A continuación, el usuario obtiene este **contenido original** del <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>, lo envía al editor HTML externo, realiza las ediciones y, una vez completadas, obtiene el **contenido modificado**. En la terminología de GroupDocs.Editor, guardar un documento implica obtener el **contenido modificado** y generar un documento en el formato de salida (procesamiento de textos, hojas de cálculo, presentaciones y muchos más) a partir de él. Este artículo explica cómo hacerlo.
+
+En resumen, guardar un documento implica los tres pasos siguientes:  
+
+1. Obtener el **contenido modificado** desde alguna fuente (editor HTML u otro almacenamiento o método) y crear una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> a partir de él. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> actúa efectivamente como un contenedor orientado a objetos del contenido del documento.  
+
+2. Seleccionar el formato de salida deseado en el que se debe guardar el **contenido modificado**, así como los parámetros opcionales.  
+
+3. Guardar el **contenido modificado** en un documento del formato previamente elegido, ya sea en una ruta de archivo específica o en un flujo determinado, mediante el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a>.<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/save" target="_blank" rel="nofollow noopener noreferrer">Save()</a>.
+
+Estos tres pasos se explican con detalle y ejemplos de código a continuación.
+
+## Obtención del contenido modificado  {#obtaining-the-modified-content}
+  
+Diversos editores de contenido entregan el contenido en distintas formas. Algunos devuelven el marcado HTML como <a href="https://learn.microsoft.com/en-us/dotnet/api/system.string" target="_blank" rel="nofollow noopener noreferrer">`System.String`</a>, mientras que los recursos externos, como hojas de estilo y/o imágenes, se encuentran en una carpeta específica como archivos. Otros pueden devolver tanto el contenido principal como los recursos como una colección de flujos de bytes. Algunos editores HTML generan una única cadena que ya contiene todo el marcado HTML con los recursos integrados mediante codificación base64. Existen infinitas posibilidades para lograrlo, y por ello la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> dispone de distintos métodos estáticos de fábrica que aceptan el **contenido modificado** del documento HTML en distintas formas de entrada y generan, según ello, una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>:  
+
+1. El método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/fromfile" target="_blank" rel="nofollow noopener noreferrer">`FromFile` </a> está diseñado para abrir documentos HTML desde el disco: recibe la ruta a un archivo \*.html (que contiene el marcado HTML) y una ruta opcional a la carpeta de recursos correspondiente, que contiene distintos recursos como hojas de estilo, imágenes, archivos de fuentes, archivos de audio, etc.  
+
+2. El método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/frommarkup" target="_blank" rel="nofollow noopener noreferrer">`FromMarkup` </a> está diseñado para abrir documentos HTML desde memoria: recibe el marcado HTML como <a href="https://docs.microsoft.com/en-us/dotnet/api/system.string?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`System.String`</a> y una lista opcional de elementos <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/ihtmlresource" target="_blank" rel="nofollow noopener noreferrer">IHtmlResource</a>, como hojas de estilo, imágenes, fuentes, recursos de audio, etc.  
+
+3. El método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/frommarkupandresourcefolder" target="_blank" rel="nofollow noopener noreferrer">`FromMarkupAndResourceFolder` </a> está diseñado para abrir documentos HTML desde almacenamientos mixtos: recibe el marcado HTML como <a href="https://docs.microsoft.com/en-us/dotnet/api/system.string?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`System.String`</a>, pero los recursos se obtienen desde una ruta a la carpeta de recursos correspondiente, la cual, a diferencia de los métodos anteriores, es obligatoria (dicha carpeta debe existir).
+
+Puede encontrar más información sobre la creación de instancias de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> a partir de archivos o marcado con recursos en el artículo correspondiente "[Crear EditableDocument a partir de archivo o marcado](/net/editor/developer-guide/editabledocument/create-editabledocument-from-file-or-markup/)".
+
+## Creación y ajuste de opciones de guardado  {#create-and-adjust-saving-options}
+  
+Cuando ya se ha creado la instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> con el **contenido modificado**, es momento de guardarlo en el documento resultante en un formato definido, y GroupDocs.Editor necesita conocer dicho formato. Al igual que con las opciones de carga y edición, cada familia de formatos tiene su propia clase que implementa la interfaz <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/isaveoptions" target="_blank" rel="nofollow noopener noreferrer">ISaveOptions</a>. A continuación se listan dichas clases.
+
+| Familia de formatos | Ejemplos de formatos | Clase de opciones de guardado | Clase de formato |
+| --- | --- | --- | --- |
+| Procesamiento de textos | DOC, DOCX, DOCM, DOT, ODT | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingsaveoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingSaveOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/wordprocessingformats" target="_blank" rel="nofollow noopener noreferrer">WordProcessingFormats</a> |
+| Hojas de cálculo | XLS, XLSX, XLSM, XLSB | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetSaveOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/spreadsheetformats" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetFormats</a> |
+| Valores separados por delimitadores (DSV) | CSV, TSV | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/delimitedtextsaveoptions" target="_blank" rel="nofollow noopener noreferrer">DelimitedTextSaveOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/spreadsheetformats/" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetFormats</a> |
+| Presentaciones | PPT, PPTX, PPS, POT | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationsaveoptions" target="_blank" rel="nofollow noopener noreferrer">PresentationSaveOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/presentationformats" target="_blank" rel="nofollow noopener noreferrer">PresentationFormats</a> |
+| Documentos de texto plano | TXT | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/textsaveoptions" target="_blank" rel="nofollow noopener noreferrer">TextSaveOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/textualformats" target="_blank" rel="nofollow noopener noreferrer">TextualFormats</a> |
+| Formato de diseño fijo | PDF | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfsaveoptions" target="_blank" rel="nofollow noopener noreferrer">PdfSaveOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/fixedlayoutformats" target="_blank" rel="nofollow noopener noreferrer">FixedLayoutFormats</a> |
+| Formato de diseño fijo | XPS | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xpssaveoptions" target="_blank" rel="nofollow noopener noreferrer">XpsSaveOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/fixedlayoutformats" target="_blank" rel="nofollow noopener noreferrer">FixedLayoutFormats</a> |
+| Correo electrónico | EML, EMLX, TNEF, MSG, HTML, MHTML, ICS, VCF, PST, MBOX, OFT | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/emailsaveoptions" target="_blank" rel="nofollow noopener noreferrer">EmailSaveOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/emailformats" target="_blank" rel="nofollow noopener noreferrer">EmailFormats</a> |
+| Libros electrónicos | ePub, Mobi, AZW3 | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebooksaveoptions/" target="_blank" rel="nofollow noopener noreferrer">EbookSaveOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/ebookformats" target="_blank" rel="nofollow noopener noreferrer">EBookFormats</a> |
+
+Por ejemplo, supongamos que es necesario guardar el **contenido modificado** en un documento en formato DOCX. DOCX pertenece a la familia de formatos de Procesamiento de textos. Por lo tanto, se debe crear una instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingsaveoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingSaveOptions</a>, y especificar el valor <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/wordprocessingformats/docx/" target="_blank" rel="nofollow noopener noreferrer">WordProcessingFormats.Docx</a> en su constructor, como se muestra a continuación:
+
+
+<Tabs groupId="Save options creation">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+WordProcessingSaveOptions saveOptions = new WordProcessingSaveOptions(WordProcessingFormats.Docx);
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Dim saveOptions As WordProcessingSaveOptions = New WordProcessingSaveOptions(WordProcessingFormats.Docx)
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+Si también es necesario codificar el documento resultante con la contraseña, se puede hacer utilizando una sola línea de código:
+
+
+<Tabs groupId="Save options adjustment">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+saveOptions.Password = "some-password";
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+saveOptions.Password = "some-password"
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+Por supuesto, distintos formatos tienen distintas opciones. Por ejemplo, existe una propiedad `Password` en <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingsaveoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingSaveOptions</a>, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetSaveOptions</a>, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationsaveoptions" target="_blank" rel="nofollow noopener noreferrer">PresentationSaveOptions</a>, pero no existe nada similar en <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xpssaveoptions" target="_blank" rel="nofollow noopener noreferrer">XpsSaveOptions</a>, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/emailsaveoptions" target="_blank" rel="nofollow noopener noreferrer">EmailSaveOptions</a>, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/textsaveoptions" target="_blank" rel="nofollow noopener noreferrer">TextSaveOptions</a> y <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebooksaveoptions/" target="_blank" rel="nofollow noopener noreferrer">EbookSaveOptions</a>, ya que estos formatos no admiten protección con contraseña.
+
+Asimismo, cabe mencionar que el formato del documento de entrada con **contenido original** y el formato del documento resultante con **contenido modificado** pueden diferir. Por ejemplo, el documento original puede ser de algún formato de procesamiento de textos, mientras que el documento de salida puede ser TXT o PDF. O bien, el documento original puede ser un PDF y el de salida, DOCX. También se permiten conversiones similares entre hojas de cálculo y DSV (en ambos sentidos). Sin embargo, por supuesto, no están permitidas aquellas conversiones en las que los formatos sean teóricamente incompatibles en su esencia, como entre procesamiento de textos y hojas de cálculo.
+
+## Guardar contenido modificado en el documento {#saving-modified-content-to-the-document}
+  
+Finalmente, cuando se crea una instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> que contiene el contenido modificado y se define el formato del documento resultante, es posible generar dicho documento resultante mediante el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a>.<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/save" target="_blank" rel="nofollow noopener noreferrer">Save()</a>. Este método dispone de dos sobrecargas, las cuales únicamente difieren en la forma en que se especifica el documento de salida: como una ruta donde se debe crear el archivo, o como un flujo de bytes en el que se debe escribir el contenido del documento. El resto de los parámetros es idéntico en ambos casos.
+
+Aquí se muestra su firma:
+
+<Tabs groupId="Save signature">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+Save(EditableDocument inputDocument, string filePath, ISaveOptions saveOptions)
+Save(EditableDocument inputDocument, Stream outputDocument, ISaveOptions saveOptions)
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Save(inputDocument As EditableDocument, filePath As String, saveOptions As ISaveOptions)
+Save(inputDocument As EditableDocument, outputDocument As Stream, saveOptions As ISaveOptions)
+```
+
+</TabItem>
+
+
+</Tabs>
+
+Aquí:
+- El primer parámetro - `EditableDocument inputDocument` - es una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> con **contenido modificado** en su interior, creada en el primer paso.
+- El segundo parámetro es un <a href="https://learn.microsoft.com/en-us/dotnet/api/system.io.stream" target="_blank" rel="nofollow noopener noreferrer">flujo</a> en el que se debe escribir el documento resultante en el formato definido, o un `string`, que representa una ruta de archivo donde se debe almacenar el documento resultante en el formato definido.
+- El tercer parámetro es una instancia de algunas opciones de guardado, que define el formato del documento resultante y ajustes adicionales, creada en el segundo paso.
+
+En la <a href="https://releases.groupdocs.com/editor/net/release-notes/2025/groupdocs-editor-for-net-25-7-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 25.7</a> se agregó una nueva sobrecarga del método `Editor.Save()`:
+
+
+<Tabs groupId="Save simplified">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+Save(EditableDocument inputDocument, string filePath)
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Save(inputDocument As EditableDocument, filePath As String)
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+Esta sobrecarga es esencialmente un contenedor para la sobrecarga mencionada anteriormente: analiza la extensión del archivo del argumento `filePath` e infiere automáticamente las opciones de guardado predeterminadas.
+
+## Ejemplo completo de código {#complete-code-example}
+  
+Dado que el editor HTML WYSIWYG no forma parte de GroupDocs.Editor, resulta difícil proporcionar un ejemplo de código ligero con una funcionalidad de edición completa. Por lo tanto, en este ejemplo, el contenido se editará programáticamente mediante el método <a href="https://learn.microsoft.com/ru-ru/dotnet/api/system.string.replace" target="_blank" rel="nofollow noopener noreferrer">`String.Replace`</a>.
+
+
+<Tabs groupId="Full example">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Editor.Formats;
+using GroupDocs.Editor.Options;
+// ...
+
+// Create Editor class by loading an input document in DOCX format by path
+Editor editor = new Editor("input.docx");
+
+// Open document for edit and obtain EditableDocument
+EditableDocument original = editor.Edit();
+
+// Get the original content as a string
+string originalContent = original.GetEmbeddedHtml();
+
+// Get the modified content by editing original content
+string modifiedContent = originalContent.Replace("old", "new");
+
+// Create EditableDocument from modified content
+EditableDocument modified = EditableDocument.FromMarkup(modifiedContent, null);
+
+// Create and adjust 2 different saving options
+WordProcessingSaveOptions docxSaveOptions = new WordProcessingSaveOptions(WordProcessingFormats.Docx);
+PdfSaveOptions pdfSaveOptions = new PdfSaveOptions();
+
+// Save modified content to the 2 documents
+editor.Save(modified, "output.docx", docxSaveOptions);
+editor.Save(modified, "output.pdf", pdfSaveOptions);
+
+// Dispose all
+original.Dispose();
+modified.Dispose();
+editor.Dispose();
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Editor.Formats
+Imports GroupDocs.Editor.Options
+' ...
+
+' Create Editor class by loading an input document in DOCX format by path
+Dim editor As Editor = New Editor("input.docx")
+
+' Open document for edit And obtain EditableDocument
+Dim original As EditableDocument = editor.Edit()
+
+' Get the original content as a string
+Dim originalContent As String = original.GetEmbeddedHtml()
+
+' Get the modified content by editing original content
+Dim modifiedContent As String = originalContent.Replace("old", "new")
+
+
+' Create EditableDocument from modified content
+Dim modified As EditableDocument = EditableDocument.FromMarkup(modifiedContent, Nothing)
+
+' Create And adjust 2 different saving options
+Dim docxSaveOptions As WordProcessingSaveOptions = New WordProcessingSaveOptions(WordProcessingFormats.Docx)
+Dim pdfSaveOptions As PdfSaveOptions = New PdfSaveOptions()
+
+' Save modified content to the 2 documents
+editor.Save(modified, "output.docx", docxSaveOptions)
+editor.Save(modified, "output.pdf", pdfSaveOptions)
+
+' Dispose all
+original.Dispose()
+modified.Dispose()
+editor.Dispose()
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+En este ejemplo, se crean dos opciones de guardado diferentes y se realizan dos llamadas distintas a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a>.<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/save" target="_blank" rel="nofollow noopener noreferrer">Save()</a> para guardar el contenido modificado en los formatos DOCX y PDF.

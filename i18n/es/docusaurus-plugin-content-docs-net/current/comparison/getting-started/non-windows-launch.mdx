@@ -1,0 +1,105 @@
+---
+title: "Inicio no en Windows"
+sidebar_label: "Inicio no en Windows"
+sidebar_key: "net-comparison-non-windows-launch"
+sidebar_position: 5
+description: "Configure GroupDocs.Comparison para .NET en Linux y en Docker: instale libgdiplus, las fuentes principales de Microsoft y configure los Dockerfiles de .NET 6 o .NET 8 para entornos no Windows."
+product: "comparison"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "comparison-net"
+source_path: "net/getting-started/non-windows-launch.md"
+source_commit: "7624b4308e90feb1963a8dfe447bff38010a8a60"
+source_sha256: "166f309ad206212b7e41b267d6a9fbcd50621997000b823cbeb5461994f42242"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "b68b2b915fc129f5fc63724027ab1e8c0d69c5b607b1bce0bc246a61f279e41c"
+translation_updated_at: "2026-11-16T03:55:13.456Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Comparison para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Limitaciones  {#limitations}
+  
+Si el marco de destino es .NET 6 o una versión posterior, debido a limitaciones en System.Drawing.Common versión 6.0.0 (consulte <a href="https://learn.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/6.0/system-drawing-common-windows-only#new-behavior" target="_blank" rel="nofollow noopener noreferrer">documentación de Microsoft</a>), debe agregar la siguiente configuración al archivo `.csproj`.
+
+```csharp
+<ItemGroup>
+	<RuntimeHostConfigurationOption Include="System.Drawing.EnableUnixSupport" Value="true" />
+</ItemGroup>
+```
+
+## Recomendaciones {#recommendations}
+  
+Al utilizar GroupDocs.Comparison en un entorno no Windows, se deben instalar los siguientes paquetes para mejorar los resultados de renderizado y evitar posibles errores en tiempo de ejecución:  
+
+1. libgdiplus: es la biblioteca de Mono que proporciona una API compatible con GDI+ en sistemas operativos no Windows.
+2. ttf-mscorefonts-installer: paquete con fuentes compatibles con Microsoft, ya que GroupDocs.Comparison utiliza la fuente Arial en algunos escenarios predeterminados.  
+
+Para instalar los paquetes en distribuciones de Linux basadas en Debian, utilice la utilidad <a href="https://wiki.debian.org/apt-get" target="_blank" rel="nofollow noopener noreferrer">apt-get</a>:  
+
+1. `sudo apt-get install libgdiplus`
+2. `sudo apt-get install ttf-mscorefonts-installer`  
+
+## Cómo ejecutar en Docker {#how-to-run-in-the-docker}
+  
+Ejecutar GroupDocs.Comparison en Docker es sencillo. Todo lo que debe hacer es agregar la instalación de los paquetes descritos en el párrafo anterior al archivo Dockerfile.  
+
+### .NET 6 en Docker {#net-6-in-docker}  
+Un ejemplo del inicio de un Dockerfile podría ser el siguiente:
+
+```Dockerfile
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+WORKDIR /app
+EXPOSE 80
+
+# Add libgdiplus for graphics support
+RUN apt-get update && apt-get install -y apt-utils libgdiplus
+
+# Add `contrib` archive area to package sources list
+RUN sed -i'.bak' 's/$/ contrib/' /etc/apt/sources.list
+# Add fonts
+RUN apt-get update; apt-get install -y ttf-mscorefonts-installer fontconfig
+RUN fc-cache -f -v
+
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+# etc
+```
+**fontconfig:** Esta biblioteca configura y personaliza el acceso a las fuentes.
+
+**ttf-mscorefonts-installer:** Este paquete proporciona las fuentes TrueType principales de Microsoft. Está disponible en el área de repositorio <a href="https://www.debian.org/doc/debian-policy/ch-archive#s-contrib" target="_blank" rel="nofollow noopener noreferrer">contrib</a>. (Nota: El uso de fuentes no libres puede tener implicaciones de licencia, por lo que asegúrese de revisar los términos de la licencia).
+
+### .NET 8 en Docker {#net-8-in-docker}  
+En el Dockerfile de .NET 8, hay algunos cambios en la forma en que se instala `ttf-mscorefonts-installer`.
+
+```Dockerfile
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 8080
+
+# Add libgdiplus for graphics support
+RUN apt-get update && apt-get install -y libgdiplus
+
+RUN apt install software-properties-common -y
+RUN echo "deb http://deb.debian.org/debian bookworm contrib non-free" > /etc/apt/sources.list.d/contrib.list
+RUN apt update && apt upgrade
+# Add fonts
+RUN apt install ttf-mscorefonts-installer -y
+
+# This stage is used to build the service project
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# etc
+```
+
+## Consulte también {#see-also}
+
+- [Requisitos del sistema](/net/comparison/getting-started/system-requirements/)
+- [Instalación](/net/comparison/getting-started/installation/)

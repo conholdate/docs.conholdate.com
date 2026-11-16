@@ -1,0 +1,111 @@
+---
+title: "Opciones avanzadas de edición de hojas de cálculo"
+sidebar_label: "Opciones avanzadas de edición de hojas de cálculo"
+sidebar_key: "net-editor-edit-document-edit-excel-advanced-worksheet-editing-options"
+sidebar_position: 4
+description: "Este artículo describe dos nuevas características de GroupDocs.Editor para .NET versión 26.6: las opciones avanzadas de edición de hojas de cálculo, que controlan exactamente cómo se convertirá la hoja de cálculo de entrada a HTML."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-excel/advanced-worksheet-editing-options.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "de8db71c0bc23bd8863f221995b199debc9040f1df4f13ae8cd014a17f3e86c6"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "fa2ec44957e8c2bac124a001f0bf742d9289b18dbfb188d3ebd7e90edbdded9b"
+translation_updated_at: "2026-11-16T03:46:39.695Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Cuando se editan documentos de hojas de cálculo, GroupDocs.Editor edita una hoja (pestaña) a la vez. La hoja editada se especifica mediante <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheeteditoptions/worksheetindex/" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetEditOptions.WorksheetIndex`</a> propiedad. Por lo tanto, cuando el documento de hoja de cálculo se carga en el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> clase, el usuario crea una <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheeteditoptions/" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetEditOptions`</a> instancia, especifica un índice de hoja de cálculo deseado y llama al `Editor.Edit` método. Como resultado, `Editor.Edit` convierte la hoja de cálculo seleccionada al formato HTML editable y la encapsula en el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> instancia.
+
+Antes de <a href="https://releases.groupdocs.com/editor/net/release-notes/2025/groupdocs-editor-for-net-26-6-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 26.6</a> no había otras opciones en el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheeteditoptions/" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetEditOptions`</a> excepto el `ExcludeHiddenWorksheets` que solo define si las hojas ocultas deben considerarse o no. Sin embargo, a partir de la versión 26.6, se agregaron dos nuevas opciones (propiedades públicas): `MergeEmptyAdjacentCells` y `ExportBogusRowData` propiedades, ambas de `Boolean` tipo.
+
+A primera vista, las hojas de cálculo, tal como se pueden ver en MS Excel, y las tablas HTML pueden parecer muy similares. Sin embargo, presentan más diferencias que similitudes: distinto formato, diseño, renderizado, procesamiento, estructura interna, distintas reglas para calcular su apariencia, etc. Quizás la diferencia más importante sea que los documentos de hojas de cálculo de Office Open XML admiten eficazmente datos dispersos. Puede haber una hoja de cálculo con solo dos celdas no vacías: una, por ejemplo, es `A1`, mientras que el segundo es `ZZ1000000000`. Este tamaño de hoja de cálculo será menor que 1<a href="https://en.wiktionary.org/wiki/kibibyte" target="_blank" rel="nofollow noopener noreferrer">KiB</a> y MS Excel lo abrirá instantáneamente. Para tablas HTML, que no pueden almacenar eficazmente datos tan dispersos, dicho documento requerirá cientos de <a href="https://en.wiktionary.org/wiki/mebibyte" target="_blank" rel="nofollow noopener noreferrer">MiB</a>y un navegador común, lo más probable es que se congele al intentar abrirlo.
+
+Por eso, convertir hojas de Excel a tablas HTML siempre implica una dura compensación, un equilibrio entre distintos enfoques y propósitos que suelen entrar en conflicto entre sí. Estas 2 nuevas opciones permiten “ajustar” esta compensación, adaptar la marca HTML generada a las necesidades del usuario.
+
+La primera, una `MergeEmptyAdjacentCells` `flag`, controla qué hacer con múltiples celdas vacías consecutivas en la hoja de cálculo de Excel de entrada. De forma predeterminada, se traducen uno a uno a la tabla HTML: `MergeEmptyAdjacentCells` flag tiene un `false` valor predeterminado. Esto es ideal para editar tablas HTML en un editor WYSIWYG. Sin embargo, en caso de que el libro de entrada contenga datos dispersos y haya muchas celdas vacías consecutivas, el marcado HTML generado puede ser muy grande en tamaño. Con `MergeEmptyAdjacentCells` habilitado, GroupDocs.Editor encuentra y fusiona dichas celdas vacías consecutivas en una sola celda TD con la `colspan` atributo. Un documento HTML «optimizado» de este tipo es visualmente idéntico a la versión predeterminada, puede tener un tamaño en bytes considerablemente menor, pero puede presentar problemas al editar su contenido; por lo tanto, utilice esta opción con cautela.
+
+![Merged empty cells in produced HTML document as it can be seen in a browser debugger](/net/editor/images/Merged-empty-cells-in-browser-debugger.png)
+
+La captura de pantalla anterior muestra lo que parece ser un documento de hoja de cálculo de entrada, convertido al formato HTML, en un depurador del navegador. Se ven claramente siete celdas fusionadas consecutivas (elementos TD) en una única fila.
+
+La segunda, `ExportBogusRowData` es un poco más compleja. Es necesario recordar que GroupDocs.Editor no solo debe convertir el documento de entrada al formato HTML editables, sino también obtener el documento HTML editado y convertirlo nuevamente al formato de entrada, proceso que se denomina “conversión inversa”. Como se mencionó anteriormente, las tablas de Excel y las tablas HTML son muy distintas, y cuando se realiza una conversión “pura”, se pierden muchos datos técnicos, ya que no tienen un equivalente en HTML/CSS. Como consecuencia, se produce una degradación constante en el documento de hoja de cálculo de salida durante la conversión inversa. Para solucionar este problema, cuando el documento de hoja de cálculo de entrada se convierte al formato HTML, GroupDocs.Editor agrega una llamada “fila falsa”: una fila vacía y oculta ubicada al final de la tabla HTML, que no contiene datos, tiene una altura de cero y cuya única función es almacenar los valores originales de ancho de cada columna. Como resultado, la hoja de cálculo resultante conserva los valores correctos de ancho de columna.
+
+![Bogus bottom empty row in produced HTML document as it can be seen in a browser debugger](/net/editor/images/Bogus-bottom-row-in-HTML.png)
+
+La captura de pantalla anterior muestra cómo se presenta esta fila oculta falsa en el marcado HTML.
+
+Esta opción está habilitada de forma predeterminada: `ExportBogusRowData` tiene un valor predeterminado de `true`. Sin embargo, esta opción presenta una desventaja importante: dicha fila falsa también está presente en la hoja de cálculo resultante, donde se muestra como una fila oculta.
+
+![Bogus bottom empty row in produced resultant Spreadsheet document as it can be seen in MS Excel](/net/editor/images/Bogus-bottom-row-in-produced-Spreadsheet.png)
+
+La captura de pantalla anterior muestra cómo se ve cuando se abre el documento de hoja de cálculo resultante en Microsoft Excel: la fila falsa tiene el número `8` y está oculta. Por esta razón, el equipo de GroupDocs.Editor decidió agregar la posibilidad de deshabilitarla.
+
+#### Ejemplo {#example}  
+Ambas opciones son muy fáciles de utilizar: ambas son de tipo booleano y están presentes en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheeteditoptions/" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetEditOptions`</a>. El siguiente código muestra cómo cargar un documento de entrada, crear una instancia de `SpreadsheetEditOptions`, configurar estas opciones y editar el documento, en cuyo proceso se crea la instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a>.
+
+
+<Tabs groupId="DeleteWorksheetsFromLoadedAndEditedSpreadsheet">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Editor;
+using GroupDocs.Editor.Options;
+// ...
+
+using (Editor editor = new Editor("Input.xlsx", new SpreadsheetLoadOptions()))
+{
+    SpreadsheetEditOptions editOpt = new SpreadsheetEditOptions();
+    editOpt.WorksheetIndex = 0;
+    editOpt.MergeEmptyAdjacentCells = true;
+    editOpt.ExportBogusRowData = false;
+
+    using (EditableDocument convertedWorksheet = editor.Edit(editOpt))
+    {
+        convertedWorksheet.Save("Output.html");
+    }
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports GroupDocs.Editor
+Imports GroupDocs.Editor.Options
+' ...
+
+Using editor As New Editor("Input.xlsx", New SpreadsheetLoadOptions())
+    Dim editOpt As New SpreadsheetEditOptions
+    editOpt.WorksheetIndex = 0
+    editOpt.MergeEmptyAdjacentCells = True
+    editOpt.ExportBogusRowData = False
+
+    Using convertedWorksheet As EditableDocument = editor.Edit(editOpt)
+        convertedWorksheet.Save("Output.html")
+    End Using
+End Using
+```
+
+</TabItem>
+
+
+</Tabs>

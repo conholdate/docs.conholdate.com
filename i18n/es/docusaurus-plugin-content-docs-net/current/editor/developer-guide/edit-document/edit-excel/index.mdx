@@ -1,0 +1,91 @@
+---
+title: "Editar libro de Excel"
+sidebar_label: "Editar libro de Excel"
+sidebar_key: "net-editor-edit-document-edit-excel-index"
+sidebar_position: 46
+description: "Esta guía muestra cómo editar hojas de cálculo XLS, XLSX, XLSM, XLSB, ODS y SXC con hojas ocultas, proteger la hoja de cálculo editada con contraseña y muchas otras funciones avanzadas de GroupDocs.Editor para .NET."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-excel/_index.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "f241d7af26cf71d1a1c0b8498c94bbc01dd2bacc317693861c84644de8905146"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "8bcd42bdc8fcecf6fff51fe6f7a8cf0345db3cb70585dbfb07adcf34b5f6b40d"
+translation_updated_at: "2026-11-16T03:49:09.857Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+> Esta demostración muestra y explica todos los momentos y opciones necesarios relacionados con el procesamiento de los documentos <a href="https://docs.fileformat.com/spreadsheet/" target="_blank" rel="nofollow noopener noreferrer">hojas de cálculo</a>.
+
+## Introducción {#introduction}
+
+<a href="https://docs.fileformat.com/spreadsheet/" target="_blank" rel="nofollow noopener noreferrer">**Hoja de cálculo**</a>, también conocidas como **libros de trabajo**, se presentan en múltiples formatos: XLS, XLSX, XLSM, XLSB, ODS, SXC y otros, todos ellos compatibles con **<a href="https://products.groupdocs.com/editor/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Editor</a>**. Existen opciones independientes de carga, edición y guardado para todos los documentos de hoja de cálculo. Tenga en cuenta que GroupDocs.Editor distingue los documentos de hoja de cálculo de los documentos de texto separados por delimitadores (DSV), como CSV, TSV, separados por punto y coma, separados por espacios, etc. Estos tipos de documentos tienen un conjunto distinto de opciones y no se abordan en este artículo.
+
+Los documentos de hoja de cálculo presentan una diferencia fundamental respecto a los documentos de procesamiento de texto o documentos textuales: en lugar de páginas, disponen de pestañas (también denominadas hojas de cálculo), las cuales son independientes entre sí. Las pestañas no tienen una representación válida ni correcta en el marcado HTML. Esto implica que los editores HTML WYSIWYG no permiten editar una hoja de cálculo con varias pestañas simultáneamente, sino que solo es posible editar una pestaña a la vez: se debe guardar la pestaña editada y, posteriormente, cambiar a otra. Dado que GroupDocs.Editor está diseñado para editar documentos del lado del cliente, debe ser coherente con este enfoque. Como consecuencia, un documento de hoja de cálculo con varias pestañas puede cargarse en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a>, pero la instancia <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> almacena únicamente el contenido de una única pestaña. En otras palabras, el usuario carga una hoja de cálculo con varias pestañas en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a>, pero para editar dos pestañas, por ejemplo, debe invocar el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a>.<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit" target="_blank" rel="nofollow noopener noreferrer">Edit</a> dos veces: la primera vez para la primera pestaña y la segunda vez para la segunda pestaña. Como resultado, con estas dos llamadas el usuario obtiene dos instancias <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>: la primera contiene la primera pestaña y la segunda, la segunda.
+
+Al igual que los documentos de procesamiento de texto, los documentos de hoja de cálculo pueden estar protegidos mediante contraseña y protegidos contra ediciones; GroupDocs.Editor admite todas estas características.
+
+## Cargar un libro para su edición {#load-workbook-for-edit}
+
+Para cargar una hoja de cálculo en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a>, el usuario debe utilizar la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetloadoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetLoadOptions</a>. En algunos casos generales no es necesaria: incluso sin <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetloadoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetLoadOptions</a>, GroupDocs.Editor puede reconocer el formato de hoja de cálculo y aplicar automáticamente las opciones de carga predeterminadas correspondientes. Sin embargo, cuando la hoja de cálculo está cifrada, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetloadoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetLoadOptions</a> constituye el único método para establecer la contraseña y cargar correctamente el documento.
+El ejemplo siguiente muestra esta situación: carga de una hoja de cálculo protegida con contraseña:
+
+```csharp
+string inputXlsxPath = "C://input/spreadsheet.xlsx";
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+loadOptions.Password = "password";
+Editor editor = new Editor(inputXlsxPath, loadOptions);
+```
+
+Pueden presentarse varios escenarios aquí:  
+
+1. Si se especifica una contraseña, pero el documento no está protegido por contraseña, esta se ignorará.
+2. Si el documento está protegido por contraseña, pero no se especifica ninguna, se lanzará <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/passwordrequiredexception" target="_blank" rel="nofollow noopener noreferrer">PasswordRequiredException</a> más adelante durante la edición.
+3. Si el documento está protegido por contraseña y se especifica una contraseña, pero esta es incorrecta, se lanzará <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/incorrectpasswordexception" target="_blank" rel="nofollow noopener noreferrer">IncorrectPasswordException</a> más adelante durante la edición.
+
+## Editar un libro de Excel {#edit-excel-workbook}
+  
+<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheeteditoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetEditOptions</a> debe utilizarse para editar documentos de hojas de cálculo. Si se utiliza la sobrecarga del método `Editor.Edit` sin parámetros, se abrirá la primera pestaña para su edición. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheeteditoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetEditOptions</a> permite especificar la pestaña a abrir mediante un índice basado en cero y una bandera booleana que indica si es necesario procesar las hojas de cálculo ocultas. A continuación se muestra un ejemplo:
+
+```csharp
+SpreadsheetEditOptions editOptions1 = new SpreadsheetEditOptions();
+editOptions1.WorksheetIndex = 0;//index is 0-based, so this is 1st tab
+editOptions1.ExcludeHiddenWorksheets = true;
+
+SpreadsheetEditOptions editOptions2 = new SpreadsheetEditOptions();
+editOptions2.WorksheetIndex = 1;//index is 0-based, so this is 2nd tab
+editOptions2.ExcludeHiddenWorksheets = false;
+
+EditableDocument firstTab = editor.Edit(editOptions1);
+EditableDocument secondTab = editor.Edit(editOptions2);
+```
+
+## Guardar libro de trabajo tras la edición  {#save-workbook-after-edit}
+  
+La clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetSaveOptions</a> está diseñada para guardar documentos de hojas de cálculo. Su constructor acepta un parámetro obligatorio: el tipo de documento, representado por la estructura <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/spreadsheetformats" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetFormats</a>. Con esta clase, el usuario también puede especificar una contraseña; en tal caso, el documento de salida se codificará. Otra posibilidad consiste en establecer protección contra escritura para la pestaña (hoja) editada, también mediante contraseña. Todas estas funcionalidades se muestran en el siguiente código:
+
+```csharp
+SpreadsheetSaveOptions saveOptions = new SpreadsheetSaveOptions(SpreadsheetFormats.Xlsm);
+saveOptions.Password = "new password";//after setting this password the output XLSM will be encoded and thus cannot be opened without password anymore
+saveOptions.WorksheetProtection = new WorksheetProtection(WorksheetProtectionType.All, "write password");//this is a write-protection; even after opening user should specify password for editing
+
+System.IO.Stream outputStream = /* obtain it from somewhere */;
+  
+//saving 2nd edited tab to specified stream in XLSM format with additional parameters
+editor.Save(secondTab, outputStream, saveOptions);
+```
+
+Como se puede observar en el fragmento del código fuente anterior, la variable `secondTab` contiene una referencia a la instancia `<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>`, la cual representa una segunda pestaña. Esto implica que el documento XLSM de salida tendrá únicamente una pestaña: aquella que inicialmente se abrió para su edición, se pasó al editor WYSIWYG, fue editada por el usuario allí, y posteriormente se devolvió y guardó. Este comportamiento es el predeterminado e inicial, introducido desde los inicios de GroupDocs.Editor, al mismo tiempo que se lanzó el módulo de hojas de cálculo.
+
+Sin embargo, a partir de la versión 20.10 se introdujo una nueva posibilidad: ahora GroupDocs.Editor puede crear una copia completa del documento de hoja de cálculo inicial e inyectar la pestaña editada en ella, ya sea reemplazando la pestaña original o junto con ella. Para lograr esto, se introdujeron dos nuevos parámetros en la clase `<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetSaveOptions</a>`: un entero `<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumber" target="_blank" rel="nofollow noopener noreferrer">WorksheetNumber</a>` y un valor booleano `<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/insertasnewworksheet/" target="_blank" rel="nofollow noopener noreferrer">InsertAsNewWorksheet</a>`. Esta funcionalidad se explica detalladamente en [un artículo independiente](/net/editor/developer-guide/edit-document/edit-excel/inserting-edited-worksheet-into-existing-spreadsheet/).

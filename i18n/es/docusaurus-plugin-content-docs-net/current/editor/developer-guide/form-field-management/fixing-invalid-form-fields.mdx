@@ -1,0 +1,199 @@
+---
+title: "Corrección de campos de formulario no válidos"
+sidebar_label: "Corrección de campos de formulario no válidos"
+sidebar_key: "net-editor-form-field-management-fixing-invalid-form-fields"
+sidebar_position: 4
+description: "Corrección de campos de formulario no válidos y guardado del documento con GroupDocs.Editor para .NET"
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/form-field-management/fixing-invalid-form-fields.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "b094ae3c79e3d8ccd8a741beecb5d2f88f9785d25db18c89fc441697f2541415"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "7c4fc6ee617fd950246946b1a53b61c76c319fbc66db0c2f4e75e8191889ba73"
+translation_updated_at: "2026-11-16T04:53:42.001Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+Este artículo demuestra cómo corregir campos de formulario inválidos en un documento de Word utilizando GroupDocs.Editor para .NET. El ejemplo guía paso a paso a través de la carga de un documento, la identificación y corrección de campos de formulario inválidos, y el guardado del documento actualizado.
+
+#### Guía paso a paso {#step-by-step-guide}
+
+1. **Crear un flujo a partir de la ruta de acceso**
+
+   Cree un `FileStream` a partir de la ruta de acceso del archivo de entrada.
+
+   ```csharp
+   using (FileStream fs = File.OpenRead(inputFilePath))
+   {
+       // Further code will be placed here
+   }
+   ```
+
+2. **Crear opciones de carga**
+
+   Inicialice el `WordProcessingLoadOptions` para cargar el documento. Si su documento está protegido con contraseña, especifique la contraseña. En este ejemplo, el documento no está protegido, por lo que la contraseña se ignorará.
+
+   ```csharp
+   WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+   loadOptions.Password = "some_password_to_open_a_document";
+   ```
+
+3. **Cargar el documento en la instancia del editor**
+
+   Utilice la clase `Editor` para cargar el documento con las opciones de carga especificadas.
+
+   ```csharp
+   using (Editor editor = new Editor(fs, loadOptions))
+   {
+       // Further code will be placed here
+   }
+   ```
+
+4. **Recuperar y corregir campos de formulario no válidos**
+
+   Obtenga la instancia `FormFieldManager` a partir de `Editor` y lea `FormFieldCollection`. Intente corregir automáticamente los campos de formulario no válidos y, a continuación, verifique si siguen existiendo campos de formulario no válidos. En caso afirmativo, genere nombres únicos para los campos no válidos y corrija dichos campos.
+
+   ```csharp
+   FormFieldManager fieldManager = editor.FormFieldManager;
+   FormFieldCollection collection = fieldManager.FormFieldCollection;
+
+   fieldManager.FixInvalidFormFieldNames(new InvalidFormField[0]);
+   collection = fieldManager.FormFieldCollection;
+
+   bool hasInvalidFormFields = fieldManager.HasInvalidFormFields();
+   System.Console.WriteLine("FormFieldCollection contains invalid items: {0}", hasInvalidFormFields);
+
+   var invalidFormFields = fieldManager.GetInvalidFormFieldNames();
+   foreach (var invalidItem in invalidFormFields)
+   {
+       invalidItem.FixedName = string.Format("{0}_{1}", invalidItem.Name, Guid.NewGuid());
+   }
+   fieldManager.FixInvalidFormFieldNames(invalidFormFields);
+   collection = fieldManager.FormFieldCollection;
+   ```
+
+5. **Crear y configurar opciones de guardado**
+
+   Inicialice `WordProcessingSaveOptions` con el formato deseado. Optimice el uso de memoria si es necesario y proteja el documento contra escritura con una contraseña.
+
+   ```csharp
+   WordProcessingFormats docFormat = WordProcessingFormats.Docx;
+   WordProcessingSaveOptions saveOptions = new WordProcessingSaveOptions(docFormat);
+   saveOptions.OptimizeMemoryUsage = true;
+   saveOptions.Protection = new WordProcessingProtection(WordProcessingProtectionType.AllowOnlyFormFields, "write_password");
+   ```
+
+6. **Guardar el documento**
+
+   Prepárese un flujo para guardar y utilice el método `Save` del `Editor` para guardar el documento actualizado.
+
+   ```csharp
+   using (MemoryStream outputStream = new MemoryStream())
+   {
+       editor.Save(outputStream, saveOptions);
+   }
+   ```
+
+7. **Mensaje de finalización**
+
+   Imprime un mensaje de confirmación para indicar la finalización correcta de la operación.
+
+   ```csharp
+   System.Console.WriteLine("FixInvalidFormFieldCollectionAndSave routine has successfully finished");
+   ```
+
+### Código de ejemplo completo {#complete-example-code}
+
+A continuación se muestra el código de ejemplo completo que demuestra todo el proceso:
+
+```csharp
+/// <summary>
+/// This example demonstrates how to fix invalid form fields in a collection and save the document using GroupDocs.Editor for .NET.
+/// </summary>
+internal static class FixInvalidFormFieldCollectionAndSave
+{
+    /// <summary>
+    /// Runs the example to demonstrate loading, fixing invalid form fields, and saving a document.
+    /// </summary>
+    internal static void Run()
+    {
+        // 1. Get a path to the input file (or stream with file content).
+        // In this case, it is a sample DOCX with form fields.
+        string inputFilePath = Constants.SampleLegacyFormFields_docx;
+
+        // 2. Create a stream from this path
+        using (FileStream fs = File.OpenRead(inputFilePath))
+        {
+            // 3. Create load options for this document
+            WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+            // 3.1. If the input document is password-protected, specify the password for its opening...
+            loadOptions.Password = "some_password_to_open_a_document";
+            // 3.2. ...but, because the document is unprotected, this password will be ignored
+
+            // 4. Load the document with options into the Editor instance
+            using (Editor editor = new Editor(fs, loadOptions))
+            {
+                // 4.1. Read the FormFieldManager instance
+                FormFieldManager fieldManager = editor.FormFieldManager;
+                // 4.2. Read the FormFieldCollection in the document
+                FormFieldCollection collection = fieldManager.FormFieldCollection;
+
+                // 4.3. Try to auto-fix invalid form fields
+                fieldManager.FixInvalidFormFieldNames(new InvalidFormField[0]);
+                collection = fieldManager.FormFieldCollection;
+
+                bool hasInvalidFormFields = fieldManager.HasInvalidFormFields();
+                System.Console.WriteLine("FormFieldCollection contains invalid items: {0}", hasInvalidFormFields);
+
+                // 4.4. Try to fix invalid form fields
+                // 4.4.1. Get all invalid form field names
+
+
+                var invalidFormFields = fieldManager.GetInvalidFormFieldNames();
+
+                // 4.4.2. Create unique names for invalid fields
+                foreach (var invalidItem in invalidFormFields)
+                {
+                    invalidItem.FixedName = string.Format("{0}_{1}", invalidItem.Name, Guid.NewGuid());
+                }
+
+                // 4.4.3. Fix invalid fields
+                fieldManager.FixInvalidFormFieldNames(invalidFormFields);
+                collection = fieldManager.FormFieldCollection;
+
+                // 5. Create document save options
+                WordProcessingFormats docFormat = WordProcessingFormats.Docx;
+                WordProcessingSaveOptions saveOptions = new WordProcessingSaveOptions(docFormat);
+
+                // 5.1. If the document is large and causes OutOfMemoryException, set the memory optimization option
+                saveOptions.OptimizeMemoryUsage = true;
+
+                // 5.2. Protect the document from writing (allow only form fields) with a password
+                saveOptions.Protection = new WordProcessingProtection(WordProcessingProtectionType.AllowOnlyFormFields, "write_password");
+
+                // 6. Save the document
+                // 6.1. Prepare a stream for saving
+                using (MemoryStream outputStream = new MemoryStream())
+                {
+                    // 6.2. Save the document
+                    editor.Save(outputStream, saveOptions);
+                }
+            }
+        }
+        System.Console.WriteLine("FixInvalidFormFieldCollectionAndSave routine has successfully finished");
+    }
+}
+```

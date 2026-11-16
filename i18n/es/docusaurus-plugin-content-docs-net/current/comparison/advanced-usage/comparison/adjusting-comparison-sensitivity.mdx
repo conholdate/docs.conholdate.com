@@ -1,0 +1,139 @@
+---
+title: "Ajustar la sensibilidad de la comparación"
+sidebar_label: "Ajustar la sensibilidad de la comparación"
+sidebar_key: "net-comparison-comparison-adjusting-comparison-sensitivity"
+sidebar_position: 2
+description: "Obtenga más información sobre la sensibilidad de la comparación de documentos y cómo ajustarla para lograr el mejor rendimiento y precisión al comparar documentos con GroupDocs.Comparison para .NET."
+product: "comparison"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "comparison-net"
+source_path: "net/advanced-usage/comparison/adjusting-comparison-sensitivity.md"
+source_commit: "7624b4308e90feb1963a8dfe447bff38010a8a60"
+source_sha256: "7c4422ffb3318c9c1f5de36f137061cb859ab1f2cffab5cc41ede50b8b7e8f6d"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "eb026daaecc286d596d77c6b864a69aca80375dd9bd15e6aaf9c9a0ed2ee9afa"
+translation_updated_at: "2026-11-16T04:43:22.219Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Comparison para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+<a href="https://products.groupdocs.com/comparison/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Comparison</a> le permite ajustar la sensibilidad de comparación para lograr el equilibrio necesario entre la velocidad y la precisión de la comparación. El rango de valores posibles para la sensibilidad de comparación va de **0** a **100**.
+
+- **Valor mínimo** (**0**): establece la sensibilidad en un valor mínimo, lo que proporciona la velocidad de comparación más rápida, pero puede generar una calidad de comparación peor. Si hay al menos una letra común en dos palabras comparadas, estas palabras no se consideran completamente insertadas y eliminadas.
+- **Valor por defecto** significa **75**. La comparación se realiza cuando el porcentaje de elementos eliminados o insertados en relación con todos los elementos no supera el 75%.
+- **Valor máximo** (**100**) ofrece la mejor calidad, pero la velocidad de comparación más lenta. La comparación se realiza independientemente de la longitud de la subsecuencia común entre los dos objetos comparados.
+
+Para una mejor comprensión sobre cómo funcionan los algoritmos de comparación, supongamos que tenemos dos cadenas:
+
+| Cadenas |
+| -------------------------------- |
+| ` 1`. Es nuestra poesía de capital |
+| ` 2`. Jack es un ternero feliz |
+
+Por lo tanto, estas cadenas tienen dos subsecuencias comunes: la palabra **“is”** y 4 símbolos de espacio.   
+La subsecuencia común es: **"is"**, y su longitud es de 4 símbolos (incluye 2 espacios).  
+La longitud de la subsecuencia insertada es de 13 símbolos: **Jackagladcalf**  
+La longitud de la subsecuencia eliminada es de 17 símbolos: **Itourequitypoetry\***  
+Calculemos el porcentaje de símbolos eliminados e insertados: (17 + 13) / (17 + 13 + 4) * 100 = 88%
+
+*Caso 1.* Si **SensitivityOfComparison = 80 %**, la comparación de estas dos cadenas produce el siguiente resultado:  
+**Jack es un ternero alegre. Es nuestra poesía de capital.**
+
+Debido a que el porcentaje calculado de símbolos eliminados e insertados es del **88%** y es mayor que el valor de **SensitivityOfComparison**, que es del **80%**, esta subsecuencia común no se tendrá en cuenta.  
+La primera cadena se considera completamente eliminada y la segunda cadena se considera completamente insertada. Se obtienen los mismos resultados para cualquier porcentaje calculado inferior al **83 %**.
+
+_Caso 2._ Si **SensitivityOfComparison = 89%**, la comparación de estas dos cadenas produce el siguiente resultado:  
+**JackIt es nuestra gladequity calfpoetry**
+
+Se encontró una subsecuencia común, ya que **89% &gt; **88 %**. Se obtienen los mismos resultados para cualquier porcentaje calculado mayor que **88 %**.
+
+Para comparar documentos con una sensibilidad de comparación específica, siga estos pasos:
+
+1.  Instanciar el <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer" target="_blank" rel="nofollow noopener noreferrer">Comparer</a> objeto. Especifique la ruta del documento de origen o el flujo.
+2.  Llamar a <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer/methods/add/index" target="_blank" rel="nofollow noopener noreferrer">Add</a> método. Especifique la ruta del documento de destino o el flujo.
+3.  Instanciar el <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.options/compareoptions" target="_blank" rel="nofollow noopener noreferrer">CompareOptions</a> objeto. Especifique el adecuado  <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.options/compareoptions/properties/sensitivityofcomparison" target="_blank" rel="nofollow noopener noreferrer">SensitivityOfComparison</a> valor.
+4.  Llamar a <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.comparer/compare/methods/1" target="_blank" rel="nofollow noopener noreferrer">Compare</a> método. Especifique el <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.options/compareoptions" target="_blank" rel="nofollow noopener noreferrer">CompareOptions</a> objeto.
+
+El siguiente fragmento de código muestra cómo comparar documentos con una sensibilidad específica:
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Comparison;
+using GroupDocs.Comparison.Options;
+// ...
+
+using (Comparer comparer = new Comparer("source.docx"))
+{
+    comparer.Add("target.docx");
+    CompareOptions options = new CompareOptions() { SensitivityOfComparison = 100 };
+    comparer.Compare("result.docx", options);
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+El resultado es el siguiente:
+
+| SensitivityOfComparison = 50 | SensitivityOfComparison = 100 |
+| :-----------------------------------------------------------------: | :----------------------------------------------------------------: |
+| ![](/net/comparison/images/sensitivity50.png) | ![](/net/comparison/images/sensitivity100.png) |
+
+
+También puede establecer el nivel de sensibilidad específicamente para las tablas.
+El siguiente fragmento de código muestra cómo hacerlo:
+
+
+<Tabs groupId="example2">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Comparison;
+using GroupDocs.Comparison.Options;
+// ...
+
+using (Comparer comparer = new Comparer("source.docx"))
+{
+    comparer.Add("target.docx");
+    CompareOptions options = new CompareOptions() 
+    { 
+        SensitivityOfComparison = 100, SensitivityOfComparisonForTables = 75 
+    };
+    comparer.Compare("result.docx", options);
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+El resultado es el siguiente:
+
+| SensitivityOfComparisonForTables = 50 | SensitivityOfComparisonForTables = 75 |
+| :-----------------------------------------------------------------: | :----------------------------------------------------------------: |
+| ![](/net/comparison/images/tablesensitivity50.png) | ![](/net/comparison/images/tablesensitivity75.png) |

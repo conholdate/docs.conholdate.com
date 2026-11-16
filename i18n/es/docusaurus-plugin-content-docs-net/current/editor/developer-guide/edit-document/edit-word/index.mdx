@@ -1,0 +1,146 @@
+---
+title: "Editar Word"
+sidebar_label: "Editar Word"
+sidebar_key: "net-editor-edit-document-edit-word-index"
+sidebar_position: 12
+description: "Esta guía muestra cómo editar documentos DOC, DOT, DOCX, DOCM, DOTX, ODT y RTF con extracción de fuentes, diferentes modos de paginación y muchas otras funciones potentes de GroupDocs.Editor para .NET."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-word/_index.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "ce578159ff13f32dbc1cc72198bc0b64106f98966ceefdcf5663c6dd6c640087"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "9f4088e3e16d7143bf89eee924db1769f0834deab317caaa0c8a35ad911c8ebf"
+translation_updated_at: "2026-11-16T04:04:02.306Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+> Este ejemplo demuestra el ciclo estándar de abrir-editar-guardar con documentos de procesamiento de texto, utilizando diferentes opciones en cada paso.
+
+## ¿Cómo editar un documento de Word? {#how-to-edit-word-document}
+  
+El formato de la familia de documentos de procesamiento de texto (WordProcessing) es el más utilizado y conocido, e incluye DOC, DOT, DOCX, DOCM, DOTX, ODT, RTF y muchos más. Todos estos formatos son compatibles con <a href="https://products.groupdocs.com/editor/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Editor**</a>.  
+Existen dos modos de procesamiento para documentos de WordProcessing:  
+
+* *float* (predeterminado)
+* *paged* (también conocido como *paginal*).  
+
+En el modo *float*, cuando el documento se abre para su edición y se carga en el editor HTML del lado cliente con vista WYSIWYG, se representa sin páginas, como un documento de texto de una sola página.  
+Por el contrario, cuando se habilita el modo *paged*, el contenido del documento se divide en páginas. Para un uso adecuado del modo *paged*, si se habilita, debe activarse simultáneamente tanto en las opciones de edición como en las opciones de guardado (esto se describe a continuación).
+
+## Cargar un archivo de Word para editar {#load-word-file-for-edit}
+  
+En primer lugar, el usuario debe abrir un documento cargándolo en una instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a>. Este ejemplo demuestra cómo cargar un documento protegido con contraseña desde un flujo. Supongamos, por tanto, que disponemos de un DOCX cifrado y que el usuario conoce su contraseña. En primer lugar, debe crear las opciones de carga: una instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingloadoptions" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Options.WordProcessingLoadOptions`.</a>
+
+```csharp
+Options.WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+loadOptions.Password = "some_password_to_open_a_document";
+```
+
+Tenga en cuenta que si el documento no está protegido, la contraseña se ignorará. Sin embargo, si el documento está protegido pero el usuario no ha especificado una contraseña, una <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/passwordrequiredexception" target="_blank" rel="nofollow noopener noreferrer">PasswordRequiredException</a> se lanzará durante la edición del documento.  
+
+El siguiente paso es cargar el documento desde el flujo en el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a> clase. Para cargar documentos, utiliza flujos (implementaciones de una `System.IO.Stream`) en el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor` clase</a>.  
+Lo mismo ocurre con las opciones de carga: deben pasarse.
+
+```csharp
+FileStream inputStream = File.OpenRead("C:\\input_path\\document.docx");
+Editor editor = new Editor(inputStream, loadOptions);
+```
+
+## Editar el documento  {#edit-the-document}
+  
+Cuando el documento se carga, puede editarse (transformarse en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>), y este proceso puede ajustarse mediante opciones de edición. Creémoslas:
+
+```csharp
+Options.WordProcessingEditOptions editOptions = new WordProcessingEditOptions(); //#1
+editOptions.FontExtraction = FontExtractionOptions.ExtractEmbeddedWithoutSystem; //#2
+editOptions.EnableLanguageInformation = true; //#3
+//5.3. Switch to pagination mode instead of default float mode
+editOptions.EnablePagination = true; //#4
+```
+
+Describamos el código anterior línea por línea.  
+*Línea #1*: cada formato de familia de documentos admitido tiene su propia clase de opciones. Por lo tanto, para todos los formatos de procesamiento de texto se debe aplicar <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingEditOptions</a>. Lo mismo ocurre con otros formatos: <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheeteditoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetEditOptions</a> para todos los formatos basados en hojas de cálculo (como XLS, ODS, etc.) y así sucesivamente.  
+*Línea #2*: especifica las opciones de extracción de fuentes. De forma predeterminada, no se extraen fuentes del documento, pero con esta opción el usuario puede especificar qué categorías de fuentes deben extraerse y guardarse en la instancia <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>.  
+*Línea #3*: habilita la extracción de información lingüística para mejorar la corrección ortográfica posterior en el lado del cliente. Finalmente, la *línea #4* cambia el modo de procesamiento del documento de flotante (predeterminado) a paginado.  
+
+Tras preparar las opciones, el documento previamente cargado puede editarse:
+
+```csharp
+EditableDocument beforeEdit = editor.Edit(editOptions);
+```
+
+A diferencia del ejemplo anterior, extraigamos el marcado HTML y los recursos por separado:
+
+```csharp
+string originalContent = beforeEdit.GetContent();
+List<IHtmlResource> allResources = beforeEdit.AllResources;
+```
+
+La primera cadena contiene todo el marcado HTML sin recursos, mientras que la segunda `List` contiene todos los recursos (imágenes, fuentes y hojas de estilos).
+
+### Modificación del contenido del documento {#modifying-document-content}
+  
+Imaginemos que el usuario pasó el marcado HTML y los recursos obtenidos de la instancia <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> al editor WYSIWYG, editó el documento del lado del cliente y obtuvo de vuelta el marcado HTML modificado.  
+Ahora, el usuario necesita crear una nueva instancia <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> a partir de este marcado modificado.
+
+```csharp
+string editedContent = originalContent.Replace("document", "edited document");
+EditableDocument afterEdit = EditableDocument.FromMarkup(editedContent, allResources);
+```
+
+Pasamos el mismo `List` con recursos al <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> editado; sin embargo, este último puede ser un `List` completamente nuevo con otros recursos.
+
+## Guardar archivo de Word tras la edición {#save-word-file-after-edit}
+  
+Antes de guardar el documento, el usuario debe crear las opciones de guardado.
+
+```csharp
+WordProcessingFormats docmFormat = WordProcessingFormats.Docm; //#1
+Options.WordProcessingSaveOptions saveOptions = new WordProcessingSaveOptions(docmFormat); //#2
+saveOptions.Password = "password"; //#3
+saveOptions.EnablePagination = true; //#4
+saveOptions.Locale = System.Globalization.CultureInfo.GetCultureInfo("en-US"); //#5
+saveOptions.OptimizeMemoryUsage = true; //#6
+saveOptions.Protection = new WordProcessingProtection(WordProcessingProtectionType.ReadOnly, "write_password"); //#7
+```
+
+Describamos el código anterior línea por línea:  
+
+1. Creación de un formato para el documento de salida, en nuestro caso es DOCM.
+2. Creación de una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingsaveoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingSaveOptions</a> con el formato previamente preparado.
+3. Cuando el usuario especifica una contraseña, GroupDocs.Editor cifra el documento con dicha contraseña. Por lo tanto, cuando el documento se guarde, solo podrá abrirse con esa contraseña.
+4. Dado que la paginación ya se habilitó previamente en <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingEditOptions</a> (variable `editOptions`), para obtener un mejor resultado de salida, se recomienda encarecidamente habilitarla también en <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingsaveoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingSaveOptions</a>.
+5. Puede establecer la configuración regional del documento de procesamiento de texto de salida de forma manual.
+6. Si el documento es muy grande y provoca una excepción OutOfMemoryException, puede habilitar la opción de optimización de memoria.
+7. Puede proteger el documento contra escritura (hacerlo de solo lectura) mediante una contraseña. Tenga en cuenta que esta es una protección contra escritura, distinta de la protección contra apertura que se configuró anteriormente.
+
+Finalmente, el usuario debe guardar el documento editado en un flujo utilizando las opciones de guardado previamente preparadas.
+
+```csharp
+MemoryStream outputStream = new memorySream();
+editor.Save(afterEdit, outputStream, saveOptions);
+```
+
+Y no olvides liberar todos los recursos:
+
+```csharp
+beforeEdit.Dispose();
+afterEdit.Dispose();
+editor.Dispose();
+```
+
+## Conclusión {#conclusion}
+  
+Este tutorial muestra un escenario básico: abrir un documento, editarlo y guardarlo, pero con opciones detalladas en cada paso.

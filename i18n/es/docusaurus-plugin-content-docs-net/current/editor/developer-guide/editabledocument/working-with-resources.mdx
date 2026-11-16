@@ -1,0 +1,109 @@
+---
+title: "Trabajar con recursos"
+sidebar_label: "Trabajar con recursos"
+sidebar_key: "net-editor-editabledocument-working-with-resources"
+sidebar_position: 3
+description: "Este artículo demuestra y explica diferentes operaciones con recursos, incluyendo su recuperación, ajuste y guardado en distintos escenarios al editar documentos con GroupDocs.Editor para .NET."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/editabledocument/working-with-resources.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "fb5ea3329de476c57e9e1a42e029e5a393b6032c3528668591be9a5aa81aeb7e"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "40b9cae367d9c1881863b2f3711d9be9835c89add30a4894079c80ea88819527"
+translation_updated_at: "2026-11-16T04:52:45.881Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+> Esta demostración muestra y explica distintas operaciones con recursos, incluyendo su recuperación, ajuste y guardado en distintos escenarios.
+
+## Introducción {#introduction}
+
+Casi todos los documentos, independientemente de su tipo, contienen recursos. En primer lugar, se trata de imágenes; algunos formatos de documento también incluyen fuentes tipográficas. Incluso en documentos de texto plano (TXT), al convertirlos a HTML para su edición, se generará una hoja de estilos, la cual se considera un recurso. Los documentos de procesamiento de texto de ciertos formatos, como Office Open XML, también pueden contener archivos de audio incrustados. GroupDocs.Editor permite trabajar con recursos durante la fase de edición, cuando el documento ya ha sido cargado en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a> y abierto para su edición mediante la generación de una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>, producida por el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a>.<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit" target="_blank" rel="nofollow noopener noreferrer">Edit</a>. La instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> puede considerarse como el documento de entrada, convertido a un formato interno intermedio, con la capacidad de generar marcado HTML y recursos para su envío al editor HTML WYSIWYG del lado del cliente. GroupDocs.Editor clasifica todos los recursos en tres grupos:
+
+* Imágenes, incluyendo: mapas de bits (PNG, BMP, JPEG, GIF, ICON) y vectoriales (SVG y WMF).
+* Fuentes tipográficas, incluyendo: TTF, EOT, WOFF, WOFF2.
+* Recursos textuales: únicamente CSS.
+* Archivos de audio: únicamente MP3 (disponibles desde la versión 21.10).
+
+Cada tipo de recurso posee su propia clase específica, con metadatos, constructores y otros métodos. Todos estos se encuentran dentro del espacio de nombres <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Editor.HtmlCss.Resources</a>.
+
+## Preparativos {#preparations}
+
+Prepararemos una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> cargando y editando un documento de procesamiento de texto de entrada, como siempre (la directiva using se omite para simplificar):
+
+```csharp
+string inputDocxPath = "C://input/document.docx";
+Editor editor = new Editor(inputDocxPath, new WordProcessingLoadOptions());
+WordProcessingEditOptions editOptions = new WordProcessingEditOptions();
+editOptions.FontExtraction = FontExtractionOptions.ExtractAll;// Enable max font extraction - ExtractAll
+EditableDocument beforeEdit = editor.Edit(editOptions);// Create EditableDocument instance
+```
+
+## Obtención de recursos {#obtaining-resources}
+
+Ahora, cuando <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> la instancia está lista, es posible obtener recursos de ella, y <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> proporciona varias formas de hacerlo.
+
+En primer lugar, los recursos pueden recuperarse por su tipo. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> contiene cuatro propiedades para cada tipo de recurso:
+
+* <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/images" target="_blank" rel="nofollow noopener noreferrer">EditableDocument.Images</a> - devuelve una Lista de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images/iimageresource" target="_blank" rel="nofollow noopener noreferrer">IImageResource</a>, interfaz, que es común para todas las imágenes, tanto raster como vectoriales.
+* <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/fonts" target="_blank" rel="nofollow noopener noreferrer">EditableDocument.Fonts</a> - devuelve una Lista de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.fonts/fontresourcebase" target="_blank" rel="nofollow noopener noreferrer">FontResourceBase</a>, clase abstracta, que es común para todas las fuentes.
+* <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/css" target="_blank" rel="nofollow noopener noreferrer">EditableDocument.Css</a> - devuelve una Lista de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.textual/csstext" target="_blank" rel="nofollow noopener noreferrer">CssText</a>, clase, que representa una hoja de estilos CSS.
+* [EditableDocument.Audio]((https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/audio)) - devuelve una lista de [Mp3Audio]((https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.audio/mp3audio)), clase, que representa un archivo de audio MP3. Agregado en la versión 21.10.
+
+En segundo lugar, todos los recursos pueden obtenerse mediante una única propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/allresources" target="_blank" rel="nofollow noopener noreferrer">EditableDocument.AllResources</a>. Devuelve una lista de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/ihtmlresource" target="_blank" rel="nofollow noopener noreferrer">IHtmlResource</a>, interfaz, que es común para absolutamente todos los recursos HTML, incluidas imágenes, fuentes, hojas de estilo y audio. La colección devuelta por el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/allresources" target="_blank" rel="nofollow noopener noreferrer">AllResources</a> propiedad, de hecho, es una concatenación de las cuatro anteriores.
+
+Aquí tienes un código fuente:
+
+```csharp
+List<IImageResource> images = beforeEdit.Images;
+List<FontResourceBase> fonts = beforeEdit.Fonts;
+List<CssText> stylesheets = beforeEdit.Css;
+List<Mp3Audio> audiofiles = beforeEdit.Audio;
+List<IHtmlResource> allTogether = beforeEdit.AllResources;
+```
+
+Si el usuario desea guardar manualmente una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> como archivo HTML con recursos, puede utilizar algo como lo siguiente:
+
+```csharp
+string outputFolder = "C://output/document_resources/";
+foreach (IImageResource oneImage in images)
+{
+    oneImage.Save(Path.Combine(outputFolder, oneImage.FilenameWithExtension));
+}
+foreach (FontResourceBase oneFont in fonts)
+{
+    oneFont.Save(Path.Combine(outputFolder, oneFont.FilenameWithExtension));
+}
+foreach (CssText oneStylesheet in stylesheets)
+{
+    oneStylesheet.Save(Path.Combine(outputFolder, oneStylesheet.FilenameWithExtension));
+}
+foreach (Mp3Audio oneMp3 in audiofiles)
+{
+    oneMp3.Save(Path.Combine(outputFolder, oneMp3.FilenameWithExtension));
+}
+System.IO.File.WriteAllText("c://output/document.html", beforeEdit.GetContent());
+```
+
+## Recursos CSS {#css-resources}
+
+También existe una tercera forma, diseñada especialmente para las hojas de estilos. La razón es que las hojas de estilos pueden contener también recursos externos, los cuales se presentan como enlaces con URLs. Por ejemplo, pueden ser imágenes, fuentes y otras hojas de estilos. En tal caso, es necesario ajustar dichos enlaces. Para abordar esta situación, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> proporciona dos sobrecargas del método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/getcsscontent" target="_blank" rel="nofollow noopener noreferrer">GetCssContent()</a>.<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/getcsscontent" target="_blank" rel="nofollow noopener noreferrer">Primera sobrecarga</a>: no recibe parámetros y devuelve un `List` de cadenas de texto, cada una de las cuales representa una hoja de estilos. En la mayoría de los casos, el documento solo tiene una hoja de estilos, por lo que dicha lista contendrá un único elemento. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/getcsscontent/#getcsscontent_1" target="_blank" rel="nofollow noopener noreferrer">Segunda sobrecarga</a>: recibe dos parámetros de tipo cadena: `externalImagesPrefix` y `externalFontsPrefix`. El primer parámetro está destinado a las imágenes, mientras que el segundo lo está a las fuentes. A continuación se muestra un ejemplo con ambas sobrecargas:
+
+```csharp
+List<string> stylesheetsWithoutPrefixes = beforeEdit.GetCssContent();
+string externalImagesPrefix = "http://www.mywebsite.com/images/id=";
+string externalFontsPrefix = "http://www.mywebsite.com/fonts/id=";
+List<string> stylesheetsWithPrefixes = beforeEdit.GetCssContent(externalImagesPrefix, externalFontsPrefix);
+```

@@ -1,0 +1,132 @@
+---
+title: "Insertar hoja editada en una hoja de cálculo existente"
+sidebar_label: "Insertar hoja editada en una hoja de cálculo existente"
+sidebar_key: "net-editor-edit-document-edit-excel-inserting-edited-worksheet-into-existing-spreadsheet"
+sidebar_position: 1
+description: "Este artículo describe la nueva funcionalidad de GroupDocs.Editor para .NET versión 20.10: insertar una hoja de cálculo editada en una hoja de cálculo existente."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-excel/inserting-edited-worksheet-into-existing-spreadsheet.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "621124c42020a7d1396dd62b770e1dcec7de5ef5238c7cadb3458619f764d277"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "e85c113604040790b3c00a495df8327d6a816a0878928d2cdfa07ff30d5755d8"
+translation_updated_at: "2026-11-16T03:50:18.777Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+De forma predeterminada y desde el momento en que se lanzó al público el módulo de hoja de cálculo, el proceso completo de edición de hojas de cálculo era el siguiente:  
+
+1. Cargar una hoja de cálculo en forma de archivo o flujo dentro del constructor de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a>.
+2. Seleccionar una hoja de cálculo específica para editar y especificar su índice en la propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheeteditoptions/worksheetindex" target="_blank" rel="nofollow noopener noreferrer">WorksheetIndex</a> de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheeteditoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetEditOptions</a>.
+3. Abrir la hoja de cálculo para su edición llamando al método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit" target="_blank" rel="nofollow noopener noreferrer">Editor.Edit()</a>, pasando una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheeteditoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetEditOptions</a> con la hoja seleccionada, y obteniendo una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> desde este método.
+4. Generar marcado HTML y CSS que represente el contenido del documento editado, a partir de la instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>, utilizando distintos métodos como <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/getcontent" target="_blank" rel="nofollow noopener noreferrer">GetContent()</a>.
+5. Pasar este marcado HTML y CSS al editor WYSIWYG, ubicado en el lado del cliente y ejecutándose en el navegador.
+6. El usuario final edita el contenido del documento en el editor WYSIWYG.
+7. El contenido del documento editado, en forma de marcado HTML y CSS, se devuelve al lado del servidor.
+8. Crear una nueva instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> pasando el contenido editado, obtenido desde el servidor, a los métodos estáticos <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/fromfile" target="_blank" rel="nofollow noopener noreferrer">FromFile</a>, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/frommarkup" target="_blank" rel="nofollow noopener noreferrer">FromMarkup</a> o <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/frommarkupandresourcefolder/" target="_blank" rel="nofollow noopener noreferrer">FromBodyMarkupAndResourceFolder</a> (según el contenido).
+9. Crear una instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetSaveOptions</a> con el formato del archivo de hoja de cálculo de salida.
+10. Llamar al método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/save" target="_blank" rel="nofollow noopener noreferrer">Editor.Save</a> pasando la instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>, un flujo de salida para el documento y las opciones <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetSaveOptions</a>. Esto generará una nueva hoja de cálculo que contendrá únicamente una hoja: aquella que fue editada en el lado del cliente y cuyo contenido se pasó mediante la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> a este método.  
+
+Antes de la versión 20.10 de GroupDocs.Editor, este era el único proceso disponible para el cliente.  
+
+A partir de la versión 20.10, el décimo y último paso puede modificarse: la hoja editada puede insertarse directamente en la hoja de cálculo original cargada en el primer paso.  
+
+La clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetSaveOptions</a> ahora contiene dos nuevas propiedades: un entero <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumber" target="_blank" rel="nofollow noopener noreferrer">WorksheetNumber</a> y una bandera booleana <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/insertasnewworksheet/" target="_blank" rel="nofollow noopener noreferrer">InsertAsNewWorksheet</a>. Ambas tienen valores predeterminados «habituales»: `WorksheetNumber` tiene `0` y `InsertAsNewWorksheet` se establece en `false`.
+
+```csharp
+public int WorksheetNumber { get; set; }
+public bool InsertAsNewWorksheet { get; set; }
+```
+
+De forma predeterminada, cuando estas propiedades no se modifican o, al menos, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumber" target="_blank" rel="nofollow noopener noreferrer">WorksheetNumber</a> tiene un valor predeterminado `0`, GroupDocs.Editor generará una nueva hoja de cálculo de una sola hoja, como en versiones anteriores. Sin embargo, si la propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumber" target="_blank" rel="nofollow noopener noreferrer">WorksheetNumber</a> contiene un número distinto de `0` y una hoja de cálculo válida se carga en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a> (se espera que sea la hoja de cálculo original que se editó, aunque en realidad puede ser cualquier hoja de cálculo, incluso aquellas que no tengan relación con la original), entonces la hoja editada se **insertará** en la hoja de cálculo proporcionada.
+
+## Propiedad WorksheetNumber  {#worksheetnumber-property}
+  
+La propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumber" target="_blank" rel="nofollow noopener noreferrer">WorksheetNumber</a>, si no es cero, define en qué posición exacta de la hoja de cálculo dada debe insertarse la nueva hoja editada. El parámetro <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/insertasnewworksheet/" target="_blank" rel="nofollow noopener noreferrer">InsertAsNewWorksheet</a>, que es una bandera booleana, determina cómo debe insertarse esta hoja: si debe reemplazar la hoja existente ubicada en la posición especificada ('false', valor predeterminado), o si debe insertarse entre hojas existentes sin sobrescribirlas, aumentando así en una unidad el número total de hojas de la hoja de cálculo dada.
+
+Dado que el valor predeterminado `0` del parámetro <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumber" target="_blank" rel="nofollow noopener noreferrer">WorksheetNumber</a> está reservado, la numeración real de las hojas comienza en `1`. Esto difiere del índice basado en cero ampliamente utilizado, pero tiene sentido, ya que no se trata del índice de una hoja, sino más bien del número de la hoja, tal como lo hace, por ejemplo, Microsoft Excel. Esto significa que, por ejemplo, para una hoja de cálculo dada que consta de 5 hojas, la primera hoja tiene el número de hoja '1' y la quinta, `5`. Si el usuario especifica un número de hoja que excede el número total de hojas en la hoja de cálculo, este número se ajustará automáticamente al último. Esto significa que, por ejemplo, para la misma hoja de cálculo de 5 hojas, si el usuario especifica '6', '7' o incluso 'Int32.MaxValue', internamente se establecerá `5`, es decir, el número de la última hoja.
+
+Además de los números de hoja positivos, la propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumber" target="_blank" rel="nofollow noopener noreferrer">WorksheetNumber</a> también admite numeración negativa, lo que implica contar desde el final de la hoja de cálculo. En este caso, `-1` se considera la última hoja, `-2` la penúltima, y así sucesivamente. De nuevo, al igual que con la numeración positiva, si el número excede la cantidad de hojas, se ajustará al más cercano: la primera hoja para números negativos.
+
+Una parte del código fuente a continuación explica este sistema de numeración:
+
+```csharp
+SpreadsheetSaveOptions saveOptions = new SpreadsheetSaveOptions(Formats.SpreadsheetFormats.Xlsx)
+  
+//let's say we have a spreadsheet with 5 worksheets
+  
+saveOptions.WorksheetNumber = 0;  // default value, given spreadsheet will be ignored and new will be created
+  
+//positive numbering
+saveOptions.WorksheetNumber =  1;  // first worksheet
+saveOptions.WorksheetNumber =  2;  // second worksheet
+saveOptions.WorksheetNumber =  3;  // third worksheet
+saveOptions.WorksheetNumber =  4;  // fourth worksheet
+saveOptions.WorksheetNumber =  5;  // fifth worksheet
+saveOptions.WorksheetNumber =  6;  // fifth worksheet, because value '6' exceeds the worksheets amount '5' and thus is adjusted to the closest
+  
+//negative numbering
+saveOptions.WorksheetNumber = -1;  // fifth worksheet, which is first from end (last)
+saveOptions.WorksheetNumber = -2;  // fourth worksheet, which is second from end (last but one)
+saveOptions.WorksheetNumber = -3;  // third worksheet, which is third from end
+saveOptions.WorksheetNumber = -4;  // second worksheet, which is fourth from end
+saveOptions.WorksheetNumber = -5;  // first worksheet, which is fifth from end
+saveOptions.WorksheetNumber = -6;  // first worksheet, because value '-6' exceeds the worksheets amount '5' and thus is adjusted to the closest
+```
+
+## Propiedad InsertAsNewWorksheet {#insertasnewworksheet-property}
+  
+<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/insertasnewworksheet/" target="_blank" rel="nofollow noopener noreferrer">InsertAsNewWorksheet</a> es una propiedad que complementa la propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumber" target="_blank" rel="nofollow noopener noreferrer">WorksheetNumber</a> descrita anteriormente y se ignora cuando <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumber" target="_blank" rel="nofollow noopener noreferrer">WorksheetNumber</a> se establece en `0`. Si <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumber" target="_blank" rel="nofollow noopener noreferrer">WorksheetNumber</a> apunta a una hoja de cálculo con un número específico, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/insertasnewworksheet/" target="_blank" rel="nofollow noopener noreferrer">InsertAsNewWorksheet</a> determina cómo tratar este número de hoja y cómo insertar la hoja:  
+
+* <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/insertasnewworksheet/" target="_blank" rel="nofollow noopener noreferrer">InsertAsNewWorksheet</a> tiene un valor predeterminado de `false`; en este caso, la hoja de cálculo existente en la hoja de cálculo dada se borrará por completo, y el contenido de la nueva hoja (ubicado en la instancia <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>) se colocará en su lugar. Como resultado, la hoja de cálculo conservará la misma cantidad de hojas sin modificar, pero una de sus hojas (especificada por <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumber" target="_blank" rel="nofollow noopener noreferrer">WorksheetNumber</a>) se reemplazará por la nueva.
+* Si la propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/insertasnewworksheet/" target="_blank" rel="nofollow noopener noreferrer">InsertAsNewWorksheet</a> tiene el valor 'true', la hoja editada, obtenida de la instancia <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>, se insertará entre las hojas existentes en la hoja de cálculo dada, incrementando así su número de hojas en una unidad. La nueva hoja se inserta en la posición especificada por <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetnumber" target="_blank" rel="nofollow noopener noreferrer">WorksheetNumber</a>, y todas las hojas subsiguientes (anteriores o posteriores) se desplazarán hacia el final o hacia el principio, según corresponda, dependiendo de si la numeración es positiva o negativa.
+
+El código fuente siguiente muestra cómo se trata el número de hoja cuando la propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/insertasnewworksheet/" target="_blank" rel="nofollow noopener noreferrer">InsertAsNewWorksheet</a> está habilitada:
+
+```csharp
+SpreadsheetSaveOptions saveOptions = new SpreadsheetSaveOptions(Formats.SpreadsheetFormats.Xlsx)
+  
+//let's say we have a spreadsheet with 5 worksheets
+  
+saveOptions.WorksheetNumber = 0;  // default value, given spreadsheet will be ignored, as well as InsertAsNewWorksheet
+  
+saveOptions.InsertAsNewWorksheet = true;//enabling the adding of worksheet instead of replacing
+  
+//positive numbering
+saveOptions.WorksheetNumber =  1;  // new worksheet is injected as first, while all following (including 'old' 1st) are shifting to the end
+saveOptions.WorksheetNumber =  2;  // new worksheet is injected as second, while 2nd, 3rh, 4th and 5th are shifting to the end
+saveOptions.WorksheetNumber =  3;  // new worksheet is injected as third, while 3rh, 4th and 5th are shifting to the end
+saveOptions.WorksheetNumber =  4;  // new worksheet is injected as fourth, while 4th and 5th are shifting to the end
+saveOptions.WorksheetNumber =  5;  // new worksheet is injected as fifth, while 5th is shifting to the end and becomes 6th
+saveOptions.WorksheetNumber =  6;  // new worksheet is injected as sixth, it already becomes the latest, none of existing worksheets are shifting to the end
+saveOptions.WorksheetNumber =  7;  // same as previous
+  
+//negative numbering
+saveOptions.WorksheetNumber = -1;  // new worksheet is inject as first from end (it becomes sixth if starting from beginning), none of existing worksheets are shifting to the end
+saveOptions.WorksheetNumber = -2;  // new worksheet is inject as second from end (it becomes fifth if starting from beginning), following single worksheet is shifting to the end
+saveOptions.WorksheetNumber = -3;  // new worksheet is inject as third from end (it becomes fourth if starting from beginning), two following worksheets are shifting to the end
+saveOptions.WorksheetNumber = -4;  // new worksheet is inject as fourth from end (it becomes third if starting from beginning), three following worksheets are shifting to the end
+saveOptions.WorksheetNumber = -5;  // new worksheet is inject as fifth from end (it becomes second if starting from beginning), four following worksheets are shifting to the end
+saveOptions.WorksheetNumber = -6;  // new worksheet is inject as sixth from end (it becomes first if starting from beginning), five following worksheets are shifting to the end
+saveOptions.WorksheetNumber = -7;  // same as previous
+```
+
+### Notas adicionales  {#additional-notes}
+  
+Vale la pena mencionar que la nueva función descrita no modifica el documento de hoja de cálculo original, que fue cargado inicialmente en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a> mediante su constructor. Al guardar una hoja de cálculo e insertar la hoja editada en una hoja de cálculo existente, GroupDocs.Editor crea una copia completa y exacta del documento original, y solo después agrega o reemplaza la hoja editada sobre ella. Por lo tanto, en ningún caso se modifica el documento original.
+
+A partir de esto queda claro que GroupDocs.Editor no puede insertar una hoja editada en un documento de hoja de cálculo existente si dicho documento no está disponible. Por ejemplo, si el documento de hoja de cálculo original se cargó en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a>, luego se abrió para editarlo y se guardó en algún lugar para su posterior edición, y posteriormente se creó una nueva instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a> a partir de otro documento distinto, en tal caso, si el nuevo documento cargado no es una hoja de cálculo, la función de inserción de hoja no funcionará (ya que no existe una fuente de destino en la que insertar la hoja). Esto también implica que, para este escenario, el documento de hoja de cálculo de "salida" podría no ser el mismo documento que el de "origen" original. Por ejemplo, es un escenario perfectamente válido y funcional: el usuario carga inicialmente una hoja de cálculo denominada "A" en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a>, edita (por ejemplo) la segunda hoja de la misma, luego crea una nueva instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a> y carga otra hoja de cálculo denominada "B" en ella, y finalmente genera un documento de salida a partir de "B", donde la hoja editada se inyecta en la posición número 5.
+
+La clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetSaveOptions</a> contiene propiedades para proteger una hoja contra ediciones: <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/password" target="_blank" rel="nofollow noopener noreferrer">Password</a> y <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions/worksheetprotection" target="_blank" rel="nofollow noopener noreferrer">WorksheetProtection</a>. Cuando estas opciones se aplican y también se lleva a cabo la inserción de una hoja editada en una hoja de cálculo existente, la protección de hoja solo se aplica a la hoja editada que se está insertando; todas las demás hojas permanecen sin cambios.

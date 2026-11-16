@@ -1,0 +1,67 @@
+---
+title: "Opciones de extracción de fuentes"
+sidebar_label: "Opciones de extracción de fuentes"
+sidebar_key: "net-editor-edit-document-edit-word-font-extraction-options"
+sidebar_position: 5
+description: "Aprenda esta guía para conocer cómo extraer fuentes del documento de Word de entrada al editar con la API de GroupDocs.Editor."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-word/font-extraction-options.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "3160506248c5c2d6804d51d96cd94c3834dd70a1e3d9efdcd89cd4916c31ed91"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "784b9e3be4b3adef154c927a405c29b8294c7ca6442330c1c732e47a6e463985"
+translation_updated_at: "2026-11-16T04:02:36.125Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## Introducción {#introduction}
+  
+Los documentos de procesamiento de texto suelen contener contenido de texto, y cada fragmento de texto debe representarse mediante alguna fuente. Pueden utilizarse fuentes del sistema (instaladas en el sistema operativo), así como fuentes personalizadas que no estén instaladas en el sistema. Por otro lado, muchos formatos de procesamiento de texto, como DOCX y ODT, permiten almacenar fuentes directamente dentro del propio documento; dichas fuentes, guardadas como recursos binarios en los archivos de procesamiento de texto, se denominan *incrustadas*. Las fuentes incrustadas son la única opción para que el usuario final pueda utilizar fuentes específicas que no estén instaladas en el sistema. No obstante, cualquier fuente puede incrustarse en el documento. Esto implica, por ejemplo, que puede darse una situación en la que una misma fuente esté instalada en el sistema y, simultáneamente, incrustada en el documento de procesamiento de texto.
+
+En el sistema operativo Microsoft Windows, anterior a Windows 10 (y a Microsoft Windows Server 2016), únicamente existe una ubicación donde se almacenan las fuentes instaladas en el sistema: la carpeta del sistema `%windir%\fonts`, cuyas fuentes están disponibles para todos los usuarios. Sin embargo, a partir de Microsoft Windows 10, cada usuario dispone de su propio almacenamiento local de fuentes: `%userprofile%\AppData\Local\Microsoft\Windows\Fonts` (además de la carpeta común, que sigue existiendo, por supuesto).
+
+Cuando decimos que «un documento de procesamiento de texto utiliza cierta fuente», esta afirmación puede interpretarse de distintas maneras, ya que un documento de procesamiento de texto puede utilizar fuentes de varias formas. Desde una perspectiva *amplia*, toda fuente a la que se haga referencia de algún modo en el documento, ya sea aplicada al contenido de texto o formando parte de algún estilo, se considera utilizada por el documento. En contraste, desde una perspectiva *restringida*, únicamente las fuentes que se aplican efectivamente a algún contenido de texto se consideran utilizadas por el documento. Por ejemplo, puede darse el siguiente escenario: un usuario crea un documento de procesamiento de texto, escribe cierto texto, crea un estilo denominado "*Estilo1*" con una fuente específica "*Fuente1*", y aplica este estilo "*Estilo1*" al texto. En esta situación, la fuente específica "*Fuente1*" se considera utilizada por el documento desde todas las perspectivas. Sin embargo, si posteriormente el usuario edita el documento y elimina todo el contenido de texto que utiliza el estilo "*Estilo1*", pero —lo que es importante— no elimina el propio estilo "*Estilo1*" del documento (este sigue existiendo y conserva la referencia a la "*Fuente1*"), entonces, desde la perspectiva restringida, el documento ya no utiliza la "*Fuente1*", ya que no existe ningún fragmento de texto que la emplee, aunque la "*Fuente1*" siga siendo parte del estilo "*Estilo1*", el cual forma parte del documento.
+
+## Cómo extraer fuentes {#how-to-extract-fonts}
+  
+GroupDocs.Editor permite extraer fuentes de un documento de procesamiento de texto y representarlas como recursos dentro de una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>; cuando dicha instancia se utilice para generar marcado HTML, todos los recursos de fuente estarán presentes y correctamente vinculados al contenido HTML. GroupDocs.Editor puede extraer fuentes incrustadas del documento de procesamiento de texto, así como extraer fuentes instaladas en el sistema. Antes de la versión 20.3, solo era posible extraer fuentes del sistema desde la carpeta común de fuentes, compartida por todos los usuarios. A partir de la versión 20.3, GroupDocs.Editor para .NET también admite las fuentes instaladas en la carpeta específica de cada usuario.
+
+Existen dos propiedades públicas responsables del trabajo con fuentes, todas ellas ubicadas en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingEditOptions</a>:
+
+```csharp
+public FontExtractionOptions FontExtraction {get; set;}
+
+public bool ExtractOnlyUsedFont { get; set; }
+```
+
+<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/fontextractionoptions" target="_blank" rel="nofollow noopener noreferrer">FontExtractionOptions</a> es una enumeración pública ubicada en el espacio de nombres <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Editor.Options</a>. Por defecto, al crear una instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingEditOptions</a>, esta enumeración tiene el valor predeterminado `NotExtract`, lo que significa que no se extraerá ninguna fuente: ni del documento ni del sistema. Los demás valores son los siguientes:  
+
+* `ExtractAllEmbedded`. En este caso, GroupDocs.Editor extrae todas las fuentes incrustadas en el documento de procesamiento de texto de entrada, independientemente de si algunas de ellas están instaladas en el sistema o no. En otras palabras, el convertidor encuentra y extrae todos los recursos tipográficos (100 %) incrustados en el documento de procesamiento de texto de entrada, pero no determina si son fuentes del sistema o personalizadas. Debido a esto, el convertidor no accede en absoluto al Registro de Windows ni a las carpetas del sistema.  
+
+* `ExtractEmbeddedWithoutSystem`. A diferencia de la opción anterior, en este caso GroupDocs.Editor no solo extrae simplemente todas las fuentes incrustadas, sino que también verifica si cada fuente es del sistema o no. Si alguna fuente incrustada está instalada en el sistema, se ignorará y no aparecerá en los recursos tipográficos dentro de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>. Para detectar si una fuente es del sistema o no, el convertidor intenta obtener una lista de todas las fuentes del sistema mediante el Registro de Windows y las carpetas del sistema, y luego compara esta lista con el conjunto de fuentes incrustadas. Como resultado, solo se devolverá un subconjunto de esas fuentes incrustadas que no se encontraron en el sistema.  
+
+* `ExtractAll`. Cuando se selecciona esta opción, GroupDocs.Editor intenta extraer absolutamente todas las fuentes utilizadas en el documento de entrada, independientemente de su naturaleza: incrustadas o del sistema. Para ello, GroupDocs.Editor analiza el documento de procesamiento de texto de entrada y encuentra todas las fuentes utilizadas allí (desde una perspectiva “amplia”). Si alguna de estas fuentes utilizadas está incrustada en el documento, GroupDocs.Editor la extrae y la utiliza. Si el documento no contiene ninguna fuente incrustada, o si bien existe una colección de fuentes incrustadas, esta no cubre todas las fuentes utilizadas en el documento, GroupDocs.Editor intenta extraer estas fuentes del sistema mediante el Registro de Windows y las carpetas del sistema. Esta opción es especialmente útil cuando los clientes desean asegurarse de que el documento de entrada se represente perfectamente para cada usuario final, independientemente de qué fuentes estén instaladas en la máquina del cliente.  
+
+Se agregó una segunda propiedad, una bandera booleana denominada `ExtractOnlyUsedFont`, a GroupDocs.Editor a partir de la versión 20.3. Por defecto, tiene el valor `false`, lo que significa que se procesarán todas las fuentes utilizadas en el documento de procesamiento de texto desde una perspectiva “amplia”. Este es el comportamiento predeterminado, idéntico al que tenía GroupDocs.Editor antes de la versión 20.3, cuando esta opción aún no existía. Pero cuando se habilita estableciendo el valor `true`, GroupDocs.Editor solo procesa aquellas fuentes que se utilizan en el documento de procesamiento de texto desde una perspectiva “estrecha”, es decir, solo aquellas fuentes que se aplican a contenido textual en el documento.  
+
+Estas dos opciones públicas funcionan en conjunto. En particular:  
+
+* Si la enumeración `FontExtraction` tiene el valor `NotExtract`, entonces el valor de la propiedad `ExtractOnlyUsedFont` se ignorará.  
+
+* Si la enumeración `FontExtraction` tiene el valor `ExtractAllEmbedded` y la bandera `ExtractOnlyUsedFont` está establecida en `true`, GroupDocs.Editor no extraerá el 100 % de todas las fuentes incrustadas, sino solo un subconjunto de aquellas incrustadas que se utilizan en el documento de procesamiento de texto desde una perspectiva “estrecha”.  
+
+* Si la enumeración `FontExtraction` tiene el valor `ExtractEmbeddedWithoutSystem` y la bandera `ExtractOnlyUsedFont` está establecida en `true`, GroupDocs.Editor devolverá un subconjunto de las fuentes devueltas por esta opción cuando `ExtractOnlyUsedFont` esté establecida en `false`: solo se devolverán aquellas fuentes que, simultáneamente, estén incrustadas en el documento de procesamiento de texto, no estén instaladas en el sistema y se utilicen en el documento desde una perspectiva “estrecha”.  
+
+* Si la enumeración `FontExtraction` tiene el valor `ExtractAll` y la bandera `ExtractOnlyUsedFont` está establecida en `true`, GroupDocs.Editor primero forma una lista de las fuentes utilizadas en el documento desde una perspectiva “estrecha”, y luego solo se devuelven esas fuentes, ya sea desde los repositorios de fuentes incrustadas o (si no se encuentran en las incrustadas) desde los repositorios de fuentes instaladas en el sistema.

@@ -1,0 +1,170 @@
+---
+title: "Aceptar o rechazar los cambios detectados"
+sidebar_label: "Aceptar o rechazar los cambios detectados"
+sidebar_key: "net-comparison-comparison-accept-or-reject-detected-changes"
+sidebar_position: 1
+description: "Aceptar o rechazar los cambios individuales detectados por `Comparer.GetChanges()` y escribir el resultado mediante `ApplyChanges()`, con la opción opcional `SaveOriginalState` para conservar ambos resultados en GroupDocs.Comparison para .NET."
+product: "comparison"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "comparison-net"
+source_path: "net/advanced-usage/comparison/accept-or-reject-detected-changes.md"
+source_commit: "7624b4308e90feb1963a8dfe447bff38010a8a60"
+source_sha256: "cce0d24f45a2b0048f22aef6370eabcefb6696adf6de61d7078df7cf3069d4a2"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "acf9e97c702a248f16f090fe7ce1faf0ebcee29b89947cf7c4fb42c8d098bfae"
+translation_updated_at: "2026-11-16T03:43:09.126Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Comparison para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+<a href="https://products.groupdocs.com/comparison/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Comparison</a> le permite aplicar o descartar cambios específicos entre los documentos fuente y destino, y guardar el documento de salida con (o sin) los cambios seleccionados.
+
+Para aplicar/rechazar cambios en el documento de salida, siga estos pasos:  
+
+1.  Instancie el objeto <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer" target="_blank" rel="nofollow noopener noreferrer">Comparer</a>. Especifique la ruta o el flujo del documento fuente.
+2.  Llame al método <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer/methods/add/index" target="_blank" rel="nofollow noopener noreferrer">Add</a>. Especifique la ruta o el flujo del documento destino.
+3.  Llame al método <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer/methods/compare/index" target="_blank" rel="nofollow noopener noreferrer">Compare</a>.
+4.  Llame al método <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer/methods/getchanges/index" target="_blank" rel="nofollow noopener noreferrer">GetChanges</a> para obtener la lista de cambios.
+5.  Establezca la <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/changeinfo/properties/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction</a> del objeto de cambio correspondiente en el valor <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction.Accept</a> o <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction.Reject</a>.
+6.  Llame al método <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer/methods/applychanges/index" target="_blank" rel="nofollow noopener noreferrer">ApplyChanges</a>. Especifique la colección de cambios.
+
+La clase <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.options/applychangeoptions" target="_blank" rel="nofollow noopener noreferrer">ApplyChangeOptions</a> incluye las siguientes propiedades:  
+
+- <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.options/applychangeoptions/properties/changes" target="_blank" rel="nofollow noopener noreferrer">Changes</a> es una lista de cambios que deben aplicarse (o no) al documento de salida.  
+
+- <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.options/applychangeoptions/properties/saveoriginalstate" target="_blank" rel="nofollow noopener noreferrer">SaveOriginalState</a> es una opción para conservar el estado original del resultado comparado tras aplicar los cambios.
+
+Los fragmentos de código siguientes muestran cómo aceptar/rechazar cambios:
+
+## Aceptar o rechazar cambios para documentos almacenados en el disco local  {#accept-or-reject-changes-for-documents-stored-at-local-disk}
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Comparison;
+using GroupDocs.Comparison.Options;
+using GroupDocs.Comparison.Result;
+using System.IO;
+// ...
+
+using (Comparer comparer = new Comparer("source.docx"))
+{
+    comparer.Add("target.docx");
+    comparer.Compare();
+    ChangeInfo[] changes = comparer.GetChanges();
+    changes[0].ComparisonAction = ComparisonAction.Reject;
+    comparer.ApplyChanges(File.Create("result.docx"), new SaveOptions(), new ApplyChangeOptions() 
+    { 
+      Changes = changes 
+    });
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+El resultado es el siguiente:
+
+| Cambios aceptados | Cambios rechazados |
+| :-----------------------------------------------------------------: | :----------------------------------------------------------------: |
+| ![](/net/comparison/images/accepted-changes.png) | ![](/net/comparison/images/rejected-changes.png) |
+
+## Aceptar o rechazar cambios en documentos proporcionados como un flujo  {#accept-or-reject-changes-for-documents-provided-as-a-stream}
+
+
+<Tabs groupId="example2">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Comparison;
+using GroupDocs.Comparison.Options;
+using GroupDocs.Comparison.Result;
+using System.IO;
+// ...
+
+using (Comparer comparer = new Comparer(File.OpenRead("source.docx")))
+{
+    comparer.Add(File.OpenRead("target.docx"));
+    comparer.Compare(new SaveOptions(), new CompareOptions());
+    ChangeInfo[] changes = comparer.GetChanges(new GetChangeOptions());
+    changes[0].ComparisonAction = ComparisonAction.Reject;
+    comparer.ApplyChanges(File.Create("result.docx"), new SaveOptions(), new ApplyChangeOptions() 
+    { 
+      Changes = changes 
+    });
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+## Aceptar o rechazar los cambios detectados mediante la opción SaveOriginalState  {#accept-or-reject-detected-changes-using-saveoriginalstate-option}
+
+
+<Tabs groupId="example3">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Comparison;
+using GroupDocs.Comparison.Options;
+using GroupDocs.Comparison.Result;
+using System.IO;
+// ...
+
+using (Comparer comparer = new Comparer("source.docx"))
+{
+    comparer.Add("target.docx");
+    comparer.Compare();
+    ChangeInfo[] changes = comparer.GetChanges();
+    changes[0].ComparisonAction = ComparisonAction.Reject;
+    comparer.ApplyChanges("resultWithRejectedChange.docx", new ApplyChangeOptions() 
+    { 
+      Changes = changes, SaveOriginalState = true 
+    });
+    changes = comparer.GetChanges();
+    changes[0].ComparisonAction = ComparisonAction.Accept;
+    comparer.ApplyChanges("resultWithAcceptedChange.docx", new ApplyChangeOptions() 
+    { 
+      Changes = changes 
+    });
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+## Consulte también {#see-also}
+
+- [Aceptar o rechazar revisiones](/net/comparison/advanced-usage/accept-or-reject-revisions/) - para el procesamiento nativo de cambios en Word sin comparación
+- [Obtener lista de cambios](/net/comparison/advanced-usage/comparison/get-list-of-changes/)
+- [Comparar documentos](/net/comparison/comparison-basic/compare-documents/)

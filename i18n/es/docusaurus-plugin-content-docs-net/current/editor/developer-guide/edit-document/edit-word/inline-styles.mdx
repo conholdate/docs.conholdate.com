@@ -1,0 +1,77 @@
+---
+title: "Habilitar estilos CSS en línea"
+sidebar_label: "Habilitar estilos CSS en línea"
+sidebar_key: "net-editor-edit-document-edit-word-inline-styles"
+sidebar_position: 12
+description: "Este artículo describe el procedimiento para habilitar la opción de estilos en línea en los documentos de procesamiento de texto, con el fin de almacenar los estilos CSS no en una hoja de estilos externa, sino directamente dentro del marcado HTML."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-word/inline-styles.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "d0c0dcc070fa193476796880439898e198b3f9f5583a05de920c100ba39fd584"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "872b52a5b7eea7df90157928eefc7e42ea2746f83a12799c736f1818fcf6f51e"
+translation_updated_at: "2026-11-16T04:04:39.893Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+En GroupDocs.Editor, la operación de edición implica que el documento de origen se convierte en el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> instancia, y esta instancia puede emitir marcado HTML y CSS para colocarlo en el editor WYSIWYG del lado del cliente; luego, el usuario final edita este documento en el navegador web; y finalmente, el documento se guarda, lo que implica convertir el contenido del documento de HTML/CSS de nuevo al formato original (o a otro).  
+
+Antes del <a href="https://releases.groupdocs.com/editor/net/release-notes/2023/groupdocs-editor-for-net-23-8-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 23.8</a> de GroupDocs.Editor, la versión HTML de un documento, que se obtiene a partir de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> clase, los estilos CSS se colocaron en el archivo de hoja de estilos externo «style.css». El archivo HTML, en este caso, contiene una referencia a la hoja de estilos externa. Y no existía la posibilidad de cambiar la ubicación de los estilos CSS.
+
+La versión 23.8 de GroupDocs.Editor introduce una nueva opción: la capacidad de habilitar el modo «estilos en línea» para todos los documentos que pertenecen a la <a href="https://docs.fileformat.com/word-processing/" target="_blank" rel="nofollow noopener noreferrer">familia de formatos de procesamiento de texto</a>. En este modo solo <a href="https://docs.groupdocs.com/editor/net/styles-export/" target="_blank" rel="nofollow noopener noreferrer">Los estilos de WordProcessing se exportan a la hoja de estilos externa.</a>, mientras que todos los demás estilos —la formato de texto y párrafo, la configuración de listas y tablas— se exportan directamente al marcado HTML. Estos se convirtieron en _estilos CSS en línea_, lo que significa que, en este caso, los estilos se guardan en el <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/style" target="_blank" rel="nofollow noopener noreferrer">Atributo HTML `style`</a> para cada elemento HTML. Como resultado, un documento HTML generado con la opción de estilos en línea habilitada tiene un marcado HTML más grande y un marcado CSS más pequeño, en comparación con el generado cuando esta opción está deshabilitada.
+
+La opción de estilos en línea se representa como una propiedad pública de la <a href="https://learn.microsoft.com/en-us/dotnet/api/system.boolean" target="_blank" rel="nofollow noopener noreferrer">`System.Boolean`</a> escriba en el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions" target="_blank" rel="nofollow noopener noreferrer">`WordProcessingEditOptions`</a> clase. De forma predeterminada, está deshabilitada (`false`), por lo que GroupDocs.Editor actuará con el mismo comportamiento que sus versiones anteriores.
+
+```csharp
+public bool UseInlineStyles { get; set; }
+```
+El ejemplo siguiente muestra cómo abrir y editar un documento de WordProcessing una sola vez: primero en el estilo predeterminado y luego con los estilos en línea habilitados.
+
+```csharp
+// Obtain a valid full path to the existing WordProcessing file
+string inputPath = "SampleDoc.docx";
+
+// Create default edit options, where all styles are external
+WordProcessingEditOptions editOptionsExternalStyles = new WordProcessingEditOptions();
+
+//Create custom edit options, where most of styles are inline
+WordProcessingEditOptions editOptionsInlineStyles = new WordProcessingEditOptions();
+// Enable inline styles in this instance
+editOptionsInlineStyles.UseInlineStyles = true;
+
+// Create instance of the Editor class and load a document
+using (Editor editor = new Editor(inputPath))
+{
+	// Get editable document instance, where all styles are external 
+	EditableDocument docWithExternalStyles = editor.Edit(editOptionsExternalStyles);
+
+	// Get editable document instance, where most of styles are inline
+	EditableDocument docWithInlineStyles = editor.Edit(editOptionsInlineStyles);
+
+	// Get only HTML-markup, where all styles are external
+	string htmlMarkupExternal = docWithExternalStyles.GetContent();
+
+	// Get only HTML-markup, where most of styles are inline
+	string htmlMarkupInline = docWithInlineStyles.GetContent();
+
+	// Make sure that HTML-markup with inline styles is bigger
+	Assert.Greater(htmlMarkupInline.Length, htmlMarkupExternal.Length);
+}
+
+```
+
+Es necesario destacar que, independientemente de dónde se encuentren los estilos CSS —ya sea dentro del marcado HTML o en un archivo externo—, la representación final del documento HTML en el navegador web será idéntica.
+
+Asimismo, tenga en cuenta que esta característica solo existe para la familia de formatos de procesamiento de texto.

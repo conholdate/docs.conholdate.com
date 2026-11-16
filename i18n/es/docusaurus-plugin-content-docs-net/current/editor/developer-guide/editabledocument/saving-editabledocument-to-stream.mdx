@@ -1,0 +1,188 @@
+---
+title: "Guardar EditableDocument en un flujo"
+sidebar_label: "Guardar EditableDocument en un flujo"
+sidebar_key: "net-editor-editabledocument-saving-editabledocument-to-stream"
+sidebar_position: 5
+description: "Este artículo muestra y explica técnicas y enfoques avanzados al trabajar con `EditableDocument` a un nivel avanzado: guardar en un flujo con devolución de llamada de recursos, guardar los recursos por separado del marcado HTML y guardar el marcado HTML con enlaces de recursos ajustables."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/editabledocument/saving-editabledocument-to-stream.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "a4560cd6381ae2bb57dc500ea83000f901016362362fe9de3ca2a77302ec2b8c"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "e95914262bfab2c83f833f1e1d5c73622975a1a45bfcaa19633af8ff9a014969"
+translation_updated_at: "2026-11-16T04:51:31.543Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+> Este artículo muestra y explica técnicas y enfoques avanzados al trabajar con `EditableDocument` a un nivel avanzado: guardar en un flujo con devolución de llamada de recursos, guardar recursos por separado del marcado HTML y guardar el marcado HTML con enlaces de recursos ajustables.
+
+
+:::info
+La información explicada en este artículo es aplicable para GroupDocs.Editor para .NET <a href="https://releases.groupdocs.com/editor/net/release-notes/2023/groupdocs-editor-for-net-23-9-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 23.9</a> y versiones superiores.
+:::
+
+
+## Introducción {#introduction}
+
+En las versiones más recientes de GroupDocs.Editor para .NET, especialmente en la versión 23.9, la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a>, una de las más importantes entre todos los tipos de GroupDocs.Editor, se expandió y mejoró significativamente. Estas nuevas funcionalidades se centran en guardar el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> en formato HTML en un flujo, mediante distintos métodos, y permitiendo especificar una cadena de plantilla de recursos. Este artículo abarca todas ellas.
+
+## Guardado en flujo únicamente del marcado HTML {#saving-to-stream-the-html-markup-only}
+
+A partir de la <a href="https://releases.groupdocs.com/editor/net/release-notes/2023/groupdocs-editor-for-net-23-4-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 23.4</a>, la clase `EditableDocument` incluye un nuevo método de instancia <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/getcontent/#getcontent_2" target="_blank" rel="nofollow noopener noreferrer">`GetContent`</a>, que permite guardar el marcado HTML del documento en un flujo especificado, con una codificación determinada. Su firma es la siguiente:
+
+```csharp
+TStream GetContent<TStream>(TStream storage, System.Text.Encoding encoding) where TStream : System.IO.Stream
+```
+
+Este método genérico obtiene un heredero de la clase abstracta `System.IO.Stream` mediante el parámetro `storage`, escribe una marca HTML en él con la codificación de caracteres especificada y devuelve una referencia a la `storage`.
+
+Este método convierte internamente el contenido de la instancia `EditableDocument` en una marca HTML, en la que las hojas de estilo CSS y las imágenes no se almacenan dentro de la marca. Estos recursos externos (CSS e imágenes) se hacen referencia mediante enlaces (URI) especificando sus nombres de archivo. Por ejemplo, si un documento HTML tiene una hoja de estilos y dos imágenes con los nombres de archivo «foo.jpeg» y «bar.png», se hará referencia a ellos en la marca HTML de la siguiente manera:
+
+```html
+<link href="stylesheet.css" rel="stylesheet" />
+.....
+<IMG src="foo.jpeg" />
+.....
+<IMG src="bar.png" />
+```
+
+Con este método, no existe la opción de especificar ni ajustar de ninguna manera la referencia a los recursos externos. Además, este método solo es útil para guardar la marca HTML, pero no los recursos externos.
+
+Para abordar estos problemas, se introdujo el siguiente enfoque.
+
+## Guardar el documento HTML completo en un flujo con devolución de llamada para recursos {#saving-whole-html-document-to-stream-with-resource-callback}
+
+A partir de la versión 23.9, se agregó una nueva sobrecarga del método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/save/#save" target="_blank" rel="nofollow noopener noreferrer">`Save`</a>:
+
+```csharp
+void Save(System.IO.TextWriter htmlMarkup, Options.HtmlSaveOptions saveOptions)
+```
+
+Este método permite el guardado más avanzado, detallado y ajustable de la instancia `EditableDocument` al formato HTML.
+
+El primer parámetro es un parámetro de salida en el que se escribirá la marca HTML. El usuario debe especificar cualquier implementación válida de la clase abstracta `System.IO.TextWriter`, normalmente `System.IO.StringWriter` o `System.IO.StreamWriter`. No puede ser `null`.
+
+El segundo parámetro es la nueva clase pública <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/htmlsaveoptions/" target="_blank" rel="nofollow noopener noreferrer">`Options.HtmlSaveOptions`</a>, que se describe a continuación. Este argumento tampoco puede ser `null`.
+
+La clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/htmlsaveoptions/" target="_blank" rel="nofollow noopener noreferrer">`Options.HtmlSaveOptions`</a> contiene 4 propiedades, de las cuales solo una es obligatoria y no puede ser nula.
+La propiedad
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/htmlsaveoptions/htmltagcase/" target="_blank" rel="nofollow noopener noreferrer">`HtmlTagCase`</a> controla cómo aparecerán los nombres de las etiquetas HTML en la marca HTML: todo en minúsculas (valor predeterminado), todo en mayúsculas o primera letra en mayúsculas. Su valor es un enumerado especial: <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.serialization/tagrenderingcase/" target="_blank" rel="nofollow noopener noreferrer">`TagRenderingCase`</a>.  
+La propiedad
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/htmlsaveoptions/attributevaluedelimiter/" target="_blank" rel="nofollow noopener noreferrer">`AttributeValueDelimiter`</a> controla qué delimitador se utilizará alrededor de los valores de los atributos en los elementos HTML: comilla simple (valor predeterminado) o comilla doble. Su valor es un tipo especial: <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.serialization/quotetype/" target="_blank" rel="nofollow noopener noreferrer">`QuoteType`</a>.  
+La propiedad
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/htmlsaveoptions/embedstylesheetsintomarkup/" target="_blank" rel="nofollow noopener noreferrer">`EmbedStylesheetsIntoMarkup`</a> es una bandera booleana que controla dónde almacenar las hojas de estilos CSS: como recursos externos (`false`) o incrustarlos dentro de la marca HTML, en el elemento `STYLE` ubicado en la sección `HTML`->`HEAD` (`true`). Por defecto es `false`: no incrustar dentro de la marca HTML.  
+La propiedad
+- <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/htmlsaveoptions/savingcallback/" target="_blank" rel="nofollow noopener noreferrer">`SavingCallback`</a> es la más importante y la única obligatoria, que debe especificarse por el usuario y no puede ser `null`. Se trata de una referencia a una devolución de llamada de recursos definida por el usuario, que implementa la interfaz <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ihtmlsavingcallback/" target="_blank" rel="nofollow noopener noreferrer">`IHtmlSavingCallback`</a>.
+
+Cuando se llama al método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/save/#save" target="_blank" rel="nofollow noopener noreferrer">`Save`</a>, GroupDocs.Editor analiza el contenido de la instancia `EditableDocument` y recopila todos los recursos: imágenes, hojas de estilo, audio, etc. Para cada uno de estos recursos, invoca el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ihtmlsavingcallback/saveoneresource/" target="_blank" rel="nofollow noopener noreferrer">`SaveOneResource`</a>, definido en la interfaz <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ihtmlsavingcallback/" target="_blank" rel="nofollow noopener noreferrer">`IHtmlSavingCallback`</a> e implementado por el usuario. Al invocar este método, GroupDocs.Editor pasa el propio recurso como un tipo que implementa la interfaz <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/ihtmlresource/" target="_blank" rel="nofollow noopener noreferrer">`IHtmlResource`</a> —por ejemplo, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.raster/jpegimage/" target="_blank" rel="nofollow noopener noreferrer">`JpegImage`</a> para imágenes JPEG, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.textual/csstext/" target="_blank" rel="nofollow noopener noreferrer">`CssText`</a> para hojas de estilo CSS, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.audio/mp3audio/" target="_blank" rel="nofollow noopener noreferrer">`Mp3Audio`</a> para archivos de audio MP3, y así sucesivamente.
+
+Cuando el usuario recibe una instancia de recurso en el método `SaveOneResource`, puede hacer con ella lo que desee: guardarla en disco, en una base de datos, convertirla de alguna manera o incluso no hacer nada. Lo importante es que el usuario **debe** devolver un enlace a este recurso mediante el valor `return`. De este modo, cuando GroupDocs.Editor comience a generar la marca HTML para escribirla en el argumento `System.IO.TextWriter htmlMarkup`, utilizará los enlaces proporcionados por el usuario a los recursos.
+
+El ejemplo de código completo que sigue muestra cómo crear una instancia de `EditableDocument` abriendo un archivo DOCX arbitrario para su edición, luego creando una implementación personalizada de `IHtmlSavingCallback`, que guarda los recursos proporcionados en una base de datos, y finalmente guardando el contenido de `EditableDocument` en formato HTML.
+
+```csharp
+public void SavingToStreamPublicExample()
+{
+	//Define an input document
+	string inputDocx = "Path\\SampleDoc.docx";
+
+	//Create and instance of custom SavingCallback
+	SavingCallback callback = new SavingCallback();
+
+	//Create HTML saving options
+	GroupDocs.Editor.Options.HtmlSaveOptions saveOptions = new Options.HtmlSaveOptions();
+	saveOptions.EmbedStylesheetsIntoMarkup = false;//Do not embed CSS into markup
+	saveOptions.AttributeValueDelimiter = GroupDocs.Editor.HtmlCss.Serialization.QuoteType.DoubleQuote;
+	saveOptions.HtmlTagCase = GroupDocs.Editor.HtmlCss.Serialization.TagRenderingCase.UpperCase;
+	saveOptions.SavingCallback = callback;//Specify our custom callback
+
+	//Create an Editor class instance - load options are not necessary for DOCX and are default here
+	using (GroupDocs.Editor.Editor editor = new GroupDocs.Editor.Editor(inputDocx))
+	{
+		//Create an EditableDocument instance - edit options are not specified and thus are default
+		using (EditableDocument document = editor.Edit())
+		{
+			//Define a StringWriter, into which the HTML markup will be written
+			System.Text.StringBuilder markup = new StringBuilder();
+			using (System.IO.StringWriter writer = new StringWriter(markup))
+			{
+				//Save the document
+				document.Save(writer, saveOptions);
+			}
+		}
+	}
+}
+
+private sealed class SavingCallback : GroupDocs.Editor.Options.IHtmlSavingCallback
+{
+	public string SaveOneResource(IHtmlResource resource)
+	{
+		//save this stream to the DB or to the disk somehow
+		Stream resourceStream = resource.ByteContent;
+
+		//form and return a reference to the resource depending on resource type
+		if (resource is GroupDocs.Editor.HtmlCss.Resources.Textual.CssText)
+		{
+			return string.Format("https://mywebsite.web/stylesheet/{0}", resource.FilenameWithExtension);
+		}
+		else
+		{
+			return string.Format("https://mywebsite.web/GetImage/name={0}", resource.FilenameWithExtension);
+		}
+	}
+}
+```
+
+Tras ejecutar este código, la variable `markup` de tipo `StringBuilder` contendrá una marca HTML, donde las referencias a los recursos externos serán como:
+
+```html
+<link href="https://mywebsite.web/stylesheet/stylesheet.css" rel="stylesheet"/>
+.....
+<IMG src="https://mywebsite.web/GetImage/name=foo.jpeg"/>
+.....
+<IMG src="https://mywebsite.web/GetImage/name=bar.png"/>
+```
+
+## Guardado de marcado HTML mediante cadenas de plantilla para enlaces de recursos {#saving-html-markup-with-template-strings-for-resource-links}
+
+A veces es necesario guardar únicamente el marcado y no guardar los recursos. En tales casos, el enfoque descrito anteriormente puede considerarse demasiado redundante. La clase `EditableDocument`, desde su inicio, contiene los métodos `GetContent` y `GetBodyContent`. Estos dos métodos tienen dos sobrecargas cada uno, pero, en general, el primero devuelve todo el marcado HTML del documento, mientras que el segundo devuelve únicamente el contenido interno del elemento HTML->BODY, sin las etiquetas de apertura y cierre de BODY.
+
+Antes de la versión 23.9, estos dos métodos permitían especificar prefijos externos para los recursos, de modo que, al generar el marcado HTML, dichos prefijos se añadían a los nombres de los recursos. Por ejemplo, si el documento contiene dos imágenes, digamos «foo.jpeg» y «bar.png», al invocar `EditableDocument.GetBodyContent("https://mywebsite.web/image?name=")`, el marcado resultante contendrá dos elementos IMG con el siguiente contenido:
+
+```html
+<IMG src="https://mywebsite.web/image?name=foo.jpeg"/>
+.....
+<IMG src="https://mywebsite.web/image?name=bar.png"/>
+```
+
+Sin embargo, este estado de cosas presentaba dos problemas principales:
+- No era posible insertar el nombre del recurso *dentro* de la URI de la solicitud, únicamente al final.
+- No era posible insertar el nombre del recurso más de una vez en la URI de una única solicitud.
+
+La versión 23.9 de GroupDocs.Editor soluciona ambos problemas. Las firmas de los métodos permanecen intactas, pero ahora tratan las cadenas especificadas no como prefijos, sino como *cadenas de formato de plantilla*. El protocolo es el siguiente:
+
+1. Si la cadena de plantilla especificada es nula o vacía, el nombre del recurso se insertará tal cual en el marcado HTML.
+2. Si la cadena de plantilla especificada contiene un único marcador de posición válido y único, que aparece una o más veces, el nombre del recurso reemplazará al marcador de posición en el marcado HTML.
+3. De lo contrario, si la cadena de plantilla especificada contiene más de un marcador de posición único, o no contiene ningún marcador de posición, se tratará como una cadena de prefijo.
+
+Debido a este protocolo, el código de usuario previamente escrito seguirá funcionando igual que en las versiones anteriores, ya que las cadenas de plantilla no contienen marcadores de posición y, por tanto, se tratan como prefijos.
+
+Sin embargo, al utilizar una cadena de plantilla ahora, al llamar al método `EditableDocument.GetBodyContent("https://mywebsite.web/image?name={0}&stamp=456789&token={0}&expireIn=123987")`, la imagen denominada "foo.jpeg" se presentará en el marcado de salida de la siguiente manera:
+
+```html
+<IMG src="https://mywebsite.web/image?name=foo.jpeg&stamp=456789&token=foo.jpeg&expireIn=123987"/>
+```
+
+Por lo tanto, este nuevo mecanismo permite especificar con gran precisión los URI de las solicitudes para las imágenes y hojas de estilos externas.

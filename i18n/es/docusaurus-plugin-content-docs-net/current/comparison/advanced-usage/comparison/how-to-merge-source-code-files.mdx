@@ -1,0 +1,106 @@
+---
+title: "Cómo fusionar archivos de código fuente"
+sidebar_label: "Cómo fusionar archivos de código fuente"
+sidebar_key: "net-comparison-comparison-how-to-merge-source-code-files"
+sidebar_position: 8
+description: "Este artículo explica cómo controlar la fusión de archivos en GroupDocs.Comparison para .NET."
+product: "comparison"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "comparison-net"
+source_path: "net/advanced-usage/comparison/how-to-merge-source-code-files.md"
+source_commit: "7624b4308e90feb1963a8dfe447bff38010a8a60"
+source_sha256: "37152f3ef08277d52f6a1ac5a2f0e8756a4dffe0f299ec5d080e33479ec071d9"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "9b9aada9cfb1e897f5c42ede0249efd7567ec54cbca50c75a0bd0b4967ce084b"
+translation_updated_at: "2026-11-16T03:46:27.137Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Comparison para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+<a href="https://products.groupdocs.com/comparison/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Comparison</a> le permite fusionar archivos de código fuente utilizando las propiedades <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/changeinfo/properties/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction</a>:  
+
+- <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction.Accept</a> acepta los cambios detectados y los agrega al archivo sin resaltarlos
+- <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction.Reject</a> rechaza los cambios detectados y los elimina del archivo de salida  
+
+Para aplicar o rechazar cambios en el archivo de salida, siga estos pasos:  
+
+1.  Instancie el objeto <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer" target="_blank" rel="nofollow noopener noreferrer">Comparer</a>. Especifique la ruta o el flujo del documento de origen.
+2.  Llame al método <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer/methods/add/index" target="_blank" rel="nofollow noopener noreferrer">Add</a>. Especifique la ruta o el flujo del documento de destino.
+3.  Llame al método <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer/methods/compare/index" target="_blank" rel="nofollow noopener noreferrer">Compare</a>.
+4.  Llame al método <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer/methods/getchanges/index" target="_blank" rel="nofollow noopener noreferrer">GetChanges</a> para obtener la lista de cambios.
+5.  Establezca la propiedad <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/changeinfo/properties/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction</a> del objeto de cambio correspondiente en el valor <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction.Accept</a> o <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction.Reject</a>;
+6.  Llame al método <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison/comparer/methods/applychanges/index" target="_blank" rel="nofollow noopener noreferrer">ApplyChanges</a>. Especifique la colección de cambios.  
+
+Por ejemplo, es necesario comparar y fusionar varias versiones de archivos de código fuente y aceptar o descartar los cambios realizados por distintas personas.
+
+![](/net/comparison/images/how-to-merge-source-code-file-source.png)
+![](/net/comparison/images/how-to-merge-source-code-file-target.png)
+
+Las diferencias muestran que dos métodos están en el archivo **source.cs**: `AddNumbers` y `Sum`.
+
+Si no utiliza la propiedad <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/changeinfo/properties/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction</a>, todos los cambios se confirman en el archivo de salida y estos métodos se eliminan. Si necesita controlar la fusión de archivos, la propiedad <a href="https://reference.groupdocs.com/comparison/net/groupdocs.comparison.result/changeinfo/properties/comparisonaction" target="_blank" rel="nofollow noopener noreferrer">ComparisonAction</a> le ayuda a lograrlo.
+
+El siguiente fragmento de código muestra cómo fusionar dos archivos de código fuente:
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Comparison;
+using GroupDocs.Comparison.Result;
+using GroupDocs.Comparison.Options;
+using System.IO;
+// ...
+
+using (Comparer comparer = new Comparer("source.docx"))
+{
+    comparer.Add("target.docx");
+    comparer.Compare("result.docx");
+
+    ChangeInfo[] changes = comparer.GetChanges();
+    for (int i = 0; i < 10; i++)
+    {
+        changes[i].ComparisonAction = ComparisonAction.Accept;
+    }
+
+    for (int i = 10; i < changes.Length; i++)
+    {
+    	changes[i].ComparisonAction = ComparisonAction.Reject;
+    }
+
+    comparer.ApplyChanges(File.Create("result.docx"), new ApplyChangeOptions { Changes = changes });
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+
+Como resultado, obtienes un archivo de código fuente fusionado donde los elementos eliminados están marcados en <font color="red">**rojo**</font>, los añadidos en <font color="blue">**azul**</font> y los modificados en <font color="green">**verde**</font>.
+
+Además, recibes un archivo HTML en el que se han resaltado las zonas modificadas del código.
+
+| Archivo de código fuente resultante | Archivo HTML resultante |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| ![](/net/comparison/images/how-to-merge-source-code-file-result-CS.png) | ![](/net/comparison/images/how-to-merge-source-code-file-result-HTML.png) |  
+
+Como puede verse en los archivos resultantes, solo se eliminó uno de los dos métodos.

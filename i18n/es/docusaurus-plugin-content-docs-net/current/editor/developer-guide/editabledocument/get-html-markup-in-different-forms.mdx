@@ -1,0 +1,122 @@
+---
+title: "Obtener marcado HTML en diferentes formas"
+sidebar_label: "Obtener marcado HTML en diferentes formas"
+sidebar_key: "net-editor-editabledocument-get-html-markup-in-different-forms"
+sidebar_position: 1
+description: "Aprenda este artículo para saber cómo obtener el marcado HTML del documento editado: el cuerpo sin la etiqueta `<head>`, el contenido en formato crudo y en base64, y otros, utilizando la API de GroupDocs.Editor para .NET."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/editabledocument/get-html-markup-in-different-forms.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "240898e8ec8c6d91c88be7c212937a44531a19ec95de14cd6c1452e5a6d4dad1"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "8fe3257008f6fd375a821fc830bda890a112bcf1cf1933b30ccc960c681c7d29"
+translation_updated_at: "2026-11-16T04:12:18.304Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+> Esta demostración muestra cómo abrir un documento de entrada, convertirlo al <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> intermedio y obtener el marcado HTML en distintas formas según los requisitos del cliente.
+
+## Preparaciones {#preparations}
+  
+Cuando el documento de entrada se carga en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a> y se abre para su edición mediante la transformación a la clase intermedia <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>, es posible generar y obtener el marcado HTML en distintas formas. El código siguiente muestra todas las variantes de este procedimiento.
+
+En primer lugar, el usuario debe cargar el documento en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a> y abrirlo para su edición, como se demuestra en el código siguiente.
+
+```csharp
+string inputFilePath = "C:\\input_path\\document.docx"; //path to some document
+WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+Editor editor = new Editor(inputFilePath, loadOptions); //passing path and load options to the constructor
+EditableDocument document = editor.Edit(new WordProcessingEditOptions()); //opening document for editing with format-specific edit options
+```
+
+El fragmento de código anterior ha preparado una instancia lista para usar de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>, que contiene el documento original en su propio formato intermedio y es capaz de generar marcado HTML en distintas formas.
+
+## Obtención del contenido HTML completo  {#getting-whole-html-content}
+  
+El método más predeterminado y estándar para generar marcado HTML es el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/getcontent" target="_blank" rel="nofollow noopener noreferrer">GetContent</a> sin parámetros:
+
+```csharp
+string htmlContent = document.GetContent();
+
+```
+
+Si el documento tiene recursos externos (hojas de estilo, fuentes, imágenes), estos se referencian mediante diferentes elementos HTML: las hojas de estilo se especifican mediante elementos LINK, mientras que las imágenes lo hacen mediante elementos IMG. Al utilizar el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/getcontent" target="_blank" rel="nofollow noopener noreferrer">GetContent()</a>, dichos recursos externos se referenciarán mediante enlaces externos. Por ejemplo:
+
+```html
+<link href="stylesheet.css" rel="stylesheet"/>
+<IMG src="image.png"/>
+```
+
+Con frecuencia, en el servidor web donde se editará dicho HTML, los recursos se procesan mediante un controlador HTTP específico. En estos casos, es necesario ajustar las rutas hacia dichos puntos finales. Una sobrecarga más avanzada del método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/getcontent" target="_blank" rel="nofollow noopener noreferrer">GetContent()</a> puede ayudar:
+
+```csharp
+string externalImagesPrefix = "http://www.mywebsite.com/images/id=";
+string externalCssPrefix = "http://www.mywebsite.com/css/id=";
+string prefixedHtmlContent = document.GetContent(externalImagesPrefix, externalCssPrefix);
+```
+
+En el ejemplo anterior, los prefijos especificados se agregarán a cada enlace externo en el marcado del documento. Por ejemplo, con el código anterior, el enlace será el siguiente:
+
+```html
+<link href="http://www.mywebsite.com/css/id=stylesheet.css" rel="stylesheet"/>
+.....
+<IMG src="http://www.mywebsite.com/css/id=image.png"/> 
+```
+
+A partir de GroupDocs.Editor para .NET <a href="https://releases.groupdocs.com/editor/net/release-notes/2023/groupdocs-editor-for-net-23-9-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 23.9</a>, es posible no solo especificar un prefijo, sino también una cadena de formato de plantilla, en la que uno o más marcadores de posición indican los lugares donde se registrarán los nombres de los recursos. Si la cadena especificada contiene marcadores de posición válidos, GroupDocs.Editor reemplazará dichos marcadores con los nombres de los recursos. En caso contrario, si no se encuentran marcadores de posición, GroupDocs.Editor los tratará como una cadena de prefijo. Por ejemplo, el siguiente fragmento de código muestra cómo especificar la cadena de plantilla para las imágenes y hojas de estilos externas:
+
+```csharp
+string externalImagesTemplate = "http://www.mywebsite.com/images/{0}/expires=3600&token={0}";
+string externalCssTemplate = "http://www.mywebsite.com/css/{0}/expires=60&token={0}";
+string templatedHtmlContent = document.GetContent(externalImagesTemplate, externalCssTemplate);
+```
+
+En el ejemplo anterior, los nombres de los recursos se colocarán dentro de los marcadores de posición en las cadenas de plantilla especificadas; por lo tanto, si el documento original contiene una hoja de estilos y dos imágenes denominadas `foo.jpeg` y `bar.png`, el marcado HTML resultante será el siguiente:
+
+```html
+<link href="http://www.mywebsite.com/css/stylesheet.css/expires=60&token=stylesheet.css" rel="stylesheet"/>
+.....
+<IMG src="http://www.mywebsite.com/images/foo.jpeg/expires=3600&token=foo.jpeg"/>
+.....
+<IMG src="http://www.mywebsite.com/images/bar.png/expires=3600&token=bar.png"/>
+```
+
+## Obtención del contenido del cuerpo HTML  {#getting-html-body-content}
+  
+Muchos editores WYSIWYG de HTML no pueden procesar el documento HTML completo, incluida la sección HEAD y demás. Solo pueden procesar el contenido interno del elemento HTML->BODY. Para obtener dicha parte del marcado HTML, la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> contiene el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/getcontent" target="_blank" rel="nofollow noopener noreferrer">GetBodyContent()</a>, el cual, al igual que el anterior, dispone de dos sobrecargas, que se muestran a continuación:
+
+```csharp
+string bodyContent = document.GetBodyContent();
+string externalImagesPrefix = "http://www.mywebsite.com/images/id=";
+string prefixedBodyContent = document.GetBodyContent(externalImagesPrefix); 
+```
+
+La primera sobrecarga sin parámetros, como la anterior, deja intactos los enlaces a las imágenes externas. La segunda, que recibe un prefijo de recurso externo, agrega este prefijo a cada URL del atributo `src` de todas las etiquetas `IMG` que se encuentren dentro del marcado HTML->BODY.
+
+Como en el ejemplo anterior, a partir de la versión 23.9, este valor puede ser no solo un prefijo, sino también una cadena con plantilla.
+
+## Obtención de contenido codificado en base64  {#getting-base64-encoded-content}
+  
+A veces es necesario obtener todo el contenido del documento, incluidos todos los recursos utilizados, en una única cadena. GroupDocs.Editor permite hacer esto:
+
+```csharp
+string embeddedHtmlContent = document.GetEmbeddedHtml();
+```
+
+En esta cadena, todas las hojas de estilo se colocarán en los elementos `STYLE` dentro de la sección `HTML->HEAD`, todas las imágenes en elementos `IMG` se serializarán con codificación base64 y se insertarán directamente en los atributos `src`. Todas las fuentes y imágenes utilizadas en las hojas de estilo también se serializarán y almacenarán en las ubicaciones correspondientes dentro de la hoja de estilo pertinente. Esta cadena será totalmente autónoma y autosuficiente.
+
+## Conclusión {#conclusion}
+  
+Esta guía ha explicado distintas formas de obtener el marcado HTML a partir de un documento en distintas formas.

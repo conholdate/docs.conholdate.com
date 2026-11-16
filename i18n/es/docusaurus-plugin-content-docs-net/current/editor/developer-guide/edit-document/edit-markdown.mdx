@@ -1,0 +1,280 @@
+---
+title: "Editar documentos Markdown"
+sidebar_label: "Editar documentos Markdown"
+sidebar_key: "net-editor-edit-document-edit-markdown"
+sidebar_position: 95
+description: "Esta guía muestra cómo editar el contenido de documentos/archivos de Markdown como si fueran documentos de texto comunes, utilizando GroupDocs.Editor para .NET."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-markdown.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "9da46364aeb88e172373f8e58cdc45e59a06ad13923119598cc1aa44905fb421"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "845de4eda23f9428377d93f89161502531677029ef3c251c6a3ed66409313b8b"
+translation_updated_at: "2026-11-16T03:51:40.525Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+> Este ejemplo demuestra el flujo estándar de abrir-editar-guardar con documentos Markdown (MD), utilizando diferentes opciones en cada paso.
+
+## Introducción {#introduction}
+  
+<a href="https://docs.fileformat.com/word-processing/md/" target="_blank" rel="nofollow noopener noreferrer">Markdown</a> es un lenguaje de marcado ligero que ganó popularidad recientemente. Los archivos Markdown con la extensión `*.md` son, de hecho, archivos de texto plano que contienen una sintaxis especial, y admiten formato de texto, tablas, listas, imágenes, entre otros elementos. De hecho, existen varios dialectos de Markdown, como GFM, CommonMark, Multi-Markdown, entre otros.
+
+A partir de la <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-22-11-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 22.11</a>, GroupDocs.Editor para .NET ofrece soporte completo para el formato Markdown tanto en la importación como en la exportación, así como en su detección automática.
+
+Con respecto a la <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-22-11-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 22.11</a>, GroupDocs.Editor para .NET admite las siguientes características de Markdown, las cuales siguen principalmente la especificación CommonMark y se representan como estilos adecuados o formato directo:  
+
+- Encabezados
+- Citas de bloque
+- Bloques de código
+- Líneas horizontales
+- Énfasis en negrita
+- Énfasis en cursiva
+- Formato de tachado
+- Listas numeradas y con viñetas
+- Tablas
+- Imágenes internas, almacenadas con codificación base64
+- Imágenes externas
+
+## Carga {#loading}
+  
+La carga de documentos Markdown en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> es habitual y similar a la de otros formatos. No existen opciones de carga específicas para el formato Markdown; basta con especificar el archivo mediante su ruta de archivo o un <a href="https://docs.microsoft.com/en-us/dotnet/api/system.IO.Stream?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">flujo de bytes</a>.
+
+El siguiente ejemplo de código muestra cómo cargar el mismo archivo Markdown en dos instancias de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a>, utilizando tanto una ruta de archivo como un flujo de bytes, y luego verificar cómo GroupDocs.Editor detectará el formato del archivo especificado.
+
+```csharp
+const string filename = "sample.md";
+string inputPath = System.IO.Path.Combine("markdown folder", filename);
+
+using (FileStream content = File.OpenRead(inputPath))
+{
+	using (Editor fromStream = new Editor(content)
+	using (Editor fromPath = new Editor(inputPath))
+	{
+		GroupDocs.Editor.Metadata.IDocumentInfo info = fromStream.GetDocumentInfo(null);
+		Assert.AreEqual(Formats.TextualFormats.Md, info.Format);
+	}
+}
+```
+
+## Edición {#editing}
+
+
+Existe una clase especial <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdowneditoptions/" target="_blank" rel="nofollow noopener noreferrer">`MarkdownEditOptions`</a> para editar archivos Markdown. Como siempre, no es obligatoria al editar un documento, por lo que se puede utilizar la sobrecarga de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit" target="_blank" rel="nofollow noopener noreferrer">`Editor.Edit()`</a> sin parámetros: GroupDocs.Editor detectará automáticamente el formato y aplicará las opciones predeterminadas.
+
+Sin embargo, especificar una <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdowneditoptions/" target="_blank" rel="nofollow noopener noreferrer">`MarkdownEditOptions`</a> personalizada puede ser vital cuando el archivo Markdown de entrada contiene imágenes externas; “externas” significa que las imágenes se almacenan en otro lugar, y en el código Markdown existen _enlaces_ a dichas imágenes. Si <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdowneditoptions/" target="_blank" rel="nofollow noopener noreferrer">`MarkdownEditOptions`</a> no se especifican ni se configuran correctamente (como se explica a continuación), GroupDocs.Editor no podrá localizar dichas imágenes. Para indicar todas las imágenes externas, se debe crear una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdowneditoptions/" target="_blank" rel="nofollow noopener noreferrer">`MarkdownEditOptions`</a>, y la propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdowneditoptions/imageloadcallback/" target="_blank" rel="nofollow noopener noreferrer">`ImageLoadCallback`</a> debe configurarse adecuadamente.
+
+Para lograrlo, el usuario debe crear su propio tipo que implemente la interfaz <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/imarkdownimageloadcallback/" target="_blank" rel="nofollow noopener noreferrer">`IMarkdownImageLoadCallback`</a>. Esta interfaz define un único método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/imarkdownimageloadcallback/processimage/" target="_blank" rel="nofollow noopener noreferrer">`ProcessImage`</a>, que recibe un tipo <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownimageloadargs/" target="_blank" rel="nofollow noopener noreferrer">`MarkdownImageLoadArgs`</a> y debe devolver un valor de la enumeración <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownimageloadingaction/" target="_blank" rel="nofollow noopener noreferrer">`MarkdownImageLoadingAction`</a>.
+
+El mecanismo de funcionamiento es el siguiente: GroupDocs.Editor analiza el archivo Markdown de entrada línea por línea y carácter por carácter. Cuando detecta un enlace a una imagen externa, crea una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownimageloadargs/" target="_blank" rel="nofollow noopener noreferrer">`MarkdownImageLoadArgs`</a> con todos los datos relativos a dicha imagen: su nombre de archivo (o ruta relativa o URL) y una bandera booleana que indica si se trata de un enlace local (en el sistema de archivos) o de un enlace web. Luego, cuando <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdowneditoptions/" target="_blank" rel="nofollow noopener noreferrer">`MarkdownEditOptions`</a> tienen la propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdowneditoptions/imageloadcallback/" target="_blank" rel="nofollow noopener noreferrer">`ImageLoadCallback`</a> especificada con la implementación del usuario de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/imarkdownimageloadcallback/" target="_blank" rel="nofollow noopener noreferrer">`IMarkdownImageLoadCallback`</a>, GroupDocs.Editor invoca el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/imarkdownimageloadcallback/processimage/" target="_blank" rel="nofollow noopener noreferrer">`ProcessImage`</a>, pasándole una instancia previamente preparada de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownimageloadargs/" target="_blank" rel="nofollow noopener noreferrer">`MarkdownImageLoadArgs`</a>. A continuación, GroupDocs.Editor “espera” hasta que el código del usuario tome una decisión: el valor devuelto de la enumeración <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownimageloadingaction/" target="_blank" rel="nofollow noopener noreferrer">`MarkdownImageLoadingAction`</a>.
+
+Si la implementación del usuario devuelve un valor <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownimageloadingaction/" target="_blank" rel="nofollow noopener noreferrer">`MarkdownImageLoadingAction`</a>`.Skip`, la imagen se omitirá: el documento resultante contendrá un “área vacía” en el lugar donde debería estar la imagen.
+
+Si la implementación del usuario devuelve un valor <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownimageloadingaction/" target="_blank" rel="nofollow noopener noreferrer">`MarkdownImageLoadingAction`</a>`.Default`, GroupDocs.Editor intentará cargar la imagen por sí mismo —esto es posible, por ejemplo, si el enlace a la imagen es una ruta absoluta o una URL.
+
+Si la implementación del usuario devuelve un <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownimageloadingaction/" target="_blank" rel="nofollow noopener noreferrer">`MarkdownImageLoadingAction`</a>`.UserProvided`, significa que el código del usuario debe proporcionar los datos de la imagen por sí mismo, especificándolos en [`SetData(byte[] data)`](https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownimageloadargs/setdata/). En ese caso, GroupDocs.Editor procesará los datos binarios especificados para dicha imagen.
+
+El ejemplo de código que se muestra a continuación corresponde exactamente al último escenario, en el que el usuario final crea su propia implementación de la interfaz <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/imarkdownimageloadcallback/" target="_blank" rel="nofollow noopener noreferrer">`IMarkdownImageLoadCallback`</a>.
+
+Supongamos que tenemos la siguiente estructura de archivos y carpetas:
+- root/`input.md`
+- root/images/`image1.png`
+- root/images/`image2.jpeg`
+
+El `input.md` es un archivo Markdown que deseamos abrir y editar, ubicado en la carpeta “root”, y que hace referencia a dos imágenes rasterizadas, `image1.png` y `image2.jpeg`, ubicadas en la subcarpeta “images”.
+
+
+```csharp
+public void EditingMarkdown()
+{
+	string inputMdPath = Path.Combine("root", "input.md");
+	string imagesFolder = Path.Combine("root", "images");
+
+	// Creating the edit options
+	Options.MarkdownEditOptions editOptions = new MarkdownEditOptions();
+	editOptions.ImageLoadCallback = new MdImageLoader(imagesFolder);
+
+	using (Editor editor = new Editor(inputMdPath))
+	{
+		EditableDocument beforeEdit = editor.Edit(editOptions);
+
+		// Make sure there are 2 images here
+		Assert.AreEqual(2, beforeEdit.Images.Count);
+		Assert.AreEqual("png", beforeEdit.Images[0].Type.FileExtension);
+		Assert.AreEqual("jpeg", beforeEdit.Images[1].Type.FileExtension);
+
+		string originalHtmlContent = beforeEdit.GetEmbeddedHtml();
+
+		// Send the 'originalHtmlContent' to the client-side WYSIWYG-editor,
+		// obtain the edited version and create a new EditableDocument from it
+
+		EditableDocument afterEdit = EditableDocument.FromMarkup(originalHtmlContent, null);
+
+		// Make sure 2 images are still here
+		Assert.AreEqual(2, afterEdit.Images.Count);
+		Assert.AreEqual("png", afterEdit.Images[0].Type.FileExtension);
+		Assert.AreEqual("jpeg", afterEdit.Images[1].Type.FileExtension);
+
+		// Save to the DOCX, for example
+		Options.WordProcessingSaveOptions saveOptions = new WordProcessingSaveOptions(Formats.WordProcessingFormats.Docx);
+		 string outputDocxPath = Path.Combine("root", "Output."+ saveOptions.OutputFormat.Extension);
+
+		editor.Save(afterEdit, outputDocxPath, saveOptions);		
+
+	}
+}
+
+internal sealed class MdImageLoader : Options.IMarkdownImageLoadCallback
+{
+	private readonly string _imagesFolder;
+
+	public MdImageLoader(string imagesFolder)
+	{
+		this._imagesFolder = imagesFolder;
+	}
+
+	public MarkdownImageLoadingAction ProcessImage(MarkdownImageLoadArgs args)
+	{
+		string filePath = Path.Combine(this._imagesFolder, Path.GetFileName(args.ImageFileName));
+		using (FileStream content = File.OpenRead(filePath))
+		{
+			byte[] data = new byte[content.Length];
+			content.Read(data, 0, (int)content.Length);
+			args.SetData(data);
+		}
+		return MarkdownImageLoadingAction.UserProvided;
+	}
+}
+```
+
+En este ejemplo hay una clase `MdImageLoader` creada por el usuario. Se inicializa con la ruta de la carpeta de imágenes, y en el método `ProcessImage` se lee el contenido del archivo y se envía a la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownimageloadargs/" target="_blank" rel="nofollow noopener noreferrer">`MarkdownImageLoadArgs`</a> mediante el método [`SetData(byte[] data)`](https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownimageloadargs/setdata/).
+
+## Guardado en formato Markdown {#saving}
+
+
+GroupDocs.Editor también admite el guardado en formato Markdown. Al igual que con cualquier otro formato, para guardar en Markdown el usuario debe crear una instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownsaveoptions/" target="_blank" rel="nofollow noopener noreferrer">`MarkdownSaveOptions`</a> y especificarla en el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/save" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Editor.Save()`</a>.
+
+Si el documento destinado a guardarse en formato Markdown contiene imágenes, estas deben ser “resueltas” de manera similar a la descrita anteriormente. Sin embargo, aquí no existe un método de devolución de llamada para guardar las imágenes. En su lugar, el usuario tiene tres opciones:
+1. Ignorar las imágenes: no se incluirán en el resultado.
+2. Guardar las imágenes dentro del código Markdown, en cuyo caso se almacenarán en codificación base64.
+3. Guardar las imágenes como archivos independientes en una carpeta especificada, y en el código Markdown se incluirán referencias a dichos archivos de imagen.
+
+Para lograr esto, la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownsaveoptions/" target="_blank" rel="nofollow noopener noreferrer">`MarkdownSaveOptions`</a> dispone de varias propiedades. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownsaveoptions/exportimagesasbase64/" target="_blank" rel="nofollow noopener noreferrer">`ExportImagesAsBase64`</a> es una bandera booleana que, por defecto, tiene el valor `false`. Si se establece en `true`, el contenido de las imágenes se inyectará directamente en el Markdown de salida en formato base64. Además, si esta bandera se establece en `true`, tendrá la máxima prioridad y la propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownsaveoptions/imagesfolder/" target="_blank" rel="nofollow noopener noreferrer">`ImagesFolder`</a> se ignorará.
+
+La propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownsaveoptions/imagesfolder/" target="_blank" rel="nofollow noopener noreferrer">`ImagesFolder`</a>, a su vez, se aplica cuando <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownsaveoptions/exportimagesasbase64/" target="_blank" rel="nofollow noopener noreferrer">`ExportImagesAsBase64`</a> está establecida en `false`. Esta propiedad, si se especifica, debe contener una ruta completa válida a una carpeta existente donde GroupDocs.Editor debe guardar las imágenes.
+
+El ejemplo siguiente muestra cómo abrir un archivo DOCX de entrada para editarlo y guardarlo en tres archivos de salida distintos en formato Markdown, cada uno con sus propias opciones de guardado.
+
+```csharp
+const string filename = "SampleDoc.docx";
+string inputPath = Path.Combine("some-path", filename);
+
+string outputFolder = "Some-full-path-to-output-folder";
+
+string outputMdEmbeddedFilePath = Path.Combine(outputFolder, "Output_Markdown_Embedded.md");
+string outputMdExternalFilePath = Path.Combine(outputFolder, "Output_Markdown_External.md");
+string outputMdAbsentFilePath = Path.Combine(outputFolder, "Output_Markdown_Absent.md");
+
+GroupDocs.Editor.Editor editor = new Editor(inputPath);                
+EditableDocument beforeEdit = editor.Edit();
+// Send content to client-side WYSIWYG-editor, edit it there, send back to the server-side
+EditableDocument afterEdit = EditableDocument.FromMarkup(beforeEdit.GetEmbeddedHtml(), null);
+
+{// Saving to "embedded" version, where all images are injected inside MD with base64 encoding
+	Options.MarkdownSaveOptions mdSaveOptionsEmbedded = new MarkdownSaveOptions();
+	mdSaveOptionsEmbedded.ExportImagesAsBase64 = true;
+	editor.Save(afterEdit, outputMdEmbeddedFilePath, mdSaveOptionsEmbedded);
+}
+
+{// Saving to "external" version, where all images are stored in distinct files, while MD contains links to these files as paths in file system
+	Options.MarkdownSaveOptions mdSaveOptionsExternal = new MarkdownSaveOptions();
+	mdSaveOptionsExternal.ImagesFolder = outputFolder;
+	editor.Save(afterEdit, outputMdExternalFilePath, mdSaveOptionsExternal);
+}
+
+{// Saving to "absent" version, where all images are skipped and are not present in MD
+	Options.MarkdownSaveOptions mdSaveOptionsAbsent = new MarkdownSaveOptions();
+	MemoryStream outputMdAbsentTemp = new MemoryStream();
+	editor.Save(afterEdit, outputMdAbsentTemp, mdSaveOptionsAbsent);
+	outputMdAbsentTemp.Position = 0;
+	FileStream outputMdAbsentStream = File.Create(outputMdAbsentFilePath);
+	outputMdAbsentTemp.CopyTo(outputMdAbsentStream);
+	outputMdAbsentStream.Close();
+	outputMdAbsentTemp.Close();
+}
+	
+// Disposing all resources
+beforeEdit.Dispose();
+afterEdit.Dispose();
+editor.Dispose();
+```
+
+En este ejemplo puede verse un pequeño truco: para la versión «ausente», el contenido del documento se guarda en <a href="https://docs.microsoft.com/en-us/dotnet/api/system.IO.MemoryStream?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`MemoryStream`</a> y, posteriormente, se copia en <a href="https://docs.microsoft.com/en-us/dotnet/api/system.IO.FileStream?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`FileStream`</a>. Esto se realiza porque GroupDocs.Editor dispone de un truco: si <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownsaveoptions/exportimagesasbase64/" target="_blank" rel="nofollow noopener noreferrer">`ExportImagesAsBase64`</a> se establece en `false` y <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/markdownsaveoptions/imagesfolder/" target="_blank" rel="nofollow noopener noreferrer">`ImagesFolder`</a> no está definido, GroupDocs.Editor intenta analizar la secuencia especificada. Si dicha secuencia corresponde a un <a href="https://docs.microsoft.com/en-us/dotnet/api/system.IO.FileStream?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`FileStream`</a>, GroupDocs.Editor obtiene la ruta a la carpeta y guarda las imágenes en ella. Por lo tanto, con el fin de «engañar» a GroupDocs.Editor en este ejemplo, se utilizó <a href="https://docs.microsoft.com/en-us/dotnet/api/system.IO.MemoryStream?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`MemoryStream`</a>.
+
+## Redondeo (Roundtrip) {#roundtrip}
+  
+Dado que el formato Markdown es compatible tanto en la importación como en la exportación, es posible llevar a cabo un escenario de redondeo: abrir un archivo Markdown para editarlo, realizar las modificaciones y, a continuación, guardar la versión editada también en formato Markdown. El ejemplo siguiente demuestra dicho escenario.
+
+```csharp
+public void MarkdownRoundtrip()
+{
+	string inputFolderPath = "Some-full-path-to-input-folder";
+	string outputFolder = "Some-full-path-to-output-folder";
+	string outputMdPath = Path.Combine(outputFolder, "Output.md");
+
+	const string filename = "ComplexImage.md";
+	string inputPath = Path.Combine(inputFolderPath, filename);	
+
+	Options.MarkdownEditOptions editOptions = new MarkdownEditOptions();
+	editOptions.ImageLoadCallback = new MdImageLoader(inputFolderPath);
+
+	Options.MarkdownSaveOptions saveOptions = new Options.MarkdownSaveOptions();
+	saveOptions.TableContentAlignment = MarkdownTableContentAlignment.Center;
+	saveOptions.ImagesFolder = outputFolder;
+
+	using (Editor editor = new Editor(inputPath))
+	{
+		using (EditableDocument doc = editor.Edit(editOptions))
+		{
+			Assert.AreEqual(3, doc.Images.Count);
+			// edit "doc" in WYSIWYG-editor and obtain its edited version
+
+			editor.Save(doc, outputMdPath, saveOptions);
+		}
+	}
+}
+
+internal sealed class MdImageLoader : Options.IMarkdownImageLoadCallback
+{
+	private readonly string _imagesFolder;
+
+	public MdImageLoader(string imagesFolder)
+	{
+		this._imagesFolder = imagesFolder;
+	}
+
+	public MarkdownImageLoadingAction ProcessImage(MarkdownImageLoadArgs args)
+	{
+		string filePath = Path.Combine(this._imagesFolder, Path.GetFileName(args.ImageFileName));
+		using (FileStream content = File.OpenRead(filePath))
+		{
+			byte[] data = new byte[content.Length];
+			content.Read(data, 0, (int)content.Length);
+			args.SetData(data);
+		}
+		return MarkdownImageLoadingAction.UserProvided;
+	}
+}
+```

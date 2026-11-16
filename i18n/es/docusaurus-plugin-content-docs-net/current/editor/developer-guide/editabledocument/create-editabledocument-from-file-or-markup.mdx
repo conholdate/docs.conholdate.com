@@ -1,0 +1,134 @@
+---
+title: "Crear `EditableDocument` a partir de un archivo o marcado"
+sidebar_label: "Crear `EditableDocument` a partir de un archivo o marcado"
+sidebar_key: "net-editor-editabledocument-create-editabledocument-from-file-or-markup"
+sidebar_position: 4
+description: "Este artículo explica cómo crear una instancia de la clase `EditableDocument` a partir de archivos HTML del disco o a partir de marcado HTML con recursos utilizando la API de GroupDocs.Editor para .NET."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/editabledocument/create-editabledocument-from-file-or-markup.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "853f23985c7ef7789485db4bbbb937fec62bded93ccbbb7a0652c2b03ea3b1ed"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "ac78b90da4d7c3f899da3ba75c9e69e01fc22ec47f6e618b68443fd73328805e"
+translation_updated_at: "2026-11-16T04:49:58.362Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+> Esta demostración muestra cómo crear una instancia de la clase `EditableDocument` a partir de archivos HTML del disco o a partir de marcado HTML con recursos.
+
+## Introducción {#introduction}
+
+Al trabajar con <a href="https://products.groupdocs.com/editor/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Editor**</a> de forma habitual, cargando, abriendo, editando y guardando documentos, las instancias de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> son generadas por el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit" target="_blank" rel="nofollow noopener noreferrer">Editor.Edit</a> y aceptadas por el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/save" target="_blank" rel="nofollow noopener noreferrer">Editor.Save</a>. Sin embargo, en algunos casos es necesario crear una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> a partir de marcado HTML existente con recursos opcionales. Por ejemplo, se carga un documento en la clase `Editor`, se abre para su edición y luego <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> se guarda en el disco como un conjunto de archivos HTML y recursos asociados. Posteriormente, este documento HTML se pasa a un editor WYSIWYG, se edita y se guarda de nuevo en el disco como HTML modificado. O bien, la salida en bruto del editor WYSIWYG se guarda en una variable `string`. Para guardarlo en un formato final como DOCX o XLSX, el usuario debe pasar el documento al método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/save" target="_blank" rel="nofollow noopener noreferrer">Editor.Save</a> en forma de una instancia <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>. Esto implica que el usuario debe crear manualmente una instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>.
+
+La clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> contiene tres métodos públicos estáticos para crear sus instancias: <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/fromfile" target="_blank" rel="nofollow noopener noreferrer">FromFile</a>, <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/frommarkup" target="_blank" rel="nofollow noopener noreferrer">FromMarkup</a> y <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/frommarkupandresourcefolder" target="_blank" rel="nofollow noopener noreferrer">FromMarkupAndResourceFolder</a>. Antes de la versión 21.10 también existía un método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/frommarkupandresourcefolder/" target="_blank" rel="nofollow noopener noreferrer">FromBodyMarkupAndResourceFolder</a>, pero fue eliminado debido a su inutilidad. Este artículo los revisa a todos.
+
+## Apertura desde archivo {#opening-from-file}
+
+Supongamos que disponemos de un archivo HTML con el contenido del documento editado, guardado en el disco. También existe una carpeta con recursos (imágenes, fuentes, hojas de estilo) utilizados por este documento, y el documento contiene enlaces correctos a dichos recursos. Digamos que el documento HTML se llama “document.html” y se encuentra en la carpeta “input”. La carpeta de recursos se encuentra en la misma carpeta “input” y se llama “document\_resources”. Y, lo más importante, el marcado HTML de “document.html” contiene enlaces adecuados a los archivos de la carpeta “document\_resources”. Por ejemplo, contendrá
+
+&lt;link rel = "stylesheet" type = "text/css" href = "document\_resources/style.css" /&gt;
+
+en “document.html”, y la carpeta “document\_resources” contendrá efectivamente el archivo “style.css”.
+
+En tal caso, crear una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> resulta lo más sencillo:
+
+```csharp
+string inputHtmlPath = "C://input/document.html";
+EditableDocument document = EditableDocument.FromFile(inputHtmlPath, null);
+```
+
+El método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/fromfile" target="_blank" rel="nofollow noopener noreferrer">FromFile</a> acepta dos parámetros: el primero es la ruta al archivo HTML, y el segundo es la ruta a la carpeta de recursos. Si el archivo HTML contiene enlaces correctos, tal como se describe anteriormente, el segundo parámetro no es necesario: GroupDocs.Editor escaneará los enlaces y encontrará automáticamente la carpeta de recursos y los recursos correspondientes. Sin embargo, si la ruta a la carpeta de recursos no coincide con los enlaces del archivo HTML, es posible especificar forzosamente una carpeta de recursos, como se ilustra en el siguiente código:
+
+```csharp
+string inputHtmlPath = "C://input/document.html";
+string inputResourceFolderPath = "C://input/document_resources/";
+EditableDocument document = EditableDocument.FromFile(inputHtmlPath, inputResourceFolderPath);
+```
+
+Si el archivo HTML contiene un enlace a un recurso que no está presente en la carpeta de recursos, este se omitirá.
+
+## Apertura desde marcado y recursos predefinidos {#opening-from-markup-and-prepared-resources}
+
+En algunos casos, el documento HTML editado no existe como archivo físico. Puede estar almacenado en una base de datos, obtenerse desde un almacenamiento remoto o provenir de otra fuente. En tales casos, la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> proporciona el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/frommarkup" target="_blank" rel="nofollow noopener noreferrer">FromMarkup</a>. Este método, al igual que el anterior, acepta dos parámetros:
+
+* `string newHtmlContent` – cadena que contiene el marcado HTML en bruto. Este parámetro es obligatorio.
+* IEnumerable&lt;<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources/ihtmlresource" target="_blank" rel="nofollow noopener noreferrer">IHtmlResource</a>&gt;&gt; resources – conjunto de recursos predefinidos (imágenes, fuentes, hojas de estilo, archivos de audio) que se utilizan o podrían utilizarse en el documento HTML. El usuario debe preparar esta colección por sí mismo. Este parámetro es opcional; el usuario puede pasar `NULL` o una colección vacía. Al igual que con el método anterior, si el marcado HTML hace referencia a un recurso que no se encuentra en la colección "resources", dicho recurso se omitirá.
+
+El siguiente ejemplo de código demuestra este enfoque.
+
+```csharp
+string inputHtmlMarkup = "<HTML><HEAD><TITLE>Edited document</TITLE>.....";
+JpegImage image1 = new JpegImage("image1.jpg", /* stream or base64 text*/);
+PngImage image2 = new PngImage("image2.png", /* stream or base64 text*/);
+CssText stylesheet = new CssText("stylesheet.css", "p {color: black; text-align: left; }......", System.Text.Encoding.UTF8);
+
+List<IHtmlResource> allResources = new List<IHtmlResource>();
+allResources.Add(image1);
+allResources.Add(image2);
+allResources.Add(stylesheet);
+
+EditableDocument document = EditableDocument.FromMarkup(inputHtmlMarkup, allResources);
+```
+
+A partir de la <a href="https://releases.groupdocs.com/editor/net/release-notes/2025/groupdocs-editor-for-net-25-7-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 25.7</a>, se implementó una nueva sobrecarga simplificada del método `FromMarkup`: `EditableDocument.FromMarkup(string newHtmlContent)`. Esta sobrecarga resulta útil cuando no existen recursos HTML externos para el marcado HTML dado. Esto suele ocurrir cuando todo el contenido del documento, incluido el marcado HTML y CSS, así como todos los recursos, se empaquetan dentro de una única cadena (los recursos se empaquetan en el marcado HTML mediante el <a href="https://en.wikipedia.org/wiki/Data_URI_scheme" target="_blank" rel="nofollow noopener noreferrer">esquema de URI de datos</a> con codificación base64). Por lo tanto, en el caso de que la variable `inputHtmlMarkup` del ejemplo anterior contenga todos los recursos internamente y no haya imágenes, fuentes ni hojas de estilos externos, todo el ejemplo anterior puede reescribirse de la siguiente manera:
+
+
+<Tabs groupId="FromMarkup simplified">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+string inputHtmlMarkup = "<HTML><HEAD><TITLE>Edited document</TITLE>.....";//all content is here
+EditableDocument document = EditableDocument.FromMarkup(inputHtmlMarkup);
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Dim inputHtmlMarkup As String = "<HTML><HEAD><TITLE>Edited document</TITLE>....." 'all content is here
+Dim document As EditableDocument = EditableDocument.FromMarkup(inputHtmlMarkup)
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+## Apertura desde marcado y carpeta de recursos {#opening-from-markup-and-resource-folder}
+
+En algunos casos, existe el marcado HTML del documento editado, pero los recursos se representan como un conjunto de archivos ubicados en una carpeta específica. Por ejemplo, el documento original se convirtió a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> y luego se guardó en el disco como un documento HTML con un archivo *.html y una carpeta con recursos. Posteriormente, se cargó en el editor WYSIWYG, fue editado por el usuario final y el contenido editado se recuperó desde el frontend hacia el backend. Ahora se dispone de un marcado HTML editado, disponible como un flujo, y de una carpeta de recursos. En este caso, se introdujo un nuevo método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/frommarkupandresourcefolder" target="_blank" rel="nofollow noopener noreferrer">FromMarkupAndResourceFolder</a> en la versión 21.10. A continuación se muestra un ejemplo de su uso.
+
+```csharp
+string inputHtmlMarkup = "<HTML><HEAD><TITLE>Edited document</TITLE>.....";
+string inputResourceFolderPath = "C://input/document_resources/";
+  
+EditableDocument document = EditableDocument.FromMarkupAndResourceFolder inputHtmlMarkup, inputResourceFolderPath);
+```
+
+El método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/frommarkupandresourcefolder" target="_blank" rel="nofollow noopener noreferrer">FromMarkupAndResourceFolder</a> recibe dos parámetros de tipo <a href="https://docs.microsoft.com/en-us/dotnet/api/system.string?view=net-5.0" target="_blank" rel="nofollow noopener noreferrer">string</a>, ambos obligatorios. El primero, `newHtmlContent`, corresponde a una marca HTML, mientras que el segundo, `resourceFolderPath`, representa una ruta completa y válida a la carpeta de recursos, la cual debe existir y contener los recursos necesarios. Si la carpeta no existe, se lanzará una excepción.
+
+Muchos (o incluso la mayoría de) editores WYSIWYG modifican la estructura HTML de un documento eliminando los elementos HTML, HEAD, BODY y otros, e incluso pueden suprimir todo el bloque HEAD que contiene los metadatos. De hecho, la mayoría de los editores HTML WYSIWYG del lado del cliente, como TinyMCE y CKEditor, solo trabajan con el contenido interno del elemento BODY: reciben únicamente dicha marca como entrada y la devuelven de la misma forma como salida. Las hojas de estilo externas suelen incluirse en la configuración del editor HTML o en otro lugar, pero no mediante la propia marca HTML (salvo los estilos en línea definidos en el atributo “style”). Para pasar una marca HTML->BODY *dentro* del editor HTML existe el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/getbodycontent" target="_blank" rel="nofollow noopener noreferrer">GetBodyContent()</a>, que devuelve el contenido interno del elemento HTML-BODY. El problema radica en que, cuando la marca HTML editada se recupera del editor WYSIWYG, normalmente no contiene en absoluto enlaces a las hojas de estilo externas.
+
+El método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/frommarkupandresourcefolder" target="_blank" rel="nofollow noopener noreferrer">FromMarkupAndResourceFolder</a> resulta especialmente útil en estos casos, ya que escanea la carpeta de recursos especificada en el parámetro `resourceFolderPath`, lee todos los archivos *.css encontrados y aplica las hojas de estilo analizadas al contenido del documento. Esta es la principal diferencia entre este método y el previamente descrito <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/fromfile" target="_blank" rel="nofollow noopener noreferrer">FromFile</a>: este último aplica todas las hojas de estilo presentes en la carpeta al documento, mientras que <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/fromfile" target="_blank" rel="nofollow noopener noreferrer">FromFile</a> solo aplica aquellas hojas de estilo que se hacen referencia explícitamente en la marca HTML.
+
+En resumen: cuando se invoca el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/frommarkupandresourcefolder" target="_blank" rel="nofollow noopener noreferrer">FromMarkupAndResourceFolder()</a>, GroupDocs.Editor escanea la carpeta especificada en el parámetro `resourceFolderPath`, localiza todos los archivos *.css, los abre, analiza su contenido y, si este es válido, aplica dichas hojas de estilo al documento. Si alguna hoja de estilo hace referencia a imágenes y/o fuentes externas, GroupDocs.Editor intentará también localizar estos recursos dentro de la carpeta de recursos especificada. Asimismo, si la marca HTML indicada en el primer parámetro contiene imágenes externas referenciadas mediante elementos IMG, GroupDocs.Editor también intentará encontrar dichas imágenes en esta carpeta de recursos. En otras palabras, el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument/frommarkupandresourcefolder" target="_blank" rel="nofollow noopener noreferrer">FromMarkupAndResourceFolder()</a> *asume* que la carpeta `resourceFolderPath` contiene los recursos correspondientes al documento HTML cuya marca se especifica en el primer parámetro.

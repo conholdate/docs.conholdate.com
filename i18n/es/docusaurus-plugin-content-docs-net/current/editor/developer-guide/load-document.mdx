@@ -1,0 +1,103 @@
+---
+title: "Cargar documento"
+sidebar_label: "Cargar documento"
+sidebar_key: "net-editor-load-document"
+sidebar_position: 4
+description: "Siguiendo esta guía, aprenderá cómo cargar un documento desde el disco local o un flujo de archivos para editarlo con la API de GroupDocs.Editor para .NET."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/load-document.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "cc180afee4b4b5ad55c3376a2a11c2d9c3a8219ce3356c4b43ddf4ec36ccb458"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "ce6580dc4930930023b6a601036304041f6ccbccc8ec93c6eff3797edf05282f"
+translation_updated_at: "2026-11-16T04:19:48.794Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+> El texto proporciona una guía completa sobre cómo cargar documentos mediante la API de GroupDocs.Editor para .NET. A continuación se presenta una versión revisada que mejora la legibilidad, la coherencia y la claridad.
+
+---
+
+### Cargar documento  {#load-document}
+  
+Esta guía explica cómo cargar un documento desde un disco local o un flujo de archivos para su edición mediante la API de GroupDocs.Editor para .NET.
+
+#### Introducción {#introduction}
+  
+En este artículo aprenderá cómo cargar un documento de entrada en <a href="https://products.groupdocs.com/editor/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Editor**</a> y aplicar opciones de carga.
+
+### Carga de documentos {#loading-documents}
+  
+Para cargar un documento de entrada, el cual debe estar accesible ya sea como una secuencia de bytes o mediante una ruta de archivo válida, puede crear una instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a> utilizando una de sus sobrecargas de constructor. A continuación se muestran ejemplos de carga de documentos desde una ruta de archivo y desde un flujo.
+
+```csharp
+// Load document from file path
+string inputFilePath = "C:\\input_path\\document.docx"; // Path to the document
+Editor editor = new Editor(inputFilePath);
+
+// Load document from stream
+FileStream inputStream = System.IO.File.OpenRead(inputFilePath);
+Editor editor = new Editor(inputStream);
+```
+
+Cuando se utilizan las sobrecargas del constructor mostradas anteriormente, GroupDocs.Editor detecta automáticamente el formato del documento de entrada y aplica las opciones de carga predeterminadas más adecuadas. Sin embargo, se recomienda especificar explícitamente las opciones de carga correctas mediante el uso de sobrecargas del constructor que acepten dos parámetros. A continuación se explica cómo hacerlo:
+
+```csharp
+// Load document from file path with load options
+string inputFilePath = "C:\\input_path\\document.docx"; // Path to the document
+WordProcessingLoadOptions wordLoadOptions = new WordProcessingLoadOptions();
+Editor editor = new Editor(inputFilePath, wordLoadOptions); // Passing path and load options to the constructor
+
+// Load document from stream with load options
+MemoryStream inputStream = new MemoryStream(); // Stream obtained from somewhere
+SpreadsheetLoadOptions spreadsheetLoadOptions = new SpreadsheetLoadOptions();
+Editor editor = new Editor(inputStream, spreadsheetLoadOptions);
+```
+
+### Opciones de carga  {#load-options}
+  
+Tenga en cuenta que no todos los formatos de documento tienen clases asociadas para las opciones de carga. A partir de la versión 22.7, únicamente los formatos de procesamiento de texto, hojas de cálculo, presentaciones y un formato PDF distinto disponen de clases específicas para las opciones de carga. Otros formatos, como DSV, TXT o XML, no tienen opciones de carga.
+
+| Familia de formatos | Ejemplos de formatos | Clase de opciones de carga |
+| -------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Procesamiento de texto | DOC, DOCX, DOCM, DOT, ODT | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingloadoptions" target="_blank" rel="nofollow noopener noreferrer">`WordProcessingLoadOptions`</a> |
+| Hojas de cálculo | XLS, XLSX, XLSM, XLSB | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetloadoptions" target="_blank" rel="nofollow noopener noreferrer">`SpreadsheetLoadOptions`</a> |
+| Presentaciones | PPT, PPTX, PPS, POT | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationloadoptions" target="_blank" rel="nofollow noopener noreferrer">`PresentationLoadOptions`</a> |
+| Formato de diseño fijo | PDF | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfloadoptions" target="_blank" rel="nofollow noopener noreferrer">`PdfLoadOptions`</a> |
+
+### Manejo de documentos protegidos con contraseña  {#handling-password-protected-documents}
+  
+El uso de las opciones de carga es esencial al trabajar con documentos protegidos con contraseña. Cualquier documento puede cargarse en una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a>, incluso si está protegido con contraseña. Sin embargo, si la contraseña no se maneja correctamente, se lanzará una excepción durante el proceso de edición. A continuación se describe cómo GroupDocs.Editor gestiona las contraseñas:  
+
+1. Si el documento no está protegido con contraseña, cualquier contraseña especificada se ignorará.
+2. Si el documento está protegido con contraseña pero no se especifica ninguna contraseña, se lanzará una <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/passwordrequiredexception" target="_blank" rel="nofollow noopener noreferrer">`PasswordRequiredException`</a> durante la edición.
+3. Si el documento está protegido con contraseña y se proporciona una contraseña incorrecta, se lanzará una <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/incorrectpasswordexception" target="_blank" rel="nofollow noopener noreferrer">`IncorrectPasswordException`</a> durante la edición.
+
+El ejemplo siguiente muestra cómo especificar una contraseña para abrir un documento de procesamiento de texto protegido con contraseña:
+
+```csharp
+Stream inputStream = GetDocumentStreamFromSomewhere();
+WordProcessingLoadOptions wordLoadOptions = new WordProcessingLoadOptions();
+wordLoadOptions.Password = "correct_password";
+Editor editor = new Editor(inputFilePath, wordLoadOptions);
+```
+
+
+:::info
+El mismo enfoque se aplica también a documentos de hojas de cálculo, presentaciones y PDF.
+:::
+
+
+Esta revisión mejora la claridad, optimiza la estructura y garantiza que las instrucciones sean fáciles de seguir.

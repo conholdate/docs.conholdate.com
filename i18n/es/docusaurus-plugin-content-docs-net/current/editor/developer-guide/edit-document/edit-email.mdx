@@ -1,0 +1,181 @@
+---
+title: "Editar correo electrónico"
+sidebar_label: "Editar correo electrónico"
+sidebar_key: "net-editor-edit-document-edit-email"
+sidebar_position: 62
+description: "Esta guía muestra cómo editar el contenido de documentos de la familia de formatos de correo electrónico, como documentos de texto comunes, utilizando GroupDocs.Editor para .NET."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-email.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "43c9de760412ab692a026d9881b713614b508448958bfa47559856b7d7997d7a"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "4b2d935c09c5065feebb9dc1e5f97cb27310138c4cec294cb5b5d453c3b2fb53"
+translation_updated_at: "2026-11-16T03:45:37.737Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+> Este ejemplo demuestra el flujo estándar de abrir-editar-guardar con documentos de correo electrónico, utilizando diferentes opciones en cada paso.
+
+## Introducción {#introduction}
+  
+Existe un grupo de <a href="https://docs.fileformat.com/email/" target="_blank" rel="nofollow noopener noreferrer">formatos de archivo de correo electrónico</a>, los cuales generalmente están destinados a almacenar mensajes individuales de correo, datos de contactos, información personal, calendarios, entre otros. Existen numerosos formatos de este tipo, ya que casi cada programa de correo electrónico utiliza su propio conjunto de dichos formatos.
+
+Desde su creación, GroupDocs.Editor para .NET no ofrecía soporte para editar documentos en formatos de correo electrónico. Sin embargo, a partir de la <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-22-7-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 22.7</a>, ¡finalmente lanzamos esta funcionalidad! Este artículo explica detalladamente cómo editar distintos archivos de correo electrónico, ya que, debido a su naturaleza, su edición difiere de la de documentos de texto comunes.
+
+## Carga {#loading}
+  
+La carga de documentos de correo electrónico es habitual y similar a la de otros formatos. Al igual que con los formatos de texto, XPS y libros electrónicos, y a diferencia de los formatos PDF y Office, no existen opciones específicas de carga para documentos de correo electrónico: simplemente especifique la ruta al archivo o un <a href="https://docs.microsoft.com/en-us/dotnet/api/system.IO.Stream?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">flujo de bytes</a> con el contenido del documento en el constructor de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Editor`</a>, y eso es todo.
+
+El siguiente ejemplo de código demuestra la carga de un único archivo EML en una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> mediante la ruta del archivo y un flujo de bytes.
+
+```csharp
+const string emlFilename = "Attachments.eml";
+string emlInputPath = System.IO.Path.Combine(Common.TestHelper.EmailFolder, emlFilename);
+
+using (FileStream emlStream = File.OpenRead(emlInputPath))
+using (Editor editorFromPath = new Editor(emlInputPath))//from the path
+using (Editor editorFromStream = new Editor(emlStream))//from the stream
+{
+	//Here two Editor instances can separately work with one file
+}
+```
+
+## Edición {#editing}
+
+
+Al igual que con todos los demás formatos, existe una clase especial <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/emaileditoptions" target="_blank" rel="nofollow noopener noreferrer">`EmailEditOptions`</a> para ajustar la edición de documentos de correo electrónico. Una instancia de esta clase debe especificarse en el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit/#edit" target="_blank" rel="nofollow noopener noreferrer">`Editor.Edit(IEditOptions editOptions)`</a>. Y, al igual que con todos los demás formatos, es posible utilizar una sobrecarga sin parámetros del método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit" target="_blank" rel="nofollow noopener noreferrer">`Editor.Edit()`</a>; en este caso, si un documento de correo electrónico se carga en una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a>, GroupDocs.Editor aplicará automáticamente la <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/emaileditoptions" target="_blank" rel="nofollow noopener noreferrer">`EmailEditOptions`</a> predeterminada.
+
+La clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/emaileditoptions" target="_blank" rel="nofollow noopener noreferrer">`EmailEditOptions`</a> posee únicamente un miembro: una propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/emaileditoptions/mailmessageoutput" target="_blank" rel="nofollow noopener noreferrer">`MailMessageOutput`</a> de tipo <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/mailmessageoutput" target="_blank" rel="nofollow noopener noreferrer">`MailMessageOutput`</a>. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/mailmessageoutput" target="_blank" rel="nofollow noopener noreferrer">`MailMessageOutput`</a> es una enumeración con banderas que controla qué partes del mensaje de correo deben incluirse en la salida <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> y, posteriormente, en el HTML generado. La enumeración <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/mailmessageoutput" target="_blank" rel="nofollow noopener noreferrer">`MailMessageOutput`</a> incluye valores *atómicos*, responsables de una única parte del mensaje de correo, así como valores *compuestos*, como `Common` y `All`. Es válido utilizar no solo estos valores compuestos, sino también cualquier combinación definida por el usuario de valores atómicos. Por ejemplo, es posible crear una combinación `Subject | Date | To | Cc | Bcc | From`, que procese únicamente los metadatos, sin incluir el cuerpo ni la lista de adjuntos.
+
+Es importante señalar que, actualmente, GroupDocs.Editor no puede procesar el contenido de los adjuntos, sino que únicamente muestra una lista con los nombres de los adjuntos. Por lo tanto, la bandera `MailMessageOutput.Attachments`, cuando se especifica, genera una lista con los nombres de los adjuntos, si estos están presentes en el mensaje de correo.
+
+El siguiente ejemplo de código muestra cómo ajustar la <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/mailmessageoutput" target="_blank" rel="nofollow noopener noreferrer">`MailMessageOutput`</a> y generar dos <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> distintos para edición a partir de un único documento de correo electrónico de entrada.
+
+```csharp
+//0. Prepare a sample file
+const string emlFilename = "Attachments.eml";
+string emlInputPath = System.IO.Path.Combine(Common.TestHelper.EmailFolder, emlFilename);
+
+//1. Load to the Editor class
+Editor editor = new Editor(emlInputPath);
+
+//2. Create 1st edit options with only metadata
+Options.EmailEditOptions editOptionsMetadata = new EmailEditOptions(MailMessageOutput.Subject | MailMessageOutput.From | MailMessageOutput.To | MailMessageOutput.Cc | MailMessageOutput.Bcc | MailMessageOutput.Date);
+
+//2. Create 2nd edit options with only subject, body and attachments list
+Options.EmailEditOptions editOptionsBody = new EmailEditOptions(MailMessageOutput.Subject | MailMessageOutput.Body | MailMessageOutput.Attachments);
+
+//3. Generate two different EditableDocument with these options from single input "Attachments.eml"
+EditableDocument onlyMetadata = editor.Edit(editOptionsMetadata);
+EditableDocument onlyBody = editor.Edit(editOptionsBody);
+
+//4. Then emit HTML/CSS and send to the WYSIWYG-editor on the client-side
+```
+
+## Guardado de  {#saving}
+
+
+El guardado de documentos de correo electrónico editados sigue, en general, los mismos principios que para otros formatos de documento, aunque con varias diferencias. Como es habitual, tras obtener el contenido HTML editado desde el editor WYSIWYG del lado del cliente, se debe crear una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> y, a continuación, pasarla al método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/save" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Editor.Save()`</a>.
+
+Al igual que en todos los demás formatos, durante el proceso de guardado, junto con <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> y una ruta o un flujo, debe especificarse un descendiente de la interfaz <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/isaveoptions" target="_blank" rel="nofollow noopener noreferrer">`ISaveOptions`</a>, y para los documentos de correo electrónico este es la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/emailsaveoptions" target="_blank" rel="nofollow noopener noreferrer">`EmailSaveOptions`</a>. Al igual que la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/emaileditoptions" target="_blank" rel="nofollow noopener noreferrer">`EmailEditOptions`</a> descrita anteriormente, esta clase posee únicamente un miembro: una propiedad <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/emailsaveoptions/mailmessageoutput" target="_blank" rel="nofollow noopener noreferrer">`MailMessageOutput`</a> de tipo <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/mailmessageoutput" target="_blank" rel="nofollow noopener noreferrer">`MailMessageOutput`</a>. La única diferencia entre esta propiedad `MailMessageOutput` en `EmailEditOptions` y `EmailSaveOptions` radica en que, en el primer caso, la propiedad `MailMessageOutput` controla qué partes del mensaje de correo se procesarán al generar <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> a partir del archivo de correo electrónico de entrada, mientras que, en el segundo caso, la propiedad `MailMessageOutput` controla qué partes del mensaje de correo se procesarán al generar el archivo de correo electrónico de salida a partir de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a>, obtenido tras la edición. Por lo tanto, es posible, por ejemplo, enviar al editor WYSIWYG un mensaje de correo completo con un 100 % de su contenido, pero generar un archivo de salida únicamente con el contenido de `Subject` y `Body`, por ejemplo.
+
+La familia de formatos de correo electrónico comprende numerosos formatos distintos, pero <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/emailsaveoptions" target="_blank" rel="nofollow noopener noreferrer">`EmailSaveOptions`</a> no permite especificar el formato del documento de salida: este será automáticamente el mismo que el formato del documento de correo electrónico original cargado en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Editor`</a>. Por ejemplo, si carga un archivo MSG, el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/save" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Editor.Save()`</a> también generará un archivo MSG, independientemente de la extensión de archivo que especifique.
+
+El siguiente ejemplo de código muestra el flujo completo de carga-edición-guardado para documentos de correo electrónico: carga un documento, lo hace editable mediante la bandera combinada `MailMessageOutput.All` y, a continuación, genera dos documentos de correo electrónico de salida: el primero se guarda en un archivo con `MailMessageOutput.Common`, mientras que el segundo se guarda en un flujo mediante una bandera combinada creada personalmente.
+
+```csharp
+//0. Prepare a sample file
+const string msgFilename = "ComplexExample.msg";
+string msgInputPath = System.IO.Path.Combine(Common.TestHelper.EmailFolder, msgFilename);
+
+//1. Load to the Editor class
+Editor msgEditor = new Editor(msgInputPath);
+
+//2. Create edit options with all content
+Options.EmailEditOptions editOptions = new EmailEditOptions(MailMessageOutput.All);
+
+//3. Generate an editable document
+EditableDocument originalDoc = msgEditor.Edit(editOptions);
+
+//4. Emit HTML from EditableDocument, send it to the client-side, edit it there in WYSIWYG-editor (omitted here)
+string savedHtmlContent = originalDoc.GetEmbeddedHtml();
+
+//5. Obtain edited content from the client-side and generate a new EditableDocument from it (omitted here)
+EditableDocument editedDoc = EditableDocument.FromMarkup(savedHtmlContent, null);
+
+//6. Create 1st save options
+EmailSaveOptions saveOptions1 = new EmailSaveOptions(MailMessageOutput.Common);
+
+//7. Create 2nd save options
+EmailSaveOptions saveOptions2 = new EmailSaveOptions(MailMessageOutput.Body | MailMessageOutput.Attachments);
+
+//8. Generate and save 1st output MSG to the file
+string outputMsgPath = System.IO.Path.Combine(Common.TestHelper.OutputFolder, "OutputFile.msg");
+msgEditor.Save(editedDoc, outputMsgPath, saveOptions1);
+
+//9. Generate and save 2nd output MSG to the stream
+Stream outputMsgStream = File.Create(Path.Combine(Common.TestHelper.OutputFolder, "OutputStream.msg"));
+msgEditor.Save(editedDoc, outputMsgStream, saveOptions2);
+
+//10. Dispose all resources
+outputMsgStream.Dispose();
+editedDoc.Dispose();
+originalDoc.Dispose();
+msgEditor.Dispose();
+```
+
+## Obtención de información del documento de correo electrónico {#obtaining-email-document-info}
+
+Artículo <a href="https://docs.groupdocs.com/editor/net/extracting-document-metainfo/" target="_blank" rel="nofollow noopener noreferrer">Extrayendo metainformación del documento</a> describe la <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`GetDocumentInfo()` método</a>, que permite detectar el formato del documento y extraer sus metadatos sin editarlo. De hecho, tras añadir el soporte para correos electrónicos en GroupDocs.Editor, este mecanismo también funciona con documentos de correo electrónico.
+
+Cuando el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`GetDocumentInfo()` método</a> se llama para el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor` clase</a> instancia que se carga con un documento de correo electrónico, el método devolverá un <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/emaildocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Metadata.EmailDocumentInfo`</a> instancia: es una clase común para todos los formatos de correo electrónico, como EML, EMLX, MSG, etc.
+
+Como todas <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`IDocumentInfo`</a> implementaciones, tiene cuatro propiedades:
+
+1. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/emaildocumentinfo/format" target="_blank" rel="nofollow noopener noreferrer">`Format`</a> propiedad de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/emailformats" target="_blank" rel="nofollow noopener noreferrer">`Formats.EmailFormats`</a> tipo. Indica el formato específico del documento de correo electrónico proporcionado.
+2. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/emaildocumentinfo/pagecount" target="_blank" rel="nofollow noopener noreferrer">`PageCount`</a> propiedad de <a href="https://docs.microsoft.com/en-us/dotnet/api/system.int32?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">entero (`Int32`)</a> tipo. Siempre devuelve 1, ya que los documentos de correo electrónico no tienen vista paginada.
+3. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/emaildocumentinfo/size" target="_blank" rel="nofollow noopener noreferrer">`Size`</a> propiedad de a <a href="https://docs.microsoft.com/en-us/dotnet/api/system.int64?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">entero largo (`Int64`)</a> tipo. Devuelve un tamaño de archivo en bytes.
+4. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/emaildocumentinfo/isencrypted" target="_blank" rel="nofollow noopener noreferrer">`IsEncrypted` propiedad</a> de un <a href="https://docs.microsoft.com/en-us/dotnet/api/system.boolean?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`Boolean`</a> tipo. Dado que los documentos de correo electrónico no se pueden cifrar con contraseña, esta propiedad siempre devuelve `false`El ejemplo de código a continuación muestra la extracción de información de documentos desde tres documentos de correo electrónico diferentes en distintos formatos. El código fuente se representa como una prueba unitaria escrita con el marco de trabajo NUnit.
+
+```csharp
+const string emlFilename = "Attachments.eml";
+string emlInputPath = System.IO.Path.Combine(Common.TestHelper.EmailFolder, emlFilename);
+
+const string msgFilename = "ComplexExample.msg";
+string msgInputPath = System.IO.Path.Combine(Common.TestHelper.EmailFolder, msgFilename);
+
+const string pstFilename = "PersonalStorage.pst";
+string pstInputPath = System.IO.Path.Combine(Common.TestHelper.EmailFolder, pstFilename);
+
+Editor emlEditor = new Editor(emlInputPath);
+Editor msgEditor = new Editor(msgInputPath);
+Editor pstEditor = new Editor(pstInputPath);
+
+IDocumentInfo emlDocInfo = emlEditor.GetDocumentInfo(null);
+IDocumentInfo msgDocInfo = msgEditor.GetDocumentInfo(null);
+IDocumentInfo pstDocInfo = pstEditor.GetDocumentInfo(null);
+
+Assert.IsTrue(emlDocInfo is EmailDocumentInfo);
+Assert.IsTrue(msgDocInfo is EmailDocumentInfo);
+Assert.IsTrue(pstDocInfo is EmailDocumentInfo);
+
+Assert.AreEqual(GroupDocs.Editor.Formats.EmailFormats.Eml, emlDocInfo.Format);
+Assert.AreEqual(GroupDocs.Editor.Formats.EmailFormats.Msg, msgDocInfo.Format);
+Assert.AreEqual(GroupDocs.Editor.Formats.EmailFormats.Pst, pstDocInfo.Format);
+
+emlEditor.Dispose();
+msgEditor.Dispose();
+pstEditor.Dispose();
+```

@@ -1,0 +1,351 @@
+---
+title: "Editar PDF"
+sidebar_label: "Editar PDF"
+sidebar_key: "net-editor-edit-document-edit-pdf"
+sidebar_position: 14
+description: "Esta guía muestra cómo editar el contenido de archivos PDF como si fueran documentos de texto comunes, utilizando GroupDocs.Editor para .NET."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-pdf.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "fb555bf7c8f95165b1252fcbb2820a822a13fd2317e6b87029d53dd927730a8d"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "78bc08dc45416554f89f081203d2ec0d4c1064378a4a5c3c7498bac97265cace"
+translation_updated_at: "2026-11-16T04:51:45.377Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+> Este ejemplo demuestra el flujo de trabajo estándar de abrir-editar-guardar con documentos PDF, utilizando diferentes opciones en cada paso.
+
+## Introducción {#introduction}
+
+Los <a href="https://docs.fileformat.com/pdf/" target="_blank" rel="nofollow noopener noreferrer">documentos PDF, o documentos en formato de documento portátil (Portable Document Format)</a>, desarrollados por Adobe Corp., son ampliamente utilizados en todo Internet y en sistemas de gestión de documentos. El formato PDF presenta una distinción fundamental respecto a otros formatos como <a href="https://docs.fileformat.com/word-processing/docx/" target="_blank" rel="nofollow noopener noreferrer">DOCX</a>, <a href="https://docs.fileformat.com/word-processing/txt/" target="_blank" rel="nofollow noopener noreferrer">TXT</a> o <a href="https://docs.fileformat.com/web/html/" target="_blank" rel="nofollow noopener noreferrer">HTML</a>/<a href="https://docs.fileformat.com/web/css/" target="_blank" rel="nofollow noopener noreferrer">CSS</a>: se trata de un formato de diseño fijo (*fixed-layout*). El objetivo principal del PDF es ser independiente de la plataforma y almacenar la representación exacta de un documento: independientemente de dónde y cuándo se abra dicho documento, debe ofrecer una fidelidad exacta, incluso hasta el nivel de caracteres y píxeles. Esto implica que, una vez creado, un documento PDF queda “congelado” en términos de su representación y editabilidad. Si bien puede editar libremente cualquier documento DOCX añadiendo, eliminando o moviendo cualquier parte de su contenido, y el diseño de página se actualiza de forma orgánica para adaptarse a los párrafos o imágenes recién añadidos (o las páginas se colapsan cuando se elimina texto u otro contenido desde el principio o el centro del documento), los documentos PDF permanecen “congelados”. Los documentos PDF tienen páginas, pero cada palabra, carácter y píxel está estrictamente vinculado a una página específica y no puede moverse. De hecho, el formato PDF no contiene definiciones de párrafos, títulos, oraciones, palabras ni siquiera letras: internamente, un documento PDF consta de páginas, donde cada página contiene un conjunto de glifos (carácteres visuales), y cada glifo tiene coordenadas que indican su ubicación exacta en dicha página. Lo mismo ocurre con las imágenes y otros elementos visuales. Palabras, bloques de texto, párrafos, etc., identificables visualmente por los usuarios que abren el PDF en un visor como Adobe Reader, no son más que un conjunto de símbolos dispuestos mediante coordenadas sobre la página para “parecerse a un texto”. Por ejemplo, las tablas no son más que un conjunto de líneas dibujadas que forman una cuadrícula visual, con glifos dibujados en sus celdas. Desde esta perspectiva, el formato PDF es mucho más cercano a las imágenes rasterizadas o vectoriales, como JPEG, PNG o SVG, que a los documentos de texto “verdaderos”, como DOCX o TXT.
+
+En resumen:
+- Editar documentos PDF como si fueran documentos ordinarios DOCX, TXT o HTML es una tarea extremadamente difícil y compleja.
+- La calidad de la edición de un documento PDF puede acercarse mucho a lo que podemos lograr con documentos de texto habituales, pero nunca será del 100 %, especialmente cuando el PDF de entrada tenga un formato y contenido bastante complejos.
+- Debido a la complejidad del formato PDF y al proceso necesario para hacerlo editable, esta operación requiere mucho tiempo de procesamiento y memoria.
+
+Desde su creación, GroupDocs.Editor para .NET no ha ofrecido soporte para editar documentos PDF. Pero a partir de la <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-22-7-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 22.7</a>, ¡finalmente lanzamos esta funcionalidad! Este artículo explica detalladamente cómo editar documentos PDF de cualquier complejidad como si fueran documentos de texto o documentos de procesamiento de textos (WordProcessing) normales.
+
+**Nota importante.**
+
+
+:::info
+GroupDocs.Editor para .NET <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-22-7-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 22.7</a> se distribuye para tres plataformas/entornos de ejecución: .NET Framework 2.0, .NET Framework 4.6.1 y .NET Standard 2.0. La capacidad de editar documentos PDF solo está disponible para .NET Framework 4.6.1 y versiones posteriores, o .NET Standard 2.0 y versiones posteriores.
+:::
+
+
+## En dos palabras {#in-two-words}
+
+La edición de los documentos PDF es igual que la edición de cualquier otro documento:
+
+1. Cargue un documento PDF en el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Editor` clase</a> con  <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfloadoptions" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Options.PdfLoadOptions`</a>, especifique una contraseña si es necesario.
+2. Editar un documento usando <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit/#edit" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Editor.Edit()` método</a> con <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfeditoptions" target="_blank" rel="nofollow noopener noreferrer">`PdfEditOptions`</a> y obtener una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a>.
+3. Enviar el contenido de un documento al lado del cliente, editarlo allí con un editor WYSIWYG y enviar de vuelta al lado del servidor el contenido modificado (editado).
+4. Crear una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> con contenido modificado y llamar a un <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/save" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Editor.Save()`</a> usando <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfsaveoptions" target="_blank" rel="nofollow noopener noreferrer">`PdfSaveOptions`</a>.
+
+Ejemplo de código breve a continuación:
+
+```csharp
+//0. Simple preparations of input data
+const string filename = "NET_Framework-protected.pdf";
+const string password = "password";
+string inputPath = System.IO.Path.Combine(Common.TestHelper.PdfFolder, filename);
+
+//1. Create a load options class with password
+GroupDocs.Editor.Options.PdfLoadOptions loadOptions = new PdfLoadOptions();
+loadOptions.Password = password;
+
+//2. Create edit options and tune/adjust if necessary
+GroupDocs.Editor.Options.PdfEditOptions editOptions = new PdfEditOptions();
+editOptions.EnablePagination = true;//enable pagination for per-page processing in WYSIWYG-editor
+editOptions.Pages = PageRange.FromStartPageTillEnd(3);//edit not all pages, but starting from 3rd and till the end
+
+//3. Create Editor instance, load a document
+GroupDocs.Editor.Editor editor = new Editor(inputPath, loadOptions);
+
+//4. Edit a document and generate EditableDocument
+GroupDocs.Editor.EditableDocument originalDoc = editor.Edit(editOptions);
+
+//5. Generate HTML/CSS, send it to WYSIWYG, edit there...and obtain edited version
+string originalContent = originalDoc.GetEmbeddedHtml();
+string editedContent = originalContent.Replace(".NET Framework", "I love Java!!!");
+
+//6. Generate EditableDocument from edited content
+EditableDocument editedDoc = EditableDocument.FromMarkup(editedContent, null);
+
+//7. Create and adjust save options
+GroupDocs.Editor.Options.PdfSaveOptions saveOptions = new PdfSaveOptions();
+saveOptions.Compliance = PdfCompliance.Pdf20;
+
+//8. Save to a file or a stream
+string outputPath = System.IO.Path.Combine(Common.TestHelper.OutputFolder, filename);
+editor.Save(editedDoc, outputPath, saveOptions);
+
+//9. Don't forget to dispose all resources
+originalDoc.Dispose();
+editedDoc.Dispose();
+editor.Dispose();
+```
+
+## Cargando {#loading}
+
+<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfloadoptions" target="_blank" rel="nofollow noopener noreferrer">La clase `GroupDocs.Editor.Options.PdfLoadOptions`</a> se encarga de cargar los archivos PDF en el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Editor`</a>. Solo tiene una propiedad: un <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfloadoptions/password" target="_blank" rel="nofollow noopener noreferrer">`Password`</a> de tipo <a href="https://docs.microsoft.com/en-us/dotnet/api/system.string?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`string`</a>. Por defecto, este valor es `null` (no se especifica ninguna contraseña). Esta propiedad es fundamental cuando el documento de entrada está cifrado con contraseña. Si el documento no está cifrado, el valor de la propiedad se ignora, independientemente de si se ha especificado o no.
+
+En realidad, cuando el PDF de entrada no está protegido con contraseña, el `PdfLoadOptions` no es necesario en absoluto: GroupDocs.Editor detectará automáticamente el formato PDF y aplicará el `PdfLoadOptions` predeterminado por sí mismo. Sin embargo, especificar incluso un `PdfLoadOptions` predeterminado acelerará el procesamiento del documento, ya que en este caso GroupDocs.Editor no dedicará tiempo de procesamiento a la rutina de detección automática del formato.
+
+```csharp
+//Creating the default PDF loading options
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+
+//Setting a password
+loadOptions.Password = "some_password";
+
+string inputPdfPath = System.IO.Path.Combine(Common.TestHelper.PdfFolder, "NET_Framework-protected.pdf");
+
+//Loading a PDF without PDF load options
+Editor editor1 = new Editor(inputPdfPath);
+
+//Loading a PDF with PDF load options
+Editor editor2 = new Editor(inputPdfPath, loadOptions);
+```
+
+## Edición {#editing}
+
+Al igual que para otras familias de formatos en GroupDocs.Editor, existe un especial <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfeditoptions" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Options.PdfEditOptions` clase</a> para editar documentos PDF. Esta clase no tiene sus propios miembros; en cambio, implementa una <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/fixedlayouteditoptionsbase" target="_blank" rel="nofollow noopener noreferrer">`FixedLayoutEditOptionsBase` clase abstracta</a>, lo cual es común para los formatos PDF y XPS (ya que son muy similares en su propósito e idea).
+
+Las siguientes propiedades se heredan de `FixedLayoutEditOptionsBase`:
+
+1. <a href="https://docs.microsoft.com/en-us/dotnet/api/system.boolean?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`Boolean`</a> bandera <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/fixedlayouteditoptionsbase/skipimages" target="_blank" rel="nofollow noopener noreferrer">`SkipImages`</a>. De forma predeterminada, si tiene un `false` value: las imágenes no se omiten y se conservan. Sin embargo, si solo necesita la información textual del documento, puede establecer esta bandera en `true`.
+
+2. <a href="https://docs.microsoft.com/en-us/dotnet/api/system.boolean?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`Boolean`</a> bandera <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/fixedlayouteditoptionsbase/enablepagination" target="_blank" rel="nofollow noopener noreferrer">`EnablePagination`</a>. Tiene el mismo significado exacto que <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions/enablepagination" target="_blank" rel="nofollow noopener noreferrer">la misma bandera</a> en el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions" target="_blank" rel="nofollow noopener noreferrer">`WordProcessingEditOptions`</a>. Esta bandera establece el modo de conversión de documentos: el **float** (el valor predeterminado es `false`) o **página** (`true`). Para los documentos PDF y XPS, significa lo mismo:
+> - Cuando se selecciona el modo flotante, el contenido del documento se convertirá en un documento HTML sin páginas (flotante), donde solo existe una única página (como cualquier documento web común).
+>
+> - Cuando se selecciona el modo paginado, las páginas del documento se conservarán en el documento HTML generado, tal como se puede ver en un visor de PDF como Adobe Reader.
+>En realidad, la relevancia y necesidad de este modo dependen principalmente de su editor WYSIWYG.
+
+3. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/fixedlayouteditoptionsbase/pages" target="_blank" rel="nofollow noopener noreferrer">`Pages` propiedad</a> de la <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pagerange" target="_blank" rel="nofollow noopener noreferrer">`PageRange` tipo</a>. `PageRange` es una estructura inmutable que contiene un rango de páginas de cualquier documento, sin relación con el documento específico. Y el `Pages` propiedad a través de un `PageRange` `struct` permite establecer un rango de páginas que deben procesarse. De forma predeterminada, se procesan todas las páginas del documento de entrada (<a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pagerange/isdefault" target="_blank" rel="nofollow noopener noreferrer">`PageRange.IsDefault`</a>` == true`). Puede elegir las distintas formas de establecer un rango de páginas utilizando diferentes métodos estáticos de un `PageRange` estructura. También preste atención: en `PageRange` las páginas se especifican mediante números de página, no mediante índices, por lo que son de base 1 y no de base 0.
+
+Cuando la instancia de un `PdfEditOptions` se crea y ajusta la clase, puedes pasarla a la <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit/#edit" target="_blank" rel="nofollow noopener noreferrer">`Editor.Edit(PdfEditOptions editOptions)`</a> método y obtener una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument` clase</a>, que está listo para generar marcado HTML/CSS y enviarlo al lado del cliente.
+
+Por cierto, si un valor predeterminado `PdfEditOptions` la instancia es aceptable para usted, es decir, no desea ajustar su configuración, le está permitido omitir `PdfEditOptions` creando en absoluto: simplemente llame a la <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit" target="_blank" rel="nofollow noopener noreferrer">`Editor.Edit()` sobrecarga sin parámetros</a> y GroupDocs.Editor generará y aplicará internamente el valor predeterminado `PdfEditOptions` para el documento PDF de entrada.
+
+El ejemplo de código a continuación demuestra todo lo descrito con detalle:
+
+```csharp
+//0. Prepare path to your input PDF file
+const string filename = "Comparison for .NET.pdf";
+string inputPdfPath = System.IO.Path.Combine(Common.TestHelper.PdfFolder, filename);
+
+//1. Create Editor instance - we do not use PdfLoadOptions here
+Editor editor = new Editor(inputPdfPath);
+
+//2. Edit PDF document with default PdfEditOptions - no need to create and pass PdfEditOptions explicitly
+EditableDocument originalDefaultDoc = editor.Edit();
+
+//3. Create and adjust PdfEditOptions for advanced edit
+
+//3.1. Create instance of PdfEditOptions class with specified pagination mode (enabled)
+PdfEditOptions editOptions = new PdfEditOptions(true);
+
+//3.2. Set to skip images - now they will be omitted during processing
+editOptions.SkipImages = true;
+
+//3.3. Set a page range - only second and third pages (input document initially has 4 pages)
+editOptions.Pages = PageRange.FromStartPageWithCount(2, 2);//don't forget that page numbers are 1-based
+
+//4. Edit the same PDF document with tuned edit options
+EditableDocument tunedDoc = editor.Edit(editOptions);
+```
+
+## Guardando {#saving}
+
+Al igual que con otros formatos de documento, existe una clase especial encargada de guardar los documentos PDF: una <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfsaveoptions" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Options.PdfSaveOptions` clase</a>, que implementa <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/isaveoptions" target="_blank" rel="nofollow noopener noreferrer">`ISaveOptions` interfaz</a>.
+
+Esta clase tiene las siguientes propiedades:
+
+1. <a href="https://docs.microsoft.com/en-us/dotnet/api/system.string?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`String`</a> <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfsaveoptions/password" target="_blank" rel="nofollow noopener noreferrer">propiedad `Password`</a> - permite proteger el documento PDF de salida con una contraseña especificada. De forma predeterminada es `null` - la protección por contraseña no se aplica. Cuando se especifica y no es un `null` o una cadena vacía, entonces el PDF de salida se cifrará con RC4 (longitud de clave de 128 bits).
+
+2. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfsaveoptions/compliance" target="_blank" rel="nofollow noopener noreferrer">`Compliance` propiedad</a> permite establecer el nivel de cumplimiento de estándares PDF para el PDF de salida. Tiene un tipo de enumeración <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfcompliance" target="_blank" rel="nofollow noopener noreferrer">`PdfCompliance`</a>, cada valor representa un nivel específico de cumplimiento de PDF. Por defecto, es el estándar PDF 1.7 (ISO 32000-1).
+
+3. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfsaveoptions/optimizememoryusage" target="_blank" rel="nofollow noopener noreferrer">`OptimizeMemoryUsage`</a> <a href="https://docs.microsoft.com/en-us/dotnet/api/system.boolean?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`boolean`</a> bandera, que permite modificar el proceso de generación de un documento PDF de salida a partir de un `EditableDocument` instancia de tal manera que este proceso consuma menos memoria a cambio de un tiempo de procesamiento más largo. De forma predeterminada, tiene un `false` valor, lo que significa que la optimización de memoria está deshabilitada para mejorar el rendimiento. En el caso de documentos extremadamente grandes, habilitar esta propiedad es vital para poder manejar <a href="https://docs.microsoft.com/en-us/dotnet/api/system.OutOfMemoryException?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`OutOfMemoryException`</a>, especialmente en procesos de 32 bits.
+
+4. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfsaveoptions/fontembedding/" target="_blank" rel="nofollow noopener noreferrer">`FontEmbedding`</a> propiedad de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/fontembeddingoptions" target="_blank" rel="nofollow noopener noreferrer">`FontEmbeddingOptions`</a> `type` es responsable de incrustar los recursos de fuentes en el documento PDF resultante. `FontEmbeddingOptions` es un enum que tiene varios valores, los cuales permiten controlar qué fuentes deben incrustarse en el PDF. De forma predeterminada, las fuentes no se incrustan en absoluto (`NotEmbed`). Al especificar el `EmbedAll` valor de la enumeración, todas las fuentes utilizadas en el documento se incrustarán dentro del PDF resultante. Al especificar el `EmbedWithoutSystem` - solo aquellas fuentes que no están presentes en el sistema operativo actual (donde se ejecuta GroupDocs.Editor).
+
+A diferencia de la <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfloadoptions" target="_blank" rel="nofollow noopener noreferrer">`PdfLoadOptions`</a> y <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfeditoptions" target="_blank" rel="nofollow noopener noreferrer">`PdfEditOptions`</a>, que son opcionales cuando son predeterminados (pueden omitirse respectivamente durante la carga y la edición), el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfsaveoptions" target="_blank" rel="nofollow noopener noreferrer">`PdfSaveOptions`</a> es obligatorio, incluso si todos sus valores son predeterminados.
+
+El ejemplo de código a continuación muestra todas las preparaciones necesarias (operaciones de carga y edición) y luego guarda los detalles.
+
+```csharp
+//0. Prepare path to your input PDF file
+const string filename = "Comparison for .NET.pdf";
+string inputPdfPath = System.IO.Path.Combine(Common.TestHelper.PdfFolder, filename);
+
+//1. Create Editor instance - we do not use PdfLoadOptions here
+Editor editor = new Editor(inputPdfPath);
+
+//2. Edit PDF document with default PdfEditOptions - no need to create and pass PdfEditOptions explicitly
+EditableDocument originalDoc = editor.Edit();
+
+//3. Generate HTML/CSS/resources, send to WYSIWYG-editor, edit there, send back to server and create EditableDocument... omitted here
+EditableDocument editedDoc = originalDoc;//just use the same in the sake of simplicity
+
+//4. Prepare PDF save options:
+//4.1. Create instance
+Options.PdfSaveOptions saveOptionsAdjusted = new PdfSaveOptions();
+//4.2. Adjust properties
+saveOptionsAdjusted.Password = "some_password";//protect output PDF with password
+saveOptionsAdjusted.FontEmbedding = FontEmbeddingOptions.EmbedAll;//set font embedding - all used
+saveOptionsAdjusted.Compliance = PdfCompliance.Pdf20;//set a PDF 2.0 (ISO 32000-2) standard compliance
+saveOptionsAdjusted.OptimizeMemoryUsage = true;//set memory optimization on
+
+//5. Create an output stream and save to it
+using (System.IO.MemoryStream outputStream = new MemoryStream())
+{
+	editor.Save(editedDoc, outputStream, saveOptionsAdjusted);
+}
+
+//6. Create another, default at this time, PDF save options
+Options.PdfSaveOptions saveOptionsDefault = new PdfSaveOptions();
+
+//7. Save to the file path at this time
+string outputPdfPath = System.IO.Path.Combine(Common.TestHelper.OutputFolder, filename);
+editor.Save(editedDoc, outputPdfPath, saveOptionsDefault);
+
+//8. Don't forget to dispose all
+originalDoc.Dispose();
+editedDoc.Dispose();
+editor.Dispose();
+```
+
+En este ejemplo, hemos creado dos archivos PDF de salida con diferentes opciones de guardado de PDF a partir de un único `EditableDocument` de origen, y los hemos guardado en dos almacenamientos distintos (memoria y disco).
+
+## Obtención de información del documento PDF {#obtaining-pdf-document-info}
+
+Artículo <a href="https://docs.groupdocs.com/editor/net/extracting-document-metainfo/" target="_blank" rel="nofollow noopener noreferrer">Extrayendo metainformación del documento</a> describe la <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`GetDocumentInfo()` método</a>, que permite detectar el formato del documento y extraer sus metadatos sin editarlo. De hecho, tras añadir el soporte de PDF a GroupDocs.Editor, este mecanismo también funciona con documentos PDF.
+
+Cuando el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`GetDocumentInfo()` método</a> se llama para el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor` clase</a> instancia que se carga con un documento PDF, el método devolverá un <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/fixedlayoutdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Metadata.FixedLayoutDocumentInfo`</a> instancia: es una clase común para todos los documentos de diseño fijo, en particular PDF y XPS.
+
+Como todos <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/idocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`IDocumentInfo`</a> implementaciones, tiene cuatro propiedades:
+
+1. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/fixedlayoutdocumentinfo/format" target="_blank" rel="nofollow noopener noreferrer">`Format` propiedad</a> de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/fixedlayoutformats" target="_blank" rel="nofollow noopener noreferrer">`Formats.FixedLayoutFormats` tipo</a>. Para documentos PDF, siempre es un <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.formats/fixedlayoutformats/fields/pdf" target="_blank" rel="nofollow noopener noreferrer">`FixedLayoutFormats.Pdf`</a>.
+2. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/fixedlayoutdocumentinfo/pagecount" target="_blank" rel="nofollow noopener noreferrer">`PageCount` propiedad</a> de <a href="https://docs.microsoft.com/en-us/dotnet/api/system.int32?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">entero (`Int32`)</a> tipo. Devuelve un número de páginas.
+3. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/fixedlayoutdocumentinfo/size" target="_blank" rel="nofollow noopener noreferrer">`Size` propiedad</a> de un <a href="https://docs.microsoft.com/en-us/dotnet/api/system.int64?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">entero largo (`Int64`)</a> tipo. Devuelve un tamaño de archivo en bytes.
+4. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/fixedlayoutdocumentinfo/isencrypted" target="_blank" rel="nofollow noopener noreferrer">`IsEncrypted` propiedad</a> de un <a href="https://docs.microsoft.com/en-us/dotnet/api/system.boolean?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`Boolean`</a> tipo. Para los documentos codificados con contraseña, devuelve `true`, y `false` en caso contrario. Para archivos XPS, siempre devuelve `false`, porque el formato XPS no admite cifrado.
+
+Como de costumbre, si el PDF de entrada, cargado en el <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor` clase</a>, se codifica, entonces su contraseña correcta debe especificarse en la <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`GetDocumentInfo()` método</a>. Si el PDF no está codificado, entonces el valor de la <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">`GetDocumentInfo()`</a> se ignora.
+
+**¡Nota importante!**
+
+
+:::info
+A diferencia del proceso de edición, la extracción de metadatos desde PDF no requiere .NET Framework 4.6.1 ni superior, ni .NET Standard 2.0 ni superior; es compatible incluso con .NET Framework 2.0, la versión más antigua.
+:::
+
+
+El ejemplo de código a continuación demuestra la extracción de metadatos de dos archivos PDF: el primero no está protegido, mientras que el segundo sí lo está.
+
+```csharp
+//0. Prepare path to your input unprotected and protected PDF files
+const string filenameUnprotected = "Comparison for .NET.pdf";
+const string filenameProtected = "NET_Framework-protected.pdf";
+string inputPdfUnprotectedPath = System.IO.Path.Combine(Common.TestHelper.PdfFolder, filenameUnprotected);
+string inputPdfProtectedPath = System.IO.Path.Combine(Common.TestHelper.PdfFolder, filenameProtected);
+
+//1. Create two Editor instances - we do not use PdfLoadOptions here
+Editor editorUnprotected = new Editor(inputPdfUnprotectedPath);
+Editor editorProtected = new Editor(inputPdfProtectedPath);
+
+//2. Extract metadata: do not specify a password (null value instead) for the 1st, and DO specify for the 2nd
+GroupDocs.Editor.Metadata.IDocumentInfo unprotectedPdfInfo = editorUnprotected.GetDocumentInfo(null);
+GroupDocs.Editor.Metadata.IDocumentInfo protectedPdfInfo = editorProtected.GetDocumentInfo("password");
+
+//3. Cast it if necessary and check properties
+GroupDocs.Editor.Metadata.FixedLayoutDocumentInfo castedUnprotected = (FixedLayoutDocumentInfo)unprotectedPdfInfo;
+Assert.AreEqual(4, castedUnprotected.PageCount);
+Assert.IsFalse(castedUnprotected.IsEncrypted);
+Assert.AreEqual(246298, castedUnprotected.Size);
+Assert.AreEqual(Formats.FixedLayoutFormats.Pdf, castedUnprotected.Format);
+
+Assert.AreEqual(14, protectedPdfInfo.PageCount);
+Assert.IsTrue(protectedPdfInfo.IsEncrypted);
+Assert.AreEqual(1016198, protectedPdfInfo.Size);
+Assert.AreEqual(Formats.FixedLayoutFormats.Pdf, protectedPdfInfo.Format);
+```
+
+## Información extendida {#extended-info}
+
+### EnablePagination en las opciones de guardado {#enablepagination-in-save-options}
+
+En las versiones anteriores de GroupDocs.Editor, la <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfsaveoptions" target="_blank" rel="nofollow noopener noreferrer">`PdfSaveOptions`</a> contenía una bandera booleana <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfsaveoptions/enablepagination" target="_blank" rel="nofollow noopener noreferrer">`EnablePagination`</a>. A partir de la <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-22-7-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 22.7</a>, esta bandera se marcó como <a href="https://docs.microsoft.com/en-us/dotnet/api/system.obsoleteattribute?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`Obsolete`</a> y su valor se ignora, ya sea que haya sido especificado por el usuario o se haya mantenido sin cambios. Esto se realizó como parte de las mejoras en el convertidor inverso, que genera el PDF de salida a partir de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a>. Actualmente, el convertidor inverso detecta automáticamente el contenido del <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> obtenido: si este fue generado con la bandera <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/fixedlayouteditoptionsbase/enablepagination" target="_blank" rel="nofollow noopener noreferrer">`EnablePagination`</a> establecida en `true` dentro de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfeditoptions" target="_blank" rel="nofollow noopener noreferrer">`PdfEditOptions`</a>, entonces se aplicará paginación al PDF de salida; lo mismo ocurre para el valor `false`.
+
+Si utiliza una versión de GroupDocs.Editor anterior a la 22.7, debe especificar manualmente la bandera <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfsaveoptions/enablepagination" target="_blank" rel="nofollow noopener noreferrer">`EnablePagination`</a> y hacerlo de acuerdo con el valor de la misma bandera en <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfeditoptions" target="_blank" rel="nofollow noopener noreferrer">`PdfEditOptions`</a>: si `EnablePagination` en <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfeditoptions" target="_blank" rel="nofollow noopener noreferrer">`PdfEditOptions`</a> está establecido en `true`, entonces en <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfsaveoptions" target="_blank" rel="nofollow noopener noreferrer">`PdfSaveOptions`</a> también debe ser `true`; lo mismo aplica para `false`.
+
+A partir de la <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-23-2-release-notes/" target="_blank" rel="nofollow noopener noreferrer">versión 23.2</a>, la bandera `EnablePagination` se eliminó completamente de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfsaveoptions" target="_blank" rel="nofollow noopener noreferrer">`PdfSaveOptions`</a>; por lo tanto, actualice su código al migrar desde versiones anteriores a versiones más recientes.
+
+### Diferentes formatos de salida {#different-output-formats}
+
+Tenga en cuenta que, cuando se edita un PDF de entrada y se va a guardar, no es necesario guardarlo necesariamente en formato PDF: puede elegir libremente cualquier formato compatible, como todos los formatos de procesamiento de textos, o formato de texto, o formato de libro electrónico.
+
+El siguiente ejemplo de código muestra cómo editar un archivo PDF y luego guardar el contenido editado en tres archivos distintos en formatos diferentes.
+
+```csharp
+//0. Prepare path to your input PDF file
+const string filename = "Comparison for .NET.pdf";
+string inputPdfPath = System.IO.Path.Combine(Common.TestHelper.PdfFolder, filename);
+
+//1. Create Editor instance - we do not use PdfLoadOptions here
+Editor editor = new Editor(inputPdfPath);
+
+//2. Edit PDF document with default PdfEditOptions - no need to create and pass PdfEditOptions explicitly
+EditableDocument originalDoc = editor.Edit();
+
+//3. Generate HTML/CSS/resources, send to WYSIWYG-editor, edit there, send back to server and create EditableDocument... omitted here
+EditableDocument editedDoc = originalDoc;//just use the same in the sake of simplicity
+
+//4. Prepare PDF save options
+Options.PdfSaveOptions pdfSaveOptions = new PdfSaveOptions();
+pdfSaveOptions.Compliance = PdfCompliance.PdfA2a;
+
+//5. Prepare DOCX save options
+Options.WordProcessingSaveOptions docxSaveOptions = new WordProcessingSaveOptions(Formats.WordProcessingFormats.Docx);
+
+//6. Prepare TXT save options
+Options.TextSaveOptions txtSaveOptions = new TextSaveOptions();
+txtSaveOptions.PreserveTableLayout = true;
+
+//7. Save to PDF format to the stream
+using (MemoryStream pdfStream = new MemoryStream())
+{
+	editor.Save(editedDoc, pdfStream, pdfSaveOptions);
+}
+
+//8. Save to DOCX format to the stream
+using (MemoryStream docxStream = new MemoryStream())
+{
+	editor.Save(editedDoc, docxStream, docxSaveOptions);
+}
+
+//9. Save to TXT format to the stream
+using (MemoryStream txtStream = new MemoryStream())
+{
+	editor.Save(editedDoc, txtStream, txtSaveOptions);
+}
+
+//10. Dispose all resources
+editedDoc.Dispose();
+originalDoc.Dispose();
+editor.Dispose();
+```

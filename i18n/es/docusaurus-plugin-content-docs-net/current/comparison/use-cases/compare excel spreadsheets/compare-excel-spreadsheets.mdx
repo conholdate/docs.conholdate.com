@@ -1,0 +1,345 @@
+---
+title: "Comparar hojas de cálculo de Excel. Análisis avanzado celda por celda en C#"
+sidebar_label: "Comparar hojas de cálculo de Excel. Análisis avanzado celda por celda en C#"
+sidebar_key: "net-comparison-compare-excel-spreadsheets-compare-excel-spreadsheets"
+sidebar_position: 1
+description: "Aprenda cómo comparar hojas de cálculo de Excel de forma programática mediante GroupDocs.Comparison para .NET. Compare hojas de cálculo con estilos personalizados, controles de visibilidad, páginas resumen y opciones avanzadas de comparación."
+product: "comparison"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "comparison-net"
+source_path: "net/use-cases/compare excel spreadsheets/compare-excel-spreadsheets.md"
+source_commit: "7624b4308e90feb1963a8dfe447bff38010a8a60"
+source_sha256: "f5810890704b06d311eded3986228ff7c82b849c12bcb34d9d1d01a75a69d9e5"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "48a9ff647cbe0412e1414d93fc0fcea0fcbcd288d45c7a1704e17cfc45da8376"
+translation_updated_at: "2026-11-16T03:59:22.032Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Comparison para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+
+:::info
+💡 Para el **código funcional completo** y explicaciones detalladas, consulte el repositorio completo <a href="https://github.com/groupdocs-comparison/net-excel-comparison-sample" target="_blank" rel="nofollow noopener noreferrer">full aquí</a>.  
+Este repositorio contiene todos los archivos de código fuente, clases auxiliares y ejemplos de configuración necesarios para implementar la comparación de hojas de cálculo de Excel en sus aplicaciones .NET.
+:::
+
+
+Este artículo demuestra cómo comparar **hojas de cálculo de Excel** (XLSX, XLS) mediante **GroupDocs.Comparison para .NET**.  
+El proyecto de ejemplo proporciona ejemplos listos para usar que permiten a los desarrolladores identificar rápidamente las diferencias a nivel de celda, con estilos personalizables, controles de visibilidad, páginas resumen y opciones avanzadas de comparación.
+
+La comparación de hojas de cálculo de Excel es esencial para la **auditoría financiera**, la **validación de datos**, el **control de versiones**, los **informes de cumplimiento** y la **edición colaborativa**.  
+Con GroupDocs.Comparison para .NET, puede automatizar los flujos de trabajo de comparación de Excel y generar documentos de resultado que resalten inserciones, eliminaciones y modificaciones, con estilos visuales configurables.
+
+> 💡 Utilice este enfoque cuando necesite detectar y resaltar automáticamente las diferencias entre versiones de hojas de cálculo de Excel sin revisión manual.
+
+## Requisitos previos {#prerequisites}
+  
+Antes de proceder, asegúrese de tener instalado lo siguiente:  
+
+-   **GroupDocs.Comparison para .NET**. <a href="https://purchase.conholdate.com/temp-license/100078" target="_blank">Obtenga una prueba gratuita</a>.
+-   **.NET SDK** 6.0 o posterior instalado.
+-   **Visual Studio** 2019 o posterior (recomendado) o cualquier IDE compatible con .NET.
+-   Un archivo de licencia válido de **GroupDocs.Comparison** (disponible una licencia temporal para evaluación).
+
+## Instalación {#installation}
+  
+Clone o descargue el <a href="https://github.com/groupdocs-comparison/net-excel-comparison-sample" target="_blank" rel="nofollow noopener noreferrer">repositorio de ejemplo</a>.
+
+```bash
+git clone https://github.com/groupdocs-comparison/net-excel-comparison-sample.git
+cd net-excel-comparison-sample/CompareExcelSpreadsheets
+```
+
+Instale el paquete NuGet GroupDocs.Comparison:
+
+```bash
+dotnet add package GroupDocs.Comparison
+```
+
+O mediante la Consola del Administrador de Paquetes en Visual Studio:
+
+```powershell
+Install-Package GroupDocs.Comparison
+```
+
+## Estructura del repositorio {#repository-structure}
+  
+El proyecto incluye:
+
+```text
+    compare-excel-spreadsheets-dotnet/
+     ├── CompareExcelSpreadsheets/
+     │   ├── Program.cs                    # Main program with all comparison examples
+     │   └── CompareExcelSpreadsheets.csproj  # Project file with dependencies
+     ├── sample-files/                     # Input Excel files (source.xlsx, target.xlsx)
+     ├── output/                           # Generated comparison results
+     └── README.md
+```
+
+## Ejemplos de uso  {#usage-examples}
+  
+A continuación se presentan versiones simplificadas del código de ejemplo. Para la implementación completa, consulte el <a href="https://github.com/groupdocs-comparison/net-excel-comparison-sample" target="_blank" rel="nofollow noopener noreferrer">repositorio</a>.
+
+### Comparación básica  {#basic-comparison}
+  
+El método `BasicComparison` realiza una comparación sencilla utilizando la configuración predeterminada:
+
+```csharp
+using GroupDocs.Comparison;
+using GroupDocs.Comparison.Options;
+
+private static void BasicComparison(string sourcePath, string targetPath, string resultPath)
+{
+    EnsureFileExists(sourcePath, "source Excel file");
+    EnsureFileExists(targetPath, "target Excel file");
+
+    using (var comparer = new Comparer(sourcePath))
+    {
+        comparer.Add(targetPath);
+        comparer.Compare(resultPath);
+    }
+
+    Console.WriteLine("Basic comparison completed.");
+}
+```
+
+Este código utiliza la clase `Comparer` de GroupDocs.Comparison para comparar dos archivos de Excel con el estilo predeterminado, resaltando automáticamente todas las diferencias.
+
+### Comparación con estilo personalizado  {#styled-comparison-with-custom-formatting}
+  
+El método `StyledComparison` aplica un formato personalizado y genera una página de resumen:
+
+```csharp
+private static void StyledComparison(string sourcePath, string targetPath, string resultPath)
+{
+    EnsureFileExists(sourcePath, "source Excel file");
+    EnsureFileExists(targetPath, "target Excel file");
+
+    var compareOptions = new CompareOptions
+    {
+        InsertedItemStyle = new StyleSettings()
+        {
+            FontColor = System.Drawing.Color.Green,
+            IsUnderline = true,
+            IsBold = true,
+            IsItalic = true
+        },
+        DeletedItemStyle = new StyleSettings()
+        {
+            FontColor = System.Drawing.Color.Brown,
+            IsUnderline = true,
+            IsBold = true,
+            IsItalic = true
+        },
+        ChangedItemStyle = new StyleSettings()
+        {
+            FontColor = System.Drawing.Color.Firebrick,
+            IsUnderline = true,
+            IsBold = true,
+            IsItalic = true
+        },
+        GenerateSummaryPage = true,
+        ShowDeletedContent = false,
+    };
+
+    using (var comparer = new Comparer(sourcePath))
+    {
+        comparer.Add(targetPath);
+        comparer.Compare(resultPath, compareOptions);
+    }
+
+    Console.WriteLine("Styled comparison completed (changes highlighted, summary page generated).");
+}
+```
+
+Este ejemplo demuestra las clases `CompareOptions` y `StyleSettings` de GroupDocs.Comparison para el formato personalizado. Las celdas insertadas aparecen en verde, las celdas eliminadas en marrón y las celdas modificadas en rojo ladrillo, todas con formato en negrita, cursiva y subrayado.
+
+### Ocultar contenido insertado  {#hide-inserted-content}
+  
+El método `HideInsertedContentComparison` se centra en las eliminaciones y modificaciones:
+
+```csharp
+private static void HideInsertedContentComparison(string sourcePath, string targetPath, string resultPath)
+{
+    EnsureFileExists(sourcePath, "source Excel file");
+    EnsureFileExists(targetPath, "target Excel file");
+
+    var compareOptions = new CompareOptions
+    {
+        ShowInsertedContent = false
+    };
+
+    using (var comparer = new Comparer(sourcePath))
+    {
+        comparer.Add(targetPath);
+        comparer.Compare(resultPath, compareOptions);
+    }
+
+    Console.WriteLine("Comparison completed (inserted content hidden).");
+}
+```
+
+Al establecer `ShowInsertedContent` en `false`, este ejemplo oculta la visualización de cualquier celda recién agregada en el documento resultante, haciendo que las eliminaciones y modificaciones sean más visibles.
+
+### Ocultar contenido eliminado  {#hide-deleted-content}
+  
+El método `HideDeletedContentComparison` se centra en las adiciones y modificaciones:
+
+```csharp
+private static void HideDeletedContentComparison(string sourcePath, string targetPath, string resultPath)
+{
+    EnsureFileExists(sourcePath, "source Excel file");
+    EnsureFileExists(targetPath, "target Excel file");
+
+    var compareOptions = new CompareOptions
+    {
+        ShowDeletedContent = false
+    };
+
+    using (var comparer = new Comparer(sourcePath))
+    {
+        comparer.Add(targetPath);
+        comparer.Compare(resultPath, compareOptions);
+    }
+
+    Console.WriteLine("Comparison completed (deleted content hidden).");
+}
+```
+
+Establecer `ShowDeletedContent` en `false` elimina cualquier indicación visual de celdas eliminadas, resaltando únicamente las adiciones y modificaciones.
+
+### Dejar espacios para el contenido eliminado  {#leave-gaps-for-deleted-content}
+  
+El método `LeaveGapsComparison` conserva la estructura del documento:
+
+```csharp
+private static void LeaveGapsComparison(string sourcePath, string targetPath, string resultPath)
+{
+    EnsureFileExists(sourcePath, "source Excel file");
+    EnsureFileExists(targetPath, "target Excel file");
+
+    var compareOptions = new CompareOptions
+    {
+        LeaveGaps = true
+    };
+
+    using (var comparer = new Comparer(sourcePath))
+    {
+        comparer.Add(targetPath);
+        comparer.Compare(resultPath, compareOptions);
+    }
+
+    Console.WriteLine("Comparison completed (gaps left for deleted content).");
+}
+```
+
+Habilitar `LeaveGaps` conserva las celdas vacías donde se produjeron eliminaciones, manteniendo intacta la estructura de la hoja de cálculo y haciendo visible inmediatamente el contenido ausente.
+
+### Ocultar tanto el contenido insertado como el eliminado  {#hide-both-inserted-and-deleted-content}
+  
+El método `HideBothContentComparison` muestra únicamente las modificaciones:
+
+```csharp
+private static void HideBothContentComparison(string sourcePath, string targetPath, string resultPath)
+{
+    EnsureFileExists(sourcePath, "source Excel file");
+    EnsureFileExists(targetPath, "target Excel file");
+
+    var compareOptions = new CompareOptions
+    {
+        ShowInsertedContent = false,
+        ShowDeletedContent = false,
+        LeaveGaps = true
+    };
+
+    using (var comparer = new Comparer(sourcePath))
+    {
+        comparer.Add(targetPath);
+        comparer.Compare(resultPath, compareOptions);
+    }
+
+    Console.WriteLine("Comparison completed (both inserted and deleted content hidden, gaps left).");
+}
+```
+
+Ambas `ShowInsertedContent` y `ShowDeletedContent` están deshabilitadas, mientras que `LeaveGaps` permanece en `true` para conservar el diseño. El resultado resalta únicamente las celdas cuyo valor haya cambiado, lo cual es ideal para el análisis de impacto de los cambios.
+
+### Gestión de licencias  {#license-management}
+  
+Aplique la licencia de GroupDocs.Comparison antes de realizar comparaciones:
+
+```csharp
+private static void ApplyLicense()
+{
+    string licensePath = "path to your license file";
+    License license = new License();
+    license.SetLicense(licensePath);
+}
+```
+
+Actualice la variable `licensePath` con la ruta a su archivo de licencia. Sin una licencia válida, la biblioteca se ejecuta en modo de evaluación con capacidades limitadas.
+
+### Validación de archivos  {#file-validation}
+  
+El método auxiliar `EnsureFileExists` valida la presencia del archivo:
+
+```csharp
+private static void EnsureFileExists(string path, string description)
+{
+    if (!File.Exists(path))
+    {
+        throw new FileNotFoundException($"The {description} was not found. Path: {path}", path);
+    }
+}
+```
+
+Esta utilidad valida la existencia del archivo antes de realizar cualquier operación de comparación, proporcionando un mensaje de excepción claro que facilita la depuración.
+
+## Ejecutar los ejemplos  {#running-the-examples}  
+
+1. Coloque sus archivos de Excel en el directorio `sample-files`:
+   - `source.xlsx` – El archivo de Excel original
+   - `target.xlsx` – El archivo de Excel modificado con el que se realizará la comparación  
+
+2. Actualice la ruta de la licencia en `Program.cs`:
+   ```csharp
+   string licensePath = "path to your license file";
+   ```
+
+3. Ejecute el proyecto:
+   ```bash
+   dotnet run
+   ```
+
+4. Consulte el directorio `output` para ver los resultados de la comparación:
+   - `result_basic.xlsx` – Resultado básico de la comparación
+   - `result_styled.xlsx` – Comparación con estilo y página de resumen
+   - `result_hide_inserted.xlsx` – Resultado con el contenido insertado oculto
+   - `result_hide_deleted.xlsx` – Resultado con el contenido eliminado oculto
+   - `result_leave_gaps.xlsx` – Resultado con espacios vacíos para el contenido eliminado
+   - `result_hide_both.xlsx` – Resultado que muestra únicamente las modificaciones
+
+## Notas {#notes}
+
+- Reemplace las rutas de archivo por las ubicaciones reales de sus documentos.
+- El estilo predeterminado utiliza colores estándar para el contenido insertado, eliminado y modificado.
+- La generación de la página de resumen ofrece una vista consolidada de todos los cambios en una única página.
+- Los controles de visibilidad le permiten centrarse en tipos específicos de cambios según sus necesidades de análisis.
+- La opción `LeaveGaps` conserva la estructura del documento, facilitando la identificación de dónde se eliminó contenido.
+- Para ejemplos detallados y escenarios avanzados, consulte el <a href="https://github.com/groupdocs-comparison/net-excel-comparison-sample" target="_blank" rel="nofollow noopener noreferrer">repositorio completo</a>.
+
+## Véase también {#see-also}
+
+- [Comparar documentos](/net/comparison/comparison-basic/compare-documents/)
+- [Personalizar estilos de cambios](/net/comparison/advanced-usage/comparison/customize-changes-styles/)
+- <a href="https://blog.groupdocs.com/comparison/compare-excel-spreadsheets-advanced-cell-by-cell-analysis-csharp/" target="_blank" rel="nofollow noopener noreferrer">Comparar hojas de cálculo de Excel: Análisis avanzado celda por celda con C#</a>

@@ -1,0 +1,67 @@
+---
+title: "Generación de vista previa de diapositivas para la presentación"
+sidebar_label: "Generación de vista previa de diapositivas para la presentación"
+sidebar_key: "net-editor-edit-document-edit-powerpoint-generating-slides-preview-for-presentation"
+sidebar_position: 4
+description: "Este artículo describe cómo generar una vista previa para cualquier diapositiva de la presentación de PowerPoint existente en formato SVG."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-powerpoint/generating-slides-preview-for-presentation.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "18af75ace12a4d56338fa6bebb0e0683b51cff3abcc68efc8e4a7bd1907a88c5"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "5ae66601aa05bbc22de36361a2210469e1562f730e564107384e43d020f5a971"
+translation_updated_at: "2026-11-16T03:55:53.568Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+A partir de la versión <a href="https://docs.groupdocs.com/editor/net/groupdocs-editor-for-net-22-11-release-notes/" target="_blank" rel="nofollow noopener noreferrer">22.11</a> de GroupDocs.Editor para .NET, es posible generar una vista previa en formato SVG para cualquier diapositiva de un documento de presentación. Esta funcionalidad permite al usuario final visualizar e inspeccionar el contenido de la presentación sin necesidad de enviarla para su edición. Dicha vista previa generada no es editable, pero sí puede visualizarse en cualquier visor de imágenes de escritorio o en línea, así como en el navegador (ya que todos los navegadores modernos admiten el formato SVG).
+
+Esta característica permite al usuario final generar una vista previa para cualquier diapositiva de la presentación, independientemente del modo de licencia de GroupDocs.Editor para .NET: funciona de la misma manera tanto en modo de prueba como en modo con licencia, y no existen limitaciones de prueba para esta funcionalidad. Al generar las vistas previas de las diapositivas, GroupDocs.Editor no consume ni descuenta bytes ni créditos.
+
+Para generar las vistas previas de las diapositivas, se debe utilizar el nuevo método de instancia <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/presentationdocumentinfo/generatepreview/" target="_blank" rel="nofollow noopener noreferrer">`GeneratePreview(int slideIndex)`</a> del struct <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/presentationdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Metadata.PresentationDocumentInfo`</a>, y la diapositiva se especifica mediante su _índice_ (base cero; no debe confundirse con los _números_ de diapositiva, que son base 1). Si el índice especificado es menor que 0 o excede el número de diapositivas presentes en la presentación dada, se lanzará la excepción <a href="https://learn.microsoft.com/en-us/dotnet/api/system.ArgumentOutOfRangeException?view=net-7.0" target="_blank" rel="nofollow noopener noreferrer">System.ArgumentOutOfRangeException</a>. Las vistas previas de diapositivas pueden generarse tanto para presentaciones codificadas como no codificadas; en el caso de las presentaciones codificadas, el usuario final debe especificar una contraseña válida en el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`GetDocumentInfo`</a>.
+
+El método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/presentationdocumentinfo/generatepreview/" target="_blank" rel="nofollow noopener noreferrer">`GeneratePreview(int slideIndex)`</a> devuelve una vista previa de diapositiva como una imagen vectorial SVG, encapsulada en la clase pública <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a> del espacio de nombres <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.HtmlCss.Resources.Images.Vector`</a>. Esta clase dispone de todos los métodos y propiedades necesarios para obtener el contenido de la imagen SVG en cualquier formato deseado, guardarlo en disco, etc.
+
+El siguiente ejemplo de código muestra cómo abrir un archivo de presentación no protegido y generar vistas previas para todas sus diapositivas, para luego guardar dichas vistas previas en disco.
+
+```csharp
+// Obtain a valid full path to the presentation file
+string inputPath = "Sample.pptx";
+
+// Load file to the Editor constructor
+using (GroupDocs.Editor.Editor editor = new Editor(inputPath))
+{
+	// Get document info for this file
+	IDocumentInfo infoUncasted = editor.GetDocumentInfo(null);
+
+	// Cast this document info to the PresentationDocumentInfo type
+	PresentationDocumentInfo infoSlides = (PresentationDocumentInfo)infoUncasted;
+
+	// Get the number of all slides
+	int slidesCount = infoSlides.PageCount;
+
+	//Iterate through all slides and generate the preview on every iteration
+	for (int i = 0; i < slidesCount; i++)
+	{
+		// Generate one preview as SVG image by slide index
+		SvgImage oneSvgPreview = infoSlides.GeneratePreview(i);
+
+		// Save it to the file
+		oneSvgPreview.Save(Path.Combine(outputFolder, oneSvgPreview.FilenameWithExtension));
+	}
+}
+```
+
+En conclusión, la nueva función de vista previa de diapositivas es, por esencia, un nuevo método público en la estructura existente <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/presentationdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">`GroupDocs.Editor.Metadata.PresentationDocumentInfo`</a>, que recibe un índice de diapositiva y devuelve una instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a>. Si el usuario final necesita obtener una vista previa de la diapositiva en formato rasterizado, pero no en formato vectorial, puede utilizar el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/savetopng/" target="_blank" rel="nofollow noopener noreferrer">`SaveToPng`</a> de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a>: este método convierte el contenido SVG de la <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.htmlcss.resources.images.vector/svgimage/" target="_blank" rel="nofollow noopener noreferrer">`SvgImage`</a> actual al formato PNG y lo guarda en el <a href="https://learn.microsoft.com/en-us/dotnet/api/system.IO.Stream?view=net-6.0" target="_blank" rel="nofollow noopener noreferrer">`System.IO.Stream`</a> especificado.

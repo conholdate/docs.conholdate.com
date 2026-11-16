@@ -1,0 +1,139 @@
+---
+title: "Introducción"
+sidebar_label: "Introducción"
+sidebar_key: "net-editor-introduction"
+sidebar_position: 2
+description: "Este artículo explica los principios y etapas principales para editar documentos programáticamente con la API de GroupDocs.Editor para .NET."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/introduction.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "479e25092bfc0b8e8deb50a25232b32109028d9d0bdd2f8433ecdafd2678dd69"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "d2cd26131e1abf7d4e6b3a28bba9618539109e23cff0e913a94b3454764b22ca"
+translation_updated_at: "2026-11-16T04:55:34.212Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+> Este artículo explica los principios más comunes y fundamentales de GroupDocs.Editor, cómo funciona, cuál es su propósito y cómo debe utilizarse.
+
+<a href="https://products.groupdocs.com/editor/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Editor**</a> es una biblioteca de clases .NET sin interfaz gráfica (GUI), lo que significa que solo dispone de una interfaz programática (API). Este hecho implica que, para editar un documento, el usuario debe utilizar GroupDocs.Editor junto con alguna aplicación de editor de terceros, a través de cuya GUI el usuario final pueda editar el contenido del documento. Para GroupDocs.Editor no es relevante qué software de editor concreto se utilice; sin embargo, dado que GroupDocs.Editor está orientado al desarrollo web, tiene un único requisito: el editor de terceros debe ser compatible con documentos HTML.
+
+Para editar un documento con GroupDocs.Editor, el usuario debe realizar varios pasos secuenciales: cargar el documento en GroupDocs.Editor (mediante opciones de carga opcionales), abrir el documento para su edición (con opciones de edición opcionales), generar el marcado HTML con sus recursos (empleando distintas opciones y configuraciones), y pasar este marcado a un editor HTML WYSIWYG de terceros. A continuación, el usuario final edita el contenido del documento; una vez finalizada la edición y enviada la versión modificada, dicho marcado modificado debe devolverse a GroupDocs.Editor y convertirse en un documento de salida en el formato deseado.
+
+Desde la perspectiva de GroupDocs.Editor, esta secuencia puede dividirse condicionalmente en tres etapas principales, que se describen a continuación.
+
+## Carga del documento en GroupDocs.Editor {#loading-document-into-the-groupdocs-editor}
+
+En la etapa de *[carga del documento](/net/editor/developer-guide/load-document/)*, el usuario debe crear una instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">`Editor`</a> y pasarle el documento de entrada (mediante una ruta de archivo o un flujo de bytes), junto con las opciones de carga del documento. Las opciones de carga no son obligatorias, ya que GroupDocs.Editor puede detectar automáticamente el formato del documento y seleccionar las opciones predeterminadas más adecuadas para dicho formato. No obstante, se recomienda especificarlas explícitamente, ya que son imprescindibles al intentar cargar documentos protegidos con contraseña.
+
+```csharp
+string inputFilePath = "C:\\input_path\\document.docx"; //path to some document
+Editor editor = new Editor(inputFilePath); //passing path to the constructor, default WordProcessingLoadOptions will be applied automatically
+```
+
+Una vez finalizada esta etapa, el documento queda listo para ser abierto y editado.
+
+## Apertura de un documento para su edición {#opening-a-document-for-editing}
+
+Dado que GroupDocs.Editor es una biblioteca sin interfaz gráfica (GUI), el documento no puede editarse directamente dentro de ella. Sin embargo, para editar un documento en un editor HTML WYSIWYG, GroupDocs.Editor debe generar una versión en HTML del documento, ya que cualquier editor WYSIWYG solo puede trabajar con marcado HTML/CSS. Cuando se crea una instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a> en la primera etapa, el usuario debe *[abrir el documento para su edición](/net/editor/developer-guide/edit-document/)* invocando el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit" target="_blank" rel="nofollow noopener noreferrer">Edit()</a> de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a>. Este método devuelve una instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>. Dicha clase puede describirse como una versión convertida del documento de entrada, almacenada en un formato intermedio interno compatible con todos los formatos que admite GroupDocs.Editor. Con <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>, el usuario puede obtener el marcado HTML del documento de entrada con distintas opciones, hojas de estilo, imágenes, fuentes, guardar el documento HTML en disco y otras acciones. Se supone que el marcado HTML generado por <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> se pasa posteriormente a un editor HTML WYSIWYG del lado del cliente, donde el usuario final puede editar efectivamente el documento.
+
+Al igual que en la etapa de carga, el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/edit" target="_blank" rel="nofollow noopener noreferrer">Edit()</a> acepta herederos opcionales de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ieditoptions" target="_blank" rel="nofollow noopener noreferrer">IEditOptions</a>, que controlan exactamente cómo se abrirá el documento para su edición.
+
+```csharp
+WordProcessingEditOptions editOptions = new WordProcessingEditOptions();
+editOptions.EnableLanguageInformation = true;
+
+EditableDocument readyToEdit = editor.Edit(editOptions);
+```
+
+Tras esta etapa, el documento está listo para ser pasado al editor HTML WYSIWYG, y su contenido puede ser editado por el usuario final.
+
+## Guardado del documento {#saving-a-document}
+
+*[Guardar un documento](/net/editor/developer-guide/save-document/)* es la etapa final, que se produce cuando el contenido del documento ha sido editado en el editor HTML WYSIWYG (o en cualquier otro software, lo cual no supone ninguna diferencia para GroupDocs.Editor) y debe guardarse nuevamente como un documento en algún formato (por ejemplo, DOCX, PDF o XLSX). En esta etapa, el usuario debe crear una nueva instancia de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> con el marcado HTML y los recursos de la versión editada del documento original, obtenida del usuario final. La clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> contiene varios métodos estáticos que permiten crear instancias a partir de documentos HTML que pueden presentarse en distintas formas. Una vez que la instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">`EditableDocument`</a> está lista, es posible guardarla como un documento normal mediante el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/save" target="_blank" rel="nofollow noopener noreferrer">Save()</a> de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a>.
+
+```csharp
+EditableDocument afterEdit = EditableDocument.FromMarkup("<body>HTML content of the document...</body>", null);
+string outputFilePath = "C:\\output_path\\document.rtf";
+Options.WordProcessingSaveOptions saveOptions = new WordProcessingSaveOptions(WordProcessingFormats.Rtf);
+editor.Save(afterEdit, outputFilePath, saveOptions);
+```
+
+A diferencia de las opciones anteriores de carga y edición, las opciones de guardado son obligatorias, ya que GroupDocs.Editor necesita conocer el formato exacto del documento para guardarlo.
+
+## Detección del tipo de documento {#detecting-document-type}
+
+En ocasiones es necesario *[detectar el tipo de documento y extraer sus metadatos](/net/editor/developer-guide/extracting-document-metainfo/)* antes de enviarlo para su edición. Para tales escenarios, GroupDocs.Editor permite detectar el tipo de documento y extraer la metainformación más necesaria, dependiendo del tipo de documento:
+
+1. Si el documento está codificado o no;
+2. Formato exacto del documento;
+3. Tamaño del documento;
+4. Número de páginas (pestañas);
+5. Codificación de texto, si el documento es de texto.
+
+Para detectar el tipo de documento y recopilar su metainformación, el usuario debe cargar el documento deseado en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor" target="_blank" rel="nofollow noopener noreferrer">Editor</a> y, a continuación, invocar el método <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editor/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">GetDocumentInfo()</a>.
+
+## Descripción de las opciones {#describing-options}
+
+En cada etapa, el usuario puede ajustar (configurar) el procesamiento mediante distintas opciones:
+
+1. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/iloadoptions" target="_blank" rel="nofollow noopener noreferrer">ILoadOptions</a> para *cargar* el documento.
+2. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ieditoptions" target="_blank" rel="nofollow noopener noreferrer">IEditOptions</a> para abrir el documento para su *edición*.
+3. <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/isaveoptions" target="_blank" rel="nofollow noopener noreferrer">ISaveOptions</a> para *guardar* el documento editado.
+
+Algunas de estas opciones pueden ser opcionales en casos específicos, mientras que otras son obligatorias. Por ejemplo, es posible cargar un documento en la clase `Editor` sin especificar opciones de carga; en tal caso, GroupDocs.Editor intentará detectar automáticamente el formato del documento y aplicar las opciones predeterminadas más adecuadas para el formato detectado.
+
+### Descripción de las familias de formatos {#describing-family-formats}
+
+Todos los formatos de documento que admite GroupDocs.Editor se agrupan en familias de formatos. Cada familia de formato comparte muchas características comunes, por lo que no existen opciones específicas para cada formato individual, sino únicamente para la familia de formatos. La relación entre formatos, familias de formatos, formatos de importación/exportación y opciones se ilustra en la siguiente tabla:
+
+| Familia de formatos | Formatos admitidos | Carga | Guardado | Opciones de carga | Opciones de edición | Opciones de guardado | Metadatos |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Procesamiento de textos (WordProcessing) | DOC, DOCX, DOCM, DOT, DOTX, DOTM, RTF, WordprocessingML Flat XML, ODT, OTT, Word 2003 XML | ![(tick)](/net/editor/images/check.png) | ![(tick)](/net/editor/images/check.png) | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingloadoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingLoadOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingEditOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingsaveoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingSaveOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/wordprocessingdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">WordProcessingDocumentInfo</a> |
+| Hoja de cálculo | XLS, XLT, XLSX, XLSM, XLSB, XLTX, XLTM, XLAM, SpreadsheetML XML, ODS, FODS, SXC, DIF | ![(tick)](/net/editor/images/check.png) | ![(tick)](/net/editor/images/check.png) | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetloadoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetLoadOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheeteditoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetEditOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/spreadsheetsaveoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetSaveOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/spreadsheetdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetDocumentInfo</a> |
+| DSV | CSV, TSV, separado por punto y coma, separado por espacios en blanco, separador arbitrario | ![(tick)](/net/editor/images/check.png) | ![(tick)](/net/editor/images/check.png) | No aplica | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/delimitedtexteditoptions" target="_blank" rel="nofollow noopener noreferrer">DelimitedTextEditOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/delimitedtextsaveoptions" target="_blank" rel="nofollow noopener noreferrer">DelimitedTextSaveOptions</a> | No aplica |
+| Presentación | PPT, PPTX, PPTM, PPS, PPSX, PPSM, POT, POTX, POTM, ODP, OTP | ![(tick)](/net/editor/images/check.png) | ![(tick)](/net/editor/images/check.png) | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationloadoptions" target="_blank" rel="nofollow noopener noreferrer">PresentationLoadOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationeditoptions" target="_blank" rel="nofollow noopener noreferrer">PresentationEditOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/presentationsaveoptions" target="_blank" rel="nofollow noopener noreferrer">PresentationSaveOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/presentationdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">PresentationDocumentInfo</a> |
+| XML | Cualquier documento XML | ![(tick)](/net/editor/images/check.png) | ![(error)](/net/editor/images/error.png) | N/A | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xmleditoptions" target="_blank" rel="nofollow noopener noreferrer">XmlEditOptions</a> | N/A | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/textualdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">TextualDocumentInfo</a> |
+| TXT | Cualquier documento de texto | ![(tick)](/net/editor/images/check.png) | ![(tick)](/net/editor/images/check.png) | No aplica | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/texteditoptions" target="_blank" rel="nofollow noopener noreferrer">TextEditOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/textsaveoptions" target="_blank" rel="nofollow noopener noreferrer">TextSaveOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/textualdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">TextualDocumentInfo</a> |
+| Formato de diseño fijo | PDF | ![(tick)](/net/editor/images/check.png) | ![(tick)](/net/editor/images/check.png) | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfloadoptions" target="_blank" rel="nofollow noopener noreferrer">PdfLoadOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfeditoptions" target="_blank" rel="nofollow noopener noreferrer">PdfEditOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfsaveoptions" target="_blank" rel="nofollow noopener noreferrer">PdfSaveOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/fixedlayoutdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">FixedLayoutDocumentInfo</a> |
+| Formato de diseño fijo | XPS (incluido OpenXPS) | ![(error)](/net/editor/images/error.png) | ![(tick)](/net/editor/images/check.png) | N/A | N/A | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/xpssaveoptions" target="_blank" rel="nofollow noopener noreferrer">XpsSaveOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/fixedlayoutdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">FixedLayoutDocumentInfo</a> |
+| Libro electrónico | Mobi, AZW3, ePub | ![(tick)](/net/editor/images/check.png) | ![(tick)](/net/editor/images/check.png) | N/A | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/ebookeditoptions" target="_blank" rel="nofollow noopener noreferrer">EbookEditOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/azw3saveoptions" target="_blank" rel="nofollow noopener noreferrer">Azw3SaveOptions</a> / <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/epubsaveoptions" target="_blank" rel="nofollow noopener noreferrer">EpubSaveOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/ebookdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">EbookDocumentInfo</a> |
+| Correo electrónico | EML, EMLX, TNEF, MSG, HTML, MHTML, ICS, VCF, PST, MBOX, OFT | ![(tick)](/net/editor/images/check.png) | ![(tick)](/net/editor/images/check.png) | No aplica | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/emaileditoptions" target="_blank" rel="nofollow noopener noreferrer">EmailEditOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/emailsaveoptions" target="_blank" rel="nofollow noopener noreferrer">EmailSaveOptions</a> | <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.metadata/emaildocumentinfo" target="_blank" rel="nofollow noopener noreferrer">EmailDocumentInfo</a> |
+
+
+### Materiales adicionales {#additional-materials}
+
+Información detallada sobre cada etapa del procesamiento de documentos, junto con ejemplos de código fuente, explicaciones de opciones, etc., se encuentra en los siguientes artículos:
+
+1. [Cargar documento](/net/editor/developer-guide/load-document/)
+2. [Editar documento](/net/editor/developer-guide/edit-document/)
+3. [Guardar documento](/net/editor/developer-guide/save-document/)
+
+La descripción completa de la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>, todas sus posibilidades, miembros y propósito, junto con un ejemplo de código fuente, se encuentra en los siguientes artículos:
+
+* [Trabajar con EditableDocument](/net/editor/developer-guide/editabledocument/)
+* [Obtener marcado HTML en distintas formas](/net/editor/developer-guide/editabledocument/get-html-markup-in-different-forms/)
+* [Guardar HTML en una carpeta](/net/editor/developer-guide/editabledocument/save-html-to-folder/)
+* [Trabajar con recursos](/net/editor/developer-guide/editabledocument/working-with-resources/)
+* [Crear EditableDocument a partir de un archivo o marcado](/net/editor/developer-guide/editabledocument/create-editabledocument-from-file-or-markup/)
+
+Una revisión detallada de todas las familias de formatos admitidos, junto con la explicación de sus opciones de carga, edición y guardado, ilustrada con código fuente, se encuentra en los siguientes artículos:
+
+* [Trabajar con documentos PDF](/net/editor/developer-guide/edit-document/edit-pdf/)
+* [Trabajar con documentos de procesamiento de textos](/net/editor/developer-guide/edit-document/edit-word/)
+* [Trabajar con hojas de cálculo](/net/editor/developer-guide/edit-document/edit-excel/)
+* [Trabajar con DSV](/net/editor/developer-guide/edit-document/how-to-edit-csv-file/)
+* [Trabajar con presentaciones](/net/editor/developer-guide/edit-document/edit-powerpoint/)
+* [Trabajar con documentos de texto](/net/editor/developer-guide/edit-document/edit-txt/)

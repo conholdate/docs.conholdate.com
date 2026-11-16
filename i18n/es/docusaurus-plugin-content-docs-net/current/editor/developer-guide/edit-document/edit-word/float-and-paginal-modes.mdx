@@ -1,0 +1,57 @@
+---
+title: "Modos flotante y de paginación"
+sidebar_label: "Modos flotante y de paginación"
+sidebar_key: "net-editor-edit-document-edit-word-float-and-paginal-modes"
+sidebar_position: 4
+description: "Este artículo explica las ventajas y desventajas de los modos de edición flotante y paginada al editar documentos de Word con la API de GroupDocs.Editor."
+product: "editor"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.1"
+version: "v26.6.1"
+source_repo: "editor-net"
+source_path: "net/developer-guide/edit-document/edit-word/float-and-paginal-modes.md"
+source_commit: "43d7759259e5e675b78d077fb6e9fc8b768199bb"
+source_sha256: "85e0c144e60def04559e504d0a165a1472f9d8df93c03b78d4e58ad12bf0238d"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "0305bc28e9149e1025e04319edfb8be8db6b5655c321cdac245a045a51f6abb5"
+translation_updated_at: "2026-11-16T04:00:51.364Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Editor para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Cómo habilitar diferentes modos de edición de documentos?  {#how-to-enable-different-document-edit-modes}
+  
+El módulo WordProcessing de <a href="https://products.groupdocs.com/editor/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Editor**</a>, encargado de convertir todos los formatos de procesamiento de textos en instancias de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> y viceversa (de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> a alguno de los formatos de procesamiento de textos), contiene dos modos: *flotante* (*float*) y *paginado* (*paginal*, también conocido como *paged*), siendo el primero, el modo flotante, el predeterminado. Estos modos están representados por dos propiedades con el mismo nombre y tipo:
+
+```csharp
+public bool EnablePagination {get; set;}
+```
+
+Al principio, dicha propiedad está presente en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions" target="_blank" rel="nofollow noopener noreferrer">`WordProcessingEditOptions`</a> y se duplica en la <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions/wordprocessingeditoptions/#constructor" target="_blank" rel="nofollow noopener noreferrer">sobrecarga del constructor de la clase</a>, la cual recibe un parámetro booleano con el mismo nombre. En este caso, dicha opción es responsable del modo seleccionado durante la conversión hacia adelante (de WordProcessing a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>).
+
+En segundo lugar, dicha propiedad también está presente en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingsaveoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingSaveOptions</a> y es responsable del modo seleccionado durante la conversión hacia atrás (de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> a WordProcessing).
+
+La regla principal para el usuario final es conservar el mismo modo durante el ciclo completo de conversión del documento y no modificarlo. En otras palabras, si el documento de entrada fue convertido a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> (seguido por la generación de HTML desde una instancia de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a>) en modo *flotante*, entonces la instancia resultante de <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> (obtenida a partir del documento editado en el lado del cliente) debe ser convertida nuevamente al formato WordProcessing también en modo *flotante* (la misma regla aplica también para el modo *paginado*).
+
+La principal diferencia entre estos dos modos radica en la forma en que se representa el documento de WordProcessing de entrada. Por defecto, todos los formatos de WordProcessing carecen internamente de páginas y divisiones de página; en su lugar, se representan internamente como una estructura flotante, continua y sin páginas. No obstante, contienen información relacionada con páginas, como encabezados, pies de página, marcas de agua, formato de numeración de páginas, etc. Cuando un documento de WordProcessing se abre en un procesador de texto de escritorio o basado en navegador, como MS Word, OpenOffice o Google Docs, este procesador divide dinámicamente y “al vuelo” el documento en múltiples páginas, las cuales se recalculan cada vez que el usuario realiza alguna edición en el contenido del documento. Por ejemplo, si el usuario elimina una línea al inicio de un documento muy extenso, el espacio vacío “colapsa” y todo el contenido subsiguiente “se desplaza hacia arriba” para llenar el hueco dejado por la línea eliminada. Los mismos cálculos en tiempo real también se aplican cuando se agrega contenido: el nuevo contenido insertado empuja el contenido existente hacia abajo, creando nuevas páginas si es necesario.
+
+El problema es que la mayoría de los editores HTML WYSIWYG basados en JavaScript y ejecutados en el navegador, como TinyMCE o CKEditor, no admiten en absoluto páginas, divisiones de página ni los cálculos descritos anteriormente. Solo admiten documentos con estructura sin páginas. Por esta razón, GroupDocs.Editor admite dos modos:
+
+
+* En el modo *flotante*, el documento de WordProcessing se representa en forma sin páginas. El contenido no está dividido en páginas y no existen entidades relacionadas con páginas, como encabezados, pies de página, marcas de agua ni números de página. Este modo es el más adecuado para la mayoría de los editores HTML WYSIWYG ampliamente utilizados, razón por la cual constituye el modo predeterminado.
+* En el modo *paginado*, el documento de WordProcessing se representa como un conjunto de páginas, donde el contenido se divide en páginas de la misma manera que lo hace MS Word. Todas las entidades relacionadas con páginas, como encabezados, pies de página, marcas de agua y números de página, están presentes. Este modo debe activarse manualmente (como se describe anteriormente) y es adecuado para escenarios en los que el usuario final pueda procesar este contenido de una manera apropiada y adecuada, por ejemplo, mediante su propio software de edición HTML.
+
+## Modo de edición paginado en PDF {#paginal-edit-mode-in-pdf}
+
+
+Además de la familia de formatos de WordProcessing, GroupDocs.Editor también admite PDF como uno de los formatos de salida (resultado). En otras palabras, un documento de WordProcessing de entrada puede abrirse y editarse, y guardarse no solo en formato WordProcessing, sino también en PDF. Antes de la versión 20.3 de GroupDocs.Editor, el modo *paginado* solo estaba disponible para las conversiones hacia adelante y hacia atrás entre formatos WordProcessing, y no estaba disponible para PDF. Esto significaba que no era posible generar un PDF de salida en modo *paginado*, independientemente del valor de la bandera <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions/enablepagination" target="_blank" rel="nofollow noopener noreferrer">EnablePagination</a> en la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/wordprocessingeditoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingEditOptions</a>. En otras palabras, incluso si el documento de WordProcessing de entrada se convertía a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> en modo *paginado*, el PDF de salida se generaba en modo *flotante*.
+
+A partir de la versión 20.4 de GroupDocs.Editor, estos dos modos de conversión se incorporaron al procesador de PDF. Ahora, la clase <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfsaveoptions" target="_blank" rel="nofollow noopener noreferrer">PdfSaveOptions</a> contiene la misma propiedad: la bandera booleana <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfsaveoptions/enablepagination" target="_blank" rel="nofollow noopener noreferrer">EnablePagination</a>, la cual, al igual que en WordProcessing, tiene el valor predeterminado `false`, que significa modo *flotante*, y el valor `true`, que significa modo *paginado*. Si el documento de WordProcessing de entrada se convierte a <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor/editabledocument" target="_blank" rel="nofollow noopener noreferrer">EditableDocument</a> en modo *paginado*, el PDF de salida también debe generarse en modo *paginado*, con la bandera <a href="https://reference.groupdocs.com/editor/net/groupdocs.editor.options/pdfsaveoptions/enablepagination" target="_blank" rel="nofollow noopener noreferrer">EnablePagination</a> activada.
