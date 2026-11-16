@@ -1,0 +1,116 @@
+---
+title: "Proveedor de formas de palabras"
+sidebar_label: "Proveedor de formas de palabras"
+sidebar_position: 9
+description: "Este artículo proporciona el conocimiento de los métodos de la API que se pueden utilizar para realizar operaciones relacionadas con la interfaz del proveedor de formas de palabra."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/managing-dictionaries/word-forms-provider.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "1dcc0ecda7449721234a1dcdd7a420c06a46463c675b17a1159973f5407f7c58"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "8b7059a803f1d255eae38b59e22c494cdaab12527669a2af15e691d46906fe79"
+translation_updated_at: "2026-11-16T11:24:55.197Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+La interfaz <a href="https://reference.groupdocs.com/net/search/groupdocs.search.dictionaries/iwordformsprovider" target="_blank" rel="nofollow noopener noreferrer">IWordFormsProvider</a> está diseñada para implementar un proveedor de formas de palabra para la búsqueda por formas de palabra. Para obtener información sobre la búsqueda por formas de palabra, consulte la página [Búsqueda de distintas formas de palabra](/net/search/developer-guide/advanced-usage/searching/search-for-different-word-forms/).
+
+La interfaz <a href="https://reference.groupdocs.com/net/search/groupdocs.search.dictionaries/iwordformsprovider" target="_blank" rel="nofollow noopener noreferrer">IWordFormsProvider</a> contiene únicamente un método <a href="https://reference.groupdocs.com/net/search/groupdocs.search.dictionaries/iwordformsprovider/methods/getwordforms" target="_blank" rel="nofollow noopener noreferrer">GetWordForms</a>, que devuelve distintas formas para la palabra pasada como argumento. A continuación se presenta un ejemplo de implementación de un proveedor sencillo de formas de palabra.
+
+**C#**
+
+```csharp
+public class SimpleWordFormsProvider : IWordFormsProvider
+{
+    public string[] GetWordForms(string word)
+    {
+        List<string> result = new List<string>();
+ 
+        // We assume that the input word is in the plural, then we add the singular
+        if (word.Length > 2 &&
+            word.EndsWith("es", StringComparison.InvariantCultureIgnoreCase))
+        {
+            result.Add(word.Substring(0, word.Length - 2));
+        }
+        if (word.Length > 1 &&
+            word.EndsWith("s", StringComparison.InvariantCultureIgnoreCase))
+        {
+            result.Add(word.Substring(0, word.Length - 1));
+        }
+ 
+        // Then we assume that the input word is in the singular, we add the plural
+        if (word.Length > 1 &&
+            word.EndsWith("e", StringComparison.InvariantCultureIgnoreCase))
+        {
+            result.Add(word + "s");
+        }
+        if (word.Length > 1 &&
+            word.EndsWith("y", StringComparison.InvariantCultureIgnoreCase))
+        {
+            result.Add(word.Substring(0, word.Length - 1) + "is");
+        }
+        result.Add(word + "es");
+        // All rules are implemented in the EnglishWordFormsProvider class
+ 
+        return result.ToArray();
+    }
+}
+```
+
+De forma predeterminada, se utiliza la clase **<a href="https://reference.groupdocs.com/net/search/groupdocs.search.dictionaries/englishwordformsprovider" target="_blank" rel="nofollow noopener noreferrer">EnglishWordFormsProvider</a>**, la cual, para el idioma inglés, genera diversas formas de sustantivos, adjetivos, pronombres, verbos, etc. A continuación se presenta un ejemplo de cómo configurar un proveedor personalizado de formas de palabras.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Setting the custom word forms provider instance
+index.Dictionaries.WordFormsProvider = new SimpleWordFormsProvider();
+ 
+// Creating a search options instance
+SearchOptions options = new SearchOptions();
+options.UseWordFormsSearch = true; // Enabling search for word forms
+ 
+// Searching in the index
+SearchResult result = index.Search("relative", options);
+ 
+// The following words can be found:
+// relative
+// relatives
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le invitamos a buscar en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita de búsqueda de documentos en línea</a>.

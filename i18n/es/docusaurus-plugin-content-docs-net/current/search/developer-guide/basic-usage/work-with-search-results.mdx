@@ -1,0 +1,145 @@
+---
+title: "Trabajar con resultados de búsqueda"
+sidebar_label: "Trabajar con resultados de búsqueda"
+sidebar_key: "net-search-work-with-search-results"
+sidebar_position: 3
+description: ""
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/basic-usage/work-with-search-results.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "b5e27d8507d507ee06c9d34d3025a7044875132fdc6119f0d239e02d319e2c40"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "8c8fd68a61a2bf00c6a47143c2dc30f0c267312d88d2609622e642e5b3809aad"
+translation_updated_at: "2026-11-16T12:13:36.385Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Trabajar con los resultados de búsqueda consiste en obtener información de los objetos de resultados de búsqueda y resaltar las ocurrencias en el texto de los documentos.
+
+## Obtener información sobre los resultados de búsqueda {#obtain-search-result-information}
+
+Cuando finaliza una búsqueda, el método <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index/methods/search/index" target="_blank" rel="nofollow noopener noreferrer">Search</a> devuelve un objeto de tipo <a href="https://reference.groupdocs.com/net/search/groupdocs.search.results/searchresult" target="_blank" rel="nofollow noopener noreferrer">SearchResult</a>. Esta página describe la información disponible en un objeto de tipo <a href="https://reference.groupdocs.com/net/search/groupdocs.search.results/searchresult" target="_blank" rel="nofollow noopener noreferrer">SearchResult</a>.
+
+A partir del objeto raíz del resultado de búsqueda, se dispone de información sobre el número de documentos encontrados, el número de ocurrencias de las palabras y frases halladas, así como información detallada sobre cada documento individual. La información sobre un documento encontrado individualmente está representada por un objeto de la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search.results/founddocument" target="_blank" rel="nofollow noopener noreferrer">FoundDocument</a>.
+
+A partir del objeto de la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search.results/founddocument" target="_blank" rel="nofollow noopener noreferrer">FoundDocument</a>, se dispone de información sobre la ruta completa del documento, el número de ocurrencias, las palabras y frases encontradas, así como información detallada sobre cada campo del documento. La información sobre el campo del documento está representada por un objeto de la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search.results/founddocumentfield" target="_blank" rel="nofollow noopener noreferrer">FoundDocumentField</a>.
+
+A partir del objeto de la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search.results/founddocumentfield" target="_blank" rel="nofollow noopener noreferrer">FoundDocumentField</a>, se dispone de información sobre el nombre del campo del documento, el número de ocurrencias, las palabras y frases encontradas, y el número de ocurrencias de cada palabra y frase.
+
+A continuación se muestra un ejemplo de código que escribe en la consola la información detallada contenida en un objeto de la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search.results/searchresult" target="_blank" rel="nofollow noopener noreferrer">SearchResult</a> sobre cada documento, campo de documento, palabra, frase y el número de sus ocurrencias en los campos del documento.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentFolder = @"c:\MyDocuments\";
+ 
+// Creating an index
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentFolder);
+ 
+// Creating search options
+SearchOptions options = new SearchOptions();
+options.FuzzySearch.Enabled = true; // Enabling the fuzzy search
+options.FuzzySearch.FuzzyAlgorithm = new TableDiscreteFunction(3); // Setting the maximum number of differences to 3
+ 
+// Search for documents containing the word 'Einstein' or the phrase 'Theory of Relativity'
+SearchResult result = index.Search("Einstein OR \"Theory of Relativity\"", options);
+ 
+// Printing the result
+Console.WriteLine("Documents: " + result.DocumentCount);
+Console.WriteLine("Total occurrences: " + result.OccurrenceCount);
+for (int i = 0; i < result.DocumentCount; i++)
+{
+    FoundDocument document = result.GetFoundDocument(i);
+    Console.WriteLine("\tDocument: " + document.DocumentInfo.FilePath);
+    Console.WriteLine("\tOccurrences: " + document.OccurrenceCount);
+    for (int j = 0; j < document.FoundFields.Length; j++)
+    {
+        FoundDocumentField field = document.FoundFields[j];
+        Console.WriteLine("\t\tField: " + field.FieldName);
+        Console.WriteLine("\t\tOccurrences: " + document.OccurrenceCount);
+        // Printing found terms
+        if (field.Terms != null)
+        {
+            for (int k = 0; k < field.Terms.Length; k++)
+            {
+                Console.WriteLine("\t\t\t" + field.Terms[k].PadRight(20) + field.TermsOccurrences[k]);
+            }
+        }
+        // Printing found phrases
+        if (field.TermSequences != null)
+        {
+            for (int k = 0; k < field.TermSequences.Length; k++)
+            {
+                string sequence = string.Join(" ", field.TermSequences[k]);
+                Console.WriteLine("\t\t\t" + sequence.PadRight(30) + field.TermSequencesOccurrences[k]);
+            }
+        }
+    }
+}
+```
+
+## Resaltar resultados de búsqueda {#highlight-search-results}
+
+Al finalizar una búsqueda, generalmente es necesario visualizar los resultados resaltando las palabras encontradas en el texto. Puede resaltar los resultados de búsqueda ya sea en el texto de un documento completo o en segmentos individuales. Para obtener información detallada sobre el resaltado de resultados de búsqueda, consulte la página [Resaltado de resultados de búsqueda](/net/search/developer-guide/advanced-usage/searching/highlighting-search-results/). A continuación se muestra un ejemplo de resaltado de resultados de búsqueda en el texto de un documento completo.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentFolder = @"c:\MyDocuments\";
+ 
+// Creating an index
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentFolder);
+ 
+// Search for the word 'eternity'
+SearchResult result = index.Search("eternity");
+ 
+// Highlighting occurrences in text
+if (result.DocumentCount > 0)
+{
+    FoundDocument document = result.GetFoundDocument(0); // Getting the first found document
+    OutputAdapter outputAdapter = new FileOutputAdapter(@"c:\Highlighted.html"); // Creating an output adapter to the file
+    Highlighter highlighter = new HtmlHighlighter(outputAdapter); // Creating the highlighter object
+    index.Highlight(document, highlighter); // Generating HTML formatted text with highlighted occurrences
+}
+```
+
+## Más recursos {#more-resources}
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre las funcionalidades de búsqueda y familiarizarse con cómo mejorar su solución de búsqueda, consulte la [sección de uso avanzado](/net/search/developer-guide/advanced-usage/).
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Junto con la completa biblioteca de .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.
+
+Le damos la bienvenida a realizar búsquedas en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">aplicación gratuita de búsqueda de documentos en línea</a>.

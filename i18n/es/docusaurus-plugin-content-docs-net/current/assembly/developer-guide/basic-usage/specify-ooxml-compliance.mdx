@@ -1,0 +1,267 @@
+---
+title: "Especificar el nivel de cumplimiento de OOXML para documentos de Word"
+sidebar_label: "Especificar el nivel de cumplimiento de OOXML para documentos de Word"
+sidebar_key: "net-assembly-specify-ooxml-compliance"
+sidebar_position: 19
+description: "Controla el nivel de cumplimiento de OOXML (Ecma, Transicional o Estricto) al guardar documentos de Word en formatos OOXML utilizando GroupDocs.Assembly para .NET."
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/specify-ooxml-compliance.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "d94199d449075aec093ae83fc352eb449edd556dc3aca0ac6f4f4fff5b4029f1"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "e83021a3a4e9e35482c9af7782de38c04d518b93b1fe850b479394e0b86d8141"
+translation_updated_at: "2026-11-16T14:00:40.224Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Vista general {#overview}
+
+GroupDocs.Assembly para .NET le permite controlar el nivel de cumplimiento con OOXML al guardar documentos de Word en formatos OOXML (DOCX, DOCM, DOTX, DOTM, FlatOpc, etc.). Puede especificar explícitamente el nivel de cumplimiento o dejar que el sistema preserve automáticamente el nivel de cumplimiento del documento original.
+
+Las clases principales involucradas son:
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/loadsaveoptions/" target="_blank" rel="nofollow noopener noreferrer">LoadSaveOptions</a> – contiene la propiedad `OoxmlCompliance`
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/ooxmlcompliance/" target="_blank" rel="nofollow noopener noreferrer">OoxmlCompliance</a> – enumeración que especifica los niveles de cumplimiento
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/documentassembler/" target="_blank" rel="nofollow noopener noreferrer">DocumentAssembler</a> – ensambla documentos con el nivel de cumplimiento especificado
+
+A continuación se presentan los pasos para especificar el cumplimiento con OOXML:
+
+* Crear `LoadSaveOptions` para su formato de salida
+* Establecer la propiedad `OoxmlCompliance` en el nivel de cumplimiento deseado (o dejarla como `null` para preservación automática)
+* Utilizar `DocumentAssembler` con `LoadSaveOptions` para ensamblar el documento
+* El documento de salida se guardará con el nivel de cumplimiento especificado
+
+
+:::info
+La propiedad `OoxmlCompliance` solo se aplica a formatos OOXML (DOCX, DOCM, DOTX, DOTM, FlatOpc, etc.) y se ignora para otros formatos de archivo. Cuando se establece en `null` (valor predeterminado), el sistema conserva automáticamente el nivel de cumplimiento original del documento si era **Transitional**; de lo contrario, utiliza el cumplimiento **Strict**.
+:::
+
+
+## Niveles de cumplimiento OOXML disponibles {#available-ooxml-compliance-levels}
+
+La enumeración `OoxmlCompliance` proporciona tres niveles de cumplimiento:
+
+- **Ecma**: Especifica el nivel de cumplimiento ECMA-376
+- **Transicional**: Especifica el nivel de cumplimiento ISO/IEC 29500:2008 Transicional (comúnmente utilizado para compatibilidad)
+- **Estricto**: Especifica el nivel de cumplimiento ISO/IEC 29500:2008 Estricto (totalmente conforme con la norma)
+
+## Especificar explícitamente el nivel de cumplimiento OOXML {#specify-explicit-ooxml-compliance-level}
+
+Puede establecer explícitamente el nivel de cumplimiento OOXML al ensamblar un documento:
+
+```csharp
+using GroupDocs.Assembly;
+
+public static void SpecifyExplicitCompliance()
+{
+    DocumentAssembler assembler = new DocumentAssembler();
+
+    // Create LoadSaveOptions with explicit OOXML compliance
+    var options = new LoadSaveOptions(FileFormat.Docx);
+    options.OoxmlCompliance = OoxmlCompliance.Strict; // or Ecma, Transitional
+
+    var data = new { CompanyName = "ABC Corp", Year = 2024 };
+    
+    assembler.AssembleDocument("Template.docx", "Output.docx", options,
+        new DataSourceInfo(data, "company"));
+}
+```
+
+## Utilizar cumplimiento transicional {#use-transitional-compliance}
+
+Para una compatibilidad máxima con versiones anteriores de Office, utilice el cumplimiento transicional:
+
+```csharp
+using GroupDocs.Assembly;
+
+public static void UseTransitionalCompliance()
+{
+    DocumentAssembler assembler = new DocumentAssembler();
+
+    var options = new LoadSaveOptions(FileFormat.Docx);
+    options.OoxmlCompliance = OoxmlCompliance.Transitional;
+
+    var data = new { CustomerName = "John Doe", OrderNumber = "ORD-12345" };
+    
+    assembler.AssembleDocument("Template.docx", "Output.docx", options,
+        new DataSourceInfo(data, "order"));
+}
+```
+
+## Usar cumplimiento ECMA {#use-ecma-compliance}
+
+Para cumplimiento del estándar ECMA-376:
+
+```csharp
+using GroupDocs.Assembly;
+
+public static void UseEcmaCompliance()
+{
+    DocumentAssembler assembler = new DocumentAssembler();
+
+    var options = new LoadSaveOptions(FileFormat.Docx);
+    options.OoxmlCompliance = OoxmlCompliance.Ecma;
+
+    var data = new { ReportTitle = "Monthly Report", Month = "January 2024" };
+    
+    assembler.AssembleDocument("Template.docx", "Output.docx", options,
+        new DataSourceInfo(data, "report"));
+}
+```
+
+## Preservación automática de la conformidad original {#automatic-preservation-of-original-compliance}
+
+Cuando `OoxmlCompliance` no se establece explícitamente (por defecto `null`), el sistema preserva automáticamente el nivel de conformidad del documento original si este era Transicional:
+
+```csharp
+using GroupDocs.Assembly;
+
+public static void PreserveOriginalCompliance()
+{
+    DocumentAssembler assembler = new DocumentAssembler();
+
+    // OoxmlCompliance is null by default - original compliance will be preserved
+    var options = new LoadSaveOptions(FileFormat.Docx);
+    // options.OoxmlCompliance is null - automatic preservation
+
+    var data = new { Title = "Document Title", Content = "Document content" };
+    
+    // Output document will maintain Transitional compliance from template if it was Transitional
+    assembler.AssembleDocument("Template_Transitional.docx", "Output.docx", options,
+        new DataSourceInfo(data, "document"));
+}
+```
+
+## Uso con distintos formatos OOXML {#using-with-different-ooxml-formats}
+
+La propiedad `OoxmlCompliance` funciona con todos los formatos OOXML:
+
+```csharp
+using GroupDocs.Assembly;
+
+public static void UseWithDifferentFormats()
+{
+    DocumentAssembler assembler = new DocumentAssembler();
+    var data = new { Name = "Test Document", Value = 100 };
+    
+    // DOCX format
+    var docxOptions = new LoadSaveOptions(FileFormat.Docx);
+    docxOptions.OoxmlCompliance = OoxmlCompliance.Strict;
+    assembler.AssembleDocument("Template.docx", "Output.docx", docxOptions,
+        new DataSourceInfo(data, "item"));
+    
+    // DOCM format (macro-enabled)
+    var docmOptions = new LoadSaveOptions(FileFormat.Docm);
+    docmOptions.OoxmlCompliance = OoxmlCompliance.Transitional;
+    assembler.AssembleDocument("Template.docm", "Output.docm", docmOptions,
+        new DataSourceInfo(data, "item"));
+    
+    // DOTX format (template)
+    var dotxOptions = new LoadSaveOptions(FileFormat.Dotx);
+    dotxOptions.OoxmlCompliance = OoxmlCompliance.Strict;
+    assembler.AssembleDocument("Template.dotx", "Output.dotx", dotxOptions,
+        new DataSourceInfo(data, "item"));
+}
+```
+
+## Uso con secuencias (Streams) {#using-with-streams}
+
+También puede especificar el cumplimiento de OOXML al trabajar con secuencias:
+
+```csharp
+using GroupDocs.Assembly;
+using System.IO;
+
+public static void UseComplianceWithStreams()
+{
+    DocumentAssembler assembler = new DocumentAssembler();
+
+    var options = new LoadSaveOptions(FileFormat.Docx);
+    options.OoxmlCompliance = OoxmlCompliance.Strict;
+
+    var data = new { Company = "My Company", Year = 2024 };
+    
+    using (FileStream templateStream = new FileStream("Template.docx", FileMode.Open))
+    using (FileStream outputStream = new FileStream("Output.docx", FileMode.Create))
+    {
+        assembler.AssembleDocument(templateStream, outputStream, options,
+            new DataSourceInfo(data, "company"));
+    }
+}
+```
+
+## Comportamiento del nivel de cumplimiento {#compliance-level-behavior}
+
+Comprensión del funcionamiento de los niveles de cumplimiento:
+
+- **Cuando se establece explícitamente**: El nivel de cumplimiento especificado se utiliza al guardar en formatos OOXML
+- **Cuando es nulo (valor predeterminado)**:
+  - Si el documento original tenía cumplimiento *Transitional*, se conserva
+  - De lo contrario, se utiliza cumplimiento *Strict*
+- **Para formatos no OOXML**: La propiedad se ignora (por ejemplo, PDF, HTML, RTF)
+
+```csharp
+using GroupDocs.Assembly;
+
+public static void DemonstrateComplianceBehavior()
+{
+    DocumentAssembler assembler = new DocumentAssembler();
+    var data = new { Title = "Test", Content = "Content" };
+    
+    // Explicit Strict compliance
+    var strictOptions = new LoadSaveOptions(FileFormat.Docx);
+    strictOptions.OoxmlCompliance = OoxmlCompliance.Strict;
+    assembler.AssembleDocument("Template.docx", "Output_Strict.docx", strictOptions,
+        new DataSourceInfo(data, "doc"));
+    
+    // Automatic preservation (null)
+    var autoOptions = new LoadSaveOptions(FileFormat.Docx);
+    // autoOptions.OoxmlCompliance is null - will preserve if Transitional
+    assembler.AssembleDocument("Template.docx", "Output_Auto.docx", autoOptions,
+        new DataSourceInfo(data, "doc"));
+    
+    // Note: For PDF output, OoxmlCompliance is ignored
+    var pdfOptions = new LoadSaveOptions(FileFormat.Pdf);
+    pdfOptions.OoxmlCompliance = OoxmlCompliance.Strict; // Ignored for PDF
+    assembler.AssembleDocument("Template.docx", "Output.pdf", pdfOptions,
+        new DataSourceInfo(data, "doc"));
+}
+```
+
+
+:::warning
+La propiedad `OoxmlCompliance` solo afecta a los formatos OOXML. Al guardar en otros formatos como PDF, HTML o RTF, esta propiedad se ignora. El nivel de conformidad lo determina el formato de salida, no el formato de la plantilla.
+:::
+
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre las opciones específicas por formato, la configuración de conversión de documentos y el manejo avanzado de cumplimiento normativo, consulte la [sección de uso avanzado](/net/assembly/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para .NET</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Java</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Python-via-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Python mediante .NET</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas en línea simples pero potentes.
+
+Para ensamblar documentos a partir de plantillas y fuentes de datos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/assembly" target="_blank">Conholdate.Assembly App</a>**.

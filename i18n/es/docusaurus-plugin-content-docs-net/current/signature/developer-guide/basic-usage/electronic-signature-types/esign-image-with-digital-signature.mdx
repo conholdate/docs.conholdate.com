@@ -1,0 +1,186 @@
+---
+title: "Imagen de eFirma con firma digital"
+sidebar_label: "Firma digital de imagen"
+sidebar_position: 10
+description: "Este artículo demuestra cómo firmar imágenes con firmas digitales mediante esteganografía (técnica LSB) con GroupDocs.Signature para .NET. Aprenda cómo incrustar firmas digitales invisibles en imágenes PNG y JPG."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/basic-usage/electronic-signature-types/esign-image-with-digital-signature.md"
+source_commit: "0c3c217010a3d6a2e7ef62d7ad8ef26f94d99418"
+source_sha256: "a0d01641391d691f12e41b31266a7084c5a7b036d5d3f58c46453ce3759b1c2f"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "368b0111edc57e63165094f8ed4fda956e0ec82d0f4bdac6613e0bb52c6c3639"
+translation_updated_at: "2026-11-16T14:19:44.101Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## ¿Qué es una firma digital de imagen? {#what-is-an-image-digital-signature}
+
+Una **firma digital de imagen** utiliza **esteganografía** (técnica LSB: *Least Significant Bit*, o bit menos significativo) para incrustar firmas digitales directamente en los píxeles de imágenes rasterizadas. Este método permite agregar firmas invisibles y protegidas con contraseña a las imágenes, manteniendo la calidad visual del archivo. Los datos de la firma se incrustan en los bits menos significativos de los píxeles de la imagen, lo que hace que la firma sea indetectable a simple vista.
+
+### Características principales {#key-features}
+
+* **Firmas invisibles**: las firmas se incrustan directamente en los píxeles de la imagen mediante esteganografía
+* **Protección con contraseña**: las firmas están protegidas mediante una contraseña (mínimo 4 caracteres)
+* **Compatibilidad con formatos**: funciona con formatos de imagen PNG y JPG
+* **Preservación de calidad**: la calidad de la imagen permanece prácticamente inalterada
+* **Requisitos de tamaño**: las imágenes deben cumplir con requisitos mínimos de tamaño (8×8 píxeles, 16.384 píxeles en total)
+
+## Requisitos {#requirements}
+
+### Requisitos de tamaño de imagen {#image-size-requirements}
+
+* **Anchura mínima**: 8 píxeles
+* **Altura mínima**: 8 píxeles
+* **Píxeles totales mínimos**: 16.384 píxeles (anchura × altura)
+
+### Requisitos de contraseña {#password-requirements}
+
+* **Longitud mínima**: 4 caracteres
+* **Distingue mayúsculas y minúsculas**: sí
+* **Caracteres especiales**: permitidos
+
+### Formatos admitidos {#supported-formats}
+
+* ✅ **PNG**: totalmente compatible
+* ✅ **JPG/JPEG**: totalmente compatible
+* ❌ **BMP**: no compatible para firmas digitales mediante esteganografía
+
+## Cómo firmar digitalmente una imagen {#how-to-esign-image-with-digital-signature}
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> proporciona la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/imagedigitalsignoptions" target="_blank" rel="nofollow noopener noreferrer">ImageDigitalSignOptions</a> para especificar la configuración de las firmas digitales en imágenes mediante esteganografía.
+
+A continuación se indican los pasos para firmar una imagen con una firma digital:
+
+* Crear una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasar la ruta de la imagen de origen como parámetro del constructor
+* Instanciar el objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/imagedigitalsignoptions" target="_blank" rel="nofollow noopener noreferrer">ImageDigitalSignOptions</a> y establecer la propiedad <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/imagedigitalsignoptions/password" target="_blank" rel="nofollow noopener noreferrer">Password</a> (mínimo 4 caracteres)
+* Llamar al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasarle <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/imagedigitalsignoptions" target="_blank" rel="nofollow noopener noreferrer">ImageDigitalSignOptions</a>
+
+Este ejemplo muestra cómo firmar una imagen con una firma digital mediante esteganografía.
+
+```csharp
+using (Signature signature = new Signature("image.png"))
+{
+    // Create sign options with password
+    ImageDigitalSignOptions signOptions = new ImageDigitalSignOptions
+    {
+        Password = "MySecurePassword123"
+    };
+
+    // Sign the image
+    SignResult signResult = signature.Sign("signed_image.png", signOptions);
+    
+    Console.WriteLine($"Image signed successfully. Found {signResult.Succeeded.Count} signatures.");
+}
+```
+
+### Firmar imágenes desde flujos {#signing-images-from-streams}
+
+También puede firmar imágenes utilizando flujos en lugar de rutas de archivos:
+
+```csharp
+using (Stream inputStream = new FileStream("image.png", FileMode.Open, FileAccess.Read))
+using (Signature signature = new Signature(inputStream))
+{
+    ImageDigitalSignOptions signOptions = new ImageDigitalSignOptions
+    {
+        Password = "MySecurePassword123"
+    };
+
+    using (Stream outputStream = new FileStream("signed_image.png", FileMode.Create))
+    {
+        SignResult signResult = signature.Sign(outputStream, signOptions);
+        Console.WriteLine($"Signed: {signResult.Succeeded.Count} signature(s) added.");
+    }
+}
+```
+
+### Manejo de errores {#error-handling}
+
+La biblioteca valida automáticamente la longitud de la contraseña y los requisitos de tamaño de imagen. Maneje las excepciones adecuadamente:
+
+```csharp
+try
+{
+    using (Signature signature = new Signature("image.png"))
+    {
+        ImageDigitalSignOptions signOptions = new ImageDigitalSignOptions
+        {
+            Password = "MyPassword123"  // Minimum 4 characters required
+        };
+
+        SignResult signResult = signature.Sign("signed_image.png", signOptions);
+        Console.WriteLine("✓ Image signed successfully!");
+    }
+}
+catch (ArgumentException ex)
+{
+    Console.WriteLine($"Password validation error: {ex.Message}");
+    // Password must be at least 4 characters long
+}
+catch (InvalidOperationException ex)
+{
+    Console.WriteLine($"Image size error: {ex.Message}");
+    // Image is too small for digital steganography signature
+}
+```
+
+## Limitaciones y consideraciones {#limitations-and-considerations}
+
+### Limitaciones de formato {#format-limitations}
+
+* **PNG**: Totalmente compatible ✅
+* **JPG/JPEG**: Totalmente compatible ✅
+* **BMP**: No compatible ❌
+* **Otros formatos**: No compatibles ❌
+
+### Limitaciones de tamaño de imagen {#image-size-limitations}
+
+* Las imágenes de menos de 8x8 píxeles no pueden firmarse
+* Las imágenes con menos de 16.384 píxeles no pueden firmarse
+
+### Consideraciones sobre esteganografía {#steganography-considerations}
+
+* La compresión de imágenes (especialmente JPG) puede afectar la detección de la firma
+* La edición de imágenes puede corromper las firmas incrustadas
+* Mantenga siempre las imágenes firmadas originales para su verificación
+* La firma se incrusta de forma invisible en los píxeles de la imagen
+
+### Resumen {#summary}
+
+Esta guía muestra cómo utilizar **GroupDocs.Signature** para firmar imágenes con firmas digitales mediante esteganografía. Cubre la carga de imágenes, la configuración de firmas digitales protegidas por contraseña que se incrustan de forma invisible en los píxeles de la imagen y el guardado de las imágenes firmadas. Esta función proporciona autenticación invisible mientras mantiene la calidad de la imagen y requiere tamaños mínimos para las imágenes.
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre las funciones de firma electrónica de documentos, consulte la [sección de uso avanzado](/net/signature/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la función en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI MVC para firma de documentos con .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI WebForms para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI Dropwizard para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI Spring para Java</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Junto con la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas en línea simples pero potentes.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros, puede utilizar las aplicaciones en línea de la **familia de productos <a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

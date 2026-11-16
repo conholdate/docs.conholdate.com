@@ -1,0 +1,331 @@
+---
+title: "Trabajar con fuentes de datos JSON"
+sidebar_label: "Trabajar con fuentes de datos JSON"
+sidebar_key: "net-assembly-working-with-simple-data-sources-working-with-json-data-sources"
+sidebar_position: 2
+description: ""
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/advanced-usage/working-with-simple-data-sources/working-with-json-data-sources.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "ff8622576f8d31e9ed1b92ed9d3fed033ff79ebeb2613c19dc5700b6a30c5dc2"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "0fdc1d8e74ef1ca2aa08d4eeef25e7200b29d9e0ca90130809247a3fce8289a8"
+translation_updated_at: "2026-11-16T12:55:48.793Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+:::info
+Esta función solo es compatible con GroupDocs.Assembly para .NET 19.10 o versiones posteriores.
+:::
+
+
+Para acceder a datos JSON al generar un informe, la API de GroupDocs.Assembly introduce la clase *JsonDataSource*. Puede pasar una instancia de esta clase al ensamblador como fuente de datos. El uso de *JsonDataSource* le permite trabajar con valores tipificados de elementos JSON en las plantillas
+
+de documentos. Para mayor comodidad, el conjunto de tipos JSON simples se amplía de la siguiente manera:
+
+*   Int32?
+*   Int64?
+*   Double?
+*   Boolean?
+*   DateTime?
+*   String
+
+### Tratamiento de matrices o objetos de nivel superior que contienen una matriz {#treating-the-top-level-arrays-or-objects-having-array}
+
+En los documentos de plantilla, si un elemento JSON de nivel superior es una matriz o un objeto que solo tiene una propiedad de tipo matriz, una instancia de JsonDataSource debe tratarse de la misma manera que una instancia de DataTable (consulte "<a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-1-of-2/#using-data-sources" target="_blank" rel="nofollow noopener noreferrer">Trabajo con objetos DataTable y DataView</a>" para obtener más información).
+
+Supongamos que tenemos los siguientes datos JSON:
+```
+[ 
+   { 
+      Name:"John Doe",
+      Age:30,
+      Birth:"1989-04-01 4:00:00 pm"
+   },
+   { 
+      Name:"Jane Doe",
+      Age:27,
+      Birth:"1992-01-31 07:00:00 am"
+   },
+   { 
+      Name:"John Smith",
+      Age:51,
+      Birth:"1968-03-08 1:00:00 pm"
+   }
+]
+```
+
+o JSON alternativo como:
+```
+{ 
+   Persons:[ 
+      { 
+         Name:"John Doe",
+         Age:30,
+         Birth:"1989-04-01 4:00:00 pm"
+      },
+      { 
+         Name:"Jane Doe",
+         Age:27,
+         Birth:"1992-01-31 07:00:00 am"
+      },
+      { 
+         Name:"John Smith",
+         Age:51,
+         Birth:"1968-03-08 1:00:00 pm"
+      }
+   ]
+}
+```
+
+Si usamos la plantilla de la siguiente manera:
+```
+<<foreach \[in persons\]>>Name: <<\[Name\]>>, Age: <<\[Age\]>>, Date of Birth: <<\[Birth\]:"dd.MM.yyyy">>
+<</foreach>>
+Average age: <<\[persons.Average(p => p.Age)\]>>
+```
+
+Los resultados se generarán para ambos conjuntos de datos JSON, como:
+```
+Name: John Doe, Age: 30, Date of Birth: 01.04.1989
+Name: Jane Doe, Age: 27, Date of Birth: 31.01.1992
+Name: John Smith, Age: 51, Date of Birth: 08.03.1968
+Average age: 36
+```
+
+
+:::warning
+El uso del formato personalizado de fecha y hora es posible, ya que los valores de texto de las propiedades `Birth` se convierten automáticamente a `DateTime?`.
+:::
+
+
+### Tratamiento de los objetos de nivel superior {#treating-the-objects-at-top-level}
+
+Si un elemento JSON de nivel superior representa un objeto, una instancia de *JsonDataSource* debe tratarse en los documentos de plantilla de la misma manera que si fuera una instancia de *DataRow* (consulte "<a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-1-of-2/#using-data-sources" target="_blank" rel="nofollow noopener noreferrer">Trabajo con objetos *DataRow* y *DataRowView*</a>" para obtener más información). Si un objeto JSON de nivel superior tiene una única propiedad que también es un objeto, entonces el ensamblador accede a este objeto anidado en su lugar.
+
+Supongamos que tenemos los siguientes datos JSON:
+```
+{ 
+   Name:"John Doe",
+   Age:30,
+   Birth:"1989-04-01 4:00:00 pm",
+   Child:[ 
+      "Ann Doe",
+      "Charles Doe"
+   ]
+}
+```
+
+o alternativamente como:
+```
+{ 
+   Person:{ 
+      Name:"John Doe",
+      Age:30,
+      Birth:"1989-04-01 4:00:00 pm",
+      Child:[ 
+         "Ann Doe",
+         "Charles Doe"
+      ]
+   }
+}
+```
+
+Si usamos la plantilla de la siguiente manera:
+```
+Name: <<\[Name\]>>, Age: <<\[Age\]>>, Date of Birth:
+<<\[Birth\]:"dd.MM.yyyy">>
+Children:
+<<foreach \[in Child\]>><<\[Child\_Text\]>>
+<</foreach>>
+```
+
+Los resultados se generarán para ambos conjuntos de datos JSON, como:
+```
+Name: John Doe, Age: 30, Date of Birth: 01.04.1989
+Children:
+Ann Doe
+Charles Doe
+```
+
+
+:::warning
+Para hacer referencia a una propiedad de un objeto JSON que es un array de valores de tipo simple, se debe utilizar el nombre de la propiedad (por ejemplo, "Child") en un documento de plantilla, mientras que el mismo nombre con el sufijo "_Text" (por ejemplo, "Child_Text") debe utilizarse para hacer referencia al valor de un elemento de dicho array.
+:::
+
+
+### Ejemplo completo {#the-complete-example}
+
+El siguiente ejemplo resume escenarios típicos que involucran objetos y matrices anidados en JSON.
+
+#### JSON {#json}
+```
+[ 
+   { 
+      Name:"John Smith",
+      Contract:[ 
+         { 
+            Client:{ 
+               Name:"A Company"
+            },
+            Price:1200000
+         },
+         { 
+            Client:{ 
+               Name:"B Ltd."
+            },
+            Price:750000
+         },
+         { 
+            Client:{ 
+               Name:"C & D"
+            },
+            Price:350000
+         }
+      ]
+   },
+   { 
+      Name:"Tony Anderson",
+      Contract:[ 
+         { 
+            Client:{ 
+               Name:"E Corp."
+            },
+            Price:650000
+         },
+         { 
+            Client:{ 
+               Name:"F & Partners"
+            },
+            Price:550000
+         }
+      ]
+   },
+   { 
+      Name:"July James",
+      Contract:[ 
+         { 
+            Client:{ 
+               Name:"G & Co."
+            },
+            Price:350000
+         },
+         { 
+            Client:{ 
+               Name:"H Group"
+            },
+            Price:250000
+         },
+         { 
+            Client:{ 
+               Name:"I & Sons"
+            },
+            Price:100000
+         },
+         { 
+            Client:{ 
+               Name:"J Ent."
+            },
+            Price:100000
+         }
+      ]
+   }
+]
+```
+
+#### Documento de plantilla {#template-document}
+```
+<<foreach [in managers]>>Manager: <<[Name]>>
+Contracts:
+<<foreach [in Contract]>>- <<[Client.Name]>> ($<<[Price]>>)
+<</foreach>>
+<</foreach>>
+```
+
+#### Código fuente {#source-code}
+
+<a href="https://gist.github.com/GroupDocsGists/330892e76bb1958b9199e3d223962e27" target="_blank" rel="nofollow noopener noreferrer">Ver ejemplo de código en GitHub Gist</a>
+
+#### Documento resultante {#result-document}
+```
+Manager: John Smith
+Contracts:
+- A Company ($1200000)
+- B Ltd. ($750000)
+- C & D ($350000)
+Manager: Tony Anderson
+Contracts:
+- E Corp. ($650000)
+- F & Partners ($550000)
+Manager: July James
+Contracts:
+- G & Co. ($350000)
+- H Group ($250000)
+- I & Sons ($100000)
+- J Ent. ($100000)
+```
+
+### Reconocimiento de valores simples en JSON {#recognition-of-json-simple-values}
+
+Para el reconocimiento de valores simples de JSON (`null`, `boolean`, `number`, `integer` y `string`), el motor proporciona dos modos: *loose* (flexible) y *strict* (estricto). En el modo flexible, los tipos de los valores simples de JSON se determinan al analizar sus representaciones en forma de cadena. En el modo estricto, los tipos de los valores simples de JSON se determinan directamente a partir de la notación JSON. Para observar la diferencia principal entre ambos modos, considere el siguiente fragmento de JSON.
+
+```
+{ prop: "123" }
+```
+
+En el modo flexible, el tipo de la propiedad se determina como entero, mientras que en el modo estricto, se determina como cadena.
+
+El modo flexible se utiliza por defecto por el motor para admitir más opciones de representación de datos tipados. Sin embargo, en algunos escenarios, puede ser preferible deshabilitar el reconocimiento de números y otros valores simples de JSON a partir de cadenas, por ejemplo, cuando se necesita conservar los ceros iniciales de relleno en una cadena que representa un número. En este caso, puede cambiar al modo estricto, como se muestra en el siguiente fragmento de código.
+
+```
+JsonDataLoadOptions options = new JsonDataLoadOptions();
+options.SimpleValueParseMode = JsonSimpleValueParseMode.Strict;
+JsonDataSource dataSource = new JsonDataSource(..., options);
+```
+
+**Nota:** El análisis de valores de fecha y hora no depende de si se utiliza el modo flexible o el modo estricto.
+
+El reconocimiento de valores de fecha y hora es un caso especial, ya que <a href="https://www.json.org" target="_blank" rel="nofollow noopener noreferrer">la especificación JSON</a> no define un formato para su representación. Por lo tanto, de forma predeterminada, al analizar valores de fecha y hora desde cadenas, el motor prueba varios formatos en el siguiente orden:
+
+1. <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank" rel="nofollow noopener noreferrer">Formato ISO-8601</a> (para valores como "2015-03-02T13:56:04Z")
+2. <a href="https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/bb299886(v=msdn.10" target="_blank" rel="nofollow noopener noreferrer">Formato de fecha y hora JSON de Microsoft®</a>#from-javascript-literals-to-json) (para valores como "/Date(1224043200000)/")
+3. Todos los formatos de fecha y hora admitidos para la configuración regional actual
+4. Todos los formatos de fecha y hora admitidos para la configuración regional inglés (Estados Unidos)
+5. Todos los formatos de fecha y hora admitidos para la configuración regional inglés (Nueva Zelanda)
+
+Aunque este enfoque es bastante flexible, en algunos escenarios puede ser necesario restringir las cadenas que se reconocerán como valores de fecha y hora. Para lograrlo, puede especificar un formato exacto en el contexto de la configuración regional actual que se utilizará al analizar valores de fecha y hora desde cadenas, como se muestra en el siguiente ejemplo.
+
+```
+JsonDataLoadOptions options = new JsonDataLoadOptions();
+options.ExactDateTimeParseFormat = "MM/dd/yyyy";
+JsonDataSource dataSource = new JsonDataSource(..., options);
+```
+
+En este ejemplo, las cadenas que cumplen con el formato "MM/dd/yyyy" se reconocerán como valores de fecha y hora al cargar JSON, mientras que las demás no lo harán (pero véase la nota siguiente).
+
+En algunos escenarios, es posible que necesite deshabilitar completamente el reconocimiento de valores de fecha y hora, por ejemplo, cuando trabaja con cadenas que ya contienen valores de fecha y hora formateados y no desea reformatearlos mediante el motor. Para lograrlo, puede establecer el formato exacto de análisis de fecha y hora como una cadena vacía (pero véase la nota siguiente).
+
+**Nota:** Las cadenas que cumplen con el formato de fecha y hora de Microsoft® JSON (por ejemplo, "/Date(1224043200000)/") siempre se reconocerán como valores de fecha y hora, independientemente del formato exacto de análisis de fecha y hora establecido.
+
+### Descargar {#download}
+
+#### Documento de origen de datos {#data-source-document}
+
+*   <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET/blob/master/Examples/Data/Data%20Sources/JSON%20DataSource/ManagerData.json?raw=true" target="_blank" rel="nofollow noopener noreferrer">ManagerData.json</a>
+
+#### Plantilla {#template}
+
+*   <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET/blob/master/Examples/Data/Source/Word%20Templates/Using%20Spreadsheet%20as%20Table%20of%20Data.docx?raw=true" target="_blank" rel="nofollow noopener noreferrer">Demo Template.docx</a>

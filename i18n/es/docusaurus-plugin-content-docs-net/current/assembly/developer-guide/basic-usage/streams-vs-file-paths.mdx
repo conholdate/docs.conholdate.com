@@ -1,0 +1,278 @@
+---
+title: "Trabajar con flujos frente a rutas de archivos"
+sidebar_label: "Trabajar con flujos frente a rutas de archivos"
+sidebar_key: "net-assembly-streams-vs-file-paths"
+sidebar_position: 14
+description: "Aprenda cuándo y cómo usar flujos frente a rutas de archivos para la carga de plantillas y el guardado de documentos en .NET."
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/streams-vs-file-paths.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "142dd2e38df6b9a28a4f5edabaceeab58a39158936d75f795ece0f049c56c9e2"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "1e954542eb8f1c7e7e009235adcfc1ff33243cfd7e416fbcc9efca9f3495d677"
+translation_updated_at: "2026-11-16T14:01:47.095Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Vista general {#overview}
+
+GroupDocs.Assembly para .NET admite tanto rutas de archivos como flujos (streams) para la carga de plantillas y el guardado de documentos. Comprender cuándo utilizar cada enfoque le ayudará a construir aplicaciones eficientes y escalables. Las rutas de archivos son más sencillas para operaciones en el sistema de archivos local, mientras que los flujos son esenciales para el procesamiento en memoria, plantillas remotas y aplicaciones web.
+
+La clase principal implicada es:
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/documentassembler/" target="_blank" rel="nofollow noopener noreferrer">DocumentAssembler</a> – proporciona sobrecargas tanto para rutas de archivos como para flujos
+
+A continuación se presentan los criterios a considerar al elegir entre flujos y rutas de archivos:
+
+* Utilice rutas de archivos para operaciones simples en el sistema de archivos local
+* Utilice flujos para procesamiento en memoria, plantillas remotas o aplicaciones web
+* Combine rutas de archivos y flujos según sea necesario para su escenario
+* Asegúrese siempre de liberar adecuadamente los flujos para evitar fugas de recursos
+
+
+:::info
+DocumentAssembler proporciona múltiples sobrecargas que admiten diversas combinaciones de rutas de archivos y flujos tanto para plantillas de entrada como para documentos de salida.
+:::
+
+
+## Cuándo usar rutas de archivo {#when-to-use-file-paths}
+
+Las rutas de archivo son ideales para:
+- Operaciones simples en el sistema de archivos local
+- Plantillas almacenadas en disco
+- Documentos de salida guardados en disco
+- Aplicaciones de escritorio con acceso directo a archivos
+
+```csharp
+using GroupDocs.Assembly;
+
+public static void UseFilePaths()
+{
+    // Simple file path approach
+    string templatePath = @"C:\Templates\InvoiceTemplate.docx";
+    string outputPath = @"C:\Output\Invoice.docx";
+    
+    var data = new { CustomerName = "ABC Corp", Amount = 1500.00m };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument(templatePath, outputPath, 
+        new DataSourceInfo(data, "invoice"));
+    
+    Console.WriteLine("Document assembled using file paths.");
+}
+```
+
+## Cuándo usar flujos (Streams) {#when-to-use-streams}
+
+Los flujos (streams) son esenciales para:
+- Procesamiento basado en memoria (sin E/S en disco)
+- Plantillas cargadas desde bases de datos o fuentes remotas
+- Aplicaciones web que sirven documentos directamente
+- Procesamiento de plantillas en memoria para mejorar el rendimiento
+
+```csharp
+using GroupDocs.Assembly;
+using System.IO;
+
+public static void UseStreams()
+{
+    // Load template into memory
+    byte[] templateBytes = File.ReadAllBytes("Template.docx");
+    
+    using (MemoryStream templateStream = new MemoryStream(templateBytes))
+    using (MemoryStream outputStream = new MemoryStream())
+    {
+        var data = new { Title = "Report", Date = DateTime.Now };
+        
+        DocumentAssembler assembler = new DocumentAssembler();
+        assembler.AssembleDocument(templateStream, outputStream, 
+            new DataSourceInfo(data, "report"));
+        
+        // Use output stream (e.g., send via HTTP, save to database)
+        byte[] outputBytes = outputStream.ToArray();
+        File.WriteAllBytes("Output.docx", outputBytes);
+        
+        Console.WriteLine("Document assembled using streams.");
+    }
+}
+```
+
+## Enfoque híbrido: entrada de ruta de archivo, salida en flujo {#mixed-approach-file-path-input-stream-output}
+
+Cargar plantilla desde archivo, guardar en flujo:
+
+```csharp
+using GroupDocs.Assembly;
+using System.IO;
+
+public static void FilePathInputStreamOutput()
+{
+    // Template from file path
+    string templatePath = "Template.docx";
+    
+    // Output to memory stream
+    using (MemoryStream outputStream = new MemoryStream())
+    {
+        var data = new { Name = "Test", Value = 100 };
+        
+        DocumentAssembler assembler = new DocumentAssembler();
+        assembler.AssembleDocument(templatePath, outputStream, 
+            new DataSourceInfo(data, "item"));
+        
+        // Use output stream (e.g., send via HTTP response)
+        byte[] outputBytes = outputStream.ToArray();
+        
+        Console.WriteLine($"Document assembled, output size: {outputBytes.Length} bytes");
+    }
+}
+```
+
+## Enfoque mixto: entrada de flujo, salida de ruta de archivo {#mixed-approach-stream-input-file-path-output}
+
+Cargar plantilla desde un flujo y guardar en un archivo:
+
+```csharp
+using GroupDocs.Assembly;
+using System.IO;
+
+public static void StreamInputFilePathOutput()
+{
+    // Template from memory stream
+    byte[] templateBytes = File.ReadAllBytes("Template.docx");
+    
+    using (MemoryStream templateStream = new MemoryStream(templateBytes))
+    {
+        // Output to file path
+        string outputPath = "Output.docx";
+        
+        var data = new { Title = "Report", Date = DateTime.Now };
+        
+        DocumentAssembler assembler = new DocumentAssembler();
+        assembler.AssembleDocument(templateStream, outputPath, 
+            new DataSourceInfo(data, "report"));
+        
+        Console.WriteLine("Document assembled from stream to file.");
+    }
+}
+```
+
+## Ejemplo de aplicación web {#web-application-example}
+
+En las aplicaciones web, generalmente se prefieren los flujos (streams):
+
+```csharp
+using GroupDocs.Assembly;
+using System.IO;
+
+public static byte[] GenerateDocumentForWeb(byte[] templateBytes, object data)
+{
+    using (MemoryStream templateStream = new MemoryStream(templateBytes))
+    using (MemoryStream outputStream = new MemoryStream())
+    {
+        DocumentAssembler assembler = new DocumentAssembler();
+        assembler.AssembleDocument(templateStream, outputStream, 
+            new DataSourceInfo(data, "data"));
+        
+        return outputStream.ToArray();
+    }
+}
+```
+
+## Carga de plantilla desde una fuente remota {#loading-template-from-remote-source}
+
+Los *streams* permiten cargar plantillas desde URLs o fuentes remotas:
+
+```csharp
+using GroupDocs.Assembly;
+using System.IO;
+using System.Net.Http;
+
+public static async Task<byte[]> LoadTemplateFromUrl(string url, object data)
+{
+    using (HttpClient client = new HttpClient())
+    {
+        // Download template
+        byte[] templateBytes = await client.GetByteArrayAsync(url);
+        
+        using (MemoryStream templateStream = new MemoryStream(templateBytes))
+        using (MemoryStream outputStream = new MemoryStream())
+        {
+            DocumentAssembler assembler = new DocumentAssembler();
+            assembler.AssembleDocument(templateStream, outputStream, 
+                new DataSourceInfo(data, "data"));
+            
+            return outputStream.ToArray();
+        }
+    }
+}
+```
+
+## Prácticas recomendadas para el desecho de flujos {#stream-disposal-best-practices}
+
+Siempre desechen adecuadamente los flujos:
+
+```csharp
+using GroupDocs.Assembly;
+using System.IO;
+
+public static void ProperStreamDisposal()
+{
+    // Good: Using statement ensures disposal
+    using (FileStream templateStream = new FileStream("Template.docx", FileMode.Open))
+    using (FileStream outputStream = new FileStream("Output.docx", FileMode.Create))
+    {
+        var data = new { Name = "Test" };
+        
+        DocumentAssembler assembler = new DocumentAssembler();
+        assembler.AssembleDocument(templateStream, outputStream, 
+            new DataSourceInfo(data, "item"));
+    } // Streams are automatically disposed here
+    
+    Console.WriteLine("Streams properly disposed.");
+}
+```
+
+
+:::warning
+DocumentAssembler no libera automáticamente los flujos de entrada. Siempre utilice `using` declaraciones o liberar manualmente los flujos para evitar fugas de recursos. Los flujos de salida son gestionados por el ensamblador.
+:::
+
+
+## Consideraciones de rendimiento {#performance-considerations}
+
+- **Rutas de archivo**: Más simples, pero requieren E/S en disco
+- **Flujos (streams)**: Más flexibles y pueden ser más rápidos para operaciones en memoria
+- **Flujos en memoria**: Ideales para documentos pequeños o medianos
+- **Flujos de archivo**: Más adecuados para documentos grandes, a fin de evitar presión en memoria
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre el manejo avanzado de flujos, las implementaciones personalizadas de flujos y la optimización del rendimiento, consulte la [sección de uso avanzado](/net/assembly/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para .NET</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Java</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Python-via-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Python mediante .NET</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas en línea simples pero potentes.
+
+Para ensamblar documentos a partir de plantillas y fuentes de datos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/assembly" target="_blank">Conholdate.Assembly App</a>**.

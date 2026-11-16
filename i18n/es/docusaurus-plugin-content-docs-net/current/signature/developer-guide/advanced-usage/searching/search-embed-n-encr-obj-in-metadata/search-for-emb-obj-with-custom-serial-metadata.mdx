@@ -1,0 +1,194 @@
+---
+title: "Buscar objeto incrustado con serialización personalizada de firmas de metadatos"
+sidebar_label: "Buscar objeto incrustado con serialización personalizada de firmas de metadatos"
+sidebar_key: "net-signature-searching-search-embed-n-encr-obj-in-metadata-search-for-emb-obj-with-custom-serial-metadata"
+sidebar_position: 2
+description: "Este artículo explica cómo buscar firmas electrónicas incrustadas con serialización personalizada en los metadatos de documentos. Este tema contiene un ejemplo de serialización personalizada, definición de clase y búsqueda de objetos serializados en los metadatos del documento con GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/searching/search-embed-n-encr-obj-in-metadata/search-for-emb-obj-with-custom-serial-metadata.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "b58c596712f22c191ff6ebfd54d013d088a842840578fe20a932bbcf415f0c66"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "efa9c89ff2b792e5e82b3c4a5219a260c2907fe546224170c5ffa2f2bbbe7fa1"
+translation_updated_at: "2026-11-16T13:06:05.893Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> ofrece características adicionales al buscar firmas de metadatos que previamente estaban cifradas y contenían objetos de datos incrustados.
+
+* Posibilidad de buscar objetos personalizados incrustados en los metadatos y descifrarlos a sus valores originales de origen
+* Posibilidad de buscar el texto cifrado de una firma de metadatos y descifrarlo
+
+A continuación se indican los pasos para buscar y descifrar previamente texto cifrado de metadatos y descifrar un objeto personalizado desde una firma de metadatos (<a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/metadatasignature" target="_blank" rel="nofollow noopener noreferrer">MetadataSignature</a>) mediante la API de GroupDocs.Signature:
+
+* Implementar una clase personalizada de serialización de datos que implemente la interfaz <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/idataencryption" target="_blank" rel="nofollow noopener noreferrer">IDataEncryption</a>. De forma predeterminada, Signature utiliza la serialización en formato JSON integrado, pero permite al usuario personalizarla. Si un objeto de clase fue serializado mediante una serialización personalizada, al buscarlo dicha clase también debe tener el mismo atributo de serialización.
+* Implementar una clase personalizada de cifrado de datos que implemente la interfaz <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/idataencryption" target="_blank" rel="nofollow noopener noreferrer">IDataEncryption</a>. De forma predeterminada, Signature incluye varias implementaciones de cifrado que pueden utilizarse, pero también permite al usuario personalizarlas. Existe la posibilidad de especificar un cifrado en línea a utilizar.
+* Definir una clase con el atributo DataSerialization adecuado.
+* Instanciar el valor del objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasearchoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataSearchOptions</a>.
+* Llamar al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasarle <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasearchoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataSearchOptions</a>.
+* Procesar cada firma de metadatos y establecer la propiedad <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasearchoptions/dataencryption" target="_blank" rel="nofollow noopener noreferrer">DataEncryption</a> para especificar el cifrado de datos, y luego llamar al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/metadatasignature/getdata" target="_blank" rel="nofollow noopener noreferrer">GetData</a> para recuperar el objeto.
+
+## Implementación de una serialización de datos personalizada {#implementation-of-custom-data-serialization}
+
+Este ejemplo muestra cómo especificar una clase de serialización personalizada. Esta clase debe implementarse como un atributo y la interfaz <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/idataserializer" target="_blank" rel="nofollow noopener noreferrer">IDataSerializer</a>.
+
+```csharp
+public class CustomSerializationAttribute : Attribute, IDataSerializer
+{
+    public T Deserialize<T>(string source) where T : class
+    {
+        return JsonConvert.DeserializeObject<T>(source);
+    }
+    public string Serialize(object data)
+    {
+        var serializerSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
+        return JsonConvert.SerializeObject(data, serializerSettings);
+    }
+}
+```
+
+## Implementación de cifrado de datos personalizado {#implementation-of-custom-data-encryption}
+
+Este ejemplo muestra cómo especificar una clase de serialización personalizada. Esta clase también puede implementarse como un atributo (opcional) para especificarla como atributo de clase.
+
+```csharp
+// Define class that implements IDataEncryption interface
+private class CustomXOREncryption : IDataEncryption
+{
+    /// <summary>
+    /// Gets or sets non empty key for encryption (at least one character)
+    /// </summary>
+    public int Key { get; set; }
+    /// <summary>
+    /// Encode method to encrypt string.
+    /// </summary>
+    /// <param name="source">Source string to encode.</param>
+    /// <returns>Returns enccrypted string</returns>
+    public string Encode(string source)
+    {
+        return Process(source);
+    }
+    /// <summary>
+    /// Decode method to obtain decrypted string.
+    /// </summary>
+    /// <param name="source">Source string to decode.</param>
+    /// <returns>Returns decrypted string</returns>
+    public string Decode(string source)
+    {
+        return Process(source);
+    }
+    /// <summary>
+    /// Using XOR operation get encoded / decoded string
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    private string Process(string source)
+    {
+        StringBuilder src = new StringBuilder(source);
+        StringBuilder dst = new StringBuilder(src.Length);
+        char chTmp;
+        for (int index = 0; index < src.Length; ++index)
+        {
+            chTmp = src[index];
+            chTmp = (char)(chTmp ^ this.Key);
+            dst.Append(chTmp);
+        }
+        return dst.ToString();
+    }
+}
+```
+
+## Definición de la clase {#definition-of-class}
+
+Este ejemplo muestra cómo definir una clase personalizada con propiedades de serialización y cifrado, y cómo configurar los atributos de formato para las propiedades.
+
+```csharp
+// setup CustomSerialization Attribute to setup customer serialization(see example above)
+[CustomSerialization]
+private class DocumentSignatureData
+{
+    [Format("SignID")]
+    public string ID { get; set; }
+    [Format("SAuth")]
+    public string Author { get; set; }
+    [Format("SDate", "yyyy-MM-dd")]
+    public DateTime Signed { get; set; }
+    [Format("SDFact", "N2")]
+    public decimal DataFactor { get; set; }
+    [SkipSerialization]
+    public string Comments { get; set; }
+}
+```
+
+## Buscar objetos personalizados incrustados en firmas de metadatos {#search-for-embedded-custom-objects-in-metadata-signatures}
+
+ Este ejemplo muestra cómo descifrar objetos personalizados previamente incrustados y cifrados dentro de una firma de metadatos. <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/metadatasignature" target="_blank" rel="nofollow noopener noreferrer">MetadataSignature</a> contiene el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/metadatasignature/getdata" target="_blank" rel="nofollow noopener noreferrer">GetData</a> para recuperar el objeto
+
+```csharp
+using (Signature signature = new Signature("MetadataCustomSerializationObject.docx"))
+{
+    // create data encryption
+    IDataEncryption encryption = new CustomXOREncryption();
+    MetadataSearchOptions options = new MetadataSearchOptions()
+    {
+        DataEncryption = encryption
+    };
+    // search for signatures in document
+    List<WordProcessingMetadataSignature> signatures = signature.Search<WordProcessingMetadataSignature>(options);
+    Console.WriteLine("\nSource document contains following signatures.");
+    // get required metadata signatures
+    WordProcessingMetadataSignature mdSignature = signatures.FirstOrDefault(p => p.Name == "Signature");
+    if (mdSignature != null)
+    {
+        DocumentSignatureData documentSignatureData = mdSignature.GetData<DocumentSignatureData>();
+        if (documentSignatureData != null)
+        {
+            Console.WriteLine("Signature has DocumentSignatureData object:\n ID = {0}, Author = {1}, Signed = {2}, DataFactor {3}",
+                documentSignatureData.ID, documentSignatureData.Author, documentSignatureData.Signed.ToShortDateString(), documentSignatureData.DataFactor);
+        }
+    }
+    // get required metadata signatures
+    WordProcessingMetadataSignature mdAuthor = signatures.FirstOrDefault(p => p.Name == "Author");
+    if (mdAuthor != null)
+    {
+        Console.WriteLine("Metadata signature found. Name : {0}. Value: {1}", mdAuthor.Name, mdAuthor.GetData<string>());
+    }
+    // get required metadata signatures
+    WordProcessingMetadataSignature mdDocId = signatures.FirstOrDefault(p => p.Name == "DocumentId");
+    if (mdDocId != null)
+    {
+        Console.WriteLine("Metadata signature found. Name : {0}. Value: {1}", mdDocId.Name, mdDocId.GetData<string>());
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario MVC para firma de documentos en .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario WebForms para firma de documentos en .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Dropwizard para firma de documentos en Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Spring para firma de documentos en Java</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

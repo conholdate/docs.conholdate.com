@@ -1,0 +1,97 @@
+---
+title: "Consultas en forma de texto y objeto"
+sidebar_label: "Consultas en forma de texto y objeto"
+sidebar_position: 15
+description: "Este artículo proporciona conocimientos sobre dos formas de crear una consulta de búsqueda: en forma de texto o en forma de objeto."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/searching/queries-in-text-and-object-form.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "c3afbb82d2e0195f21bb74d995c1d69ed2c24e95afd878792faf480f2f220655"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "042e377d2dafd3f88d1e9ee432451b439d2281b554eb8726416ef42f6edc897e"
+translation_updated_at: "2026-11-16T11:50:41.392Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Existen dos formas de crear una consulta de búsqueda: en forma de texto o en forma de objeto.
+
+Una consulta de búsqueda en forma de texto es más sencilla, pero menos flexible. La flexibilidad de las consultas en forma de objeto radica en que es posible que cada subconsulta defina opciones de búsqueda independientes. En forma de objeto, también puedes utilizar, por ejemplo, una consulta con expresiones regulares como parte de una consulta más compleja. Todas las combinaciones posibles de anidamiento de consultas de búsqueda en forma de objeto se pueden encontrar en la página. [Anidación de consultas de búsqueda en forma de objeto](/net/search/developer-guide/advanced-usage/searching/nesting-search-queries-in-object-form/).
+
+La correlación entre dos formas de consultas de búsqueda es que cada consulta de texto antes de la búsqueda se transforma en una consulta en forma de objeto. Por lo tanto, el procesador maneja las consultas en forma de objeto de manera más rápida.
+
+La especificación completa del lenguaje de consulta en forma de texto se presenta en esta página. [Especificación del lenguaje de consultas](/net/search/developer-guide/advanced-usage/searching/query-language-specification/). Sintaxis con ejemplos de todos los elementos permitidos en las consultas de búsqueda de texto se presenta en la página [Tabla de operaciones de búsqueda](/net/search/developer-guide/advanced-usage/searching/search-operation-table/).
+
+Cada ejemplo en esta documentación generalmente se presenta con la consulta de búsqueda tanto en forma de texto como en forma de objeto.
+
+A continuación se muestra un ejemplo de consulta compleja en forma de objeto.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating index
+Index index = new Index(indexFolder);
+ 
+// Indexing
+index.Add(documentsFolder);
+ 
+// Creating subquery 1 - simple word query
+SearchQuery subquery1 = SearchQuery.CreateWordQuery("future");
+subquery1.SearchOptions = new SearchOptions(); // Setting search options only for subquery 1
+subquery1.SearchOptions.FuzzySearch.Enabled = true;
+subquery1.SearchOptions.FuzzySearch.FuzzyAlgorithm = new TableDiscreteFunction(3); // The maximum number of differences is 3
+ 
+// Creating subquery 2 - numeric range query
+SearchQuery subquery2 = SearchQuery.CreateNumericRangeQuery(1, 1000000);
+ 
+// Creating subquery 3 - regular expression query 
+SearchQuery subquery3 = SearchQuery.CreateRegexQuery(@"(.)\1");
+ 
+// Combining subqueries into one query - phrase search query
+SearchQuery query = SearchQuery.CreatePhraseSearchQuery(subquery1, subquery2, subquery3);
+ 
+// Creating overall search options with increased capacity of occurrences
+SearchOptions options = new SearchOptions();
+options.MaxOccurrenceCountPerTerm = 1000000;
+options.MaxTotalOccurrenceCount = 10000000;
+ 
+// Searching
+SearchResult result = index.Search(query, options);
+ 
+// The result may contain the following word sequences:
+// futile 12 blessed
+// father 7 excellent
+// tyre 8 assyria
+// return 147 229
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le invitamos a buscar en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita de búsqueda de documentos en línea</a>.

@@ -1,0 +1,121 @@
+---
+title: "Búsqueda difusa"
+sidebar_label: "Búsqueda difusa"
+sidebar_position: 6
+description: "Este artículo proporciona conocimientos sobre la definición de la búsqueda difusa y sus capacidades en GroupDocs.Search."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/searching/fuzzy-search.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "1980a8670591d35b04423d3bd6b41f22e52d8f9038dc2112c16896b1bcf3e3c1"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "ee31e18f460bc66d602f92101cc33f99bd2da32ac91f0a28e4b2e440a6b51633"
+translation_updated_at: "2026-11-16T11:40:08.597Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Esta página proporciona una definición de búsqueda difusa, una descripción de sus capacidades en GroupDocs.Search y ejemplos en C# de búsqueda difusa utilizando GroupDocs.Search.
+
+## Definición de búsqueda difusa {#fuzzy-search-definition}
+
+La búsqueda difusa es una técnica de búsqueda de texto basada en lógica difusa que permite encontrar coincidencias incluso cuando las consultas de búsqueda o el texto de los documentos a buscar contienen errores.
+
+## Características de la búsqueda difusa {#fuzzy-search-features}
+
+La búsqueda difusa permite buscar palabras que no coinciden exactamente con la consulta de búsqueda. Este tipo de búsqueda puede utilizarse, por ejemplo, para encontrar palabras que contengan errores ortográficos en documentos. Durante la búsqueda difusa, el número de diferencias posibles con la palabra de búsqueda lo determina el algoritmo de búsqueda difusa utilizado. Las diferencias o errores significan inserciones, eliminaciones, sustituciones y, opcionalmente, transposiciones de caracteres adyacentes.
+
+GroupDocs.Search no utiliza consultas difusas especiales. En su lugar, puede habilitar la búsqueda difusa en las opciones de búsqueda para cualquier consulta, ya sea una sola palabra, una frase o una consulta lógica. Al hacerlo, dicha consulta se convierte en una consulta difusa.
+
+El algoritmo de búsqueda difusa utilizado se define en la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/searchoptions" target="_blank" rel="nofollow noopener noreferrer">SearchOptions</a>. De forma predeterminada, se utiliza el algoritmo proporcionado por la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/similaritylevel" target="_blank" rel="nofollow noopener noreferrer">SimilarityLevel</a> con un nivel de similitud de 0,5. Este algoritmo utiliza una dependencia lineal entre el número de diferencias posibles y la longitud de la palabra de búsqueda. Para calcular el número máximo de diferencias posibles, se utiliza la siguiente expresión:
+
+int maxMistakeCount = (int)((1 - similarityLevel) \* termLength);
+
+donde `similarityLevel` es un parámetro del algoritmo de búsqueda difusa y `termLength` es la longitud de la palabra buscada.
+
+A continuación se presenta un ejemplo de configuración de este tipo de algoritmo de búsqueda difusa.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+string query = "Einstein";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+SearchOptions options = new SearchOptions();
+options.FuzzySearch.Enabled = true; // Enabling the fuzzy search
+options.FuzzySearch.FuzzyAlgorithm = new SimilarityLevel(0.8); // Creating the fuzzy search algorithm
+// This function specifies 0 as the maximum number of mistakes for words from 1 to 4 characters.
+// It specifies 1 as the maximum number of mistakes for words from 5 to 9 characters.
+// It specifies 2 as the maximum number of mistakes for words from 10 to 14 characters. And so on.
+ 
+// Search in index
+SearchResult result = index.Search(query, options);
+```
+
+El algoritmo de búsqueda difusa también puede especificarse mediante una tabla de correspondencias entre la longitud de la palabra buscada y el número máximo de diferencias posibles. Para ello, se utiliza el algoritmo presentado por la clase **<a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/tablediscretefunction" target="_blank" rel="nofollow noopener noreferrer">TableDiscreteFunction</a>**. En este caso, la tabla de correspondencias puede calcularse basándose en los parámetros de una función escalón. A continuación se presenta un ejemplo de configuración del algoritmo de búsqueda difusa en forma de función escalón.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+string query = "Einstein";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+SearchOptions options = new SearchOptions();
+options.FuzzySearch.Enabled = true; // Enabling the fuzzy search
+options.FuzzySearch.FuzzyAlgorithm = new TableDiscreteFunction(1, new Step(5, 2), new Step(8, 3)); // Creating the fuzzy search algorithm
+// This function specifies 1 as the maximum number of mistakes for words from 1 to 4 characters.
+// It specifies 2 as the maximum number of mistakes for words from 5 to 7 characters.
+// It specifies 3 as the maximum number of mistakes for words from 8 and more characters.
+ 
+// Search in index
+SearchResult result = index.Search(query, options);
+```
+
+El objeto de opciones de búsqueda difusa le permite especificar las siguientes opciones:
+
+*   La propiedad <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/fuzzysearchoptions/properties/fuzzyalgorithm" target="_blank" rel="nofollow noopener noreferrer">FuzzyAlgorithm</a> define el algoritmo de búsqueda difusa. Los algoritmos de búsqueda difusa disponibles actualmente son <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/similaritylevel" target="_blank" rel="nofollow noopener noreferrer">SimilarityLevel</a> y <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/tablediscretefunction" target="_blank" rel="nofollow noopener noreferrer">TableDiscreteFunction</a>. El valor predeterminado es una instancia de la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/similaritylevel" target="_blank" rel="nofollow noopener noreferrer">SimilarityLevel</a> con un nivel de similitud de 0.5.
+*   La propiedad <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/fuzzysearchoptions/properties/onlybestresults" target="_blank" rel="nofollow noopener noreferrer">OnlyBestResults</a> determina si se deben devolver únicamente los mejores resultados. El valor predeterminado es `false`, lo que significa que se devolverán todos los resultados.
+*   La propiedad <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/fuzzysearchoptions/properties/onlybestresultsrange" target="_blank" rel="nofollow noopener noreferrer">OnlyBestResultsRange</a> determina el valor de exceso del número de diferencias respecto al mejor resultado. El valor predeterminado es 0.
+*   La propiedad <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/fuzzysearchoptions/properties/considertranspositions" target="_blank" rel="nofollow noopener noreferrer">ConsiderTranspositions</a> determina si se debe considerar la transposición de caracteres adyacentes como un solo error. El valor predeterminado es `true`.
+*   La propiedad <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/fuzzysearchoptions/properties/enabled" target="_blank" rel="nofollow noopener noreferrer">Enabled</a> habilita o deshabilita la búsqueda difusa. El valor predeterminado es `false`.
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le invitamos a buscar en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita de búsqueda de documentos en línea</a>.

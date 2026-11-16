@@ -1,0 +1,360 @@
+---
+title: "Usar agregados simples (Suma, Contar, Promedio)"
+sidebar_label: "Usar agregados simples (Suma, Contar, Promedio)"
+sidebar_key: "net-assembly-use-aggregates"
+sidebar_position: 24
+description: "Calcular y mostrar valores agregados como sumas, conteos y promedios a partir de colecciones de datos en plantillas."
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/use-aggregates.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "c198476e968dd4bfcc154ac115978db9dbd01eb8ea56e425e6f6f0e8ab248366"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "638b0732f427cd21c00900f9136f4cd66d054c50c8f0268261a640e580b1cee3"
+translation_updated_at: "2026-11-16T14:02:56.342Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Vista general {#overview}
+
+GroupDocs.Assembly para .NET admite funciones agregadas basadas en LINQ que permiten calcular sumas, conteos, promedios y otros valores agregados directamente en las plantillas. Estas funciones operan sobre colecciones y le permiten mostrar totales, resúmenes e información estadística en sus documentos.
+
+Las principales funciones agregadas son:
+- `Sum()` – calcula la suma de valores numéricos
+- `Count()` – cuenta el número de elementos
+- `Average()` – calcula el promedio de valores numéricos
+- `Min()` – encuentra el valor mínimo
+- `Max()` – encuentra el valor máximo
+
+A continuación se indican los pasos para utilizar funciones agregadas:
+
+* Crear una plantilla con expresiones agregadas
+* Utilizar métodos agregados de LINQ sobre colecciones
+* Hacer referencia a los resultados agregados en su plantilla
+* Generar el documento con sus datos
+
+
+:::info
+Las funciones de agregación utilizan la sintaxis de LINQ y funcionan con cualquier tipo de colección, incluidas listas, matrices, DataTables y otras colecciones enumerables.
+:::
+
+
+## Calcular Suma {#calculate-sum}
+
+Calcula la suma de los valores en una colección:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public class OrderItem
+{
+    public string ProductName { get; set; }
+    public decimal Price { get; set; }
+    public int Quantity { get; set; }
+}
+
+public static void CalculateSum()
+{
+    List<OrderItem> items = new List<OrderItem>
+    {
+        new OrderItem { ProductName = "Laptop", Price = 999.99m, Quantity = 1 },
+        new OrderItem { ProductName = "Mouse", Price = 29.99m, Quantity = 2 },
+        new OrderItem { ProductName = "Keyboard", Price = 79.99m, Quantity = 1 }
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("AggregatesTemplate.docx", "AggregatesOutput.docx", 
+        new DataSourceInfo(items, "items"));
+    
+    Console.WriteLine("Sum calculated successfully.");
+}
+```
+
+## Ejemplo de plantilla para Sum {#template-example-for-sum}
+
+En su plantilla (AggregatesTemplate.docx):
+
+```
+Items:
+<<foreach [in items]>>
+<<[ProductName]>> - <<[Price]:"C">> x <<[Quantity]>>
+<</foreach>>
+
+Total: <<[items.Sum(i => i.Price * i.Quantity)]:"C">>
+```
+
+## Calcular recuento {#calculate-count}
+
+Cuenta el número de elementos en una colección:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public static void CalculateCount()
+{
+    List<string> products = new List<string> 
+    { 
+        "Laptop", 
+        "Mouse", 
+        "Keyboard", 
+        "Monitor" 
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("AggregatesTemplate.docx", "AggregatesOutput.docx", 
+        new DataSourceInfo(products, "products"));
+    
+    Console.WriteLine("Count calculated successfully.");
+}
+```
+
+Plantilla:
+
+```
+Products:
+<<foreach [in products]>>
+- <<[products_Text]>>
+<</foreach>>
+
+Total Products: <<[products.Count()]>>
+```
+
+## Calcular promedio {#calculate-average}
+
+Calcula el promedio de valores numéricos:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public class Sale
+{
+    public decimal Amount { get; set; }
+}
+
+public static void CalculateAverage()
+{
+    List<Sale> sales = new List<Sale>
+    {
+        new Sale { Amount = 1000.00m },
+        new Sale { Amount = 1500.00m },
+        new Sale { Amount = 800.00m },
+        new Sale { Amount = 1200.00m }
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("AggregatesTemplate.docx", "AggregatesOutput.docx", 
+        new DataSourceInfo(sales, "sales"));
+    
+    Console.WriteLine("Average calculated successfully.");
+}
+```
+
+Plantilla:
+
+```
+Sales:
+<<foreach [in sales]>>
+<<[Amount]:"C">>
+<</foreach>>
+
+Average Sale: <<[sales.Average(s => s.Amount)]:"C">>
+```
+
+## Calcular mínimo y máximo {#calculate-min-and-max}
+
+Encontrar valores mínimos y máximos:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public static void CalculateMinMax()
+{
+    List<Sale> sales = new List<Sale>
+    {
+        new Sale { Amount = 1000.00m },
+        new Sale { Amount = 1500.00m },
+        new Sale { Amount = 800.00m }
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("AggregatesTemplate.docx", "AggregatesOutput.docx", 
+        new DataSourceInfo(sales, "sales"));
+    
+    Console.WriteLine("Min and max calculated successfully.");
+}
+```
+
+Plantilla:
+
+```
+Minimum Sale: <<[sales.Min(s => s.Amount)]:"C">>
+Maximum Sale: <<[sales.Max(s => s.Amount)]:"C">>
+```
+
+## Múltiples agregados {#multiple-aggregates}
+
+Utilice múltiples agregados en la misma plantilla:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public static void MultipleAggregates()
+{
+    List<OrderItem> items = new List<OrderItem>
+    {
+        new OrderItem { ProductName = "Laptop", Price = 999.99m, Quantity = 1 },
+        new OrderItem { ProductName = "Mouse", Price = 29.99m, Quantity = 2 },
+        new OrderItem { ProductName = "Keyboard", Price = 79.99m, Quantity = 1 }
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("AggregatesTemplate.docx", "AggregatesOutput.docx", 
+        new DataSourceInfo(items, "items"));
+    
+    Console.WriteLine("Multiple aggregates calculated successfully.");
+}
+```
+
+Plantilla:
+
+```
+Items:
+<<foreach [in items]>>
+<<[ProductName]>> - <<[Price]:"C">> x <<[Quantity]>>
+<</foreach>>
+
+Summary:
+Total Items: <<[items.Count()]>>
+Total Quantity: <<[items.Sum(i => i.Quantity)]>>
+Total Amount: <<[items.Sum(i => i.Price * i.Quantity)]:"C">>
+Average Price: <<[items.Average(i => i.Price)]:"C">>
+```
+
+## Agregados con condiciones {#aggregates-with-conditions}
+
+Utilice agregados con datos filtrados:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public static void AggregatesWithConditions()
+{
+    List<OrderItem> items = new List<OrderItem>
+    {
+        new OrderItem { ProductName = "Laptop", Price = 999.99m, Quantity = 1 },
+        new OrderItem { ProductName = "Mouse", Price = 29.99m, Quantity = 2 },
+        new OrderItem { ProductName = "Keyboard", Price = 79.99m, Quantity = 1 }
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("AggregatesTemplate.docx", "AggregatesOutput.docx", 
+        new DataSourceInfo(items, "items"));
+    
+    Console.WriteLine("Conditional aggregates calculated successfully.");
+}
+```
+
+Plantilla:
+
+```
+High-value items (Price > 100):
+<<foreach [in items.Where(i => i.Price > 100)]>>
+<<[ProductName]>> - <<[Price]:"C">>
+<</foreach>>
+
+Total High-value: <<[items.Where(i => i.Price > 100).Sum(i => i.Price)]:"C">>
+```
+
+## Agregados en informes de maestro-detalle {#aggregates-in-master-detail-reports}
+
+Calcule agregados para registros detallados dentro de registros maestros:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public class Order
+{
+    public int OrderId { get; set; }
+    public List<OrderItem> Items { get; set; }
+}
+
+public static void AggregatesInMasterDetail()
+{
+    List<Order> orders = new List<Order>
+    {
+        new Order
+        {
+            OrderId = 1001,
+            Items = new List<OrderItem>
+            {
+                new OrderItem { ProductName = "Laptop", Price = 999.99m, Quantity = 1 },
+                new OrderItem { ProductName = "Mouse", Price = 29.99m, Quantity = 2 }
+            }
+        }
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("AggregatesTemplate.docx", "AggregatesOutput.docx", 
+        new DataSourceInfo(orders, "orders"));
+    
+    Console.WriteLine("Master-detail aggregates calculated successfully.");
+}
+```
+
+Plantilla:
+
+```
+<<foreach [in orders]>>
+Order #<<[OrderId]>>
+Items:
+<<foreach [in Items]>>
+  <<[ProductName]>> - <<[Price]:"C">> x <<[Quantity]>>
+<</foreach>>
+Order Total: <<[Items.Sum(i => i.Price * i.Quantity)]:"C">>
+<</foreach>>
+```
+
+
+:::warning
+Las funciones de agregación requieren colecciones. Asegúrese de que su origen de datos sea de un tipo colección (List, Array, DataTable, etc.) al utilizar funciones de agregación.
+:::
+
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre agrupación, filtrado con agregados, funciones agregadas personalizadas y optimización de rendimiento, consulte la [sección de uso avanzado](/net/assembly/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para .NET</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Java</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Python-via-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Python mediante .NET</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas en línea sencillas pero potentes.
+
+Para ensamblar documentos a partir de plantillas y fuentes de datos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/assembly" target="_blank">Conholdate.Assembly App</a>**.

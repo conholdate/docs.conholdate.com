@@ -1,0 +1,303 @@
+---
+title: "Insertar imágenes dinámicamente"
+sidebar_label: "Insertar imágenes dinámicamente"
+sidebar_key: "net-assembly-insert-images-dynamically"
+sidebar_position: 20
+description: "Insertar imágenes en documentos desde rutas de archivos, URLs o fuentes de datos binarios durante el ensamblaje de documentos."
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/insert-images-dynamically.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "c8b2bd545db098b631d798c8cdf4855132709838748746d0add6a04d675de106"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "1d840ad5de32decc89364db212eb6130d01413ee9d073ea82056cbc84454b65c"
+translation_updated_at: "2026-11-16T13:56:42.574Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Vista general {#overview}
+
+GroupDocs.Assembly para .NET le permite insertar imágenes dinámicamente en documentos mediante etiquetas de imagen. Las imágenes pueden cargarse desde rutas de archivo, URL, flujos, matrices de bytes o cadenas codificadas en Base64, lo que facilita incluir imágenes dinámicas en sus informes.
+
+Las clases principales involucradas son:
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/documentassembler/" target="_blank" rel="nofollow noopener noreferrer">DocumentAssembler</a>: ensambla documentos
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/datasourceinfo/" target="_blank" rel="nofollow noopener noreferrer">DataSourceInfo</a>: envuelve las fuentes de datos
+
+A continuación se indican los pasos para insertar imágenes dinámicamente:
+
+* Agregue un cuadro de texto en la plantilla en la ubicación donde desea colocar la imagen.
+* Ajuste el tamaño y la apariencia del cuadro de texto para que coincidan con las dimensiones deseadas de la imagen.
+* Inserte una etiqueta de imagen `<<image [expression]>>` dentro del cuadro de texto.
+* Proporcione los datos de la imagen desde una ruta de archivo, URL, flujo o matriz de bytes.
+* Ensamble el documento.
+
+
+:::info
+Las etiquetas de imagen se reemplazan por imágenes reales durante el ensamblaje del documento. El cuadro de texto actúa como un marcador de posición y contenedor para la imagen.
+:::
+
+
+## Insertar imagen desde una ruta de archivo {#insert-image-from-file-path}
+
+Insertar una imagen desde una ruta de archivo:
+
+```csharp
+using GroupDocs.Assembly;
+
+public class Product
+{
+    public string Name { get; set; }
+    public string ImagePath { get; set; }
+}
+
+public static void InsertImageFromFilePath()
+{
+    // Sample data with image path
+    var product = new Product
+    {
+        Name = "Laptop",
+        ImagePath = @"C:\Images\laptop.jpg"
+    };
+    
+    // Assemble document
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("ImageTemplate.docx", "ImageOutput.docx", 
+        new DataSourceInfo(product, "product"));
+    
+    Console.WriteLine("Image inserted from file path successfully.");
+}
+```
+
+## Estructura de plantilla para imágenes {#template-structure-for-images}
+
+En su plantilla (ImageTemplate.docx):
+
+1. Inserte un cuadro de texto en el lugar donde desea colocar la imagen
+2. Configure el tamaño del cuadro de texto (ancho y alto)
+3. Agregue la etiqueta de imagen dentro del cuadro de texto:
+
+```
+Product: <<[product.Name]>>
+
+[Textbox with image tag:]
+<<image [product.ImagePath]>>
+```
+
+## Insertar imagen desde una URL {#insert-image-from-url}
+
+Insertar una imagen desde una URL:
+
+```csharp
+using GroupDocs.Assembly;
+
+public class Product
+{
+    public string Name { get; set; }
+    public string ImageUrl { get; set; }
+}
+
+public static void InsertImageFromUrl()
+{
+    var product = new Product
+    {
+        Name = "Laptop",
+        ImageUrl = "https://example.com/images/laptop.jpg"
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("ImageTemplate.docx", "ImageOutput.docx", 
+        new DataSourceInfo(product, "product"));
+    
+    Console.WriteLine("Image inserted from URL successfully.");
+}
+```
+
+Plantilla:
+
+```
+Product: <<[product.Name]>>
+
+[Textbox:]
+<<image [product.ImageUrl]>>
+```
+
+## Insertar imagen desde matriz de bytes {#insert-image-from-byte-array}
+
+Insertar una imagen a partir de datos binarios:
+
+```csharp
+using GroupDocs.Assembly;
+using System.IO;
+
+public class Product
+{
+    public string Name { get; set; }
+    public byte[] ImageData { get; set; }
+}
+
+public static void InsertImageFromByteArray()
+{
+    // Load image into byte array
+    byte[] imageBytes = File.ReadAllBytes(@"C:\Images\laptop.jpg");
+    
+    var product = new Product
+    {
+        Name = "Laptop",
+        ImageData = imageBytes
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("ImageTemplate.docx", "ImageOutput.docx", 
+        new DataSourceInfo(product, "product"));
+    
+    Console.WriteLine("Image inserted from byte array successfully.");
+}
+```
+
+Plantilla:
+
+```
+Product: <<[product.Name]>>
+
+[Textbox:]
+<<image [product.ImageData]>>
+```
+
+## Insertar imagen desde un flujo {#insert-image-from-stream}
+
+Insertar una imagen desde un flujo:
+
+```csharp
+using GroupDocs.Assembly;
+using System.IO;
+
+public class Product
+{
+    public string Name { get; set; }
+    public Stream ImageStream { get; set; }
+}
+
+public static void InsertImageFromStream()
+{
+    using (FileStream imageStream = new FileStream(@"C:\Images\laptop.jpg", FileMode.Open))
+    {
+        var product = new Product
+        {
+            Name = "Laptop",
+            ImageStream = imageStream
+        };
+        
+        DocumentAssembler assembler = new DocumentAssembler();
+        assembler.AssembleDocument("ImageTemplate.docx", "ImageOutput.docx", 
+            new DataSourceInfo(product, "product"));
+        
+        Console.WriteLine("Image inserted from stream successfully.");
+    }
+}
+```
+
+## Opciones de tamaño de imagen {#image-sizing-options}
+
+Controla cómo se dimensionan las imágenes dentro de los cuadros de texto:
+
+```csharp
+using GroupDocs.Assembly;
+
+public static void InsertImageWithSizing()
+{
+    var product = new Product
+    {
+        Name = "Laptop",
+        ImagePath = @"C:\Images\laptop.jpg"
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("ImageTemplate.docx", "ImageOutput.docx", 
+        new DataSourceInfo(product, "product"));
+    
+    Console.WriteLine("Image inserted with sizing options.");
+}
+```
+
+Opciones de dimensionado de plantillas:
+
+- `<<image [product.ImagePath]>>` – Estirar para llenar el cuadro de texto (predeterminado)
+- `<<image [product.ImagePath] -keepRatio>>` – Mantener la relación de aspecto dentro del cuadro de texto
+- `<<image [product.ImagePath] -fitHeight>>` – Ajustar a la altura del cuadro de texto
+- `<<image [product.ImagePath] -fitWidth>>` – Ajustar al ancho del cuadro de texto
+- `<<image [product.ImagePath] -fitSize>>` – Redimensionar el cuadro de texto al tamaño de la imagen
+- `<<image [product.ImagePath] -fitSizeLim>>` – Redimensionar el cuadro de texto hasta el tamaño de la imagen
+
+## Insertar varias imágenes desde una colección {#insert-multiple-images-from-collection}
+
+Insertar imágenes para cada elemento de una colección:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public static void InsertImagesFromCollection()
+{
+    List<Product> products = new List<Product>
+    {
+        new Product { Name = "Laptop", ImagePath = @"C:\Images\laptop.jpg" },
+        new Product { Name = "Mouse", ImagePath = @"C:\Images\mouse.jpg" }
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("ImagesTemplate.docx", "ImagesOutput.docx", 
+        new DataSourceInfo(products, "products"));
+    
+    Console.WriteLine("Images inserted from collection successfully.");
+}
+```
+
+Plantilla con foreach:
+
+```
+<<foreach [in products]>>
+Product: <<[Name]>>
+
+[Textbox:]
+<<image [ImagePath]>>
+
+<</foreach>>
+```
+
+
+:::warning
+Si una expresión de imagen devuelve un flujo, este se cierra automáticamente por el ensamblador una vez cargada la imagen. No libere manualmente el flujo.
+:::
+
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre el formato de imágenes, imágenes codificadas en Base64, optimización de imágenes y manejo avanzado de imágenes, consulte la [sección de uso avanzado](/net/assembly/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para .NET</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Java</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Python-via-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Python mediante .NET</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas en línea sencillas pero potentes.
+
+Para ensamblar documentos a partir de plantillas y fuentes de datos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/assembly" target="_blank">Conholdate.Assembly App</a>**.

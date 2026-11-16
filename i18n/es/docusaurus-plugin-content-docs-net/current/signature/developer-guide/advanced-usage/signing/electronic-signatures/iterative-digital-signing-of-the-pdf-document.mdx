@@ -1,0 +1,267 @@
+---
+title: "Firma digital iterativa del documento PDF"
+sidebar_label: "✎ Firma digital iterativa del documento PDF"
+sidebar_key: "net-signature-signing-electronic-signatures-iterative-digital-signing-of-the-pdf-document"
+sidebar_position: 1
+description: "Este artículo explica cómo firmar iterativamente un documento PDF con múltiples certificados digitales utilizando opciones avanzadas con la API de GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/signing/electronic-signatures/iterative-digital-signing-of-the-pdf-document.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "26807905673538aed49336fc21d6332f762e658432c133c94937b57ad89f61b2"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "7f244d4d8cafcc61e867c6616d1bbd3312eca81e6c8ccc2261408bc8022e44bd"
+translation_updated_at: "2026-11-16T13:18:03.715Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+ 
+### Cómo aplicar firmas digitales de forma iterativa a un documento PDF {#how-to-apply-digital-signatures-iteratively-to-a-pdf-document}
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> proporciona la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/digitalsignoptions/" target="_blank" rel="nofollow noopener noreferrer">DigitalSignOptions</a> para especificar distintas opciones de configuración para la firma digital
+
+* certificado digital (archivo en disco local <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/digitalsignoptions/certificatefilepath/" target="_blank" rel="nofollow noopener noreferrer">CertificateFilePath</a> o flujo <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/digitalsignoptions/certificatestream/" target="_blank" rel="nofollow noopener noreferrer">CertificateStream</a>) (obligatorio)
+* contraseña del certificado digital <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/digitalsignoptions/password/" target="_blank" rel="nofollow noopener noreferrer">Password</a> (obligatorio)
+* detalles de la firma digital (<a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/digitalsignoptions/reason/" target="_blank" rel="nofollow noopener noreferrer">Reason</a>, <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/digitalsignoptions/contact/" target="_blank" rel="nofollow noopener noreferrer">Contact</a>, <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/digitalsignoptions/location/" target="_blank" rel="nofollow noopener noreferrer">Location</a>)
+
+### Cómo agregar una firma digital: {#how-to-add-digital-signature}
+
+* Defina las rutas para el archivo PDF de entrada, los certificados digitales y especifique la ruta de salida donde se guardarán los documentos firmados.
+* Cree una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pase la ruta del documento de origen como parámetro del constructor.
+* Instancie el objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/digitalsignoptions/" target="_blank" rel="nofollow noopener noreferrer">DigitalSignOptions</a> con el certificado requerido y su contraseña, y configure propiedades adicionales como motivo, contacto, ubicación y posición.
+* Llame al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/digitalsignoptions/" target="_blank" rel="nofollow noopener noreferrer">DigitalSignOptions</a> como argumento.
+* Tras firmar, actualice la ruta del documento para la siguiente iteración.
+* Analice <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/signresult" target="_blank" rel="nofollow noopener noreferrer">SignResult</a> para verificar las firmas recién creadas, si es necesario.
+* Itere sobre cada certificado, repitiendo los pasos anteriores para cada uno.
+
+Este ejemplo demuestra cómo firmar iterativamente un documento PDF con múltiples certificados digitales. Consulte <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/signresult" target="_blank" rel="nofollow noopener noreferrer">SignResult</a>
+
+```csharp
+string filePath = "sample.pdf";
+string fileName = Path.GetFileName(filePath);
+
+string[] certificatePaths = new string[] { "certificate1.pfx", "certificate2.pfx" };
+
+string outputFilePath = Path.Combine("output folder path", "SignWithDigitalIterative", fileName);
+int iteration = 1;
+string documentFile = filePath;
+
+foreach (var certificatePath in certificatePaths)
+{
+    using (Signature signature = new Signature(documentFile))
+    {
+        DigitalSignOptions options = new DigitalSignOptions(certificatePath)
+        {
+            Password = "1234567890", // Certificate password
+            Reason = $"Approved-{iteration}", // Digital certificate details
+            Contact = $"John{iteration} Smith{iteration}",
+            Location = $"Location-{iteration}",
+            AllPages = true, // Sign all pages
+            Left = 10 + 100 * (iteration - 1),
+            Top = 10 + 100 * (iteration - 1),
+            Width = 160,
+            Height = 80,
+            Margin = new Padding() { Bottom = 10, Right = 10 }
+        };
+
+        SignResult signResult = signature.Sign(outputFilePath, options);
+        documentFile = outputFilePath;
+        Console.WriteLine($"\nSource document signed successfully {iteration++}-" +
+                          $"time with {signResult.Succeeded.Count} signature(s).\n" +
+                          $"File saved at {outputFilePath}.");
+    }
+}
+```
+### Firmado iterativo con apariencia personalizada e imagen {#iteratively-sign-with-custom-appearance-and-image}
+
+Este ejemplo muestra cómo firmar iterativamente un documento PDF con múltiples certificados digitales, personalizando la apariencia y agregando una imagen a cada firma. Consulte <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/signresult" target="_blank" rel="nofollow noopener noreferrer">SignResult</a>
+
+A continuación se presentan los pasos:
+* Configuración de variables: definir las rutas del archivo PDF de entrada, los certificados digitales y especificar la ruta de salida donde se guardarán los documentos firmados.
+```csharp
+// File paths for source document, image, and output files
+string sourceFile = "sample.pdf";
+string imageFilePath = "image.jpg";
+string signedFile = "signed.pdf";
+string resultOutputFile = "result.pdf";
+
+// Paths to digital certificates for signing
+string[] certificatePaths = new string[] { certificateFilePath1, certificateFilePath2 };
+int iteration = 0;
+```
+
+* Método auxiliar para generar el <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/digitalsignoptions/" target="_blank" rel="nofollow noopener noreferrer">DigitalSignOptions</a> objeto con el certificado requerido y su contraseña, y configurar propiedades adicionales como motivo, contacto, ubicación y posición. También se establecen una imagen y etiquetas de apariencia personalizadas.
+
+```csharp
+private static DigitalSignOptions CreateDigitalSignOptions(string certificatePath, 
+    string imageFilePath, int iteration)
+{
+    return new DigitalSignOptions(certificatePath)
+    {
+        Password = "1234567890",             // Certificate password
+        Reason = "Sign",                     // Signature reason
+        Contact = $"JohnSmith{iteration}",   // Contact details
+        Location = $"Office{iteration}",     // Signature location
+        Visible = true,
+        Left = 80 + iteration * 5,           // Positioning for visibility
+        Top = 600 + iteration * 5,
+        Height = 50 + iteration * 5,
+        Width = 200 + iteration * 5,
+        ImageFilePath = imageFilePath,       // Image appearance for signature
+        Appearance = new PdfDigitalSignatureAppearance
+        {
+            ReasonLabel = "Reason Label",
+            DigitalSignedLabel = "Digital Signed Label"
+        }
+    };
+}
+```
+
+* Cree una nueva instancia de la <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase y pasar la ruta del documento de origen como parámetro del constructor.
+* Llame a <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> método de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase, instancia y `pass` <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/digitalsignoptions/" target="_blank" rel="nofollow noopener noreferrer">DigitalSignOptions</a> a él.
+* Después de firmar, actualice la ruta del documento para la siguiente iteración.
+* Analice el <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/signresult" target="_blank" rel="nofollow noopener noreferrer">SignResult</a> para verificar las firmas recién creadas, si es necesario.
+* Itera a través de cada certificado, repitiendo los pasos anteriores para cada uno.
+
+```csharp
+foreach (var certificatePath in certificatePaths)
+{
+    using (Signature signature = new Signature("sample.pdf"))
+    {
+        // Generate signature options with helper method
+        DigitalSignOptions options = CreateDigitalSignOptions(certificatePath, imageFilePath,
+            iteration);
+
+        // Update output file name on second iteration
+        if (iteration == 1) signedFile = resultOutputFile;
+
+        // Sign document and display result
+        SignResult signResult = signature.Sign(signedFile, options);
+        Console.WriteLine(
+            $"\nDocument signed successfully {iteration + 1}-time with " +
+            $"{signResult.Succeeded.Count} signature(s).\nFile saved at {signedFile}.");
+        iteration++;
+    }
+}
+```
+### Personalice la apariencia digital con color, imagen y fuente {#customize-digital-appearance-with-color-image-and-font}
+
+Este ejemplo muestra cómo aplicar una firma digital con una apariencia personalizada, incluyendo un color de primer plano, una imagen y configuraciones específicas de fuente.
+
+A continuación se presentan los pasos:
+* Configuración de variables: defina las rutas para el archivo PDF de entrada, los certificados digitales y especifique la ruta de salida donde se guardarán los documentos firmados.
+```csharp
+// File paths for source document, image, and output files
+string sourceFile = "sample.pdf";
+string imageFilePath = "image.jpg";
+string signedFile = "signed.pdf";
+string resultOutputFile = "result.pdf";
+
+// Paths to digital certificates for signing
+string[] certificatePaths = new string[] { certificateFilePath1, certificateFilePath2 };
+int iteration = 0;
+```
+
+* Método auxiliar para generar el <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/digitalsignoptions/" target="_blank" rel="nofollow noopener noreferrer">DigitalSignOptions</a> objeto con el certificado requerido y su contraseña, y configurar propiedades adicionales como motivo, contacto, ubicación y posición. También se establecen una imagen y etiquetas de apariencia personalizadas.
+
+```csharp
+private static DigitalSignOptions CreateDigitalSignOptions(string certificatePath, 
+    string imageFilePath, int iteration)
+{
+    return new DigitalSignOptions(certificatePath)
+    {
+        // Specify the type of signature
+        SignatureType = SignatureType.Digital,
+
+        // Provide the certificate password
+        Password = "1234567890",
+
+        // Digital certificate details for signature metadata
+        Reason = "Sign",                            // Reason for the signature
+        Contact = "JohnSmith" + iteration,          // Contact information of the signer
+        Location = "Office1" + iteration,           // Location where the document is signed
+
+        // Enable visibility of the signature on the document
+        Visible = true,
+
+        // Specify the position and size of the signature on the page
+        Left = 400,                                 // Horizontal position (X-axis)
+        Top = 20 + iteration * 70,                  // Vertical position (Y-axis)
+        Height = 70,                                // Height of the signature area
+        Width = 200,                                // Width of the signature area
+
+        // Add an image to represent the digital certificate's appearance
+        ImageFilePath = imageFilePath,              // Path to the image file
+
+        // Customize the signature's appearance
+        Appearance = new PdfDigitalSignatureAppearance
+        {
+            // Set a custom font color for the signature text
+            Foreground = Color.FromArgb(50, Color.Gray), 
+
+            // Apply specific font settings for the signature
+            FontFamilyName = "TimesNewRoman",        // Font family name
+            FontSize = 12                            // Font size
+        }
+    };
+}
+```
+
+* Cree una nueva instancia de la <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase y pasar la ruta del documento de origen como parámetro del constructor.
+* Llame a <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> método de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase, instancia y `pass` <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/digitalsignoptions/" target="_blank" rel="nofollow noopener noreferrer">DigitalSignOptions</a> a él.
+* Después de firmar, actualice la ruta del documento para la siguiente iteración.
+* Analice el <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/signresult" target="_blank" rel="nofollow noopener noreferrer">SignResult</a> para verificar las firmas recién creadas, si es necesario.
+* Itera a través de cada certificado, repitiendo los pasos anteriores para cada uno.
+
+```csharp
+foreach (var certificatePath in certificatePaths)
+{
+    using (Signature signature = new Signature("sample.pdf"))
+    {
+        // Generate signature options with helper method
+        DigitalSignOptions options = CreateDigitalSignOptions(certificatePath, imageFilePath, 
+            iteration);
+
+        // Update output file name on second iteration
+        if (iteration == 1) signedFile = resultOutputFile;
+
+        // Sign document and display result
+        SignResult signResult = signature.Sign(signedFile, options);
+        Console.WriteLine(
+            $"\nDocument signed successfully {iteration + 1}-time with " +
+            $"{signResult.Succeeded.Count} signature(s).\nFile saved at {signedFile}.");
+        iteration++;
+    }
+}
+```
+La siguiente imagen muestra el resultado:
+![Digital](/net/signature/images/iterative-digital-signing-of-the-pdf-document_custom_colors.png)
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con interfaz MVC</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con interfaz WebForms</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con interfaz Dropwizard</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con interfaz Spring</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

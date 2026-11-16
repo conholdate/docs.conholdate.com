@@ -1,0 +1,100 @@
+---
+title: "Cómo cargar un documento desde Azure Blob Storage"
+sidebar_label: "→ Amazon Blob"
+sidebar_key: "net-signature-loading-loading-documents-from-different-sources-load-document-from-azure-blob-storage"
+sidebar_position: 2
+description: "Esta sección explica cómo cargar documentos desde Azure Blob Storage con la API de GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/loading/loading-documents-from-different-sources/load-document-from-azure-blob-storage.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "6e30e795977bae5d6bc9c870c8dfb08b6f3adc420822adb0704fcf57aab8791f"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "8d59cde97665c678474a8ee2dfae13f32f68f69914033dbe0becbfa7a4b8b163"
+translation_updated_at: "2026-11-16T12:46:26.683Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+El siguiente ejemplo demuestra cómo procesar documentos desde Azure Blob Storage.
+
+```csharp
+public static void Run()
+{
+    string blobName = "sample.docx";
+    string outputFilePath = "SignedSample";
+    using (Stream stream = DownloadFile(blobName))
+    {
+        using (Signature signature = new Signature(stream))
+        {
+            QrCodeSignOptions options = new QrCodeSignOptions("JohnSmith")
+            {
+                EncodeType = QRCodeTypes.QR,
+                Left = 100,
+                Top = 100
+            };
+            // sign document to file
+            signature.Sign(outputFilePath, options);
+        }
+    }
+    Console.WriteLine("\nSource document signed successfully.\nFile saved at " + outputFilePath);
+}
+
+public static Stream DownloadFile(string blobName)
+{
+    CloudBlobContainer container = GetContainer();
+
+    CloudBlob blob = container.GetBlobReference(blobName);
+    MemoryStream memoryStream = new MemoryStream();
+    blob.DownloadToStream(memoryStream);
+    memoryStream.Position = 0;
+    return memoryStream;
+}
+
+private static CloudBlobContainer GetContainer()
+{
+    string accountName = "***";
+    string accountKey = "***";
+    string endpoint = $"https://{accountName}.blob.core.windows.net/";
+    string containerName = "***";
+
+    StorageCredentials storageCredentials = new StorageCredentials(accountName, accountKey);
+    CloudStorageAccount cloudStorageAccount = new CloudStorageAccount(
+        storageCredentials, new Uri(endpoint), null, null, null);
+    CloudBlobClient cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
+
+    CloudBlobContainer container = cloudBlobClient.GetContainerReference(containerName);
+    container.CreateIfNotExists();
+
+    return container;
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos de GitHub {#github-examples}
+
+Puedes ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostración de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostración de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Firma de Documentos para Ejemplo de Interfaz de Usuario en .NET MVC</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Firma de Documentos para Ejemplo de Interfaz de Usuario WebForms en .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Firma de documento para el ejemplo de UI de Java App Dropwizard</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Firma de Documento para Ejemplo de UI en Java Spring</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Junto con la biblioteca completa de .NET, proporcionamos aplicaciones en línea gratuitas, sencillas pero potentes.
+
+Para firmar PDF, Word, Excel, PowerPoint y otros documentos, puede utilizar las aplicaciones en línea de **<a href="https://products.conholdate.app/signature" target="_blank">Familia de productos Conholdate.Signature App</a>**.

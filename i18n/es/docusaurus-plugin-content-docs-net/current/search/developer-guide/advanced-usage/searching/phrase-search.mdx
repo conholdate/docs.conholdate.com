@@ -1,0 +1,167 @@
+---
+title: "Búsqueda por frase"
+sidebar_label: "Búsqueda por frase"
+sidebar_position: 14
+description: "Este artículo proporciona conocimientos sobre la definición de la búsqueda por frase, así como una descripción de la misma."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/searching/phrase-search.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "2b54970f04be7bbd8b9791c5b13f3bdad9280736439819146b4707f2b1099b20"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "7a152bab738f1ac321ef947b3505c26110da9dffcf4cf875b8286c55d9b19bd3"
+translation_updated_at: "2026-11-16T11:49:17.097Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Esta página contiene una definición de búsqueda por frase, así como una descripción de la misma con el uso de la API de GroupDocs.Search.
+
+## Definición de búsqueda por frase {#phrase-search-definition}
+
+La búsqueda por frase es un tipo de búsqueda que permite a los usuarios buscar documentos que contengan una oración o frase exacta, en lugar de un conjunto de palabras clave en orden aleatorio.
+
+## Búsqueda por frase en GroupDocs.Search {#phrase-search-in-groupdocs-search}
+
+La búsqueda por frase le permite realizar búsquedas de frases exactas y encontrar una secuencia determinada de palabras en el texto de los documentos indexados. En forma de texto, se utiliza la siguiente sintaxis para especificar una consulta de búsqueda por frase:
+
+*   "palabra1 palabra2 palabra3 ..."
+
+Las comillas dobles son obligatorias; por ejemplo:
+
+string query = "\"teoría de la relatividad\"";
+
+Tenga en cuenta que si se utilizan palabras vacías (stop words) en una consulta de búsqueda, la frase seguirá encontrándose; sin embargo, en lugar de las palabras vacías, el motor de búsqueda intentará sustituirlas por cualquier otra palabra.
+
+El siguiente ejemplo demuestra cómo realizar una búsqueda por frase utilizando una consulta en forma de texto y en forma de objeto.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Search for the phrase 'theory of relativity' in text form
+string query1 = "\"theory of relativity\"";
+SearchResult result1 = index.Search(query1);
+ 
+// Search for the phrase 'theory of relativity' in object form
+SearchQuery word1 = SearchQuery.CreateWordQuery("theory");
+SearchQuery word2 = SearchQuery.CreateWordQuery("of");
+SearchQuery word3 = SearchQuery.CreateWordQuery("relativity");
+SearchQuery query2 = SearchQuery.CreatePhraseSearchQuery(word1, word2, word3);
+SearchResult result2 = index.Search(query2);
+```
+
+## Búsqueda de frases con comodines {#phrase-search-with-wildcards}
+
+Además de palabras, la búsqueda de frases también puede utilizar dos tipos de caracteres comodín:
+
+*   \* número-de-byte
+*   \* número-de-byte ~~ número-de-byte
+
+donde número-de-byte es un número comprendido entre 0 y 255.
+
+El primer patrón representa el número exacto de palabras desconocidas en una frase, por ejemplo \*2. El segundo patrón representa el rango del número de palabras desconocidas en una frase, por ejemplo \*1~~2.
+
+La consulta de búsqueda de frases con comodines es lo suficientemente flexible como para utilizarse en lugar de una consulta de término de intervalo (span query).
+
+El siguiente ejemplo demuestra el uso de comodines en consultas de búsqueda de frases, tanto en forma de texto como de objeto.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Search for the phrase in text form
+string query1 = "\"theory *1~~2 relativity\"";
+SearchResult result1 = index.Search(query1);
+ 
+// Search for the phrase in object form
+SearchQuery word1 = SearchQuery.CreateWordQuery("theory");
+SearchQuery wildcard2 = SearchQuery.CreateWildcardQuery(1, 2);
+SearchQuery word3 = SearchQuery.CreateWordQuery("relativity");
+SearchQuery query2 = SearchQuery.CreatePhraseSearchQuery(word1, wildcard2, word3);
+SearchResult result2 = index.Search(query2);
+ 
+// The search can find the following phrases:
+// "theory of relativity"
+// "theory of special relativity"
+```
+
+La búsqueda por frases puede combinarse con otros tipos de búsquedas. La especificación de consultas de búsqueda en forma de texto se presenta en la página [Especificación del lenguaje de consultas](/net/search/developer-guide/advanced-usage/searching/query-language-specification/). Una tabla sobre la posibilidad de anidar consultas de búsqueda en forma de objeto se presenta en la página [Anidamiento de consultas de búsqueda en forma de objeto](/net/search/developer-guide/advanced-usage/searching/nesting-search-queries-in-object-form/).
+
+El siguiente ejemplo demuestra el uso tanto de comodines que representan palabras como de comodines que representan caracteres dentro de palabras.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Search for the phrase in text form
+string query1 = "\"Test?(0~1) *1~~2 relativity\"";
+SearchResult result1 = index.Search(query1);
+ 
+// Search for the phrase in object form
+WordPattern pattern = new WordPattern();
+pattern.AppendString("Test");
+pattern.AppendWildcard(0, 1);
+SearchQuery wordPattern1 = SearchQuery.CreateWordPatternQuery(pattern);
+SearchQuery wildcard2 = SearchQuery.CreateWildcardQuery(1, 2);
+SearchQuery word3 = SearchQuery.CreateWordQuery("relativity");
+SearchQuery query2 = SearchQuery.CreatePhraseSearchQuery(wordPattern1, wildcard2, word3);
+SearchResult result2 = index.Search(query2);
+ 
+// The search can find the following phrases:
+// "Test of special relativity"
+// "Tests of special relativity"
+// "Test of general relativity"
+// "Tests of general relativity"
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le damos la bienvenida a realizar búsquedas en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita de búsqueda de documentos en línea</a>.

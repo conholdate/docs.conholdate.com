@@ -1,0 +1,181 @@
+---
+title: "Firmar documentos con PKCS#11 en .NET"
+sidebar_label: "Firmar documentos con PKCS#11 en .NET"
+sidebar_key: "net-signature-esign-with-digital-certificates-signing-pdf-with-pkcs11-standard"
+sidebar_position: 1
+description: "Aprenda a firmar documentos PDF y otros formatos en .NET utilizando tokens de hardware PKCS#11, llaveros USB o tarjetas inteligentes con GroupDocs.Signature. Una versión gratuita de la API de firma electrónica está disponible para evaluación con funciones limitadas."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/use-cases/eSign with digital certificates/signing-pdf-with-pkcs11-standard.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "23c9752c3af8d4debcc1ea6435d4e8858264db2da3d4e2663b885e14583b094b"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "0c69d7d2fda2fc3a609dbedbc1cc2e37c27fc04868c55d880dedb506ecc5431b"
+translation_updated_at: "2026-11-16T14:50:49.846Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+
+:::info
+💡 Para el **código completo y funcional** y explicaciones detalladas, consulte <a href="https://github.com/groupdocs-signature/esign-documents-with-pkcs11-using-groupdocs-signature-dotnet" target="_blank" rel="nofollow noopener noreferrer">repositorio completo aquí</a>.  
+Este repositorio contiene todos los archivos de código fuente, clases auxiliares y ejemplos de configuración necesarios para implementar la firma digital PKCS#11 en sus aplicaciones .NET.
+:::
+
+
+
+Este artículo muestra cómo firmar documentos con **tokens de hardware PKCS#11** (HSM, tarjetas inteligentes y tokens USB) mediante **GroupDocs.Signature para .NET**.\
+El proyecto de ejemplo integra la biblioteca <a href="https://github.com/Pkcs11Interop/Pkcs11Interop" target="_blank" rel="nofollow noopener noreferrer">Pkcs11Interop</a>, la cual proporciona una interfaz de .NET para dispositivos PKCS#11.
+
+Los dispositivos PKCS#11 pueden incluir **módulos de seguridad de hardware (HSM)**, **tarjetas inteligentes** y **llaveros USB (dongles)**.  
+Los llaveros USB se utilizan con frecuencia en entornos corporativos como una forma portátil y segura de almacenar claves privadas.  
+Con GroupDocs.Signature para .NET, puede utilizar un dongle de la misma manera que otros tokens PKCS#11 para aplicar firmas digitales a sus documentos.
+
+
+> 💡 Utilice este enfoque cuando necesite firmar documentos de forma segura con una clave privada almacenada en hardware, en lugar de en un archivo local.
+
+## Requisitos previos {#prerequisites}
+
+Antes de comenzar, asegúrese de tener:
+
+-   **GroupDocs.Signature para .NET** instalado. <a href="https://releases.groupdocs.com/signature/net/" target="_blank" rel="nofollow noopener noreferrer">Obtenga una prueba gratuita</a>.
+-   Un dispositivo compatible con PKCS#11 (HSM, tarjeta inteligente o token).
+-   <a href="https://github.com/Pkcs11Interop/Pkcs11Interop" target="_blank" rel="nofollow noopener noreferrer">Pkcs11Interop</a>.
+-   .NET 6.0 o posterior (el ejemplo también es compatible con .NET Framework 4.6.2).
+
+
+## Instalación {#installation}
+
+Clone o descargue el <a href="https://github.com/groupdocs-signature/esign-documents-with-pkcs11-using-groupdocs-signature-dotnet" target="_blank" rel="nofollow noopener noreferrer">repositorio de ejemplo</a>.
+
+``` bash
+git clone https://github.com/groupdocs-signature/esign-documents-with-pkcs11-using-groupdocs-signature-dotnet.git
+```
+
+Restaurar dependencias con NuGet:
+
+``` bash
+dotnet restore
+```
+
+## Estructura del repositorio {#repository-structure}
+
+El proyecto incluye:
+
+```text
+    GroupDocs.Signature-for-.NET-PKCS11-Sample
+     ├── GroupDocs.Signature-for-.NET-PKCS11-Sample.csproj
+     ├── Helpers.cs              # Utility functions for PKCS#11
+     ├── Pkcs11DigitalSigner.cs  # Integration with GroupDocs.Signature
+     ├── Program.cs              # Main entry point
+     └── Settings.cs             # PKCS#11 configuration
+```
+    
+
+## Ejemplo de uso {#usage-example}
+
+A continuación se muestra una versión simplificada del código de ejemplo. Para la implementación completa, consulte el <a href="https://github.com/groupdocs-signature/esign-documents-with-pkcs11-using-groupdocs-signature-dotnet" target="_blank" rel="nofollow noopener noreferrer">repositorio</a>.
+
+### Configuración de los ajustes de PKCS#11 {#configure-pkcs-11-settings}
+
+`Settings.cs` define la ruta de la biblioteca PKCS#11, el PIN del token y el asunto del certificado:
+
+``` csharp
+public static class Settings
+{
+    public static string Pkcs11LibraryPath = "<PKCS11_LIBRARY_PATH>";
+    public static string TokenPin = "<TOKEN_PIN>";
+    public static string CertificateSubject = "<CERT_SUBJECT>";
+}
+```
+
+### Inicializar el firmante PKCS#11 {#initialize-pkcs-11-signer}
+
+`Pkcs11DigitalSigner.cs` integra PKCS#11 con GroupDocs.Signature:
+
+``` csharp
+public class Pkcs11DigitalSigner
+{
+    public X509Certificate2 GetCertificateFromPkcs11()
+    {
+        // Load certificate directly from token
+        // Uses Settings.Pkcs11LibraryPath and Settings.TokenPin
+    }
+}
+```
+
+### Firmar un documento {#sign-a-document}
+
+`Program.cs` muestra cómo firmar utilizando GroupDocs.Signature.
+
+Este ejemplo demuestra dos flujos:\
+1. **Directamente desde un dispositivo PKCS#11**\
+2. **Desde el almacén de certificados de Windows**
+
+``` csharp
+using GroupDocs.Signature;
+using GroupDocs.Signature.Options;
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        string filePath = "sample.pdf";
+        string outputPath = "signed.pdf";
+
+        // (1) Sign using PKCS#11 device
+        var pkcs11Signer = new Pkcs11DigitalSigner();
+        var certificate = pkcs11Signer.GetCertificateFromPkcs11();
+
+        using (var signature = new Signature(filePath))
+        {
+            var options = new DigitalSignOptions(certificate)
+            {
+                Comments = "Signed with PKCS#11 device",
+                SignTime = DateTime.Now
+            };
+
+            signature.Sign(outputPath, options);
+        }
+
+        // (2) Sign using certificate from Windows store
+        // var windowsCert = Helpers.GetCertificateFromWindowsStore(Settings.CertificateSubject);
+        // (sign in the same way with windowsCert)
+    }
+}
+```
+
+## Notas {#notes}
+
+-   Reemplace `<PKCS11_LIBRARY_PATH>`, `<TOKEN_PIN>` y `<CERT_SUBJECT>` con sus valores reales.
+-   Ambos flujos, PKCS#11 y el almacén de certificados de Windows, son compatibles. Seleccione el que se ajuste a su infraestructura.
+-   Para obtener métodos auxiliares detallados y escenarios avanzados, consulte el <a href="https://github.com/groupdocs-signature/esign-documents-with-pkcs11-using-groupdocs-signature-dotnet" target="_blank" rel="nofollow noopener noreferrer">repositorio completo</a>.
+
+
+
+:::warning
+**Aviso de implementación temprana**  
+ Esta solución se proporciona actualmente como una implementación temprana para utilizar dispositivos de firma digital PKCS#11 con GroupDocs.Signature.  
+ Aunque permite firmar documentos con tokens de hardware, recomendamos encarecidamente realizar pruebas adicionales en su propio entorno para garantizar que cumple con sus requisitos de cumplimiento y seguridad.
+ Agradeceríamos mucho sus comentarios, resultados de pruebas y sugerencias para mejorar esta funcionalidad.  
+ Su aportación nos ayudará a refinar esta característica y explorar nuevas ideas para hacerla más robusta y fácil de usar.
+:::
+
+
+## Consulte también {#see-also}
+
+-   <a href="https://docs.groupdocs.com/signature/net/sign-document-with-digital-signature-advanced/" target="_blank" rel="nofollow noopener noreferrer">Firmas digitales en GroupDocs.Signature</a>
+-   <a href="https://blog.groupdocs.com/signature/iterative-digital-signing/" target="_blank" rel="nofollow noopener noreferrer">Firma digital iterativa</a>
+-   <a href="https://blog.groupdocs.com/signature/custom-hash-sign-with-azure-key-vault/" target="_blank" rel="nofollow noopener noreferrer">Firma con hash personalizado mediante Azure Key Vault</a>

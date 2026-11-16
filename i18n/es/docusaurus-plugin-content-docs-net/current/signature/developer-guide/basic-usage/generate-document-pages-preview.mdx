@@ -1,0 +1,188 @@
+---
+title: "Generar vista previa de páginas de documentos"
+sidebar_label: "Generar vista previa de páginas de documentos"
+sidebar_position: 6
+description: "Este tema explica cómo obtener una vista previa de las páginas de un documento como imágenes con varias opciones mediante la API de GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/basic-usage/generate-document-pages-preview.md"
+source_commit: "0c3c217010a3d6a2e7ef62d7ad8ef26f94d99418"
+source_sha256: "1b7edb0de08d5a7b39a3fd427662fbc55249dbb690ae3a2b2d9969e10713b055"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "c492c66ea014b650093557ff33e5cb36cf1f69ce3c8eebdf5df15a9313253679"
+translation_updated_at: "2026-11-16T14:20:41.187Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## Vista general {#overview}
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> proporciona la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> para especificar distintas opciones que permiten controlar el proceso de generación de vistas previas de las páginas del documento. Esta funcionalidad también admite la generación de vistas previas de archivos comprimidos.
+  
+A continuación se indican los pasos para generar una vista previa del documento mediante GroupDocs.Signature:
+
+* Crear una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasar la ruta del documento de origen como parámetro del constructor.
+* Instanciar el objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> con:
+* un delegado para la creación de cada flujo de página (consulte el controlador de eventos <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/createpagestream" target="_blank" rel="nofollow noopener noreferrer">CreatePageStream</a>);
+* el formato de vista previa de la imagen: PNG, JPG o BMP;
+* los números de página que se van a procesar;
+* el tamaño personalizado de las imágenes de vista previa (si es necesario).
+
+:::info
+El flujo creado por `CreatePageStreamDelegate` se liberará automáticamente una vez finalizada la generación de la imagen de vista previa. Si necesita implementar una liberación personalizada del flujo para la vista previa de imágenes, debe pasar el argumento adicional `ReleaseStream` para limpiar los recursos.
+:::
+
+* Llame al método `GeneratePreview` de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> como argumento.
+
+## Implementación del delegado `CreatePageStream` {#createpagestream-delegate-implementation}
+
+GroupDocs.Signature espera que el delegado <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/createpagestream" target="_blank" rel="nofollow noopener noreferrer">CreatePageStream</a> proporcione cada flujo de página necesario para el proceso de generación de vistas previas de imagen.
+
+```csharp
+private static Stream CreatePageStream(PreviewPageData pageData)
+{
+    string imageName = "image-" + pageData.PageNumber + ".jpg";
+    string imageFilePath = Path.Combine("GeneratePreviewFolder", imageName);
+    string folder = Path.GetDirectoryName(imageFilePath);
+    if(!Directory.Exists(folder))
+    {
+        Directory.CreateDirectory(folder);
+    }
+    return new System.IO.FileStream(imageFilePath, FileMode.Create);
+}
+```
+
+## Implementación del delegado ReleasePageStream {#releasepagestream-delegate-implementation}
+
+```csharp
+private static void ReleasePageStream(PreviewPageData pageData, Stream pageStream)
+{
+     pageStream.Dispose();
+     string imageName = "image-" + pageData.PageNumber + ".jpg";
+     string imageFilePath = Path.Combine("GeneratePreviewFolder", imageName);
+     Console.WriteLine("Image file {0} is ready for preview", imageFilePath);
+}
+```
+
+## Generar vista previa del documento a partir de un archivo en el disco local {#generate-document-preview-from-file-on-local-disk}
+
+```csharp
+public static void GetPreview()
+{
+    using (Signature signature = new Signature("sample.pdf"))
+    {
+        // create preview options object
+        PreviewOptions previewOption = new PreviewOptions(GeneratePreview.CreatePageStream)
+        {
+            PreviewFormat = PreviewOptions.PreviewFormats.JPEG,
+        };
+        // generate preview
+        signature.GeneratePreview(previewOption);
+    }
+}
+
+private static Stream CreatePageStream(PreviewPageData pageData)
+{
+    string imageName = "image-" + pageData.PageNumber + ".jpg";
+    string imageFilePath = Path.Combine("GeneratePreviewFolder", imageName);
+    var folder = Path.GetDirectoryName(imageFilePath);
+    if(!Directory.Exists(folder))
+    {
+        Directory.CreateDirectory(folder);
+    }
+    return new System.IO.FileStream(imageFilePath, FileMode.Create);
+}
+```
+
+## Generar vista previa de documento desde un flujo con delegado personalizado para liberación de flujo {#generate-document-preview-from-stream-with-custom-stream-releasing-delegate}
+
+```csharp
+public static void GetPreview()
+{
+  using (var stream = File.OpenRead("sample.pdf"))
+  {
+    using (Signature signature = new Signature("sample.pdf"))
+    {
+        // create preview options object
+        PreviewOptions previewOption = new PreviewOptions(GeneratePreview.CreatePageStream)
+        {
+            PreviewFormat = PreviewOptions.PreviewFormats.JPEG,
+        };
+        // generate preview
+        signature.GeneratePreview(previewOption);
+    }
+  }
+}
+
+private static Stream CreatePageStream(PreviewPageData pageData)
+{
+    string imageName = "image-" + pageData.PageNumber + ".jpg";
+    string imageFilePath = Path.Combine("GeneratePreviewFolder", imageName);
+    var folder = Path.GetDirectoryName(imageFilePath);
+    if(!Directory.Exists(folder))
+    {
+        Directory.CreateDirectory(folder);
+    }
+    return new System.IO.FileStream(imageFilePath, FileMode.Create);
+}
+
+private static void ReleasePageStream(PreviewPageData pageData, Stream pageStream)
+{        
+    pageStream.Dispose();
+    string imageName = "image-" + pageData.PageNumber + ".jpg";
+    string imageFilePath = Path.Combine("GeneratePreviewFolder", imageName);
+    Console.WriteLine("Image file {0} is ready for preview", imageFilePath);
+}
+```
+
+## Creación de una vista previa de documento con resolución personalizada {#creating-a-document-preview-with-custom-resolution}
+
+```csharp
+// The path to the documents
+string filePath = "sample.pdf";
+using (Signature signature = new Signature(filePath))
+{
+    int resolution = 96;
+    // create preview options object
+    // You can reuse CreatePageStream and ReleasePageStream methods from the previous example
+    PreviewOptions previewOption = new PreviewOptions(CreatePageStream, ReleasePageStream, resolution)
+    {
+        PreviewFormat = PreviewOptions.PreviewFormats.JPEG
+    };
+    // generate preview
+    signature.GeneratePreview(previewOption);
+}
+```
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre las funciones de firma electrónica de documentos, consulte la sección de [uso avanzado](/net/signature/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI MVC para firma de documentos con .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI WebForms para firma de documentos con .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI Dropwizard para firma de documentos con Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI Spring para firma de documentos con Java</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

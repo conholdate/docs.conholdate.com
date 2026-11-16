@@ -1,0 +1,241 @@
+---
+title: "Generar listas con viñetas a partir de una fuente de datos"
+sidebar_label: "Generar listas con viñetas a partir de una fuente de datos"
+sidebar_key: "net-assembly-generate-bullet-lists"
+sidebar_position: 16
+description: "Cree listas con viñetas en documentos iterando sobre colecciones de datos y mostrando los elementos como viñetas."
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/generate-bullet-lists.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "35c036774c00c9707ce10bfcaed9385caf1bde124d7266401961a472226d15df"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "17913f0c016ac163dbd9a81e6d8bba1ffe42cbabf9798af5dbdb32f910bd0867"
+translation_updated_at: "2026-11-16T13:44:20.484Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Vista general {#overview}
+
+Las listas con viñetas son una forma común de mostrar colecciones de elementos en documentos. GroupDocs.Assembly para .NET facilita la generación de listas con viñetas mediante la iteración sobre colecciones de datos utilizando bandas de datos *foreach* dentro de estructuras de lista.
+
+Las clases principales involucradas son:
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/documentassembler/" target="_blank" rel="nofollow noopener noreferrer">DocumentAssembler</a> – ensambla documentos
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/datasourceinfo/" target="_blank" rel="nofollow noopener noreferrer">DataSourceInfo</a> – envuelve las fuentes de datos
+
+A continuación se presentan los pasos para generar listas con viñetas:
+
+* Crear una lista con viñetas en el documento plantilla
+* Añadir una banda de datos *foreach* dentro de la lista para iterar sobre la colección
+* Referenciar las propiedades de los elementos de la colección en los elementos de la lista
+* Cerrar la banda de datos *foreach*
+* Ensamblar el documento con los datos de la colección
+
+
+:::info
+La banda de datos `foreach` repite automáticamente los elementos de la lista para cada elemento de la colección, generando una lista con viñetas completa con todos los elementos de datos.
+:::
+
+
+## Generar una lista con viñetas a partir de una colección de .NET {#generate-bullet-list-from-net-collection}
+
+Crear una lista con viñetas a partir de una lista de objetos:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public class Product
+{
+    public string Name { get; set; }
+    public string Description { get; set; }
+}
+
+public static void GenerateBulletList()
+{
+    // Create sample data
+    List<Product> products = new List<Product>
+    {
+        new Product { Name = "Laptop", Description = "High-performance laptop" },
+        new Product { Name = "Mouse", Description = "Wireless mouse" },
+        new Product { Name = "Keyboard", Description = "Mechanical keyboard" }
+    };
+    
+    // Assemble document
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("BulletListTemplate.docx", "BulletListOutput.docx", 
+        new DataSourceInfo(products, "products"));
+    
+    Console.WriteLine("Bullet list generated successfully.");
+}
+```
+
+## Estructura de plantilla para listas con viñetas {#template-structure-for-bullet-lists}
+
+En su documento de plantilla (BulletListTemplate.docx), cree una lista con viñetas con esta estructura:
+
+```
+We provide the following products:
+
+<<foreach [in products]>>
+• <<[Name]>> - <<[Description]>>
+<</foreach>>
+```
+
+Después del ensamblaje, obtendrás:
+
+```
+We provide the following products:
+
+• Laptop - High-performance laptop
+• Mouse - Wireless mouse
+• Keyboard - Mechanical keyboard
+```
+
+## Generar lista con viñetas a partir de DataTable {#generate-bullet-list-from-datatable}
+
+También puede generar listas con viñetas a partir de un DataTable de ADO.NET:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Data;
+
+public static void GenerateBulletListFromDataTable()
+{
+    // Create DataTable
+    DataTable productsTable = new DataTable("Products");
+    productsTable.Columns.Add("Name", typeof(string));
+    productsTable.Columns.Add("Description", typeof(string));
+    
+    // Add rows
+    productsTable.Rows.Add("Laptop", "High-performance laptop");
+    productsTable.Rows.Add("Mouse", "Wireless mouse");
+    productsTable.Rows.Add("Keyboard", "Mechanical keyboard");
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("BulletListTemplate.docx", "BulletListOutput.docx", 
+        new DataSourceInfo(productsTable, "products"));
+    
+    Console.WriteLine("Bullet list generated from DataTable successfully.");
+}
+```
+
+## Lista simple de viñetas (solo nombre) {#simple-bullet-list-name-only}
+
+Para listas simples que muestren únicamente nombres:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public static void GenerateSimpleBulletList()
+{
+    List<string> items = new List<string> 
+    { 
+        "Item 1", 
+        "Item 2", 
+        "Item 3" 
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("SimpleBulletListTemplate.docx", "SimpleBulletListOutput.docx", 
+        new DataSourceInfo(items, "items"));
+    
+    Console.WriteLine("Simple bullet list generated successfully.");
+}
+```
+
+Plantilla para lista simple:
+
+```
+Items:
+<<foreach [in items]>>
+• <<[items_Text]>>
+<</foreach>>
+```
+
+## Lista con viñetas en hojas de cálculo {#bullet-list-in-spreadsheet}
+
+Las listas con viñetas también funcionan en plantillas de hojas de cálculo:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public static void GenerateBulletListInSpreadsheet()
+{
+    List<Product> products = new List<Product>
+    {
+        new Product { Name = "Laptop", Description = "High-performance laptop" },
+        new Product { Name = "Mouse", Description = "Wireless mouse" }
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("BulletListTemplate.xlsx", "BulletListOutput.xlsx", 
+        new DataSourceInfo(products, "products"));
+    
+    Console.WriteLine("Bullet list generated in spreadsheet successfully.");
+}
+```
+
+## Lista con viñetas en correo electrónico {#bullet-list-in-email}
+
+Genere listas con viñetas en mensajes de correo electrónico:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public static void GenerateBulletListInEmail()
+{
+    List<Product> products = new List<Product>
+    {
+        new Product { Name = "Laptop", Description = "High-performance laptop" },
+        new Product { Name = "Mouse", Description = "Wireless mouse" }
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("BulletListTemplate.msg", "BulletListOutput.msg", 
+        new DataSourceInfo(products, "products"));
+    
+    Console.WriteLine("Bullet list generated in email successfully.");
+}
+```
+
+
+:::warning
+En los documentos de Word, asegúrese de que el formato de lista con viñetas se aplique en la plantilla. La banda de datos `foreach` repetirá el formato del elemento de lista para cada elemento de la colección.
+:::
+
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre listas con viñetas anidadas, elementos condicionales en listas y formato avanzado de listas, consulte la [sección de uso avanzado](/net/assembly/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para .NET</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Java</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Python-via-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Python mediante .NET</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas en línea sencillas pero potentes.
+
+Para ensamblar documentos a partir de plantillas y fuentes de datos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/assembly" target="_blank">Conholdate.Assembly App</a>**.

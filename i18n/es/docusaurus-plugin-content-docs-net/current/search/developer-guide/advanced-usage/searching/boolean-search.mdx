@@ -1,0 +1,161 @@
+---
+title: "Búsqueda booleana"
+sidebar_label: "Búsqueda booleana"
+sidebar_position: 1
+description: "Este artículo proporciona el conocimiento sobre la definición de la búsqueda booleana, que incluye todos los operadores booleanos utilizados en la búsqueda booleana, así como ejemplos de consultas booleanas."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/searching/boolean-search.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "abb52f8a7ddd13f625f2d177149472969ab6b265b87fe7e9cc3aaf99f3968a55"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "f76a36bf2599f438b9897c436d642131b5f518548cd620a72dded23cb8762286"
+translation_updated_at: "2026-11-16T11:34:03.381Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Esta página contiene la definición de la búsqueda booleana, una descripción de todos los operadores booleanos utilizados en la búsqueda booleana y ejemplos de consultas booleanas.
+
+## Términos de búsqueda booleana {#boolean-search-terms}
+
+La búsqueda booleana es un tipo de búsqueda que le permite combinar consultas mediante operadores booleanos AND (Y), OR (O) y NOT (NO) para crear una consulta booleana y obtener así resultados más relevantes. Por ejemplo, una consulta booleana podría ser "Albert AND Einstein". Esto limitará los resultados de la búsqueda únicamente a los documentos que contengan ambas palabras.
+
+## Operador AND {#operator-and}
+
+El operador AND le permite encontrar únicamente aquellos documentos que coinciden con cada subconsulta anidada por separado. El siguiente ejemplo demuestra el uso del operador AND en consultas de tipo texto y objeto. Las consultas buscan documentos cuyo texto contenga tanto la palabra "theory" como "relativity".
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Search with text query
+SearchResult result1 = index.Search("theory AND relativity");
+ 
+// Search with object query
+SearchQuery wordQuery1 = SearchQuery.CreateWordQuery("theory");
+SearchQuery wordQuery2 = SearchQuery.CreateWordQuery("relativity");
+SearchQuery andQuery = SearchQuery.CreateAndQuery(wordQuery1, wordQuery2);
+SearchResult result2 = index.Search(andQuery);
+```
+
+## Operador OR {#operator-or}
+
+El operador OR permite encontrar todos los documentos que coinciden con al menos una de las consultas de búsqueda anidadas. El ejemplo demuestra el uso del operador OR en consultas de forma de texto y de objeto. Las consultas buscan documentos cuyo texto contenga al menos una de las palabras “Einstein” o “relativity”.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Search with text query
+SearchResult result1 = index.Search("Einstein OR relativity");
+ 
+// Search with object query
+SearchQuery wordQuery1 = SearchQuery.CreateWordQuery("Einstein");
+SearchQuery wordQuery2 = SearchQuery.CreateWordQuery("relativity");
+SearchQuery orQuery = SearchQuery.CreateOrQuery(wordQuery1, wordQuery2);
+SearchResult result2 = index.Search(orQuery);
+```
+
+## Operador NOT {#operator-not}
+
+El operador NOT permite invertir el resultado de una consulta de búsqueda anidada y encontrar todos los documentos en los que **no** se encuentran ocurrencias de la consulta de búsqueda anidada. El ejemplo demuestra el uso del operador NOT en consultas de forma de texto y de objeto. Las consultas buscan documentos cuyo texto contenga la palabra **"relativity"**, pero **no** contenga la palabra **"Einstein"**.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Search with text query
+SearchResult result1 = index.Search("relativity AND NOT Einstein");
+ 
+// Search with object query
+SearchQuery wordQuery1 = SearchQuery.CreateWordQuery("relativity");
+SearchQuery wordQuery2 = SearchQuery.CreateWordQuery("Einstein");
+SearchQuery notQuery = SearchQuery.CreateNotQuery(wordQuery2);
+SearchQuery andQuery = SearchQuery.CreateAndQuery(wordQuery1, notQuery);
+SearchResult result2 = index.Search(andQuery);
+```
+
+## Consultas complejas {#complex-queries}
+
+Los operadores de búsqueda booleana pueden combinarse utilizando paréntesis. El ejemplo siguiente muestra cómo utilizar paréntesis para construir consultas booleanas complejas. En el ejemplo, la consulta se presenta tanto en forma de texto como en forma de objeto, y busca documentos que contengan las palabras *“theory”* y *“relativity”*, pero que no contengan las palabras *“Einstein”* y *“Albert”*.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Search with text query
+SearchResult result1 = index.Search("(theory AND relativity) AND NOT (Einstein OR Albert)");
+ 
+// Search with object query
+SearchQuery theoryWordQuery = SearchQuery.CreateWordQuery("theory");
+SearchQuery relativityWordQuery = SearchQuery.CreateWordQuery("relativity");
+SearchQuery andQuery = SearchQuery.CreateAndQuery(theoryWordQuery, relativityWordQuery);
+ 
+SearchQuery einsteinWordQuery = SearchQuery.CreateWordQuery("Einstein");
+SearchQuery albertWordQuery = SearchQuery.CreateWordQuery("Albert");
+SearchQuery orQuery = SearchQuery.CreateOrQuery(einsteinWordQuery, albertWordQuery);
+SearchQuery notQuery = SearchQuery.CreateNotQuery(orQuery);
+ 
+SearchQuery rootQuery = SearchQuery.CreateAndQuery(andQuery, notQuery);
+SearchResult result2 = index.Search(rootQuery);
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos de GitHub {#github-examples}
+
+Puedes ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca de .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le damos la bienvenida a realizar búsquedas en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">aplicación gratuita de búsqueda de documentos en línea</a>.

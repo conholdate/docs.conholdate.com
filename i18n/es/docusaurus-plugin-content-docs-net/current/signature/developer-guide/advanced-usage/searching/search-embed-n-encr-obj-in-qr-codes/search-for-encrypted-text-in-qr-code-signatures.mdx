@@ -1,0 +1,87 @@
+---
+title: "Buscar texto cifrado en firmas de códigos QR"
+sidebar_label: "Buscar texto cifrado en firmas de códigos QR"
+sidebar_key: "net-signature-searching-search-embed-n-encr-obj-in-qr-codes-search-for-encrypted-text-in-qr-code-signatures"
+sidebar_position: 4
+description: "Este artículo explica cómo buscar texto cifrado en firmas electrónicas QR en los metadatos del documento. Este tema incluye un ejemplo del uso estándar de cifrado y la búsqueda de texto cifrado en la firma electrónica QR, seguida de su descifrado mediante la API de GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/searching/search-embed-n-encr-obj-in-qr-codes/search-for-encrypted-text-in-qr-code-signatures.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "9b868d44855f38b3210533cf82e5236dbe54fa0c96730ec1847b413c974c42db"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "7606a87e87148172f60b337b844cddc36217124965a471fe43c94702c911d14c"
+translation_updated_at: "2026-11-16T13:10:18.916Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> proporciona la capacidad de buscar firmas QR seguras con cifrado estándar o personalizado. El cifrado estándar se implementa mediante la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/symmetricencryption" target="_blank" rel="nofollow noopener noreferrer">SymmetricEncryption</a>. La creación de este objeto requiere 3 argumentos: una enumeración del algoritmo de cifrado <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/symmetricalgorithmtype" target="_blank" rel="nofollow noopener noreferrer">SymmetricAlgorithmType</a> con uno de los siguientes valores (<a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/symmetricalgorithmtype" target="_blank" rel="nofollow noopener noreferrer">DES, TripleDES, RC2, Rijndael</a>), una clave en formato de cadena y una sal en formato de cadena.
+
+A continuación se indican los pasos para buscar texto en una firma QR segura mediante cifrado estándar con GroupDocs.Signature:
+
+* Crear una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasar la ruta del documento de origen o un flujo como parámetro del constructor.
+* Construir un objeto de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/symmetricencryption" target="_blank" rel="nofollow noopener noreferrer">SymmetricEncryption</a> con los mismos parámetros utilizados al firmar la QR segura.
+* Crear objetos de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/qrcodesearchoptions" target="_blank" rel="nofollow noopener noreferrer">QrCodeSearchOptions</a> y configurar la propiedad <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/qrcodesearchoptions/dataencryption" target="_blank" rel="nofollow noopener noreferrer">DataEncryption</a> con una instancia de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/symmetricencryption" target="_blank" rel="nofollow noopener noreferrer">SymmetricEncryption</a>.
+* Llamar al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasarle <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/qrcodesearchoptions" target="_blank" rel="nofollow noopener noreferrer">QrCodeSearchOptions</a>.
+
+## Búsqueda de texto incrustado en la firma QR {#searching-for-embedded-text-in-qr-code-signature}
+
+Este ejemplo muestra cómo buscar texto en una firma QR segura.
+
+```csharp
+using (Signature signature = new Signature("QRCodeEncryptedText.pdf"))
+{
+    // setup key and pasphrase
+    string key = "1234567890";
+    string salt = "1234567890";
+    // create data encryption
+    IDataEncryption encryption = new SymmetricEncryption(SymmetricAlgorithmType.Rijndael, key, salt);
+    QrCodeSearchOptions options = new QrCodeSearchOptions()
+    {
+        // specify special pages to search on
+        AllPages = true,
+        // specify special QRCode type to search
+        EncodeType = QrCodeTypes.QR,
+        //
+        DataEncryption = encryption
+    };
+    // search for signatures in document
+    List<QrCodeSignature> signatures = signature.Search<QrCodeSignature>(options);
+    Console.WriteLine("\nSource document contains following signatures.");
+    foreach (var qrCodeSignature in signatures)
+    {
+        Console.WriteLine("QRCode signature found at page {0} with type {1} and text '{2}'", qrCodeSignature.PageNumber,
+            qrCodeSignature.EncodeType.TypeName, qrCodeSignature.Text);
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con interfaz MVC</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con interfaz WebForms</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con interfaz Dropwizard</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con interfaz Spring</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

@@ -1,0 +1,88 @@
+---
+title: "Firma de imagen con metadatos de eSign"
+sidebar_label: "Imagen de eSign"
+sidebar_position: 1
+description: "Este artículo muestra cómo agregar firmas de metadatos a la capa de metadatos EXIF de la imagen con varios tipos de datos."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/basic-usage/electronic-signature-types/esign-document-with-metadata-signature/esign-image-with-metadata-signature.md"
+source_commit: "0c3c217010a3d6a2e7ef62d7ad8ef26f94d99418"
+source_sha256: "9c1099a91e7adcef180b8910054557711308647a74b5aa6bff9ed13d0dda896a"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "eebb5ad42922dff33ea5fdd0d618af0bbd29f72bb973abed91aca2b9cd6e7a85"
+translation_updated_at: "2026-11-16T15:18:01.625Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## Resumen {#overview}
+Firma de metadatos para documentos de imagen: es una firma electrónica basada en el estándar de metadatos de imagen. La mayoría de los formatos de imagen admiten la especificación de metadatos o <a href="https://en.wikipedia.org/wiki/Exif" target="_blank" rel="nofollow noopener noreferrer">EXIF</a>. Los metadatos de la imagen son un mapa de diccionario con un identificador entero corto único en el rango 0-65535. Algunos identificadores están reservados por <a href="https://www.exiv2.org/tags.html" target="_blank" rel="nofollow noopener noreferrer">Especificación EXIF.</a> Desde la perspectiva de la firma, los metadatos de la imagen pueden contener cualquier valor oculto de tipo estándar (int, char, string) o personalizado (clase definida por el usuario), y pueden ser cifrados y descifrados nuevamente mediante una clave conocida a través del método de búsqueda.
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> proporciona <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/imagemetadatasignature" target="_blank" rel="nofollow noopener noreferrer">ImageMetadataSignature</a> clase para especificar la firma electrónica de metadatos para documentos de imagen. Los metadatos de documentos de imagen contienen un par con identificador único `Id` y su `Value`.  
+Los metadatos de documentos de imagen pueden contener una gran cantidad de datos, lo que permite almacenar objetos personalizados serializados con cifrado adicional. Consulte más ejemplos [aquí](/net/signature/developer-guide/advanced-usage/signing/sign-document-with-secure-custom-metadata-signatures/).
+
+### Aquí están los pasos para agregar firmas de metadatos en una imagen con GroupDocs.Signature: {#here-are-the-steps-to-add-metadata-signatures-into-image-with-groupdocs-signature}
+
+* Crear nueva instancia de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase y pasar la ruta del documento fuente como parámetro del constructor.
+* Instanciar el <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasignoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataSignOptions</a> objeto según sus requisitos.
+* Instanciar uno o varios <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/imagemetadatasignature" target="_blank" rel="nofollow noopener noreferrer">ImageMetadataSignature</a> objetos y agregarlos en <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasignoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataSignOptions</a> a la colección de firmas de metadatos (<a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasignoptions/signatures" target="_blank" rel="nofollow noopener noreferrer">Signatures</a>) vía <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/metadatasignaturecollection/add" target="_blank" rel="nofollow noopener noreferrer">Add</a> o <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/metadatasignaturecollection/addrange" target="_blank" rel="nofollow noopener noreferrer">AddRange</a> método.
+* Llamar <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> método de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase, instancia y `pass` <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasignoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataSignOptions</a> a él.
+
+## Cómo firmar digitalmente una imagen con una firma de metadatos {#how-to-esign-image-with-metadata-signature}
+
+Este ejemplo muestra cómo firmar una imagen PNG con firmas electrónicas de metadatos
+
+```csharp
+using (Signature signature = new Signature("sample.png"))
+{
+    // create Metadata option with predefined Metadata text
+    var options = new MetadataSignOptions();
+    // Specify different Metadata Signatures and add them to options signature collection
+    ushort imgsMetadataId = 41996;
+    // Create several Image Metadata signatures with different types
+    options
+        .Add(new ImageMetadataSignature(imgsMetadataId++, "Mr.Scherlock Holmes")) // String value
+        .Add(new ImageMetadataSignature(imgsMetadataId++, DateTime.Now))          // Date Time value
+        .Add(new ImageMetadataSignature(imgsMetadataId++, 123456))                // Integer value
+        .Add(new ImageMetadataSignature(imgsMetadataId++, 123.456D))              // Double value
+        .Add(new ImageMetadataSignature(imgsMetadataId++, 123.456M))              // Decimal value
+        .Add(new ImageMetadataSignature(imgsMetadataId++, 123.456F));             // Float value
+
+    // add these signatures to options
+    options.Signatures.AddRange(signatures);
+    signature.Sign("SampleSigned.png", options);
+}
+```
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre las funciones de firma electrónica de documentos, consulte la [sección de uso avanzado](/net/signature/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la función en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario MVC para .NET de Firma de Documentos</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario WebForms para .NET de Firma de Documentos</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Dropwizard para Java de Firma de Documentos</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Spring para Java de Firma de Documentos</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, proporcionamos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

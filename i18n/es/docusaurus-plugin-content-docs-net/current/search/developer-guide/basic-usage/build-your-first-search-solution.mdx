@@ -1,0 +1,178 @@
+---
+title: "Construye tu primera solución de búsqueda"
+sidebar_label: "Construye tu primera solución de búsqueda"
+sidebar_key: "net-search-build-your-first-search-solution"
+sidebar_position: 1
+description: "En primer lugar, debes crear un índice. Un índice puede crearse en memoria o en disco. Un índice creado en memoria no puede guardarse tras salir de tu programa. En cambio, un índice creado en disco puede cargarse en el futuro para continuar trabajando."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/basic-usage/build-your-first-search-solution.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "eae6b8df0279556a3ac4ad559aea14d96bf3734474be4ac8071f5759a0af2474"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "0de3580395923c7ebee409dd1d5b7756b4480a1c0543f7c22c387476958fde1e"
+translation_updated_at: "2026-11-16T12:10:56.704Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Esta breve guía describe los pasos básicos para crear su primer índice de búsqueda.
+
+## Paso #1: Crear un nuevo índice {#step-1-create-new-index}
+
+En primer lugar, debe crear un índice. Un índice puede crearse en memoria o en disco. Un índice creado en memoria no puede guardarse tras salir de su programa. En cambio, un índice creado en disco puede cargarse en el futuro para continuar trabajando. Los detalles sobre cómo crear un índice se describen en la sección [Creación de un índice](/net/search/developer-guide/advanced-usage/creating-an-index/). El siguiente ejemplo muestra cómo crear un índice en disco.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\"; // Specify the path to the index folder
+Index index = new Index(indexFolder);
+```
+
+## Paso #2: Abrir el índice existente {#step-2-open-existing-index}
+
+Para continuar trabajando con un índice creado previamente, debe cargarse. Cada constructor de la **<a href="https://reference.groupdocs.com/net/search/groupdocs.search/index" target="_blank" rel="nofollow noopener noreferrer">Index</a>** La clase carga, de forma predeterminada, el índice si este existe en la ruta especificada. Solo una indicación explícita provoca que se sobrescriba el índice. El siguiente ejemplo muestra cómo cargar un índice existente.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\"; // Specify the path to the index folder
+Index index = new Index(indexFolder);
+```
+
+## Paso #3: Suscribirse a eventos del índice {#step-3-subscribe-to-index-events}
+
+Después de crear un índice, debe agregar documentos al índice para su indexación. La indexación de documentos puede ser exitosa o no, por diversas razones, por ejemplo, debido a errores de lectura desde el disco o a la presencia de una contraseña para acceder a un documento. Para recibir información sobre errores de indexación, puede suscribirse al evento `ErrorOccurred`. Para trabajar con eventos, consulte la sección [Eventos del índice de búsqueda](/net/search/developer-guide/advanced-usage/creating-an-index/search-index-events/). El siguiente ejemplo muestra cómo suscribirse al evento `ErrorOccurred`.
+
+**C#**
+
+```csharp
+index.Events.ErrorOccurred += (sender, args) =>
+{
+    Console.WriteLine(args.Message); // Writing error messages to the console
+};
+```
+
+## Paso #4: Agregar archivos de forma sincrónica {#step-4-add-files-synchronously}
+
+El indexado de documentos puede realizarse de forma sincrónica o asincrónica. El indexado sincrónico significa que el hilo que inició el proceso de indexado permanecerá ocupado hasta que la operación se complete. El siguiente ejemplo muestra cómo realizar el indexado de forma sincrónica.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\"; // Specify path to the index folder
+string documentsFolder = @"c:\MyDocuments\"; // Specify the path to a folder containing documents to search
+ 
+Index index = new Index(indexFolder); // Creating an index in the specified folder
+ 
+index.Add(documentsFolder); // Synchronous indexing documents from the specified folder
+```
+
+## Paso #5: Agregar archivos de forma asincrónica {#step-5-add-files-asynchronously}
+
+Con mayor frecuencia, sin embargo, es necesario realizar la indexación de forma asincrónica, con la posibilidad de ejecutar otras tareas en el subproceso que inició la operación. Una descripción detallada de todos los aspectos del proceso de indexación se proporciona en la sección [Indexación](/net/search/developer-guide/advanced-usage/indexing/). El siguiente ejemplo muestra cómo realizar la indexación de forma asincrónica.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\"; // Specify path to the index folder
+string documentsFolder = @"c:\MyDocuments\"; // Specify the path to a folder containing documents to search
+ 
+// Creating an index
+Index index = new Index(indexFolder);
+ 
+// Subscribing to the event
+index.Events.StatusChanged += (sender, args) =>
+{
+    if (args.Status != IndexStatus.InProgress)
+    {
+        // There should be a code indicating the completion of the operation
+    }
+};
+ 
+// Setting the flag for asynchronous indexing
+IndexingOptions options = new IndexingOptions();
+options.IsAsync = true;
+ 
+// Asynchronous indexing documents from the specified folder
+// The current method terminates before the operation completes
+index.Add(documentsFolder, options);
+```
+
+## Paso #6: Realizar la búsqueda {#step-6-perform-search}
+
+Una vez que los documentos están indexados, el índice está listo para manejar consultas de búsqueda. Los siguientes tipos de consultas de búsqueda son compatibles: simples, difusas, sensibles a mayúsculas y minúsculas, booleanas, de frases, facetadas, con comodines, entre otras. La descripción de los distintos tipos de consultas de búsqueda se presenta en la sección [Búsqueda](/net/search/developer-guide/advanced-usage/searching/). El ejemplo siguiente muestra cómo realizar una búsqueda sencilla en un índice.
+
+**C#**
+
+```csharp
+string query = "Einstein"; // Specify a search query
+SearchResult result = index.Search(query); // Searching in the index
+```
+
+## Paso #7: Utilizar los resultados de la búsqueda {#step-7-use-search-results}
+
+Cuando finaliza una búsqueda, debe interpretar los resultados de alguna manera. Los resultados pueden presentarse como una lista sencilla de documentos encontrados, o bien las palabras y frases halladas pueden resaltarse en el texto del documento. Para obtener más información sobre el procesamiento de resultados de búsqueda, consulte [Resultados de la búsqueda](/net/search/developer-guide/advanced-usage/searching/search-results/). El ejemplo siguiente muestra cómo listar los documentos encontrados en la consola.
+
+**C#**
+
+```csharp
+// Search in index
+SearchResult result = index.Search(query);
+ 
+// Printing the result
+Console.WriteLine("Documents found: " + result.DocumentCount);
+Console.WriteLine("Total occurrences found: " + result.OccurrenceCount);
+for (int i = 0; i < result.DocumentCount; i++)
+{
+    FoundDocument document = result.GetFoundDocument(i);
+    Console.WriteLine("\tDocument: " + document.DocumentInfo.FilePath);
+    Console.WriteLine("\tOccurrences: " + document.OccurrenceCount);
+}
+```
+
+El siguiente ejemplo muestra cómo resaltar los resultados de la búsqueda en el texto de un documento. La información detallada sobre cómo resaltar los resultados de la búsqueda se describe en la sección [Resaltado de resultados de búsqueda](/net/search/developer-guide/advanced-usage/searching/highlighting-search-results/).
+
+**C#**
+
+```csharp
+SearchResult result = index.Search(query, options); // Search in the index
+if (result.DocumentCount > 0)
+{
+    FoundDocument document = result.GetFoundDocument(0); // Getting the first found document
+    OutputAdapter outputAdapter = new FileOutputAdapter(@"c:\Highlighted.html"); // Creating the output adapter to a file
+    HtmlHighlighter highlighter = new HtmlHighlighter(outputAdapter); // Creating the highlighter object
+    index.Highlight(document, highlighter); // Generating output HTML formatted document with highlighted search results
+}
+```
+
+## Más recursos {#more-resources}
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre las funciones de búsqueda y familiarizarse con cómo mejorar su solución de búsqueda, consulte la [sección de uso avanzado](/net/search/developer-guide/advanced-usage/).
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funciones en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Junto con la completa biblioteca de .NET, ofrecemos aplicaciones sencillas pero potentes y gratuitas.
+
+Le invitamos a buscar en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita de búsqueda de documentos en línea</a>.

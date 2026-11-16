@@ -1,0 +1,176 @@
+---
+title: "Construir consulta de búsqueda"
+sidebar_label: "Construir consulta de búsqueda"
+sidebar_key: "net-search-build-search-query"
+sidebar_position: 2
+description: "Esta página contiene información sobre cómo construir consultas de búsqueda de texto de varios tipos. Se proporcionan más ejemplos sobre la construcción de consultas de búsqueda en la página"
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/basic-usage/build-search-query.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "ac2cee12fcebb021d80f6189c138786512ae11e9e820b0897ca6fc6a961ef43f"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "04f90b947cc3ce3316829068c3bc0129db2531b6f568f89ec88b60a9d2822ac8"
+translation_updated_at: "2026-11-16T12:09:30.298Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Esta página contiene información sobre la construcción de consultas de búsqueda de texto de diversos tipos. Se proporcionan más ejemplos sobre la construcción de consultas de búsqueda en la página [Tabla de operaciones de búsqueda](/net/search/developer-guide/advanced-usage/searching/search-operation-table/). Una especificación detallada del lenguaje de consultas de búsqueda se presenta en la página [Especificación del lenguaje de consultas](/net/search/developer-guide/advanced-usage/searching/query-language-specification/).
+
+Además de las consultas de búsqueda de texto, también existe la posibilidad de crear consultas en forma de objeto. Las formas de consulta de búsqueda se describen en la página [Consultas en forma de texto y objeto](/net/search/developer-guide/advanced-usage/searching/queries-in-text-and-object-form/).
+
+También puede utilizar opciones de búsqueda para personalizar sus consultas de búsqueda. La información detallada sobre las opciones de búsqueda se proporciona en la página [Opciones de búsqueda](/net/search/developer-guide/advanced-usage/searching/search-options/).
+
+## Consulta de búsqueda sencilla {#simple-search-query}
+
+El primer tipo de consulta de búsqueda es la consulta de búsqueda sencilla. Este tipo de consultas se utiliza para buscar una única palabra en el texto de un documento. A continuación se presenta un ejemplo.
+
+**C#**
+
+```csharp
+string query = "Einstein";
+SearchResult result = index.Search(query); // Search in the index
+```
+
+## Consulta de búsqueda con comodines {#wildcard-search-query}
+
+Un tipo más complejo de consulta es una consulta de búsqueda con comodines. Existen 2 tipos de caracteres comodín en una palabra: un comodín para un solo carácter y un comodín para un grupo de caracteres. La información detallada sobre los comodines en una palabra se proporciona en la página [Búsqueda con comodines](/net/search/developer-guide/advanced-usage/searching/wildcard-search/). El ejemplo siguiente muestra el uso del comodín para un solo carácter.
+
+**C#**
+
+```csharp
+string query = "?ffect";
+SearchResult result = index.Search(query); // Search for words 'affect', 'effect', ets.
+```
+
+El comodín de grupo de caracteres le permite especificar un rango de caracteres desconocidos en la forma `?(N~M)`, donde `N` y `M` están en el rango de 0 a 255. El siguiente ejemplo demuestra el uso del comodín de grupo de caracteres.
+
+**C#**
+
+```csharp
+string query = "princip?(2~4)";
+SearchResult result = index.Search(query); // Search for words 'principal', 'principle', 'principles', 'principally', ets.
+```
+
+## Consulta de búsqueda por facetas {#faceted-search-query}
+
+El siguiente tipo de consulta, la **consulta de búsqueda por facetas**, le permite especificar el campo del documento en el que realizar la búsqueda. La información detallada sobre la búsqueda por facetas se presenta en la página [Búsqueda por facetas](/net/search/developer-guide/advanced-usage/searching/faceted-search/). El siguiente ejemplo muestra cómo realizar una búsqueda únicamente en el campo **'Content'**.
+
+**C#**
+
+```csharp
+string query = "Content: Einstein";
+SearchResult result = index.Search(query); // Search for word 'Einstein' only in 'Content' field
+```
+
+## Consulta de búsqueda por rango numérico {#numeric-range-search-query}
+
+El siguiente tipo de consulta permite especificar un rango de números para realizar la búsqueda: consulta de búsqueda por rango numérico. La información detallada sobre la búsqueda por rango numérico se presenta en la página [Búsqueda por rango numérico](/net/search/developer-guide/advanced-usage/searching/numeric-range-search/). El ejemplo siguiente muestra cómo buscar números en el rango comprendido entre 2000 y 3000.
+
+**C#**
+
+```csharp
+string query = "2000 ~~ 3000";
+SearchResult result = index.Search(query); // Search for numbers from 2000 to 3000
+```
+
+## Consulta de búsqueda por rango de fechas {#date-range-search-query}
+
+La búsqueda de fechas dentro de un rango específico se realiza mediante una consulta de búsqueda por rango de fechas. Los detalles sobre esta búsqueda se presentan en la página [Búsqueda por rango de fechas](/net/search/developer-guide/advanced-usage/searching/date-range-search/). El ejemplo muestra cómo buscar fechas en el formato 'MM/dd/yyyy' dentro del rango comprendido entre el 01/01/2000 y el 15/06/2001.
+
+**C#**
+
+```csharp
+SearchOptions options = new SearchOptions(); // Creating a search options object
+options.DateFormats.Clear(); // Removing default date formats
+ 
+// Creating a date format pattern 'MM/dd/yyyy'
+DateFormatElement[] elements = new DateFormatElement[]
+{
+    DateFormatElement.MonthTwoDigits,
+    DateFormatElement.DateSeparator,
+    DateFormatElement.DayOfMonthTwoDigits,
+    DateFormatElement.DateSeparator,
+    DateFormatElement.YearFourDigits,
+};
+DateFormat dateFormat = new DateFormat(elements, "/");
+ 
+options.DateFormats.Add(dateFormat); // Adding the date format pattern to the date format collection
+string query = "daterange(2000-01-01 ~~ 2001-06-15)"; // Dates in the search query are always specified in the format 'yyyy-MM-dd'
+ 
+SearchResult result = index.Search(query, options); // Search in index
+```
+
+## Consulta de búsqueda con expresiones regulares {#regular-expression-search-query}
+
+El siguiente tipo de consulta es una **consulta de búsqueda con expresiones regulares**. La información detallada sobre este tipo de consultas se presenta en la página [Búsqueda con expresiones regulares](/net/search/developer-guide/advanced-usage/searching/regular-expression-search/). El siguiente ejemplo demuestra el uso de expresiones regulares para realizar búsquedas en un índice.
+
+**C#**
+
+```csharp
+string query = "^(.)\\1{2,}"; // The caret character at the beginning indicates that this is a regular expression search query
+SearchResult result = index.Search(query); // Search for three or more identical characters in a row
+```
+
+## Consulta de búsqueda booleana {#boolean-search-query}
+
+El siguiente tipo de consulta de búsqueda es una consulta de búsqueda booleana. Este tipo de consultas permite utilizar condiciones lógicas para verificar la presencia o ausencia de palabras específicas en los documentos. En este tipo de consultas se pueden utilizar los operadores booleanos AND, OR y NOT. La información detallada sobre este tipo de búsqueda se presenta en la página [Búsqueda booleana](/net/search/developer-guide/advanced-usage/searching/boolean-search/). El siguiente ejemplo muestra cómo buscar documentos que contengan la palabra «Einstein», pero que no contengan la palabra «relativity».
+
+**C#**
+
+```csharp
+string query = "Einstein AND NOT relativity";
+SearchResult result = index.Search(query);
+```
+
+Las consultas de búsqueda booleana pueden combinarse utilizando paréntesis y otros tipos de consultas. Por ejemplo, la siguiente consulta busca todos los documentos que contienen palabras que comienzan con «relativ» en la ruta del documento o que contienen la palabra «Einstein» en el contenido del documento.
+
+**C#**
+
+```csharp
+string query = "FileName: relativ?(1~3) OR Content: (Einstein AND Albert)";
+SearchResult result = index.Search(query); // Search for documents whose paths contain 'relative', 'relativity', ets., or documents containing both 'Einstein' and 'Albert' in the content
+```
+
+## Consulta de búsqueda de frases {#phrase-search-query}
+
+Otro tipo de consulta: la **consulta de búsqueda de frases** permite buscar frases completas en documentos. La información detallada sobre la búsqueda de frases se encuentra en la página [Búsqueda de frases](/net/search/developer-guide/advanced-usage/searching/phrase-search/). A continuación se presenta un ejemplo de búsqueda de frases.
+
+**C#**
+
+```csharp
+string query = "\"theory of special relativity\"";
+SearchResult result = index.Search(query); // Search for the phrase 'theory of special relativity'
+```
+
+## Más recursos {#more-resources}
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre las funciones de búsqueda y familiarizarse con cómo mejorar su solución de búsqueda, consulte la [sección de uso avanzado](/net/search/developer-guide/advanced-usage/).
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funciones en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le damos la bienvenida a realizar búsquedas en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita de búsqueda de documentos en línea</a>.

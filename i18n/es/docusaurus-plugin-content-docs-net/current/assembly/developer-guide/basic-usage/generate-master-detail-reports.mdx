@@ -1,0 +1,275 @@
+---
+title: "Generar informes maestro-detalle"
+sidebar_label: "Generar informes maestro-detalle"
+sidebar_key: "net-assembly-generate-master-detail-reports"
+sidebar_position: 18
+description: "Cree informes de padres e hijos con bandas de datos anidadas para mostrar registros maestros con sus registros de detalle."
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/generate-master-detail-reports.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "75564574f1da82f1c997af22c535c49bb12cca987f0ac6538af74852ad25fa48"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "b5dd8314e59de11b27b5a7a0fbce25eb1f8538dcf700b3c4e0eb2ca45750d864"
+translation_updated_at: "2026-11-16T13:51:56.423Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Vista general {#overview}
+
+Los informes maestro-detalle muestran datos jerárquicos en los que cada registro maestro (padre) tiene registros de detalle asociados (hijos). GroupDocs.Assembly para .NET admite informes maestro-detalle mediante bandas de datos **foreach** anidadas, lo que permite mostrar registros padres junto con sus registros hijos relacionados.
+
+Las clases principales involucradas son:
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/documentassembler/" target="_blank" rel="nofollow noopener noreferrer">DocumentAssembler</a> – ensambla documentos
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/datasourceinfo/" target="_blank" rel="nofollow noopener noreferrer">DataSourceInfo</a> – envuelve las fuentes de datos
+
+A continuación se presentan los pasos para generar informes maestro-detalle:
+
+* Definir estructuras de datos con relaciones padre-hijo
+* Crear una plantilla con bandas de datos **foreach** anidadas
+* El **foreach** externo itera sobre los registros maestros
+* El **foreach** interno itera sobre los registros de detalle para cada maestro
+* Ensamblar el documento con los datos jerárquicos
+
+
+:::info
+Los bandos de datos anidados con `foreach` permiten crear informes jerárquicos complejos. El bando externo procesa los registros maestros, mientras que los bandos internos procesan los registros de detalle relacionados.
+:::
+
+
+## Definir estructura de datos Maestro-Detalle {#define-master-detail-data-structure}
+
+Comience definiendo clases con relaciones padre-hijo:
+
+```csharp
+public class Order
+{
+    public int OrderId { get; set; }
+    public DateTime OrderDate { get; set; }
+    public string CustomerName { get; set; }
+    public List<OrderItem> Items { get; set; }
+}
+
+public class OrderItem
+{
+    public string ProductName { get; set; }
+    public int Quantity { get; set; }
+    public decimal Price { get; set; }
+}
+```
+
+## Generar informe maestro-detalle {#generate-master-detail-report}
+
+Cree un informe maestro-detalle a partir de datos jerárquicos:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public static void GenerateMasterDetailReport()
+{
+    // Create sample data with master-detail relationship
+    List<Order> orders = new List<Order>
+    {
+        new Order
+        {
+            OrderId = 1001,
+            OrderDate = new DateTime(2024, 1, 15),
+            CustomerName = "John Doe",
+            Items = new List<OrderItem>
+            {
+                new OrderItem { ProductName = "Laptop", Quantity = 1, Price = 999.99m },
+                new OrderItem { ProductName = "Mouse", Quantity = 2, Price = 29.99m }
+            }
+        },
+        new Order
+        {
+            OrderId = 1002,
+            OrderDate = new DateTime(2024, 1, 16),
+            CustomerName = "Jane Smith",
+            Items = new List<OrderItem>
+            {
+                new OrderItem { ProductName = "Keyboard", Quantity = 1, Price = 79.99m }
+            }
+        }
+    };
+    
+    // Assemble document
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("MasterDetailTemplate.docx", "MasterDetailOutput.docx", 
+        new DataSourceInfo(orders, "orders"));
+    
+    Console.WriteLine("Master-detail report generated successfully.");
+}
+```
+
+## Estructura de plantilla para Maestro-Detalle {#template-structure-for-master-detail}
+
+En su plantilla (MasterDetailTemplate.docx), utilice bandas de datos foreach anidadas:
+
+```
+<<foreach [in orders]>>
+Order #<<[OrderId]>>
+Date: <<[OrderDate]:"yyyy-MM-dd">>
+Customer: <<[CustomerName]>>
+
+Items:
+<<foreach [in Items]>>
+  - <<[ProductName]>> (Qty: <<[Quantity]>>, Price: <<[Price]:"C">>)
+<</foreach>>
+
+Total: <<[Items.Sum(i => i.Price * i.Quantity)]:"C">>
+
+<</foreach>>
+```
+
+Después del ensamblaje, obtendrás:
+
+```
+Order #1001
+Date: 2024-01-15
+Customer: John Doe
+
+Items:
+  - Laptop (Qty: 1, Price: $999.99)
+  - Mouse (Qty: 2, Price: $29.99)
+
+Total: $1,059.97
+
+Order #1002
+Date: 2024-01-16
+Customer: Jane Smith
+
+Items:
+  - Keyboard (Qty: 1, Price: $79.99)
+
+Total: $79.99
+```
+
+## Master-Detail en tablas {#master-detail-in-tables}
+
+También puede crear informes maestro-detalle en formato de tabla:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public static void GenerateMasterDetailTable()
+{
+    List<Order> orders = new List<Order>
+    {
+        new Order
+        {
+            OrderId = 1001,
+            CustomerName = "John Doe",
+            Items = new List<OrderItem>
+            {
+                new OrderItem { ProductName = "Laptop", Quantity = 1, Price = 999.99m },
+                new OrderItem { ProductName = "Mouse", Quantity = 2, Price = 29.99m }
+            }
+        }
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("MasterDetailTableTemplate.docx", "MasterDetailTableOutput.docx", 
+        new DataSourceInfo(orders, "orders"));
+    
+    Console.WriteLine("Master-detail table generated successfully.");
+}
+```
+
+Estructura de la tabla de plantilla:
+
+| ID de pedido | Cliente | Producto | Cantidad | Precio |
+| ---------- | ---------- | --------- | ---------- | ------- |
+| `<<foreach [in orders]>>` |  |  |  |  |
+| `<<[OrderId]>>` | `<<[CustomerName]>>` | `<<foreach [in Items]>>` |  |  |
+|  |  | `<<[ProductName]>>` | `<<[Quantity]>>` | `<<[Price]:"C">>` |
+|  |  | `<<foreach>>` |  |  |
+| `<<foreach>>` |  |  |  |  |
+
+## Uso de agregados en maestro-detalle {#using-aggregates-in-master-detail}
+
+Calcular totales y agregados para cada registro maestro:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public static void GenerateMasterDetailWithAggregates()
+{
+    List<Order> orders = new List<Order>
+    {
+        new Order
+        {
+            OrderId = 1001,
+            CustomerName = "John Doe",
+            Items = new List<OrderItem>
+            {
+                new OrderItem { ProductName = "Laptop", Quantity = 1, Price = 999.99m },
+                new OrderItem { ProductName = "Mouse", Quantity = 2, Price = 29.99m }
+            }
+        }
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("MasterDetailTemplate.docx", "MasterDetailOutput.docx", 
+        new DataSourceInfo(orders, "orders"));
+    
+    Console.WriteLine("Master-detail report with aggregates generated successfully.");
+}
+```
+
+Plantilla con agregados:
+
+```
+<<foreach [in orders]>>
+Order #<<[OrderId]>> - <<[CustomerName]>>
+
+Items:
+<<foreach [in Items]>>
+  <<[ProductName]>> - <<[Quantity]>> x <<[Price]:"C">> = <<[Quantity * Price]:"C">>
+<</foreach>>
+
+Subtotal: <<[Items.Sum(i => i.Price * i.Quantity)]:"C">>
+Item Count: <<[Items.Count()]>>
+<</foreach>>
+```
+
+
+:::warning
+Al utilizar bandas de datos anidadas con `foreach`, asegúrese de cerrar correctamente las etiquetas. Cada apertura `<<foreach>>` debe tener un cierre correspondiente `<<foreach>>`.
+:::
+
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre estructuras jerárquicas complejas, múltiples niveles de anidamiento y patrones maestro-detalle avanzados, consulte la [sección de uso avanzado](/net/assembly/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para .NET</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Java</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Python-via-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Python mediante .NET</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes.
+
+Para ensamblar documentos a partir de plantillas y fuentes de datos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/assembly" target="_blank">Conholdate.Assembly App</a>**.

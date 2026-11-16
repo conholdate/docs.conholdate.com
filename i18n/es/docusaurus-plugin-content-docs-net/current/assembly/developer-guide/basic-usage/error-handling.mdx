@@ -1,0 +1,389 @@
+---
+title: "Manejar errores comunes en plantillas y datos"
+sidebar_label: "Manejar errores comunes en plantillas y datos"
+sidebar_key: "net-assembly-error-handling"
+sidebar_position: 31
+description: "Capturar y manejar excepciones comunes durante el ensamblaje de documentos y validar la sintaxis de la plantilla y los datos."
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/error-handling.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "4a2723fea7a3736ab81e1129d09dbf0fe1b9f2553c6e99fc7cd034f59c41da4a"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "9efceadc8d8cfdba7b2a277addb8cebfdd6d2d889b8abf29c576740f35ec6adb"
+translation_updated_at: "2026-11-16T13:43:27.707Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Vista general {#overview}
+
+El manejo de errores es fundamental al generar documentos a partir de plantillas y fuentes de datos. GroupDocs.Assembly para .NET proporciona excepciones que le ayudan a identificar y resolver problemas relacionados con plantillas, fuentes de datos u operaciones de ensamblado. Comprender los escenarios comunes de error y cómo manejarlos mejora la fiabilidad del código de generación de documentos.
+
+Los principales tipos de excepciones son:
+- `DocumentAssemblerException` – errores generales de ensamblado
+- Errores de sintaxis de plantilla
+- Errores de fuente de datos
+- Errores por miembros ausentes
+
+A continuación se presentan los pasos para manejar los errores:
+
+* Envolver las operaciones de ensamblado en bloques try-catch
+* Capturar tipos específicos de excepciones
+* Validar las fuentes de datos antes del ensamblado
+* Manejar de forma adecuada los miembros ausentes
+* Registrar los errores para su depuración
+
+
+:::info
+GroupDocs.Assembly proporciona mensajes de error detallados que ayudan a identificar la ubicación exacta y la causa de los errores en la plantilla o en los datos.
+:::
+
+
+## Manejo Básico de Errores {#basic-error-handling}
+
+Envolver las operaciones de ensamblado en bloques try-catch:
+
+```csharp
+using GroupDocs.Assembly;
+using System;
+
+public static void BasicErrorHandling()
+{
+    try
+    {
+        var data = new { Name = "John Doe", Age = 30 };
+        
+        DocumentAssembler assembler = new DocumentAssembler();
+        assembler.AssembleDocument("Template.docx", "Output.docx", 
+            new DataSourceInfo(data, "data"));
+        
+        Console.WriteLine("Document assembled successfully.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error assembling document: {ex.Message}");
+        // Handle error appropriately
+    }
+}
+```
+
+## Manejo de errores de sintaxis en plantillas {#handle-template-syntax-errors}
+
+Capturar y manejar errores de sintaxis en plantillas:
+
+```csharp
+using GroupDocs.Assembly;
+using System;
+
+public static void HandleTemplateErrors()
+{
+    try
+    {
+        var data = new { Name = "John Doe" };
+        
+        DocumentAssembler assembler = new DocumentAssembler();
+        assembler.AssembleDocument("Template.docx", "Output.docx", 
+            new DataSourceInfo(data, "data"));
+    }
+    catch (DocumentAssemblerException ex)
+    {
+        Console.WriteLine($"Template error: {ex.Message}");
+        Console.WriteLine($"Error details: {ex.InnerException?.Message}");
+        // Log error, notify user, or use fallback template
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Unexpected error: {ex.Message}");
+    }
+}
+```
+
+## Manejo de miembros de datos faltantes {#handle-missing-data-members}
+
+Manejo de casos en los que las plantillas hacen referencia a miembros de datos que faltan:
+
+```csharp
+using GroupDocs.Assembly;
+using System;
+
+public static void HandleMissingMembers()
+{
+    try
+    {
+        // Data doesn't have all properties referenced in template
+        var data = new { Name = "John Doe" };
+        // Template might reference data.Email which doesn't exist
+        
+        DocumentAssembler assembler = new DocumentAssembler();
+        
+        // Option 1: Allow missing members (returns null/empty)
+        assembler.Options |= DocumentAssemblyOptions.AllowMissingMembers;
+        
+        assembler.AssembleDocument("Template.docx", "Output.docx", 
+            new DataSourceInfo(data, "data"));
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error: {ex.Message}");
+    }
+}
+```
+
+## Validar datos antes del ensamblaje {#validate-data-before-assembly}
+
+Validar las fuentes de datos antes del ensamblaje:
+
+```csharp
+using GroupDocs.Assembly;
+using System;
+using System.Collections.Generic;
+
+public static void ValidateDataBeforeAssembly()
+{
+    var products = new List<Product>();
+    // products might be empty or null
+    
+    if (products == null || products.Count == 0)
+    {
+        Console.WriteLine("Warning: No products to process.");
+        return;
+    }
+    
+    try
+    {
+        DocumentAssembler assembler = new DocumentAssembler();
+        assembler.AssembleDocument("Template.docx", "Output.docx", 
+            new DataSourceInfo(products, "products"));
+        
+        Console.WriteLine("Document assembled successfully.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error: {ex.Message}");
+    }
+}
+```
+
+## Manejo de errores de archivo no encontrado {#handle-file-not-found-errors}
+
+Verifique si el archivo de plantilla existe:
+
+```csharp
+using GroupDocs.Assembly;
+using System;
+using System.IO;
+
+public static void HandleFileNotFound()
+{
+    string templatePath = "Template.docx";
+    
+    if (!File.Exists(templatePath))
+    {
+        Console.WriteLine($"Template file not found: {templatePath}");
+        return;
+    }
+    
+    try
+    {
+        var data = new { Name = "John Doe" };
+        
+        DocumentAssembler assembler = new DocumentAssembler();
+        assembler.AssembleDocument(templatePath, "Output.docx", 
+            new DataSourceInfo(data, "data"));
+        
+        Console.WriteLine("Document assembled successfully.");
+    }
+    catch (FileNotFoundException ex)
+    {
+        Console.WriteLine($"File not found: {ex.FileName}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error: {ex.Message}");
+    }
+}
+```
+
+## Manejo de errores de tipos de datos {#handle-data-type-errors}
+
+Validar los tipos de datos antes del ensamblaje:
+
+```csharp
+using GroupDocs.Assembly;
+using System;
+
+public class Invoice
+{
+    public string CustomerName { get; set; }
+    public decimal? Amount { get; set; } // Nullable
+}
+
+public static void HandleDataTypeErrors()
+{
+    var invoice = new Invoice
+    {
+        CustomerName = "John Doe",
+        Amount = null // Might cause issues if template expects non-null
+    };
+    
+    try
+    {
+        DocumentAssembler assembler = new DocumentAssembler();
+        assembler.AssembleDocument("Template.docx", "Output.docx", 
+            new DataSourceInfo(invoice, "invoice"));
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Data type error: {ex.Message}");
+        // Handle null values or provide defaults
+    }
+}
+```
+
+## Manejo Integral de Errores {#comprehensive-error-handling}
+
+Combine multiple error handling strategies:
+
+```csharp
+using GroupDocs.Assembly;
+using System;
+using System.IO;
+
+public static void ComprehensiveErrorHandling()
+{
+    string templatePath = "Template.docx";
+    string outputPath = "Output.docx";
+    
+    // Validate inputs
+    if (string.IsNullOrEmpty(templatePath) || !File.Exists(templatePath))
+    {
+        Console.WriteLine("Invalid template path.");
+        return;
+    }
+    
+    try
+    {
+        var data = new { Name = "John Doe", Age = 30 };
+        
+        // Validate data
+        if (data == null)
+        {
+            Console.WriteLine("Data source is null.");
+            return;
+        }
+        
+        DocumentAssembler assembler = new DocumentAssembler();
+        
+        // Configure error handling options
+        assembler.Options |= DocumentAssemblyOptions.AllowMissingMembers;
+        
+        assembler.AssembleDocument(templatePath, outputPath, 
+            new DataSourceInfo(data, "data"));
+        
+        Console.WriteLine("Document assembled successfully.");
+    }
+    catch (DocumentAssemblerException ex)
+    {
+        Console.WriteLine($"Assembly error: {ex.Message}");
+        if (ex.InnerException != null)
+        {
+            Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+        }
+        // Log detailed error information
+    }
+    catch (FileNotFoundException ex)
+    {
+        Console.WriteLine($"File not found: {ex.FileName}");
+    }
+    catch (UnauthorizedAccessException ex)
+    {
+        Console.WriteLine($"Access denied: {ex.Message}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Unexpected error: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+    }
+}
+```
+
+## Manejo de errores en transmisiones {#handle-stream-errors}
+
+Maneje adecuadamente los errores relacionados con transmisiones (streams):
+
+```csharp
+using GroupDocs.Assembly;
+using System;
+using System.IO;
+
+public static void HandleStreamErrors()
+{
+    try
+    {
+        using (FileStream templateStream = new FileStream("Template.docx", FileMode.Open))
+        using (FileStream outputStream = new FileStream("Output.docx", FileMode.Create))
+        {
+            var data = new { Name = "John Doe" };
+            
+            DocumentAssembler assembler = new DocumentAssembler();
+            assembler.AssembleDocument(templateStream, outputStream, 
+                new DataSourceInfo(data, "data"));
+        }
+    }
+    catch (IOException ex)
+    {
+        Console.WriteLine($"IO error: {ex.Message}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error: {ex.Message}");
+    }
+}
+```
+
+## Prácticas recomendadas para el manejo de errores {#error-handling-best-practices}
+
+1. **Utilice siempre bloques try-catch** alrededor de las operaciones de ensamblado
+2. **Valide las entradas** antes del ensamblado (verificación de existencia de archivos, comprobaciones de valores nulos en los datos)
+3. **Use tipos de excepción específicos** siempre que sea posible
+4. **Habilite la opción AllowMissingMembers** si su estructura de datos es dinámica
+5. **Registre los errores** con suficiente detalle para facilitar la depuración
+6. **Proporcione mensajes de error amigables para el usuario** en el código de producción
+
+
+:::warning
+Es posible que se produzcan algunos errores durante la evaluación de plantillas. Siempre pruebe las plantillas con datos de ejemplo antes de implementarlas en producción. Considere utilizar herramientas de validación de plantillas o ensamblados de prueba.
+:::
+
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre el registro detallado de errores, la validación de plantillas, el manejo personalizado de errores y las técnicas de depuración, consulte la [sección de uso avanzado](/net/assembly/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para .NET</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Java</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Python-via-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Python mediante .NET</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas en línea simples pero potentes.
+
+Para ensamblar documentos a partir de plantillas y fuentes de datos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/assembly" target="_blank">Conholdate.Assembly App</a>**.

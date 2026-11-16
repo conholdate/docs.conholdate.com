@@ -1,0 +1,140 @@
+---
+title: "Firmar documento con firma de sello: avanzado"
+sidebar_label: "✎ Sello"
+sidebar_key: "net-signature-signing-sign-document-with-stamp-signature-advanced"
+sidebar_position: 13
+description: "Este artículo explica cómo firmar documentos con firmas electrónicas generadas mediante sellos, utilizando opciones avanzadas con la API de GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/signing/sign-document-with-stamp-signature-advanced.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "d9341085f48f0e067a0c4cd1232dec41036261f7d66dc620e4c7e7e945a3c8a0"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "66593b40063da3e650c092ff525632ba4898670a750ffbb7d0cf15df00e84a12"
+translation_updated_at: "2026-11-16T13:35:05.677Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> proporciona la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/stampsignoptions" target="_blank" rel="nofollow noopener noreferrer">StampSignOptions</a> con propiedades adicionales para especificar distintas opciones para la firma de sello. Este tipo de firma implementa sellos con distintas implementaciones, formas, líneas, etc. Cada opción de sello contiene líneas internas y externas. Las líneas internas representan líneas verticales dentro del sello, mientras que las líneas externas representan círculos (o rectángulos, según el tipo de sello) que rodean el sello, con su propio texto, configuración de borde, fondo, etc.
+
+A continuación se indican los pasos para agregar una firma de sello a un documento mediante GroupDocs.Signature:
+
+* Crear una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasar la ruta del documento de origen como parámetro del constructor.
+* Instanciar el objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/stampsignoptions" target="_blank" rel="nofollow noopener noreferrer">StampSignOptions</a> según sus necesidades y especificar las opciones de la firma de texto.
+* Llamar al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasarle <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/stampsignoptions" target="_blank" rel="nofollow noopener noreferrer">StampSignOptions</a> como argumento.
+* Analizar el resultado <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/signresult" target="_blank" rel="nofollow noopener noreferrer">SignResult</a> para verificar las firmas recién creadas, si es necesario.
+
+Este ejemplo muestra cómo agregar una firma de sello a un documento. Consulte <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/signresult" target="_blank" rel="nofollow noopener noreferrer">SignResult</a>
+
+```csharp
+using (Signature signature = new Signature(filePath))
+{
+    // setup options with text of signature
+    StampSignOptions signOptions = new StampSignOptions()
+    {
+        Height = 300,
+        Width = 300,
+        VerticalAlignment = VerticalAlignment.Bottom,
+        HorizontalAlignment = HorizontalAlignment.Right,
+        Margin = new Padding() { Right = 10, Bottom = 10 },
+        Background = new Background() { Color = Color.DarkOrange },
+        BackgroundColorCropType = StampBackgroundCropType.OuterArea,
+        ImageFilePath = @"center.jpg",
+        BackgroundImageCropType = StampBackgroundCropType.InnerArea,
+        AllPages = true
+    };
+    //add few outer round lines
+    signOptions.OuterLines.Add(
+        new StampLine()
+        {
+            Text = "* European Union *",
+            TextRepeatType = StampTextRepeatType.FullTextRepeat,
+            Font = new SignatureFont() { Size = 12 },
+            Height = 22,
+            TextBottomIntent = 6,
+            TextColor = Color.WhiteSmoke,
+            BackgroundColor = Color.DarkSlateBlue
+        }
+    );
+    signOptions.OuterLines.Add(
+        new StampLine()
+        {
+            Height = 2,
+            BackgroundColor = Color.White
+        }
+    );
+    signOptions.OuterLines.Add(
+        new StampLine()
+        {
+            Text = "* Entrepreneur *",
+            TextRepeatType = StampTextRepeatType.FullTextRepeat,
+            TextColor = Color.DarkSlateBlue,
+            Font = new SignatureFont() { Size = 15 },
+            Height = 30,
+            TextBottomIntent = 8,
+            InnerBorder = new BorderLine() { Color = Color.DarkSlateBlue, DashStyle = DashStyle.Dot },
+            OuterBorder = new BorderLine() { Color = Color.DarkSlateBlue },
+        }
+    );
+    //Inner square lines
+    signOptions.InnerLines.Add(
+        new StampLine()
+        {
+            Text = "John",
+            TextColor = Color.MediumVioletRed,
+            Font = new SignatureFont() { Size = 20, Bold = true },
+            Height = 40,
+        }
+    );
+    signOptions.InnerLines.Add(
+        new StampLine()
+        {
+            Text = "Smith",
+            TextColor = Color.MediumVioletRed,
+            Font = new SignatureFont() { Size = 20, Bold = true },
+            Height = 40
+        }
+    );
+    signOptions.InnerLines.Add(
+        new StampLine()
+        {
+            Text = "SSN 1230242424",
+            TextColor = Color.MediumVioletRed,
+            Font = new SignatureFont() { Size = 12, Bold = true },
+            Height = 40,
+        }
+    );
+    // sign document
+    string signedPath = @"C:\GroupDocs\Output\Pdf_Documents_Stamp.pdf";
+    signature.Sign(signedPath, signOptions);
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario MVC para la firma de documentos con .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario WebForms para la firma de documentos con .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Dropwizard para la firma de documentos con Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Spring para la firma de documentos con Java</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

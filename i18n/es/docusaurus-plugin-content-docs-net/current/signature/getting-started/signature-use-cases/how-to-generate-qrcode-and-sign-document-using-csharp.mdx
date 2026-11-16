@@ -1,0 +1,132 @@
+---
+title: "Cómo generar un código QR y firmar un documento usando C#"
+sidebar_label: "Cómo generar un código QR y firmar un documento usando C#"
+sidebar_key: "net-signature-signature-use-cases-how-to-generate-qrcode-and-sign-document-using-csharp"
+sidebar_position: 3
+description: "Esta guía describe cómo mejorar su documento con un código QR generado mediante C#. Firme sus documentos con un código QR y diversos elementos estándar de códigos QR, como códigos QR de eventos, códigos QR de contacto en formato VCard o MeCard, y códigos QR de pagos SEPA, utilizando la API de GroupDocs.Signature .NET de GroupDocs."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/getting-started/signature-use-cases/how-to-generate-qrcode-and-sign-document-using-csharp.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "d03f89bfcddb30101421fc1ed3a5977be0bbe1f9ed5c743b4cd82a918a6e23f3"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "1c8e399274a2f97de6afc5f3d953d1e091dd1303aa17ccee6c86688d1ef218e0"
+translation_updated_at: "2026-11-16T14:44:58.987Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+El código QR generado puede descargarse y utilizarse para incluirlo en contratos comerciales y documentos oficiales. Cualquier código QR contiene información textual única que confirma la identidad del firmante o autoriza el documento comercial. La verificación del código QR puede realizarse automáticamente al leer los datos incrustados en su interior. Estas firmas pueden escanearse automáticamente. El código QR permite almacenar más de 2 kilobytes de datos.
+
+## API nativa de .NET para firmas electrónicas {#native-net-api-for-electronic-signatures}
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Signature para .NET</a> proporciona una API para firmar una amplia gama de formatos de documentos. Además, la API incluye capacidades especiales para el procesamiento adicional del contenido del documento. Los formatos compatibles son PDF, Microsoft Word, Microsoft PowerPoint, Microsoft Excel, PNG, JPEG y [muchos otros](/net/signature/supported-document-formats/).
+
+Utilice la <a href="https://downloads.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">sección de descargas</a> para obtener los DLL de la API o el instalador MSI, o bien utilice el administrador de paquetes NuGet:
+
+```nuget
+PM> Install-Package GroupDocs.Signature
+```
+
+## Firmar un documento con un código QR de evento en C\# {#signing-a-document-with-an-event-qr-code-in-c}
+
+A veces es necesario informar a los compañeros de trabajo sobre eventos empresariales. En tales casos, un código QR de evento puede proporcionar toda la información requerida de una manera muy eficaz. Este tema describe cómo firmar un documento PDF con el código QR de evento generado.
+
+* Instanciar la clase `Signature`, proporcionando la ruta al documento de origen o al flujo de documentos.
+* Establecer los datos del evento en la instancia del objeto `Event`.
+* Crear el objeto `QrCodeSignOptions` y configurar todos los campos requeridos.
+* Invocar el método `Sign` para procesar el documento, proporcionando la ruta del archivo de salida y las opciones de firma.
+
+```cs
+            // instantiating the signature object
+            using (Signature signature = new Signature(@"source.pdf"))
+            {
+                //provide event data
+                Event eventQr = new Event()
+                {
+                    Title = "Meeting",
+                    Description = "Productivity issues",
+                    Location = "room 408",
+                    StartDate = new DateTime(2022, 06, 19, 15, 30, 0),
+                    EndDate = new DateTime(2022, 06, 19, 17, 0, 0)
+                };
+
+                // setup qrcode signature options
+                QrCodeSignOptions signOptions = new QrCodeSignOptions()
+                {
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    VerticalAlignment = VerticalAlignment.Bottom,
+                    EncodeType = QrCodeTypes.QR,
+                    Text = "",
+                    Data = eventQr
+                };
+
+                // sign document
+                signature.Sign(@"signed_event.pdf", signOptions);
+            }
+```
+
+El resultado de firmar un documento puede verse como la imagen a continuación. Estos códigos QR pueden ser muy útiles para organizar eventos.
+
+![Document signed with an Event QR code](/net/signature/images/signature-use-cases/how-to-generate-barcode-and-sign-document-using-csharp/signed_event.png)
+
+Para probar la firma de documentos con códigos QR de forma gratuita, puede utilizar la aplicación en línea <a href="https://products.groupdocs.app/signature/generate/qrcode" target="_blank" rel="nofollow noopener noreferrer">Generador de Código QR</a>.
+
+## Generación de imágenes de código QR en C\# {#qr-code-image-generation-in-c}
+
+Otra forma de mejorar los documentos es generar primero el código QR y luego agregarlo a los documentos mediante herramientas de terceros. En este caso, es posible generar el código como una imagen.
+
+* Crear la instancia de `QrCodeSignOptions` y configurar todos los campos requeridos.
+* Instanciar el objeto `PreviewSignatureOptions`, proporcionando los métodos para su creación y liberación.
+* Invocar el método `GenerateSignaturePreview` para obtener la imagen del código QR como un flujo (stream).
+* Utilizar el flujo resultante del código QR de cualquier manera posible.
+
+```cs
+            MemoryStream result = new MemoryStream();
+            // setup QR Code signature options
+            QrCodeSignOptions signOptions = new QrCodeSignOptions()
+            {
+                EncodeType = QRCodeTypes.Code93,
+                Text = "Case 148.01"
+            };
+
+            //Instantiate preview options
+            var previewOptions = new PreviewSignatureOptions(
+                signOptions,
+                delegate (PreviewSignatureOptions options) { return result; },
+                delegate (PreviewSignatureOptions options, Stream signatureStream) { }
+                );
+
+            //Generate image to stream
+            GroupDocs.Signature.Signature.GenerateSignaturePreview(previewOptions);
+
+```
+Una imagen con el código QR generado podría verse como la siguiente:
+
+![Generated QR Code](/net/signature/images/signature-use-cases/how-to-generate-barcode-and-sign-document-using-csharp/textqrcode.png)
+
+## Obtener una licencia gratuita para la API {#get-a-free-api-license}
+Para utilizar la API sin limitaciones de evaluación, puede obtener una <a href="https://purchase.conholdate.com/temporary-license" target="_blank">licencia temporal gratuita</a>.
+
+## Conclusión {#conclusion}
+
+En resumen, en este artículo se discutieron algunos métodos útiles para procesar documentos mediante códigos QR. El uso de C# en aplicaciones .NET mejora considerablemente la productividad de estas operaciones.
+Además, puede utilizar la aplicación gratuita **QR Code Generator Online** para generar códigos QR y/o firmar sus archivos con códigos QR.
+
+Consulte la <a href="https://docs.groupdocs.com/signature/net/" target="_blank" rel="nofollow noopener noreferrer">documentación</a> para aprender a utilizar GroupDocs.Signature en sus aplicaciones .NET. Asimismo, puede plantear cualquier duda o problema en el <a href="https://forum.conholdate.com/" target="_blank">foro de Conholdate</a>.
+
+## Consulte también {#see-also}
+
+* [Cómo firmar documentos con códigos de barras mediante C#](/net/signature/how-to-generate-barcode-and-sign-document-using-csharp/)
+* [Cómo firmar hojas de cálculo de Excel y sus macros mediante C#](/net/signature/how-to-sign-excel-macros-using-csharp/)

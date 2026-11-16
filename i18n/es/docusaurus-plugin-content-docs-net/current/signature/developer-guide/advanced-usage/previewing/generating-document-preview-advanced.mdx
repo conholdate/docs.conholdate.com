@@ -1,0 +1,104 @@
+---
+title: "Generando vista previa del documento: avanzado"
+sidebar_label: "Generando vista previa del documento: avanzado"
+sidebar_key: "net-signature-previewing-generating-document-preview-advanced"
+sidebar_position: 1
+description: "Este artículo muestra cómo generar una vista previa de páginas de documentos con opciones avanzadas."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/previewing/generating-document-preview-advanced.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "dfec3d778c30ee7e469d4cc88a8b0fab7d4f9ea502ec18d330e3adf894cd8904"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "3f0d72ffcf781dcf9faa5c2e918469770fea9341be3de0df87656740b2b05630"
+translation_updated_at: "2026-11-16T12:49:41.563Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> proporciona la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> para especificar distintas opciones que permiten controlar el proceso de generación de vistas previas de páginas de documentos. A partir de la versión 19.12, existe la posibilidad de ocultar firmas en documentos. Utilizando la propiedad <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/previewoptions/hidesignatures" target="_blank" rel="nofollow noopener noreferrer">HideSignature</a> de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a>, será posible ocultar las firmas en la vista previa del documento.  
+  
+A continuación se indican los pasos para generar una vista previa del documento con GroupDocs.Signature, ocultando las firmas:
+
+* Crear una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasar la ruta del documento de origen como parámetro del constructor.
+* Instanciar el objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> con:
+* un delegado para la creación de cada flujo de página (consulte el controlador de eventos <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/createpagestream" target="_blank" rel="nofollow noopener noreferrer">CreatePageStream</a>);
+* la propiedad <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/previewoptions/hidesignatures" target="_blank" rel="nofollow noopener noreferrer">HideSignature</a> establecida en `true`;
+* el formato de vista previa de imagen: PNG / JPG / BMP;
+* los números de página que se van a procesar;
+* el tamaño personalizado de las imágenes de vista previa (si es necesario).  
+
+:::info
+Las secuencias creadas por `CreatePageStreamDelegate` se liberarán automáticamente una vez finalizada la generación de la imagen de vista previa. Si necesita implementar una liberación personalizada de la secuencia de vista previa de imagen, debe pasar el argumento adicional <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/releasepagestream" target="_blank" rel="nofollow noopener noreferrer">ReleasePageStream</a> para limpiar los recursos.
+:::
+  
+* Llame al método GeneratePreview de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> como argumento.
+
+## Genere una vista previa del documento sin firmas en él {#generate-document-preview-without-signatures-on-it}
+
+```csharp
+public static void GetPreview()
+{
+    // The path to the documents directory.
+    string filePath = Constants.SAMPLE_WORD_SIGNED;
+    using (Signature signature = new Signature(filePath))
+    {
+        // create preview options object
+        PreviewOptions previewOption = new PreviewOptions(CreatePageStream, ReleasePageStream)
+        {
+            PreviewFormat = PreviewOptions.PreviewFormats.JPEG,
+            // set property to hide all known signatures
+            HideSignatures = true
+        };
+        // generate preview
+        signature.GeneratePreview(previewOption);
+    }
+}
+
+private static Stream CreatePageStream(PreviewPageData pageData)
+{
+    string imageFilePath = Path.Combine("GeneratePreviewFolder", "image-" + pageData.PageNumber.ToString() + ".jpg");
+    var folder = Path.GetDirectoryName(imageFilePath);
+    if(!Directory.Exists(folder))
+    {
+       Directory.CreateDirectory(folder);
+    }
+    return new System.IO.FileStream(imageFilePath, FileMode.Create);
+}
+
+private static void ReleasePageStream(PreviewPageData pageData, Stream pageStream)
+{
+    pageStream.Dispose();
+    string imageFilePath = Path.Combine("GeneratePreviewFolder", "image-" + pageData.PageNumber.ToString() + ".jpg");
+    Console.WriteLine("Image file {0} is ready for preview", imageFilePath);
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con UI MVC</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con UI WebForms</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con UI Dropwizard</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con UI Spring</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

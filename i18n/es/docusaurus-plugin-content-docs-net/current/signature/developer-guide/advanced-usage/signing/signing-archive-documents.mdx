@@ -1,0 +1,123 @@
+---
+title: "Firma de documentos archivados por lotes"
+sidebar_label: "✎ Archivos"
+sidebar_key: "net-signature-signing-signing-archive-documents"
+sidebar_position: 20
+description: "Este artículo muestra cómo firmar documentos en modo por lotes dentro de los archivos de archivo con una o varias firmas electrónicas."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/signing/signing-archive-documents.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "e39723b809b430cbe3f3d1674ff84628b3f65753f442c230d412d80e23dcb027"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "d87e98a4ae9c7f1b32e451b9254608810b69e9ebd220cfd065de025501e5aa8e"
+translation_updated_at: "2026-11-16T13:42:45.495Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> permite firmar archivos de archivo con formatos como ZIP, TAR, 7Z, LZ y GZIP de la misma manera que los documentos normales. La única diferencia en la <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/signresult/" target="_blank" rel="nofollow noopener noreferrer">SignResult</a> del método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> radica en que, para archivos de archivo, contendrá listas de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/signresult/succeeded" target="_blank" rel="nofollow noopener noreferrer">Succeeded</a> y <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/signresult/failed" target="_blank" rel="nofollow noopener noreferrer">Failed</a> firmas como una lista de instancias de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/documentresultsignature/" target="_blank" rel="nofollow noopener noreferrer">DocumentResultSignature</a>.
+
+A continuación se presentan los pasos para firmar archivos de archivo como ZIP, TAR, 7z, LZ y GZIP con GroupDocs.Signature:
+
+* Crear una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasar la ruta del archivo de origen o un flujo del archivo como parámetro del constructor.
+* Instanciar un único objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/signoptions" target="_blank" rel="nofollow noopener noreferrer">SignOptions</a> o una lista de esta clase con las opciones requeridas.
+* Llamar al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasarle <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/signoptions" target="_blank" rel="nofollow noopener noreferrer">SignOptions</a>.
+* Las opciones de firma pasadas se aplicarán a todos los documentos contenidos dentro del archivo.
+* Analizar la respuesta <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/signresult/" target="_blank" rel="nofollow noopener noreferrer">SignResult</a> a través de las propiedades <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/signresult/succeeded" target="_blank" rel="nofollow noopener noreferrer">Succeeded</a> y <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/signresult/failed" target="_blank" rel="nofollow noopener noreferrer">Failed</a>, las cuales contienen instancias de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/documentresultsignature/" target="_blank" rel="nofollow noopener noreferrer">DocumentResultSignature</a>.
+
+## Firmar documento de archivo {#sign-archive-document}
+
+Este ejemplo muestra cómo firmar un documento de archivo con varias opciones de firma (SignOptions).
+
+```csharp
+/// <summary>
+/// Support Succeeded and Failed list as result of processing archives
+/// </summary>
+using (var signature = new Signature("sample.zip"))
+{
+    // create sign options
+    var options = new TextSignOptions("signed!")
+    {
+        // set signature position
+        Left = 100,
+        Top = 100
+    };
+    // sign archive to new zip file
+    SignResult result = signature.Sign("output.zip", options);
+    // analyze signed documents
+    foreach (DocumentResultSignature document in result.Succeeded)
+    {
+        Console.WriteLine($"Document {document.FileName}. Processed: {document.ProcessingTime}, mls");
+    }
+    if (signResult.Failed.Count > 0)
+    {
+        Console.WriteLine("\nList of failed documents:");
+        number = 1;
+        foreach (DocumentResultSignature document in result.Failed)
+        {
+            Console.WriteLine($"Document {document.FileName}. Processed: {document.ProcessingTime}, mls");
+        }
+    }
+}
+```
+
+## Firmar documentos de archivo de un solo archivo {#sign-single-file-archive-documents}
+Los formatos LZ y GZIP comprimen archivos individuales en archivos de un solo archivo, optimizándolos para almacenamiento y transmisión.
+
+
+:::note
+El nombre del archivo de archivo debe coincidir con el nombre del archivo contenido.
+:::
+
+
+Este ejemplo muestra cómo firmar un documento de archivo GZIP con `SignOptions`.
+
+```csharp
+using (Signature signature = new Signature("sample.pdf.gz"))
+{
+    // create sign options
+    TextSignOptions options = new TextSignOptions("signed!")
+    {
+        // set signature position
+        Left = 100,
+        Top = 100
+    };
+    // sign archive to new zip file
+    SignResult result = signature.Sign("output.pdf.gz", options);
+    // analyze signed documents
+    foreach (DocumentResultSignature document in result.Succeeded)
+    {
+        Console.WriteLine($"Document {document.FileName}. Processed: {document.ProcessingTime}, mls");
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con UI MVC</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con UI WebForms</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con UI Dropwizard</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con UI Spring</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

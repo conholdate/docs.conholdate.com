@@ -1,0 +1,90 @@
+---
+title: "Buscar texto cifrado en firmas de metadatos"
+sidebar_label: "Buscar texto cifrado en firmas de metadatos"
+sidebar_key: "net-signature-searching-search-embed-n-encr-obj-in-metadata-search-for-encrypted-text-in-metadata-signatures"
+sidebar_position: 4
+description: "Este artículo explica cómo buscar firmas electrónicas de texto cifrado en los metadatos del documento. Este tema incluye un ejemplo de uso de cifrado estándar y búsqueda de texto cifrado en los metadatos del documento, seguido de su descifrado mediante la API de GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/searching/search-embed-n-encr-obj-in-metadata/search-for-encrypted-text-in-metadata-signatures.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "292291b13b943127808b4eaa267860d0e790641ab906c9ad6c111adcc37c5b29"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "44183276e624663c930c04412b90b17b5fb5c6fbc6840cdd4745300319b1e168"
+translation_updated_at: "2026-11-16T13:07:19.687Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> proporciona la capacidad de buscar firmas de metadatos cifradas mediante cifrado estándar o personalizado. El cifrado estándar se implementa mediante la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/symmetricencryption" target="_blank" rel="nofollow noopener noreferrer">SymmetricEncryption</a>. La creación de este objeto requiere 3 argumentos: una enumeración del algoritmo de cifrado <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/symmetricalgorithmtype" target="_blank" rel="nofollow noopener noreferrer">SymmetricAlgorithmType</a> con uno de los siguientes valores (DES, TripleDES, RC2, Rijndael), una cadena que representa la clave y una cadena que representa la sal.
+
+A continuación se indican los pasos para buscar una firma de metadatos cifrada con cifrado estándar en GroupDocs.Signature:
+
+* Crear una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasar la ruta del documento de origen como parámetro del constructor.
+* Construir un objeto de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/symmetricencryption" target="_blank" rel="nofollow noopener noreferrer">SymmetricEncryption</a> con los mismos parámetros utilizados al firmar el código QR protegido.
+* Crear objetos de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasearchoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataSearchOptions</a> y configurar la propiedad <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasearchoptions/dataencryption" target="_blank" rel="nofollow noopener noreferrer">DataEncryption</a> con una instancia de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/symmetricencryption" target="_blank" rel="nofollow noopener noreferrer">SymmetricEncryption</a>.
+* Llamar al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasarle <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasearchoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataSearchOptions</a>.
+* Llamar al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/metadatasignature/getdata" target="_blank" rel="nofollow noopener noreferrer">GetData&lt;string&gt;</a> del objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/metadatasignature" target="_blank" rel="nofollow noopener noreferrer">MetadataSignature</a> cifrado que se haya encontrado.
+
+## Buscar texto de firma de metadatos cifrada {#search-for-encrypted-metadata-signature-text}
+
+Este ejemplo muestra cómo buscar texto de una firma de metadatos protegida.
+
+```csharp
+using (Signature signature = new Signature("MetadataEncryptedText.docx"))
+{
+    // setup key and passphrase
+    string key = "1234567890";
+    string salt = "1234567890";
+    // create data encryption
+    IDataEncryption encryption = new SymmetricEncryption(SymmetricAlgorithmType.Rijndael, key, salt);
+    MetadataSearchOptions options = new MetadataSearchOptions()
+    {
+        DataEncryption = encryption
+    };
+    // search for signatures in document
+    List<WordProcessingMetadataSignature> signatures = signature.Search<WordProcessingMetadataSignature>(options);
+    Console.WriteLine("\nSource document contains following signatures.");
+    // get required metadata signatures
+    WordProcessingMetadataSignature mdAuthor = signatures.FirstOrDefault(p => p.Name == "Author");
+    if(mdAuthor != null)
+    {
+        Console.WriteLine("Metadata signature found. Name : {0}. Value: {1}", mdAuthor.Name, mdAuthor.GetData<string>());
+    }
+    // get required metadata signatures
+    WordProcessingMetadataSignature mdDocId = signatures.FirstOrDefault(p => p.Name == "DocumentId");
+    if (mdDocId != null)
+    {
+        Console.WriteLine("Metadata signature found. Name : {0}. Value: {1}", mdDocId.Name, mdDocId.GetData<string>());
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con interfaz MVC</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con interfaz WebForms</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con interfaz Dropwizard</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con interfaz Spring</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

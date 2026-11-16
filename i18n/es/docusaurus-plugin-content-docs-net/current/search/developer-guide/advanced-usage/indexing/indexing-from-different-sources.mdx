@@ -1,0 +1,396 @@
+---
+title: "Indexación desde diferentes fuentes"
+sidebar_label: "Indexación desde diferentes fuentes"
+sidebar_position: 10
+description: "GroupDocs.Search permite indexar documentos de diversas fuentes"
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/indexing/indexing-from-different-sources.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "305f4da60cb80e9729565ca0d764331b8af940a2fe21bf541a948b6e45c72aed"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "023af841c3a7d15ac2418c02bd882afe7b0b1cad00b6b000f3df49e3987bc34f"
+translation_updated_at: "2026-11-16T11:13:04.979Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+GroupDocs.Search permite indexar documentos procedentes de diversas fuentes:
+
+- Desde archivos en el sistema de archivos.
+- Desde un flujo (stream).
+- Desde una estructura de datos, como un array de campos.
+
+La biblioteca también permite la indexación desde todas las fuentes mencionadas con inicialización diferida (*lazy initialization*).
+
+Tenga en cuenta que la operación de actualización genera automáticamente una lista de archivos modificados únicamente cuando se indexa desde el sistema de archivos local. Al indexar desde flujos o estructuras, no es posible actualizar los documentos mediante la operación de actualización. Para actualizar documentos procedentes de estas fuentes, debe reindexar los documentos modificados pasando sus claves y los datos actualizados al método <a href="https://reference.groupdocs.com/search/net/groupdocs.search/index/methods/add/index" target="_blank" rel="nofollow noopener noreferrer">Add</a>.
+
+## Indexación desde un archivo {#indexing-from-a-file}
+
+Cabe señalar que el método <a href="https://reference.groupdocs.com/search/net/groupdocs.search/index/methods/add/index" target="_blank" rel="nofollow noopener noreferrer">Add</a>, con un parámetro de tipo <a href="https://reference.groupdocs.com/search/net/groupdocs.search.common/document" target="_blank" rel="nofollow noopener noreferrer">Document</a>[], permite indexar únicamente documentos de forma individual, y no carpetas completas. La ventaja de utilizar esta sobrecarga del método es que puede agregar atributos y campos adicionales al documento que se va a indexar antes de llamar al método <a href="https://reference.groupdocs.com/search/net/groupdocs.search/index/methods/add/index" target="_blank" rel="nofollow noopener noreferrer">Add</a>. El siguiente ejemplo demuestra cómo indexar un documento desde un archivo.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex";
+string documentFilePath = @"c:\MyDocuments\ExampleDocument.pdf";
+  
+// Creating an index
+Index index = new Index(indexFolder);
+  
+// Creating a document object
+Document document = Document.CreateFromFile(documentFilePath);
+Document[] documents = new Document[]
+{
+    document,
+};
+  
+// Indexing document from the file
+IndexingOptions options = new IndexingOptions();
+index.Add(documents, options);
+```
+
+## Indexación desde un flujo {#indexing-from-a-stream}
+
+El siguiente ejemplo muestra cómo indexar un documento desde un flujo.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex";
+string documentFilePath = @"c:\MyDocuments\ExampleDocument.pdf";
+  
+// Creating an index
+Index index = new Index(indexFolder);
+  
+// Creating a document object
+Stream stream = File.OpenRead(documentFilePath); // Opening a stream
+Document document = Document.CreateFromStream(documentFilePath, DateTime.Now, ".pdf", stream);
+Document[] documents = new Document[]
+{
+    document,
+};
+  
+// Indexing document from the stream
+IndexingOptions options = new IndexingOptions();
+index.Add(documents, options);
+  
+// Closing the document stream after indexing is complete
+stream.Close();
+```
+
+## Indexación desde una estructura {#indexing-from-a-structure}
+
+El siguiente ejemplo demuestra cómo indexar un documento desde una estructura.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex";
+string documentFilePath = @"c:\MyDocuments\ExampleDocument.txt";
+  
+// Creating an index
+Index index = new Index(indexFolder);
+  
+// Creating a document object
+string text = File.ReadAllText(documentFilePath);
+DocumentField[] fields = new DocumentField[]
+{
+    new DocumentField(CommonFieldNames.Content, text),
+};
+Document document = Document.CreateFromStructure("ExampleDocument", DateTime.Now, fields);
+Document[] documents = new Document[]
+{
+    document,
+};
+  
+// Indexing document from the structure
+IndexingOptions options = new IndexingOptions();
+index.Add(documents, options);
+```
+
+## Indexación desde una URL {#indexing-from-url}
+
+El siguiente ejemplo demuestra cómo indexar un documento por URL cuando se inicializa de forma perezosa.
+
+**C#**
+
+```csharp
+private class DocumentLoaderFromUrl : IDocumentLoader
+{
+    private readonly string documentKey;
+    private readonly string url;
+    private readonly string extension;
+  
+    public DocumentLoaderFromUrl(string documentKey, string url, string extension)
+    {
+        this.documentKey = documentKey;
+        this.url = url;
+        this.extension = extension;
+    }
+  
+    public Document LoadDocument()
+    {
+        ServicePointManager.Expect100Continue = true;
+        ServicePointManager.SecurityProtocol =
+            SecurityProtocolType.Ssl3 |
+            SecurityProtocolType.Tls |
+            SecurityProtocolType.Tls12 |
+            SecurityProtocolType.Tls11;
+  
+        WebRequest request = WebRequest.Create(url);
+        using (WebResponse response = request.GetResponse())
+        using (Stream stream = response.GetResponseStream())
+        {
+            MemoryStream memoryStream = new MemoryStream();
+            stream.CopyTo(memoryStream);
+            memoryStream.Position = 0;
+            Document document = Document.CreateFromStream(documentKey, DateTime.Now, extension, memoryStream);
+            return document;
+        }
+    }
+  
+    public void CloseDocument()
+    {
+    }
+}
+ 
+ 
+string indexFolder = @"c:\MyIndex";
+string url = "http://example.com/ExampleDocument.pdf";
+  
+// Creating an index
+Index index = new Index(indexFolder);
+  
+// Creating a document object
+string documentKey = url;
+IDocumentLoader documentLoader = new DocumentLoaderFromUrl(documentKey, url, ".pdf");
+Document document = Document.CreateLazy(DocumentSourceKind.Stream, documentKey, documentLoader);
+Document[] documents = new Document[]
+{
+    document,
+};
+  
+// Indexing the lazy-loaded document
+IndexingOptions options = new IndexingOptions();
+index.Add(documents, options);
+```
+
+## Indexación desde FTP {#indexing-from-ftp}
+
+El siguiente ejemplo muestra cómo indexar un documento desde FTP cuando se inicializa de forma perezosa.
+
+**C#**
+
+```csharp
+private class DocumentLoaderFromUrl : IDocumentLoader
+{
+    private readonly string documentKey;
+    private readonly string url;
+    private readonly string extension;
+  
+    public DocumentLoaderFromUrl(string documentKey, string url, string extension)
+    {
+        this.documentKey = documentKey;
+        this.url = url;
+        this.extension = extension;
+    }
+  
+    public Document LoadDocument()
+    {
+        FtpWebRequest request = (FtpWebRequest)WebRequest.Create(url);
+        using (WebResponse response = request.GetResponse())
+        using (Stream stream = response.GetResponseStream())
+        {
+            MemoryStream memoryStream = new MemoryStream();
+            stream.CopyTo(memoryStream);
+            memoryStream.Position = 0;
+            Document document = Document.CreateFromStream(documentKey, DateTime.Now, extension, memoryStream);
+            return document;
+        }
+    }
+  
+    public void CloseDocument()
+    {
+    }
+}
+ 
+ 
+string indexFolder = @"c:\MyIndex";
+string url = "ftp://example.com/ExampleDocument.pdf";
+  
+// Creating an index
+Index index = new Index(indexFolder);
+  
+// Creating a document object
+string documentKey = url;
+IDocumentLoader documentLoader = new DocumentLoaderFromUrl(documentKey, url, ".pdf");
+Document document = Document.CreateLazy(DocumentSourceKind.Stream, documentKey, documentLoader);
+Document[] documents = new Document[]
+{
+    document,
+};
+  
+// Indexing the lazy-loaded document
+IndexingOptions options = new IndexingOptions();
+index.Add(documents, options);
+```
+
+## Indexación desde el almacenamiento Amazon S3 {#indexing-from-amazon-s3-storage}
+
+El siguiente ejemplo muestra cómo indexar un documento desde el almacenamiento Amazon S3 cuando se inicializa de forma perezosa.
+
+**C#**
+
+```csharp
+private class DocumentLoaderFromAmazon : IDocumentLoader
+{
+    private readonly string documentKey;
+    private readonly string extension;
+    private readonly string storageKey;
+  
+    public DocumentLoaderFromAmazon(string documentKey, string extension, string storageKey)
+    {
+        this.documentKey = documentKey;
+        this.extension = extension;
+        this.storageKey = storageKey;
+    }
+  
+    public Document LoadDocument()
+    {
+        AmazonS3Client client = new AmazonS3Client();
+        string bucketName = "my-bucket";
+        GetObjectRequest request = new GetObjectRequest
+        {
+            Key = storageKey,
+            BucketName = bucketName,
+        };
+        using (GetObjectResponse response = client.GetObject(request))
+        {
+            MemoryStream memoryStream = new MemoryStream();
+            response.ResponseStream.CopyTo(memoryStream);
+            memoryStream.Position = 0;
+            Document document = Document.CreateFromStream(documentKey, DateTime.Now, extension, memoryStream);
+            return document;
+        }
+    }
+  
+    public void CloseDocument()
+    {
+    }
+}
+ 
+ 
+string indexFolder = @"c:\MyIndex";
+string key = "example.pdf";
+  
+// Creating an index
+Index index = new Index(indexFolder);
+  
+// Creating a document object
+IDocumentLoader documentLoader = new DocumentLoaderFromAmazon("documentKey", ".pdf", key);
+Document document = Document.CreateLazy(DocumentSourceKind.Stream, "documentKey", documentLoader);
+Document[] documents = new Document[]
+{
+    document,
+};
+  
+// Indexing the lazy-loaded document
+IndexingOptions options = new IndexingOptions();
+index.Add(documents, options);
+```
+
+## Indexación desde Azure Blob Storage {#indexing-from-azure-blob-storage}
+
+El siguiente ejemplo muestra cómo indexar un documento desde Azure Blob Storage cuando se inicializa de forma diferida.
+
+**C#**
+
+```csharp
+private class DocumentLoaderFromAzure : IDocumentLoader
+{
+    private readonly string documentKey;
+    private readonly string extension;
+    private readonly string blobName;
+  
+    public DocumentLoaderFromAzure(string documentKey, string extension, string blobName)
+    {
+        this.documentKey = documentKey;
+        this.extension = extension;
+        this.blobName = blobName;
+    }
+  
+    public Document LoadDocument()
+    {
+        string accountName = "***";
+        string accountKey = "***";
+        string endpoint = $"https://{accountName}.blob.core.windows.net/";
+        string containerName = "***";
+        StorageCredentials storageCredentials = new StorageCredentials(accountName, accountKey);
+        CloudStorageAccount cloudStorageAccount = new CloudStorageAccount(
+            storageCredentials, new Uri(endpoint), null, null, null);
+        CloudBlobClient cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
+        CloudBlobContainer container = cloudBlobClient.GetContainerReference(containerName);
+        container.CreateIfNotExists();
+  
+        CloudBlob blob = container.GetBlobReference(blobName);
+        MemoryStream memoryStream = new MemoryStream();
+        blob.DownloadToStream(memoryStream);
+        memoryStream.Position = 0;
+  
+        Document document = Document.CreateFromStream(documentKey, DateTime.Now, extension, memoryStream);
+        return document;
+    }
+  
+    public void CloseDocument()
+    {
+    }
+}
+ 
+ 
+string indexFolder = @"c:\MyIndex";
+string blobName = "example.pdf";
+  
+// Creating an index
+Index index = new Index(indexFolder);
+  
+// Creating a document object
+IDocumentLoader documentLoader = new DocumentLoaderFromAzure("documentKey", ".pdf", blobName);
+Document document = Document.CreateLazy(DocumentSourceKind.Stream, "documentKey", documentLoader);
+Document[] documents = new Document[]
+{
+    document,
+};
+  
+// Indexing the lazy-loaded document
+IndexingOptions options = new IndexingOptions();
+index.Add(documents, options);
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le invitamos a buscar en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">aplicación gratuita de búsqueda de documentos en línea</a>.

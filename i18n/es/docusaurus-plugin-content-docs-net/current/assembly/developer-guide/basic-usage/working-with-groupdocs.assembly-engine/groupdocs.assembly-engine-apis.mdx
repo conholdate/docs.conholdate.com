@@ -1,0 +1,891 @@
+---
+title: "API de GroupDocs.Assembly Engine"
+sidebar_label: "API de GroupDocs.Assembly Engine"
+sidebar_key: "net-assembly-working-with-groupdocs-assembly-engine-groupdocs-assembly-engine-apis"
+sidebar_position: 3
+description: ""
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/working-with-groupdocs.assembly-engine/groupdocs.assembly-engine-apis.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "aa8f9bf8273ae0f89082dcb159a5befe66c84c5923dec7b17593b59cd58f3064"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "7920325797bab0d10f9963aa22d97766cbbf05facd123ea0a4928b5875d00445"
+translation_updated_at: "2026-11-16T14:10:34.762Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+:::info
+En este artículo, discutiremos el comportamiento de las API de GroupDocs.Assembly.
+:::
+
+
+## Descripción general de la API {#overview-of-the-api}
+
+Las clases de GroupDocs.Assembly se encuentran dentro del espacio de nombres `GroupDocs.Assembly`. La clase principal es `DocumentAssembler`. Toda la funcionalidad necesaria para generar un informe a partir de una plantilla se encuentra reunida en esta clase.
+
+### Generación de informes {#building-reports}
+
+Para generar un informe a partir de una plantilla, puede utilizar una de las `DocumentAssembler.AssembleDocument` sobrecargas. La siguiente tabla describe los parámetros de estas sobrecargas.
+
+| Parámetro | Descripción |
+| --- | --- |
+| document | Un documento plantilla. En tiempo de ejecución, esta instancia del documento se rellena con datos provenientes de la fuente especificada y se convierte en un informe listo para su uso. |
+| dataSource | Objeto que proporciona los datos para rellenar la plantilla especificada. Este objeto debe ser de uno de los siguientes tipos: `JsonDataSource`; `XmlDataSource`; `CsvDataSource`; `DataSet`; `DataTable`; `DataRow`; `DataView`; `DataRowView`; `IDataReader`; `IDataRecord`; o bien un objeto de un tipo personalizado <a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-1-of-2/#using-types" target="_blank" rel="nofollow noopener noreferrer">visible</a>. |
+| dataSourceName | Identificador del objeto de fuente de datos especificado dentro de la plantilla dada. Puede omitir este identificador si la plantilla utiliza el <a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-1-of-2/#using-contextual-object-member-access" target="_blank" rel="nofollow noopener noreferrer">acceso contextual a miembros de objetos</a> al trabajar con la fuente de datos. |
+
+Dada una plantilla que debe rellenarse con datos provenientes de una instancia `DataSet`, identificada como `"ds"` dentro de la plantilla, puede utilizar el siguiente código para generar el informe correspondiente.
+
+```csharp
+//Setting up source document template
+const String strDocumentTemplate = "Template Folder/wordTemplate.docx";
+//Setting up destination document report
+const String strDocumentReport = "Report Folder/wordReport.docx";
+// Setting up a data set.
+DataSet ds = ........
+
+DocumentAssembler assembler = new DocumentAssembler();
+assembler.AssembleDocument(strDocumentTemplate, strDocumentReport, new DataSourceInfo(ds, "ds"));
+```
+
+Dado un elemento visible `Person` una clase definida en su aplicación y una plantilla que se llenará con datos sobre una única instancia de `Person` mediante el acceso a miembros del objeto contextual, puede utilizar el siguiente código para generar el informe correspondiente.
+
+```csharp
+//Setting up source document template
+const String strDocumentTemplate = "Template Folder/wordTemplate.docx";
+//Setting up destination document report
+const String strDocumentReport = "Report Folder/wordReport.docx";
+// Setting up a person data
+Person person = ........
+
+DocumentAssembler assembler = new DocumentAssembler();
+assembler.AssembleDocument(strDocumentTemplate, strDocumentReport, new DataSourceInfo(person, "PersonDS"));
+```
+
+### Acceso a datos XML {#accessing-xml-data}
+
+Para acceder a datos XML al generar un informe, puede utilizar las funcionalidades de `DataSet` para leer el XML en él y, a continuación, pasarlo al motor como origen de datos. Sin embargo, si su escenario no permite especificar un esquema XML al cargar el XML en `DataSet`, todos los atributos y valores de texto de los elementos XML se cargan como cadenas. Por lo tanto, resulta imposible, por ejemplo, realizar operaciones aritméticas sobre números o especificar formatos personalizados de fecha-hora y numéricos para mostrar los valores correspondientes, ya que todos se tratan como cadenas.
+
+Para superar esta limitación, puede pasar una instancia de `XmlDataSource` al motor como origen de datos en su lugar. Incluso cuando no se proporcione un esquema XML, `XmlDataSource` es capaz de reconocer valores de los siguientes tipos a partir de sus representaciones en cadena:
+
+- Int64?
+- Double?
+- Boolean?
+- DateTime?
+
+**Nota:** Para que el reconocimiento de tipos de datos funcione, las representaciones en cadena de los atributos y valores de texto correspondientes de los elementos XML deben formarse utilizando la configuración cultural invariante.
+
+Al cargar datos en `XmlDataSource`, el motor realiza, en segundo plano, acciones típicas de deserialización XML: asigna elementos XML de tipo complejo a objetos internos y elementos XML de tipo simple a campos de los objetos contenedores. Por lo tanto, en los documentos de plantilla, una instancia de `XmlDataSource` debe tratarse como un objeto que posee los campos y objetos anidados correspondientes, tal como se muestra en el siguiente ejemplo.
+
+XML
+```
+<Person>
+	<Name>John Doe</Name>
+	<Age>30</Age>
+	<Birth>1989-04-01 4:00:00 pm</Birth>
+	<Child>Ann Doe</Child>
+	<Child>Charles Doe</Child>
+</Person>
+```
+
+Documento de plantilla
+
+```
+Name: <<[Name]>>, Age: <<[Age]>>, Date of Birth:
+<<[Birth]:"dd.MM.yyyy">>
+
+Children:
+
+<<foreach [in Child]>><<[Child_Text]>>
+<</foreach>>
+```
+
+Código fuente
+
+```
+XmlDataSource dataSource = ... // Loading XML.
+
+DocumentAssembler assembler = new DocumentAssembler();
+assembler.AssembleDocument(..., new DataSourceInfo(dataSource));
+```
+
+Documento de resultado
+
+```
+Name: John Doe, Age: 30, Date of Birth: 01.04.1989
+
+Children:
+
+Ann Doe
+Charles Doe
+```
+
+**Nota:** Para hacer referencia a una secuencia de elementos XML de tipo simple repetidos con el mismo nombre, en un documento de plantilla se debe utilizar el nombre del propio elemento (por ejemplo, "Child"), mientras que para hacer referencia al valor de texto de uno de estos elementos se debe utilizar el mismo nombre seguido del sufijo "_Text" (por ejemplo, "Child_Text").
+
+De forma predeterminada, si un elemento raíz XML contiene únicamente una secuencia de elementos de un solo tipo, el motor no genera un objeto raíz interno al cargar los datos XML. Por lo tanto, en los documentos de plantilla, dicha `XmlDataSource` debe tratarse como una secuencia de objetos anidados correspondientes, como se muestra en el siguiente ejemplo.
+
+XML
+
+```
+<Persons>
+	<Person>
+		<Name>John Doe</Name>
+		<Age>30</Age>
+		<Birth>1989-04-01 4:00:00 pm</Birth>
+	</Person>
+	<Person>
+		<Name>Jane Doe</Name>
+		<Age>27</Age>
+		<Birth>1992-01-31 07:00:00 am</Birth>
+	</Person>
+	<Person>
+		<Name>John Smith</Name>
+		<Age>51</Age>
+		<Birth>1968-03-08 1:00:00 pm</Birth>
+	</Person>
+</Persons>
+```
+
+Documento de plantilla
+
+```
+<<foreach [in persons]>>Name: <<[Name]>>, Age: <<[Age]>>, Date of Birth: <<[Birth]:"dd.MM.yyyy">>
+<</foreach>>
+
+Average age: <<[persons.Average(p => p.Age)]>>
+```
+
+Código fuente
+
+```
+XmlDataSource dataSource = ... // Loading XML.
+
+DocumentAssembler assembler = new DocumentAssembler();
+assembler.AssembleDocument(..., new DataSourceInfo(dataSource, "persons"));
+```
+
+Documento resultante
+
+```
+Name: John Doe, Age: 30, Date of Birth: 01.04.1989
+Name: Jane Doe, Age: 27, Date of Birth: 31.01.1992
+Name: John Smith, Age: 51, Date of Birth: 08.03.1968
+
+Average age: 36
+```
+
+Sin embargo, si su escenario requiere que un objeto interno para un elemento raíz XML siempre se genere al cargar datos en `XmlDataSource`, puede forzar esto como se muestra en el siguiente fragmento de código.
+
+```
+XmlDataLoadOptions options = new XmlDataLoadOptions();
+options.AlwaysGenerateRootObject = true;
+XmlDataSource dataSource = new XmlDataSource(..., options);
+```
+
+El siguiente ejemplo resume los escenarios típicos que involucran elementos XML anidados de tipo complejo.
+
+XML
+
+```
+<Managers>
+   <Manager>
+       <Name>John Smith</Name>
+       <Contract>
+           <Client>
+               <Name>A Company</Name>
+           </Client>
+           <Price>1200000</Price>
+       </Contract>
+       <Contract>
+           <Client>
+               <Name>B Ltd.</Name>
+           </Client>
+           <Price>750000</Price>
+       </Contract>
+       <Contract>
+           <Client>
+               <Name>C &amp; D</Name>
+           </Client>
+           <Price>350000</Price>
+       </Contract>
+   </Manager>
+   <Manager>
+       <Name>Tony Anderson</Name>
+       <Contract>
+           <Client>
+               <Name>E Corp.</Name>
+           </Client>
+           <Price>650000</Price>
+       </Contract>
+       <Contract>
+           <Client>
+               <Name>F &amp; Partners</Name>
+           </Client>
+           <Price>550000</Price>
+       </Contract>
+   </Manager>
+   <Manager>
+       <Name>July James</Name>
+       <Contract>
+           <Client>
+               <Name>G &amp; Co.</Name>
+           </Client>
+           <Price>350000</Price>
+       </Contract>
+       <Contract>
+           <Client>
+               <Name>H Group</Name>
+           </Client>
+           <Price>250000</Price>
+       </Contract>
+       <Contract>
+           <Client>
+               <Name>I &amp; Sons</Name>
+           </Client>
+           <Price>100000</Price>
+       </Contract>
+       <Contract>
+           <Client>
+               <Name>J Ent.</Name>
+           </Client>
+           <Price>100000</Price>
+       </Contract>
+   </Manager>
+</Managers>
+```
+
+Documento de plantilla
+
+```
+<<foreach [in managers]>>Manager: <<[Name]>>
+Contracts:
+<<foreach [in Contract]>>- <<[Client.Name]>> ($<<[Price]>>)
+<</foreach>>
+<</foreach>>
+```
+
+Código fuente
+
+```
+XmlDataSource dataSource = ... // Loading XML.
+
+DocumentAssembler assembler = new DocumentAssembler();
+assembler.AssembleDocument(..., new DataSourceInfo(dataSource, "managers"));
+```
+
+Documento de resultado
+
+```
+Manager: John Smith
+Contracts:
+- A Company ($1200000)
+- B Ltd. ($750000)
+- C & D ($350000)
+
+Manager: Tony Anderson
+Contracts:
+- E Corp. ($650000)
+- F & Partners ($550000)
+
+Manager: July James
+Contracts:
+- G & Co. ($350000)
+- H Group ($250000)
+- I & Sons ($100000)
+- J Ent. ($100000)
+```
+
+### Acceso a datos JSON {#accessing-json-data}
+
+Para acceder a datos JSON al generar un informe, puede pasar una instancia de `JsonDataSource` al motor como fuente de datos.
+
+El uso de `JsonDataSource` le permite trabajar con valores tipificados de elementos JSON en los documentos de plantilla. Para mayor comodidad, el conjunto de tipos JSON simples se extiende de la siguiente manera:
+
+- Int64?
+- Double?
+- Boolean?
+- DateTime?
+- String
+
+**Nota:** También se admite el trabajo con tipos JSON complejos (objetos y matrices).
+
+Al cargar datos en `JsonDataSource`, el motor realiza la deserialización JSON y genera los objetos internos correspondientes. Por lo tanto, en los documentos de plantilla, una instancia de `JsonDataSource` debe tratarse según lo que represente el elemento JSON raíz.
+
+Si el elemento JSON raíz es un objeto, una instancia de `JsonDataSource` debe tratarse también como un objeto, como se muestra en el siguiente ejemplo.
+
+JSON
+
+```
+{
+   Name: "John Doe",
+   Age: 30,
+   Birth: "1989-04-01 4:00:00 pm",
+   Child: [ "Ann Doe", "Charles Doe" ]
+}
+```
+
+Documento de plantilla
+
+```
+Name: <<[Name]>>, Age: <<[Age]>>, Date of Birth: <<[Birth]:"dd.MM.yyyy">>
+
+Children:
+
+<<foreach [in Child]>><<[Child_Text]>>
+<</foreach>>
+```
+
+Código fuente
+
+```
+JsonDataSource dataSource = ... // Loading JSON.
+
+DocumentAssembler assembler = new DocumentAssembler();
+assembler.AssembleDocument(..., new DataSourceInfo(dataSource));
+```
+
+Documento resultante
+
+```
+Name: John Doe, Age: 30, Date of Birth: 01.04.1989
+
+Children:
+
+Ann Doe
+Charles Doe
+```
+
+**Nota:** Para hacer referencia a una propiedad de un objeto JSON que es un array de valores de tipo simple, se debe utilizar el nombre de la propiedad (por ejemplo, "Child") en un documento de plantilla, mientras que el mismo nombre con el sufijo "_Text" (por ejemplo, "Child_Text") debe usarse para hacer referencia al valor de un elemento de dicho array.
+
+Si el elemento raíz JSON es un array, una instancia de `JsonDataSource` debe tratarse como una secuencia de elementos de este array, como se muestra en el siguiente ejemplo.
+
+JSON
+
+```
+[
+   {
+       Name: "John Doe",
+       Age: 30,
+       Birth: "1989-04-01 4:00:00 pm"
+   },
+   {
+       Name: "Jane Doe",
+       Age: 27,
+       Birth: "1992-01-31 07:00:00 am"
+   },
+   {
+       Name: "John Smith",
+       Age: 51,
+       Birth: "1968-03-08 1:00:00 pm"
+   }
+]
+```
+
+Documento de plantilla
+
+```
+<<foreach [in persons]>>Name: <<[Name]>>, Age: <<[Age]>>, Date of Birth: <<[Birth]:"dd.MM.yyyy">>
+<</foreach>>
+
+Average age: <<[persons.Average(p => p.Age)]>>
+```
+
+Código fuente
+
+```
+JsonDataSource dataSource = ... // Loading JSON.
+
+DocumentAssembler assembler = new DocumentAssembler();
+assembler.AssembleDocument(..., new DataSourceInfo(dataSource, "persons"));
+```
+
+Documento de resultado
+
+```
+Name: John Doe, Age: 30, Date of Birth: 01.04.1989
+Name: Jane Doe, Age: 27, Date of Birth: 31.01.1992
+Name: John Smith, Age: 51, Date of Birth: 08.03.1968
+
+Average age: 36
+```
+
+De forma predeterminada, si un elemento JSON raíz es un objeto que solo tiene una propiedad, la cual a su vez es un objeto o un array, el motor no genera un objeto raíz interno al cargar los datos JSON. Por lo tanto, en los documentos de plantilla, una instancia de `JsonDataSource` debe tratarse según lo que representa dicha propiedad. Por ejemplo, los siguientes fragmentos de JSON pueden utilizarse para generar los mismos resultados que en los ejemplos anteriores de esta sección, respectivamente.
+
+JSON1
+
+```
+{
+   Person:
+   {
+       Name: "John Doe",
+       Age: 30,
+       Birth: "1989-04-01 4:00:00 pm",
+       Child: [ "Ann Doe", "Charles Doe" ]
+   }
+}
+```
+
+JSON 2
+
+```
+{
+   Persons:
+   [
+       {
+           Name: "John Doe",
+           Age: 30,
+           Birth: "1989-04-01 4:00:00 pm"
+       },
+       {
+           Name: "Jane Doe",
+           Age: 27,
+           Birth: "1992-01-31 07:00:00 am"
+       },
+       {
+           Name: "John Smith",
+           Age: 51,
+           Birth: "1968-03-08 1:00:00 pm"
+       }
+   ]
+}
+```
+
+Sin embargo, si su escenario requiere que un objeto interno para un elemento JSON raíz siempre se genere al cargar datos en `JsonDataSource`, puede forzar esto como se muestra en el siguiente fragmento de código.
+
+```
+JsonDataLoadOptions options = new JsonDataLoadOptions();
+options.AlwaysGenerateRootObject = true;
+JsonDataSource dataSource = new JsonDataSource(..., options);
+```
+
+El siguiente ejemplo resume los escenarios típicos que involucran objetos y matrices JSON anidados.
+
+JSON
+
+```
+[
+   {
+       Name: "John Smith",
+       Contract:
+       [
+           {
+               Client:
+               {
+                   Name: "A Company"
+               },
+               Price: 1200000
+           },
+           {
+               Client:
+               {
+                   Name: "B Ltd."
+               },
+               Price: 750000
+           },
+           {
+               Client:
+               {
+                   Name: "C & D"
+               },
+               Price: 350000
+           }
+       ]
+   },
+   {
+       Name: "Tony Anderson",
+       Contract:
+       [
+           {
+               Client:
+               {
+                   Name: "E Corp."
+               },
+               Price: 650000
+           },
+           {
+               Client:
+               {
+                   Name: "F & Partners"
+               },
+               Price: 550000
+           }
+       ]
+   },
+   {
+       Name: "July James",
+       Contract:
+       [
+           {
+               Client:
+               {
+                   Name: "G & Co."
+               },
+               Price: 350000
+           },
+           {
+               Client:
+               {
+                   Name: "H Group"
+               },
+               Price: 250000
+           },
+           {
+               Client:
+               {
+                   Name: "I & Sons"
+               },
+               Price: 100000
+           },
+           {
+               Client:
+               {
+                   Name: "J Ent."
+               },
+               Price: 100000
+           }
+       ]
+   }
+]
+```
+
+Documento de plantilla
+
+```
+<<foreach [in managers]>>Manager: <<[Name]>>
+Contracts:
+<<foreach [in Contract]>>- <<[Client.Name]>> ($<<[Price]>>)
+<</foreach>>
+<</foreach>>
+```
+
+Código fuente
+
+```
+JsonDataSource dataSource = ... // Loading JSON.
+
+DocumentAssembler assembler = new DocumentAssembler();
+assembler.AssembleDocument(..., new DataSourceInfo(dataSource, "managers"));
+```
+
+Documento resultante
+
+```
+Manager: John Smith
+Contracts:
+- A Company ($1200000)
+- B Ltd. ($750000)
+- C & D ($350000)
+
+Manager: Tony Anderson
+Contracts:
+- E Corp. ($650000)
+- F & Partners ($550000)
+
+Manager: July James
+Contracts:
+- G & Co. ($350000)
+- H Group ($250000)
+- I & Sons ($100000)
+- J Ent. ($100000)
+```
+
+Para el reconocimiento de valores simples JSON (nulo, booleano, número, entero y cadena), el motor proporciona dos modos: *flexible* y *estricto*. En el modo flexible, los tipos de los valores simples JSON se determinan al analizar sus representaciones en forma de cadena. En el modo estricto, los tipos de los valores simples JSON se determinan directamente a partir de la notación JSON. Para observar la principal diferencia entre ambos modos, considere el siguiente fragmento JSON.
+
+`{ prop: "123" }`
+
+En el modo flexible, el tipo de `prop` se determina como entero, mientras que en el modo estricto, se determina como cadena.
+
+El modo flexible es el utilizado por defecto por el motor para admitir más opciones de representación de datos tipados. Sin embargo, en algunos escenarios, puede ser preferible deshabilitar el reconocimiento de números y otros valores simples JSON a partir de cadenas, por ejemplo, cuando se necesita conservar los ceros iniciales de relleno en una cadena que representa un número. En este caso, puede cambiar al modo estricto, como se muestra en el siguiente fragmento de código.
+
+```
+JsonDataLoadOptions options = new JsonDataLoadOptions();
+options.SimpleValueParseMode = JsonSimpleValueParseMode.Strict;
+JsonDataSource dataSource = new JsonDataSource(..., options);
+```
+
+**Nota:** El análisis de valores de fecha y hora no depende de si se utiliza el modo flexible o el modo estricto.
+
+El reconocimiento de valores de fecha y hora es un caso especial, ya que <a href="https://www.json.org" target="_blank" rel="nofollow noopener noreferrer">la especificación JSON</a> no define un formato para su representación. Por lo tanto, de forma predeterminada, al analizar valores de fecha y hora desde cadenas, el motor prueba varios formatos en el siguiente orden:
+
+1. <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank" rel="nofollow noopener noreferrer">Formato ISO-8601</a> (para valores como "2015-03-02T13:56:04Z")
+2. <a href="https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/bb299886(v=msdn.10" target="_blank" rel="nofollow noopener noreferrer">Formato de fecha y hora JSON de Microsoft®</a>#from-javascript-literals-to-json) (para valores como "/Date(1224043200000)/")
+3. Todos los formatos de fecha y hora admitidos para la configuración regional actual
+4. Todos los formatos de fecha y hora admitidos para la configuración regional inglés (Estados Unidos)
+5. Todos los formatos de fecha y hora admitidos para la configuración regional inglés (Nueva Zelanda)
+
+Aunque este enfoque es bastante flexible, en algunos escenarios puede ser necesario restringir las cadenas que se reconocerán como valores de fecha y hora. Para lograrlo, puede especificar uno o varios formatos exactos en el contexto de la configuración regional actual que se utilizarán al analizar valores de fecha y hora desde cadenas, como se muestra en el siguiente ejemplo.
+
+```
+List<String> formats = new List<String>();
+formats.Add("MM/dd/yyyy");
+
+JsonDataLoadOptions options = new JsonDataLoadOptions();
+options.ExactDateTimeParseFormats = formats;
+JsonDataSource dataSource = new JsonDataSource(..., options);
+```
+
+En este ejemplo, las cadenas que cumplen con el formato "MM/dd/yyyy" se reconocerán como valores de fecha y hora al cargar JSON, mientras que las demás no lo harán (véase la nota siguiente).
+
+En algunos escenarios, es posible que necesite deshabilitar completamente el reconocimiento de valores de fecha y hora, por ejemplo, cuando trabaje con cadenas que ya contengan valores de fecha y hora formateados y no desee reformatearlos mediante el motor. Para lograrlo, puede establecer los formatos exactos de análisis de fecha y hora en una lista vacía (véase la nota siguiente).
+
+**Nota:** Las cadenas que cumplen con el formato de fecha y hora de Microsoft® JSON (por ejemplo, "/Date(1224043200000)/") siempre se reconocerán como valores de fecha y hora, independientemente de los formatos exactos de análisis de fecha y hora configurados.
+
+### Acceso a datos CSV {#accessing-csv-data}
+
+Para acceder a datos CSV al generar un informe, puede pasar una instancia de `CsvDataSource` al motor como origen de datos.
+
+El uso de `CsvDataSource` le permite trabajar con valores tipados en lugar de únicamente cadenas en los documentos de plantilla. Aunque el formato CSV no define un método para almacenar valores de tipos distintos de cadenas, `CsvDataSource` es capaz de reconocer valores de los siguientes tipos a partir de sus representaciones en cadena:
+
+- Int64?
+- Double?
+- Boolean?
+- DateTime?
+
+**Nota:** Para que funcione el reconocimiento de tipos de datos, las representaciones en cadena de los valores correspondientes deben formarse utilizando la configuración regional invariante.
+
+En los documentos de plantilla, una instancia de `CsvDataSource` debe tratarse como una secuencia de objetos que poseen los campos correspondientes, tal como se muestra en el siguiente ejemplo.
+
+CSV
+
+```
+John Doe,30,1989-04-01 4:00:00 pm
+Jane Doe,27,1992-01-31 07:00:00 am
+John Smith,51,1968-03-08 1:00:00 pm
+```
+
+Documento de plantilla
+
+```
+<<foreach [in persons]>>Name: <<[Column1]>>, Age: <<[Column2]>>, Date of Birth: <<[Column3]:"dd.MM.yyyy">>
+<</foreach>>
+Average age: <<[persons.Average(p => p.Column2)]>>
+```
+
+Código fuente
+
+```
+CsvDataSource dataSource = ... // Loading CSV.
+
+DocumentAssembler assembler = new DocumentAssembler();
+assembler.AssembleDocument(..., new DataSourceInfo(dataSource, "persons"));
+```
+
+Documento resultante
+
+```
+Name: John Doe, Age: 30, Date of Birth: 01.04.1989
+Name: Jane Doe, Age: 27, Date of Birth: 31.01.1992
+Name: John Smith, Age: 51, Date of Birth: 08.03.1968
+
+Average age: 36
+```
+
+De forma predeterminada, `CsvDataSource` utiliza nombres de columnas como «Columna1», «Columna2», etc., como se puede ver en el ejemplo anterior. Sin embargo, `CsvDataSource` se puede configurar para leer los nombres de las columnas desde la primera línea de los datos CSV, como se muestra en el siguiente ejemplo.
+
+CSV
+
+```
+Name,Age,Birth
+John Doe,30,1989-04-01 4:00:00 pm
+Jane Doe,27,1992-01-31 07:00:00 am
+John Smith,51,1968-03-08 1:00:00 pm
+```
+
+Documento de plantilla
+
+```
+<<foreach [in persons]>>Name: <<[Name]>>, Age: <<[Age]>>, Date of Birth: <<[Birth]:"dd.MM.yyyy">>
+<</foreach>>
+Average age: <<[persons.Average(p => p.Age)]>>
+```
+
+Código fuente
+
+```
+CsvDataLoadOptions options = new CsvDataLoadOptions(true);
+CsvDataSource dataSource = new CsvDataSource(..., options); // Loading CSV.
+
+DocumentAssembler assembler = new DocumentAssembler();
+assembler.AssembleDocument(..., new DataSourceInfo(dataSource, "persons"));
+```
+
+Documento de resultado
+
+```
+Name: John Doe, Age: 30, Date of Birth: 01.04.1989
+Name: Jane Doe, Age: 27, Date of Birth: 31.01.1992
+Name: John Smith, Age: 51, Date of Birth: 08.03.1968
+
+Average age: 36
+```
+
+Además, puedes usar `CsvDataLoadOptions` para personalizar los siguientes caracteres que desempeñan roles especiales al cargar datos CSV:
+
+- Separador de valores (el valor predeterminado es la coma)
+- Inicio de comentario de una sola línea (el valor predeterminado es `#`)
+- Comillas que permiten usar otros caracteres especiales dentro de un valor (el valor predeterminado son comillas dobles)
+
+### Configuración de Tipos Externos Conocidos {#setting-up-known-external-types}
+
+El motor de GroupDocs.Assembly debe conocer los tipos externos personalizados a los que haces referencia en tu plantilla antes de que el motor procese dicha plantilla. Puedes configurar los tipos externos conocidos por el motor mediante la propiedad `DocumentAssembler.KnownTypes`. Esta propiedad representa un conjunto desordenado (es decir, una colección de elementos únicos) de <a href="http://msdn.microsoft.com/en-us/library/system.type(v=vs.110" target="_blank" rel="nofollow noopener noreferrer">Tipo</a>.aspx) objetos. Cada tipo del conjunto debe cumplir con los requisitos declarados en <a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-1-of-2/#using-types" target="_blank" rel="nofollow noopener noreferrer">Trabajar con tipos</a>.
+
+**Nota:** Los alias de tipos simples como `int`, `string` y otros son conocidos por el motor de forma predeterminada.
+
+Considere el siguiente ejemplo. Dada una clase `ImageUtil` declarada en su aplicación y una plantilla que accede a un miembro estático de esta clase, puede utilizar el siguiente código para hacer que el motor sea consciente de la clase antes de procesar la plantilla.
+
+```csharp
+DocumentAssembler assembler = new DocumentAssembler;
+assembler.KnownTypes.Add(typeof(ImageUtil));
+assembler.AssembleDocument(...);
+```
+
+### Acceso a miembros ausentes de objetos de datos {#accessing-missing-members-of-data-objects}
+
+De forma predeterminada, GroupDocs.Assembly prohíbe el acceso a miembros ausentes de objetos de datos utilizados para generar un informe en expresiones de plantilla, ya que dicho acceso está prohibido por la Especificación del Lenguaje C# 5.0. Al intentar utilizar un miembro ausente de un objeto de datos, el ensamblador lanza una excepción.
+
+Sin embargo, en algunos escenarios, los miembros de los objetos de datos no se conocen exactamente al diseñar la plantilla. Por ejemplo, si se utiliza una instancia de `DataSet` cargada desde XML sin que se haya definido su esquema, algunos de los miembros de datos esperados podrían faltar.
+
+Para admitir tales escenarios, el ensamblador ofrece una opción para tratar los miembros ausentes de los objetos de datos como literales nulos. Puede habilitar esta opción como se muestra en el siguiente ejemplo.
+
+```csharp
+DocumentAssembler assembler = new DocumentAssembler();
+assembler.Options |= DocumentAssemblyOptions.AllowMissingMembers;
+assembler.AssembleDocument(...);
+```
+
+Considere el siguiente ejemplo. Dado que `r` es una `DataRow` instancia que no tiene un campo `Missing`, de forma predeterminada, la siguiente expresión de plantilla hace que el ensamblador lance una excepción al generar un informe.
+
+```csharp
+<<[r.Missing]>>
+```
+
+Sin embargo, si `DocumentAssemblyOptions.AllowMissingMembers` se aplica, el ensamblador trata el acceso a dicho campo como una literal nula, por lo que no se lanza ninguna excepción y simplemente no se escribe ningún valor en el informe.
+
+### Optimización de llamadas de reflexión {#optimizing-reflection-calls}
+
+El motor de GroupDocs.Assembly utiliza llamadas de reflexión al acceder a los miembros de tipos externos personalizados. Sin embargo, las llamadas de reflexión son mucho más lentas que las llamadas directas, lo que genera una sobrecarga de rendimiento.
+
+Debido a esta sobrecarga de rendimiento, el motor proporciona una estrategia que minimiza el uso de reflexión. Esta estrategia se basa en la generación de tipos en tiempo de ejecución: el motor genera un tipo proxy por cada tipo externo. Dicho proxy llama directamente a los miembros del tipo externo correspondiente, permitiendo al motor acceder a estos miembros de forma uniforme sin recurrir a reflexión alguna. El proxy se <a href="http://en.wikipedia.org/wiki/Lazy_initialization" target="_blank" rel="nofollow noopener noreferrer">inicializa de forma perezosa</a> y se reutiliza posteriormente; así, la reflexión solo se emplea durante la construcción del proxy.
+
+Aunque esta estrategia puede minimizar significativamente el uso de reflexión a largo plazo, genera una sobrecarga de rendimiento asociada a la generación de tipos en tiempo de ejecución. Por tanto, si trabaja siempre con colecciones de datos pequeñas al generar sus informes, considere desactivar esta estrategia.
+
+Puede controlar la activación de esta estrategia mediante la propiedad estática `DocumentAssembler.UseReflectionOptimization`. De forma predeterminada, la estrategia está activada.
+
+### Integración con tipos de datos nativos de hojas de cálculo {#integrating-with-native-spreadsheet-data-types}
+
+De forma predeterminada, GroupDocs.Assembly genera los resultados de las expresiones como valores de tipo cadena, independientemente del tipo de la expresión. En la mayoría de los escenarios, esta es la mejor opción, ya que los resultados de las expresiones pueden formatearse mediante la sintaxis de plantilla según su tipo. No obstante, en documentos de hojas de cálculo, esto puede interferir con el cálculo de fórmulas que esperan valores de tipos distintos de cadena. Para solucionar este problema, GroupDocs.Assembly ofrece integración con los tipos de datos nativos de hojas de cálculo, la cual puede activarse tal como se muestra en el siguiente fragmento de código.
+
+```csharp
+DocumentAssembler assembler = new DocumentAssembler();
+assembler.Options |= DocumentAssemblyOptions.UseSpreadsheetDataTypes;
+
+assembler.AssembleDocument(...);
+```
+
+Mostraremos cómo funciona mediante un ejemplo. Sea `number` un valor numérico. A continuación, considere la siguiente plantilla para una celda de hoja de cálculo.
+
+```csharp
+<<[number]>>
+```
+
+De forma predeterminada, al ensamblar un documento, GroupDocs.Assembly convierte `number` en una cadena utilizando las rutinas integradas de .NET. Sin embargo, cuando la integración con los tipos de datos nativos de la hoja de cálculo está habilitada, el valor de la celda se escribe como un número, lo que permite utilizarlo en fórmulas de la hoja de cálculo que esperan valores numéricos.
+
+La integración con los tipos de datos nativos de hojas de cálculo también afecta el formato del valor de la celda: si se define un formato numérico para la celda (por ejemplo, mediante el menú contextual «Formato de celdas» en Microsoft Excel), entonces se aplica dicho formato; de lo contrario, se aplica un formato numérico predeterminado para las celdas.
+
+**Nota:** Lo mismo se aplica a otros tipos de datos nativos de hojas de cálculo, como fecha-hora y booleano.
+
+La siguiente tabla describe en qué casos la integración con los tipos de datos nativos de hojas de cálculo no tiene efecto, incluso cuando está habilitada.
+
+| Ejemplo de sintaxis de plantilla de celda | Explicación |
+| ----------------------------------- | ------------------------------------------------------------ |
+| `<<[number]:ordinal>>` | Si el resultado de una expresión se da formato utilizando la sintaxis de plantillas, se escribe como una cadena. |
+| `Some text <<[number]>>` | La presencia de texto distinto de la sintaxis de plantilla hace que el valor de una celda de resultado se convierta en una cadena. |
+| `<<[number]>><<[anotherNumber]>>` | Los resultados de múltiples expresiones en una sola celda se convierten en cadenas y se concatenan. |
+
+## Consideraciones Técnicas {#technical-considerations}
+
+Aquí revelaremos algunos aspectos técnicos y detalles de implementación relacionados con el motor GroupDocs.Assembly que pueden resultarle útiles al tomar decisiones de diseño para sus aplicaciones.
+
+### Determinación de Enumeración Implícita {#implicit-enumeration-determination}
+
+Si no especifica el tipo de un elemento de enumeración en un `foreach` declaración o firma de función lambda dentro de su plantilla explícitamente, el tipo se determina implícitamente por el motor a partir del tipo de la enumeración, de la siguiente manera:
+
+1.  Si la enumeración representa un `DataTable` instancia, entonces el tipo de elemento es `DataRow`.
+2.  De lo contrario, si la enumeración representa un `DataView` instancia, entonces el tipo de elemento es `DataRowView`.
+3.  De lo contrario, si la enumeración implementa `IDataReader`, entonces el tipo de elemento es `IDataRecord`.
+4.  De lo contrario, si la enumeración representa filas secundarias de un `DataRow` instancia, entonces el tipo de elemento es `DataRow`.
+5.  De lo contrario, si la enumeración implementa genérica `IEnumerable<T>`, entonces el tipo de elemento es un argumento de tipo correspondiente a `T`. Tenga en cuenta que el motor no admite enumeraciones que implementen `IEnumerable<T>` varias veces utilizando diferentes argumentos de tipo.
+6.  De lo contrario, el tipo de elemento es `Object`.
+
+### Soporte para proveedores de LINQ {#support-for-linq-providers}
+
+El motor no coopera con <a href="http://msdn.microsoft.com/en-us/library/vstudio/bb882640(v=vs.110" target="_blank" rel="nofollow noopener noreferrer">Proveedores de LINQ</a>.aspx). Para conocer las consecuencias de esta característica, considere el siguiente ejemplo.
+
+Supongamos que tienes el `City` y `Person` clases definidas en su aplicación de la siguiente manera.
+
+```csharp
+public class City
+{
+    public IList<Person> Persons { get { ... } }
+    ...
+}
+public class Person
+{
+    public String Name { get { ... } }
+    public int Age { get { ... } }
+    ...
+    }
+}
+```
+
+Dado que `city` es una instancia de la `City` clase, considere la evaluación de la siguiente expresión de plantilla por parte del motor.
+
+```csharp
+city.Persons.Where(p => p.Age > 30).OrderBy(p => p.Name)
+```
+
+Si utiliza un ORM para proporcionar la interacción de su aplicación con una base de datos SQL, junto con un proveedor LINQ para el ORM, lo más probable es que espere que, al evaluar la expresión de plantilla, se ejecute en segundo plano una consulta SQL como la siguiente.
+
+```csharp
+SELECT *
+    FROM Persons
+    WHERE CityId = @CityId AND Age > 30
+    ORDER BY Name
+```
+
+Sin embargo, dado que el motor no es compatible con proveedores de LINQ, la consulta SQL real en este caso es la siguiente.
+
+```csharp
+SELECT *
+    FROM Persons
+    WHERE CityId = @CityId
+```
+
+Es decir, el motor realiza una llamada ansiosa antes de aplicar sus métodos de extensión integrados. En algunos casos, esta característica puede provocar una sobrecarga de rendimiento significativa. Por lo tanto, si el rendimiento de su aplicación es su principal preocupación, considere preparar sus datos secuenciales fuera de sus plantillas. Es decir, pase al motor datos secuenciales que ya estén filtrados, ordenados, agrupados, etc.
+
+### Fusión de GroupDocs.Assembly {#merging-groupdocs-assembly}
+
+Puedes usar una herramienta como <a href="http://research.microsoft.com/en-us/people/mbarnett/ilmerge.aspx" target="_blank" rel="nofollow noopener noreferrer">ILMerge</a> para fusionar la biblioteca GroupDocs.Assembly con otra ensamblaje. Sin embargo, para poder utilizar el motor, agregue el siguiente atributo al ensamblaje de destino.
+
+```csharp
+[assembly: InternalsVisibleTo(
+    "TargetAssemblyName" +
+    ".ReportingDynamics" +
+    ", PublicKey=TargetAssemblyPublicKey")]
+```
+
+`TargetAssemblyName` y `TargetAssemblyPublicKey` representan, respectivamente, el nombre de su ensamblado de destino y su clave pública (no un token de clave pública).
+
+A pesar de que se aplique el atributo `InternalsVisibleTo`, normalmente puede utilizar rutinas de ofuscación en su ensamblado de destino, si es necesario. La ofuscación no perjudica la funcionalidad del motor GroupDocs.Assembly.

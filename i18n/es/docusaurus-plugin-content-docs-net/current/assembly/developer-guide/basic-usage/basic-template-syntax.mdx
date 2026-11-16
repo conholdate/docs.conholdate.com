@@ -1,0 +1,226 @@
+---
+title: "Sintaxis básica de plantillas: etiquetas de expresión y campos"
+sidebar_label: "Sintaxis básica de plantillas: etiquetas de expresión y campos"
+sidebar_key: "net-assembly-basic-template-syntax"
+sidebar_position: 5
+description: "Introducción a la sintaxis básica de plantillas, incluyendo etiquetas de expresión y acceso simple a campos en plantillas."
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/basic-template-syntax.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "1f35dbe3404868695211ae6990fc9550141dd9eb3db429809b230e1075fa6705"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "1d4e9357002a8679f85e1d29300b601fd53ae09f4fcc1e6292290e6690615b4d"
+translation_updated_at: "2026-11-16T13:40:00.580Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Vista general {#overview}
+
+GroupDocs.Assembly para .NET utiliza una sintaxis de plantilla sencilla basada en LINQ que le permite incrustar expresiones de C# directamente en sus documentos. Las etiquetas de expresión constituyen la base de la sintaxis de plantilla, permitiéndole generar resultados de expresiones y realizar cálculos.
+
+Los elementos principales de la sintaxis son:
+- Etiquetas de expresión `<<[expression]>>` – generan los resultados de las expresiones
+- Bandas de datos `<<foreach>>` – iteran sobre colecciones
+- Bloques condicionales `<<if>>` – muestran contenido de forma condicional
+
+A continuación se indican los pasos para utilizar la sintaxis básica de plantillas:
+
+* Crear un documento de plantilla en formato Word, Excel, PowerPoint o HTML
+* Insertar etiquetas de expresión utilizando la sintaxis `<<[expression]>>`
+* Hacer referencia a propiedades y métodos del origen de datos en las expresiones
+* Ensamblar el documento con su origen de datos
+
+
+:::info
+La sintaxis de plantillas distingue entre mayúsculas y minúsculas y sigue las reglas del lenguaje C#. Las etiquetas de expresión se evalúan en tiempo de ejecución y se reemplazan por sus valores calculados.
+:::
+
+
+## Etiquetas de expresión básicas {#basic-expression-tags}
+
+Las etiquetas de expresión son la forma más sencilla de mostrar datos en plantillas. Utilizan la sintaxis `<<[expression]>>`:
+
+```csharp
+using GroupDocs.Assembly;
+
+public static void BasicExpressionTags()
+{
+    // Sample data
+    var person = new { Name = "John Doe", Age = 30, Email = "john@example.com" };
+    
+    // Assemble document
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx", 
+        new DataSourceInfo(person, "person"));
+    
+    Console.WriteLine("Document assembled with expression tags.");
+}
+```
+
+## Ejemplo de plantilla con etiquetas de expresión {#template-example-with-expression-tags}
+
+En su documento de plantilla (Template.docx), utilice etiquetas de expresión como esta:
+
+```
+Name: <<[person.Name]>>
+Age: <<[person.Age]>>
+Email: <<[person.Email]>>
+```
+
+Después del ensamblaje, la salida será:
+
+```
+Name: John Doe
+Age: 30
+Email: john@example.com
+```
+
+## Uso del acceso a miembros de objeto contextual {#using-contextual-object-member-access}
+
+Cuando se utiliza una única fuente de datos, puede omitir el nombre de la fuente de datos y utilizar el acceso contextual:
+
+```csharp
+using GroupDocs.Assembly;
+
+public static void ContextualAccess()
+{
+    var product = new { Name = "Laptop", Price = 999.99m, Stock = 50 };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx", 
+        new DataSourceInfo(product));
+    
+    Console.WriteLine("Document assembled with contextual access.");
+}
+```
+
+Plantilla con acceso contextual:
+
+```
+Product: <<[Name]>>
+Price: <<[Price]>>
+Stock: <<[Stock]>>
+```
+
+## Cálculos simples en expresiones {#simple-calculations-in-expressions}
+
+Puede realizar cálculos directamente en las etiquetas de expresión:
+
+```csharp
+using GroupDocs.Assembly;
+
+public static void CalculationsInExpressions()
+{
+    var order = new { Quantity = 5, UnitPrice = 29.99m };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx", 
+        new DataSourceInfo(order, "order"));
+    
+    Console.WriteLine("Document assembled with calculations.");
+}
+```
+
+Plantilla con cálculos:
+
+```
+Quantity: <<[order.Quantity]>>
+Unit Price: <<[order.UnitPrice]>>
+Total: <<[order.Quantity * order.UnitPrice]>>
+```
+
+## Uso de métodos de cadena {#using-string-methods}
+
+Puede utilizar los métodos de cadena de .NET en expresiones:
+
+```csharp
+using GroupDocs.Assembly;
+
+public static void StringMethods()
+{
+    var company = new { Name = "ABC Corporation", Website = "www.example.com" };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx", 
+        new DataSourceInfo(company, "company"));
+    
+    Console.WriteLine("Document assembled with string methods.");
+}
+```
+
+Plantilla con métodos de cadenas:
+
+```
+Company: <<[company.Name.ToUpper()]>>
+Website: <<[company.Website.ToLower()]>>
+```
+
+## Formato de etiquetas de expresión {#expression-tag-formatting}
+
+Puede dar formato a los resultados de las expresiones utilizando cadenas de formato:
+
+```csharp
+using GroupDocs.Assembly;
+
+public static void FormattedExpressions()
+{
+    var invoice = new { 
+        Amount = 1500.50m, 
+        Date = new DateTime(2024, 1, 15),
+        Percentage = 0.15
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx", 
+        new DataSourceInfo(invoice, "invoice"));
+    
+    Console.WriteLine("Document assembled with formatting.");
+}
+```
+
+Plantilla con formato:
+
+```
+Amount: <<[invoice.Amount]:"C">>
+Date: <<[invoice.Date]:"yyyy-MM-dd">>
+Percentage: <<[invoice.Percentage]:"P">>
+```
+
+
+:::warning
+Las cadenas de formato siguen las convenciones de formato de .NET. Utilice "C" para moneda, "P" para porcentaje y las cadenas de formato estándar de fecha y hora para fechas.
+:::
+
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre bandas de datos, bloques condicionales, expresiones LINQ y características avanzadas de sintaxis de plantillas, consulte la [sección de uso avanzado](/net/assembly/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para .NET</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Java</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Python-via-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Python mediante .NET</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas en línea simples pero potentes.
+
+Para ensamblar documentos a partir de plantillas y fuentes de datos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/assembly" target="_blank">Conholdate.Assembly App</a>**.

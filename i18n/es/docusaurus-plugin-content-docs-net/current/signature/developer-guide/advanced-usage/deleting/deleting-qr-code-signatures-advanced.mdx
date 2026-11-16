@@ -1,0 +1,141 @@
+---
+title: "Eliminación de firmas de códigos QR: avanzado"
+sidebar_label: "✖ Código QR"
+sidebar_key: "net-signature-deleting-deleting-qr-code-signatures-advanced"
+sidebar_position: 4
+description: "Este artículo muestra cómo eliminar firmas electrónicas de código QR de diferentes maneras con la API GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/deleting/deleting-qr-code-signatures-advanced.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "b1a39ef18a27e3ae893b53075fa036e342569f575201c6c9290fc8a6a5f4aafb"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "1da94c22d307dda9ed86426c28b5fcd9d7a100869bf2fcb9294123ad0e78f0bd"
+translation_updated_at: "2026-11-16T12:36:32.843Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> proporciona <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/qrcodesignature" target="_blank" rel="nofollow noopener noreferrer">QrCodeSignature</a> Clase para manipular firmas de códigos QR y eliminarlas de los documentos <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/delete" target="_blank" rel="nofollow noopener noreferrer">Delete</a> método.  
+Tenga en cuenta que <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/delete" target="_blank" rel="nofollow noopener noreferrer">Delete</a> El método modifica el mismo documento que se pasó al constructor de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase.
+
+Aquí están los pasos para eliminar la firma de código QR del documento con GroupDocs.Signature:
+
+* Crear nueva instancia de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase y pasar la ruta del documento fuente como parámetro del constructor;
+* Instanciar <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/qrcodesearchoptions" target="_blank" rel="nofollow noopener noreferrer">QrCodeSearchOptions</a> objeto con las propiedades deseadas;
+* Llamada <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a> método para obtener la lista de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/qrcodesignature" target="_blank" rel="nofollow noopener noreferrer">QrCodeSignature</a>;
+* Seleccionar de la lista <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/qrcodesignature" target="_blank" rel="nofollow noopener noreferrer">QrCodeSignature</a> objeto(s) que deben eliminarse del documento;
+* Llamada <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/delete" target="_blank" rel="nofollow noopener noreferrer">Delete</a> método y pasarle una o varias firmas.
+* Analizar <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/deleteresult" target="_blank" rel="nofollow noopener noreferrer">DeleteResult</a> resultado para verificar si las firmas se actualizaron o no.
+
+Aquí tienes los pasos alternativos para eliminar la firma de código QR del documento utilizando GroupDocs.Signature. Este enfoque se basa en el ID de las firmas guardadas tras <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a> o <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> métodos.
+
+* Crear nueva instancia de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase y pasar la ruta del documento fuente como parámetro del constructor;
+* Instanciar uno o varios <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/qrcodesignature" target="_blank" rel="nofollow noopener noreferrer">QrCodeSignature</a> objetos con la firma `Id(s)` pasados al constructor;
+* Llamada <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/delete" target="_blank" rel="nofollow noopener noreferrer">Delete</a> método y pasarle una o varias firmas;
+* Analizar <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/deleteresult" target="_blank" rel="nofollow noopener noreferrer">DeleteResult</a> resultado para verificar si las firmas se actualizaron o no.
+
+## Eliminar la firma del código QR del documento después de la búsqueda {#delete-qr-code-signature-from-the-document-after-search}
+
+Este ejemplo muestra cómo eliminar la firma de código QR que se encontró utilizando <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a> método.
+
+```csharp
+// initialize Signature instance
+using (Signature signature = new Signature("signed.docx"))
+{
+    QrCodeSearchOptions options = new QrCodeSearchOptions();
+    List<QrCodeSignature> signatures = signature.Search<QrCodeSignature>(options);
+    List<BaseSignature> signaturesToDelete = new List<BaseSignature>();
+    // collect signatures to delete
+    foreach (QrCodeSignature temp in signatures)
+    {
+        if (temp.Text.Contains("John"))
+        {
+            signaturesToDelete.Add(temp);
+        }
+    }
+    // delete signatures
+    DeleteResult deleteResult = signature.Delete(signaturesToDelete);
+    if (deleteResult.Succeeded.Count == signaturesToDelete.Count)
+    {
+        Console.WriteLine("All signatures were successfully deleted!");
+    }
+    else
+    {
+        Console.WriteLine($"Successfully deleted signatures : {deleteResult.Succeeded.Count}");
+        Console.WriteLine($"Not deleted signatures : {deleteResult.Failed.Count}");
+    }
+    Console.WriteLine("List of deleted signatures:");
+    foreach (BaseSignature temp in deleteResult.Succeeded)
+    {
+        Console.WriteLine($"Signature# Id:{temp.SignatureId}, Location: {temp.Left}x{temp.Top}. Size: {temp.Width}x{temp.Height}");
+    }
+}
+```
+
+## Eliminar la firma de código QR del documento mediante el identificador de firma conocido {#delete-qr-code-signature-from-the-document-by-known-signature-identifier}
+
+Este ejemplo muestra cómo eliminar una firma de código QR del documento utilizando el identificador de firma conocido (que se obtuvo previamente mediante el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a> o <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a>).
+
+```csharp
+// initialize Signature instance
+using (Signature signature = new Signature("signed.pdf"))
+{
+    // read from some data source signature Id value
+    string[] signatureIdList = new string[]
+    {
+        "1dd21cf3-b904-4da9-9413-1ff1dab51974",
+        "9e386726-a773-4971-b2fc-eaadfce65ffd"
+    };
+    // create list of QR-code Signature by known SignatureId
+    List<BaseSignature> signatures = new List<BaseSignature>();
+    signatureIdList.ToList().ForEach(p => signatures.Add(new QrCodeSignature(p)));
+    // delete required signatures
+    DeleteResult deleteResult = signature.Delete(signatures);
+    if (deleteResult.Succeeded.Count == signatures.Count)
+    {
+        Console.WriteLine("All signatures were successfully deleted!");
+    }
+    else
+    {
+        Console.WriteLine($"Successfully deleted signatures : {deleteResult.Succeeded.Count}");
+        Console.WriteLine($"Not deleted signatures : {deleteResult.Failed.Count}");
+    }
+    Console.WriteLine("List of deleted signatures:");
+    foreach (BaseSignature temp in deleteResult.Succeeded)
+    {
+        Console.WriteLine($"Signature# Id:{temp.SignatureId}, Location: {temp.Left}x{temp.Top}. Size: {temp.Width}x{temp.Height}");
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con UI MVC</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con UI WebForms</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con UI Dropwizard</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con UI Spring</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para generar códigos QR y/o firmar sus archivos con códigos QR de forma gratuita, puede utilizar la aplicación en línea <a href="https://products.groupdocs.app/signature/generate/qrcode" target="_blank" rel="nofollow noopener noreferrer">Generador de códigos QR</a>.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros tipos, puede utilizar las demás aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

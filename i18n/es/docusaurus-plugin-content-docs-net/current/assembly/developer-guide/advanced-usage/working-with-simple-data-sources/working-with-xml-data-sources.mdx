@@ -1,0 +1,248 @@
+---
+title: "Trabajar con fuentes de datos XML"
+sidebar_label: "Trabajar con fuentes de datos XML"
+sidebar_key: "net-assembly-working-with-simple-data-sources-working-with-xml-data-sources"
+sidebar_position: 3
+description: ""
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/advanced-usage/working-with-simple-data-sources/working-with-xml-data-sources.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "cc4003bad087d5f163ce6dab133066dcb4999a6222a7e9b543101d7cd84f9c51"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "9b2f1f6a39272d252264b01fbb0498c00a2e5d8ee04d73b447f0c5e9f1884d42"
+translation_updated_at: "2026-11-16T12:56:48.020Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+:::info
+Esta función solo es compatible con GroupDocs.Assembly para .NET 19.10 o versiones posteriores.
+:::
+
+
+Para acceder a datos XML al generar un informe, puede utilizar las funcionalidades de *DataSet* para cargar el XML en él y, posteriormente, pasarlo al ensamblador como fuente de datos. Sin embargo, si su escenario no permite especificar un esquema XML al cargar el XML en *DataSet*, todos los atributos y valores de texto de los elementos XML se cargan como cadenas. Por lo tanto, resulta imposible, por ejemplo, realizar operaciones aritméticas sobre números o especificar formatos personalizados de fecha-hora y numéricos para los valores correspondientes, ya que todos se tratan como cadenas. Para superar esta limitación, puede pasar una instancia de *XmlDataSource* al ensamblador como fuente de datos en su lugar. Incluso cuando no se proporciona un esquema XML, *XmlDataSource* es capaz de reconocer valores de los siguientes tipos a partir de sus representaciones en cadena:
+
+*   Int32?
+*   Int64?
+*   Double?
+*   Boolean?
+*   DateTime?
+
+
+:::warning
+Para que el reconocimiento de tipos de datos funcione, las representaciones en cadena de los atributos correspondientes y los valores de texto de los elementos XML deben formarse utilizando la configuración regional invariante.
+:::
+
+
+## Si el elemento XML de nivel superior contiene únicamente una secuencia de elementos del mismo tipo {#treating-the-top-level-xml-element-contains-only-a-sequence-of-elements-of-the-same-type}
+
+En documentos de plantilla, si un elemento XML de nivel superior contiene únicamente una secuencia de elementos del mismo tipo, una instancia de *XmlDataSource* debe tratarse de la misma manera que si fuera una instancia de *DataTable* (consulte "<a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-1-of-2/#using-data-sources" target="_blank" rel="nofollow noopener noreferrer">Trabajo con objetos *DataTable* y *DataView*</a>" para obtener más información).
+
+Supongamos que tenemos datos XML como los siguientes:
+```
+<Persons>
+   <Person>
+      <Name>John Doe</Name>
+      <Age>30</Age>
+      <Birth>1989-04-01 4:00:00 pm</Birth>
+   </Person>
+   <Person>
+      <Name>Jane Doe</Name>
+      <Age>27</Age>
+      <Birth>1992-01-31 07:00:00 am</Birth>
+   </Person>
+   <Person>
+      <Name>John Smith</Name>
+      <Age>51</Age>
+      <Birth>1968-03-08 1:00:00 pm</Birth>
+   </Person>
+</Persons>
+```
+
+Al usar la plantilla como la siguiente:
+```
+<<foreach \[in persons\]>>Name: <<\[Name\]>>, Age: <<\[Age\]>>, Date of Birth: 
+<<\[Birth\]:"dd.MM.yyyy">>
+<</foreach>>
+Average age: <<\[persons.Average(p => p.Age)\]>>
+```
+
+Los resultados se producirán como:
+```
+Name: John Doe, Age: 30, Date of Birth: 01.04.1989
+Name: Jane Doe, Age: 27, Date of Birth: 31.01.1992
+Name: John Smith, Age: 51, Date of Birth: 08.03.1968
+Average age: 36
+```
+
+
+:::warning
+El uso del formato personalizado de fecha y hora, así como del método de extensión que involucra operaciones aritméticas en el documento de plantilla, es posible porque los valores de texto de los elementos XML *Birth* y *Age* se convierten automáticamente a `DateTime?` y `Int32?`, respectivamente, incluso en ausencia de un esquema XML.
+:::
+
+
+## Si el elemento XML de nivel superior contiene atributos o elementos anidados de distintos tipos {#treating-the-top-level-xml-element-contains-attributes-or-nested-elements-of-different-types}
+
+Si un elemento XML de nivel superior contiene atributos o elementos anidados de distintos tipos, una instancia de *XmlDataSource* debe tratarse en los documentos de plantilla de la misma manera que si fuera una instancia de *DataRow* (consulte "<a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-1-of-2/#using-data-sources" target="_blank" rel="nofollow noopener noreferrer">Trabajar con objetos *DataRow* y *DataRowView*</a>" para obtener más información), como se muestra en el siguiente ejemplo.
+
+Supongamos que tenemos datos XML como los siguientes:
+```
+<Person>
+   <Name>John Doe</Name>
+   <Age>30</Age>
+   <Birth>1989-04-01 4:00:00 pm</Birth>
+   <Child>Ann Doe</Child>
+   <Child>Charles Doe</Child>
+</Person>
+```
+
+Al usar la plantilla como la siguiente:
+```
+Name: <<\[Name\]>>, Age: <<\[Age\]>>, Date of Birth:
+<<\[Birth\]:"dd.MM.yyyy">>
+Children:
+<<foreach \[in Child\]>><<\[Child\_Text\]>>
+<</foreach>>
+```
+
+Los resultados se producirán como:
+```
+Name: John Doe, Age: 30, Date of Birth: 01.04.1989
+Children:
+Ann Doe
+Charles Doe
+```
+
+
+:::warning
+Para hacer referencia a una secuencia de elementos XML de tipo simple repetidos con el mismo nombre, se debe utilizar el nombre del propio elemento (por ejemplo, "Child") en un documento de plantilla, mientras que el mismo nombre con el sufijo "_Text" (por ejemplo, "Child_Text") debe utilizarse para hacer referencia al valor de texto de uno de estos elementos.
+:::
+
+
+## Ejemplo completo {#the-complete-example}
+
+El siguiente ejemplo resume los escenarios típicos que involucran elementos XML anidados de tipo complejo.
+
+### XML {#xml}
+```
+<Managers>
+   <Manager>
+      <Name>John Smith</Name>
+      <Contract>
+         <Client>
+            <Name>A Company</Name>
+         </Client>
+         <Price>1200000</Price>
+      </Contract>
+      <Contract>
+         <Client>
+            <Name>B Ltd.</Name>
+         </Client>
+         <Price>750000</Price>
+      </Contract>
+      <Contract>
+         <Client>
+            <Name>C &amp; D</Name>
+         </Client>
+         <Price>350000</Price>
+      </Contract>
+   </Manager>
+   <Manager>
+      <Name>Tony Anderson</Name>
+      <Contract>
+         <Client>
+            <Name>E Corp.</Name>
+         </Client>
+         <Price>650000</Price>
+      </Contract>
+      <Contract>
+         <Client>
+            <Name>F &amp; Partners</Name>
+         </Client>
+         <Price>550000</Price>
+      </Contract>
+   </Manager>
+   <Manager>
+      <Name>July James</Name>
+      <Contract>
+         <Client>
+            <Name>G &amp; Co.</Name>
+         </Client>
+         <Price>350000</Price>
+      </Contract>
+      <Contract>
+         <Client>
+            <Name>H Group</Name>
+         </Client>
+         <Price>250000</Price>
+      </Contract>
+      <Contract>
+         <Client>
+            <Name>I &amp; Sons</Name>
+            43
+         </Client>
+         <Price>100000</Price>
+      </Contract>
+      <Contract>
+         <Client>
+            <Name>J Ent.</Name>
+         </Client>
+         <Price>100000</Price>
+      </Contract>
+   </Manager>
+</Managers>
+```
+
+### Documento de plantilla {#template-document}
+```
+<<foreach \[in managers\]>>Manager: <<\[Name\]>>
+Contracts:
+<<foreach \[in Contract\]>>- <<\[Client.Name\]>> ($<<\[Price\]>>)
+<</foreach>>
+<</foreach>>
+```
+
+### Código fuente {#source-code}
+
+<a href="https://gist.github.com/GroupDocsGists/ddac17d9a69c71495b2931ca6c7e8ce7" target="_blank" rel="nofollow noopener noreferrer">Ver ejemplo de código en GitHub Gist</a>
+
+### Documento resultante {#result-document}
+```
+Manager: John Smith
+Contracts:
+- A Company ($1200000)
+- B Ltd. ($750000)
+- C & D ($350000)
+Manager: Tony Anderson
+Contracts:
+- E Corp. ($650000)
+- F & Partners ($550000)
+Manager: July James
+Contracts:
+- G & Co. ($350000)
+- H Group ($250000)
+- I & Sons ($100000)
+- J Ent. ($100000)
+```
+
+## Descargar {#download}
+
+### Documento de fuente de datos {#data-source-document}
+
+*   <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET/blob/master/Examples/Data/Data%20Sources/XML%20DataSource/Managers.xml?raw=true" target="_blank" rel="nofollow noopener noreferrer">Managers.xml</a>
+
+### Plantilla {#template}
+
+*   <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET/blob/master/Examples/Data/Source/Word%20Templates/Using%20Spreadsheet%20as%20Table%20of%20Data.docx?raw=true" target="_blank" rel="nofollow noopener noreferrer">Demo Template.docx</a>

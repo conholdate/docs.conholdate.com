@@ -1,0 +1,165 @@
+---
+title: "Cancelación de procesos"
+sidebar_label: "Cancelación de procesos"
+sidebar_key: "net-signature-common-processes-cancellation"
+sidebar_position: 3
+description: "Este artículo explica cómo controlar el procesamiento de firmas (cancelación) para documentos grandes con la API de GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/common/processes-cancellation.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "da58295e162e2429cf42c395417e6cbd3fffc5f525e67ffa43057603d8d20ee9"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "e47e6931decc7b6991d72ddb1975bbf4bdd37b0ed854ad1c642ae213a92ae085"
+translation_updated_at: "2026-11-16T12:29:22.604Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+La clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> admite la cancelación para cada uno de los procesos de documento (Firmar, Verificar, Buscar). La cancelación del proceso se lleva a cabo estableciendo la propiedad <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/processprogresseventargs/cancel" target="_blank" rel="nofollow noopener noreferrer">Cancel</a> de la propiedad <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/processprogresseventargs/" target="_blank" rel="nofollow noopener noreferrer">ProcessProgressEventArgs</a> dentro del controlador de evento correspondiente.
+
+* Para el proceso <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a>, esta bandera debe establecerse en `true` en el controlador del evento <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/signprogress" target="_blank" rel="nofollow noopener noreferrer">SignProgress</a>. Este evento se dispara cada vez que se completa la firma de una firma individual.
+* Para el proceso <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/verify" target="_blank" rel="nofollow noopener noreferrer">Verify</a>, esta bandera debe establecerse en `true` en el controlador del evento <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/verifyprogress" target="_blank" rel="nofollow noopener noreferrer">VerifyProgress</a>. Este evento se dispara cada vez que se verifica una página del documento.
+* Para el proceso <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a>, esta bandera debe establecerse en `true` en el controlador del evento <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/searchprogress" target="_blank" rel="nofollow noopener noreferrer">SearchProgress</a>. Este evento se dispara cada vez que se busca en una página del documento, por cada opción.  
+
+## Cancelar el proceso de firma {#cancel-signing-process}
+
+A continuación se indican los pasos para habilitar la cancelación del proceso de firma con GroupDocs.Signature:
+
+* Defina los delegados del controlador de evento <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/signprogress" target="_blank" rel="nofollow noopener noreferrer">SignProgress</a> para cancelar condicionalmente el proceso.
+* Cree una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pase la ruta o el flujo del documento de origen como parámetro en el constructor.
+* Suscríbase al evento <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/signprogress" target="_blank" rel="nofollow noopener noreferrer">SignProgress</a> con el método controlador adecuado.
+* Instancie el objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/signoptions" target="_blank" rel="nofollow noopener noreferrer">SignOptions</a> requerido.
+* Llame al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pase las opciones de firma como argumento.
+
+```csharp
+private static void OnSignProgress(Signature sender, ProcessProgressEventArgs args)
+{
+    // check if process takes more than 1 second (1000 milliseconds) processing cancellation
+    if(args.Ticks > 1000)
+    {
+        args.Cancel = true;
+        Console.WriteLine("Sign progress was cancelled. Time spent {0} mlsec", args.Ticks);
+    }
+}
+/// <summary>
+/// Sign document with text signature applying specific options
+/// </summary>
+public static void Run()
+{
+    using (Signature signature = new Signature("sample.docx"))
+    {
+        signature.SignProgress += OnSignProgress;
+        TextSignOptions options = new TextSignOptions("John Smith")
+        {
+            // ...
+        };
+        // sign document to file
+        signature.Sign("signedSample", options);
+    }
+}
+```
+
+## Cancelar el proceso de verificación {#cancel-verification-process}
+
+A continuación se indican los pasos para cancelar el proceso de verificación mediante <a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a>:
+
+* Defina los delegados del controlador de eventos <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/verifyprogress" target="_blank" rel="nofollow noopener noreferrer">VerifyProgress</a> para cancelar condicionalmente el proceso.
+* Cree una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pase la ruta del documento de origen o un flujo como parámetro en el constructor.
+* Suscríbase al evento <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/verifyprogress" target="_blank" rel="nofollow noopener noreferrer">VerifyProgress</a> con el método controlador adecuado.
+* Instancie el objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/verifyoptions" target="_blank" rel="nofollow noopener noreferrer">VerifyOptions</a> requerido.
+* Llame al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/verify" target="_blank" rel="nofollow noopener noreferrer">Verify</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pase las opciones de verificación como argumento.
+
+```csharp
+private static void OnVerifyProgress(Signature sender, ProcessProgressEventArgs args)
+{
+    // check if process takes more than 1 second (1000 milliseconds) processing cancellation
+    if (args.Ticks > 1000)
+    {
+        args.Cancel = true;
+        Console.WriteLine("Sign progress was cancelled. Time spent {0} mlsec", args.Ticks);
+    }
+}
+public static void Run()
+{
+    using (Signature signature = new Signature("SignedSample.pdf"))
+    {
+        signature.VerifyProgress += OnVerifyProgress;
+        TextVerifyOptions options = new TextVerifyOptions("John Smith")
+        {
+            // ...
+        };
+        // sign document to file
+        VerificationResult result = signature.Verify(options);
+    }
+}
+```
+
+## Cancelar proceso de búsqueda {#cancel-search-process}
+
+A continuación se indican los pasos para cancelar el proceso de búsqueda mediante GroupDocs.Signature:
+
+* Defina los delegados del controlador de eventos <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/searchprogress" target="_blank" rel="nofollow noopener noreferrer">SearchProgress</a> para cancelar condicionalmente el proceso.
+* Cree una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pase la ruta o el flujo del documento de origen como parámetro en el constructor.
+* Suscríbase al evento <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/searchprogress" target="_blank" rel="nofollow noopener noreferrer">SearchProgress</a> con el método de controlador adecuado.
+* Instancie el objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/searchoptions" target="_blank" rel="nofollow noopener noreferrer">SearchOptions</a> requerido.
+* Llame al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pase las opciones de búsqueda como parámetro.
+
+```csharp
+private static void OnSearchProgress(Signature sender, ProcessProgressEventArgs args)
+{
+    // check if process takes more than 1 second (1000 milliseconds) processing cancellation
+    if (args.Ticks > 1000)
+    {
+        args.Cancel = true;
+        Console.WriteLine("Sign progress was cancelled. Time spent {0} mlsec", args.Ticks);
+    }
+}
+public static void Run()
+{
+    using (Signature signature = new Signature("sampleSigned.pdf"))
+    {
+        signature.SearchProgress += OnSearchProgress;
+        QrCodeSearchOptions options = new QrCodeSearchOptions(QrCodeTypes.QR)
+        {
+            // ...
+        };
+        // search for signatures in document
+        List<QrCodeSignature> signatures = signature.Search<QrCodeSignature>(options);
+        Console.WriteLine("\nSource document contains following signatures.");
+        foreach (var QrCodeSignature in signatures)
+        {
+            Console.WriteLine("QRCode signature found at page {0} with type {1} and text {2}", QrCodeSignature.PageNumber, QrCodeSignature.EncodeType, QrCodeSignature.Text);
+        }
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario MVC para la firma de documentos con .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario WebForms para la firma de documentos con .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Dropwizard para la firma de documentos con Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Spring para la firma de documentos con Java</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

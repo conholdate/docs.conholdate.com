@@ -1,0 +1,107 @@
+---
+title: "Firmar documento con código de barras HIBC LIC y simbología"
+sidebar_label: "✎ HIBC LIC"
+sidebar_key: "net-signature-signing-sign-complex-qr-entries-sign-document-with-hibc-lic-barcode"
+sidebar_position: 2
+description: "Este artículo explica cómo firmar documentos con firmas de simbología HIBC LIC."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/signing/sign-complex-qr-entries/sign-document-with-hibc-lic-barcode.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "60954f17d7dbadac45bf71b80e960a8a4f2f6c441f00db22e0ecbf1d666f0fd1"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "8671edd704e130b74c02072b8dd6287b1eb4eca8b3876f4ae22ce79582a334f1"
+translation_updated_at: "2026-11-16T13:22:43.716Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> proporciona la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/hibcliccombineddata/" target="_blank" rel="nofollow noopener noreferrer">HIBCLICCombinedData</a> para crear códigos de barras HIBC LIC. Esta clase se utiliza por fabricantes de productos sanitarios con fines de identificación. Los etiquetadores pueden codificar datos primarios y datos secundarios.
+
+A continuación se indican los pasos para agregar una firma de código de barras HIBC LIC en un documento mediante GroupDocs.Signature:
+
+* Crear una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasar la ruta del documento de origen como parámetro del constructor.
+* Instanciar <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/hibcliccombineddata/" target="_blank" rel="nofollow noopener noreferrer">HIBCLICCombinedData</a>. Rellenar las propiedades correspondientes a la estructura de datos primarios y secundarios con los modelos <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/hibclicprimarydata/" target="_blank" rel="nofollow noopener noreferrer">HIBCLICPrimaryData</a> y <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/hibclicsecondaryadditionaldata/" target="_blank" rel="nofollow noopener noreferrer">HIBCLICSecondaryAdditionalData</a>, respectivamente.
+* Instanciar el objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/qrcodesignoptions/" target="_blank" rel="nofollow noopener noreferrer">QrCodeSignOptions</a> con todas las opciones adicionales requeridas y asignar el objeto HIBCLICCombinedData a la propiedad Data.
+* Llamar al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasarle <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/qrcodesignoptions" target="_blank" rel="nofollow noopener noreferrer">QrCodeSignOptions</a> como argumento.
+* Analizar el resultado <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/signresult" target="_blank" rel="nofollow noopener noreferrer">SignResult</a> para verificar las firmas recién creadas, si es necesario.  
+
+Este ejemplo muestra cómo agregar una firma HIBCLICCombinedData a un documento:
+
+```csharp
+using (Signature signature = new Signature(filePath))
+{
+    // Create HIBCLICCombinedData data object which composes Primary and Secondary data
+    var hibclicCombinedData = new HIBCLICCombinedData()
+    {
+        PrimaryData = new HIBCLICPrimaryData()
+        {
+            ProductOrCatalogNumber = "12345",
+            LabelerIdentificationCode = "A999",
+            UnitOfMeasureID = 1
+        },
+
+        SecondaryAdditionalData = new HIBCLICSecondaryAdditionalData()
+        {
+            ExpiryDate = DateTime.Today,
+            ExpiryDateFormat = HIBCLICDateFormat.MMDDYY,
+            Quantity = 30,
+            LotNumber = "LOT123",
+            SerialNumber = "SERIAL123",
+            DateOfManufacture = DateTime.Today
+        }
+    };
+
+    // create options
+    QrCodeSignOptions options = new QrCodeSignOptions
+    {
+        EncodeType = QrCodeTypes.QR,
+        Left = 100,
+        Top = 100,
+        // setup Data property to Mailmark2D instance
+        Data = hibclicCombinedData
+    };
+
+    // sign document to file
+    var signResult = signature.Sign(outputFilePath, options);
+            
+    // analyzing result
+    Console.WriteLine("List of newly created signatures:");
+    int number = 1;
+    foreach (BaseSignature temp in signResult.Succeeded)
+    {
+        Console.WriteLine($"Signature #{number++}: Type: {temp.SignatureType} Id:{temp.SignatureId}, Location: {temp.Left}x{temp.Top}. Size: {temp.Width}x{temp.Height}");
+    }
+ }
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario MVC para la firma de documentos con .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario WebForms para la firma de documentos con .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Dropwizard para la firma de documentos con Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Spring para la firma de documentos con Java</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para generar códigos de barras y/o firmar sus archivos con códigos de barras de forma gratuita, puede utilizar la aplicación en línea <a href="https://products.groupdocs.app/signature/generate/barcode" target="_blank" rel="nofollow noopener noreferrer">Barcode Generator</a>.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las demás aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App Product Family</a>**.

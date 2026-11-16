@@ -1,0 +1,382 @@
+---
+title: "Agregar contenido condicional con If/Else"
+sidebar_label: "Agregar contenido condicional con If/Else"
+sidebar_key: "net-assembly-conditional-content"
+sidebar_position: 23
+description: "Mostrar contenido condicionalmente en plantillas utilizando bloques `if`/`elseif`/`else` según los valores de los datos."
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/conditional-content.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "046b97375a66f89bf77ed289bebf951612e3d8fd003620fd6a80439668fbbaef"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "36412099fdefc7673f04a2204656144b8600d0ec1599ca2d4173733bb3b204fe"
+translation_updated_at: "2026-11-16T13:41:15.337Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Vista general {#overview}
+
+Los bloques condicionales permiten mostrar distintos contenidos en sus documentos según los valores de los datos. GroupDocs.Assembly para .NET admite una sintaxis if/elseif/else similar a la de C#, lo que le permite crear documentos dinámicos cuyo contenido se adapta según condiciones específicas.
+
+Los elementos principales de la sintaxis son:
+- `<<if [condition]>>` – muestra contenido si la condición es verdadera
+- `<<elseif [condition]>>` – muestra contenido si las condiciones anteriores son falsas y esta condición es verdadera
+- `<<else>>` – muestra contenido si todas las condiciones anteriores son falsas
+- `<<if>>` – etiqueta de cierre
+
+A continuación se indican los pasos para utilizar contenido condicional:
+
+* Crear una plantilla con bloques condicionales
+* Definir condiciones mediante expresiones en C# que devuelvan valores booleanos
+* Proporcionar contenido para cada rama condicional
+* Ensamblar el documento con sus datos
+
+
+:::info
+Las expresiones condicionales deben devolver valores booleanos. Puedes utilizar operadores de comparación (==, !=, &lt;, &gt;, &lt;=, &gt;=), operadores lógicos (&&, ||, !), y llamadas a métodos que devuelven un valor booleano.
+:::
+
+
+## Bloque simple Si/De lo contrario {#simple-if-else-block}
+
+Muestra contenido según una condición simple:
+
+```csharp
+using GroupDocs.Assembly;
+
+public class Customer
+{
+    public string Name { get; set; }
+    public decimal Balance { get; set; }
+}
+
+public static void SimpleConditional()
+{
+    var customer = new Customer
+    {
+        Name = "John Doe",
+        Balance = 1500.00m
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("ConditionalTemplate.docx", "ConditionalOutput.docx", 
+        new DataSourceInfo(customer, "customer"));
+    
+    Console.WriteLine("Conditional content generated successfully.");
+}
+```
+
+## Ejemplo de plantilla para condicional Si/De lo contrario {#template-example-for-simple-if-else}
+
+En su plantilla (ConditionalTemplate.docx):
+
+```
+Customer: <<[customer.Name]>>
+
+<<if [customer.Balance > 1000]>>
+Status: Premium Customer
+You have a high balance and qualify for special benefits.
+<<else>>
+Status: Standard Customer
+Thank you for your business.
+<<if>>
+```
+
+## Bloque If/Elseif/Else {#if-elseif-else-block}
+
+Utilice múltiples condiciones con elseif:
+
+```csharp
+using GroupDocs.Assembly;
+
+public class Order
+{
+    public decimal Amount { get; set; }
+}
+
+public static void MultipleConditions()
+{
+    var order = new Order
+    {
+        Amount = 750.00m
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("ConditionalTemplate.docx", "ConditionalOutput.docx", 
+        new DataSourceInfo(order, "order"));
+    
+    Console.WriteLine("Multiple conditions processed successfully.");
+}
+```
+
+Plantilla con `elseif`:
+
+```
+Order Amount: <<[order.Amount]:"C">>
+
+<<if [order.Amount > 1000]>>
+Discount: 10% (Large order discount)
+<<elseif [order.Amount > 500]>>
+Discount: 5% (Medium order discount)
+<<else>>
+Discount: No discount available
+<<if>>
+```
+
+## Contenido condicional con colecciones {#conditional-content-with-collections}
+
+Verifique si las colecciones tienen elementos:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public class Report
+{
+    public List<string> Items { get; set; }
+}
+
+public static void ConditionalWithCollections()
+{
+    var report = new Report
+    {
+        Items = new List<string> { "Item 1", "Item 2", "Item 3" }
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("ConditionalTemplate.docx", "ConditionalOutput.docx", 
+        new DataSourceInfo(report, "report"));
+    
+    Console.WriteLine("Conditional content with collections generated successfully.");
+}
+```
+
+Plantilla:
+
+```
+<<if [report.Items.Any()]>>
+Items:
+<<foreach [in report.Items]>>
+- <<[report.Items_Text]>>
+<</foreach>>
+<<else>>
+No items available.
+<<if>>
+```
+
+## Contenido condicional en bandas de datos {#conditional-content-in-data-bands}
+
+Utilice bloques condicionales dentro de bucles foreach:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public class Product
+{
+    public string Name { get; set; }
+    public decimal Price { get; set; }
+    public bool InStock { get; set; }
+}
+
+public static void ConditionalInDataBand()
+{
+    List<Product> products = new List<Product>
+    {
+        new Product { Name = "Laptop", Price = 999.99m, InStock = true },
+        new Product { Name = "Mouse", Price = 29.99m, InStock = false },
+        new Product { Name = "Keyboard", Price = 79.99m, InStock = true }
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("ConditionalTemplate.docx", "ConditionalOutput.docx", 
+        new DataSourceInfo(products, "products"));
+    
+    Console.WriteLine("Conditional content in data band generated successfully.");
+}
+```
+
+Plantilla:
+
+```
+<<foreach [in products]>>
+<<[Name]>> - <<[Price]:"C">>
+<<if [InStock]>>
+✓ In Stock
+<<else>>
+✗ Out of Stock
+<<if>>
+
+<</foreach>>
+```
+
+## Condiciones complejas {#complex-conditions}
+
+Utilice operadores lógicos para condiciones complejas:
+
+```csharp
+using GroupDocs.Assembly;
+
+public class Employee
+{
+    public int YearsOfService { get; set; }
+    public decimal Salary { get; set; }
+    public string Department { get; set; }
+}
+
+public static void ComplexConditions()
+{
+    var employee = new Employee
+    {
+        YearsOfService = 5,
+        Salary = 75000m,
+        Department = "Engineering"
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("ConditionalTemplate.docx", "ConditionalOutput.docx", 
+        new DataSourceInfo(employee, "employee"));
+    
+    Console.WriteLine("Complex conditions processed successfully.");
+}
+```
+
+Plantilla con condiciones complejas:
+
+```
+<<if [employee.YearsOfService >= 5 && employee.Salary > 70000]>>
+Eligible for promotion
+<<elseif [employee.Department == "Engineering"]>>
+Consider for technical leadership
+<<else>>
+Standard review process
+<<if>>
+```
+
+## Formato condicional {#conditional-formatting}
+
+Aplicar diferentes formatos según condiciones:
+
+```csharp
+using GroupDocs.Assembly;
+
+public class Invoice
+{
+    public decimal Amount { get; set; }
+    public bool IsPaid { get; set; }
+}
+
+public static void ConditionalFormatting()
+{
+    var invoice = new Invoice
+    {
+        Amount = 1500.00m,
+        IsPaid = false
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("ConditionalTemplate.docx", "ConditionalOutput.docx", 
+        new DataSourceInfo(invoice, "invoice"));
+    
+    Console.WriteLine("Conditional formatting applied successfully.");
+}
+```
+
+Plantilla:
+
+```
+Amount: <<[invoice.Amount]:"C">>
+
+<<if [invoice.IsPaid]>>
+Status: PAID
+<<else>>
+Status: UNPAID - Payment Required
+<<if>>
+```
+
+## Uso de métodos en condiciones {#using-methods-in-conditions}
+
+Llame a métodos que devuelvan valores booleanos:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public class Order
+{
+    public List<OrderItem> Items { get; set; }
+    
+    public bool HasItems()
+    {
+        return Items != null && Items.Count > 0;
+    }
+}
+
+public class OrderItem
+{
+    public string Name { get; set; }
+}
+
+public static void ConditionalWithMethods()
+{
+    var order = new Order
+    {
+        Items = new List<OrderItem> { new OrderItem { Name = "Product" } }
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("ConditionalTemplate.docx", "ConditionalOutput.docx", 
+        new DataSourceInfo(order, "order"));
+    
+    Console.WriteLine("Conditional with methods processed successfully.");
+}
+```
+
+Plantilla:
+
+```
+<<if [order.HasItems()]>>
+Order contains items.
+<<else>>
+Order is empty.
+<<if>>
+```
+
+
+:::warning
+Los bloques condicionales deben cerrarse correctamente con `<<if>>`. Se admiten bloques condicionales anidados, pero asegúrese de que el anidamiento y el cierre de todos los bloques sean correctos.
+:::
+
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información acerca de los bloques condicionales por fila de tabla, el formateo condicional en distintos tipos de documentos y escenarios condicionales avanzados, consulte la [sección de uso avanzado](/net/assembly/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para .NET</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Java</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Python-via-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Python mediante .NET</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas en línea sencillas pero potentes.
+
+Para ensamblar documentos a partir de plantillas y fuentes de datos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/assembly" target="_blank">Conholdate.Assembly App</a>**.

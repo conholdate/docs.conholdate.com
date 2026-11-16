@@ -1,0 +1,249 @@
+---
+title: "Generar listas numeradas a partir de una fuente de datos"
+sidebar_label: "Generar listas numeradas a partir de una fuente de datos"
+sidebar_key: "net-assembly-generate-numbered-lists"
+sidebar_position: 17
+description: "Cree listas numeradas en documentos iterando sobre colecciones de datos y mostrando los elementos con números."
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/generate-numbered-lists.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "bdbca528931b7012d66baec401e30b58fd74c70dfc13dc1bd3e1d934bb7c0f8e"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "967f0098f57c5436213ee8ecaecadb21287844960fdd75029731504df2c6ca36"
+translation_updated_at: "2026-11-16T13:52:57.121Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Vista general {#overview}
+
+Las listas numeradas ofrecen una forma secuencial y ordenada de presentar colecciones de elementos en documentos. GroupDocs.Assembly para .NET le permite generar listas numeradas iterando sobre colecciones de datos mediante bandas de datos *foreach* dentro de estructuras de listas numeradas.
+
+Las clases principales involucradas son:
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/documentassembler/" target="_blank" rel="nofollow noopener noreferrer">DocumentAssembler</a> – ensambla documentos
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/datasourceinfo/" target="_blank" rel="nofollow noopener noreferrer">DataSourceInfo</a> – envuelve fuentes de datos
+
+A continuación se presentan los pasos para generar listas numeradas:
+
+* Crear una lista numerada en el documento plantilla
+* Añadir una banda de datos *foreach* dentro de la lista para iterar sobre su colección
+* Hacer referencia a las propiedades de los elementos de la colección en los elementos de la lista
+* Opcionalmente, utilizar *NumberOf()* para mostrar los números de los elementos
+* Cerrar la banda de datos *foreach*
+* Ensamblar el documento con los datos de su colección
+
+
+:::info
+La banda de datos `foreach` repite automáticamente los elementos de la lista numerada para cada elemento de la colección, manteniendo la secuencia numérica correcta.
+:::
+
+
+## Generar una lista numerada a partir de una colección de .NET {#generate-numbered-list-from-net-collection}
+
+Cree una lista numerada a partir de una lista de objetos:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public class Task
+{
+    public string Title { get; set; }
+    public string Description { get; set; }
+}
+
+public static void GenerateNumberedList()
+{
+    // Create sample data
+    List<Task> tasks = new List<Task>
+    {
+        new Task { Title = "Design", Description = "Create design mockups" },
+        new Task { Title = "Develop", Description = "Implement features" },
+        new Task { Title = "Test", Description = "Perform testing" }
+    };
+    
+    // Assemble document
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("NumberedListTemplate.docx", "NumberedListOutput.docx", 
+        new DataSourceInfo(tasks, "tasks"));
+    
+    Console.WriteLine("Numbered list generated successfully.");
+}
+```
+
+## Estructura de plantilla para listas numeradas {#template-structure-for-numbered-lists}
+
+En su documento de plantilla (*NumberedListTemplate.docx*), cree una lista numerada:
+
+```
+Tasks to complete:
+
+<<foreach [in tasks]>>
+<<[Title]>> - <<[Description]>>
+<</foreach>>
+```
+
+Después del ensamblaje, obtendrás:
+
+```
+Tasks to complete:
+
+1. Design - Create design mockups
+2. Develop - Implement features
+3. Test - Perform testing
+```
+
+## Uso de la función NumberOf() {#using-numberof-function}
+
+Puede mostrar explícitamente los números de artículo utilizando la función NumberOf():
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public static void GenerateNumberedListWithNumber()
+{
+    List<string> items = new List<string> 
+    { 
+        "First item", 
+        "Second item", 
+        "Third item" 
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("NumberedListTemplate.docx", "NumberedListOutput.docx", 
+        new DataSourceInfo(items, "items"));
+    
+    Console.WriteLine("Numbered list with explicit numbers generated successfully.");
+}
+```
+
+Plantilla con NumberOf():
+
+```
+Items:
+<<foreach [in items]>>
+<<[NumberOf()]>>. <<[items_Text]>>
+<</foreach>>
+```
+
+## Generar lista numerada a partir de DataTable {#generate-numbered-list-from-datatable}
+
+Generar listas numeradas a partir de DataTable de ADO.NET:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Data;
+
+public static void GenerateNumberedListFromDataTable()
+{
+    // Create DataTable
+    DataTable tasksTable = new DataTable("Tasks");
+    tasksTable.Columns.Add("Title", typeof(string));
+    tasksTable.Columns.Add("Description", typeof(string));
+    
+    // Add rows
+    tasksTable.Rows.Add("Design", "Create design mockups");
+    tasksTable.Rows.Add("Develop", "Implement features");
+    tasksTable.Rows.Add("Test", "Perform testing");
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("NumberedListTemplate.docx", "NumberedListOutput.docx", 
+        new DataSourceInfo(tasksTable, "tasks"));
+    
+    Console.WriteLine("Numbered list generated from DataTable successfully.");
+}
+```
+
+## Lista numerada en hoja de cálculo {#numbered-list-in-spreadsheet}
+
+En plantillas de hojas de cálculo, puede crear listas numeradas en celdas:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public static void GenerateNumberedListInSpreadsheet()
+{
+    List<Task> tasks = new List<Task>
+    {
+        new Task { Title = "Design", Description = "Create design mockups" },
+        new Task { Title = "Develop", Description = "Implement features" }
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("NumberedListTemplate.xlsx", "NumberedListOutput.xlsx", 
+        new DataSourceInfo(tasks, "tasks"));
+    
+    Console.WriteLine("Numbered list generated in spreadsheet successfully.");
+}
+```
+
+Plantilla para hoja de cálculo (en celda):
+
+```
+"We provide support for the following products:<<foreach [in products]>>
+<<[NumberOf()]>>. <<[ProductName]>><</foreach>>"
+```
+
+## Lista numerada en correo electrónico {#numbered-list-in-email}
+
+Genere listas numeradas en mensajes de correo electrónico:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public static void GenerateNumberedListInEmail()
+{
+    List<Task> tasks = new List<Task>
+    {
+        new Task { Title = "Design", Description = "Create design mockups" },
+        new Task { Title = "Develop", Description = "Implement features" }
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("NumberedListTemplate.msg", "NumberedListOutput.msg", 
+        new DataSourceInfo(tasks, "tasks"));
+    
+    Console.WriteLine("Numbered list generated in email successfully.");
+}
+```
+
+
+:::warning
+En los documentos de Word, asegúrese de que el formato de lista numerada esté aplicado en la plantilla. La banda de datos `foreach` repetirá el formato del elemento de lista y mantendrá la numeración correcta para cada elemento de la colección.
+:::
+
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre formatos personalizados de numeración, listas numeradas anidadas y opciones avanzadas de formato de listas, consulte la [sección de uso avanzado](/net/assembly/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para .NET</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Java</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Python-via-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Python mediante .NET</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas en línea simples pero potentes.
+
+Para ensamblar documentos a partir de plantillas y fuentes de datos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/assembly" target="_blank">Conholdate.Assembly App</a>**.

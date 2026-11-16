@@ -1,0 +1,106 @@
+---
+title: "Adaptadores de salida"
+sidebar_label: "Adaptadores de salida"
+sidebar_position: 13
+description: "Este artículo proporciona conocimientos sobre los adaptadores de salida, que se utilizan para enviar el HTML o texto plano generado a diversos objetos de salida."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/searching/output-adapters.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "8dd14dad79acc4f08ff2f89383ad9c86c25e5573a18399f7586a522b054ff813"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "771f49537f518ddef0cabf402de4d41a05e133f0bc9a4aea215238a4c2eef081"
+translation_updated_at: "2026-11-16T11:47:39.112Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Los adaptadores de salida se utilizan para enviar el HTML o texto plano generado a diversos objetos de salida. Actualmente se admiten los siguientes adaptadores de salida:
+
+*   <a href="https://reference.groupdocs.com/net/search/groupdocs.search.common/fileoutputadapter" target="_blank" rel="nofollow noopener noreferrer">FileOutputAdapter</a> es un adaptador de salida que se utiliza para escribir texto en un archivo. La ruta del archivo se especifica en el constructor del adaptador.
+*   <a href="https://reference.groupdocs.com/net/search/groupdocs.search.common/streamoutputadapter" target="_blank" rel="nofollow noopener noreferrer">StreamOutputAdapter</a> es un adaptador de salida que se utiliza para escribir texto en un flujo (stream). El flujo se especifica en el constructor del adaptador.
+*   <a href="https://reference.groupdocs.com/net/search/groupdocs.search.common/stringoutputadapter" target="_blank" rel="nofollow noopener noreferrer">StringOutputAdapter</a> es un adaptador de salida que se utiliza para escribir texto en una cadena (string). La cadena resultante se puede acceder mediante el método <a href="https://reference.groupdocs.com/net/search/groupdocs.search.common/stringoutputadapter/methods/getresult" target="_blank" rel="nofollow noopener noreferrer">GetResult</a> de la clase del adaptador.
+*   <a href="https://reference.groupdocs.com/net/search/groupdocs.search.common/structureoutputadapter" target="_blank" rel="nofollow noopener noreferrer">StructureOutputAdapter</a> es un adaptador de salida que se utiliza para escribir por separado el texto de cada campo del documento. El array resultante de campos se puede acceder mediante el método <a href="https://reference.groupdocs.com/net/search/groupdocs.search.common/structureoutputadapter/methods/getresult" target="_blank" rel="nofollow noopener noreferrer">GetResult</a> de la clase del adaptador.
+
+El ejemplo siguiente muestra cómo utilizar adaptadores de distintos tipos.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+
+// Creating an index settings instance
+IndexSettings settings = new IndexSettings();
+settings.TextStorageSettings = new TextStorageSettings(Compression.High); // Enabling storage of extracted text in the index
+
+// Creating an index in the specified folder
+Index index = new Index(indexFolder, settings);
+
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+
+// Getting list of indexed documents
+DocumentInfo[] documents = index.GetIndexedDocuments();
+
+// Getting a document text
+if (documents.Length > 0)
+{
+    DocumentInfo document = documents[0];
+
+    // Output to a file
+    FileOutputAdapter fileOutputAdapter = new FileOutputAdapter(OutputFormat.Html, @"C:\Text.html");
+    index.GetDocumentText(document, fileOutputAdapter);
+
+    // Output to a stream
+    using (Stream stream = new MemoryStream())
+    {
+        StreamOutputAdapter streamOutputAdapter = new StreamOutputAdapter(OutputFormat.Html, stream);
+        index.GetDocumentText(document, streamOutputAdapter);
+    }
+
+    // Output to a string
+    StringOutputAdapter stringOutputAdapter = new StringOutputAdapter(OutputFormat.Html);
+    index.GetDocumentText(document, stringOutputAdapter);
+    string htmlText = stringOutputAdapter.GetResult();
+    Console.WriteLine(htmlText);
+
+    // Output to a structure
+    StructureOutputAdapter structureOutputAdapter = new StructureOutputAdapter(OutputFormat.PlainText);
+    index.GetDocumentText(document, structureOutputAdapter);
+    DocumentField[] fields = structureOutputAdapter.GetResult();
+    Console.WriteLine(document.ToString());
+    for (int i = 0; i < fields.Length; i++)
+    {
+        DocumentField field = fields[i];
+        Console.WriteLine("\t" + field.Name);
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Junto con la completa biblioteca de .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.
+
+Le invitamos a buscar en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita de búsqueda de documentos en línea</a>.

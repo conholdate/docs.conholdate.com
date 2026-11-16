@@ -1,0 +1,89 @@
+---
+title: "Extracción de datos separada"
+sidebar_label: "Extracción de datos separada"
+sidebar_position: 19.5
+description: "Este artículo explica cómo extraer datos de documentos de forma independiente y agregar los datos extraídos al índice."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/indexing/separate-data-extraction.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "781740008ebb9d4e0663f84c00637c8241ced9a496346aca449f6bdb3554d673"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "9d0e8207ab4adc30546b722cfb4146adb01b05d9488b92b9879d43f58974d2f3"
+translation_updated_at: "2026-11-16T11:18:14.929Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+La función descrita en este artículo permite separar las operaciones de extracción de datos de un documento y de adición de los datos extraídos al índice. Los datos extraídos pueden serializarse y deserializarse fácilmente según sea necesario.
+
+Esta función puede resultar útil porque la operación de extracción de texto y otros datos de documentos puede ser muy larga para algunos formatos. Al mismo tiempo, la adición de datos al índice es una operación relativamente ligera. Por lo tanto, separar estas operaciones puede suponer un aumento significativo del tiempo total cuando el índice no está realizando ninguna operación. Además, la adición posterior de nuevos extractores de datos incrementará notablemente el rendimiento de la indexación. En este caso, los extractores de datos pueden incluso operar en servidores independientes, liberando por completo al servidor de indexación de las tareas de extracción.
+
+La clase <a href="https://reference.groupdocs.com/search/net/groupdocs.search/extractor" target="_blank" rel="nofollow noopener noreferrer">Extractor</a> se utiliza para extraer datos de documentos. Tras finalizar la operación, el método <a href="https://reference.groupdocs.com/search/net/groupdocs.search/extractor/methods/extract" target="_blank" rel="nofollow noopener noreferrer">Extract</a> devuelve una instancia de la clase <a href="https://reference.groupdocs.com/search/net/groupdocs.search.common/extracteddata" target="_blank" rel="nofollow noopener noreferrer">ExtractedData</a>, que se utiliza directamente para agregar los datos al índice.
+
+El siguiente ejemplo muestra cómo realizar la extracción y la indexación de datos de forma separada.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex";
+string documentPath = @"c:\MyDocuments\MyDocument.pdf";
+
+// Extracting data from a document
+Extractor extractor = new Extractor();
+Document document = Document.CreateFromFile(documentPath);
+ExtractionOptions extractionOptions = new ExtractionOptions();
+extractionOptions.UseRawTextExtraction = false;
+ExtractedData extractedData = extractor.Extract(document, extractionOptions);
+
+// Serializing the data
+byte[] array = extractedData.Serialize();
+
+// Deserializing the data
+ExtractedData deserializedData = ExtractedData.Deserialize(array);
+
+// Creating an index
+Index index = new Index(indexFolder);
+
+if (deserializedData.IsExtractionSuccessful)
+{
+    // Indexing the data
+    ExtractedData[] data = new ExtractedData[]
+    {
+        deserializedData
+    };
+    index.Add(data, new IndexingOptions());
+
+    // Searching in the index
+    SearchResult result = index.Search("Einstein");
+}
+```
+
+Tenga en cuenta que, cuando los documentos indexados cambian y es necesario actualizarlos en el índice, se debe ejecutar el mismo código. Es decir, los datos deben extraerse por separado a partir de los documentos actualizados y, a continuación, los datos extraídos deben agregarse al índice.
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le invitamos a buscar en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita de búsqueda de documentos en línea</a>.

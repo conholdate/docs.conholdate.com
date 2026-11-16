@@ -1,0 +1,80 @@
+---
+title: "Indexación de campos adicionales"
+sidebar_label: "Indexación de campos adicionales"
+sidebar_position: 9
+description: "Este artículo demuestra cómo asociar cada documento con ciertos metadatos adicionales."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/indexing/indexing-additional-fields.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "1746e6e15ada004c2f944ddb8e2cfc46a52e9fe65af5719f1c8beab851d0b737"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "3cfc7b8cd0d73ea64fc56992f6d84c0448b509dbb778b0be1cf88cd958f031db"
+translation_updated_at: "2026-11-16T11:12:22.591Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+A veces, al indexar, es necesario asociar cada documento con ciertos metadatos adicionales, por ejemplo, un conjunto de etiquetas, un número en el catálogo de la biblioteca, el tema de un documento, etc. Para llevar a cabo esta tarea, se pueden agregar campos adicionales a cada documento indexado, además de los ya presentes en el propio documento.
+
+Los campos adicionales se asocian con el documento mediante los argumentos del evento <a href="https://reference.groupdocs.com/net/search/groupdocs.search.events/eventhub/events/fileindexing" target="_blank" rel="nofollow noopener noreferrer">FileIndexing</a>, que se produce antes de indexar cada documento añadido. Al agregar cada campo, se especifican su nombre y su contenido. El nombre del campo añadido puede coincidir con los nombres de otros campos añadidos o con los campos propios del documento. Durante la búsqueda dentro de los campos con el mismo nombre, se tendrán en cuenta las coincidencias con el texto de todos los campos que compartan dicho nombre.
+
+El ejemplo siguiente demuestra cómo asociar campos adicionales con los documentos durante la indexación.
+
+**C#**
+
+```csharp
+// Defining somewhere a dictionary containing subjects of documents
+Dictionary<string, string> subjects = new Dictionary<string, string>();
+subjects.Add(@"C:\MyDocuments\BhagavadGitaAsItIs.pdf".ToLowerInvariant(), "Spiritual");
+// ...
+ 
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index
+Index index = new Index(indexFolder);
+ 
+// Subscribing to the event
+index.Events.FileIndexing += (sender, args) =>
+{
+    string subject;
+    if (subjects.TryGetValue(args.DocumentFullPath.ToLowerInvariant(), out subject)) // Getting a subject for the current document
+    {
+        args.AdditionalFields = new DocumentField[] // Setting additional fields for the current document
+        {
+            new DocumentField("Subject", subject)
+        };
+    }
+};
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le invitamos a buscar en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">aplicación gratuita de búsqueda de documentos en línea</a>.

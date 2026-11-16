@@ -1,0 +1,184 @@
+---
+title: "Soporte de OCR"
+sidebar_label: "Soporte de OCR"
+sidebar_position: 18
+description: "Este artículo demuestra la capacidad de conectar un módulo externo (biblioteca) para el reconocimiento de texto impreso (reconocimiento óptico de caracteres, OCR) en imágenes, ya sea de forma independiente o incrustado en documentos."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/indexing/ocr-support.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "18ff127cf7f24338b059b0a2521209e9a1129bc8774a8ffa328186b298dd363b"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "8f9c68ee66342873bc2a32322fa69419f3706fc42de7eb3b2d963e1be9375da9"
+translation_updated_at: "2026-11-16T11:17:30.605Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+El soporte de OCR significa la capacidad de conectar un módulo externo (biblioteca) para el reconocimiento de texto impreso (reconocimiento óptico de caracteres, OCR) en imágenes, ya sean imágenes independientes o incrustadas en documentos.
+
+Para conectar OCR, debe implementar la interfaz `IOcrConnector` en el código del cliente.
+
+El siguiente ejemplo muestra cómo implementar el conector OCR utilizando la biblioteca Aspose.OCR para el reconocimiento de texto en imágenes.
+
+```csharp
+string indexFolder = @"c:\MyIndex";
+string documentFolder = @"c:\MyDocuments";
+
+// Creating an index
+Index index = new Index(indexFolder);
+
+// Setting the OCR indexing options
+IndexingOptions options = new IndexingOptions();
+options.OcrIndexingOptions.EnabledForSeparateImages = true;
+options.OcrIndexingOptions.EnabledForEmbeddedImages = true;
+options.OcrIndexingOptions.OcrConnector = new AsposeOcrConnector();
+
+// Indexing documents in a document folder
+index.Add(documentFolder, options);
+
+// Searching in the index
+SearchResult result = index.Search("Einstein");
+
+...
+
+// Implementing the OCR connector that uses Aspose.OCR library
+// You need to install the following package:
+// https://www.nuget.org/packages/Aspose.OCR/
+public class AsposeOcrConnector : IOcrConnector
+{
+    public AsposeOcrConnector()
+    {
+    }
+
+    public string Recognize(OcrContext context)
+    {
+        string extension = context.ImageFileExtension.ToLowerInvariant();
+        if (context.ImageLocation == ImageLocation.Separate)
+        {
+            switch (extension)
+            {
+                case ".gif":
+                case ".png":
+                case ".jpg":
+                case ".jpeg":
+                case ".bmp":
+                case ".tif":
+                case ".tiff":
+                case "":
+                    return RecognizePrivate(context);
+
+                default:
+                    return null;
+            }
+        }
+        else if (context.ImageLocation == ImageLocation.Embedded ||
+            context.ImageLocation == ImageLocation.ContainerItem)
+        {
+            return RecognizePrivate(context);
+        }
+        else
+        {
+            throw new NotSupportedException("The image type is not supported: " + context.ImageLocation);
+        }
+    }
+
+    private string RecognizePrivate(OcrContext context)
+    {
+        MemoryStream memoryStream = new MemoryStream((int)context.ImageStream.Length);
+        context.ImageStream.CopyTo(memoryStream);
+
+        AsposeOcr asposeOcr = new AsposeOcr();
+        string result = asposeOcr.RecognizeImage(memoryStream);
+        return result;
+    }
+}
+```
+
+El siguiente ejemplo demuestra cómo implementar el conector OCR utilizando la API de OCR de Aspose Cloud.
+
+```csharp
+// Implementing the OCR connector that uses Aspose Cloud OCR
+// The full API for Aspose Cloud OCR for .NET you can find in the repository:
+// https://github.com/aspose-ocr-cloud/aspose-ocr-cloud-dotnet
+// Sid and key you can get after free registration at
+// https://dashboard.aspose.cloud/applications
+public class AsposeCloudOcrConnector : IOcrConnector
+{
+    private readonly Configuration _configuration;
+
+    public AsposeCloudOcrConnector()
+    {
+        _configuration = new Configuration();
+        _configuration.AppSid = "...";
+        _configuration.AppKey = "...";
+    }
+
+    public string Recognize(OcrContext context)
+    {
+        OcrApi api = new OcrApi(_configuration);
+        var request = new PostOcrFromUrlOrContentRequest(context.ImageStream);
+        OCRResponse response = api.PostOcrFromUrlOrContent(request);
+        return response.Text;
+    }
+}
+```
+
+Y el siguiente ejemplo demuestra cómo implementar el conector OCR utilizando Tesseract.
+
+```csharp
+// Implementing the OCR connector that uses Tesseract
+// You need to install the following packages:
+// https://www.nuget.org/packages/Tesseract/
+// https://www.nuget.org/packages/Tesseract.Data.English/
+public class TesseractOcrConnector : IOcrConnector
+{
+    public TesseractOcrConnector()
+    {
+    }
+
+    public string Recognize(OcrContext context)
+    {
+        var buffer = new byte[context.ImageStream.Length];
+        context.ImageStream.Read(buffer, 0, buffer.Length);
+
+        var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase);
+        path = Path.Combine(path, "tessdata");
+        path = path.Replace("file:\\", "");
+
+        using (var engine = new TesseractEngine(path, "eng", EngineMode.Default))
+        using (Pix img = Pix.LoadFromMemory(buffer))
+        using (Page recognizedPage = engine.Process(img))
+        {
+            string recognizedText = recognizedPage.GetText();
+            return recognizedText;
+        }
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+
+* <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.
+
+Le invitamos a realizar búsquedas en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Search App</a>.

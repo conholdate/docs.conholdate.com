@@ -1,0 +1,151 @@
+---
+title: "Cómo controlar el cumplimiento de OOXML para documentos de procesamiento de texto"
+sidebar_label: "Cómo controlar el cumplimiento de OOXML para documentos de procesamiento de texto"
+sidebar_key: "net-signature-saving-control-ooxml-compliance-wordprocessing"
+sidebar_position: 4
+description: "Este artículo explica cómo preservar o anular el nivel de cumplimiento OOXML (ECMA-376, ISO/IEC 29500 Transitional, ISO/IEC 29500 Strict) al guardar documentos de procesamiento de texto firmados."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/saving/control-ooxml-compliance-wordprocessing.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "ea88f89425f90e390fd2568e700918bb0e1052df9ced7d106c54671b3133c996"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "895856f809a0c2251099a158436a8c1f7a1738b4c2575c40d379993060050d79"
+translation_updated_at: "2026-11-16T12:51:13.312Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Algunas herramientas descendentes de OOXML solo admiten niveles de cumplimiento específicos. Por ejemplo, <a href="https://github.com/plutext/docx4j/issues/321" target="_blank" rel="nofollow noopener noreferrer">Docx4j</a> no lee la salida en formato ISO/IEC 29500:2008 Strict, por lo que los consumidores que dependen de dichas bibliotecas necesitan que el documento firmado se genere en formato Transitional (o ECMA-376) en su lugar.
+
+A partir de GroupDocs.Signature para .NET 26.6, el <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> La clase conserva el nivel de cumplimiento con OOXML del documento de procesamiento de texto de origen al guardarlo, y le permite anularlo mediante <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/wordprocessingsaveoptions/" target="_blank" rel="nofollow noopener noreferrer">WordProcessingSaveOptions</a>.
+
+## Cómo se maneja la conformidad con OOXML {#how-ooxml-compliance-is-handled}
+
+* La fuente `OoxmlCompliance` El valor se detecta al cargar el documento y se conserva al guardar de forma predeterminada.
+* <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/wordprocessingsaveoptions/" target="_blank" rel="nofollow noopener noreferrer">WordProcessingSaveOptions</a> expone un valor nullable `OoxmlCompliance` propiedad.
+  * `null` (predeterminado): mantener el cumplimiento del documento cargado.
+  * `set`: sobrescribe el valor de origen con el nivel de cumplimiento especificado.
+* Solo se otorga por los formatos de salida de OOXML: `Docx`, `Docm`, `Dotx`, `Dotm` y sus `FlatOpc` variantes.
+
+## Niveles de cumplimiento admitidos {#supported-compliance-levels}
+
+El `OoxmlCompliance` `enum` define los niveles que puedes solicitar al guardar:
+
+```csharp
+public enum OoxmlCompliance
+{
+    /// <summary>Specifies ECMA-376 compliance level.</summary>
+    Ecma,
+    /// <summary>Specifies ISO/IEC 29500:2008 Transitional compliance level.</summary>
+    Transitional,
+    /// <summary>Specifies ISO/IEC 29500:2008 Strict compliance level.</summary>
+    Strict
+}
+```
+
+## Pasos para anular el cumplimiento de OOXML al guardar {#steps-to-override-ooxml-compliance-on-save}
+
+* Cree una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pase la ruta o secuencia del documento de origen como parámetro del constructor.
+* Instancie las opciones de firma requeridas (por ejemplo, <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/textsignoptions/" target="_blank" rel="nofollow noopener noreferrer">TextSignOptions</a>).
+* Instancie <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/wordprocessingsaveoptions/" target="_blank" rel="nofollow noopener noreferrer">WordProcessingSaveOptions</a> y establezca la propiedad `OoxmlCompliance` en el nivel requerido (`Ecma`, `Transitional` o `Strict`).
+* Llame al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pase las opciones de firma y el objeto `WordProcessingSaveOptions` a este.
+
+## Ejemplo: forzar ISO/IEC 29500:2008 Strict al guardar {#example-force-iso-iec-29500-2008-strict-on-save}
+
+```csharp
+using (Signature signature = new Signature(filePath))
+{
+    TextSignOptions signOptions = new TextSignOptions("John Smith")
+    {
+        Left = 100,
+        Top = 100,
+        Width = 200,
+        Height = 60
+    };
+
+    // Force ISO 29500:2008 Strict on save regardless of the source's compliance.
+    // Other allowed values: OoxmlCompliance.Ecma, OoxmlCompliance.Transitional.
+    WordProcessingSaveOptions saveOptions = new WordProcessingSaveOptions(WordProcessingSaveFileFormat.Docx)
+    {
+        OoxmlCompliance = OoxmlCompliance.Strict
+    };
+
+    SignResult result = signature.Sign(outputFilePath, signOptions, saveOptions);
+}
+```
+
+## Ejemplo: guardar como Transicional para compatibilidad descendente {#example-save-as-transitional-for-downstream-compatibility}
+
+Utilice `OoxmlCompliance.Transitional` cuando el consumidor del documento firmado solo lea DOCX en formato ISO/IEC 29500:2008 Transicional (o ECMA-376), por ejemplo, cuando el archivo será procesado posteriormente por una biblioteca que no admite el formato estricto.
+
+```csharp
+using (Signature signature = new Signature(filePath))
+{
+    TextSignOptions signOptions = new TextSignOptions("John Smith")
+    {
+        Left = 100,
+        Top = 100,
+        Width = 200,
+        Height = 60
+    };
+
+    WordProcessingSaveOptions saveOptions = new WordProcessingSaveOptions(WordProcessingSaveFileFormat.Docx)
+    {
+        OoxmlCompliance = OoxmlCompliance.Transitional
+    };
+
+    signature.Sign(outputFilePath, signOptions, saveOptions);
+}
+```
+
+## Ejemplo: conservar el nivel de cumplimiento del documento de origen {#example-keep-the-source-document-s-compliance}
+
+Deje `OoxmlCompliance` sin establecer (o establezca explícitamente `null`) para conservar el nivel de cumplimiento en el que se redactó el documento cargado.
+
+```csharp
+using (Signature signature = new Signature(filePath))
+{
+    TextSignOptions signOptions = new TextSignOptions("John Smith")
+    {
+        Left = 100,
+        Top = 100,
+        Width = 200,
+        Height = 60
+    };
+
+    // OoxmlCompliance not set => source compliance is preserved on save.
+    WordProcessingSaveOptions saveOptions = new WordProcessingSaveOptions(WordProcessingSaveFileFormat.Docx);
+
+    signature.Sign(outputFilePath, signOptions, saveOptions);
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario MVC para la firma de documentos con .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario WebForms para la firma de documentos con .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Dropwizard para la firma de documentos con Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Spring para la firma de documentos con Java</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

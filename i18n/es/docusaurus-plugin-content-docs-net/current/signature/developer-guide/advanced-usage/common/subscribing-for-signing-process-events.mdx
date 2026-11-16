@@ -1,0 +1,127 @@
+---
+title: "Suscripción a eventos del proceso de firma"
+sidebar_label: "Suscripción a eventos del proceso de firma"
+sidebar_key: "net-signature-common-subscribing-for-signing-process-events"
+sidebar_position: 5
+description: "Este artículo explica cómo suscribirse a eventos de firma electrónica, como inicio, progreso y finalización, mediante la API de GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/common/subscribing-for-signing-process-events.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "79d21ef7eb5e618ed42516c91e0aae70453f7971ae350603daf9fbed564b4009"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "c41974beb89541d613733844c68202cf36fdb07cd96f3b139374f4660ba8f46c"
+translation_updated_at: "2026-11-16T12:30:46.115Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+La clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> contiene varios eventos que se invocan en distintas etapas del proceso
+
+* <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/signstarted" target="_blank" rel="nofollow noopener noreferrer">SignStarted</a> para controlar el evento de inicio del proceso. Este evento se produce una única vez cuando se llama al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a>
+* <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/signprogress" target="_blank" rel="nofollow noopener noreferrer">SignProgress</a> para controlar el evento de progreso. Este evento se produce cada vez que se completa la firma de una firma individual.
+* <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/signcompleted" target="_blank" rel="nofollow noopener noreferrer">SignCompleted</a> para controlar el evento de finalización. Este evento se produce una única vez que se completa el proceso <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a>.
+
+A continuación se indican los pasos para suscribirse al proceso de firma con <a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a>:
+
+* Definir los delegados del controlador necesarios para procesar los eventos de firma.
+* Crear una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasar como parámetro en el constructor la ruta del documento de origen o un flujo.
+* Suscribirse a los eventos requeridos.
+* Instanciar el objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/signoptions" target="_blank" rel="nofollow noopener noreferrer">SignOptions</a> requerido.
+* Llamar al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasar las opciones de firma como argumento.
+
+## Implementar el método para el evento SignStarted {#implement-method-for-signstarted-event}
+
+GroupDocs.Signature espera un delegado <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/processprogresseventhandler" target="_blank" rel="nofollow noopener noreferrer">ProcessStartEventHandler</a> para suscribirse al evento <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/signstarted" target="_blank" rel="nofollow noopener noreferrer">SignStarted</a>
+
+```csharp
+private static void OnSignStarted(Signature signature, ProcessStartEventArgs args)
+{
+    Console.WriteLine("Sign process started at {0} with {1} total signatures to be put in document", args.Started, args.TotalSignatures);
+}
+```
+
+## Implementar método para el evento SignProgress {#implement-method-for-signprogress-event}
+
+```csharp
+ private static void OnSignProgress(Signature signature, ProcessProgressEventArgs args)
+ {
+     Console.WriteLine("Sign progress. Processed {0} signatures. Time spent {1} mlsec", args.ProcessedSignatures, args.Ticks);
+ }
+```
+
+## Implementar método para el evento SignCompleted {#implement-method-for-signcompleted-event}
+
+```csharp
+private static void OnSignCompleted(Signature signature, ProcessCompleteEventArgs args)
+{
+    Console.WriteLine("Sign process completed at {0} with {1} total signatures. Process took {2} mlsec", args.Completed, args.TotalSignatures, args.Ticks);
+}
+```
+
+## Suscripción a eventos del proceso de firma {#subscribing-for-signing-process-events}
+
+```csharp
+private static void OnSignStarted(Signature signature, ProcessStartEventArgs args)
+{
+    Console.WriteLine("Sign process started at {0} with {1} total signatures to be put in document", args.Started, args.TotalSignatures);
+}
+
+private static void OnSignProgress(Signature signature, ProcessProgressEventArgs args)
+{
+    Console.WriteLine("Sign progress. Processed {0} signatures. Time spent {1} mlsec", args.ProcessedSignatures, args.Ticks);
+}
+
+private static void OnSignCompleted(Signature signature, ProcessCompleteEventArgs args)
+{
+    Console.WriteLine("Sign process completed at {0} with {1} total signatures. Process took {2} mlsec", args.Completed, args.TotalSignatures, args.Ticks);
+}
+
+public static void Run()
+{
+    using (Signature signature = new Signature("sample.pdf"))
+    {
+        signature.SignStarted += OnSignStarted;
+        signature.SignProgress += OnSignProgress;
+        signature.SignCompleted += OnSignCompleted;
+        TextSignOptions options = new TextSignOptions("John Smith")
+        {
+            // set signature position
+            Left = 100,
+            Top = 100
+        };
+
+        // sign document to file
+        signature.Sign("SignedSample", options);
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con UI MVC</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con UI WebForms</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con UI Dropwizard</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con UI Spring</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

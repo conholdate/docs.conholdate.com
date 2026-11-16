@@ -1,0 +1,473 @@
+---
+title: "Implementar caché segura para subprocesos en GroupDocs.Viewer"
+sidebar_label: "Implementar caché segura para subprocesos en GroupDocs.Viewer"
+sidebar_position: 2
+description: "Este artículo explica cómo hacer que la memoria caché sea segura para subprocesos con GroupDocs.Viewer en sus aplicaciones .NET."
+product: "viewer"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.4.0"
+version: "v26.4.0"
+source_repo: "GroupDocs.Viewer-Docs"
+source_path: "net/developer-guide/caching-results/implement-thread-safe-cache-for-groupdocs-viewer.md"
+source_commit: "1787766828434e84ffee3af8d2b2e72482e06feb"
+source_sha256: "86cd25bff22daa18daaf06a154b682f3d884e9dacc88de54e448e5fabf2e854b"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "102db947f4914315778c8e10ff24931b82cbce3f87cabf10f8a08933ce0bed54"
+translation_updated_at: "2026-11-16T15:28:54.673Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Viewer for .NET se incluye en Conholdate.Total for .NET.
+:::
+
+Esta página describe cómo desarrollar una memoria caché segura para subprocesos utilizando la instrucción <a href="https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/lock-statement" target="_blank" rel="nofollow noopener noreferrer">C# lock</a> y la clase <a href="https://docs.microsoft.com/en-us/dotnet/api/system.collections.concurrent.concurrentdictionary-2" target="_blank" rel="nofollow noopener noreferrer">ConcurrentDictionary&lt;,&gt;</a>.
+
+## Introducción {#introduction}
+
+Un método es seguro para subprocesos si múltiples subprocesos pueden invocarlo sin comprometer su funcionalidad. Lograr la seguridad para subprocesos es una tarea compleja, por lo que las clases de propósito general generalmente no son seguras para subprocesos. La forma más común de lograr la seguridad para subprocesos es bloquear el recurso para su uso exclusivo por un único subproceso en cualquier momento dado.
+
+## Problema {#issue}
+
+Debe desarrollar una aplicación web donde múltiples usuarios puedan ver simultáneamente el mismo archivo. La aplicación web utiliza GroupDocs.Viewer en el lado del servidor. Debe garantizar que múltiples subprocesos puedan leer y escribir de forma segura en la memoria caché.
+
+En GroupDocs.Viewer, puede utilizar la memoria caché para mejorar el rendimiento si el mismo documento se procesa varias veces ([más información sobre la memoria caché aquí](
+    /net/viewer/developer-guide/caching-results/).) The <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.caching/filecache" target="_blank" rel="nofollow noopener noreferrer">FileCache</a> class is an implementation of the <a href="https://reference.groupdocs.com/net/viewer/groupdocs.viewer.caching/icache" target="_blank" rel="nofollow noopener noreferrer">ICache</a> interface that uses a local disk to store the cache files. The FileCache is not thread safe, so you need to make it so.
+
+## Solución {#solution}
+
+La clase FileCache utiliza un disco local para leer y escribir archivos de salida. Debes implementar lectura y escritura seguras para subprocesos en el disco. Para hacerlo, utiliza la lista para almacenar la clave o el ID del archivo y el objeto asociado que necesitas bloquear. La forma más sencilla es utilizar la <a href="https://docs.microsoft.com/en-us/dotnet/api/system.collections.concurrent.concurrentdictionary-2" target="_blank" rel="nofollow noopener noreferrer">ConcurrentDictionary&lt;,&gt; clase</a> de la <a href="https://docs.microsoft.com/en-us/dotnet/standard/collections/thread-safe/" target="_blank" rel="nofollow noopener noreferrer">.NET Framework 4.0</a>. `ConcurrentDictionary` es una implementación segura para subprocesos de un diccionario de pares clave-valor. Implemente la clase `ThreadSafeCache` que envuelve una clase no segura para subprocesos que implementa la interfaz `ICache`.
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using GroupDocs.Viewer.Caching;
+using System.Collections.Generic;
+
+internal class ThreadSafeCache : ICache
+{
+    private readonly ICache _cache;
+    private readonly IKeyLockerStore _keyLockerStore;
+
+    public ThreadSafeCache(ICache cache, IKeyLockerStore keyLockerStore)
+    {
+        _cache = cache;
+        _keyLockerStore = keyLockerStore;
+    }
+
+    public void Set(string key, object value)
+    {
+        lock (_keyLockerStore.GetLockerFor(key))
+        {
+            _cache.Set(key, value);
+        }
+    }
+
+    public bool TryGetValue<TEntry>(string key, out TEntry value)
+    {
+        lock (_keyLockerStore.GetLockerFor(key))
+        {
+            return _cache.TryGetValue(key, out value);
+        }
+    }
+
+    public IEnumerable<string> GetKeys(string filter)
+    {
+        lock (_keyLockerStore.GetLockerFor("get_keys"))
+        {
+            return _cache.GetKeys(filter);
+        }
+    }
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports System.Runtime.InteropServices
+Imports GroupDocs.Viewer.Caching
+
+Class ThreadSafeCache
+    Implements ICache
+    Private ReadOnly _cache As ICache
+    Private ReadOnly _keyLockerStore As IKeyLockerStore
+
+    Public Sub New(cache As ICache, keyLockerStore As IKeyLockerStore)
+        _cache = cache
+        _keyLockerStore = keyLockerStore
+    End Sub
+
+    Public Function TryGetValue(Of TEntry)(key As String, <Out> ByRef value As TEntry) As Boolean Implements ICache.TryGetValue
+        SyncLock _keyLockerStore.GetLockerFor(key)
+            Return _cache.TryGetValue(key, value)
+        End SyncLock
+    End Function
+
+    Public Function ICache_GetKeys(filter As String) As IEnumerable(Of String) Implements ICache.GetKeys
+        SyncLock _keyLockerStore.GetLockerFor("get_keys")
+            Return _cache.GetKeys(filter)
+        End SyncLock
+    End Function
+
+    Public Sub ICache_Set(key As String, value As Object) Implements ICache.[Set]
+        SyncLock _keyLockerStore.GetLockerFor(key)
+            _cache.Set(key, value)
+        End SyncLock
+    End Sub
+
+End Class
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+Todos los métodos de la clase ThreadSafeCache utilizan bloqueos para garantizar que las llamadas sean seguras en entornos multiproceso. La clase ConcurrentDictionaryKeyLockerStore utiliza ConcurrentDictionary para crear el objeto de bloqueo o recuperarlo si ya existe. Además, genera una clave única que identifica un archivo almacenado en caché.
+
+
+<Tabs groupId="example2">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using System.Collections.Concurrent;
+// ...
+
+interface IKeyLockerStore
+{
+    object GetLockerFor(string key);
+}
+
+class ConcurrentDictionaryKeyLockerStore : IKeyLockerStore
+{
+    private readonly ConcurrentDictionary<string, object> _keyLockerMap;
+    private readonly string _uniqueKeyPrefix;
+
+    public ConcurrentDictionaryKeyLockerStore(ConcurrentDictionary<string, object> keyLockerMap, string uniqueKeyPrefix)
+    {
+        _keyLockerMap = keyLockerMap;
+        _uniqueKeyPrefix = uniqueKeyPrefix;
+    }
+
+    public object GetLockerFor(string key)
+    {
+        string uniqueKey = GetUniqueKey(key);
+        return _keyLockerMap.GetOrAdd(uniqueKey, k => new object());
+    }
+
+    private string GetUniqueKey(string key)
+    {
+        return $"{_uniqueKeyPrefix}_{key}";
+    }
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports System.Collections.Concurrent
+' ...
+
+Interface IKeyLockerStore
+    Function GetLockerFor(key As String) As Object
+End Interface
+
+Class ConcurrentDictionaryKeyLockerStore
+    Implements IKeyLockerStore
+    Private ReadOnly _keyLockerMap As ConcurrentDictionary(Of String, Object)
+    Private ReadOnly _uniqueKeyPrefix As String
+
+    Public Sub New(keyLockerMap As ConcurrentDictionary(Of String, Object), uniqueKeyPrefix As String)
+        _keyLockerMap = keyLockerMap
+        _uniqueKeyPrefix = uniqueKeyPrefix
+    End Sub
+
+    Public Function GetLockerFor(key As String) As Object Implements IKeyLockerStore.GetLockerFor
+        Dim uniqueKey As String = Me.GetUniqueKey(key)
+        Return _keyLockerMap.GetOrAdd(uniqueKey, Function(k) New Object())
+    End Function
+
+    Private Function GetUniqueKey(key As String) As String
+        Return $"{_uniqueKeyPrefix}_{key}"
+    End Function
+End Class
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+## Resultado {#result}
+
+
+<Tabs groupId="example3">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+using System.IO;
+using System.Collections.Generic;
+using System.Collections.Concurrent;
+using GroupDocs.Viewer;
+using GroupDocs.Viewer.Caching;
+using GroupDocs.Viewer.Interfaces;
+using GroupDocs.Viewer.Options;
+
+namespace ThreadSaveCacheExample
+{
+    static class Program
+    {
+        private static readonly ConcurrentDictionary<string, object> KeyLockerMap = new ConcurrentDictionary<string, object>();
+
+        static void Main()
+        {
+            string fileName = "sample.pdf";
+            string cacheFolder = fileName.Replace('.', '_');
+            string cachePath = Path.Combine("cache", cacheFolder);
+            string uniqueKeyPrefix = cachePath;
+
+            ICache fileCache = new FileCache(cachePath);
+            IKeyLockerStore keyLockerStore = new ConcurrentDictionaryKeyLockerStore(KeyLockerMap, uniqueKeyPrefix);
+            ICache threadSafeCache = new ThreadSafeCache(fileCache, keyLockerStore);
+
+            ViewerSettings viewerSettings = new ViewerSettings(threadSafeCache);
+
+            List<MemoryStream> pages = new List<MemoryStream>();
+            using (Viewer viewer = new Viewer(fileName, viewerSettings))
+            {
+                IPageStreamFactory pageStreamFactory = new MemoryPageStreamFactory(pages);
+                ViewOptions viewOptions = HtmlViewOptions.ForEmbeddedResources(pageStreamFactory);
+                viewer.View(viewOptions);
+            }
+        }
+    }
+
+    class ThreadSafeCache : ICache
+    {
+        private readonly ICache _cache;
+        private readonly IKeyLockerStore _keyLockerStore;
+
+        public ThreadSafeCache(ICache cache, IKeyLockerStore keyLockerStore)
+        {
+            _cache = cache;
+            _keyLockerStore = keyLockerStore;
+        }
+
+        public void Set(string key, object value)
+        {
+            lock (_keyLockerStore.GetLockerFor(key))
+            {
+                _cache.Set(key, value);
+            }
+        }
+
+        public bool TryGetValue<TEntry>(string key, out TEntry value)
+        {
+            lock (_keyLockerStore.GetLockerFor(key))
+            {
+                return _cache.TryGetValue(key, out value);
+            }
+        }
+
+        public IEnumerable<string> GetKeys(string filter)
+        {
+            lock (_keyLockerStore.GetLockerFor("get_keys"))
+            {
+                return _cache.GetKeys(filter);
+            }
+        }
+    }
+
+    interface IKeyLockerStore
+    {
+        object GetLockerFor(string key);
+    }
+
+    class ConcurrentDictionaryKeyLockerStore : IKeyLockerStore
+    {
+        private readonly ConcurrentDictionary<string, object> _keyLockerMap;
+        private readonly string _uniqueKeyPrefix;
+
+        public ConcurrentDictionaryKeyLockerStore(ConcurrentDictionary<string, object> keyLockerMap, string uniqueKeyPrefix)
+        {
+            _keyLockerMap = keyLockerMap;
+            _uniqueKeyPrefix = uniqueKeyPrefix;
+        }
+
+        public object GetLockerFor(string key)
+        {
+            string uniqueKey = GetUniqueKey(key);
+            return _keyLockerMap.GetOrAdd(uniqueKey, k => new object());
+        }
+
+        private string GetUniqueKey(string key)
+        {
+            return $"{_uniqueKeyPrefix}_{key}";
+        }
+    }
+
+    class MemoryPageStreamFactory : IPageStreamFactory
+    {
+        private readonly List<MemoryStream> _pages;
+
+        public MemoryPageStreamFactory(List<MemoryStream> pages)
+        {
+            _pages = pages;
+        }
+
+        public Stream CreatePageStream(int pageNumber)
+        {
+            MemoryStream pageStream = new MemoryStream();
+            _pages.Add(pageStream);
+
+            return pageStream;
+        }
+
+        public void ReleasePageStream(int pageNumber, Stream pageStream)
+        {
+            //Do not release page stream as we'll need to keep the stream open
+        }
+    }
+}
+```
+
+</TabItem>
+
+
+<TabItem value="vb-net" label="VB.NET">
+
+```vb
+Imports System.IO
+Imports System.Collections.Concurrent
+Imports GroupDocs.Viewer
+Imports GroupDocs.Viewer.Caching
+Imports GroupDocs.Viewer.Interfaces
+Imports GroupDocs.Viewer.Options
+Imports System.Runtime.InteropServices
+
+Module Program
+    Private ReadOnly KeyLockerMap As ConcurrentDictionary(Of String, Object) = New ConcurrentDictionary(Of String, Object)()
+
+    Public Sub Main()
+        Dim fileName As String = "resume.pdf"
+        Dim cacheFolder As String = fileName.Replace("."c, "_"c)
+        Dim cachePath As String = Path.Combine("cache", cacheFolder)
+        Dim uniqueKeyPrefix As String = cachePath
+
+        Dim fileCache As ICache = New FileCache(cachePath)
+        Dim keyLockerStore As IKeyLockerStore = New ConcurrentDictionaryKeyLockerStore(KeyLockerMap, uniqueKeyPrefix)
+        Dim threadSafeCache As ICache = New ThreadSafeCache(fileCache, keyLockerStore)
+
+        Dim viewerSettings As ViewerSettings = New ViewerSettings(threadSafeCache)
+
+        Dim pages As List(Of MemoryStream) = New List(Of MemoryStream)()
+        Using viewer As Viewer = New Viewer(fileName, viewerSettings)
+            Dim pageStreamFactory As IPageStreamFactory = New MemoryPageStreamFactory(pages)
+            Dim viewOptions As ViewOptions = HtmlViewOptions.ForEmbeddedResources(pageStreamFactory)
+            viewer.View(viewOptions)
+        End Using
+    End Sub
+End Module
+
+Class ThreadSafeCache
+    Implements ICache
+    Private ReadOnly _cache As ICache
+    Private ReadOnly _keyLockerStore As IKeyLockerStore
+
+    Public Sub New(cache As ICache, keyLockerStore As IKeyLockerStore)
+        _cache = cache
+        _keyLockerStore = keyLockerStore
+    End Sub
+
+    Public Function TryGetValue(Of TEntry)(key As String, <Out> ByRef value As TEntry) As Boolean Implements ICache.TryGetValue
+        SyncLock _keyLockerStore.GetLockerFor(key)
+            Return _cache.TryGetValue(key, value)
+        End SyncLock
+    End Function
+
+    Public Function ICache_GetKeys(filter As String) As IEnumerable(Of String) Implements ICache.GetKeys
+        SyncLock _keyLockerStore.GetLockerFor("get_keys")
+            Return _cache.GetKeys(filter)
+        End SyncLock
+    End Function
+
+    Public Sub ICache_Set(key As String, value As Object) Implements ICache.[Set]
+        SyncLock _keyLockerStore.GetLockerFor(key)
+            _cache.Set(key, value)
+        End SyncLock
+    End Sub
+
+End Class
+
+Interface IKeyLockerStore
+    Function GetLockerFor(key As String) As Object
+End Interface
+
+Class ConcurrentDictionaryKeyLockerStore
+    Implements IKeyLockerStore
+    Private ReadOnly _keyLockerMap As ConcurrentDictionary(Of String, Object)
+    Private ReadOnly _uniqueKeyPrefix As String
+
+    Public Sub New(keyLockerMap As ConcurrentDictionary(Of String, Object), uniqueKeyPrefix As String)
+        _keyLockerMap = keyLockerMap
+        _uniqueKeyPrefix = uniqueKeyPrefix
+    End Sub
+
+    Public Function GetLockerFor(key As String) As Object Implements IKeyLockerStore.GetLockerFor
+        Dim uniqueKey As String = Me.GetUniqueKey(key)
+        Return _keyLockerMap.GetOrAdd(uniqueKey, Function(k) New Object())
+    End Function
+
+    Private Function GetUniqueKey(key As String) As String
+        Return $"{_uniqueKeyPrefix}_{key}"
+    End Function
+End Class
+
+Class MemoryPageStreamFactory
+    Implements IPageStreamFactory
+    Private ReadOnly _pages As List(Of MemoryStream)
+
+    Public Sub New(pages As List(Of MemoryStream))
+        _pages = pages
+    End Sub
+
+    Public Sub IPageStreamFactory_ReleasePageStream(pageNumber As Integer, pageStream As Stream) Implements IPageStreamFactory.ReleasePageStream
+        'Do not release page stream as we'll need to keep the stream open
+    End Sub
+
+    Public Function IPageStreamFactory_CreatePageStream(pageNumber As Integer) As Stream Implements IPageStreamFactory.CreatePageStream
+        Dim pageStream As MemoryStream = New MemoryStream()
+        _pages.Add(pageStream)
+
+        Return pageStream
+    End Function
+End Class
+```
+
+</TabItem>
+
+
+</Tabs>

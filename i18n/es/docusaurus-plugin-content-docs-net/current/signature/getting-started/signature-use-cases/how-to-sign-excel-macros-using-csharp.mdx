@@ -1,0 +1,171 @@
+---
+title: "Cómo firmar hojas de cálculo de Excel y sus macros mediante C#"
+sidebar_label: "Cómo firmar hojas de cálculo de Excel y sus macros mediante C#"
+sidebar_key: "net-signature-signature-use-cases-how-to-sign-excel-macros-using-csharp"
+sidebar_position: 4
+description: "Esta guía describe cómo firmar libros de Excel y/o macros en ellos utilizando C#. Firme sus hojas de cálculo con certificados digitales mediante la API de GroupDocs.Signature para .NET, proporcionada por GroupDocs."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/getting-started/signature-use-cases/how-to-sign-excel-macros-using-csharp.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "7cb716c7652d047cba54a5edc801f7bd9d20a7c32f76ceb2f11b74478e10a817"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "e79e33c7c59dcfeb2965a52b7efa3b07a82b7308a9eef6b3fbd4ea7fd48e4529"
+translation_updated_at: "2026-11-16T14:45:53.888Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+Puede firmar hojas de cálculo, así como también macros de Visual Basic para Aplicaciones (VBA) incrustadas en hojas de cálculo, mediante certificados digitales. La firma de un libro de trabajo confirma la identidad del firmante y la validez del contenido. Esto mejora la seguridad y la autenticación. Modificar una hoja de cálculo firmada invalida la firma. Al abrir un libro de trabajo firmado, otros usuarios pueden estar seguros de que proviene de una fuente confiable y de que nadie lo ha modificado desde su firma. 
+
+## Obtención de un certificado digital {#obtaining-a-digital-certificate}
+
+Un certificado digital es un par de claves criptográficas que consta de una clave pública y una clave privada, emitido por una tercera parte de confianza conocida como Autoridad de Certificación (CA, por sus siglas en inglés). Existen numerosas autoridades de certificación comerciales de terceros de las que puede adquirir un certificado digital o obtener uno gratuito. Muchas instituciones, gobiernos y corporaciones también pueden emitir sus propios certificados.
+
+Puede crear su propio certificado digital para uso personal o fines de prueba mediante la herramienta SelfCert.exe, que se proporciona con Microsoft Office. Sin embargo, este certificado no está autenticado por una Autoridad de Certificación (CA).
+
+En este artículo, utilizaremos un certificado de prueba creado por el propio usuario.
+
+![Test certificate](/net/signature/images/signature-use-cases/how-to-sign-excel-macros-using-csharp/MrSmithSignature.png)
+
+Tenga en cuenta que, para entornos de producción, debe obtener un certificado de una autoridad de confianza (CA) para garantizar una comunicación segura y de confianza.
+
+## ¿Qué archivos de Excel pueden firmarse? {#what-excel-files-could-be-signed}
+
+Puede firmar los siguientes archivos y proyectos:
+  * libros (XLSX),
+  * plantillas (XLTX),
+  * libros con macros habilitadas (XLSM),
+  * plantillas con macros habilitadas (XLTM),
+  * proyectos de macros VBA dentro de libros o plantillas.
+
+## Firmar hojas de cálculo con certificados digitales en C\# {#signing-spreadsheets-with-digital-certificates-in-c}
+
+Para firmar el contenido de una hoja de cálculo o plantilla específica:
+
+* Instancie la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a>, proporcionando una ruta al documento de origen o a un flujo de documentos.
+* Cree una instancia del objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/digitalsignoptions/" target="_blank" rel="nofollow noopener noreferrer">DigitalSignOptions</a>, proporcionando una ruta al certificado. Especifique la contraseña del certificado mediante la propiedad `DigitalSignOptions.Password`.
+* Invocar el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> para procesar el documento, proporcionando la ruta del archivo de salida y las opciones de firma.
+
+```csharp
+using GroupDocs.Signature;
+using GroupDocs.Signature.Options;
+
+string filePath = @"C:\sample.xlsx"; // NOTE: Put here actual path for your document and certificate
+string certificatePath = @"C:\MrSmithSignature.pfx";
+string password = "1234567890";
+string fileName = Path.GetFileName(filePath);
+string outputFilePath = Path.Combine(@"C:\output", fileName);
+
+// Sign a spreadsheet
+using (Signature signature = new Signature(filePath))
+{
+    // Setup digital signature options
+    DigitalSignOptions signOptions = new DigitalSignOptions(certificatePath);
+    signOptions.Signature.Comments = "Test Signature";
+    signOptions.Password = password;
+
+    signature.Sign(outputFilePath, signOptions);
+}
+```
+Una hoja de cálculo firmada con un certificado digital se vería como a continuación:
+
+![Signed workbook](/net/signature/images/signature-use-cases/how-to-sign-excel-macros-using-csharp/signed-workbook.png)
+
+## Firmar proyectos de macros dentro de hojas de cálculo con certificados digitales en C\# {#signing-macro-projects-within-spreadsheets-with-digital-certificates-in-c}
+
+Puede firmar únicamente las macros incrustadas en la hoja de cálculo, o bien firmar tanto el contenido de la hoja de cálculo como sus macros.
+
+Para firmar únicamente las macros:
+
+* Instanciar la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a>, proporcionando una ruta al documento de origen o un flujo de documento.
+* Crear una instancia del objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/digitalsignoptions/" target="_blank" rel="nofollow noopener noreferrer">DigitalSignOptions</a>.
+* Crear una instancia del objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/digitalvba/" target="_blank" rel="nofollow noopener noreferrer">DigitalVBA</a>, pasando como parámetros del constructor la ruta del certificado y su contraseña.
+* Establecer la propiedad <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/digitalvba/signonlyvbaproject/" target="_blank" rel="nofollow noopener noreferrer">SignOnlyVBAProject</a> en `true`.
+* Añadir la instancia del objeto `DigitalVBA` como una extensión de opciones de firma.
+* Invocar el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> para procesar el documento, proporcionando la ruta del archivo de salida y las opciones de firma.
+
+```csharp
+using GroupDocs.Signature;
+using GroupDocs.Signature.Options;
+using GroupDocs.Signature.Domain.Extensions;
+
+string filePath = @"C:\sample.xlsm"; // NOTE: Put here actual path for your document and certificate
+string certificatePath = @"C:\MrSmithSignature.pfx";
+string password = "1234567890";
+string fileName = Path.GetFileName(filePath);
+string outputFilePath = Path.Combine(@"C:\output", fileName);
+
+// Sign macros within the spreadsheet
+using (Signature signature = new Signature(filePath))
+{
+    //Create digital signature options without digital certificate
+    DigitalSignOptions signOptions = new DigitalSignOptions();
+    //Add extension for signing VBA project digitally
+    DigitalVBA digitalVBA = new DigitalVBA(certificatePath, password);
+    //Set to true only for signing VBA project
+    digitalVBA.SignOnlyVBAProject = true;
+    digitalVBA.Comments = "Signed VBA macros";
+    signOptions.Extensions.Add(digitalVBA);
+
+    signature.Sign(outputFilePath, signOptions);
+}
+```
+
+Para firmar tanto el contenido como las macros:
+
+* Instancie la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a>, proporcionando una ruta al documento de origen o a un flujo de documentos.
+* Cree una instancia del objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/digitalsignoptions/" target="_blank" rel="nofollow noopener noreferrer">DigitalSignOptions</a>, proporcionando una ruta al certificado. Especifique la contraseña del certificado mediante la propiedad `DigitalSignOptions.Password`.
+* Cree una instancia del objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/digitalvba/" target="_blank" rel="nofollow noopener noreferrer">DigitalVBA</a>, pasando la ruta del certificado y la contraseña como parámetros del constructor.
+* No especifique la propiedad <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/digitalvba/signonlyvbaproject/" target="_blank" rel="nofollow noopener noreferrer">SignOnlyVBAProject</a>, o bien déle el valor 'false'.
+* Agregue la instancia del objeto `DigitalVBA` como una extensión de opciones de firma.
+* Invoque el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> para procesar el documento, proporcionando la ruta del archivo de salida y las opciones de firma.
+
+```csharp
+using GroupDocs.Signature;
+using GroupDocs.Signature.Options;
+using GroupDocs.Signature.Domain.Extensions;
+
+string filePath = @"C:\sample.xlsm"; // NOTE: Put here actual path for your document and certificate
+string certificatePath = @"C:\MrSmithSignature.pfx";
+string password = "1234567890";
+string fileName = Path.GetFileName(filePath);
+string outputFilePath = Path.Combine(@"C:\output", fileName);
+
+// Sign macros within the spreadsheet
+using (Signature signature = new Signature(filePath))
+{
+    // Setup digital signature options
+    DigitalSignOptions signOptions = new DigitalSignOptions(certificatePath);
+    signOptions.Signature.Comments = "Test Signature";
+    signOptions.Password = password;
+        
+    //Add extension for signing VBA project digitally
+    DigitalVBA digitalVBA = new DigitalVBA(certificatePath, password);
+    digitalVBA.Comments = "Signed VBA macros";
+    signOptions.Extensions.Add(digitalVBA);
+
+    signature.Sign(outputFilePath, signOptions);
+}
+```
+## Obtener una licencia de API gratuita {#get-a-free-api-license}
+
+Para utilizar la API sin limitaciones de evaluación, puede obtener una <a href="https://purchase.conholdate.com/temporary-license" target="_blank">licencia temporal</a> gratuita.
+
+## Conclusión {#conclusion}
+
+En este artículo, aprendimos las razones para firmar hojas de cálculo de Excel y las macros incrustadas en ellas. Aprovechar C# dentro de aplicaciones .NET mejora significativamente la eficiencia de estas tareas.
+Además, puede utilizar la aplicación en línea <a href="https://products.groupdocs.app/signature/xlsx" target="_blank" rel="nofollow noopener noreferrer">Firma digital - XLSX</a> para firmar sus archivos de Excel con GroupDocs.Signature de forma gratuita.
+
+Consulte la <a href="https://docs.groupdocs.com/signature/net/" target="_blank" rel="nofollow noopener noreferrer">documentación</a> para aprender cómo utilizar GroupDocs.Signature en sus aplicaciones .NET. Asimismo, puede plantear cualquier pregunta o problema en el <a href="https://forum.conholdate.com/" target="_blank">foro de Conholdate</a>.

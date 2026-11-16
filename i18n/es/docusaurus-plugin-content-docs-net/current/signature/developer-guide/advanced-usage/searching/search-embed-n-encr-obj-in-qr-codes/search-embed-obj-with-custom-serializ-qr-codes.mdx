@@ -1,0 +1,189 @@
+---
+title: "Buscar objeto incrustado con serialización personalizada de firmas de códigos QR"
+sidebar_label: "Buscar objeto incrustado con serialización personalizada de firmas de códigos QR"
+sidebar_key: "net-signature-searching-search-embed-n-encr-obj-in-qr-codes-search-embed-obj-with-custom-serializ-qr-codes"
+sidebar_position: 2
+description: "Este artículo explica cómo buscar firmas electrónicas incrustadas con serialización personalizada en firmas electrónicas de código QR. Este tema incluye un ejemplo de serialización personalizada, definición de clase y búsqueda de objetos serializados en los códigos QR con GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/searching/search-embed-n-encr-obj-in-qr-codes/search-embed-obj-with-custom-serializ-qr-codes.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "8a1b8af4e80716facc26ef7e9ff949030a2540d8fdf670a8ef999e271c52d51e"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "6417aa445c5963271ec5ad646070b0bf95b36abde20050dd53be91c5f50ea89d"
+translation_updated_at: "2026-11-16T13:09:04.663Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> proporciona las siguientes capacidades para buscar objetos de datos incrustados en firmas QR-code (<a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/qrcodesignature" target="_blank" rel="nofollow noopener noreferrer">QrCodeSignature</a>) que fueron incrustados con cifrado y serialización personalizados
+
+* Capacidad para buscar objetos personalizados incrustados en los metadatos y descifrarlos a sus valores originales
+* Capacidad para buscar firmas QR-code personalizadas cifradas y descifrarlas
+* Capacidad para buscar firmas QR-code personalizadas serializadas  
+
+A continuación se presentan los pasos para buscar y descifrar texto previamente cifrado en un QR-Code, así como descifrar un objeto personalizado desde una firma QR-Code mediante la API de GroupDocs.Signature:
+
+* Implementar (utilizar) una clase personalizada de serialización de datos que implemente la interfaz <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/idataencryption" target="_blank" rel="nofollow noopener noreferrer">IDataEncryption</a>.
+* Asegurarse de que la clase de datos esté definida con el atributo personalizado de serialización
+* Instanciar el objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/qrcodesearchoptions" target="_blank" rel="nofollow noopener noreferrer">QrCodeSearchOptions</a> y configurar el valor <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/qrcodesearchoptions/dataencryption" target="_blank" rel="nofollow noopener noreferrer">DataEncryption</a> con la implementación del objeto de cifrado personalizado
+* Llamar al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasarle <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/qrcodesearchoptions" target="_blank" rel="nofollow noopener noreferrer">QrCodeSearchOptions</a>.
+
+## Implementación de serialización personalizada de datos {#implementation-of-custom-data-serialization}
+
+ Este ejemplo muestra cómo especificar una clase personalizada de serialización. Esta clase debe implementarse como un atributo y la interfaz <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/idataserializer" target="_blank" rel="nofollow noopener noreferrer">IDataSerializer</a>.
+
+```csharp
+/// <summary>
+/// Creates class that implements IDataSerializer interface
+/// This implementation is using json library to provide serialization and deserialization
+/// </summary>
+
+public class CustomSerializationAttribute : Attribute, IDataSerializer
+{
+    public T Deserialize<T>(string source) where T : class
+    {
+        return JsonConvert.DeserializeObject<T>(source);
+    }
+    public string Serialize(object data)
+    {
+        var serializerSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
+        return JsonConvert.SerializeObject(data, serializerSettings);
+    }
+}
+```
+
+## Implementación de cifrado de datos personalizado {#implementation-of-custom-data-encryption}
+
+Este ejemplo muestra cómo especificar una clase de serialización personalizada. Esta clase también puede implementarse como un atributo (opcional) para especificarla como atributo de clase.
+
+```csharp
+// Define class that implements IDataEncryption interface
+// Class could inherits Attribute to use it with class definition
+
+public class CustomXOREncryption : IDataEncryption
+{
+    /// <summary>
+    /// Gets or sets non empty key for encryption (at least one character)
+    /// </summary>
+    public int Key { get; set; }
+    /// <summary>
+    /// Encode method to encrypt string.
+    /// </summary>
+    /// <param name="source">Source string to encode.</param>
+    /// <returns>Returns enccrypted string</returns>
+    public string Encode(string source)
+    {
+        return Process(source);
+    }
+    /// <summary>
+    /// Decode method to obtain decrypted string.
+    /// </summary>
+    /// <param name="source">Source string to decode.</param>
+    /// <returns>Returns decrypted string</returns>
+    public string Decode(string source)
+    {
+        return Process(source);
+    }
+    /// <summary>
+    /// Using XOR operation get encoded / decoded string
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    private string Process(string source)
+    {
+        StringBuilder src = new StringBuilder(source);
+        StringBuilder dst = new StringBuilder(src.Length);
+        char chTmp;
+        for (int index = 0; index < src.Length; ++index)
+        {
+            chTmp = src[index];
+            chTmp = (char)(chTmp ^ this.Key);
+            dst.Append(chTmp);
+        }
+        return dst.ToString();
+    }
+}
+```
+
+## Definición de la clase {#definition-of-class}
+
+Este ejemplo muestra cómo definir una clase personalizada para la serialización.
+
+```csharp
+// define class with custom serialization attribute
+[CustomSerialization]
+public class DocumentSignatureData
+{
+    [Format("SignID")]
+    public string ID { get; set; }
+    [Format("SAuth")]
+    public string Author { get; set; }
+    [Format("SDate", "yyyy-MM-dd")]
+    public DateTime Signed { get; set; }
+    [Format("SDFact", "N2")]
+    public decimal DataFactor { get; set; }
+    [SkipSerialization]
+    public string Comments { get; set; }
+}
+```
+
+## Buscar objetos personalizados incrustados en firmas de códigos QR {#search-for-embedded-custom-objects-in-qr-code-signatures}
+
+Este ejemplo muestra cómo descifrar objetos personalizados previamente incrustados y cifrados en el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/qrcodesignature" target="_blank" rel="nofollow noopener noreferrer">QrCodeSignature</a>, <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/qrcodesignature/getdata" target="_blank" rel="nofollow noopener noreferrer">GetData</a>, para recuperar el objeto
+
+```csharp
+using (Signature signature = new Signature("QRCodeCustomSerializationObject.pdf"))
+{
+    // create data encryption
+    IDataEncryption encryption = new CustomXOREncryption();
+    QrCodeSearchOptions options = new QrCodeSearchOptions()
+    {
+        // specify special pages to search on
+        AllPages = true,
+        DataEncryption = encryption
+    };
+    // search for signatures in document
+    List<QrCodeSignature> signatures = signature.Search<QrCodeSignature>(options);
+    Console.WriteLine("\nSource document contains following signatures:");
+    foreach (var qrCodeSignature in signatures)
+    {
+        Console.WriteLine("QRCode signature found at page {0} with type {1}.", qrCodeSignature.PageNumber, qrCodeSignature.EncodeType);
+        DocumentSignatureData documentSignatureData = qrCodeSignature.GetData<DocumentSignatureData>();
+        if (documentSignatureData != null)
+        {
+            Console.WriteLine("QRCode signature has DocumentSignatureData object:\n ID = {0}, Author = {1}, Signed = {2}, DataFactor {3}",
+                documentSignatureData.ID, documentSignatureData.Author, documentSignatureData.Signed.ToShortDateString(), documentSignatureData.DataFactor);
+        }
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con interfaz MVC</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con interfaz WebForms</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con interfaz Dropwizard</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con interfaz Spring</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

@@ -1,0 +1,701 @@
+---
+title: "Verificar firmas digitales en imágenes"
+sidebar_label: "🛡 Firmas digitales de imágenes"
+sidebar_position: 6
+description: "Este tema explica cómo verificar firmas digitales incrustadas en imágenes mediante esteganografía (técnica LSB) con la API de GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/basic-usage/verify-document-for-signatures/verify-digital-signatures-in-image.md"
+source_commit: "0c3c217010a3d6a2e7ef62d7ad8ef26f94d99418"
+source_sha256: "47058cb8160574c15e33f4522e77102c09116a331145e5d59e29e213a71efd7d"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "526055f9ab19d96563d807dc63e3228e540c7a4ccf46b7d37ff33152511b1c03"
+translation_updated_at: "2026-11-16T14:34:24.278Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## Vista general {#overview}
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> para .NET permite verificar firmas digitales incrustadas en imágenes rasterizadas mediante **esteganografía** (técnica LSB: *Least Significant Bit*). Estas firmas se incrustan de forma invisible en los píxeles de la imagen y pueden verificarse utilizando la contraseña empleada durante el proceso de firma.
+
+### Características clave {#key-features}
+
+* **Verificación basada en contraseña**: Verificación de firmas mediante la contraseña utilizada en el momento de la firma
+* **Umbrales de detección**: Umbral configurable para la verificación (0–100 %)
+* **Extracción completa de datos**: Modo opcional de extracción completa de datos para máxima precisión
+* **Soporte de formatos**: Funciona con formatos de imagen PNG y JPG
+* **Detección probabilística**: Obtención de puntuaciones de probabilidad al utilizar el modo de extracción completa
+
+## Cómo funciona {#how-it-works}
+
+Verificación de firmas digitales en imágenes:
+
+1. **Extracción**: Los datos de la firma incrustada se extraen de los bits menos significativos de los píxeles de la imagen
+2. **Verificación mediante contraseña**: Los datos extraídos se verifican utilizando la contraseña proporcionada
+3. **Comprobación del umbral**: El umbral de detección determina si se ha encontrado suficiente información de la firma
+4. **Resultado**: Devuelve el estado de la verificación y los detalles de la firma
+
+## Requisitos {#requirements}
+
+### Requisitos de contraseña {#password-requirements}
+
+* **Deben coincidir**: La contraseña debe coincidir con la utilizada durante la firma
+* **Sensible a mayúsculas y minúsculas**: Sí, las contraseñas distinguen entre mayúsculas y minúsculas
+* **Longitud mínima**: 4 caracteres (igual que en el proceso de firma)
+
+### Formatos admitidos {#supported-formats}
+
+* ✅ **PNG**: Totalmente admitido
+* ✅ **JPG/JPEG**: Totalmente admitido
+* ❌ **BMP**: No admitido para firmas digitales esteganográficas
+
+## Uso básico {#basic-usage}
+
+### Verificación de una imagen firmada {#verifying-a-signed-image}
+
+```csharp
+using GroupDocs.Signature;
+using GroupDocs.Signature.Options;
+
+// Load the signed image
+using (Signature signature = new Signature("signed_image.png"))
+{
+    // Create verify options with the same password used for signing
+    ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+    {
+        Password = "MySecurePassword123"
+    };
+
+    // Verify the signature
+    VerificationResult verifyResult = signature.Verify(verifyOptions);
+    
+    if (verifyResult.IsValid)
+    {
+        Console.WriteLine("Digital signature is valid!");
+        Console.WriteLine($"Found {verifyResult.Succeeded.Count} verified signatures.");
+    }
+    else
+    {
+        Console.WriteLine("Digital signature is invalid or not found.");
+    }
+}
+```
+
+### Ejemplo completo de verificación {#complete-verification-example}
+
+```csharp
+using GroupDocs.Signature;
+using GroupDocs.Signature.Options;
+
+string signedFile = "signed_document.png";
+string password = "SecurePassword123";
+
+// Verify the signed image
+using (Signature signature = new Signature(signedFile))
+{
+    ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+    {
+        Password = password
+    };
+
+    VerificationResult verifyResult = signature.Verify(verifyOptions);
+    
+    if (verifyResult.IsValid)
+    {
+        Console.WriteLine("Digital signature is valid!");
+        Console.WriteLine($"Verified signatures: {verifyResult.Succeeded.Count}");
+
+        foreach (var sig in verifyResult.Succeeded)
+        {
+            if (sig is DigitalSignature digitalSig)
+            {
+                Console.WriteLine($"  Signature ID: {digitalSig.SignatureId}");
+                Console.WriteLine($"  Sign Time: {digitalSig.SignTime}");
+                Console.WriteLine($"  Is Valid: {digitalSig.IsValid}");
+            }
+        }
+    }
+    else
+    {
+        Console.WriteLine("✗ Digital signature is invalid or not found.");
+
+        if (verifyResult.Failed != null && verifyResult.Failed.Count > 0)
+        {
+            Console.WriteLine($"  Failed verifications: {verifyResult.Failed.Count}");
+            foreach (var failure in verifyResult.Failed)
+            {
+                Console.WriteLine($"    - {failure}");
+            }
+        }
+    }
+}
+```
+
+## Uso avanzado {#advanced-usage}
+
+### Umbral de detección personalizado {#custom-detection-threshold}
+
+El umbral de detección determina el porcentaje mínimo de datos de firma que deben detectarse para que la verificación se considere exitosa (0-100%). El valor predeterminado es 75%.
+
+```csharp
+using (Signature signature = new Signature("signed_image.png"))
+{
+    ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+    {
+        Password = "MySecurePassword123",
+        DetectionThresholdPercent = 90  // Require 90% detection
+    };
+
+    VerificationResult verifyResult = signature.Verify(verifyOptions);
+    
+    if (verifyResult.IsValid)
+    {
+        Console.WriteLine("Signature verified with 90% threshold");
+    }
+    else
+    {
+        Console.WriteLine("Signature verification failed - threshold not met");
+    }
+}
+```
+
+### Prueba de Diferentes Umbrales {#testing-different-thresholds}
+
+```csharp
+using (Signature signature = new Signature("signed_image.png"))
+{
+    string password = "MyPassword123";
+    
+    // Test different threshold values
+    int[] thresholds = { 50, 75, 90, 95, 100 };
+    
+    foreach (int threshold in thresholds)
+    {
+        ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+        {
+            Password = password,
+            DetectionThresholdPercent = threshold
+        };
+
+        VerificationResult verifyResult = signature.Verify(verifyOptions);
+        
+        Console.WriteLine($"Threshold {threshold}%: {(verifyResult.IsValid ? "✓ Valid" : "✗ Invalid")}");
+    }
+}
+```
+
+### Modo de extracción completa de datos {#full-data-extraction-mode}
+
+Para lograr la máxima precisión, puede habilitar el modo de extracción completa de datos. Este modo realiza un análisis más exhaustivo y proporciona una puntuación de probabilidad.
+
+```csharp
+using (Signature signature = new Signature("signed_image.png"))
+{
+    ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+    {
+        Password = "MySecurePassword123",
+        UseFullDataExtraction = true,  // Enable full extraction
+        DetectionThresholdPercent = 85
+    };
+
+    VerificationResult verifyResult = signature.Verify(verifyOptions);
+    
+    if (verifyResult.IsValid)
+    {
+        Console.WriteLine("Signature verified with full data extraction");
+        
+        // DetectedProbability is set when UseFullDataExtraction is true
+        if (verifyOptions.DetectedProbability.HasValue)
+        {
+            Console.WriteLine($"Detection probability: {verifyOptions.DetectedProbability.Value}%");
+        }
+    }
+}
+```
+
+### Trabajar con flujos (streams) {#working-with-streams}
+
+Puede verificar imágenes utilizando flujos en lugar de rutas de archivos:
+
+```csharp
+using System.IO;
+using GroupDocs.Signature;
+using GroupDocs.Signature.Options;
+
+// Verifying from stream
+using (Stream imageStream = new FileStream("signed_image.png", FileMode.Open, FileAccess.Read))
+using (Signature signature = new Signature(imageStream))
+{
+    ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+    {
+        Password = "MySecurePassword123"
+    };
+
+    VerificationResult verifyResult = signature.Verify(verifyOptions);
+    
+    if (verifyResult.IsValid)
+    {
+        Console.WriteLine("Signature is valid!");
+    }
+}
+```
+
+## Umbral de detección {#detection-threshold}
+
+La propiedad `DetectionThresholdPercent` controla qué tan estricta es la verificación:
+
+* **Umbral bajo (0–50 %)**: Más permisivo, puede detectar firmas parciales
+* **Valor predeterminado (75 %)**: Detección equilibrada
+* **Umbral alto (90–100 %)**: Muy estricto, requiere datos de firma casi completos
+
+### Elección del umbral adecuado {#choosing-the-right-threshold}
+
+```csharp
+// For lenient verification (may detect partial signatures)
+ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+{
+    Password = "MyPassword",
+    DetectionThresholdPercent = 50  // Lower threshold
+};
+
+// For balanced verification (default)
+verifyOptions.DetectionThresholdPercent = 75;  // Default
+
+// For strict verification (requires complete signature)
+verifyOptions.DetectionThresholdPercent = 95;  // High threshold
+```
+
+### Ejemplos de umbral {#threshold-examples}
+
+```csharp
+using (Signature signature = new Signature("signed_image.png"))
+{
+    string password = "MyPassword123";
+    
+    // Test with different thresholds
+    var thresholds = new[] { 50, 75, 90, 95, 100 };
+    
+    foreach (int threshold in thresholds)
+    {
+        ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+        {
+            Password = password,
+            DetectionThresholdPercent = threshold
+        };
+
+        VerificationResult verifyResult = signature.Verify(verifyOptions);
+        
+        string status = verifyResult.IsValid ? "✓ Valid" : "✗ Invalid";
+        Console.WriteLine($"{threshold}% threshold: {status}");
+    }
+}
+```
+
+## Extracción completa de datos {#full-data-extraction}
+
+Cuando `UseFullDataExtraction` está habilitado:
+
+* Realiza un análisis más exhaustivo utilizando `AnalyzePercentageDigitalSignature`
+* Proporciona una puntuación de probabilidad (0-100 %) en `DetectedProbability`
+* Más preciso, aunque ligeramente más lento
+* Útil cuando la verificación estándar no es concluyente
+
+### Uso de la extracción completa de datos {#using-full-data-extraction}
+
+```csharp
+using (Signature signature = new Signature("signed_image.png"))
+{
+    ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+    {
+        Password = "MyPassword",
+        UseFullDataExtraction = true,
+        DetectionThresholdPercent = 85
+    };
+
+    VerificationResult result = signature.Verify(verifyOptions);
+
+    if (result.IsValid && verifyOptions.DetectedProbability.HasValue)
+    {
+        Console.WriteLine($"✓ Signature detected with {verifyOptions.DetectedProbability.Value}% probability");
+    }
+    else
+    {
+        Console.WriteLine("✗ Signature not detected or below threshold");
+    }
+}
+```
+
+### Cuándo usar la extracción completa de datos {#when-to-use-full-data-extraction}
+
+Use la extracción completa de datos cuando:
+* La verificación estándar arroje resultados inciertos
+* Necesite la máxima precisión
+* La imagen haya sido ligeramente modificada
+* Desea obtener puntuaciones de probabilidad
+
+```csharp
+// First try standard verification
+ImageDigitalVerifyOptions standardOptions = new ImageDigitalVerifyOptions
+{
+    Password = "MyPassword"
+};
+
+VerificationResult standardResult = signature.Verify(standardOptions);
+
+if (!standardResult.IsValid)
+{
+    // If standard verification fails, try full extraction
+    ImageDigitalVerifyOptions fullExtractionOptions = new ImageDigitalVerifyOptions
+    {
+        Password = "MyPassword",
+        UseFullDataExtraction = true,
+        DetectionThresholdPercent = 70  // Lower threshold for full extraction
+    };
+
+    VerificationResult fullResult = signature.Verify(fullExtractionOptions);
+    
+    if (fullResult.IsValid)
+    {
+        Console.WriteLine($"Signature found with {fullExtractionOptions.DetectedProbability}% probability");
+    }
+}
+```
+
+## Manejo de resultados de verificación {#handling-verification-results}
+
+### Procesamiento detallado de resultados {#detailed-result-processing}
+
+```csharp
+using (Signature signature = new Signature("signed_image.png"))
+{
+    ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+    {
+        Password = "MyPassword123"
+    };
+
+    VerificationResult verifyResult = signature.Verify(verifyOptions);
+
+    if (verifyResult.IsValid)
+    {
+        Console.WriteLine($"✓ Signature valid. Found {verifyResult.Succeeded.Count} signature(s).");
+        
+        foreach (var sig in verifyResult.Succeeded)
+        {
+            if (sig is DigitalSignature digitalSig)
+            {
+                Console.WriteLine($"  Signature ID: {digitalSig.SignatureId}");
+                Console.WriteLine($"  Sign Time: {digitalSig.SignTime}");
+                Console.WriteLine($"  Is Valid: {digitalSig.IsValid}");
+            }
+        }
+    }
+    else
+    {
+        Console.WriteLine("✗ Signature invalid or not found.");
+        
+        if (verifyResult.Failed != null && verifyResult.Failed.Count > 0)
+        {
+            Console.WriteLine($"  Failed verifications: {verifyResult.Failed.Count}");
+            foreach (var failure in verifyResult.Failed)
+            {
+                Console.WriteLine($"    - {failure}");
+            }
+        }
+    }
+}
+```
+
+## Manejo de errores {#error-handling}
+
+### Contraseña incorrecta {#wrong-password}
+
+```csharp
+try
+{
+    using (Signature signature = new Signature("signed_image.png"))
+    {
+        ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+        {
+            Password = "WrongPassword"  // Wrong password
+        };
+
+        VerificationResult verifyResult = signature.Verify(verifyOptions);
+        
+        if (!verifyResult.IsValid)
+        {
+            Console.WriteLine("Signature verification failed - wrong password or no signature found.");
+        }
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Error during verification: {ex.Message}");
+}
+```
+
+### Validación de contraseña {#password-validation}
+
+```csharp
+try
+{
+    ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+    {
+        Password = "123"  // Too short, minimum is 4 characters
+    };
+
+    using (Signature signature = new Signature("signed_image.png"))
+    {
+        VerificationResult verifyResult = signature.Verify(verifyOptions);
+    }
+}
+catch (ArgumentException ex)
+{
+    Console.WriteLine($"Password validation error: {ex.Message}");
+    // Output: "Password must be at least 4 characters long."
+}
+```
+
+### Validación del rango de umbral {#threshold-range-validation}
+
+```csharp
+try
+{
+    ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+    {
+        Password = "MyPassword",
+        DetectionThresholdPercent = 150  // Invalid: must be 0-100
+    };
+
+    using (Signature signature = new Signature("signed_image.png"))
+    {
+        VerificationResult verifyResult = signature.Verify(verifyOptions);
+    }
+}
+catch (ArgumentOutOfRangeException ex)
+{
+    Console.WriteLine($"Threshold error: {ex.Message}");
+    // Output: "Detection threshold must be within 0-100 range."
+}
+```
+
+## Prácticas Recomendadas {#best-practices}
+
+### 1. Utilizar umbrales adecuados {#1-use-appropriate-thresholds}
+
+```csharp
+// For critical applications, use higher threshold
+ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+{
+    Password = password,
+    DetectionThresholdPercent = 95,  // High threshold for critical verification
+    UseFullDataExtraction = true     // Maximum accuracy
+};
+```
+
+### 2. Manejar correctamente los resultados de la verificación {#2-handle-verification-results-properly}
+
+```csharp
+VerificationResult verifyResult = signature.Verify(verifyOptions);
+
+if (verifyResult.IsValid)
+{
+    // Process successful verification
+    ProcessValidSignature(verifyResult.Succeeded);
+}
+else
+{
+    // Handle failed verification
+    HandleInvalidSignature(verifyResult.Failed);
+}
+```
+
+### 3. Intentar extracción completa si la verificación estándar falla {#3-try-full-extraction-if-standard-verification-fails}
+
+```csharp
+// First attempt with standard verification
+ImageDigitalVerifyOptions standardOptions = new ImageDigitalVerifyOptions
+{
+    Password = password,
+    DetectionThresholdPercent = 75
+};
+
+VerificationResult result = signature.Verify(standardOptions);
+
+if (!result.IsValid)
+{
+    // Try with full extraction and lower threshold
+    ImageDigitalVerifyOptions fullOptions = new ImageDigitalVerifyOptions
+    {
+        Password = password,
+        UseFullDataExtraction = true,
+        DetectionThresholdPercent = 60  // Lower threshold
+    };
+
+    result = signature.Verify(fullOptions);
+}
+```
+
+### 4. Almacenar contraseñas de forma segura {#4-store-passwords-securely}
+
+```csharp
+// Retrieve password from secure storage
+string password = GetPasswordFromSecureStorage();
+
+ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+{
+    Password = password
+};
+```
+
+### 5. Verificar imágenes firmadas originales {#5-verify-original-signed-images}
+
+```csharp
+// Always verify the original signed image, not edited copies
+string originalSignedImage = "signed_image.png";  // Original
+string editedImage = "edited_signed_image.png";    // May have corrupted signature
+
+// Verify original
+using (Signature signature = new Signature(originalSignedImage))
+{
+    ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+    {
+        Password = "MyPassword"
+    };
+
+    VerificationResult result = signature.Verify(verifyOptions);
+    // This should work
+}
+```
+
+## Solución de problemas {#troubleshooting}
+
+### Problema: La verificación falla con la contraseña correcta {#issue-verification-fails-with-correct-password}
+
+**Posibles causas**:
+* La imagen se editó o comprimió después de la firma
+* Umbral de detección incorrecto
+* Formato de imagen no totalmente compatible
+* Corrupción de la imagen
+
+**Soluciones**:
+
+1. **Probar con un umbral más bajo**:
+```csharp
+ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+{
+    Password = "MyPassword",
+    DetectionThresholdPercent = 50  // Lower threshold
+};
+```
+
+2. **Habilitar la extracción completa de datos**:
+```csharp
+ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+{
+    Password = "MyPassword",
+    UseFullDataExtraction = true,
+    DetectionThresholdPercent = 60
+};
+```
+
+3. **Verificar imagen original**:
+```csharp
+// Always verify the original signed image, not edited copies
+using (Signature signature = new Signature("original_signed_image.png"))
+{
+    // Verify here
+}
+```
+
+### Problema: Error de contraseña incorrecta {#issue-wrong-password-error}
+
+**Solución**: Asegúrese de que la contraseña coincida exactamente (distinguiendo mayúsculas y minúsculas) con la utilizada durante el registro.
+
+```csharp
+// Password must match exactly (case-sensitive)
+ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+{
+    Password = "MyPassword123"  // Must match signing password exactly
+};
+```
+
+### Problema: El formato BMP no funciona {#issue-bmp-format-not-working}
+
+**Solución**: El formato BMP no admite firmas digitales de esteganografía LSB. Utilice en su lugar los formatos PNG o JPG.
+
+```csharp
+// Only PNG and JPG are supported
+string[] supportedFormats = { ".png", ".jpg", ".jpeg" };
+```
+
+### Problema: Umbral demasiado alto {#issue-threshold-too-high}
+
+**Solución**: Reduzca el umbral de detección si la verificación falla.
+
+```csharp
+// Start with lower threshold
+ImageDigitalVerifyOptions verifyOptions = new ImageDigitalVerifyOptions
+{
+    Password = "MyPassword",
+    DetectionThresholdPercent = 50  // Lower threshold
+};
+
+// If that works, gradually increase to find optimal threshold
+```
+
+## Resumen {#summary}
+
+La verificación de firmas digitales en imágenes proporciona:
+
+* ✅ **Seguridad basada en contraseña**: Verificación mediante la contraseña de firma
+* ✅ **Umbrales flexibles**: Sensibilidad de detección configurables (0–100 %)
+* ✅ **Alta precisión**: Modo opcional de extracción completa de datos
+* ✅ **Compatibilidad con formatos**: Funciona con formatos PNG y JPG
+* ✅ **Puntuaciones de probabilidad**: Obtención de la probabilidad de detección con extracción completa
+
+Utilice esta función cuando necesite:
+* Verificar la autenticidad e integridad de las imágenes
+* Comprobar si las imágenes contienen firmas incrustadas
+* Validar imágenes mediante firmas basadas en contraseña
+* Detectar firmas con sensibilidad configurable
+
+Recuerde:
+* Utilizar la contraseña exacta empleada en la firma (sensible a mayúsculas/minúsculas)
+* Elegir umbrales de detección adecuados
+* Utilizar la extracción completa de datos para máxima precisión
+* Verificar las imágenes originales firmadas (no copias editadas)
+* Manejar adecuadamente los resultados de la verificación
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre las funciones de eSign para documentos, consulte la [sección de uso avanzado](/net/signature/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la función en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI MVC para firmado de documentos en .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI WebForms para firmado de documentos en .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI Dropwizard para firmado de documentos en Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI Spring para firmado de documentos en Java</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas en línea simples pero potentes.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

@@ -1,0 +1,499 @@
+---
+title: "Cómo buscar firmas con funciones de predicado"
+sidebar_label: "Cómo buscar firmas con funciones de predicado"
+sidebar_key: "net-signature-searching-searching-signatures-with-linq-query-support"
+sidebar_position: 4
+description: "Este artículo explica cómo buscar firmas utilizando funciones predicado (`Func<BaseSignature, bool>`) con la API de GroupDocs.Signature para filtrar los resultados de la búsqueda según criterios personalizados."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/searching/searching-signatures-with-linq-query-support.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "858b89265e6673bf830dc28acc0785a733422835807fce8b4b7967080fb50d8d"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "3b848989d41a27c0229c3dab37583af57585c138039bdab959deaf600360805b"
+translation_updated_at: "2026-11-16T13:14:56.529Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+# Búsqueda con funciones de predicado
+
+## Vista general {#overview}
+
+La biblioteca GroupDocs.Signature proporciona métodos `Search` mejorados que aceptan funciones de predicado (`Func<BaseSignature, bool>`) para filtrar firmas según criterios personalizados. Esto le permite realizar búsquedas de firmas más flexibles y específicas, aplicando lógica de filtrado personalizada a los resultados de la búsqueda.
+
+## Ventajas {#benefits}
+
+- **Filtrado flexible**: filtre firmas según cualquier criterio personalizado utilizando expresiones lambda
+- **Seguro en tipos**: los predicados fuertemente tipados garantizan seguridad en tiempo de compilación
+- **Fácil de usar**: expresiones lambda simples hacen que el filtrado sea intuitivo
+- **Resultados completos**: realice búsquedas en todos los tipos de firmas o en tipos específicos, y luego filtre según sea necesario
+
+## Métodos disponibles {#available-methods}
+
+1. `Search(List<SearchOptions> searchOptionsList, Func<BaseSignature, bool> predicate)`
+2. `Search(Func<BaseSignature, bool> predicate)`
+
+## Firmas de los métodos {#method-signatures}
+
+```csharp
+public SearchResult Search(List<SearchOptions> searchOptionsList, Func<BaseSignature, bool> predicate)
+public List<BaseSignature> Search(Func<BaseSignature, bool> predicate)
+```
+
+## Cómo funciona {#how-it-works}
+
+Los métodos `Search` con predicados:
+
+1. **Buscar primero**: Se encuentran todas las firmas que coincidan con las opciones de búsqueda (o todas las firmas si no se proporcionan opciones).
+2. **Filtrar resultados**: Se aplica el predicado para filtrar los resultados de la búsqueda.
+3. **Devolver resultados filtrados**: Solo se devuelven las firmas que coincidan con el predicado.
+
+## Ejemplos {#examples}
+
+### Ejemplo 1: Búsqueda y filtrado por contenido de texto {#example-1-search-and-filter-by-text-content}
+
+```csharp
+using GroupDocs.Signature;
+using GroupDocs.Signature.Options;
+using GroupDocs.Signature.Domain;
+
+using (Signature signature = new Signature("document.pdf"))
+{
+    // Search for text signatures
+    List<SearchOptions> searchOptions = new List<SearchOptions>
+    {
+        new TextSearchOptions()
+    };
+    
+    // Filter to only signatures containing "Approved"
+    SearchResult result = signature.Search(searchOptions, 
+        sig => sig is TextSignature textSig && textSig.Text.Contains("Approved"));
+    
+    foreach (BaseSignature sig in result.Signatures)
+    {
+        Console.WriteLine($"Found: {((TextSignature)sig).Text}");
+    }
+}
+```
+
+### Ejemplo 2: Buscar todos los tipos de firma con filtrado {#example-2-search-all-signature-types-with-filtering}
+
+```csharp
+using (Signature signature = new Signature("document.pdf"))
+{
+    // Search all signature types and filter by type
+    List<BaseSignature> result = signature.Search(
+        sig => sig.SignatureType == SignatureType.Digital);
+    
+    Console.WriteLine($"Found {result.Count} digital signatures");
+}
+```
+
+### Ejemplo 3: Búsqueda y filtrado por múltiples criterios {#example-3-search-and-filter-by-multiple-criteria}
+
+```csharp
+using (Signature signature = new Signature("document.pdf"))
+{
+    List<SearchOptions> searchOptions = new List<SearchOptions>
+    {
+        new TextSearchOptions(),
+        new BarcodeSearchOptions()
+    };
+    
+    // Filter signatures by page and type
+    SearchResult result = signature.Search(searchOptions, sig =>
+        sig.PageNumber == 1 && 
+        (sig.SignatureType == SignatureType.Text || sig.SignatureType == SignatureType.Barcode));
+    
+    Console.WriteLine($"Found {result.Signatures.Count} signatures on page 1");
+}
+```
+
+### Ejemplo 4: Buscar firmas por rango de fechas {#example-4-search-signatures-by-date-range}
+
+```csharp
+using (Signature signature = new Signature("document.pdf"))
+{
+    DateTime startDate = new DateTime(2024, 1, 1);
+    DateTime endDate = new DateTime(2024, 12, 31);
+    
+    // Search and filter by signature date
+    List<BaseSignature> result = signature.Search(sig =>
+        sig.SignDate.HasValue &&
+        sig.SignDate.Value >= startDate &&
+        sig.SignDate.Value <= endDate);
+    
+    Console.WriteLine($"Found {result.Count} signatures in 2024");
+}
+```
+
+### Ejemplo 5: Búsqueda y filtrado por tamaño de firma {#example-5-search-and-filter-by-signature-size}
+
+```csharp
+using (Signature signature = new Signature("document.pdf"))
+{
+    List<SearchOptions> searchOptions = new List<SearchOptions>
+    {
+        new ImageSearchOptions()
+    };
+    
+    // Filter image signatures by size
+    SearchResult result = signature.Search(searchOptions, sig =>
+    {
+        if (sig is ImageSignature imgSig)
+        {
+            return imgSig.Width > 200 && imgSig.Height > 200;
+        }
+        return false;
+    });
+    
+    Console.WriteLine($"Found {result.Signatures.Count} large image signatures");
+}
+```
+
+### Ejemplo 6: Buscar firmas en una región específica {#example-6-find-signatures-in-specific-region}
+
+```csharp
+using (Signature signature = new Signature("document.pdf"))
+{
+    // Define a region (rectangle)
+    int regionLeft = 100;
+    int regionTop = 100;
+    int regionWidth = 200;
+    int regionHeight = 200;
+    
+    List<BaseSignature> result = signature.Search(sig =>
+        sig.Left >= regionLeft &&
+        sig.Top >= regionTop &&
+        sig.Left + sig.Width <= regionLeft + regionWidth &&
+        sig.Top + sig.Height <= regionTop + regionHeight);
+    
+    Console.WriteLine($"Found {result.Count} signatures in the specified region");
+}
+```
+
+### Ejemplo 7: Búsqueda de firmas con propiedades específicas {#example-7-search-signatures-with-specific-properties}
+
+```csharp
+using (Signature signature = new Signature("document.pdf"))
+{
+    List<SearchOptions> searchOptions = new List<SearchOptions>
+    {
+        new QRCodeSearchOptions()
+    };
+    
+    // Search for QR codes with specific data
+    SearchResult result = signature.Search(searchOptions, sig =>
+    {
+        if (sig is QrCodeSignature qrSig)
+        {
+            return qrSig.Text.StartsWith("https://") ||
+                   qrSig.Text.Contains("contract-id:");
+        }
+        return false;
+    });
+    
+    foreach (QrCodeSignature qrSig in result.ToList<QrCodeSignature>())
+    {
+        Console.WriteLine($"QR Code: {qrSig.Text}");
+    }
+}
+```
+
+### Ejemplo 8: Búsqueda por tipo de firma y página {#example-8-search-by-signature-type-and-page}
+
+```csharp
+using (Signature signature = new Signature("document.pdf"))
+{
+    // Search all signatures and filter by type and page
+    List<BaseSignature> result = signature.Search(sig =>
+        sig.SignatureType == SignatureType.Text &&
+        sig.PageNumber == 1);
+    
+    Console.WriteLine($"Found {result.Count} text signatures on page 1");
+}
+```
+
+## Casos de uso comunes {#common-use-cases}
+
+### 1. Buscar firmas por autor {#1-find-signatures-by-author}
+
+```csharp
+using (Signature signature = new Signature("document.pdf"))
+{
+    DigitalSearchOptions searchOptions = new DigitalSearchOptions();
+    
+    List<BaseSignature> result = signature.Search(
+        new List<SearchOptions> { searchOptions }, 
+        sig => sig is DigitalSignature digitalSig && 
+               digitalSig.SignerName == "John Doe");
+    
+    Console.WriteLine($"Found {result.Count} signatures by John Doe");
+}
+```
+
+### 2. Buscar firmas por valor de código de barras {#2-search-signatures-by-barcode-value}
+
+```csharp
+using (Signature signature = new Signature("document.pdf"))
+{
+    BarcodeSearchOptions searchOptions = new BarcodeSearchOptions();
+    
+    SearchResult result = signature.Search(
+        new List<SearchOptions> { searchOptions },
+        sig => sig is BarcodeSignature barcodeSig &&
+               barcodeSig.Text.StartsWith("PROD-"));
+    
+    foreach (BarcodeSignature barcodeSig in result.ToList<BarcodeSignature>())
+    {
+        Console.WriteLine($"Product Barcode: {barcodeSig.Text}");
+    }
+}
+```
+
+### 3. Buscar firmas por posición y tamaño {#3-find-signatures-by-position-and-size}
+
+```csharp
+using (Signature signature = new Signature("document.pdf"))
+{
+    // Find signatures in bottom-right corner that are large
+    List<BaseSignature> result = signature.Search(sig =>
+        sig.Left > 400 &&
+        sig.Top > 600 &&
+        sig.Width > 150 &&
+        sig.Height > 50);
+    
+    Console.WriteLine($"Found {result.Count} large signatures in bottom-right");
+}
+```
+
+### 4. Búsqueda de múltiples tipos de firmas con filtrado complejo {#4-search-multiple-signature-types-with-complex-filtering}
+
+```csharp
+using (Signature signature = new Signature("document.pdf"))
+{
+    List<SearchOptions> searchOptions = new List<SearchOptions>
+    {
+        new TextSearchOptions(),
+        new ImageSearchOptions(),
+        new QRCodeSearchOptions()
+    };
+    
+    // Find signatures that are either text with specific content, 
+    // or QR codes with URLs, or large images
+    SearchResult result = signature.Search(searchOptions, sig =>
+    {
+        if (sig is TextSignature textSig)
+        {
+            return textSig.Text.Contains("APPROVED");
+        }
+        if (sig is QrCodeSignature qrSig)
+        {
+            return qrSig.Text.StartsWith("http");
+        }
+        if (sig is ImageSignature imgSig)
+        {
+            return imgSig.Width > 300 && imgSig.Height > 300;
+        }
+        return false;
+    });
+    
+    Console.WriteLine($"Found {result.Signatures.Count} matching signatures");
+}
+```
+
+## Prácticas recomendadas {#best-practices}
+
+### 1. Utilizar predicados específicos {#1-use-specific-predicates}
+
+**Correcto:**
+```csharp
+// Specific and clear predicate
+SearchResult result = signature.Search(searchOptions, 
+    sig => sig is TextSignature textSig && textSig.Text == "Approved");
+```
+
+**Evite:**
+```csharp
+// Too generic, might match unintended signatures
+List<BaseSignature> result = signature.Search(sig => true);
+```
+
+### 2. Manejo de comprobaciones de nulos {#2-handle-null-checks}
+
+```csharp
+// Safe predicate with null checks
+SearchResult result = signature.Search(searchOptions, sig =>
+{
+    if (sig == null) return false;
+    if (sig is TextSignature textSig)
+    {
+        return !string.IsNullOrEmpty(textSig.Text) && 
+               textSig.Text.Contains("Contract");
+    }
+    return false;
+});
+```
+
+### 3. Combinar múltiples condiciones {#3-combine-multiple-conditions}
+
+```csharp
+// Clear, readable predicate with multiple conditions
+SearchResult result = signature.Search(searchOptions, sig =>
+    sig.PageNumber == 1 &&
+    sig.SignatureType == SignatureType.Text &&
+    sig is TextSignature textSig &&
+    textSig.Text.Length > 10);
+```
+
+### 4. Predicados reutilizables {#4-reusable-predicates}
+
+```csharp
+// Define reusable predicates
+Func<BaseSignature, bool> isOnFirstPage = sig => sig.PageNumber == 1;
+Func<BaseSignature, bool> isTextSignature = sig => sig.SignatureType == SignatureType.Text;
+Func<BaseSignature, bool> isLargeSignature = sig => sig.Width > 200 && sig.Height > 200;
+
+// Combine predicates
+SearchResult result = signature.Search(searchOptions, sig =>
+    isOnFirstPage(sig) && isTextSignature(sig) && isLargeSignature(sig));
+```
+
+### 5. Utilice opciones de búsqueda adecuadas {#5-use-appropriate-search-options}
+
+```csharp
+// Good: Use specific search options to narrow down initial search
+List<SearchOptions> searchOptions = new List<SearchOptions>
+{
+    new TextSearchOptions { Text = "Contract" }
+};
+
+// Then apply additional filtering with predicate
+SearchResult result = signature.Search(searchOptions, 
+    sig => sig.PageNumber == 1);
+```
+
+## Manejo de errores {#error-handling}
+
+### Validación de parámetros nulos {#null-parameter-validation}
+
+Los métodos lanzan `ArgumentNullException` si los parámetros obligatorios son nulos:
+
+```csharp
+try
+{
+    using (Signature signature = new Signature("document.pdf"))
+    {
+        // This will throw ArgumentNullException
+        SearchResult result = signature.Search(null, sig => true);
+    }
+}
+catch (ArgumentNullException ex)
+{
+    Console.WriteLine($"Error: {ex.Message}");
+}
+```
+
+### Patrón de uso seguro {#safe-usage-pattern}
+
+```csharp
+using (Signature signature = new Signature("document.pdf"))
+{
+    if (searchOptions != null && predicate != null)
+    {
+        SearchResult result = signature.Search(searchOptions, predicate);
+        // Process results
+    }
+}
+```
+
+## Valores devueltos {#return-values}
+
+- **`Search(List<SearchOptions>, Func<...>)`**: Devuelve `SearchResult` – Contiene firmas filtradas y metadatos (tiempo de procesamiento, tamaño del documento, etc.)
+- **`Search(Func<...>)`**: Devuelve `List<BaseSignature>` – Una lista de firmas filtradas
+- **Resultados vacíos**: Devuelve una colección vacía si ninguna firma coincide con el predicado
+
+### Trabajo con SearchResult {#working-with-searchresult}
+
+```csharp
+SearchResult result = signature.Search(searchOptions, predicate);
+
+// Access filtered signatures
+List<BaseSignature> signatures = result.Signatures;
+
+// Access metadata
+Console.WriteLine($"Processing time: {result.ProcessingTime}ms");
+Console.WriteLine($"Source document size: {result.SourceDocumentSize} bytes");
+Console.WriteLine($"Destination document size: {result.DestinDocumentSize} bytes");
+```
+
+## Comparación: Con y sin predicado {#comparison-with-vs-without-predicate}
+
+### Sin predicado {#without-predicate}
+
+```csharp
+// Get all search results
+SearchResult result = signature.Search(searchOptions);
+List<BaseSignature> allSignatures = result.Signatures;
+
+// Manual filtering
+List<BaseSignature> filtered = allSignatures
+    .Where(sig => sig.PageNumber == 1)
+    .ToList();
+```
+
+### Con predicado {#with-predicate}
+
+```csharp
+// Filtered during search (more concise)
+SearchResult result = signature.Search(searchOptions, 
+    sig => sig.PageNumber == 1);
+List<BaseSignature> filtered = result.Signatures;
+```
+
+**Ventajas:**
+- Código más conciso
+- API más limpia
+- Una única llamada al método en lugar de búsqueda + filtrado
+
+## Resumen {#summary}
+
+Los métodos basados en predicados `Search` ofrecen una forma potente y flexible de buscar firmas en GroupDocs.Signature. Le permiten:
+
+- Filtrar firmas según cualquier criterio personalizado
+- Buscar entre todos los tipos de firmas o solo entre tipos específicos
+- Escribir código más legible y mantenible
+- Manejar fácilmente escenarios de filtrado complejos
+
+Utilice estos métodos cuando necesite encontrar un subconjunto de firmas basado en criterios específicos, en lugar de buscar todas las firmas y filtrarlas manualmente.
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con UI MVC</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con UI WebForms</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con UI Dropwizard</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con UI Spring</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

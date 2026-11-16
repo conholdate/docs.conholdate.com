@@ -1,0 +1,132 @@
+---
+title: "Tipos de caracteres"
+sidebar_label: "Tipos de caracteres"
+sidebar_position: 2
+description: "Esta página contiene descripciones de todos los tipos de caracteres. Los tipos de caracteres difieren en cómo se indexan los caracteres de estos tipos."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/indexing/character-types.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "d6ba7c0536f4331eb107573050bbb6f44b2e37261e6999c64e62b4c839c2c002"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "529cbded0b7614a75adb87a8a3ef02811667edd5ff184485d88e49ad49d6bee2"
+translation_updated_at: "2026-11-16T11:08:19.728Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Esta página contiene descripciones de todos los tipos de caracteres. Los tipos de caracteres difieren en cómo se indexan los caracteres de dichos tipos. Para obtener más información sobre la gestión del alfabeto, consulte la página [Alphabet](/net/search/developer-guide/advanced-usage/managing-dictionaries/alphabet/) en la sección [Gestión de diccionarios](/net/search/developer-guide/advanced-usage/managing-dictionaries/).
+
+## Caracteres normales {#regular-characters}
+
+Los caracteres normales son separadores y letras. Durante la indexación, los separadores se utilizan para separar las palabras entre sí, y las palabras se forman a partir de secuencias continuas de letras.
+
+El tipo de cada carácter concreto puede especificarse en el alfabeto. De forma predeterminada, se definen como letras los siguientes caracteres (se indican los números Unicode):
+
+*   Dígitos: 0030-0039;
+*   Letras mayúsculas latinas: 0041-005A;
+*   Guion bajo: 005F;
+*   Letras minúsculas latinas: 0061-007A;
+*   Letras latinas: 00C0-00D6, 00D8-00F6, 00F8-00FF, 0100-017F, 0180-024F, 0250-02AF;
+*   Letras griegas y coptas: 0370-0373, 0376-0377, 037F, 0386, 0388-038A, 038C, 038E-03A1, 03A3-03FC;
+*   Letras cirílicas: 0400-0481, 048A-04FF, 0500-052F;
+*   Letras armenias: 0531-0556, 0561-0587.
+
+El resto de caracteres se definen como separadores en el alfabeto.
+
+El siguiente ejemplo muestra cómo especificar únicamente números, el carácter de guion bajo y caracteres en inglés como letras en el alfabeto.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentFolder = @"c:\MyDocuments\";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Configuring the alphabet
+// Setting the separator type for all characters in the alphabet
+index.Dictionaries.Alphabet.Clear();
+// Creating a list of letter characters
+List<char> list = new List<char>();
+for (char i = (char)0x0030; i <= 0x0039; i++)
+{
+    list.Add(i); // Digits
+}
+for (char i = (char)0x0041; i <= 0x005A; i++)
+{
+    list.Add(i); // Latin capital letters
+}
+list.Add((char)0x005F); // Low line
+for (char i = (char)0x0061; i <= 0x007A; i++)
+{
+    list.Add(i); // Latin small letters
+}
+// Setting the type of characters in the alphabet
+char[] characters = list.ToArray();
+index.Dictionaries.Alphabet.SetRange(characters, CharacterType.Letter);
+ 
+// Indexing documents from the specified folder
+index.Add(documentFolder);
+ 
+// Searching in the index
+SearchResult result = index.Search("Einstein");
+```
+
+## Caracteres combinados {#blended-characters}
+
+Los caracteres combinados son caracteres especiales que se indexan tanto como separadores como letras. Este tipo de carácter puede ser útil, por ejemplo, para indexar guiones. En este caso, las partes de una palabra compuesta que contiene un guion se indexan tanto como una única palabra con guion como individualmente sin guion. A continuación se presenta un ejemplo del uso de caracteres combinados.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentFolder = @"c:\MyDocuments\";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Setting hyphen character type to blended
+index.Dictionaries.Alphabet.SetRange(new char[] { '-' }, CharacterType.Blended);
+ 
+// Indexing documents from the specified folder
+index.Add(documentFolder);
+ 
+// Searching in the index
+SearchResult result1 = index.Search("Elliot-Murray-Kynynmound");
+SearchResult result2 = index.Search("Elliot");
+SearchResult result3 = index.Search("Murray");
+SearchResult result4 = index.Search("Kynynmound");
+```
+
+## Indexar cada carácter como una palabra completa {#indexing-each-character-as-a-whole-word}
+
+Otro tipo especial de carácter es aquel que se indexa como una palabra independiente. Este tipo de carácter está diseñado para funcionar con lenguajes jeroglíficos y permite indexar cada carácter del texto como una palabra separada, independientemente de la presencia de separadores.
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le damos la bienvenida a realizar búsquedas en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita de búsqueda de documentos en línea</a>.

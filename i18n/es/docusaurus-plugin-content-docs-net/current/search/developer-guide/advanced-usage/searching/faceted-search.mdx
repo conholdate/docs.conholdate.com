@@ -1,0 +1,321 @@
+---
+title: "Búsqueda facetada"
+sidebar_label: "Búsqueda facetada"
+sidebar_position: 5
+description: "Este artículo proporciona el conocimiento sobre la creación de consultas de búsqueda facetada."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/searching/faceted-search.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "89f7cfa802a34f4683fb4111c0610bb849e2ed4d7af53321a4a6321fc2395704"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "d5b791d42ae4a946217e2582858c0ec2910eba376d6b16f7adea0e952b639ee9"
+translation_updated_at: "2026-11-16T11:38:52.580Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Esta página describe la creación de consultas de búsqueda facetada.
+
+## Definición de búsqueda facetada {#faceted-search-definition}
+
+La búsqueda facetada en GroupDocs.Search consiste en filtrar los resultados de búsqueda estableciendo nombres válidos de campos de documento para la búsqueda.
+
+## Creación de consultas de búsqueda facetada {#creating-faceted-search-queries}
+
+La búsqueda facetada le permite buscar únicamente en ciertos campos de los documentos, por ejemplo, únicamente en el campo de contenido o en el campo del nombre de archivo. A continuación se presenta un ejemplo sencillo de búsqueda facetada con consultas en formato de texto y en formato de objeto.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Search in the content field with text query
+SearchResult result1 = index.Search("content: Einstein");
+ 
+// Search in the content field with object query
+SearchQuery wordQuery = SearchQuery.CreateWordQuery("Einstein");
+SearchQuery fieldQuery = SearchQuery.CreateFieldQuery(CommonFieldNames.Content, wordQuery);
+SearchResult result2 = index.Search(fieldQuery);
+```
+
+La búsqueda facetable se puede combinar con otros tipos de búsquedas utilizando paréntesis. El siguiente ejemplo de búsqueda facetable muestra la misma consulta de búsqueda multifacetable tanto en forma de texto como en forma de objeto. Ambas consultas buscan documentos cuyo nombre contenga tanto las palabras “Albert” como “Einstein”, o cuyo contenido contenga la frase “teoría de la relatividad” o la frase “relatividad especial”.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Search with text query
+SearchResult result1 = index.Search("(filename: (Albert AND Einstein)) OR (content: (\"theory of relativity\" OR \"special relativity\"))");
+ 
+// Search with object query
+SearchQuery albertQuery = SearchQuery.CreateWordQuery("Albert");
+SearchQuery einsteinQuery = SearchQuery.CreateWordQuery("Einstein");
+SearchQuery andQuery = SearchQuery.CreateAndQuery(albertQuery, einsteinQuery);
+SearchQuery filenameQuery = SearchQuery.CreateFieldQuery(CommonFieldNames.FileName, andQuery);
+ 
+SearchQuery theoryQuery = SearchQuery.CreateWordQuery("theory");
+SearchQuery ofQuery = SearchQuery.CreateWordQuery("of");
+SearchQuery relativity1Query = SearchQuery.CreateWordQuery("relativity");
+SearchQuery specialQuery = SearchQuery.CreateWordQuery("special");
+SearchQuery relativity2Query = SearchQuery.CreateWordQuery("relativity");
+ 
+SearchQuery phrase1Query = SearchQuery.CreatePhraseSearchQuery(theoryQuery, ofQuery, relativity1Query);
+SearchQuery phrase2Query = SearchQuery.CreatePhraseSearchQuery(specialQuery, relativity2Query);
+SearchQuery orQuery = SearchQuery.CreateOrQuery(phrase1Query, phrase2Query);
+SearchQuery contentQuery = SearchQuery.CreateFieldQuery(CommonFieldNames.Content, orQuery);
+ 
+SearchQuery rootQuery = SearchQuery.CreateOrQuery(filenameQuery, contentQuery);
+SearchResult result2 = index.Search(rootQuery);
+```
+
+## Uso de campos específicos por formato {#using-format-specific-fields}
+
+Para cada formato de documento, existen campos estándar que pueden estar presentes en documentos de este tipo. La biblioteca proporciona las siguientes clases que contienen constantes con los nombres de los campos estándar de documentos: <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/epubfieldnames" target="_blank" rel="nofollow noopener noreferrer">EpubFieldNames</a>, <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/fictionbookfieldnames" target="_blank" rel="nofollow noopener noreferrer">FictionBookFieldNames</a>, <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/mailfieldnames" target="_blank" rel="nofollow noopener noreferrer">MailFieldNames</a>, <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/presentationfieldnames" target="_blank" rel="nofollow noopener noreferrer">PresentationFieldNames</a>, <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/spreadsheetfieldnames" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetFieldNames</a>, <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/wordsfieldnames" target="_blank" rel="nofollow noopener noreferrer">WordsFieldNames</a>.
+
+Asimismo, existen campos que pueden estar presentes en documentos de cualquier tipo. Los nombres de dichos campos se representan en la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/commonfieldnames" target="_blank" rel="nofollow noopener noreferrer">CommonFieldNames</a>.
+
+A continuación se presenta un ejemplo de uso de los nombres de campos estándar de documentos.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Search in the content field with text query
+string query1 = WordsFieldNames.Company + ": Dycum";
+SearchResult result1 = index.Search(query1);
+ 
+// Search in the content field with object query
+SearchQuery wordQuery = SearchQuery.CreateWordQuery("Dycum");
+SearchQuery fieldQuery = SearchQuery.CreateFieldQuery(WordsFieldNames.Company, wordQuery);
+SearchResult result2 = index.Search(fieldQuery);
+```
+
+A continuación se indican los nombres de los campos estándar incluidos en la biblioteca, agrupados según los formatos que los contienen.
+
+### Campos comunes {#common-fields}
+
+*   Contenido
+    
+*   FileName
+    
+*   FormatFamily
+    
+*   CreationDate
+    
+*   ModificationDate
+    
+
+### Campos del formato Epub {#epub-format-fields}
+
+*   Título
+    
+*   Asunto
+    
+*   Autor
+    
+*   Descripción
+    
+*   Idioma
+    
+*   Derechos de autor
+    
+*   Editor
+    
+*   PublishedDate
+    
+
+### Campos de formato para libros de ficción {#fiction-book-format-fields}
+
+*   Título
+    
+*   Asunto
+    
+*   Palabras clave
+    
+*   Autor
+    
+*   Descripción
+    
+*   Idioma
+    
+*   Editor
+    
+*   PublishedDate
+    
+
+### Campos del formato de correo {#mail-format-fields}
+
+*   MailMessageBody
+    
+*   MailSenderName
+    
+*   MailDisplayTo
+    
+*   MailSubject
+    
+
+### Campos del formato de presentación {#presentation-format-fields}
+
+*   Aplicación
+    
+*   ApplicationVersion
+    
+*   Título
+    
+*   Asunto
+    
+*   Comentarios
+    
+*   Palabras clave
+    
+*   Estado del contenido
+    
+*   Categoría
+    
+*   Manager
+    
+*   Autor
+    
+*   Último autor
+    
+*   Empresa
+    
+*   HyperlinkBase
+    
+*   CreatedTime
+    
+*   LastSavedTime
+    
+*   LastPrintedTime
+    
+*   NúmeroDeRevisión
+    
+*   TiempoTotalDeEdición
+    
+
+### Campos del formato de hoja de cálculo {#spreadsheet-format-fields}
+
+*   Aplicación
+    
+*   ApplicationVersion
+    
+*   Título
+    
+*   Asunto
+    
+*   Comentarios
+    
+*   Palabras clave
+    
+*   EstadoDelContenido
+    
+*   Categoría
+    
+*   Manager
+    
+*   Autor
+    
+*   Último autor
+    
+*   Empresa
+    
+*   HyperlinkBase
+    
+*   CreatedTime
+    
+*   LastSavedTime
+    
+*   LastPrintedTime
+    
+
+### Campos de formato de palabras {#words-format-fields}
+
+*   Aplicación
+    
+*   ApplicationVersion
+    
+*   Plantilla
+    
+*   Título
+    
+*   Asunto
+    
+*   Comentarios
+    
+*   Palabras clave
+    
+*   EstadoDelContenido
+    
+*   Categoría
+    
+*   Manager
+    
+*   Autor
+    
+*   Último autor
+    
+*   Empresa
+    
+*   HyperlinkBase
+    
+*   CreatedTime
+    
+*   LastSavedTime
+    
+*   LastPrintedTime
+    
+*   NúmeroDeRevisión
+    
+*   TiempoTotalDeEdición
+    
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le invitamos a buscar en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita de búsqueda de documentos en línea</a>.

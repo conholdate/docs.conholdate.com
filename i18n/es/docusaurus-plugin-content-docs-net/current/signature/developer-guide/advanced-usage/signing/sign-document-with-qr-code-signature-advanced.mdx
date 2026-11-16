@@ -1,0 +1,115 @@
+---
+title: "Firmar documento con firma de código QR: avanzado"
+sidebar_label: "✎ Código QR"
+sidebar_key: "net-signature-signing-sign-document-with-qr-code-signature-advanced"
+sidebar_position: 11
+description: "Este artículo explica cómo firmar documentos con firmas electrónicas de código QR utilizando opciones extendidas con la API de GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/signing/sign-document-with-qr-code-signature-advanced.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "1d39cac4ef89e4344a89bca291e92b0d7ccdb016dba514441dd05080201d9ce9"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "efdf4ba5925c2924f2a67030f683eb2e39247677119b5ca959ba25d47aceff0d"
+translation_updated_at: "2026-11-16T13:30:06.423Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Signature proporciona la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/qrcodesignoptions" target="_blank" rel="nofollow noopener noreferrer">QrCodeSignOptions</a> para especificar opciones adicionales para la firma de código QR, con las siguientes opciones de apariencia de la firma:
+
+* Alineación de la firma (<a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/textsignoptions/horizontalalignment" target="_blank" rel="nofollow noopener noreferrer">HorizontalAlignment</a>, <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/textsignoptions/verticalalignment" target="_blank" rel="nofollow noopener noreferrer">VerticalAlignment</a>)
+* Márgenes (<a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/textsignoptions/margin" target="_blank" rel="nofollow noopener noreferrer">Margin</a>)
+* Configuración del borde y del fondo (<a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/textsignoptions/border" target="_blank" rel="nofollow noopener noreferrer">Border, </a> <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/textsignoptions/background" target="_blank" rel="nofollow noopener noreferrer">Background</a>)
+* Fuente y colores (<a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/textsignoptions/font" target="_blank" rel="nofollow noopener noreferrer">Font</a>, <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/qrcodesignoptions/forecolor" target="_blank" rel="nofollow noopener noreferrer">Forecolor</a>)
+
+A continuación se indican los pasos para agregar una firma de código QR en un documento mediante GroupDocs.Signature:
+
+* Crear una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasar la ruta del documento de origen como parámetro del constructor.
+* Instanciar el objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/qrcodesignoptions" target="_blank" rel="nofollow noopener noreferrer">QrCodeSignOptions</a> con todas las opciones adicionales requeridas.
+* Llamar al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasarle <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/qrcodesignoptions" target="_blank" rel="nofollow noopener noreferrer">QrCodeSignOptions</a>.
+* Analizar el resultado <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/signresult" target="_blank" rel="nofollow noopener noreferrer">SignResult</a> para verificar las firmas recién creadas, si es necesario.  
+
+Este ejemplo muestra cómo agregar una firma de código de barras a un documento. Consulte <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/signresult" target="_blank" rel="nofollow noopener noreferrer">SignResult</a>
+
+```csharp
+ using (Signature signature = new Signature("sample.docx"))
+ {
+     // create QRCode option with predefined QRCode text
+     QrCodeSignOptions options = new QrCodeSignOptions("12345678")
+     {
+         // setup QRCode encoding type
+         EncodeType = QrCodeTypes.QR,
+         // set signature position
+         Left = 100,
+         Top = 100,
+         // set signature alignment
+         // when VerticalAlignment is set the Top coordinate will be ignored.
+         // Use Margin properties Top, Bottom to provide vertical offset
+         VerticalAlignment = VerticalAlignment.Top,
+         // when HorizontalAlignment is set the Left coordinate will be ignored.
+         // Use Margin properties Left, Right to provide horizontal offset
+         HorizontalAlignment = HorizontalAlignment.Right,
+         Margin = new Padding() { Top = 20, Right = 20 },
+         // adjust signature appearance
+         // setup signature border
+         Border = new Border()
+         {
+             Color = Color.DarkGreen,
+             DashStyle = DashStyle.DashLongDashDot,
+             Transparency = 0.5,
+             Visible = true,
+             Weight = 2
+         },
+         // set text color and Font
+         ForeColor = Color.Red,
+         Font = new SignatureFont { Size = 12, FamilyName = "Comic Sans MS" },
+         // setup background
+         Background = new Background()
+         {
+             Color = Color.LimeGreen,
+             Transparency = 0.5,
+             Brush = new LinearGradientBrush(Color.LimeGreen, Color.DarkGreen)
+         }
+     };
+     // sign document to file
+     SignResult signResult = signature.Sign("signed.docx", options);
+     Console.WriteLine("\nList of newly created signatures:");
+     int number = 1;
+     foreach (BaseSignature temp in signResult.Succeeded)
+     {
+         Console.WriteLine($"Signature #{number++}: Type: {temp.SignatureType} Id:{temp.SignatureId}, Location: {temp.Left}x{temp.Top}. Size: {temp.Width}x{temp.Height}");
+     }
+ }
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario MVC para la firma de documentos en .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario WebForms para la firma de documentos en .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Dropwizard para la firma de documentos en Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Spring para la firma de documentos en Java</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para generar códigos QR y/o firmar sus archivos con códigos QR de forma gratuita, puede utilizar la aplicación en línea <a href="https://products.groupdocs.app/signature/generate/qrcode" target="_blank" rel="nofollow noopener noreferrer">Generador de códigos QR</a>.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros tipos, puede utilizar las demás aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

@@ -1,0 +1,379 @@
+---
+title: "Generar mensajes de correo electrónico a partir de datos"
+sidebar_label: "Generar mensajes de correo electrónico a partir de datos"
+sidebar_key: "net-assembly-generate-email-messages"
+sidebar_position: 29
+description: "Cree mensajes de correo electrónico con asunto, cuerpo y destinatarios dinámicos a partir de fuentes de datos utilizando plantillas."
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/generate-email-messages.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "2c1cb1f570b3767c276ec5183c5b09e745710e5a9e17d9f70a5b4a938be573f1"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "3a19833a833800d1cfb8c73ae62a5abeb15d177895bc385f1a5fad9f59432123"
+translation_updated_at: "2026-11-16T13:45:42.311Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Información general {#overview}
+
+GroupDocs.Assembly para .NET le permite generar mensajes de correo electrónico dinámicamente a partir de plantillas. Puede establecer atributos del correo electrónico, como asunto, cuerpo y destinatarios (Para, CC, CCO), mediante la sintaxis de plantilla, lo que facilita la creación de mensajes de correo electrónico personalizados a partir de fuentes de datos.
+
+Las clases principales involucradas son:
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/documentassembler/" target="_blank" rel="nofollow noopener noreferrer">DocumentAssembler</a> – ensambla mensajes de correo electrónico
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/datasourceinfo/" target="_blank" rel="nofollow noopener noreferrer">DataSourceInfo</a> – encapsula fuentes de datos
+
+A continuación se presentan los pasos para generar mensajes de correo electrónico:
+
+* Crear una plantilla de correo electrónico (formato MSG o EML)
+* Establecer atributos del correo electrónico (asunto, Para, CC, CCO) mediante la sintaxis de plantilla
+* Crear contenido del cuerpo del correo electrónico con enlace de datos
+* Ensamblar el mensaje de correo electrónico con su fuente de datos
+* Guardar el mensaje de correo electrónico ensamblado
+
+
+:::info
+Las plantillas de correo electrónico admiten la misma sintaxis de plantilla que los documentos de Word, incluyendo etiquetas de expresión, bandas de datos, bloques condicionales y formato.
+:::
+
+
+## Generar correo electrónico con asunto y cuerpo {#generate-email-with-subject-and-body}
+
+Cree un correo electrónico simple con asunto y cuerpo dinámicos:
+
+```csharp
+using GroupDocs.Assembly;
+
+public class EmailData
+{
+    public string Recipient { get; set; }
+    public string Subject { get; set; }
+    public string CustomerName { get; set; }
+    public decimal InvoiceAmount { get; set; }
+}
+
+public static void GenerateEmail()
+{
+    var emailData = new EmailData
+    {
+        Recipient = "customer@example.com",
+        Subject = "Invoice #1001",
+        CustomerName = "John Doe",
+        InvoiceAmount = 1500.00m
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("EmailTemplate.msg", "EmailOutput.msg", 
+        new DataSourceInfo(emailData, "email"));
+    
+    Console.WriteLine("Email generated successfully.");
+}
+```
+
+## Estructura de la plantilla de correo electrónico {#email-template-structure}
+
+En su plantilla de correo electrónico (**EmailTemplate.msg**), configure los atributos y el cuerpo:
+
+**Campo Asunto:**
+```
+<<[email.Subject]>>
+```
+
+**Campo de:**
+```
+<<[email.Recipient]>>
+```
+
+**Cuerpo:**
+```
+Dear <<[email.CustomerName]>>,
+
+Please find your invoice below:
+
+Amount: <<[email.InvoiceAmount]:"C">>
+
+Thank you for your business.
+```
+
+## Generar correo electrónico con múltiples destinatarios {#generate-email-with-multiple-recipients}
+
+Establecer múltiples destinatarios mediante foreach:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public class EmailData
+{
+    public List<string> Recipients { get; set; }
+    public string Subject { get; set; }
+    public string Message { get; set; }
+}
+
+public static void GenerateEmailWithMultipleRecipients()
+{
+    var emailData = new EmailData
+    {
+        Recipients = new List<string> 
+        { 
+            "recipient1@example.com", 
+            "recipient2@example.com" 
+        },
+        Subject = "Important Update",
+        Message = "This is an important message for all recipients."
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("EmailTemplate.msg", "EmailOutput.msg", 
+        new DataSourceInfo(emailData, "email"));
+    
+    Console.WriteLine("Email with multiple recipients generated successfully.");
+}
+```
+
+Plantilla para múltiples destinatarios:
+
+**Campo Para:**
+```
+<<foreach [r in email.Recipients]>><<[r]>>; <</foreach>>
+```
+
+**Cuerpo:**
+```
+<<[email.Message]>>
+```
+
+## Generar correo electrónico con CC y CCO {#generate-email-with-cc-and-bcc}
+
+Establecer destinatarios en CC y CCO:
+
+```csharp
+using GroupDocs.Assembly;
+
+public class EmailData
+{
+    public string To { get; set; }
+    public string Cc { get; set; }
+    public string Bcc { get; set; }
+    public string Subject { get; set; }
+    public string Body { get; set; }
+}
+
+public static void GenerateEmailWithCcBcc()
+{
+    var emailData = new EmailData
+    {
+        To = "customer@example.com",
+        Cc = "manager@example.com",
+        Bcc = "archive@example.com",
+        Subject = "Invoice",
+        Body = "Please find attached invoice."
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("EmailTemplate.msg", "EmailOutput.msg", 
+        new DataSourceInfo(emailData, "email"));
+    
+    Console.WriteLine("Email with CC and BCC generated successfully.");
+}
+```
+
+Plantilla:
+
+**Campo Destinatario:**
+```
+<<[email.To]>>
+```
+
+**Campo CC:**
+```
+<<[email.Cc]>>
+```
+
+**Campo BCC:**
+```
+<<[email.Bcc]>>
+```
+
+**Cuerpo:**
+```
+<<[email.Body]>>
+```
+
+## Generar correo electrónico con contenido enriquecido {#generate-email-with-rich-content}
+
+Cree correos electrónicos con tablas, listas y contenido con formato:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public class OrderEmail
+{
+    public string CustomerName { get; set; }
+    public string Subject { get; set; }
+    public List<OrderItem> Items { get; set; }
+}
+
+public class OrderItem
+{
+    public string ProductName { get; set; }
+    public decimal Price { get; set; }
+}
+
+public static void GenerateRichEmail()
+{
+    var orderEmail = new OrderEmail
+    {
+        CustomerName = "John Doe",
+        Subject = "Order Confirmation",
+        Items = new List<OrderItem>
+        {
+            new OrderItem { ProductName = "Laptop", Price = 999.99m },
+            new OrderItem { ProductName = "Mouse", Price = 29.99m }
+        }
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("EmailTemplate.msg", "EmailOutput.msg", 
+        new DataSourceInfo(orderEmail, "order"));
+    
+    Console.WriteLine("Rich email generated successfully.");
+}
+```
+
+Cuerpo de la plantilla:
+
+```
+Dear <<[order.CustomerName]>>,
+
+Thank you for your order. Here are your items:
+
+<<foreach [in order.Items]>>
+• <<[ProductName]>> - <<[Price]:"C">>
+<</foreach>>
+
+Total: <<[order.Items.Sum(i => i.Price)]:"C">>
+```
+
+## Generar correo electrónico a partir de una colección {#generate-email-from-collection}
+
+Generar múltiples correos electrónicos a partir de una colección:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public class CustomerEmail
+{
+    public string Email { get; set; }
+    public string Name { get; set; }
+    public string Subject { get; set; }
+}
+
+public static void GenerateEmailsFromCollection()
+{
+    List<CustomerEmail> customers = new List<CustomerEmail>
+    {
+        new CustomerEmail 
+        { 
+            Email = "customer1@example.com", 
+            Name = "John Doe",
+            Subject = "Personalized Message"
+        },
+        new CustomerEmail 
+        { 
+            Email = "customer2@example.com", 
+            Name = "Jane Smith",
+            Subject = "Personalized Message"
+        }
+    };
+    
+    // Generate email for each customer
+    DocumentAssembler assembler = new DocumentAssembler();
+    foreach (var customer in customers)
+    {
+        string outputPath = $"Email_{customer.Name.Replace(" ", "_")}.msg";
+        assembler.AssembleDocument("EmailTemplate.msg", outputPath, 
+            new DataSourceInfo(customer, "customer"));
+    }
+    
+    Console.WriteLine("Emails generated from collection successfully.");
+}
+```
+
+## Establecer la dirección de correo electrónico del remitente {#set-email-from-address}
+
+Establezca la dirección del remitente (De):
+
+```csharp
+using GroupDocs.Assembly;
+
+public class EmailData
+{
+    public string From { get; set; }
+    public string To { get; set; }
+    public string Subject { get; set; }
+}
+
+public static void GenerateEmailWithFrom()
+{
+    var emailData = new EmailData
+    {
+        From = "sender@example.com",
+        To = "recipient@example.com",
+        Subject = "Test Email"
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("EmailTemplate.msg", "EmailOutput.msg", 
+        new DataSourceInfo(emailData, "email"));
+    
+    Console.WriteLine("Email with From address generated successfully.");
+}
+```
+
+Plantilla:
+
+**Campo De:**
+```
+<<[email.From]>>
+```
+
+
+:::warning
+Las plantillas de correo electrónico deben estar en formato MSG o EML. La estructura de la plantilla depende del cliente de correo electrónico utilizado para crearla. Asegúrese de aplicar el formato adecuado para los cuerpos de correo electrónico en HTML o RTF.
+:::
+
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre los adjuntos de correo electrónico, los cuerpos de correo electrónico en HTML, los encabezados de correo electrónico y los escenarios avanzados de generación de correos electrónicos, consulte la [sección de uso avanzado](/net/assembly/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para .NET</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Java</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Python-via-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Python mediante .NET</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para ensamblar documentos a partir de plantillas y fuentes de datos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/assembly" target="_blank">Conholdate.Assembly App</a>**.

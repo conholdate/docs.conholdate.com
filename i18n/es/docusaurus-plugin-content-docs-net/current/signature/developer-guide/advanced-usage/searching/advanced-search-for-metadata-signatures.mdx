@@ -1,0 +1,106 @@
+---
+title: "Búsqueda avanzada para firmas de metadatos"
+sidebar_label: "🌐 Metadatos"
+sidebar_key: "net-signature-searching-advanced-search-for-metadata-signatures"
+sidebar_position: 12
+description: "Este artículo explica cómo buscar distintos tipos de valores de datos dentro de las firmas electrónicas en los metadatos del documento mediante la API de GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/searching/advanced-search-for-metadata-signatures.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "cc3cce978171ceef2bd960bc95b8a79c6007d574f090e4094ad2d5b4b1afff2b"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "dd4917461f2541b866689cc8d13f3d975fe230167fef6f00e672719d8a867495"
+translation_updated_at: "2026-11-16T13:02:11.080Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> ofrece la capacidad de buscar firmas de metadatos y convertir los valores obtenidos en diversos tipos de datos.
+
+A continuación se presentan los pasos para buscar firmas de metadatos y obtener el tipo de datos requerido con GroupDocs.Signature:
+
+* Crear una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasar la ruta del documento de origen o un flujo como parámetro del constructor.
+* Crear un objeto de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasearchoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataSearchOptions</a>. Ajustar sus propiedades según sea necesario: establecer <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasearchoptions/name" target="_blank" rel="nofollow noopener noreferrer">Name</a> junto con <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasearchoptions/namematchtype" target="_blank" rel="nofollow noopener noreferrer">NameMatchType</a> para conservar únicamente las entradas cuyos nombres coincidan, o establecer <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasearchoptions/includebuiltinproperties" target="_blank" rel="nofollow noopener noreferrer">IncludeBuiltinProperties</a> en `true` para obtener también las propiedades integradas del documento (esta bandera solo tiene sentido para documentos de procesamiento de texto, hojas de cálculo y presentaciones).
+* Llamar al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasarle <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasearchoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataSearchOptions</a>.
+* Llamar al método de conversión adecuado para obtener el valor de metadatos correspondiente en el tipo de datos requerido.
+
+## Buscar valores de firma electrónica de metadatos con diversos tipos de datos {#search-for-electronic-metadata-signature-values-with-various-data-type}
+
+Este ejemplo muestra cómo buscar valores de firma de metadatos con diversos tipos de datos.
+
+```csharp
+using (Signature signature = new Signature("signed.pdf"))
+{
+    // set up search options: default options return all metadata signatures of the document
+    MetadataSearchOptions searchOptions = new MetadataSearchOptions();
+    // search for signatures in document
+    List<PdfMetadataSignature> signatures = signature.Search<PdfMetadataSignature>(searchOptions);
+    // try to get each Pdf signature with proper data type added in Basic usage example SignPdfWithMetadata
+    PdfMetadataSignature mdSignature;
+    // See example SignPdfWithMetadata with added various data type values to signatures
+    try
+    {
+        mdSignature = signatures.FirstOrDefault(p => p.Name == "Author");
+        Console.WriteLine($"\t[{mdSignature.Name}] as String = {mdSignature.ToString()}");
+        mdSignature = signatures.FirstOrDefault(p => p.Name == "CreatedOn");
+        Console.WriteLine($"\t[{mdSignature.Name}] as DateTime = {mdSignature.ToDateTime().ToShortDateString()}");
+        mdSignature = signatures.FirstOrDefault(p => p.Name == "DocumentId");
+        Console.WriteLine($"\t[{mdSignature.Name}] as Integer = {mdSignature.ToInteger()}");
+        mdSignature = signatures.FirstOrDefault(p => p.Name == "SignatureId");
+        Console.WriteLine($"\t[{mdSignature.Name}] as Double = {mdSignature.ToDouble()}");
+        mdSignature = signatures.FirstOrDefault(p => p.Name == "Amount");
+        Console.WriteLine($"\t[{mdSignature.Name}] as Decimal = {mdSignature.ToDecimal()}");
+        mdSignature = signatures.FirstOrDefault(p => p.Name == "Total");
+        Console.WriteLine($"\t[{mdSignature.Name}] as Float = {mdSignature.ToSingle()}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error obtaining signature: {ex.Message}");
+    }
+
+    // narrow the search down to metadata signatures whose names end with "Id"
+    MetadataSearchOptions filteredOptions = new MetadataSearchOptions
+    {
+        Name = "Id",
+        NameMatchType = TextMatchType.EndsWith
+    };
+    List<PdfMetadataSignature> filteredSignatures = signature.Search<PdfMetadataSignature>(filteredOptions);
+    Console.WriteLine($"Found {filteredSignatures.Count} metadata signature(s) with name ending with 'Id'");
+}
+```
+
+
+:::info
+La búsqueda de metadatos es una parte del flujo de trabajo general de metadatos de documentos. Consulte [Trabajar con metadatos de documentos](/net/signature/developer-guide/basic-usage/work-with-document-metadata/) Página para la visión completa: agregar firmas de metadatos, leer propiedades integradas, proteger valores y limitaciones conocidas.
+:::
+
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI MVC para firma de documentos en .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI WebForms para firma de documentos en .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI Dropwizard para firma de documentos en Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI Spring para firma de documentos en Java</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

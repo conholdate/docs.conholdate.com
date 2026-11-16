@@ -1,0 +1,80 @@
+---
+title: "Buscar por fragmentos"
+sidebar_label: "Buscar por fragmentos"
+sidebar_position: 18
+description: "Este artículo proporciona conocimientos sobre la capacidad de realizar búsquedas por fragmentos (chunks)."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/searching/search-by-chunks.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "89b11adda43b75698e3499736c64a3503f73682743c9b2f040c1b90ddc2b6fd2"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "df026dd19569835a1c5b5b978c4c7532db3cdb997df03188169d7ab02f2a5fe8"
+translation_updated_at: "2026-11-16T11:53:37.182Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+La API de GroupDocs.Search proporciona la capacidad de realizar búsquedas por fragmentos (chunks). Esto significa que, en una única llamada al método <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index/methods/search/index" target="_blank" rel="nofollow noopener noreferrer">Search</a> de la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index" target="_blank" rel="nofollow noopener noreferrer">Index</a>, solo se realiza la búsqueda en un segmento del índice. Esta funcionalidad resulta relevante al realizar búsquedas en índices grandes que contienen decenas y cientos de miles de documentos.
+
+Al realizar búsquedas por fragmentos, primero se llama al método <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index/methods/search/index" target="_blank" rel="nofollow noopener noreferrer">Search</a> con la bandera <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/searchoptions/properties/ischunksearch" target="_blank" rel="nofollow noopener noreferrer">IsChunkSearch</a> establecida en `true` en las opciones de búsqueda. A continuación, la búsqueda en cada segmento subsiguiente se lleva a cabo mediante el método <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index/methods/searchnext/index" target="_blank" rel="nofollow noopener noreferrer">SearchNext</a>, pasando como argumento el <a href="https://reference.groupdocs.com/net/search/groupdocs.search.results/searchresult/properties/nextchunksearchtoken" target="_blank" rel="nofollow noopener noreferrer">ChunkSearchToken</a> del siguiente fragmento.
+
+El siguiente ejemplo demuestra la búsqueda por fragmentos.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+string query = "Einstein";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Creating a search options instance
+SearchOptions options = new SearchOptions();
+options.IsChunkSearch = true; // Enabling the search by chunks
+ 
+// Starting the search by chunks
+SearchResult result = index.Search(query, options);
+Console.WriteLine("Document count: " + result.DocumentCount);
+Console.WriteLine("Occurrence count: " + result.OccurrenceCount);
+ 
+// Continuing the search by chunks
+while (result.NextChunkSearchToken != null)
+{
+    result = index.SearchNext(result.NextChunkSearchToken);
+    Console.WriteLine("Document count: " + result.DocumentCount);
+    Console.WriteLine("Occurrence count: " + result.OccurrenceCount);
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le invitamos a buscar en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita de búsqueda de documentos en línea</a>.

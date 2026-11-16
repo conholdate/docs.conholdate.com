@@ -1,0 +1,149 @@
+---
+title: "Lista numerada en un documento de correo electrónico"
+sidebar_label: "Lista numerada en un documento de correo electrónico"
+sidebar_key: "net-assembly-working-with-list-reports-numbered-numbered-list-in-email-document"
+sidebar_position: 6
+description: ""
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/advanced-usage/working-with-list-reports-numbered/numbered-list-in-email-document.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "d3c3a1623055b7bfdfe511afdb686480e139b107e7a2a9ad0dd4740845005fb9"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "d82ba50872f13de21444af7c1741962e9614adb66e075f8ee7b807f4ca0e157e"
+translation_updated_at: "2026-11-16T12:37:35.635Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+:::info
+En este artículo, utilizaremos GroupDocs.Assembly para generar un informe de lista numerada en formato de documento de correo electrónico.
+:::
+
+:::info
+El código utiliza algunos de los objetos definidos en <a href="https://docs.groupdocs.com/assembly/net/the-business-layer/" target="_blank" rel="nofollow noopener noreferrer">La Capa de Negocio</a>.
+:::
+
+:::info
+Esta función es compatible con la versión 17.8.0 o superior.
+:::
+
+
+## Lista numerada en un documento de correo electrónico {#numbered-list-in-email-document}
+
+### Creación de una lista numerada {#creating-a-numbered-list}
+
+Siga los pasos siguientes para crear una plantilla de lista numerada en Microsoft Outlook 2013.
+
+1.  Crear un nuevo correo electrónico.
+2.  Escriba una frase como: «Ofrecemos soporte para los siguientes clientes:».
+3.  Iniciar la lista numerada.
+4.  Guardar la plantilla.
+
+### Requisito del informe {#reporting-requirement}
+
+Como desarrollador de informes, se le requiere representar los siguientes requisitos clave:
+
+*   El informe debe estar en formato .eml o .msg.
+*   Debe incluir el destinatario del correo electrónico, el CSS y el asunto del correo electrónico.
+*   El informe debe mostrar los productos en una lista numerada.
+
+### Adición de sintaxis que será evaluada por GroupDocs.Assembly Engine {#adding-syntax-to-be-evaluated-by-groupdocs-assembly-engine}
+
+```csharp
+We provide support for the following products:
+<<foreach [in products]>><<[NumberOf()]>>. <<[ProductName]>>
+<</foreach>>
+```
+
+
+:::info
+Para obtener información técnica detallada sobre la sintaxis, las expresiones y la generación de informes por parte del motor, visite: <a href="https://docs.groupdocs.com/assembly/net/working-with-groupdocs-assembly-engine/" target="_blank" rel="nofollow noopener noreferrer">Trabajar con el motor GroupDocs.Assembly</a>.
+:::
+
+
+### Descargar plantilla de lista numerada {#download-numbered-list-template}
+
+Descargue el documento de ejemplo de lista numerada que creamos en este artículo:
+
+*   <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET/raw/master/Examples/Data/Source/Email%20Templates/Numbered%20List.msg?raw=true" target="_blank" rel="nofollow noopener noreferrer">Lista numerada.msg</a>
+
+### Generación del informe {#generating-the-report}
+
+<a href="https://gist.github.com/GroupDocsGists/a41628c2748f0237a84b710d9538fc4f" target="_blank" rel="nofollow noopener noreferrer">Ver ejemplo de código en GitHub Gist</a>
+
+## Reinicio de numeración en lista numerada anidada {#numbering-restart-in-nested-numbered-list}
+
+
+:::info
+Esta función es compatible con la versión 19.7 o superior.
+:::
+
+
+
+El motor GroupDocs.Assembly permite reiniciar dinámicamente la numeración de listas dentro de sus documentos mediante las etiquetas *&lt;&lt;restartNum&gt;&gt;*. En particular, esta funcionalidad resulta útil al trabajar con una lista numerada anidada dentro de una banda de datos.
+
+Supongamos que seleccionamos las clases *Order* y *Service*, tal como se definen en los *Objetos personalizados* de nuestro caso de uso empresarial.
+
+<a href="https://gist.github.com/GroupDocsGists/cd8768711ff88414192c3f50a9b7c918" target="_blank" rel="nofollow noopener noreferrer">Ver ejemplo de código en GitHub Gist</a>
+
+Dado que *orders* es una enumeración de instancias de *Order*, puede intentar utilizar la siguiente plantilla para generar información sobre varios pedidos en un solo documento.
+
+```csharp
+<<foreach [in orders]>><<[Customer.CustomerName]>> (<<[Customer.CustomerContactNumber]>>)
+1.	<<foreach [in Services]>><<[ServiceName]>>
+<</foreach>><</foreach>>
+```
+
+El informe generado tendrá el siguiente aspecto:
+
+```
+Jane Doe (+9211874)
+	1.	Regular Cleaning
+	2.	Oven Cleaning
+John Smith (+458789)
+	3.	Regular Cleaning
+	4.	Oven Cleaning
+	5.	Carpet Cleaning
+John Smith (+458789)
+	6.	Regular Cleaning
+	7.	Carpet Cleaning
+John Smith (+458789)
+	8.	Oven Cleaning
+```
+
+Sin embargo, habría una única lista numerada para todos los pedidos, lo cual no es aplicable en este escenario. Por lo tanto, puedes hacer que la numeración de la lista se reinicie para cada pedido colocando un `*`&lt;&lt;`restartNum`&gt;&gt;* etiqueta en su plantilla antes de una correspondiente *&lt;&lt;`foreach`&gt;&gt;* etiquetar de la siguiente manera:
+
+```csharp
+<<foreach [in orders]>><<[ Customer.CustomerName]>> (<<[Customer.CustomerContactNumber]>>)
+1.	<<restartNum>><<foreach [in Services]>><<[ServiceName]>>
+<</foreach>><</foreach>>
+```
+
+ Luego, el informe generado tendrá el siguiente aspecto:
+
+```
+Jane Doe (+9211874)
+	1.	Regular Cleaning
+	2.	Oven Cleaning
+John Smith (+458789)
+	1.	Regular Cleaning
+	2.	Oven Cleaning
+	3.	Carpet Cleaning
+John Smith (+458789)
+	1.	Regular Cleaning
+	2.	Carpet Cleaning
+John Smith (+458789)
+	1.	Oven Cleaning
+```

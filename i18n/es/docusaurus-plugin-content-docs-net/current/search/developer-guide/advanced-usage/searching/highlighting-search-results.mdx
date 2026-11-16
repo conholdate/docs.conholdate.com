@@ -1,0 +1,182 @@
+---
+title: "Resaltado de resultados de búsqueda"
+sidebar_label: "Resaltado de resultados de búsqueda"
+sidebar_position: 8
+description: "Este artículo brinda conocimientos sobre cómo resaltar los resultados de búsqueda en el texto de un documento."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/searching/highlighting-search-results.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "807fa957d16c8298e677a1f78e0307d14bc3f31e865fb9309d2eaffb4301f132"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "87d09e2170666246ea36441c9a04213c453109573bdd38f5dc66981b4e037f18"
+translation_updated_at: "2026-11-16T11:43:24.333Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Esta página describe cómo resaltar los resultados de búsqueda en el texto de un documento.
+
+## Resaltado de coincidencias en el texto de todo el documento {#hit-highlighting-in-the-text-of-entire-document}
+
+Tras realizar una búsqueda, las ocurrencias de palabras y frases encontradas para un documento concreto pueden resaltarse en el texto del documento mediante el método <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index/methods/highlight/index" target="_blank" rel="nofollow noopener noreferrer">Highlight</a> de la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index" target="_blank" rel="nofollow noopener noreferrer">Index</a>. Para ello, debe pasarse como argumento al método un resaltador del tipo correspondiente.
+
+La clase `Index` también ofrece una sobrecarga del método <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index/methods/highlight/index" target="_blank" rel="nofollow noopener noreferrer">Highlight</a>, que acepta como argumento un objeto de la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/highlightoptions" target="_blank" rel="nofollow noopener noreferrer">HighlightOptions</a>. La clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/highlightoptions" target="_blank" rel="nofollow noopener noreferrer">HighlightOptions</a> contiene propiedades para configurar las siguientes opciones:
+
+*   <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/textoptions/properties/customextractor" target="_blank" rel="nofollow noopener noreferrer">CustomExtractor</a> es un extractor utilizado durante la indexación; es necesario si el texto del documento no se guardó en el índice.
+*   <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/textoptions/properties/additionalfields" target="_blank" rel="nofollow noopener noreferrer">AdditionalFields</a> son campos adicionales del documento añadidos durante la indexación del documento, también necesarios si el texto del documento no se guardó en el índice.
+*   <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/textoptions/properties/cancellation" target="_blank" rel="nofollow noopener noreferrer">Cancellation</a> es un objeto utilizado para cancelar la operación.
+*   <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/textoptions/properties/generatehead" target="_blank" rel="nofollow noopener noreferrer">GenerateHead</a> es una bandera que especifica si se genera la etiqueta `<head>` en el HTML de salida.
+*   <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/textoptions/properties/metadataindexingoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataIndexingOptions</a> es un objeto para especificar las opciones de indexación de metadatos.
+*   <a href="https://reference.groupdocs.com/search/net/groupdocs.search.options/highlightoptions/properties/useinlinestyles" target="_blank" rel="nofollow noopener noreferrer">UseInlineStyles</a> es una bandera que especifica si se utilizan estilos en línea o clases CSS para resaltar las ocurrencias.
+*   <a href="https://reference.groupdocs.com/search/net/groupdocs.search.options/highlightoptions/properties/highlightcolor" target="_blank" rel="nofollow noopener noreferrer">HighlightColor</a> es el color utilizado para resaltar las ocurrencias.
+*   <a href="https://reference.groupdocs.com/search/net/groupdocs.search.options/highlightoptions/properties/termhighlightstarttag" target="_blank" rel="nofollow noopener noreferrer">TermHighlightStartTag</a> es la etiqueta inicial del resaltado de la palabra encontrada. Esta etiqueta solo se utiliza al resaltar en texto sin formato.
+*   <a href="https://reference.groupdocs.com/search/net/groupdocs.search.options/highlightoptions/properties/termhighlightendtag" target="_blank" rel="nofollow noopener noreferrer">TermHighlightEndTag</a> es la etiqueta final del resaltado de la palabra encontrada. Esta etiqueta solo se utiliza al resaltar en texto sin formato.
+
+El resto de opciones se utilizan para resaltar ocurrencias en fragmentos de texto.
+
+Para resaltar los resultados de búsqueda en el texto de todo el documento, se utiliza un resaltador de la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search.highlighters/documenthighlighter" target="_blank" rel="nofollow noopener noreferrer">DocumentHighlighter</a>. Para crear un resaltador de este tipo, debe pasarse a su constructor un objeto de una clase derivada de la clase abstracta <a href="https://reference.groupdocs.com/net/search/groupdocs.search.common/outputadapter" target="_blank" rel="nofollow noopener noreferrer">OutputAdapter</a>. Los detalles sobre los adaptadores de salida se presentan en la página [Adaptadores de salida](/net/search/developer-guide/advanced-usage/searching/output-adapters/).
+
+Si tras la generación el texto del documento se guarda en un archivo, este puede abrirse con un navegador web para navegar entre las ocurrencias de las palabras encontradas. Para navegar entre las ocurrencias, se añade el siguiente texto a la URL en el navegador:
+
+#hitN
+
+donde *N* es un número que comienza en cero. La URL completa del documento en el navegador podría tener este aspecto:
+
+[file:///C:/Text.html#hit0](file:///C:/Text.html#hit0)
+
+El siguiente ejemplo demuestra cómo resaltar los resultados de búsqueda en el texto de todo el documento.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentFolder = @"c:\MyDocuments\";
+
+// Creating an index settings instance
+IndexSettings settings = new IndexSettings();
+settings.TextStorageSettings = new TextStorageSettings(Compression.High); // Enabling storage of extracted text in the index
+
+// Creating an index in the specified folder
+Index index = new Index(indexFolder, settings);
+
+// Indexing documents from the specified folder
+index.Add(documentFolder);
+
+// Search for the word 'Universe'
+SearchResult result = index.Search("Universe");
+
+// Highlighting occurrences in the text
+if (result.DocumentCount > 0)
+{
+    FoundDocument document = result.GetFoundDocument(0); // Getting the first found document
+    StructureOutputAdapter outputAdapter = new StructureOutputAdapter(OutputFormat.PlainText); // Creating the output adapter
+    Highlighter highlighter = new DocumentHighlighter(outputAdapter); // Creating the highlighter instance
+    HighlightOptions options = new HighlightOptions(); // Creating the highlight options
+    options.TermHighlightStartTag = "<Term>"; // Setting the start tag for the found word
+    options.TermHighlightEndTag = "</Term>"; // Setting the end tag for the found word
+    index.Highlight(document, highlighter, options); // Generating plain text with highlighted occurrences
+
+    DocumentField[] fields = outputAdapter.GetResult();
+    Console.WriteLine(document.ToString());
+    for (int i = 0; i < fields.Length; i++)
+    {
+        // Printing field names of the found document
+        DocumentField field = fields[i];
+        Console.WriteLine("\t" + field.Name);
+    }
+}
+```
+
+## Resaltado de coincidencias en fragmentos de texto {#hit-highlighting-in-text-fragments}
+
+Las ocurrencias también pueden resaltarse en fragmentos separados de HTML o texto sin formato. Para ello, se utiliza el resaltador de la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search.highlighters/fragmenthighlighter" target="_blank" rel="nofollow noopener noreferrer">FragmentHighlighter</a>. En la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/highlightoptions" target="_blank" rel="nofollow noopener noreferrer">HighlightOptions</a> se presentan las siguientes propiedades para su uso con este tipo de resaltador:
+
+*   <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/highlightoptions/properties/termsbefore" target="_blank" rel="nofollow noopener noreferrer">TermsBefore</a> se utiliza para especificar el número máximo de palabras en un fragmento de texto *antes* de la palabra resaltada. El valor debe estar en el rango de 0 a 10000. El valor predeterminado es 7.
+*   <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/highlightoptions/properties/termsafter" target="_blank" rel="nofollow noopener noreferrer">TermsAfter</a> se utiliza para especificar el número máximo de palabras en un fragmento de texto *después* de la palabra resaltada. El valor debe estar en el rango de 0 a 10000. El valor predeterminado es 7.
+*   <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/highlightoptions/properties/termstotal" target="_blank" rel="nofollow noopener noreferrer">TermsTotal</a> se utiliza para especificar el número máximo de palabras en un fragmento de texto. El valor debe estar en el rango de 0 a 10000. El valor predeterminado es 21.
+*   <a href="https://reference.groupdocs.com/search/net/groupdocs.search.options/highlightoptions/properties/termhighlightstarttag" target="_blank" rel="nofollow noopener noreferrer">TermHighlightStartTag</a> es la etiqueta inicial del resaltado de la palabra encontrada. Esta etiqueta solo se utiliza al resaltar en texto sin formato.
+*   <a href="https://reference.groupdocs.com/search/net/groupdocs.search.options/highlightoptions/properties/termhighlightendtag" target="_blank" rel="nofollow noopener noreferrer">TermHighlightEndTag</a> es la etiqueta final del resaltado de la palabra encontrada. Esta etiqueta solo se utiliza al resaltar en texto sin formato.
+
+Los fragmentos de texto generados con ocurrencias resaltadas pueden utilizarse, por ejemplo, para generar páginas web que contengan resultados de búsqueda en un sitio web.
+
+El siguiente ejemplo demuestra cómo resaltar resultados de búsqueda en fragmentos de texto separados.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+
+// Creating an index settings instance
+IndexSettings settings = new IndexSettings();
+settings.TextStorageSettings = new TextStorageSettings(Compression.High); // Enabling storage of extracted text in the index
+
+// Creating an index in the specified folder
+Index index = new Index(indexFolder, settings);
+
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+
+// Search for the word 'Einstein'
+SearchResult result = index.Search("Einstein");
+
+// Assigning highlight options
+HighlightOptions options = new HighlightOptions();
+options.TermsBefore = 5;
+options.TermsAfter = 5;
+options.TermsTotal = 15;
+options.HighlightColor = new Color(0, 0, 127);
+options.UseInlineStyles = true;
+
+// Highlighting found words in separate text fragments of a document
+FoundDocument document = result.GetFoundDocument(0);
+FragmentHighlighter highlighter = new FragmentHighlighter(OutputFormat.Html);
+index.Highlight(document, highlighter, options);
+
+// Getting the result
+FragmentContainer[] fragmentContainers = highlighter.GetResult();
+for (int i = 0; i < fragmentContainers.Length; i++)
+{
+    FragmentContainer container = fragmentContainers[i];
+    string[] fragments = container.GetFragments();
+    if (fragments.Length > 0)
+    {
+        Console.WriteLine(container.FieldName);
+        Console.WriteLine();
+        for (int j = 0; j < fragments.Length; j++)
+        {
+            // Printing HTML markup to console
+            Console.WriteLine(fragments[j]);
+            Console.WriteLine();
+        }
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le damos la bienvenida a realizar búsquedas en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">aplicación gratuita de búsqueda de documentos en línea</a>.

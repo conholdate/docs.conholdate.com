@@ -1,0 +1,218 @@
+---
+title: "Trabajar con metadatos de documentos"
+sidebar_label: "Trabajar con metadatos de documentos"
+sidebar_position: 9
+description: "Aprenda qué es la metadatos de documentos, dónde los archivos PDF, Word, Excel, PowerPoint e imágenes los almacenan, y cómo agregar, buscar y leer entradas de metadatos en C# con GroupDocs.Signature para .NET."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/basic-usage/work-with-document-metadata.md"
+source_commit: "0c3c217010a3d6a2e7ef62d7ad8ef26f94d99418"
+source_sha256: "d74cb753803364447de5b5b4b5e0d24cb6d5f05369b08e1d4382ebb5062bb0f7"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "263715167c5b5e749ab292c60aa0228122418114e4bdcf1f4bf71690e6940f31"
+translation_updated_at: "2026-11-16T14:39:11.077Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## ¿Qué es la metadatos de documento {#what-is-document-metadata}
+
+Los metadatos de documento son los datos que el documento mantiene sobre sí mismo. Viajan dentro del archivo pero permanecen invisibles cuando el documento se abre en un visor o editor: los lectores ven las páginas, mientras que la capa de metadatos registra silenciosamente quién creó el archivo, cuándo, con qué herramienta y cualquier otra información que la aplicación haya decidido almacenar allí.
+
+Las entradas de metadatos suelen dividirse en tres categorías clásicas:
+
+* **Descriptivos** – sobre qué trata el documento: título, autor, asunto, palabras clave, comentarios. Esto es lo que indexan primero los motores de búsqueda y los sistemas de gestión de documentos.
+* **Estructurales** – cómo está construido el archivo: formato y versión, número de páginas y dimensiones, relaciones entre las partes incrustadas.
+* **Administrativos** – cómo se gestiona el archivo: fechas de creación y modificación, aplicación generadora, historial de revisiones, derechos y permisos.
+
+Cada familia de documentos almacena esta capa en su propia ubicación física, y <a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> replica dichas ubicaciones mediante clases dedicadas derivadas de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/metadatasignature/" target="_blank" rel="nofollow noopener noreferrer">MetadataSignature</a>:
+
+| Familia de documentos | Ubicación física de los metadatos | Clase de GroupDocs.Signature |
+| --- | --- | --- |
+| PDF | Paquete XMP: un bloque XML con nombres de entradas con prefijos como `xmp:CreateDate` | <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/pdfmetadatasignature" target="_blank" rel="nofollow noopener noreferrer">PdfMetadataSignature</a> (agrega la propiedad `TagPrefix`) |
+| Documentos de procesamiento de texto (DOCX, DOC, RTF, ODT) | Propiedades del documento: campos integrados más una colección de propiedades personalizadas | <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/wordprocessingmetadatasignature" target="_blank" rel="nofollow noopener noreferrer">WordProcessingMetadataSignature</a> |
+| Hojas de cálculo (XLSX, XLS, ODS) | Propiedades integradas y personalizadas del libro | <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/spreadsheetmetadatasignature" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetMetadataSignature</a> |
+| Presentaciones (PPTX, PPT, ODP) | Propiedades integradas y personalizadas de la presentación | <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/presentationmetadatasignature" target="_blank" rel="nofollow noopener noreferrer">PresentationMetadataSignature</a> |
+| Imágenes (JPG, TIFF, …) | Elementos de propiedad EXIF, identificados por identificadores numéricos en lugar de nombres | <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/imagemetadatasignature" target="_blank" rel="nofollow noopener noreferrer">ImageMetadataSignature</a> (agrega la propiedad `Id`) |
+| Certificados digitales (PFX) | Campos del certificado: emisor, número de serie, huella digital, fecha de caducidad y otros similares | <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/certificatemetadatasignature" target="_blank" rel="nofollow noopener noreferrer">CertificateMetadataSignature</a> (devuelto por la búsqueda) |
+
+Cada entrada, independientemente del formato, es un par nombre-valor con un tipo de valor detectado. La clase base <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/metadatasignature/" target="_blank" rel="nofollow noopener noreferrer">MetadataSignature</a> expone las propiedades `Name`, `Value` y `Type`, donde `Type` es uno de los valores `MetadataType`: `Boolean`, `Integer`, `Double`, `DateTime`, `String` o `Undefined`.
+
+## Por qué son importantes los metadatos {#why-metadata-matters}
+
+Los metadatos bien mantenidos son lo que hace gestionables grandes colecciones de documentos. Los archivos con entradas descriptivas significativas pueden encontrarse mediante una consulta por propiedad en lugar de un escaneo de texto completo, redirigirse automáticamente al almacenamiento o rama de flujo de trabajo adecuados, y agruparse con sus revisiones relacionadas. Dado que GroupDocs.Signature trata las entradas de metadatos como firmas electrónicas invisibles, la misma capa se convierte en un canal de auditoría: puede marcar un documento con la identidad del firmante, identificadores de documento, marcas de tiempo o incluso objetos de negocio completos serializados, sin modificar ni un solo píxel de su contenido visible.
+
+La misma invisibilidad también representa un riesgo. Los documentos abandonan las organizaciones llevando consigo nombres de autores, rutas internas de archivos, restos de cambios rastreados y otros detalles que nadie pretendió publicar, lo que podría violar normas de privacidad o filtrar información interna. Antes de distribuir un documento, vale la pena auditar qué contiene realmente su capa de metadatos: las APIs de búsqueda e información de documento descritas a continuación enumeran dicha capa en pocas líneas de código, y las funciones de cifrado le permiten proteger los valores que añada deliberadamente.
+
+## Qué puede hacer GroupDocs.Signature con los metadatos {#what-groupdocs-signature-can-do-with-metadata}
+
+| Familia de documentos | Añadir (firmar) metadatos | Buscar metadatos | Aparece en GetDocumentInfo |
+| --- | --- | --- | --- |
+| PDF | Sí (XMP) | Sí (XMP) | Sí |
+| Documentos de procesamiento de texto | Sí | Sí | Sí |
+| Hojas de cálculo | Sí | Sí | Sí |
+| Presentaciones | Sí | Sí | Sí |
+| Imágenes | Sí (EXIF, ver nota) | Sí | Sí |
+| Certificados (PFX) | No | Sí (único tipo de búsqueda admitido) | Sí (campos de certificado) |
+| Archivos (ZIP, TAR, 7Z) | No | No | No |
+
+Notas sobre formatos a tener en cuenta:
+
+* **Las operaciones de metadatos en PDF solo afectan al paquete XMP.** Las entradas se leen y escriben en los metadatos XMP del documento; cada nombre de entrada puede llevar un prefijo de etiqueta (`xmp`, `dc`, `pdf` y otros), controlado mediante `PdfMetadataSignature.TagPrefix`. La clase predefinida <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/pdfmetadatasignatures" target="_blank" rel="nofollow noopener noreferrer">PdfMetadataSignatures</a> ofrece entradas estándar listas para usar, como `Author`, `CreateDate` o `Producer`.
+* **Los metadatos de imagen se escriben como elementos de propiedad EXIF.** Si la imagen cargada no contiene ninguna entrada EXIF en absoluto —lo habitual en archivos PNG, BMP o GIF recién creados—, el paso de firma de metadatos se omite silenciosamente, sin generar un error. Los formatos como JPG o TIFF, que normalmente contienen datos EXIF, son los objetivos más fiables. Las imágenes SVG, CDR, CMX, WEBP y WMF no admiten metadatos en absoluto, y las imágenes DICOM no pueden firmarse mediante `MetadataSignOptions`.
+* **Las propiedades integradas del documento se excluyen de forma predeterminada.** `GetDocumentInfo` las devuelve únicamente cuando `SignatureSettings.IncludeStandardMetadataSignatures` se establece en `true`, y `Search` las devuelve únicamente cuando `MetadataSearchOptions.IncludeBuiltinProperties` está habilitado —esto último se aplica a documentos de procesamiento de texto, hojas de cálculo y presentaciones.
+
+La matriz completa de características por formato está disponible en la página [formatos de documento admitidos](/net/signature/getting-started/supported-document-formats/).
+
+
+:::warning
+Las firmas de metadatos solo admiten las operaciones de **agregar (firmar)** y **búsqueda**. Los métodos **Actualizar**, **Eliminar** y **Verificar** no procesan firmas de metadatos: no existe forma de modificar, eliminar ni verificar una entrada de metadatos mediante dichas API. Para cambiar una entrada existente, firme el documento nuevamente con el mismo nombre de metadato: el nuevo valor reemplazará al anterior.
+:::
+
+
+## Leer detalles del documento y metadatos {#read-document-details-and-metadata}
+
+El método de clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a>, `GetDocumentInfo`, devuelve los detalles generales del documento junto con la colección de entradas de metadatos encontradas en el archivo:
+
+```csharp
+string filePath = "sample.docx";
+
+// Built-in properties (author, creation date, etc.) are excluded by default.
+// Turn them on via SignatureSettings to see the complete metadata picture.
+SignatureSettings signatureSettings = new SignatureSettings()
+{
+    IncludeStandardMetadataSignatures = true
+};
+
+using (Signature signature = new Signature(filePath, signatureSettings))
+{
+    IDocumentInfo documentInfo = signature.GetDocumentInfo();
+    Console.WriteLine($"Document properties {Path.GetFileName(filePath)}:");
+    Console.WriteLine($" - format : {documentInfo.FileType.FileFormat}");
+    Console.WriteLine($" - extension : {documentInfo.FileType.Extension}");
+    Console.WriteLine($" - size : {documentInfo.Size}");
+    Console.WriteLine($" - page count : {documentInfo.PageCount}");
+    Console.WriteLine($"Metadata signatures : {documentInfo.MetadataSignatures.Count}");
+    foreach (MetadataSignature metadataSignature in documentInfo.MetadataSignatures)
+    {
+        Console.WriteLine($" - {metadataSignature.Name} = {metadataSignature.Value} ({metadataSignature.Type})");
+    }
+}
+```
+
+## Añadir metadatos a un documento {#add-metadata-to-a-document}
+
+Para agregar entradas de metadatos, complete un <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasignoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataSignOptions</a> instancia con firmas de metadatos de la clase que coincida con el formato de su documento y pásela a <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> método. El tipo de valor que asignas — cadena, entero, fecha o número de punto flotante — se conserva y se detecta nuevamente al realizar una búsqueda:
+
+```csharp
+string filePath = "sample.pdf";
+string outputFilePath = "SignedWithMetadata.pdf";
+
+using (Signature signature = new Signature(filePath))
+{
+    MetadataSignOptions options = new MetadataSignOptions();
+    options
+        .Add(new PdfMetadataSignature("Author", "Mr.Sherlock Holmes")) // String value
+        .Add(new PdfMetadataSignature("CreatedOn", DateTime.Now))      // DateTime value
+        .Add(new PdfMetadataSignature("DocumentId", 123456));          // Integer value
+
+    SignResult result = signature.Sign(outputFilePath, options);
+    Console.WriteLine($"Document signed with {result.Succeeded.Count} metadata signature(s).");
+}
+```
+
+Para otras familias de documentos, reemplace `PdfMetadataSignature` por `WordProcessingMetadataSignature`, `SpreadsheetMetadataSignature`, `PresentationMetadataSignature` o `ImageMetadataSignature`; el patrón permanece igual.
+
+## Buscar metadatos y convertir valores {#search-metadata-and-convert-values}
+
+El método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a> con `SignatureType.Metadata` lee de nuevo las entradas de metadatos. Cada resultado informa su `Type` detectado, y los métodos de conversión (`ToInteger`, `ToDateTime`, `ToDouble`, `ToBoolean`, `ToString` y otros) devuelven el valor como un tipo .NET adecuado. El siguiente ejemplo busca el documento generado por el fragmento anterior:
+
+```csharp
+string filePath = "SignedWithMetadata.pdf";
+
+using (Signature signature = new Signature(filePath))
+{
+    List<PdfMetadataSignature> signatures = signature.Search<PdfMetadataSignature>(SignatureType.Metadata);
+    Console.WriteLine($"Found {signatures.Count} metadata signature(s).");
+    foreach (PdfMetadataSignature mdSignature in signatures)
+    {
+        switch (mdSignature.Type)
+        {
+            case MetadataType.Integer:
+                Console.WriteLine($" - {mdSignature.Name} as integer = {mdSignature.ToInteger()}");
+                break;
+            case MetadataType.DateTime:
+                Console.WriteLine($" - {mdSignature.Name} as date = {mdSignature.ToDateTime().ToShortDateString()}");
+                break;
+            case MetadataType.Double:
+                Console.WriteLine($" - {mdSignature.Name} as double = {mdSignature.ToDouble()}");
+                break;
+            default:
+                Console.WriteLine($" - {mdSignature.Name} as string = {mdSignature.ToString()}");
+                break;
+        }
+    }
+}
+```
+
+Para reducir los resultados, pase una instancia de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasearchoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataSearchOptions</a> con los filtros `Name` y `NameMatchType`. Cuando una entrada de metadatos contenga un objeto serializado completo, recupérelo mediante el método genérico `GetData<T>()`; consulte los temas sobre metadatos seguros a continuación.
+
+## Más información sobre las funcionalidades de metadatos {#learn-more-about-metadata-features}
+
+### Obtener información del documento {#get-document-information}
+
+* [Obtener información del documento](/net/signature/developer-guide/basic-usage/get-document-information/): tipo de archivo, tamaño, páginas y dimensiones de estas.
+* [Obtener información sobre los campos de formulario y las firmas del documento](/net/signature/developer-guide/advanced-usage/common/obtain-document-form-fields-and-signatures-information/): vista extendida del documento que incluye la colección `MetadataSignatures`.
+
+### Firmar documentos con metadatos {#sign-documents-with-metadata}
+
+* [Firmar documento con firma de metadatos](/net/signature/developer-guide/basic-usage/electronic-signature-types/esign-document-with-metadata-signature/): guías específicas por formato para documentos PDF, de procesamiento de texto, hojas de cálculo, presentaciones e imágenes.
+* [Firmar documento con firma de metadatos: avanzado](/net/signature/developer-guide/advanced-usage/signing/sign-document-with-metadata-signature-advanced/): descripción general de las funcionalidades avanzadas de firma con metadatos.
+
+### Buscar metadatos {#search-for-metadata}
+
+* [Cómo buscar firmas de metadatos](/net/signature/developer-guide/basic-usage/search-for-electronic-signatures-in-document/search-for-metadata-e-signatures/): búsqueda básica de metadatos.
+* [Búsqueda avanzada de firmas de metadatos](/net/signature/developer-guide/advanced-usage/searching/advanced-search-for-metadata-signatures/): lectura de valores mediante métodos de conversión tipada.
+* [Buscar firmas de metadatos integrados](/net/signature/developer-guide/advanced-usage/searching/search-for-built-in-metadata-signatures/): lectura de propiedades estándar del documento mediante `IncludeBuiltinProperties`.
+
+### Valores seguros de metadatos {#secure-metadata-values}
+
+* [Firmar documento con firmas personalizadas de metadatos seguros](/net/signature/developer-guide/advanced-usage/signing/sign-document-with-secure-custom-metadata-signatures/): cifrado y serialización personalizada de valores de metadatos.
+* [Firmar documentos con texto de metadatos cifrado](/net/signature/developer-guide/advanced-usage/signing/sign-document-with-secure-custom-metadata-signatures/sign-documents-with-encrypted-metadata-text/): protección de valores de tipo cadena mediante cifrado simétrico.
+* [Firmar documentos con objeto incrustado en metadatos](/net/signature/developer-guide/advanced-usage/signing/sign-document-with-secure-custom-metadata-signatures/sign-documents-with-metadata-embedded-object/): almacenamiento de objetos personalizados completos dentro de una entrada de metadatos.
+* [Buscar objetos incrustados y cifrados en firmas de metadatos](/net/signature/developer-guide/advanced-usage/searching/search-embed-n-encr-obj-in-metadata/): recuperación de valores protegidos mediante `GetData<T>()`.
+* [Buscar texto cifrado en firmas de metadatos](/net/signature/developer-guide/advanced-usage/searching/search-embed-n-encr-obj-in-metadata/search-for-encrypted-text-in-metadata-signatures/): descifrado de valores de cadena durante la búsqueda.
+* [Buscar objetos cifrados en firmas de metadatos](/net/signature/developer-guide/advanced-usage/searching/search-embed-n-encr-obj-in-metadata/search-for-encrypted-objects-metadata-signatures/): descifrado de objetos incrustados durante la búsqueda.
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre las funcionalidades de firma electrónica de documentos, consulte la [sección de uso avanzado](/net/signature/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI MVC para Firma de Documentos en .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI WebForms para Firma de Documentos en .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI Dropwizard para Firma de Documentos en Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI Spring para Firma de Documentos en Java</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App Product Family</a>**.

@@ -1,0 +1,307 @@
+---
+title: "Generar documento desde base de datos"
+sidebar_label: "Generar documento desde base de datos"
+sidebar_key: "net-assembly-generate-from-database"
+sidebar_position: 9
+description: "Crear informes a partir de datos de base de datos utilizando `DataSet`, `DataTable` o `IDataReader` como fuentes de datos para plantillas."
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/generate-from-database.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "08e5a9db48ba0d6f34034281bf40c995428e51d4e038e9e42a08630add20c96f"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "50b87b38aadf54d9f3433c14eae5bdb0827982ae5c5c1d5dc42160fd40de708d"
+translation_updated_at: "2026-11-16T13:48:41.066Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Vista general {#overview}
+
+GroupDocs.Assembly para .NET se integra perfectamente con ADO.NET, lo que le permite generar documentos directamente a partir de consultas a bases de datos. Puede utilizar DataSet, DataTable, DataView o IDataReader como fuentes de datos, facilitando así la creación de informes a partir de SQL Server, Oracle, MySQL y otras bases de datos.
+
+Las clases principales involucradas son:
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/documentassembler/" target="_blank" rel="nofollow noopener noreferrer">DocumentAssembler</a>: ensambla documentos
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/datasourceinfo/" target="_blank" rel="nofollow noopener noreferrer">DataSourceInfo</a>: envuelve las fuentes de datos
+- Clases ADO.NET: DataSet, DataTable, DataView, IDataReader
+
+A continuación se presentan los pasos para generar documentos desde bases de datos:
+
+* Conectarse a la base de datos mediante ADO.NET
+* Ejecutar consultas SQL y poblar un DataSet o DataTable
+* Crear un documento plantilla con etiquetas de expresión que hagan referencia a nombres de tablas y columnas
+* Utilizar DocumentAssembler para ensamblar la plantilla con los datos procedentes de la base de datos
+* Guardar el documento ensamblado
+
+
+:::info
+GroupDocs.Assembly admite todos los orígenes de datos estándar de ADO.NET, incluidos `DataSet`, `DataTable`, `DataView`, `DataRow`, `DataRowView`, `IDataReader` e `IDataRecord`.
+:::
+
+
+## Generar documento a partir de DataTable {#generate-document-from-datatable}
+
+El enfoque más sencillo consiste en utilizar un DataTable:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Data;
+using System.Data.SqlClient;
+
+public static void GenerateFromDataTable()
+{
+    // Connect to database and populate DataTable
+    string connectionString = "Server=localhost;Database=MyDB;Integrated Security=true;";
+    string query = "SELECT CustomerName, Email, Balance FROM Customers";
+    
+    DataTable customersTable = new DataTable();
+    
+    using (SqlConnection connection = new SqlConnection(connectionString))
+    {
+        using (SqlCommand command = new SqlCommand(query, connection))
+        {
+            using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+            {
+                adapter.Fill(customersTable);
+            }
+        }
+    }
+    
+    // Assemble document
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx", 
+        new DataSourceInfo(customersTable, "customers"));
+    
+    Console.WriteLine("Document generated from DataTable successfully.");
+}
+```
+
+## Ejemplo de plantilla para DataTable {#template-example-for-datatable}
+
+En su plantilla, haga referencia a las columnas por su nombre:
+
+```
+Customers List:
+
+<<foreach [in customers]>>
+<<[CustomerName]>> - <<[Email]>> - Balance: <<[Balance]:"C">>
+<</foreach>>
+```
+
+## Generar documento a partir de un DataSet {#generate-document-from-dataset}
+
+Al trabajar con varias tablas, utilice DataSet:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Data;
+using System.Data.SqlClient;
+
+public static void GenerateFromDataSet()
+{
+    string connectionString = "Server=localhost;Database=MyDB;Integrated Security=true;";
+    
+    DataSet dataSet = new DataSet();
+    
+    using (SqlConnection connection = new SqlConnection(connectionString))
+    {
+        // Load customers table
+        using (SqlDataAdapter adapter = new SqlDataAdapter(
+            "SELECT * FROM Customers", connection))
+        {
+            adapter.Fill(dataSet, "Customers");
+        }
+        
+        // Load orders table
+        using (SqlDataAdapter adapter = new SqlDataAdapter(
+            "SELECT * FROM Orders", connection))
+        {
+            adapter.Fill(dataSet, "Orders");
+        }
+    }
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx", 
+        new DataSourceInfo(dataSet, "ds"));
+    
+    Console.WriteLine("Document generated from DataSet successfully.");
+}
+```
+
+## Ejemplo de plantilla para DataSet {#template-example-for-dataset}
+
+Haga referencia a las tablas por nombre en su plantilla:
+
+```
+Customers:
+<<foreach [in ds.Customers]>>
+<<[CustomerName]>> - <<[Email]>>
+<</foreach>>
+
+Orders:
+<<foreach [in ds.Orders]>>
+Order #<<[OrderId]>> - Amount: <<[Amount]:"C">>
+<</foreach>>
+```
+
+## Generar documento a partir de IDataReader {#generate-document-from-idatareader}
+
+Para conjuntos de datos grandes, utilice IDataReader para una transmisión eficiente:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Data;
+using System.Data.SqlClient;
+
+public static void GenerateFromDataReader()
+{
+    string connectionString = "Server=localhost;Database=MyDB;Integrated Security=true;";
+    string query = "SELECT CustomerName, Email, Balance FROM Customers";
+    
+    using (SqlConnection connection = new SqlConnection(connectionString))
+    {
+        connection.Open();
+        
+        using (SqlCommand command = new SqlCommand(query, connection))
+        using (SqlDataReader reader = command.ExecuteReader())
+        {
+            DocumentAssembler assembler = new DocumentAssembler();
+            assembler.AssembleDocument("Template.docx", "Output.docx", 
+                new DataSourceInfo(reader, "customers"));
+            
+            Console.WriteLine("Document generated from DataReader successfully.");
+        }
+    }
+}
+```
+
+## Uso de DataView para datos filtrados {#using-dataview-for-filtered-data}
+
+Puede utilizar DataView para filtrar y ordenar los datos antes del ensamblado:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Data;
+using System.Data.SqlClient;
+
+public static void GenerateFromDataView()
+{
+    string connectionString = "Server=localhost;Database=MyDB;Integrated Security=true;";
+    
+    DataTable customersTable = new DataTable();
+    
+    using (SqlConnection connection = new SqlConnection(connectionString))
+    {
+        using (SqlDataAdapter adapter = new SqlDataAdapter(
+            "SELECT * FROM Customers", connection))
+        {
+            adapter.Fill(customersTable);
+        }
+    }
+    
+    // Create filtered and sorted DataView
+    DataView customersView = new DataView(customersTable);
+    customersView.RowFilter = "Balance > 1000";
+    customersView.Sort = "CustomerName ASC";
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx", 
+        new DataSourceInfo(customersView, "customers"));
+    
+    Console.WriteLine("Document generated from DataView successfully.");
+}
+```
+
+## Trabajo con tablas relacionadas {#working-with-related-tables}
+
+DataSet admite relaciones de datos para informes maestro-detalle:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Data;
+using System.Data.SqlClient;
+
+public static void GenerateWithRelations()
+{
+    string connectionString = "Server=localhost;Database=MyDB;Integrated Security=true;";
+    
+    DataSet dataSet = new DataSet();
+    
+    using (SqlConnection connection = new SqlConnection(connectionString))
+    {
+        using (SqlDataAdapter adapter = new SqlDataAdapter(
+            "SELECT * FROM Customers", connection))
+        {
+            adapter.Fill(dataSet, "Customers");
+        }
+        
+        using (SqlDataAdapter adapter = new SqlDataAdapter(
+            "SELECT * FROM Orders", connection))
+        {
+            adapter.Fill(dataSet, "Orders");
+        }
+    }
+    
+    // Create relation
+    DataRelation relation = new DataRelation(
+        "CustomerOrders",
+        dataSet.Tables["Customers"].Columns["CustomerId"],
+        dataSet.Tables["Orders"].Columns["CustomerId"]);
+    dataSet.Relations.Add(relation);
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx", 
+        new DataSourceInfo(dataSet.Tables["Customers"], "customers"));
+    
+    Console.WriteLine("Document generated with relations successfully.");
+}
+```
+
+Plantilla con relaciones:
+
+```
+<<foreach [in customers]>>
+Customer: <<[CustomerName]>>
+Orders:
+<<foreach [in GetChildRows(\"CustomerOrders\")]>>
+  - Order #<<[OrderId]>>: <<[Amount]:"C">>
+<</foreach>>
+<</foreach>>
+```
+
+
+:::warning
+Al utilizar conexiones a bases de datos, asegúrese siempre de liberar adecuadamente los recursos. Utilice `using` sentencias o bloques `try-finally` para cerrar conexiones y lectores.
+:::
+
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre el trabajo con consultas complejas a bases de datos, procedimientos almacenados, consultas parametrizadas y optimización de rendimiento para grandes conjuntos de datos, consulte la [sección de uso avanzado](/net/assembly/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para .NET</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Java</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Python-via-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Python mediante .NET</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes.
+
+Para ensamblar documentos a partir de plantillas y fuentes de datos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/assembly" target="_blank">Conholdate.Assembly App</a>**.

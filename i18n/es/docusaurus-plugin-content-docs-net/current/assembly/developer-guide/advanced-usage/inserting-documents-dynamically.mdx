@@ -1,0 +1,95 @@
+---
+title: "Inserción dinámica de documentos"
+sidebar_label: "Inserción dinámica de documentos"
+sidebar_key: "net-assembly-inserting-documents-dynamically"
+sidebar_position: 43
+description: ""
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/advanced-usage/inserting-documents-dynamically.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "446fe10972e5a5cabb6e2b54a7c56f9e494508e6ffeb6945fb23ebf2b31b5483"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "ca51a2b5aef78e1042e91086483101bcd06cf322fd8849d3963cf70ffb300f6c"
+translation_updated_at: "2026-11-16T11:07:55.311Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+:::info
+Esta función es compatible con la versión 20.3 o superior.
+:::
+
+:::info
+El código utiliza algunos de los objetos definidos en <a href="https://docs.groupdocs.com/assembly/net/the-business-layer/" target="_blank" rel="nofollow noopener noreferrer">La Capa de Negocio</a>.
+:::
+
+
+
+:::warning
+La inserción dinámica de documentos a partir de bytes codificados en Base64 está disponible únicamente para formatos de archivo donde la inserción dinámica de documentos esté habilitada, es decir, para documentos de procesamiento de textos y correos electrónicos con cuerpos en HTML y RTF únicamente.
+:::
+
+
+Puedes insertar dinámicamente el contenido de documentos externos en tus informes utilizando `doc` etiquetas. A `doc` `tag` denota un marcador de posición dentro de una plantilla para un documento que se insertará durante el tiempo de ejecución.
+
+Sintaxis de un `doc` la etiqueta se define de la siguiente manera:
+
+```csharp
+<<doc [document_expression]>>
+```
+
+Y simplemente llame al método del ensamblador para generar el informe, como se muestra en los siguientes fragmentos de código:
+
+<a href="https://gist.github.com/GroupDocsGists/b06d6c5655c84fc772c6411d66016943" target="_blank" rel="nofollow noopener noreferrer">Ver ejemplo de código en GitHub Gist</a>
+
+
+:::warning
+A `doc` La etiqueta `tag` se puede usar casi en cualquier lugar de un documento de plantilla, excepto en cuadros de texto y gráficos.
+:::
+
+
+Una expresión declarada dentro de una etiqueta `doc` es utilizada por el ensamblador para cargar un documento que será insertado durante el tiempo de ejecución. La expresión debe devolver un valor de uno de los siguientes tipos:
+
+*   Una matriz de bytes que contiene los datos del documento
+*   Una instancia de <a href="http://msdn.microsoft.com/en-us/library/system.io.stream(v=vs.110" target="_blank" rel="nofollow noopener noreferrer">Stream</a>.aspx) capaz de leer los datos del documento
+*   Una instancia de la clase Document
+*   Una cadena que contiene una URI, ruta o datos del documento codificados en Base64
+
+Al construir un informe, una expresión declarada dentro de una etiqueta `doc` se evalúa y su resultado se utiliza para cargar un documento cuyo contenido reemplaza la etiqueta `doc` posteriormente.
+
+
+:::warning
+Si una expresión declarada dentro de un `doc` `tag` devuelve un objeto de flujo (`stream`), y luego el ensamblador cierra ese flujo tan pronto como se carga el documento correspondiente.
+:::
+
+
+De forma predeterminada, al insertar el contenido de un documento externo, el motor aplica los estilos correspondientes del documento de plantilla. Esto hace que el contenido del documento resultante se vea más coherente. Sin embargo, puedes conservar el formato de origen para el contenido que se inserta mediante un `sourceStyles` conmutador como se muestra en el siguiente fragmento:
+
+```csharp
+<<doc [document_expression] -sourceStyles>>
+```
+
+De forma predeterminada, un documento que se está insertando no se verifica contra la sintaxis de plantilla ni se completa con datos. Sin embargo, puedes habilitar esta funcionalidad mediante un `build` cambie de la siguiente manera:
+
+```csharp
+<<doc [document_expression] -build>>
+```
+
+Cuando se utiliza un interruptor `build`, el ensamblador trata el documento que se está insertando como una plantilla que puede acceder a los siguientes datos disponibles en el ámbito de la etiqueta `doc` correspondiente:
+
+*   Fuentes de datos
+*   Variables
+*   Un objeto contextual (consulte <a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-1-of-2/#using-contextual-object-member-access" target="_blank" rel="nofollow noopener noreferrer">"Uso del acceso a miembros de objetos contextuales"</a> para obtener más información)
+*   Tipos externos conocidos (consulte <a href="https://docs.groupdocs.com/assembly/net/groupdocs-assembly-engine-apis/#setting-up-known-external-types" target="_blank" rel="nofollow noopener noreferrer">"Configuración de tipos externos conocidos"</a> para obtener más información)

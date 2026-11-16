@@ -1,0 +1,86 @@
+---
+title: "Métodos de extensión de enumeración"
+sidebar_label: "Métodos de extensión de enumeración"
+sidebar_key: "net-assembly-enumeration-extension-methods"
+sidebar_position: 2
+description: ""
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/advanced-usage/enumeration-extension-methods.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "804f19937f370a031ab8f957407a856185e6f10ed430e18d6af80a39cb19a770"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "eb63e08c52b2bd710a94844e19eee0321d093a626551cdfe4785ef0b6ccacb2b"
+translation_updated_at: "2026-11-16T11:06:45.750Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+El motor de informes LINQ le permite realizar operaciones comunes sobre datos secuenciales mediante los métodos de extensión integrados del motor para `IEnumerable`. Estos métodos de extensión imitan algunos métodos de extensión de <a href="http://msdn.microsoft.com/en-us/library/9eekhta0\(v=vs.110\" target="_blank" rel="nofollow noopener noreferrer">IEnumerable&amp;lt;T&amp;gt;</a>.aspx), proporcionando las mismas firmas y características de comportamiento. Por lo tanto, puede agrupar, ordenar y realizar otras manipulaciones de datos secuenciales en expresiones de plantilla de forma familiar.
+
+La siguiente tabla describe estos métodos de extensión integrados. Dentro de la tabla se utilizan las siguientes convenciones de notación:
+
+- `Selector` representa una función lambda que devuelve un valor y toma un elemento de la enumeración como único argumento. Consulte «Uso de funciones lambda» para obtener más información.
+- `ComparableSelector` representa `Selector` que devuelve <a href="http://msdn.microsoft.com/en-US/library/system.icomparable\(v=vs.110\" target="_blank" rel="nofollow noopener noreferrer">IComparable</a>.aspx).
+- `EnumerationSelector` representa `Selector` que devuelve `IEnumerable`.
+- `Predicate` representa `Selector` que devuelve un valor booleano.
+
+Los ejemplos de la siguiente tabla se proporcionan utilizando personas y `otherPersons`, que son enumeraciones de instancias de la clase `Person`, definida de la siguiente manera.
+```csharp
+
+public class Person
+{
+    public String Name { get { ... } }
+    public int Age { get { ... } }
+    public IEnumerable<Person> Children { get { ... } }
+    ...
+}
+```
+
+| Método de extensión | Ejemplos y notas |
+| :- | :- |
+| All(Predicate) | `persons.All(p => p.Age < 50)` |
+| Any() | `persons.Any()` |
+| Any(Predicate) | `persons.Any(p => p.Name == "John Smith")` |
+| Average(Selector) | `persons.Average(p => p.Age)` El selector de entrada debe devolver un valor de cualquier tipo que tenga operadores de suma y división predefinidos o definidos por el usuario. |
+| Concat(IEnumerable) | `persons.Concat(otherPersons)` Debe existir una conversión implícita de referencia entre los tipos de elementos de las enumeraciones concatenadas. |
+| Contains(Object) | `persons.Contains(otherPersons.First())` |
+| Count() | `persons.Count()` |
+| Count(Predicate) | `persons.Count(p => p.Age > 30)` |
+| Distinct() | `persons.Distinct()` |
+| First() | `persons.First()` |
+| First(Predicate) | `persons.First(p => p.Age > 30)` |
+| FirstOrDefault() | `persons.FirstOrDefault()` |
+| FirstOrDefault(Predicate) | `persons.FirstOrDefault(p => p.Age > 30)` |
+| GroupBy(Selector) | ` persons.GroupBy(p => p.Age)`O ` persons.GroupBy(    p => new \{ Age = p.Age, Count = p.Children.Count() \})`Este método devuelve una enumeración de objetos de grupo. Cada grupo tiene una clave única definida por el selector de entrada y contiene los elementos de la enumeración de origen asociados a dicha clave. Puede acceder a la clave de una instancia de grupo mediante la propiedad Key. Puede tratar un grupo como una enumeración de los elementos que contiene. |
+| Last() | `persons.Last()` |
+| Last(Predicate) | `persons.Last(p => p.Age > 100)` |
+| LastOrDefault() | `persons.LastOrDefault()` |
+| LastOrDefault(Predicate) | `persons.LastOrDefault(p => p.Age > 100)` |
+| Max(ComparableSelector) | `persons.Max(p => p.Age)` |
+| Min(ComparableSelector) | `persons.Min(p => p.Age)` |
+| OrderBy(ComparableSelector) | ` persons.OrderBy(p => p.Age)`O ` persons.OrderBy(p => p.Age).ThenByDescending(p => p.Name)`O ` persons.OrderBy(p => p.Age).ThenByDescending(p => p.Name).ThenBy(p => p.Children.Count())`Este método devuelve una enumeración ordenada por una única clave. Para especificar claves de orden adicionales, puede utilizar los siguientes métodos de extensión de una enumeración ordenada: ThenBy(ComparableSelector); ThenByDescending(ComparableSelector) |
+| OrderByDescending(ComparableSelector) | ` persons.OrderByDescending(p => p.Age)`O ` persons.OrderByDescending(p => p.Age).ThenByDescending(p => p.Name)`O ` persons.OrderByDescending(p => p.Age).ThenByDescending(p => p.Name).ThenBy(p => p.Children.Count())`Consulte la nota anterior. |
+| Select(Selector) | `persons.Select(p => p.Name)` |
+| SelectMany(EnumerationSelector) | `persons.SelectMany(p => p.Children)` |
+| Single() | `persons.Single()` |
+| Single(Predicate) | `persons.Single(p => p.Name == "John Smith")` |
+| SingleOrDefault() | `persons.SingleOrDefault()` |
+| SingleOrDefault(Predicate) | `persons.SingleOrDefault(p => p.Name == "John Smith")` |
+| Skip(int) | `persons.Skip(10)` |
+| SkipWhile(Predicate) | `persons.SkipWhile(p => p.Age < 21)` |
+| Sum(Selector) | `persons.Sum(p => p.Children.Count())` El selector de entrada debe devolver un valor de cualquier tipo que tenga un operador de suma predefinido o definido por el usuario. |
+| Take(int) | `persons.Take(5)` |
+| TakeWhile(Predicate) | `persons.TakeWhile(p => p.Age < 50)` |
+| Union(IEnumerable) | `persons.Union(otherPersons)` Debe existir una conversión implícita de referencia entre los tipos de elementos de las enumeraciones unidas. |
+| Where(Predicate) | `persons.Where(p => p.Age > 18)` |

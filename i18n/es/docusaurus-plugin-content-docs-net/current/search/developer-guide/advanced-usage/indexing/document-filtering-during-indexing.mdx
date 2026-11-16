@@ -1,0 +1,187 @@
+---
+title: "Filtrado de documentos durante la indexación"
+sidebar_label: "Filtrado de documentos durante la indexación"
+sidebar_position: 7
+description: "Esta página contiene una descripción del uso de filtros de documentos para la indexación, así como descripciones de todos los tipos de filtros con ejemplos de su creación."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/indexing/document-filtering-during-indexing.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "202fbbfd2964c470645f12080ec2d6345b7c1cd1810bc02334922d972f051a17"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "d8bdd5d19dbbda564425479cd53e86bd797c07343f70e733fdda445abf185dba"
+translation_updated_at: "2026-11-16T11:11:00.475Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Esta página contiene una descripción del uso de filtros de documentos para la indexación, así como descripciones de todos los tipos de filtros con ejemplos de su creación.
+
+## Configuración de un filtro {#setting-a-filter}
+
+Para indicar qué documentos de las carpetas de agregación deben indexarse y cuáles no, se puede utilizar la propiedad <a href="https://reference.groupdocs.com/net/search/groupdocs.search/indexsettings/properties/documentfilter" target="_blank" rel="nofollow noopener noreferrer">DocumentFilter</a> de la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search/indexsettings" target="_blank" rel="nofollow noopener noreferrer">IndexSettings</a> para especificar un filtro basado en diversas propiedades de dichos documentos. Si un documento se agrega por separado o se encuentra en una carpeta de agregación y no cumple con el filtro, no se agregará ni se indexará. El valor predeterminado es null, lo que significa que todos los archivos agregados se indexarán si su formato es compatible. El siguiente ejemplo muestra cómo configurar un filtro de documentos para la indexación.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating a filter that skips documents with extensions '.doc', '.docx', '.rtf'
+IndexSettings settings = new IndexSettings();
+DocumentFilter fileExtensionFilter = DocumentFilter.CreateFileExtension(".doc", ".docx", ".rtf"); // Creating file extension filter that allows only specified extensions
+DocumentFilter invertedFilter = DocumentFilter.CreateNot(fileExtensionFilter); // Inverting file extension filter to allow all extensions except specified ones
+settings.DocumentFilter = invertedFilter;
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder, settings);
+ 
+// Indexing documents
+index.Add(documentsFolder);
+```
+
+## Filtros por fecha de creación {#creation-time-filters}
+
+El primer tipo de filtros se basa en la fecha en que se creó el archivo del documento. Estos filtros pueden omitir archivos creados antes de una fecha determinada, después de una fecha determinada o fuera de un rango específico de fechas. A continuación se presentan ejemplos de estos filtros.
+
+**C#**
+
+```csharp
+// The first filter skips files created earlier than January 1, 2017, 00:00:00 a.m.
+DocumentFilter filter1 = DocumentFilter.CreateCreationTimeLowerBound(new DateTime(2017, 1, 1));
+ 
+// The second filter skips files created later than June 15, 2018, 00:00:00 a.m.
+DocumentFilter filter2 = DocumentFilter.CreateCreationTimeUpperBound(new DateTime(2018, 6, 15));
+ 
+// The third filter skips files created outside the range from January 1, 2017, 00:00:00 a.m. to June 15, 2018, 00:00:00 a.m.
+DocumentFilter filter3 = DocumentFilter.CreateCreationTimeRange(new DateTime(2017, 1, 1), new DateTime(2018, 6, 15));
+```
+
+## Filtros por fecha de modificación {#modification-time-filters}
+
+El siguiente tipo de filtros funciona de manera similar, pero se basa en la fecha de modificación del archivo del documento. A continuación se presentan algunos ejemplos.
+
+**C#**
+
+```csharp
+// The first filter skips files modified earlier than January 1, 2017, 00:00:00 a.m.
+DocumentFilter filter1 = DocumentFilter.CreateModificationTimeLowerBound(new DateTime(2017, 1, 1));
+ 
+// The second filter skips files modified later than June 15, 2018, 00:00:00 a.m.
+DocumentFilter filter2 = DocumentFilter.CreateModificationTimeUpperBound(new DateTime(2018, 6, 15));
+ 
+// The third filter skips files modified outside the range from January 1, 2017, 00:00:00 a.m. to June 15, 2018, 00:00:00 a.m.
+DocumentFilter filter3 = DocumentFilter.CreateModificationTimeRange(new DateTime(2017, 1, 1), new DateTime(2018, 6, 15));
+```
+
+## Filtros de rutas de archivo {#file-path-filters}
+
+El siguiente tipo de filtros le permite establecer una expresión regular para omitir aquellos documentos cuya ruta completa no coincida con el patrón especificado. Este tipo de filtros utiliza la clase **System.Text.RegularExpressions.Regex** para comparar con el patrón.
+
+**C#**
+
+```csharp
+// The filter skips files that do not contain the word 'Einstein' in their paths
+DocumentFilter filter = DocumentFilter.CreateFilePathRegularExpression("Einstein", RegexOptions.IgnoreCase);
+```
+
+## Filtros por longitud de archivo {#file-length-filters}
+
+El siguiente grupo de filtros utiliza la longitud del archivo en bytes para realizar la filtración. Es posible especificar un límite inferior, un límite superior o un rango de longitudes de archivo aceptables. A continuación se presentan algunos ejemplos.
+
+**C#**
+
+```csharp
+ // The first filter skips documents less than 50 KB in length
+DocumentFilter filter1 = DocumentFilter.CreateFileLengthLowerBound(50 * 1024);
+ 
+// The second filter skips documents more than 10 MB in length
+DocumentFilter filter2 = DocumentFilter.CreateFileLengthUpperBound(10 * 1024 * 1024);
+ 
+// The third filter skips documents less than 100 KB and more than 5 MB in length
+DocumentFilter filter3 = DocumentFilter.CreateFileLengthRange(100 * 1024, 5 * 1024 * 1024);
+```
+
+## Filtro por extensión de archivo {#file-extension-filter}
+
+El siguiente tipo de filtros le permite especificar una lista de extensiones de archivo válidas para la indexación.
+
+**C#**
+
+```csharp
+// This filter allows indexing only FB2, EPUB, and TXT files
+DocumentFilter filter = DocumentFilter.CreateFileExtension(".fb2", ".epub", ".txt");
+```
+
+## Filtro de negación lógica {#logical-not-filter}
+
+El siguiente tipo de filtro permite invertir la lógica de un filtro interno.
+
+**C#**
+
+```csharp
+IndexSettings settings = new IndexSettings();
+DocumentFilter filter = DocumentFilter.CreateFileExtension(".htm", ".html");
+DocumentFilter invertedFilter = DocumentFilter.CreateNot(filter); // Inverting file extension filter to allow all extensions except of HTM and HTML
+settings.DocumentFilter = invertedFilter;
+```
+
+## Filtro lógico AND {#logical-and-filter}
+
+El filtro de este tipo permite componer un filtro complejo a partir de varios filtros internos, utilizando la lógica "AND". Este filtro compuesto exige que se cumplan simultáneamente las condiciones de todos los filtros internos para que cada archivo sea incluido. El ejemplo siguiente muestra cómo crear un filtro que permita indexar únicamente documentos creados en el rango de fechas del 01/01/2015 al 01/01/2016, con la extensión '.txt' y un tamaño no superior a 8 MB.
+
+**C#**
+
+```csharp
+IndexSettings settings = new IndexSettings();
+DocumentFilter filter1 = DocumentFilter.CreateCreationTimeRange(new DateTime(2015, 1, 1), new DateTime(2016, 1, 1));
+DocumentFilter filter2 = DocumentFilter.CreateFileExtension(".txt");
+DocumentFilter filter3 = DocumentFilter.CreateFileLengthUpperBound(8 * 1024 * 1024);
+DocumentFilter finalFilter = DocumentFilter.CreateAnd(filter1, filter2, filter3);
+settings.DocumentFilter = finalFilter;
+```
+
+## Filtro lógico OR {#logical-or-filter}
+
+El filtro de tipo siguiente le permite componer un filtro complejo a partir de varios filtros internos, utilizando la lógica "OR". Este filtro compuesto exige que se cumpla la condición de al menos uno de los filtros internos para cada archivo añadido. El ejemplo siguiente muestra cómo crear un filtro que limite el tamaño de los archivos de texto a 5 MB y el de los demás archivos a 10 MB.
+
+**C#**
+
+```csharp
+IndexSettings settings = new IndexSettings();
+DocumentFilter txtFilter = DocumentFilter.CreateFileExtension(".txt");
+DocumentFilter notTxtFilter = DocumentFilter.CreateNot(txtFilter);
+DocumentFilter bound5Filter = DocumentFilter.CreateFileLengthUpperBound(5 * 1024 * 1024);
+DocumentFilter bound10Filter = DocumentFilter.CreateFileLengthUpperBound(10 * 1024 * 1024);
+DocumentFilter txtSizeFilter = DocumentFilter.CreateAnd(txtFilter, bound5Filter);
+DocumentFilter notTxtSizeFilter = DocumentFilter.CreateAnd(notTxtFilter, bound10Filter);
+DocumentFilter finalFilter = DocumentFilter.CreateOr(txtSizeFilter, notTxtSizeFilter);
+settings.DocumentFilter = finalFilter;
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Junto con la completa biblioteca de .NET, ofrecemos aplicaciones sencillas pero potentes y gratuitas.
+
+Le damos la bienvenida a realizar búsquedas en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">aplicación gratuita de búsqueda de documentos en línea</a>.

@@ -1,0 +1,151 @@
+---
+title: "Migración a GroupDocs.Assembly 18.9 o superior"
+sidebar_label: "Migración a GroupDocs.Assembly 18.9 o superior"
+sidebar_position: 2
+description: ""
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/getting-started/migration-notes/migrating-to-groupdocs.assembly-18.9-or-higher.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "c814080238cf124917f112cd20cdd38111531c09ecd4d19c4450b31e0a7fbab8"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "e9d3949233692fb1c7db4fa289bbbf0febf20a1f9a9568a558739922ce882e9d"
+translation_updated_at: "2026-11-16T14:38:22.200Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+:::info
+Este documento describe los cambios realizados en la API de GroupDocs.Assembly desde la versión 18.7 hasta la versión 18.9 o superior, que pueden ser de interés para los desarrolladores de módulos o aplicaciones. Incluye no solo los nuevos y actualizados métodos públicos, clases añadidas y eliminadas, etc., sino también una descripción de cualquier cambio en el comportamiento interno de GroupDocs.Assembly.
+:::
+
+
+### Cambios rompedores {#breaking-changes}
+
+Los miembros eliminados de `DocumentAssembler` fueron reemplazados por nuevos miembros. Estos miembros eliminados no se marcaron previamente como obsoletos (deprecados), como suele ser habitual, ya que esto complicaría la migración hacia los nuevos miembros de `DocumentAssembler` en Java. Por lo tanto, hemos introducido un cambio rompedor y los clientes deben migrar su código desde los miembros eliminados de `DocumentAssembler` hacia los recién añadidos al actualizar a la nueva versión de GroupDocs.Assembly.
+
+### Tipos recién añadidos {#newly-added-types}
+
+**C#**
+
+```csharp
+/// <summary>
+/// Provides information on a single data source object to be used to assemble a document from a template.
+/// </summary>
+public class DataSourceInfo
+```
+
+**C#**
+
+```csharp
+/// <summary>
+/// Specifies the format of a file.
+/// </summary>
+public enum FileFormat
+```
+
+**C#**
+
+```csharp
+/// <summary>
+/// Specifies additional options for loading and saving of a document to be assembled.
+/// </summary>
+public class LoadSaveOptions
+```
+
+### Nuevos miembros de DocumentAssembler {#new-members-of-documentassembler}
+
+**C#**
+
+```csharp
+/// <summary>
+/// Loads a template document from the specified source path, populates the template document with data from
+/// the specified single or multiple sources, and stores the result document to the target path using default
+/// <see cref="LoadSaveOptions"/>.
+/// </summary>
+/// <param name="sourcePath">The path to a template document to be populated with data.</param>
+/// <param name="targetPath">The path to a result document.</param>
+/// <param name="dataSourceInfos">Provides information on data source objects to be used.</param>
+public void AssembleDocument(string sourcePath, string targetPath, params DataSourceInfo[] dataSourceInfos)
+```
+
+**C#**
+
+```csharp
+/// <summary>
+/// Loads a template document from the specified source path, populates the template document with data from
+/// the specified single or multiple sources, and stores the result document to the target path using the given
+/// <see cref="LoadSaveOptions"/>.
+/// </summary>
+/// <param name="sourcePath">The path to a template document to be populated with data.</param>
+/// <param name="targetPath">The path to a result document.</param>
+/// <param name="loadSaveOptions">Specifies additional options for document loading and saving.</param>
+/// <param name="dataSourceInfos">Provides information on data source objects to be used.</param>
+public void AssembleDocument(string sourcePath, string targetPath, LoadSaveOptions loadSaveOptions, params DataSourceInfo[] dataSourceInfos)
+```
+
+**C#**
+
+```csharp
+/// <summary>
+/// Loads a template document from the specified source stream, populates the template document with data from
+/// the specified single or multiple sources, and stores the result document to the target stream using default
+/// <see cref="LoadSaveOptions"/>.
+/// </summary>
+/// <param name="sourceStream">The stream to read a template document from.</param>
+/// <param name="targetStream">The stream to write a result document.</param>
+/// <param name="dataSourceInfos">Provides information on data source objects to be used.</param>
+public void AssembleDocument(Stream sourceStream, Stream targetStream, params DataSourceInfo[] dataSourceInfos)
+```
+
+**C#**
+
+```csharp
+/// <summary>
+/// Loads a template document from the specified source stream, populates the template document with data from
+/// the specified single or multiple sources, and stores the result document to the target stream using the given
+/// <see cref="LoadSaveOptions"/>.
+/// </summary>
+/// <param name="sourceStream">The stream to read a template document from.</param>
+/// <param name="targetStream">The stream to write a result document.</param>
+/// <param name="loadSaveOptions">Specifies additional options for document loading and saving.</param>
+/// <param name="dataSourceInfos">Provides information on data source objects to be used.</param>
+public void AssembleDocument(Stream sourceStream, Stream targetStream, LoadSaveOptions loadSaveOptions, params DataSourceInfo[] dataSourceInfos)
+```
+
+### Miembros eliminados de DocumentAssembler {#removed-members-of-documentassembler}
+
+**C#**
+
+```csharp
+public void AssembleDocument(string sourcePath, string targetPath, object dataSource)
+public void AssembleDocument(string sourcePath, string targetPath, object dataSource, string dataSourceName)
+public void AssembleDocument(string sourcePath, string targetPath, object[] dataSources, string[] dataSourceNames)
+public void AssembleDocument(Stream sourceStream, Stream targetStream, object dataSource)
+public void AssembleDocument(Stream sourceStream, Stream targetStream, object dataSource, string dataSourceName)
+public void AssembleDocument(Stream sourceStream, Stream targetStream, object[] dataSources, string[] dataSourceNames)
+```
+
+### Migración del código desde miembros eliminados de DocumentAssembler a los recién agregados {#migrating-code-from-removed-members-of-documentassembler-to-newly-added-ones}
+
+La siguiente tabla muestra cómo migrar el código desde los miembros eliminados de DocumentAssembler a los recién agregados.
+
+| Código anterior | Código nuevo |
+| --- | --- |
+| `assembler.AssembleDocument(sourcePath, targetPath, dataSource);` | `assembler.AssembleDocument(sourcePath, targetPath, new DataSourceInfo(dataSource));` |
+| `assembler.AssembleDocument(sourcePath, targetPath, dataSource, dataSourceName);` | `assembler.AssembleDocument(sourcePath, targetPath, new DataSourceInfo(dataSource, dataSourceName));` |
+| `object[] dataSources = new object[] { dataSource1, dataSource2 };`<br/>`string[] dataSourceNames = new string[] { dataSourceName1, dataSourceName2 };`<br/>`assembler.AssembleDocument(sourcePath, targetPath, dataSources, dataSourceNames);` | `assembler.AssembleDocument(sourcePath, targetPath, new DataSourceInfo(dataSource1, dataSourceName1), new DataSourceInfo(dataSource2, dataSourceName2));` |
+| `assembler.AssembleDocument(sourceStream, targetStream, dataSource);` | `assembler.AssembleDocument(sourceStream, targetStream, new DataSourceInfo(dataSource));` |
+| `assembler.AssembleDocument(sourceStream, targetStream, dataSource, dataSourceName);` | `assembler.AssembleDocument(sourceStream, targetStream, new DataSourceInfo(dataSource, dataSourceName));` |
+| `object[] dataSources = new object[] { dataSource1, dataSource2 };`<br/>`string[] dataSourceNames = new string[] { dataSourceName1, dataSourceName2 };`<br/>`assembler.AssembleDocument(sourceStream, targetStream, dataSources, dataSourceNames);` | `assembler.AssembleDocument(sourceStream, targetStream, new DataSourceInfo(dataSource1, dataSourceName1), new DataSourceInfo(dataSource2, dataSourceName2));` |

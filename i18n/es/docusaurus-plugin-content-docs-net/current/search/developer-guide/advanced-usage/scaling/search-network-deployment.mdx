@@ -1,0 +1,115 @@
+---
+title: "Implementación de red de búsqueda"
+sidebar_label: "Implementación de red de búsqueda"
+sidebar_position: 20
+description: "Esta página contiene información sobre la implementación de la red de búsqueda."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/scaling/search-network-deployment.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "ef4c293346fd96e329f0e5403455268ce69f1e652e98eb28caf93d0bcb17c320"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "4155fabe0952f1737b5017b70a78e79961d61864765de2702af586a84d246725"
+translation_updated_at: "2026-11-16T11:30:54.589Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+La red de búsqueda de GroupDocs.Search está compuesta por un nodo maestro y varios nodos esclavos. Cada nodo es un servidor físico con la plataforma .NET implementada en él. Dentro de la plataforma .NET, se implementa una aplicación que crea una instancia de la clase <a href="https://reference.groupdocs.com/search/net/groupdocs.search.scaling/searchnetworknode/" target="_blank" rel="nofollow noopener noreferrer">SearchNetworkNode</a>.
+
+Una instancia de la clase <a href="https://reference.groupdocs.com/search/net/groupdocs.search.scaling/searchnetworknode/" target="_blank" rel="nofollow noopener noreferrer">SearchNetworkNode</a> proporciona los servicios descritos en la configuración:
+ - Servicio de indexación;
+ - Servicios de búsqueda;
+ - Servicios de extracción;
+ - Servicios de fragmentación (shard).
+
+Los servicios de indexación y búsqueda también proporcionan una interfaz para acceder a todas las funcionalidades de la red de búsqueda.
+
+Para implementar la red de búsqueda de GroupDocs.Search, debe realizar los siguientes pasos:
+ - En cada servidor esclavo, cree una instancia de la clase <a href="https://reference.groupdocs.com/search/net/groupdocs.search.scaling/searchnetworknode/" target="_blank" rel="nofollow noopener noreferrer">SearchNetworkNode</a> y llame al método <a href="https://reference.groupdocs.com/search/net/groupdocs.search.scaling/searchnetworknode/start/" target="_blank" rel="nofollow noopener noreferrer">Start</a>.
+ - En el servidor maestro, cree una instancia de la clase <a href="https://reference.groupdocs.com/search/net/groupdocs.search.scaling/searchnetworknode/" target="_blank" rel="nofollow noopener noreferrer">SearchNetworkNode</a>, pasando el objeto de configuración al constructor.
+ - Llame al método <a href="https://reference.groupdocs.com/search/net/groupdocs.search.scaling/searchnetworknode/configureallnodes/" target="_blank" rel="nofollow noopener noreferrer">ConfigureAllNodes</a> del objeto <a href="https://reference.groupdocs.com/search/net/groupdocs.search.scaling/searchnetworknode/" target="_blank" rel="nofollow noopener noreferrer">SearchNetworkNode</a> en el servidor maestro.
+ - Llame al método <a href="https://reference.groupdocs.com/search/net/groupdocs.search.scaling/searchnetworknode/start/" target="_blank" rel="nofollow noopener noreferrer">Start</a> del objeto <a href="https://reference.groupdocs.com/search/net/groupdocs.search.scaling/searchnetworknode/" target="_blank" rel="nofollow noopener noreferrer">SearchNetworkNode</a> en el servidor maestro.
+
+El siguiente ejemplo de código demuestra cómo iniciar un nodo esclavo en el servidor.
+
+**C#**
+
+```csharp
+SearchNetworkNode node1 = SearchNetworkNode.CreateSlaveNode(
+    1,
+    basePath + "Node1",
+    new TcpSettings(basePort + 1, sendTimeout, receiveTimeout, connectTimeout, retryTimeout));
+node1.Start();
+```
+
+El siguiente ejemplo de código demuestra cómo iniciar un nodo maestro en el servidor.
+
+**C#**
+
+```csharp
+SearchNetworkNode node0 = SearchNetworkNode.CreateMasterNode(
+    0,
+    basePath + "Node0",
+    new TcpSettings(basePort, sendTimeout, receiveTimeout, connectTimeout, retryTimeout),
+    new ConsoleLogger(),
+    configuration);
+
+node0.Events.ConfigurationCompleted += (s, e) =>
+{
+    Console.WriteLine("Configuration complete");
+};
+
+Console.WriteLine();
+Console.WriteLine("Configuring the search network");
+node0.ConfigureAllNodes();
+
+Console.WriteLine("Launching the search network");
+node0.Start();
+```
+
+El siguiente ejemplo de código demuestra la implementación de un registrador simple para consola.
+
+**C#**
+
+```csharp
+class ConsoleLogger : ILogger
+{
+    public void Error(string message)
+    {
+        Console.WriteLine("Error: " + message);
+    }
+
+    public void Trace(string message)
+    {
+        Console.WriteLine("Trace: " + message);
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.
+
+Le invitamos a realizar búsquedas en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Search App</a>.

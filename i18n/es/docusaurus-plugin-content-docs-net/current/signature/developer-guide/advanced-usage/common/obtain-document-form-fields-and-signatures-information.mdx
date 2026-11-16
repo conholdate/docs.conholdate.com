@@ -1,0 +1,134 @@
+---
+title: "Obtener campos de formulario y información de firmas del documento"
+sidebar_label: "Obtener campos de formulario y información de firmas del documento"
+sidebar_key: "net-signature-common-obtain-document-form-fields-and-signatures-information"
+sidebar_position: 1
+description: "Este artículo muestra cómo obtener información sobre las firmas electrónicas en el documento y sus campos de formulario con la API de GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/common/obtain-document-form-fields-and-signatures-information.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "74970440a77ebb57fba32d586289fe78039c3d82adc7482863498413ea0328e9"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "f5b246c1cd78241041734f0b1ea41001db30050b809cb844dfd31acc12d69178"
+translation_updated_at: "2026-11-16T12:28:02.296Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> permite obtener información extendida del documento, la cual incluye:
+
+* lista de los campos de formulario del documento expuestos como elementos <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/formfieldsignature/" target="_blank" rel="nofollow noopener noreferrer">FormFieldSignature</a>: la colección `FormFields`. Esta lista contendrá todos los elementos de campos de formulario del documento, sin importar si estos componentes fueron agregados por GroupDocs.Signature o por cualquier otro software de terceros. Tenga en cuenta que únicamente los documentos PDF y de procesamiento de texto (Word) admiten estos elementos.
+* lista de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/textsignature" target="_blank" rel="nofollow noopener noreferrer">Firmas de texto</a> previamente agregadas al documento mediante el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> o actualizadas mediante el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/update" target="_blank" rel="nofollow noopener noreferrer">Update</a>;
+* lista de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/imagesignature" target="_blank" rel="nofollow noopener noreferrer">Firmas de imagen</a> previamente agregadas al documento mediante el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> o actualizadas mediante el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/update" target="_blank" rel="nofollow noopener noreferrer">Update</a>;
+* lista de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/digitalsignature" target="_blank" rel="nofollow noopener noreferrer">DigitalSignature</a> previamente agregadas al documento mediante el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> o actualizadas mediante el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/update" target="_blank" rel="nofollow noopener noreferrer">Update</a>;
+* lista de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/barcodesignature" target="_blank" rel="nofollow noopener noreferrer">BarcodeSignature</a> previamente agregadas al documento mediante el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> o actualizadas mediante el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/update" target="_blank" rel="nofollow noopener noreferrer">Update</a>;
+* lista de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/qrcodesignature" target="_blank" rel="nofollow noopener noreferrer">QrCodeSignature</a> previamente agregadas al documento mediante el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> o actualizadas mediante el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/update" target="_blank" rel="nofollow noopener noreferrer">Update</a>;
+* lista de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/formfieldsignature/" target="_blank" rel="nofollow noopener noreferrer">FormFieldSignature</a> previamente agregadas al documento mediante el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> o actualizadas mediante el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/update" target="_blank" rel="nofollow noopener noreferrer">Update</a>: la colección `FormFieldSignatures`, la cual, a diferencia de `FormFields`, solo contiene las firmas de campos de formulario agregadas mediante GroupDocs.Signature;
+* lista de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/metadatasignature/" target="_blank" rel="nofollow noopener noreferrer">MetadataSignature</a> previamente agregadas al documento mediante el método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a>: a diferencia de los otros tipos de firma, las firmas de metadatos no pueden modificarse mediante el método Update, por lo que esta colección solo refleja las operaciones de firma.
+
+## Analizar la información de los campos de formulario y las firmas del documento {#analyze-document-form-fields-and-signatures-information}
+
+El siguiente fragmento de código demuestra cómo obtener información sobre los campos de formulario y las firmas del documento, así como analizarla.
+
+```csharp
+string filePath = "sampleSigned.pdf";
+using (Signature signature = new Signature(filePath))
+{
+    IDocumentInfo documentInfo = signature.GetDocumentInfo();
+    Console.WriteLine($"Document properties {Path.GetFileName(filePath)}:");
+    Console.WriteLine($" - format : {documentInfo.FileType.FileFormat}");
+    Console.WriteLine($" - extension : {documentInfo.FileType.Extension}");
+    Console.WriteLine($" - size : {documentInfo.Size}");
+    Console.WriteLine($" - page count : {documentInfo.PageCount}");
+    foreach (PageInfo pageInfo in documentInfo.Pages)
+    {
+        Console.WriteLine($" - page-{pageInfo.PageNumber} Width {pageInfo.Width}, Height {pageInfo.Height}");
+    }
+    // display document Form Field signatures information
+    Console.WriteLine($"Document Form Fields information: count = {documentInfo.FormFields.Count}");
+    foreach (FormFieldSignature formField in documentInfo.FormFields)
+    {
+        Console.WriteLine($" - type #{formField.Type}: Name: {formField.Name} Value: {formField.Value}");
+    }
+    // display document Text signatures information
+    Console.WriteLine($"Document Text signatures : {documentInfo.TextSignatures.Count}");
+    foreach (TextSignature textSignature in documentInfo.TextSignatures)
+    {
+        Console.WriteLine($" - #{textSignature.SignatureId}: Text: {textSignature.Text}");
+    }
+    // display document Image signatures information
+    Console.WriteLine($"Document Image signatures : {documentInfo.ImageSignatures.Count}");
+    foreach (ImageSignature imageSignature in documentInfo.ImageSignatures)
+    {
+        Console.WriteLine($" - #{imageSignature.SignatureId}: Size: {imageSignature.Size} bytes, Format: {imageSignature.Format}.");
+    }
+    // display document Digital signatures information
+    Console.WriteLine($"Document Digital signatures : {documentInfo.DigitalSignatures.Count}");
+    foreach (DigitalSignature digitalSignature in documentInfo.DigitalSignatures)
+    {
+        Console.WriteLine($" - #{digitalSignature.SignatureId}.");
+    }
+    // display document Barcode signatures information
+    Console.WriteLine($"Document Barcode signatures : {documentInfo.BarcodeSignatures.Count}");
+    foreach (BarcodeSignature barcodeSignature in documentInfo.BarcodeSignatures)
+    {
+        Console.WriteLine($" - #{barcodeSignature.SignatureId}: Type: {barcodeSignature.EncodeType?.TypeName}. Text: {barcodeSignature.Text}");
+    }
+    // display document QrCode signatures information
+    Console.WriteLine($"Document QR-Code signatures : {documentInfo.QrCodeSignatures.Count}");
+    foreach (QrCodeSignature qrCodeSignature in documentInfo.QrCodeSignatures)
+    {
+        Console.WriteLine($" - #{qrCodeSignature.SignatureId}: Type: {qrCodeSignature.EncodeType?.TypeName}. Text: {qrCodeSignature.Text}");
+    }
+    // display document Form Fields signatures information
+    Console.WriteLine($"Document Form Fields signatures : {documentInfo.FormFieldSignatures.Count}");
+    foreach (FormFieldSignature formFieldSignature in documentInfo.FormFieldSignatures)
+    {
+        Console.WriteLine($" - #{formFieldSignature.SignatureId} Type {formFieldSignature.Type}: Name: {formFieldSignature.Name} Value: {formFieldSignature.Value}");
+    }
+    // display document Metadata signatures information
+    Console.WriteLine($"Document Metadata signatures : {documentInfo.MetadataSignatures.Count}");
+    foreach (MetadataSignature metadataSignature in documentInfo.MetadataSignatures)
+    {
+        Console.WriteLine($" - #{metadataSignature.Name} = {metadataSignature.Value}.Type:{metadataSignature.Type}");
+    }
+}
+```
+
+
+:::info
+**GroupDocs.Signature** también permite agregar, buscar y leer firmas de metadatos en documentos.  
+Para obtener más información, consulte la siguiente guía:
+[Trabajar con metadatos de documentos](/net/signature/developer-guide/basic-usage/work-with-document-metadata/)
+:::
+
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con UI MVC</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con UI WebForms</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con UI Dropwizard</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con UI Spring</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

@@ -1,0 +1,260 @@
+---
+title: "Generar documento a partir de objetos .NET personalizados"
+sidebar_label: "Generar documento a partir de objetos .NET personalizados"
+sidebar_key: "net-assembly-generate-from-custom-objects"
+sidebar_position: 6
+description: "Genere documentos enlazando datos de clases y objetos personalizados de .NET a documentos plantilla."
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/generate-from-custom-objects.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "9c2d051b8ef7e67e6e00bd388cb54bdf7e44336a64f3b411c7fc4f9d3812cfc0"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "b9511cb6bd6fba3f19a959da954d96b5587c42910e929389aafcac185252607b"
+translation_updated_at: "2026-11-16T13:47:45.349Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Vista general {#overview}
+
+Uno de los escenarios más comunes en la generación de documentos es la creación de informes a partir de objetos personalizados de .NET. GroupDocs.Assembly para .NET facilita la vinculación directa de sus objetos empresariales con las plantillas, lo que le permite crear código de generación de documentos seguro en cuanto a tipos y fácil de mantener.
+
+Las clases principales involucradas son:
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/documentassembler/" target="_blank" rel="nofollow noopener noreferrer">DocumentAssembler</a>: ensambla documentos a partir de plantillas
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/datasourceinfo/" target="_blank" rel="nofollow noopener noreferrer">DataSourceInfo</a>: envuelve los objetos de origen de datos
+
+A continuación se presentan los pasos para generar documentos a partir de objetos personalizados:
+
+* Defina su clase personalizada de .NET con propiedades públicas
+* Cree una instancia de la clase y llénela con datos
+* Cree un documento de plantilla con etiquetas de expresión que hagan referencia a las propiedades del objeto
+* Utilice DocumentAssembler para ensamblar la plantilla con su objeto
+* Guarde el documento ensamblado
+
+
+:::info
+Los objetos personalizados deben tener propiedades o campos públicos para ser accesibles en las plantillas. Los miembros privados no son accesibles por el motor de plantillas.
+:::
+
+
+## Definir una clase personalizada {#define-a-custom-class}
+
+Comience definiendo una clase con las propiedades que desea utilizar en su plantilla:
+
+```csharp
+public class Customer
+{
+    public string Name { get; set; }
+    public string Email { get; set; }
+    public string Address { get; set; }
+    public DateTime RegistrationDate { get; set; }
+    public decimal Balance { get; set; }
+}
+```
+
+## Generar documento a partir de un solo objeto {#generate-document-from-single-object}
+
+Genere un documento a partir de una única instancia de objeto:
+
+```csharp
+using GroupDocs.Assembly;
+
+public static void GenerateFromSingleObject()
+{
+    // Create and populate object
+    Customer customer = new Customer
+    {
+        Name = "John Doe",
+        Email = "john.doe@example.com",
+        Address = "123 Main St, New York, NY 10001",
+        RegistrationDate = new DateTime(2023, 1, 15),
+        Balance = 1250.75m
+    };
+    
+    // Assemble document
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("CustomerTemplate.docx", "CustomerReport.docx", 
+        new DataSourceInfo(customer, "customer"));
+    
+    Console.WriteLine("Document generated from custom object successfully.");
+}
+```
+
+## Ejemplo de plantilla {#template-example}
+
+Su plantilla (CustomerTemplate.docx) puede hacer referencia a las propiedades del objeto:
+
+```
+Customer Information
+
+Name: <<[customer.Name]>>
+Email: <<[customer.Email]>>
+Address: <<[customer.Address]>>
+Registration Date: <<[customer.RegistrationDate]:"yyyy-MM-dd">>
+Balance: <<[customer.Balance]:"C">>
+```
+
+## Generar documento a partir de una colección de objetos {#generate-document-from-object-collection}
+
+También puede generar documentos a partir de colecciones de objetos:
+
+```csharp
+using GroupDocs.Assembly;
+using System.Collections.Generic;
+
+public static void GenerateFromCollection()
+{
+    // Create collection of objects
+    List<Customer> customers = new List<Customer>
+    {
+        new Customer { Name = "John Doe", Email = "john@example.com", Balance = 1000m },
+        new Customer { Name = "Jane Smith", Email = "jane@example.com", Balance = 2500m },
+        new Customer { Name = "Bob Johnson", Email = "bob@example.com", Balance = 750m }
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("CustomersTemplate.docx", "CustomersReport.docx", 
+        new DataSourceInfo(customers, "customers"));
+    
+    Console.WriteLine("Document generated from collection successfully.");
+}
+```
+
+Plantilla para colección (usando banda de datos):
+
+```
+Customers List:
+
+<<foreach [in customers]>>
+<<[Name]>> - <<[Email]>> - Balance: <<[Balance]:"C">>
+<</foreach>>
+```
+
+## Uso de objetos anidados {#using-nested-objects}
+
+Los objetos personalizados pueden contener objetos anidados:
+
+```csharp
+public class Order
+{
+    public int OrderId { get; set; }
+    public DateTime OrderDate { get; set; }
+    public Customer Customer { get; set; }
+    public decimal TotalAmount { get; set; }
+}
+
+public static void GenerateFromNestedObjects()
+{
+    Order order = new Order
+    {
+        OrderId = 1001,
+        OrderDate = DateTime.Now,
+        Customer = new Customer 
+        { 
+            Name = "John Doe", 
+            Email = "john@example.com" 
+        },
+        TotalAmount = 599.99m
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("OrderTemplate.docx", "OrderReport.docx", 
+        new DataSourceInfo(order, "order"));
+    
+    Console.WriteLine("Document generated from nested objects successfully.");
+}
+```
+
+Plantilla con acceso a objetos anidados:
+
+```
+Order #<<[order.OrderId]>>
+Date: <<[order.OrderDate]:"yyyy-MM-dd">>
+
+Customer:
+Name: <<[order.Customer.Name]>>
+Email: <<[order.Customer.Email]>>
+
+Total: <<[order.TotalAmount]:"C">>
+```
+
+## Uso de métodos de objetos {#using-object-methods}
+
+Puede invocar métodos sobre objetos en plantillas:
+
+```csharp
+public class Product
+{
+    public string Name { get; set; }
+    public decimal Price { get; set; }
+    public int Quantity { get; set; }
+    
+    public decimal GetTotal()
+    {
+        return Price * Quantity;
+    }
+}
+
+public static void GenerateWithMethods()
+{
+    Product product = new Product
+    {
+        Name = "Laptop",
+        Price = 999.99m,
+        Quantity = 2
+    };
+    
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("ProductTemplate.docx", "ProductReport.docx", 
+        new DataSourceInfo(product, "product"));
+    
+    Console.WriteLine("Document generated with method calls successfully.");
+}
+```
+
+Plantilla que utiliza el método:
+
+```
+Product: <<[product.Name]>>
+Price: <<[product.Price]:"C">>
+Quantity: <<[product.Quantity]>>
+Total: <<[product.GetTotal()]:"C">>
+```
+
+
+:::warning
+Los métodos llamados en plantillas deben ser públicos y no deben tener efectos secundarios. El motor de plantillas puede invocar métodos varias veces durante la compilación del documento.
+:::
+
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre el trabajo con jerarquías de objetos complejas, colecciones, consultas LINQ sobre objetos y optimización de rendimiento, consulte la [sección de uso avanzado](/net/assembly/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para .NET</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Java</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Python-via-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Python mediante .NET</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para ensamblar documentos a partir de plantillas y fuentes de datos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/assembly" target="_blank">Conholdate.Assembly App</a>**.

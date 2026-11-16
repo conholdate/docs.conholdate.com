@@ -1,0 +1,109 @@
+---
+title: "Búsqueda avanzada para firmas de código de barras"
+sidebar_label: "🌐 Código de barras"
+sidebar_key: "net-signature-searching-advanced-search-for-barcode-signatures"
+sidebar_position: 1
+description: "Este artículo explica cómo realizar búsquedas avanzadas de firmas electrónicas de código de barras con la API de GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/searching/advanced-search-for-barcode-signatures.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "cfcf6ef5bd1d376d07d5112be8f2f9bb82ddd5fe266ddcf9ea821fdebbbfe253"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "9ba03e31d4b7deec6235518b33910174a2887b61a1dc797ffeaa0e75eb7d2b93"
+translation_updated_at: "2026-11-16T13:00:00.094Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> proporciona la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/barcodesearchoptions" target="_blank" rel="nofollow noopener noreferrer">BarcodeSearchOptions</a> para especificar distintas opciones de búsqueda de firmas de código de barras.
+
+A continuación se indican los pasos para buscar firmas de código de barras en un documento mediante GroupDocs.Signature:
+
+* Crear una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasar la ruta del documento de origen como parámetro del constructor.
+* Instanciar el objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/barcodesearchoptions" target="_blank" rel="nofollow noopener noreferrer">BarcodeSearchOptions</a> según sus necesidades y especificar las opciones de búsqueda.
+* Llamar al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pasarle <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/barcodesearchoptions" target="_blank" rel="nofollow noopener noreferrer">BarcodeSearchOptions</a>.
+
+Este ejemplo muestra cómo realizar una búsqueda avanzada de firmas de código de barras en un documento, con las opciones habilitadas para recuperar el contexto de la firma electrónica del código de barras.
+
+```csharp
+using (Signature signature = new Signature("sample.pdf"))
+{
+    BarcodeSearchOptions options = new BarcodeSearchOptions()
+    {
+        // specify special pages to search on
+        AllPages = false,
+        // single page number
+        PageNumber = 1,
+        // setup extended search in pages setup
+        PagesSetup = new PagesSetup() { FirstPage = true, LastPage = true, OddPages = false, EvenPages = false },
+        // specify special barcode type to search
+        EncodeType = BarcodeTypes.Code39Standard,
+        // specify text match type
+        MatchType = TextMatchType.Contains,
+        // specify text pattern to search
+        Text = "12345678",
+        // set field for barcode images returning
+        ReturnContent = true,
+        // specify type of returned barcode images
+        ReturnContentType = FileType.PNG
+    };
+    // search for signatures in document
+    List<BarcodeSignature> signatures = signature.Search<BarcodeSignature>(options);
+    Console.WriteLine("\nSource document contains following signatures.");
+    foreach (var barcodeSignature in signatures)
+    {
+        Console.WriteLine("Barcode signature found at page {0} with type {1} and text {2}", barcodeSignature.PageNumber, barcodeSignature.EncodeType, barcodeSignature.Text);
+        Console.WriteLine("Barcode signature size {0} and format {1}", barcodeSignature.Content?.Length, barcodeSignature.Format);
+        Console.WriteLine($"Location at {barcodeSignature.Left}-{barcodeSignature.Top}. Size is {barcodeSignature.Width}x{barcodeSignature.Height}.");
+    }
+    //Save Barcode images
+    string outputPath = Path.Combine(Constants.OutputPath, "SearchForBarcodeAdvanced");
+    if (!Directory.Exists(outputPath))
+    {
+        Directory.CreateDirectory(outputPath);
+    }
+    int i = 0;
+    foreach (BarcodeSignature barcodeSignature in signatures)
+    {
+        if (barcodeSignature.Content != null)
+        {
+            string outputFilePath = Path.Combine(outputPath, $"image{i}{barcodeSignature.Format?.Extension}");
+            using (FileStream fs = new FileStream(outputFilePath, FileMode.Create))
+            {
+                fs.Write(barcodeSignature.Content, 0, barcodeSignature.Content.Length);
+            }
+        }
+        i++;
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con interfaz MVC</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con interfaz WebForms</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con interfaz Dropwizard</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con interfaz Spring</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

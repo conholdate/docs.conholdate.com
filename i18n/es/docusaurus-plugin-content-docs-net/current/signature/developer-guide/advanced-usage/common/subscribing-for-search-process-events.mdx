@@ -1,0 +1,131 @@
+---
+title: "Suscripción a eventos del proceso de búsqueda"
+sidebar_label: "Suscripción a eventos del proceso de búsqueda"
+sidebar_key: "net-signature-common-subscribing-for-search-process-events"
+sidebar_position: 4
+description: "Este artículo explica cómo suscribirse a eventos de firmas electrónicas de búsqueda, como inicio, progreso y finalización, con la API de GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/common/subscribing-for-search-process-events.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "b9764f0e6734c3dcac6c45de354e2dff96d72d9b3651abc64f602375e483fe1a"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "073fe42b90aa74ef1551966a1584394c9951f0a3ec4c637a16660115f13051cb"
+translation_updated_at: "2026-11-16T12:30:09.907Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+<a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> La clase contiene varios eventos que se invocan en diferentes etapas del proceso de búsqueda.
+
+* <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/searchstarted" target="_blank" rel="nofollow noopener noreferrer">SearchStarted</a> para manejar el evento de inicio del proceso. Este evento ocurre una sola vez. <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a> se llama el método
+* <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/searchprogress" target="_blank" rel="nofollow noopener noreferrer">SearchProgress</a> para manejar el evento de progreso. Este evento se produce cada vez que se busca en cada página del documento.
+* <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/searchcompleted" target="_blank" rel="nofollow noopener noreferrer">SearchCompleted</a> para manejar el evento de finalización. Este evento ocurre una vez <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a> el proceso se completó.
+
+Aquí están los pasos para suscribirse al proceso de búsqueda con GroupDocs.Signature:
+
+* Defina los delegados de controladores necesarios para procesar eventos de búsqueda.
+* Crear nueva instancia de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase y pase la ruta del documento de origen o el flujo como parámetro del constructor.
+* Suscribirse a los eventos requeridos.
+* `required` debe ser instanciado <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/searchoptions" target="_blank" rel="nofollow noopener noreferrer">SearchOptions</a> objeto.
+* Llamada <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a> método de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase de instancia y pasar las opciones de búsqueda en ella.
+
+## Implementar método para el evento `SearchStarted` {#implement-method-for-searchstarted-event}
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> espera que el delegado `ProcessStartEventHandler` se suscriba al evento `SearchStarted`
+
+```csharp
+private static void OnSearchStarted(Signature signature, ProcessStartEventArgs args)
+{
+    Console.WriteLine("Search process started at {0} with {1} total signatures to be put in document", args.Started, args.TotalSignatures);
+}
+```
+
+## Implementar método para el evento SearchProgress {#implement-method-for-searchprogress-event}
+
+```csharp
+ private static void OnSearchProgress(Signature signature, ProcessProgressEventArgs args)
+ {
+     Console.WriteLine("Search progress. Processed {0} signatures. Time spent {1} mlsec", args.ProcessedSignatures, args.Ticks);
+ }
+```
+
+## Implementar método para el evento SearchCompleted {#implement-method-for-searchcompleted-event}
+
+```csharp
+private static void OnSearchCompleted(Signature signature, ProcessCompleteEventArgs args)
+{
+    Console.WriteLine("Search process completed at {0} with {1} total signatures. Process took {2} mlsec", args.Completed, args.TotalSignatures, args.Ticks);
+}
+```
+
+## Suscripción a eventos del proceso de búsqueda {#subscribing-for-search-process-events}
+
+```csharp
+private static void OnSearchStarted(Signature sender, ProcessStartEventArgs args)
+{
+    Console.WriteLine("Search process started at {0} with {1} total signatures to be put in document", args.Started, args.TotalSignatures);
+}
+
+private static void OnSearchProgress(Signature sender, ProcessProgressEventArgs args)
+{
+    Console.WriteLine("Search progress. Processed {0} signatures. Time spent {1} mlsec", args.ProcessedSignatures, args.Ticks);
+}
+
+private static void OnSearchCompleted(Signature sender, ProcessCompleteEventArgs args)
+{
+    Console.WriteLine("Search process completed at {0} with {1} total signatures. Process took {2} mlsec", args.Completed, args.TotalSignatures, args.Ticks);
+}
+
+public static void Run()
+{
+    using (Signature signature = new Signature("SignedSample.pdf"))
+    {
+        signature.SearchStarted += OnSearchStarted;
+        signature.SearchProgress += OnSearchProgress;
+        signature.SearchCompleted += OnSearchCompleted;
+        BarcodeSearchOptions options = new BarcodeSearchOptions()
+        {
+            // specify special pages to search on
+            AllPages = true
+        };
+        // search for signatures in document
+        List<BarcodeSignature> signatures = signature.Search<BarcodeSignature>(options);
+        Console.WriteLine("\nSource document contains following signatures.");
+        foreach (var barcodeSignature in signatures)
+        {
+            Console.WriteLine("Barcode signature found at page {0} with type {1} and text {2}",
+                  barcodeSignature.PageNumber, barcodeSignature.EncodeType, barcodeSignature.Text);
+        }
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con interfaz MVC</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con interfaz WebForms</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con interfaz Dropwizard</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con interfaz Spring</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

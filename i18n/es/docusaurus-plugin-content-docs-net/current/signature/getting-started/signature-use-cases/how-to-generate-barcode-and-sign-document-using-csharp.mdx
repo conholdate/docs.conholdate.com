@@ -1,0 +1,126 @@
+---
+title: "Cómo generar un código de barras y firmar un documento usando C#"
+sidebar_label: "Cómo generar un código de barras y firmar un documento usando C#"
+sidebar_key: "net-signature-signature-use-cases-how-to-generate-barcode-and-sign-document-using-csharp"
+sidebar_position: 2
+description: "Esta guía describe cómo mejorar su documento con códigos de barras generados mediante C#. Firme sus documentos con Codabar, Event o Code39Extended utilizando la API GroupDocs.Signature .NET de GroupDocs."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/getting-started/signature-use-cases/how-to-generate-barcode-and-sign-document-using-csharp.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "ffa94d0285bcda7393512fb06a9f97053a1f9a090cd7aaaa74ac76c7c952a0a1"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "b3b1c0bbc9470967fcff1cc2bd9e8b05fb4f3d3b3f104be654a9d2f82096f881"
+translation_updated_at: "2026-11-16T14:44:04.122Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+Los códigos de barras representan información textual como una imagen muy pequeña que puede escanearse automáticamente. Este enfoque abre nuevas posibilidades para el procesamiento informático de documentos, como su clasificación o el seguimiento a través de un flujo de trabajo empresarial. En este artículo, discutiremos formas útiles de firmar documentos electrónicos con datos cifrados en códigos de barras o códigos QR utilizando C# en aplicaciones .NET.
+
+## API nativa de .NET para firmas electrónicas {#native-net-api-for-electronic-signatures}
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Signature for .NET</a> proporciona una API para firmar una amplia gama de formatos de documento. Además, la API incluye capacidades especiales para el procesamiento adicional del contenido de los documentos. Los formatos compatibles incluyen PDF, Microsoft Word, Microsoft PowerPoint, Microsoft Excel, PNG, JPEG y [muchos otros](/net/signature/supported-document-formats/).
+
+Utilice la sección <a href="https://downloads.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">downloads</a> para obtener los DLL de la API o el instalador MSI, o bien utilice el administrador de paquetes NuGet:
+
+```nuget
+PM> Install-Package GroupDocs.Signature
+```
+
+## Cómo firmar archivos PDF con un código de barras {#how-to-sign-pdf-files-with-a-barcode}
+
+Es un problema común agregar datos adicionales a diversos tipos de documentos empresariales. Un documento de este tipo podría verse como en la imagen siguiente. Una de las formas más útiles es colocar directamente un código de barras en la página del documento.
+
+![Source PDF document preview](/net/signature/images/signature-use-cases/how-to-generate-barcode-and-sign-document-using-csharp/source_doc_preview.png)
+
+### Firmar un documento con un código de barras Codabar en C\# {#signing-a-document-with-a-codabar-in-c}
+
+Para generar un código de barras y firmar un documento específico con él:
+
+* Instanciar la clase `Signature`, proporcionando la ruta al documento de origen o un flujo de documentos.
+* Crear la instancia de `BarcodeSignOptions` y configurar todos los campos requeridos.
+* Invocar el método `Sign` para procesar el documento, proporcionando la ruta del archivo de salida y las opciones de firma.
+
+```cs
+            // instantiating the signature object
+            using (Signature signature = new Signature(@"source.pdf"))
+            {
+                // setup barcode signature options
+                BarcodeSignOptions signOptions = new BarcodeSignOptions()
+                {
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    Top = 150,
+                    EncodeType = BarcodeTypes.Codabar,
+                    Text = "Approved_19/06/2022"
+                };
+                // sign document
+                signature.Sign(@"signed_codabar.pdf", signOptions);
+            }
+```
+
+Un documento firmado con Codabar podría verse como en la imagen siguiente. El formato Codabar se desarrolló para documentos impresos y podría ser útil en el flujo de documentos de oficina.
+
+![A document signed with a Codabar](/net/signature/images/signature-use-cases/how-to-generate-barcode-and-sign-document-using-csharp/signed_codabar.png)
+
+La aplicación en línea <a href="https://products.groupdocs.app/signature/generate/barcode" target="_blank" rel="nofollow noopener noreferrer">Generador de Códigos de Barras</a> le ofrece la oportunidad de probar gratuitamente la firma de documentos mediante códigos de barras.
+
+## Generación de códigos de barras e imágenes en C\# {#barcode-and-image-generation-in-c}
+
+Otra forma de mejorar los documentos es generar primero el código de barras y luego agregarlo a los documentos mediante herramientas de terceros. En este caso, es posible generar el código como una imagen.
+
+* Crear una instancia de la clase `BarcodeSignOptions` y configurar todos los campos requeridos.
+* Instanciar el objeto `PreviewSignatureOptions`, proporcionando los métodos para su creación y liberación.
+* Invocar el método `GenerateSignaturePreview` para obtener la imagen del código de barras como un flujo (stream).
+* Utilizar el flujo resultante del código de barras de cualquier manera posible.
+
+```cs
+            MemoryStream result = new MemoryStream();
+            // setup barcode signature options
+            BarcodeSignOptions signOptions = new BarcodeSignOptions()
+            {
+                EncodeType = BarcodeTypes.Code93,
+                Text = "Case 148.01"
+            };
+
+            //Instantiate preview options
+            var previewOptions = new PreviewSignatureOptions(
+                signOptions,
+                delegate (PreviewSignatureOptions options) { return result; },
+                delegate (PreviewSignatureOptions options, Stream signatureStream) { }
+                );
+
+            //Generate image to stream
+            GroupDocs.Signature.Signature.GenerateSignaturePreview(previewOptions);
+
+```
+Una imagen que contiene el código de barras generado podría verse así:
+
+![Generated barcode](/net/signature/images/signature-use-cases/how-to-generate-barcode-and-sign-document-using-csharp/code93extended.png)
+
+## Obtener una licencia API gratuita {#get-a-free-api-license}
+
+Para utilizar la API sin limitaciones de evaluación, puede obtener una <a href="https://purchase.conholdate.com/temporary-license" target="_blank">licencia temporal</a> gratuita.
+
+## Conclusión {#conclusion}
+
+En resumen, en este artículo se discutieron algunos métodos útiles para procesar documentos y códigos de barras. El uso de C# en aplicaciones .NET mejora drásticamente la productividad de estas operaciones.
+Además, puede utilizar la aplicación gratuita **Barcode Generator Online** para generar códigos de barras y/o firmar sus archivos con códigos de barras.
+
+Consulte la <a href="https://docs.groupdocs.com/signature/net/" target="_blank" rel="nofollow noopener noreferrer">documentación</a> para aprender a utilizar GroupDocs.Signature en sus aplicaciones .NET. Asimismo, puede plantear cualquier pregunta o inquietud en el <a href="https://forum.conholdate.com/" target="_blank">foro de Conholdate</a>.
+
+## Consulte también {#see-also}
+
+* [Cómo firmar documentos con códigos QR mediante C#](/net/signature/how-to-generate-qrcode-and-sign-document-using-csharp/)
+* [Cómo firmar hojas de cálculo de Excel y sus macros mediante C#](/net/signature/how-to-sign-excel-macros-using-csharp/)

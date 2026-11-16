@@ -1,0 +1,107 @@
+---
+title: "Búsqueda avanzada para firmas de imagen"
+sidebar_label: "🌐 Imagen"
+sidebar_key: "net-signature-searching-advanced-search-for-image-signatures"
+sidebar_position: 6
+description: "Este artículo explica cómo realizar búsquedas avanzadas de firmas electrónicas de imagen con la API de GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/searching/advanced-search-for-image-signatures.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "bca89006f97795e876219d957fb02b22f7bac0550da4a1261e5c86eed23fe7b5"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "c024759ad6c87dee03b0282f096b87d25939d1aa3d430c31f5e0ad2938af68c7"
+translation_updated_at: "2026-11-16T13:01:37.183Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> proporciona <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/imagesearchoptions" target="_blank" rel="nofollow noopener noreferrer">ImageSearchOptions</a> Clase para especificar diferentes opciones para buscar firmas de imagen
+
+* La propiedad `ReturnContent` permite devolver en la firma de la imagen su contenido;
+* La propiedad `long MinContentSize` con un valor distinto de cero limita el tamaño mínimo de la imagen que se devolverá;
+* La propiedad `MaxContentSize` de tipo `long` con un valor distinto de cero limita el tamaño máximo de la imagen que se devolverá.
+* <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/filetype" target="_blank" rel="nofollow noopener noreferrer">FileType</a> La propiedad `ReturnContentType` permite especificar el tipo de contenido exacto de la imagen.
+
+Aquí están los pasos para buscar firmas de imagen dentro del documento con GroupDocs.Signature:
+
+* Crear nueva instancia de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase y pasar la ruta del documento de origen como parámetro del constructor.
+* Instanciar el <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/imagesearchoptions" target="_blank" rel="nofollow noopener noreferrer">ImageSearchOptions</a>  objeto según sus requisitos y especifique las opciones de búsqueda
+* Llamada <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a> método de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase, instancia y `pass` <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/imagesearchoptions" target="_blank" rel="nofollow noopener noreferrer">ImageSearchOptions</a> a él.
+* Analizar si es necesario la lista de la lista devuelta <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/imagesignature" target="_blank" rel="nofollow noopener noreferrer">ImageSignatures</a>
+
+Este ejemplo muestra cómo realizar una búsqueda avanzada de firmas de imagen en un documento y realizar análisis adicionales sobre las firmas de imagen, incluida la保存ación del contenido de la imagen.
+
+```csharp
+using (Signature signature = new Signature("sampleSignaed.docx"))
+{
+    // setup search options
+    ImageSearchOptions searchOptions = new ImageSearchOptions()
+    {
+        // enable grabbing image content feature
+        ReturnContent = true,
+        // set minimum size if needed
+        MinContentSize = 0,
+        // set maximum size if needed
+        MaxContentSize = 0,
+        // specify exact image type to be returned
+        ReturnContentType = FileType.JPEG,
+    };
+    // search document
+    List<ImageSignature> signatures = signature.Search<ImageSignature>(searchOptions);
+    Console.WriteLine($"\nSource document ['{fileName}'] contains following image signature(s).");
+    // output signatures
+    foreach (ImageSignature imageSignature in signatures)
+    {
+        Console.Write($"Found Image signature at page {imageSignature.PageNumber} and size {imageSignature.Size}.");
+        Console.WriteLine($"Location at {imageSignature.Left}-{imageSignature.Top}. Size is {imageSignature.Width}x{imageSignature.Height}.");
+    }
+    //Save signature images
+    string outputPath = System.IO.Path.Combine(Constants.OutputPath, "SearchForImageAdvanced");
+    if (!Directory.Exists(outputPath))
+    {
+        Directory.CreateDirectory(outputPath);
+    }
+    int i = 0;
+    foreach (ImageSignature imageSignature in signatures)
+    {
+        Console.Write($"Found Image signature at page {imageSignature.PageNumber} and size {imageSignature.Size}.");
+        Console.WriteLine($"Location at {imageSignature.Left}-{imageSignature.Top}. Size is {imageSignature.Width}x{imageSignature.Height}.");
+        string outputFilePath = System.IO.Path.Combine(outputPath, $"image{i}{imageSignature.Format.Extension}");
+        using (FileStream fs = new FileStream(outputFilePath, FileMode.Create))
+        {
+            fs.Write(imageSignature.Content, 0, imageSignature.Content.Length);
+        }
+        i++;
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario MVC para firma de documentos en .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario WebForms para firma de documentos en .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Dropwizard para firma de documentos en Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Spring para firma de documentos en Java</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

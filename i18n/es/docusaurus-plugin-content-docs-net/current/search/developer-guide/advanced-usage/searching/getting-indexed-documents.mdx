@@ -1,0 +1,114 @@
+---
+title: "Obtención de documentos indexados"
+sidebar_label: "Obtención de documentos indexados"
+sidebar_position: 7
+description: "Este artículo explica cómo obtener una lista de documentos indexados a partir de un índice, y cómo obtener el texto de los documentos indexados en formato HTML o de texto plano."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/searching/getting-indexed-documents.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "1d9cc3fccb0be583c585ac405586fc678189e4747b9e810a89925cf0fffb0c5d"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "280624d22f6977922af5c5f9496128335aed6dda276a490911ba51626bb34026"
+translation_updated_at: "2026-11-16T11:41:12.297Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Esta página contiene una descripción de cómo obtener una lista de documentos indexados a partir de un índice, y cómo obtener el texto de los documentos indexados en formato HTML o texto sin formato.
+
+## Obtención de documentos indexados {#getting-indexed-documents}
+
+Para obtener una lista de documentos indexados a partir de un índice, utilice el método <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index/methods/getindexeddocuments" target="_blank" rel="nofollow noopener noreferrer">GetIndexedDocuments</a> de la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index" target="_blank" rel="nofollow noopener noreferrer">Index</a>. Los documentos con las extensiones ZIP, PST y OST también pueden contener documentos internos. Para obtener una lista de documentos internos, utilice el método <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index/methods/getindexeddocumentitems" target="_blank" rel="nofollow noopener noreferrer">GetIndexedDocumentItems</a> de la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index" target="_blank" rel="nofollow noopener noreferrer">Index</a>. En el caso de archivos ZIP, mediante este procedimiento puede acceder a documentos con cualquier profundidad de anidamiento. A continuación se presenta un ejemplo de cómo obtener una lista de documentos a partir de un índice.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Getting list of indexed documents
+DocumentInfo[] documents = index.GetIndexedDocuments();
+for (int i = 0; i < documents.Length; i++)
+{
+    DocumentInfo document = documents[i];
+    Console.WriteLine(document.FilePath);
+    DocumentInfo[] items = index.GetIndexedDocumentItems(document); // Getting list of document items
+    for (int j = 0; j < items.Length; j++)
+    {
+        DocumentInfo item = items[j];
+        Console.WriteLine("\t" + item.InnerPath);
+    }
+}
+```
+
+## Obtención del texto de los documentos indexados {#getting-text-of-indexed-documents}
+
+El texto del documento indexado también puede extraerse desde un índice si se ha habilitado la opción para guardar el texto de los documentos en el índice. Si esta opción no se activó al crear el índice, entonces, al invocar el método <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index/methods/getdocumenttext/index" target="_blank" rel="nofollow noopener noreferrer">GetDocumentText</a> de la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index" target="_blank" rel="nofollow noopener noreferrer">Index</a>, el texto del documento se recuperará nuevamente. Los detalles sobre el almacenamiento del texto de los documentos en un índice se encuentran en la página [Almacenamiento del texto de los documentos indexados](/net/search/developer-guide/advanced-usage/indexing/storing-text-of-indexed-documents/).
+
+El texto generado del documento se pasa a una instancia de una clase derivada de la clase abstracta <a href="https://reference.groupdocs.com/net/search/groupdocs.search.common/outputadapter" target="_blank" rel="nofollow noopener noreferrer">OutputAdapter</a>. Los detalles sobre los adaptadores de salida se presentan en la página [Adaptadores de salida](/net/search/developer-guide/advanced-usage/searching/output-adapters/).
+
+Tras generar el texto de un documento en un archivo, este puede abrirse mediante un navegador web. El siguiente ejemplo muestra cómo extraer el texto de un documento desde un índice.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Getting list of indexed documents
+DocumentInfo[] documents = index.GetIndexedDocuments();
+ 
+// Getting a document text
+if (documents.Length > 0)
+{
+    FileOutputAdapter outputAdapter = new FileOutputAdapter(OutputFormat.Html, @"C:\Text.html");
+    index.GetDocumentText(documents[0], outputAdapter);
+}
+```
+
+Para extraer el texto de un documento desde un índice, también se presenta una sobrecarga del método que acepta una instancia de la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/textoptions" target="_blank" rel="nofollow noopener noreferrer">TextOptions</a> como parámetro. En esta clase, se pueden especificar las siguientes opciones:
+
+*   <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/textoptions/properties/customextractor" target="_blank" rel="nofollow noopener noreferrer">CustomExtractor</a> es un extractor personalizado utilizado durante la indexación; es necesario si el texto del documento no se guardó en el índice.
+*   <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/textoptions/properties/additionalfields" target="_blank" rel="nofollow noopener noreferrer">AdditionalFields</a> son campos adicionales del documento agregados durante la indexación del documento, también son necesarios si el texto del documento no se guardó en el índice.
+*   <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/textoptions/properties/cancellation" target="_blank" rel="nofollow noopener noreferrer">Cancellation</a> es un objeto utilizado para cancelar la operación.
+*   <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/textoptions/properties/metadataindexingoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataIndexingOptions</a> es un objeto para especificar las opciones de indexación de metadatos.
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le invitamos a buscar en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">aplicación gratuita de búsqueda de documentos en línea</a>.

@@ -1,0 +1,98 @@
+---
+title: "Segmentador de texto personalizado"
+sidebar_label: "Segmentador de texto personalizado"
+sidebar_position: 3
+description: "GroupDocs.Search proporciona la capacidad de configurar la segmentación de texto personalizada."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/indexing/custom-text-segmenter.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "43c8cae0146d30fdb4d960e04df52ff6b2a98e64ce2210ede27a96b88a7b09bc"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "30323560ae8dcc1585ee84d604db2e16459bc3b8c5357f4b5d735acbf11f14bd"
+translation_updated_at: "2026-11-16T11:09:04.883Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+Algunos idiomas, en particular los idiomas jeroglíficos, suelen requerir herramientas especiales para dividir el texto en palabras.
+Esto es necesario debido a la ausencia de espacios entre palabras, las frases polisémicas, las expresiones fijas y las reglas léxicas complejas.
+
+Actualmente, la biblioteca GroupDocs.Search no contiene algoritmos especiales para dividir texto en chino, japonés y coreano en palabras. Sin embargo, proporciona la capacidad de utilizar algoritmos personalizados externos para este propósito. Para integrar una biblioteca externa de segmentación de texto, debe implementar la interfaz <a href="https://reference.groupdocs.com/search/net/groupdocs.search.common/iwordsplitter/" target="_blank" rel="nofollow noopener noreferrer">IWordSplitter</a> y pasar un objeto que implemente dicha interfaz a la propiedad <a href="https://reference.groupdocs.com/search/net/groupdocs.search.events/fileindexingeventargs/wordsplitter/" target="_blank" rel="nofollow noopener noreferrer">WordSplitter</a> de los argumentos del evento <a href="https://reference.groupdocs.com/search/net/groupdocs.search.events/eventhub/fileindexing/" target="_blank" rel="nofollow noopener noreferrer">FileIndexing</a>.
+
+El siguiente ejemplo de código muestra cómo utilizar la biblioteca externa <a href="https://www.nuget.org/packages/jieba.NET/" target="_blank" rel="nofollow noopener noreferrer">Jieba.NET</a> para la segmentación de texto en chino.
+
+**C#**
+
+```csharp
+// Implementing custom word splitter
+public class JiebaWordSplitter : IWordSplitter
+{
+    private readonly JiebaSegmenter segmenter;
+
+    public JiebaWordSplitter()
+    {
+        segmenter = new JiebaSegmenter();
+    }
+
+    public IEnumerable<string> Split(string text)
+    {
+        IEnumerable<string> segments = segmenter.Cut(text, cutAll: false);
+        return segments;
+    }
+}
+
+...
+
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+
+// Using Jieba segmenter to break text into words
+JiebaWordSplitter jiebaWordSplitter = new JiebaWordSplitter();
+index.Events.FileIndexing += (s, e) =>
+{
+    if (e.DocumentFullPath.EndsWith("Chinese.txt"))
+    {
+        // We know that the text in this document is in Chinese
+        e.WordSplitter = jiebaWordSplitter;
+    }
+};
+
+// Indexing documents
+index.Add(documentsFolder);
+
+// Searching in the index
+string query = "考虑"; // Consider
+SearchResult result = index.Search(query);
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le invitamos a buscar en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">aplicación gratuita de búsqueda de documentos en línea</a>.

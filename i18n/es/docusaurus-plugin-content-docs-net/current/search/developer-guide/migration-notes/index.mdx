@@ -1,0 +1,99 @@
+---
+title: "Notas de migración"
+sidebar_label: "Notas de migración"
+sidebar_key: "net-search-tab"
+sidebar_position: 3
+description: ""
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/migration-notes.md/"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "b1a497318116c0acd8401be27b3f5e8a8fa204c499f3844820fead7a7a51ecd7"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "36ca7679c19dd37874cabc7363dc71e0b38285e23dd13daab88af215099c9c4f"
+translation_updated_at: "2026-11-16T12:14:06.852Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+### ¿Por qué migrar? {#why-to-migrate}
+
+A continuación se presentan las principales razones para utilizar la nueva API actualizada proporcionada por GroupDocs.Search para .NET desde la versión 19.9:
+
+*   Unificación del trabajo con ciertas entidades similares para aumentar la intuitividad del uso de la API.
+*   La arquitectura del producto ha sido revisada y optimizada, por lo que algunas funciones funcionarán más rápido.
+*   Se han renombrado algunas entidades para mejorar la legibilidad del código.
+*   Los cambios realizados en la API no son demasiado significativos, por lo que la migración no será demasiado difícil.
+*   No se agregarán nuevas funcionalidades a la versión antigua de la API, únicamente a la nueva versión.
+
+### ¿Cómo migrar? {#how-to-migrate}
+
+Los siguientes ejemplos de código muestran los cambios en el uso de la API.
+
+Estilo de codificación anterior:
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.AddToIndex(documentsFolder);
+ 
+// Creating a search parameters object
+SearchParameters parameters = new SearchParameters();
+parameters.FuzzySearch.Enabled = true; // Enabling the fuzzy search
+parameters.FuzzySearch.FuzzyAlgorithm = new TableDiscreteFunction(2); // Setting the number of possible differences for each word
+ 
+// Searching in the index
+SearchResults results = index.Search("Happiness", parameters);
+ 
+if (results.Count > 0)
+{
+    // Generating HTML-formatted text of a document with highlighted search results
+    index.HighlightInText(@"c:\Highlighted.html", results[0]);
+}
+```
+
+Nuevo estilo de codificación:
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Creating a search options object
+SearchOptions options = new SearchOptions();
+options.FuzzySearch.Enabled = true; // Enabling the fuzzy search
+options.FuzzySearch.FuzzyAlgorithm = new TableDiscreteFunction(2); // Setting the number of possible differences for each word
+ 
+// Searching in the index
+SearchResult result = index.Search("Happiness", options);
+ 
+if (result.DocumentCount > 0)
+{
+    // Generating HTML-formatted text of a document with highlighted search results
+    index.Highlight(result.GetFoundDocument(0), new HtmlHighlighter(new FileOutputAdapter(@"c:\Highlighted.html")));
+}
+```

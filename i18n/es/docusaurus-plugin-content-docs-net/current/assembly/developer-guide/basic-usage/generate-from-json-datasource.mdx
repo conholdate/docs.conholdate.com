@@ -1,0 +1,228 @@
+---
+title: "Generar documento desde una fuente de datos JSON"
+sidebar_label: "Generar documento desde una fuente de datos JSON"
+sidebar_key: "net-assembly-generate-from-json-datasource"
+sidebar_position: 8
+description: "Genere documentos a partir de fuentes de datos JSON utilizando la clase `JsonDataSource` para cargar y enlazar datos JSON a plantillas en aplicaciones .NET."
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/generate-from-json-datasource.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "7c5632035eb36e3cba69d8f400eea385d746d7dff98f5246e3b6b86961f4e984"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "32e021651079faa7fd04c0f30ca85a20013c965f32a160994bfc269923dd1673"
+translation_updated_at: "2026-11-16T13:49:38.775Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Vista general {#overview}
+
+GroupDocs.Assembly para .NET le permite generar documentos directamente desde fuentes de datos JSON. La clase `JsonDataSource` analiza automáticamente el JSON y lo pone a disposición de sus plantillas, admitiendo tanto estructuras JSON simples como complejas.
+
+Las clases principales involucradas son:
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/jsondatasource/" target="_blank" rel="nofollow noopener noreferrer">JsonDataSource</a>: carga y analiza los datos JSON
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/documentassembler/" target="_blank" rel="nofollow noopener noreferrer">DocumentAssembler</a>: ensambla documentos a partir de plantillas
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/datasourceinfo/" target="_blank" rel="nofollow noopener noreferrer">DataSourceInfo</a>: envuelve la fuente de datos
+
+A continuación se presentan los pasos para generar documentos a partir de JSON:
+
+* Crear u obtener datos JSON (desde un archivo, una API o una cadena)
+* Instanciar JsonDataSource con los datos JSON
+* Crear un documento de plantilla con etiquetas de expresión que hagan referencia a propiedades JSON
+* Utilizar DocumentAssembler para ensamblar la plantilla con JsonDataSource
+* Guardar el documento ensamblado
+
+
+:::info
+`JsonDataSource` reconoce automáticamente los tipos JSON (números, booleanos, fechas y cadenas) y los pone a disposición con sus tipos adecuados en las plantillas, lo que permite realizar operaciones numéricas y dar formato a fechas.
+:::
+
+
+## Generar documento a partir de un archivo JSON {#generate-document-from-json-file}
+
+La forma más sencilla de utilizar datos JSON es desde un archivo:
+
+```csharp
+using GroupDocs.Assembly;
+using GroupDocs.Assembly.Data;
+
+public static void GenerateFromJsonFile()
+{
+    JsonDataSource jsonDataSource = new JsonDataSource("data.json");
+
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx",
+        new DataSourceInfo(jsonDataSource, "data"));
+}
+```
+
+## Generar documento a partir de una cadena JSON {#generate-document-from-json-string}
+
+También puede crear un `JsonDataSource` a partir de una cadena JSON:
+
+```csharp
+using GroupDocs.Assembly;
+using GroupDocs.Assembly.Data;
+
+public static void GenerateFromJsonString()
+{
+    string jsonString = @"{
+        ""name"": ""John Doe"",
+        ""age"": 30,
+        ""email"": ""john.doe@example.com"",
+        ""active"": true
+    }";
+    
+    JsonDataSource jsonDataSource = new JsonDataSource(jsonString);
+
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx",
+        new DataSourceInfo(jsonDataSource, "person"));
+}
+```
+
+## Trabajo con matrices JSON {#working-with-json-arrays}
+
+Cuando el elemento raíz de su JSON es una matriz, **JsonDataSource** la trata como una colección:
+
+```csharp
+using GroupDocs.Assembly;
+using GroupDocs.Assembly.Data;
+
+public static void GenerateFromJsonArray()
+{
+    string jsonArray = @"[
+        { ""name"": ""John"", ""age"": 30 },
+        { ""name"": ""Jane"", ""age"": 28 },
+        { ""name"": ""Bob"", ""age"": 35 }
+    ]";
+    
+    JsonDataSource jsonDataSource = new JsonDataSource(jsonArray);
+
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx",
+        new DataSourceInfo(jsonDataSource, "people"));
+}
+```
+
+## Ejemplo de plantilla para objeto JSON {#template-example-for-json-object}
+
+Para un objeto JSON como `{"name": "John", "age": 30}`, su plantilla puede hacer referencia directamente a sus propiedades:
+
+```
+Name: <<[data.name]>>
+Age: <<[data.age]>>
+```
+
+## Ejemplo de plantilla para una matriz JSON {#template-example-for-json-array}
+
+Para una matriz JSON, utilice una banda de datos `foreach` para iterar:
+
+```
+<<foreach [in people]>>
+Name: <<[name]>>, Age: <<[age]>>
+<</foreach>>
+```
+
+## Trabajo con objetos JSON anidados {#working-with-nested-json-objects}
+
+`JsonDataSource` maneja automáticamente estructuras JSON anidadas:
+
+```csharp
+using GroupDocs.Assembly;
+using GroupDocs.Assembly.Data;
+
+public static void GenerateFromNestedJson()
+{
+    string nestedJson = @"{
+        ""company"": ""ABC Corp"",
+        ""address"": {
+            ""street"": ""123 Main St"",
+            ""city"": ""New York"",
+            ""zip"": ""10001""
+        },
+        ""employees"": [
+            { ""name"": ""John"", ""position"": ""Developer"" },
+            { ""name"": ""Jane"", ""position"": ""Manager"" }
+        ]
+    }";
+    
+    JsonDataSource jsonDataSource = new JsonDataSource(nestedJson);
+
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx",
+        new DataSourceInfo(jsonDataSource, "company"));
+}
+```
+
+Plantilla para JSON anidado:
+
+```
+Company: <<[company.company]>>
+Address: <<[company.address.street]>>, <<[company.address.city]>> <<[company.address.zip]>>
+
+Employees:
+<<foreach [in company.employees]>>
+- <<[name]>>, <<[position]>>
+<</foreach>>
+```
+
+## Configurar opciones de carga de datos JSON {#configure-json-data-load-options}
+
+Puede configurar cómo JsonDataSource analiza el JSON:
+
+```csharp
+using GroupDocs.Assembly;
+using GroupDocs.Assembly.Data;
+
+public static void GenerateWithJsonOptions()
+{
+    JsonDataLoadOptions options = new JsonDataLoadOptions();
+    options.AlwaysGenerateRootObject = true; // Always create root object
+    options.SimpleValueParseMode = JsonSimpleValueParseMode.Strict; // Strict type parsing
+    
+    JsonDataSource jsonDataSource = new JsonDataSource("data.json", options);
+
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx",
+        new DataSourceInfo(jsonDataSource, "data"));
+}
+```
+
+
+:::warning
+De forma predeterminada, si un elemento JSON raíz es un objeto que solo tiene una propiedad, la cual es a su vez un objeto o un array, el motor omite el objeto raíz. Establezca `AlwaysGenerateRootObject` a `true` para incluirlo siempre.
+:::
+
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre el trabajo con estructuras JSON complejas, el análisis de fechas y horas, y las opciones avanzadas de JsonDataSource, consulte la [sección de uso avanzado](/net/assembly/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para .NET</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Java</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Python-via-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Python mediante .NET</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes.
+
+Para ensamblar documentos a partir de plantillas y fuentes de datos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/assembly" target="_blank">Conholdate.Assembly App</a>**.

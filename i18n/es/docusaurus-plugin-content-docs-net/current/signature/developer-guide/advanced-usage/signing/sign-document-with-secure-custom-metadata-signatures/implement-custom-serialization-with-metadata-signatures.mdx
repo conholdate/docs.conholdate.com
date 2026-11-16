@@ -1,0 +1,187 @@
+---
+title: "Implementar serialización personalizada con firmas de metadatos"
+sidebar_label: "Implementar serialización personalizada con firmas de metadatos"
+sidebar_key: "net-signature-signing-sign-document-with-secure-custom-metadata-signatures-implement-custom-serialization-with-metadata-signatures"
+sidebar_position: 2
+description: "Este artículo explica cómo implementar la serialización personalizada para las firmas electrónicas de metadatos."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/signing/sign-document-with-secure-custom-metadata-signatures/implement-custom-serialization-with-metadata-signatures.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "4caa6fa7eabbe3de6925c9b7ab20eae44cea8dce51fe4f1393517945f48251fc"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "adbfbf8772811c88a9b3f29a33241e3fb5d62a6c033023e7427f369aaafb9e25"
+translation_updated_at: "2026-11-16T13:31:57.482Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> permite incrustar objetos personalizados dentro de la firma de metadatos. Esta funcionalidad se implementa mediante serialización del objeto a una cadena y posterior cifrado. De forma predeterminada, la biblioteca utiliza la serialización en formato JSON y cifrado simétrico, pero permite proporcionar serialización y cifrado personalizados. La personalización de la serialización requiere la implementación de la interfaz <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/idataserializer" target="_blank" rel="nofollow noopener noreferrer">IDataSerializer</a> con dos métodos para serializar y deserializar los datos.
+
+A continuación se indican los pasos para incrustar un objeto personalizado en una firma de metadatos con GroupDocs.Signature:
+
+* Implemente, si es necesario, una clase de serialización de datos personalizada que implemente la interfaz <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/idataserializer" target="_blank" rel="nofollow noopener noreferrer">IDataSerializer</a>. De forma predeterminada, GroupDocs.Signature utiliza la serialización integrada en formato JSON, pero permite al usuario personalizarla.
+* Implemente, si es necesario, una clase de cifrado de datos personalizada que implemente la interfaz <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/idataencryption" target="_blank" rel="nofollow noopener noreferrer">IDataEncryption</a>. De forma predeterminada, GroupDocs.Signature incluye varias implementaciones de cifrado que puede utilizar, pero permite al usuario personalizarlas.
+* Defina una clase con propiedades y especifique atributos de clase (por ejemplo, atributo de serialización personalizado o atributo de cifrado personalizado), así como atributos para las propiedades, como <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/formatattribute" target="_blank" rel="nofollow noopener noreferrer">FormatAttribute</a> para especificar el nombre de serialización y el formato de visualización, y también el atributo <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/skipserializationattribute" target="_blank" rel="nofollow noopener noreferrer">SkipSerializationAttribute</a> para marcar una propiedad de la clase como no serializable.
+* Cree una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pase la ruta del documento de origen como parámetro en el constructor.
+* Cree uno o varios objetos del tipo <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/metadatasignature" target="_blank" rel="nofollow noopener noreferrer">MetadataSignature</a> con <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/metadatasignature/value" target="_blank" rel="nofollow noopener noreferrer">MetadataSignature.Value</a> como instancia del objeto. Configure la propiedad <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/metadatasignature/dataencryption" target="_blank" rel="nofollow noopener noreferrer">MetadataSignature.DataEncryption</a> o utilice la misma para <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasignoptions/dataencryption" target="_blank" rel="nofollow noopener noreferrer">MetadataSignOptions.DataEncryption</a> si todas las firmas deben estar cifradas.
+* Instancie el objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasignoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataSignOptions</a> según sus requisitos, agregue todas las firmas de metadatos a su colección y configure, si es necesario, la propiedad <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/metadatasignature/dataencryption" target="_blank" rel="nofollow noopener noreferrer">DataEncryption</a>.
+* Llame al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasignoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataSignOptions</a> como argumento.
+
+ Este ejemplo muestra cómo especificar una clase de serialización personalizada. Esta clase debe implementarse como un atributo y la interfaz <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/idataserializer" target="_blank" rel="nofollow noopener noreferrer">IDataSerializer</a>.
+
+```csharp
+public class CustomSerializationAttribute : Attribute, IDataSerializer
+{
+    public T Deserialize<T>(string source) where T : class
+    {
+        return JsonConvert.DeserializeObject<T>(source);
+    }
+    public string Serialize(object data)
+    {
+        var serializerSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
+        return JsonConvert.SerializeObject(data, serializerSettings);
+    }
+}
+```
+
+## Implementación de cifrado de datos personalizado {#implementation-of-custom-data-encryption}
+
+Este ejemplo muestra cómo especificar una clase de serialización personalizada. Esta clase también puede implementarse como un atributo (opcional) para especificarla como atributo de clase.
+
+```csharp
+// Define class that implements IDataEncryption interface
+private class CustomXOREncryption : IDataEncryption
+{
+    /// <summary>
+    /// Gets or sets non empty key for encryption (at least one character)
+    /// </summary>
+    public int Key { get; set; }
+    /// <summary>
+    /// Encode method to encrypt string.
+    /// </summary>
+    /// <param name="source">Source string to encode.</param>
+    /// <returns>Returns enccrypted string</returns>
+    public string Encode(string source)
+    {
+        return Process(source);
+    }
+    /// <summary>
+    /// Decode method to obtain decrypted string.
+    /// </summary>
+    /// <param name="source">Source string to decode.</param>
+    /// <returns>Returns decrypted string</returns>
+    public string Decode(string source)
+    {
+        return Process(source);
+    }
+    /// <summary>
+    /// Using XOR operation get encoded / decoded string
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    private string Process(string source)
+    {
+        StringBuilder src = new StringBuilder(source);
+        StringBuilder dst = new StringBuilder(src.Length);
+        char chTmp;
+        for (int index = 0; index < src.Length; ++index)
+        {
+            chTmp = src[index];
+            chTmp = (char)(chTmp ^ this.Key);
+            dst.Append(chTmp);
+        }
+        return dst.ToString();
+    }
+}
+```
+
+## Definición de la clase {#definition-of-class}
+
+Este ejemplo muestra cómo definir una clase personalizada con propiedades de serialización y cifrado, y cómo configurar los atributos de formato para las propiedades.
+
+```csharp
+// define class with custom serialization attribute
+[CustomSerialization]
+public class DocumentSignatureData
+{
+    [Format("SignID")]
+    public string ID { get; set; }
+    [Format("SAuth")]
+    public string Author { get; set; }
+    [Format("SDate", "yyyy-MM-dd")]
+    public DateTime Signed { get; set; }
+    [Format("SDFact", "N2")]
+    public decimal DataFactor { get; set; }
+    [SkipSerialization]
+    public string Comments { get; set; }
+}
+```
+
+## Implementación de incrustación de un objeto personalizado en la firma de Metadata {#implementation-of-embedding-custom-object-into-metadata-signature}
+
+Este ejemplo muestra cómo incrustar un objeto personalizado en la firma de Metadata.
+
+```csharp
+ using (Signature signature = new Signature("sample.docx"))
+ {
+     // create data encryption
+     IDataEncryption encryption = new CustomXOREncryption();
+     // setup options with text of signature
+     MetadataSignOptions options = new MetadataSignOptions()
+     {
+         // set encryption for all metadata signatures for this options
+         // if you need separate encryption use own MetadataSignature.DataEncryption property
+         DataEncryption = encryption
+     };
+     // create custom object
+     DocumentSignatureData documentSignatureData = new DocumentSignatureData()
+     {
+         ID = Guid.NewGuid().ToString(),
+         Author = Environment.UserName,
+         Signed = DateTime.Now,
+         DataFactor = 11.22M
+     };
+     // setup signature metadata
+     WordProcessingMetadataSignature mdSignature = new WordProcessingMetadataSignature("Signature", documentSignatureData);
+     // setup signature metadata
+     WordProcessingMetadataSignature mdAuthor = new WordProcessingMetadataSignature("Author", "Mr.Scherlock Holmes");
+     // setup data of document id
+     WordProcessingMetadataSignature mdDocId = new WordProcessingMetadataSignature("DocumentId", Guid.NewGuid().ToString());
+     // add signatures to options
+     options.Signatures.Add(mdSignature);
+     options.Signatures.Add(mdAuthor);
+     options.Signatures.Add(mdDocId);
+     // sign document to file
+     signature.Sign("MetadataCustomSerializationObject.docx", options);
+ }
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario MVC para la firma de documentos con .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario WebForms para la firma de documentos con .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Dropwizard para la firma de documentos con Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Spring para la firma de documentos con Java</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

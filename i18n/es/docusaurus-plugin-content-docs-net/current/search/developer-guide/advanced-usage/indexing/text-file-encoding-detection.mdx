@@ -1,0 +1,102 @@
+---
+title: "Detección de codificación de archivos de texto"
+sidebar_label: "Detección de codificación de archivos de texto"
+sidebar_position: 21
+description: "Este artículo explica cómo detectar automáticamente la codificación de un archivo de texto."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/indexing/text-file-encoding-detection.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "0fca5970ec42bee472488f94960b08facb794e83d1528f36eb2d83178e41d223"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "634aa649900b95f43e90bec56183403951c80e9b71830cc12652773bbc06c051"
+translation_updated_at: "2026-11-16T11:19:19.468Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Para detectar automáticamente la codificación de un archivo de texto, se puede utilizar la propiedad <a href="https://reference.groupdocs.com/net/search/groupdocs.search/indexsettings/properties/autodetectencoding" target="_blank" rel="nofollow noopener noreferrer">AutoDetectEncoding</a> definida en la clase <a href="https://reference.groupdocs.com/search/net/groupdocs.search.options/indexingoptions/" target="_blank" rel="nofollow noopener noreferrer">IndexingOptions</a>. Al establecer esta propiedad en `true`, se permite detectar las siguientes codificaciones:
+
+*   UTF-32 LE,
+*   UTF-32 BE,
+*   UTF-16 LE,
+*   UTF-16 BE,
+*   UTF-8,
+*   UTF-7,
+
+De forma predeterminada, la detección automática de codificación de archivos de texto está deshabilitada. Sin embargo, en cualquier caso, la codificación de un archivo de texto puede establecerse durante la indexación cuando se genera el evento <a href="https://reference.groupdocs.com/net/search/groupdocs.search.events/eventhub/events/fileindexing" target="_blank" rel="nofollow noopener noreferrer">FileIndexing</a>. Si la codificación de un archivo de texto no se detecta ni se especifica en los argumentos del evento, se utiliza la codificación predeterminada, UTF-8. Las codificaciones disponibles se presentan en la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search.common/encodings" target="_blank" rel="nofollow noopener noreferrer">Encodings</a>. Cuando se detecta y utiliza la codificación de un archivo de texto para la indexación, esta se guarda en el índice para su uso en métodos de la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index" target="_blank" rel="nofollow noopener noreferrer">Index</a>, como <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index/methods/highlight/index" target="_blank" rel="nofollow noopener noreferrer">Highlight</a> y <a href="https://reference.groupdocs.com/net/search/groupdocs.search/index/methods/getdocumenttext/index" target="_blank" rel="nofollow noopener noreferrer">GetDocumentText</a>.
+
+El ejemplo siguiente muestra cómo establecer la codificación de un archivo de texto durante la indexación.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index
+Index index = new Index(indexFolder);
+ 
+// Subscribing to the event
+index.Events.FileIndexing += (sender, args) =>
+{
+    if (args.DocumentFullPath.EndsWith(".txt", StringComparison.InvariantCultureIgnoreCase))
+    {
+        args.Encoding = Encodings.Windows_1253; // Setting encoding for each text file
+    }
+};
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+```
+
+Se pueden utilizar herramientas externas, como Utf.Unknown, para determinar la codificación de un archivo de texto durante la indexación.
+Se puede detectar cualquier codificación, incluida ANSI.
+
+```
+PM> NuGet\Install-Package UTF.Unknown
+```
+
+A continuación se muestra un ejemplo de cómo utilizar una biblioteca externa para determinar la codificación de un archivo de texto.
+
+**C#**
+
+```csharp
+index.Events.FileIndexing += (sender, args) =>
+{
+    byte[] data = File.ReadAllBytes(args.DocumentFullPath);
+    UtfUnknown.DetectionResult result = UtfUnknown.CharsetDetector.DetectFromBytes(data);
+    if (result.Detected != null)
+    {
+        Console.WriteLine("Encoding detected: " + result.Detected.EncodingName);
+        args.Encoding = result.Detected.EncodingName;
+    }
+};
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le invitamos a buscar en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita de búsqueda de documentos en línea</a>.

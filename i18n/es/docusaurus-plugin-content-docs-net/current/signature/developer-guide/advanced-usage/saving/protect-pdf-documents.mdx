@@ -1,0 +1,119 @@
+---
+title: "Cómo proteger un documento PDF firmado"
+sidebar_label: "Cómo proteger un documento PDF firmado"
+sidebar_key: "net-signature-saving-protect-pdf-documents"
+sidebar_position: 3
+description: "Este artículo explica cómo proteger un documento PDF firmado."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/saving/protect-pdf-documents.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "50b2e232c7be2444b3b2324b7ed4fcf9e284761ae1a904bbb70616ad134d13d7"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "3f9274606206d786a9a0b163b488d233082d08e65dfcd6ce15c8ac53a7b4bb5b"
+translation_updated_at: "2026-11-16T15:16:34.532Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+### Cómo proteger un documento PDF con permisos {#how-to-secure-pdf-document-with-permissions}
+
+La clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> admite el guardado de documentos firmados con configuraciones de permisos y protección por contraseña para acceso y modificación. Esta funcionalidad se logra mediante las propiedades <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/pdfsaveoptions/permissionspassword/" target="_blank" rel="nofollow noopener noreferrer">PermissionsPassword</a> y <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/pdfsaveoptions/permissions/" target="_blank" rel="nofollow noopener noreferrer">Permissions</a> de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/pdfsaveoptions/" target="_blank" rel="nofollow noopener noreferrer">PdfSaveOptions</a>, las cuales deben pasarse al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a>.
+
+Puede proteger un documento PDF configurando los siguientes parámetros:
+* Cree una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pase la ruta o el flujo del documento de origen como parámetro del constructor.
+* Instancie las opciones de firma requeridas.
+* Instancie el objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/pdfsaveoptions" target="_blank" rel="nofollow noopener noreferrer">PdfSaveOptions</a> y especifique la propiedad <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/pdfsaveoptions/permissionspassword" target="_blank" rel="nofollow noopener noreferrer">PermissionsPassword</a> (opcional). Configure <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/pdfsaveoptions/permissions/property" target="_blank" rel="nofollow noopener noreferrer">Permissions</a> para controlar las acciones del usuario (por ejemplo, denegar la impresión o la modificación).
+* Llame al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pase las opciones de firma y el objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/pdfsaveoptions" target="_blank" rel="nofollow noopener noreferrer">PdfSaveOptions</a> a este.
+
+El siguiente ejemplo demuestra cómo guardar un documento firmado con permisos.
+
+```csharp
+// Using the Signature class to create a signature for the specified PDF document
+using (Signature signature = new Signature("sample.pdf"))
+{
+    TextSignOptions textSignOptions = new TextSignOptions("JohnSmith")
+    {
+        Left = 0,
+        Top = 100,
+        Width = 100,
+        Height = 100,
+        AllPages = true,
+        ForeColor = Color.Black
+    };
+
+    // Create a new PdfSaveOptions object to configure the PDF save settings
+    PdfSaveOptions saveOptions = new PdfSaveOptions();
+    saveOptions.OverwriteExistingFiles = false;
+    // Set permissions to deny printing and modification
+    saveOptions.Permissions = Permissions.DenyPrinting | Permissions.DenyModification;
+    // Set a password for modifying permissions(optional)
+    saveOptions.PermissionsPassword = "0987654321";
+    // Sign the document and save the result to a new file
+    signature.Sign("result.pdf", textSignOptions, saveOptions);
+}
+```
+
+### Cómo cargar un documento PDF con permisos {#how-to-load-pdf-document-with-permissions}
+
+La clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> admite la carga de documentos con permisos específicos que se conservan tras la firma. Esta funcionalidad se gestiona mediante la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">LoadOptions</a>, donde la propiedad <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/loadoptions/permissions/" target="_blank" rel="nofollow noopener noreferrer">Permissions</a> se establece al cargar el documento. Estos permisos permanecen aplicados en el documento firmado, garantizando restricciones coherentes desde la carga hasta la salida final guardada, cuando se pasa al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a>.
+
+Para cargar un documento PDF con permisos y asegurar que dichos permisos se conserven durante todo el proceso de firma, siga estos pasos:
+* Cree una nueva instancia de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">LoadOptions</a>, configurando la propiedad <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/pdfsaveoptions/permissions/" target="_blank" rel="nofollow noopener noreferrer">Permissions</a> para establecer restricciones (por ejemplo, denegar impresión, modificación o extracción de datos).
+* Utilice esta instancia de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">LoadOptions</a> para inicializar la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> con la ruta del documento o el flujo.
+* Instancie las opciones de firma requeridas (por ejemplo, <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/textsignoptions/" target="_blank" rel="nofollow noopener noreferrer">TextSignOptions</a>) para configurar la posición y la apariencia de la firma.
+* Llame al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a>, pasando las opciones de firma. El documento conservará los permisos especificados en <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">LoadOptions</a>, garantizando que cualquier restricción aplicada durante la carga se conserve en el documento firmado.
+
+El siguiente ejemplo demuestra cómo cargar un documento PDF con permisos. 
+
+```csharp
+// Set up load options with specific permissions, denying all actions (printing, modification, extraction)
+LoadOptions loadOptions = new LoadOptions()
+{
+    Permissions = Permissions.DenyAll
+};
+
+// Using the Signature class to create a signature for the specified PDF document
+using (Signature signature = new Signature("sample.pdf", loadOptions))
+{
+    TextSignOptions textSignOptions = new TextSignOptions("JohnSmith")
+    {
+        Left = 0,
+        Top = 100,
+        Width = 100,
+        Height = 100
+    };
+    
+    signature.Sign("result.pdf", textSignOptions);
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI MVC para Firma de Documentos en .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI WebForms para Firma de Documentos en .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI Dropwizard para Firma de Documentos en Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de UI Spring para Firma de Documentos en Java</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Junto con la biblioteca completa para .NET, proporcionamos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

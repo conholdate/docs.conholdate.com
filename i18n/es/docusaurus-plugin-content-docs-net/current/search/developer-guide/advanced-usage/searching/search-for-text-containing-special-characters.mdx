@@ -1,0 +1,119 @@
+---
+title: "Buscar texto que contenga caracteres especiales"
+sidebar_label: "Buscar texto que contenga caracteres especiales"
+sidebar_position: 20.5
+description: "Este artículo muestra cómo manejar consultas de búsqueda si contienen caracteres especiales y caracteres separadores."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/searching/search-for-text-containing-special-characters.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "e03e2a8f6598399a02640c287719b9f2faba23244ad3a2059d461dfbdec2072f"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "c7089ee4e32ca1b1e82f0385e381aab3ab25c070616ca997a95ceb1aa6e46c9f"
+translation_updated_at: "2026-11-16T11:56:11.386Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+En el caso de que la consulta de búsqueda deba contener caracteres especiales que no sean caracteres de control, dichos caracteres deben ser escapados.
+Los caracteres especiales son:
+<pre>
+( ) : " & | ! ^ ~ * ? \ <i>espacio</i>
+</pre>
+Estos caracteres pueden ser escapados añadiendo un signo \\ a la izquierda del carácter. Por ejemplo:  
+\\& — escape del carácter &;  
+\\~ — escape del carácter ~;  
+\\s — escape del carácter espacio.  
+Consulte la [tabla de operaciones de búsqueda](/net/search/developer-guide/advanced-usage/searching/search-operation-table/) para obtener detalles sobre la sintaxis de la consulta de búsqueda.
+
+Sin embargo, debe tenerse en cuenta que si el carácter escapado es un separador, este no se encontrará en el texto, ya que no está indexado. Como consecuencia, las palabras que contengan dichos caracteres tampoco se encontrarán al realizar una búsqueda de coincidencia exacta.
+
+Si la consulta de búsqueda contiene caracteres separadores, las palabras que contengan dichos caracteres no se encontrarán. En efecto, al indexar, estos caracteres dividen la palabra en partes, y ellos mismos se eliminan y no se indexan.
+Por lo tanto, al realizar una búsqueda, la consulta debe verificarse para detectar la presencia de caracteres separadores. Cada palabra que contenga dichos caracteres debe dividirse en varias palabras más pequeñas y formar una frase de búsqueda.
+
+El orden de procesamiento de cada palabra en una consulta de búsqueda es el siguiente:
+1. Si hay separadores en la palabra, estos se sustituyen por espacios y la búsqueda de la palabra se convierte en una búsqueda de frase.
+2. Si hay caracteres especiales en la palabra, estos se escapan.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+
+// Setting character types
+index.Dictionaries.Alphabet.SetRange(new char[] { '&' }, CharacterType.Letter);
+index.Dictionaries.Alphabet.SetRange(new char[] { '-' }, CharacterType.Separator);
+
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+
+// Defining a search query
+string word = "rock&roll-music";
+
+// Replacing separators with the space characters
+StringBuilder result = new StringBuilder();
+for (int i = 0; i < word.Length; i++)
+{
+    char character = word[i];
+    CharacterType characterType = index.Dictionaries.Alphabet.GetCharacterType(character);
+    if (characterType == CharacterType.Separator)
+    {
+        result.Append(' ');
+    }
+    else
+    {
+        result.Append(character);
+    }
+}
+
+// Escaping special characters
+const string specialCharacters = "():\"&|!^~*?\\";
+for (int i = result.Length - 1; i >= 0; i--)
+{
+    char c = result[i];
+    if (specialCharacters.Contains(c.ToString()))
+    {
+        result.Insert(i, '\\');
+    }
+}
+
+string query = result.ToString();
+if (query.Contains(" "))
+{
+    query = "\"" + query + "\"";
+}
+
+// Searching
+SearchResult searchResult = index.Search(query);
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Junto con la completa biblioteca de .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le invitamos a buscar en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita de búsqueda de documentos en línea</a>.

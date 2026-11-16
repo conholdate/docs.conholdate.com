@@ -1,0 +1,115 @@
+---
+title: "Firma electrónica PDF con firma de metadatos"
+sidebar_label: "Firma electrónica PDF"
+sidebar_position: 2
+description: "Este artículo explica cómo agregar firmas de metadatos a la capa de información de metadatos de documentos PDF con GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/basic-usage/electronic-signature-types/esign-document-with-metadata-signature/esign-pdf-with-metadata-signature.md"
+source_commit: "0c3c217010a3d6a2e7ef62d7ad8ef26f94d99418"
+source_sha256: "8e04f468d2cdd78391c91c3b33946d904650e205bc050760034480c148eef33a"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "14c0bba7cbc5e6cdd39101afd96bf262e83cd81fc55408a93cb8a335bbdfc3c0"
+translation_updated_at: "2026-11-16T14:11:38.110Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## Resumen {#overview}
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> proporciona <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/pdfmetadatasignature" target="_blank" rel="nofollow noopener noreferrer">PdfMetadataSignature</a> clase para especificar diferentes objetos de firma de metadatos para <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasignoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataSignOptions</a> instancia.
+Los metadatos de un documento PDF son atributos ocultos, algunos de los cuales solo son visibles al ver las propiedades estándar del documento, como Autor, Fecha de creación, Productor, Entrada, Palabras clave, etc.  
+Los metadatos del documento PDF contienen 3 campos: **Name**, **Value** y **TagPrefix**; la combinación de **Name** y **TagPrefix** debe ser única.
+
+Los metadatos de un documento PDF podrían contener una gran cantidad de datos, lo que permite almacenar objetos personalizados serializados con cifrado adicional. Consulte [Ejemplos avanzados sobre cómo incrustar datos seguros](/net/signature/developer-guide/advanced-usage/signing/sign-document-with-secure-custom-metadata-signatures/).
+
+### Aquí están los pasos para agregar firmas de metadatos en un documento PDF con GroupDocs.Signature: {#here-are-the-steps-to-add-metadata-signatures-into-pdf-document-with-groupdocs-signature}
+
+* Crear nueva instancia de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase y pasar la ruta del documento de origen como parámetro del constructor.
+* Instanciar el <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasignoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataSignOptions</a> objeto según sus requisitos.
+* Instanciar uno o varios<a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/pdfmetadatasignature" target="_blank" rel="nofollow noopener noreferrer">PdfMetadataSignature</a> objetos y agregarlos a <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasignoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataSignOptions</a> a la colección de firmas de metadatos (<a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasignoptions/signatures" target="_blank" rel="nofollow noopener noreferrer">Signatures</a>) vía <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/metadatasignaturecollection/add" target="_blank" rel="nofollow noopener noreferrer">Add</a> o <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/metadatasignaturecollection/addrange" target="_blank" rel="nofollow noopener noreferrer">AddRange</a> método.
+* Llamada <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> método de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase, instancia y `pass` <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/metadatasignoptions" target="_blank" rel="nofollow noopener noreferrer">MetadataSignOptions</a> a él.
+
+## Cómo firmar electrónicamente un PDF con una firma de metadatos {#how-to-electronic-signature-pdf-with-metadata-signature}
+
+Este ejemplo muestra cómo firmar un documento PDF con varias firmas electrónicas como metadatos.
+
+```csharp
+using (Signature signature = new Signature("sample.pdf"))
+{
+    MetadataSignOptions options = new MetadataSignOptions();
+
+    options
+       .Add(new PdfMetadataSignature("Author", "Mr.Scherlock Holmes")) // String value
+       .Add(new PdfMetadataSignature("CreatedOn", DateTime.Now))       // DateTime values
+       .Add(new PdfMetadataSignature("DocumentId", 123456))            // Integer value
+       .Add(new PdfMetadataSignature("SignatureId", 123.456D))         // Double value
+       .Add(new PdfMetadataSignature("Amount", 123.456M))              // Decimal value
+       .Add(new PdfMetadataSignature("Total", 123.456F));              // Float value
+    // add these signatures to options
+    options.Signatures.AddRange(signatures);
+    signature.Sign("SampleSigned.pdf", options);
+}
+```
+
+## Cómo firmar electrónicamente un PDF con firmas de metadatos estándar {#how-to-electronic-signature-pdf-with-standard-metadata-signatures}
+
+Este ejemplo muestra cómo firmar un documento PDF mediante firmas de metadatos PDF integradas estándar. Si ya existe una firma de metadatos PDF con el mismo nombre, su valor se sobrescribirá.
+
+```csharp
+using (Signature signature = new Signature("sample.pdf"))
+{
+    MetadataSignOptions options = new MetadataSignOptions();
+    // Using standard Pdf Metadata Signatures with new values
+    MetadataSignature[] signatures = new MetadataSignature[]
+    {
+        PdfMetadataSignatures.Author.Clone("Mr.Scherlock Holmes"),
+        PdfMetadataSignatures.CreateDate.Clone(DateTime.Now.AddDays(-1)),
+        PdfMetadataSignatures.MetadataDate.Clone(DateTime.Now.AddDays(-2)),
+        PdfMetadataSignatures.CreatorTool.Clone("GD.Signature-Test"),
+        PdfMetadataSignatures.ModifyDate.Clone(DateTime.Now.AddDays(-13)),
+        PdfMetadataSignatures.Producer.Clone("GroupDocs-Producer"),
+        PdfMetadataSignatures.Entry.Clone("Signature"),
+        PdfMetadataSignatures.Keywords.Clone("GroupDocs, Signature, Metadata, Creation Tool"),
+        PdfMetadataSignatures.Title.Clone("Metadata Example"),
+        PdfMetadataSignatures.Subject.Clone("Metadata Test Example"),
+        PdfMetadataSignatures.Description.Clone("Metadata Test example description"),
+        PdfMetadataSignatures.Creator.Clone("GroupDocs.Signature"),
+    };
+    options.Signatures.AddRange(signatures);
+    // sign document to file
+    signature.Sign("sample_signed.pdf", options);
+}
+```
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre las funciones de firma electrónica de documentos, consulte la [sección de uso avanzado](/net/signature/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario MVC para .NET de Document Signature</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario WebForms para .NET de Document Signature</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Dropwizard para Java de Document Signature</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de interfaz de usuario Spring para Java de Document Signature</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas en línea simples pero potentes.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

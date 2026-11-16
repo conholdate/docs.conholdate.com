@@ -1,0 +1,191 @@
+---
+title: "Cargar documentos de plantilla desde archivo o flujo"
+sidebar_label: "Cargar documentos de plantilla desde archivo o flujo"
+sidebar_key: "net-assembly-load-template-from-file-or-stream"
+sidebar_position: 3
+description: "Aprende cómo cargar documentos de plantilla desde rutas de archivo y flujos para la generación de documentos en aplicaciones .NET."
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/load-template-from-file-or-stream.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "deb269aad95b2ede59353e613dc81a9ec7c425f954ffeb54c63fc9e0e9c5e670"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "f487ffec5589f87ae05a029b6a7b6ffe7fd05e9b5748eea36715bbfa0b205241"
+translation_updated_at: "2026-11-16T13:58:26.559Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Vista general {#overview}
+
+GroupDocs.Assembly para .NET permite cargar documentos plantilla tanto desde rutas de archivo como desde flujos (streams). Esta flexibilidad le permite trabajar con plantillas almacenadas en disco, en memoria o recuperadas desde fuentes remotas.
+
+La clase principal implicada es:
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/documentassembler/" target="_blank" rel="nofollow noopener noreferrer">DocumentAssembler</a> – proporciona sobrecargas tanto para rutas de archivo como para flujos (streams)
+
+A continuación se presentan los pasos para cargar y utilizar plantillas:
+
+* Cargar plantilla desde una ruta de archivo utilizando un parámetro de tipo cadena (path)
+* Cargar plantilla desde un flujo (stream) utilizando un parámetro de tipo Stream
+* Elegir el método adecuado según su caso de uso (sistema de archivos frente a memoria/remote)
+* Guardar el documento ensamblado en una ruta de archivo o en un flujo (stream), según corresponda
+
+
+:::info
+Al utilizar flujos (streams), asegúrese de liberar adecuadamente los recursos del flujo. El DocumentAssembler no libera automáticamente los flujos de entrada, por lo que usted debe gestionar usted mismo el ciclo de vida del flujo.
+:::
+
+
+## Cargar plantilla desde una ruta de archivo {#load-template-from-file-path}
+
+La forma más sencilla de cargar una plantilla es desde una ruta de archivo:
+
+```csharp
+using GroupDocs.Assembly;
+
+public static void LoadTemplateFromFile()
+{
+    // Template and output file paths
+    string templatePath = @"C:\Templates\InvoiceTemplate.docx";
+    string outputPath = @"C:\Output\Invoice.docx";
+    
+    // Sample data
+    var invoiceData = new { CustomerName = "ABC Corp", Amount = 1500.00 };
+    
+    // Assemble document from file path
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument(templatePath, outputPath, 
+        new DataSourceInfo(invoiceData, "invoice"));
+    
+    Console.WriteLine("Document assembled successfully.");
+}
+```
+
+## Cargar plantilla desde un flujo {#load-template-from-stream}
+
+Al trabajar con plantillas en memoria o desde fuentes remotas, utilice flujos:
+
+```csharp
+using GroupDocs.Assembly;
+using System.IO;
+
+public static void LoadTemplateFromStream()
+{
+    // Load template into memory stream
+    byte[] templateBytes = File.ReadAllBytes("Template.docx");
+    using (MemoryStream templateStream = new MemoryStream(templateBytes))
+    {
+        // Create output stream
+        using (FileStream outputStream = new FileStream("Output.docx", FileMode.Create))
+        {
+            var data = new { Title = "Report", Date = DateTime.Now };
+            
+            DocumentAssembler assembler = new DocumentAssembler();
+            assembler.AssembleDocument(templateStream, outputStream, 
+                new DataSourceInfo(data, "report"));
+            
+            Console.WriteLine("Document assembled from stream successfully.");
+        }
+    }
+}
+```
+
+## Cargar plantilla desde una fuente remota {#load-template-from-remote-source}
+
+Puede cargar plantillas desde URLs u otras fuentes remotas:
+
+```csharp
+using GroupDocs.Assembly;
+using System.IO;
+using System.Net.Http;
+
+public static async void LoadTemplateFromRemote()
+{
+    // Download template from remote URL
+    using (HttpClient client = new HttpClient())
+    {
+        byte[] templateBytes = await client.GetByteArrayAsync(
+            "https://example.com/templates/ReportTemplate.docx");
+        
+        using (MemoryStream templateStream = new MemoryStream(templateBytes))
+        using (FileStream outputStream = new FileStream("Output.docx", FileMode.Create))
+        {
+            var data = new { Company = "My Company", Year = 2024 };
+            
+            DocumentAssembler assembler = new DocumentAssembler();
+            assembler.AssembleDocument(templateStream, outputStream, 
+                new DataSourceInfo(data, "company"));
+            
+            Console.WriteLine("Document assembled from remote template.");
+        }
+    }
+}
+```
+
+## Uso combinado de rutas de archivos y flujos {#mixed-file-path-and-stream-usage}
+
+Puedes combinar rutas de archivos y flujos según sea necesario:
+
+```csharp
+using GroupDocs.Assembly;
+using System.IO;
+
+public static void MixedFileAndStream()
+{
+    // Load template from file path
+    string templatePath = "Template.docx";
+    
+    // Save output to stream
+    using (MemoryStream outputStream = new MemoryStream())
+    {
+        var data = new { Name = "Test", Value = 100 };
+        
+        DocumentAssembler assembler = new DocumentAssembler();
+        assembler.AssembleDocument(templatePath, outputStream, 
+            new DataSourceInfo(data, "item"));
+        
+        // Use the output stream (e.g., send via HTTP, save to database)
+        byte[] outputBytes = outputStream.ToArray();
+        File.WriteAllBytes("Output.docx", outputBytes);
+        
+        Console.WriteLine("Document assembled with mixed file/stream usage.");
+    }
+}
+```
+
+
+:::warning
+Al utilizar flujos para la salida, la posición del flujo se restablece tras el ensamblaje. Asegúrese de leer desde el flujo una vez que el ensamblaje haya finalizado y maneje adecuadamente la posición del flujo.
+:::
+
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre el trabajo con distintos formatos de plantillas, la carga personalizada de documentos y el manejo avanzado de flujos, consulte la [sección de uso avanzado](/net/assembly/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para .NET</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Java</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Python-via-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Python mediante .NET</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes.
+
+Para ensamblar documentos a partir de plantillas y fuentes de datos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/assembly" target="_blank">Conholdate.Assembly App</a>**.

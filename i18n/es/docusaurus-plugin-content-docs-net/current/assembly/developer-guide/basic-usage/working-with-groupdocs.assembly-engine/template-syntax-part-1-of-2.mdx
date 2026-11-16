@@ -1,0 +1,581 @@
+---
+title: "Sintaxis de plantillas – Parte 1 de 2"
+sidebar_label: "Sintaxis de plantillas – Parte 1 de 2"
+sidebar_key: "net-assembly-working-with-groupdocs-assembly-engine-template-syntax-part-1-of-2"
+sidebar_position: 1
+description: ""
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/working-with-groupdocs.assembly-engine/template-syntax-part-1-of-2.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "23170abb758fc267247cb4b4a3c31fd33b501e3a0e3793e4875f4bab6c6bcf00"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "169c64e988ebcf2b2290f44a732167f0a85fa5ac198deeaad65c2acda831f316"
+translation_updated_at: "2026-11-16T14:18:48.432Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+:::info
+Este artículo es la primera parte de la serie de artículos sobre Sintaxis de Plantillas. Para la segunda parte, visite Sintaxis de Plantillas – Parte 2 de 2.
+:::
+
+
+## Composición de plantilla {#composing-template}
+
+Una plantilla típica para el motor GroupDocs.Assembly se compone de contenido de documento común y etiquetas que describen la estructura de la plantilla y los enlaces de datos. Puede formar estas etiquetas utilizando únicamente texto corrido que pueda ocupar varios párrafos para ser más descriptivo.
+
+El cuerpo de una etiqueta debe cumplir los siguientes requisitos:
+
+*   El cuerpo de una etiqueta debe estar rodeado por las secuencias de caracteres "`<<`" y "`>>`".
+*   El cuerpo de una etiqueta debe contener únicamente nodos de texto.
+*   El cuerpo de una etiqueta no debe ubicarse dentro de nodos de marcado del documento.
+
+El cuerpo de una etiqueta normalmente consta de los siguientes elementos:
+
+*   Un nombre de etiqueta
+*   Una expresión rodeada por corchetes
+*   Un conjunto de conmutadores disponibles para la etiqueta, cada uno precedido por el carácter "`-`"
+
+```csharp
+<<tag_name [expression] -switch1 -switch2 ...>>
+```
+
+Se puede escribir un comentario opcional para proporcionar una explicación legible para humanos.
+
+```csharp
+<<tag_name [expression] -switch1 -switch2 ... // optional_comment >>
+```
+
+
+:::warning
+La función opcional de comentarios es compatible con la versión 19.1 o superior
+:::
+
+
+Algunas etiquetas particulares pueden tener elementos adicionales. Algunas etiquetas requieren etiquetas de cierre correspondientes. Una etiqueta de cierre tiene el carácter ``/`` que la precede. El nombre de esta etiqueta debe coincidir con el nombre de la etiqueta de apertura correspondiente.
+
+```csharp
+<</tag_name>>
+```
+
+**Nota:** Los elementos del cuerpo de la etiqueta distinguen mayúsculas de minúsculas.
+
+## Composición de expresiones {#composing-expressions}
+
+### Uso de tokens léxicos {#using-lexical-tokens}
+
+La siguiente tabla describe los tokens léxicos que puede utilizar en expresiones y restricciones de plantillas, así como las restricciones aplicables a su uso en comparación con <a href="http://www.microsoft.com/en-us/download/details.aspx?id=7029" target="_blank" rel="nofollow noopener noreferrer">Especificación del lenguaje C# 5.0</a>.
+
+| Token | Restricciones |
+| --- | --- |
+| **Palabra clave** | Solo los siguientes tokens están reservados como palabras clave: `true`, `false`, `null`, `new` y `in` |
+| **Identificador** | No se admite la funcionalidad de escape de palabras clave mediante el carácter "@". Tampoco se permiten escapes de caracteres Unicode en identificadores. |
+| **Literal** | Ninguna |
+| **Operador** | Véase <a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-1-of-2/" target="_blank" rel="nofollow noopener noreferrer">Uso de operadores</a> |
+
+Puede utilizar los siguientes identificadores en expresiones de plantilla, siempre que no estén precedidos por un operador de acceso a miembro:
+
+*   El nombre de un objeto de origen de datos pasado
+*   El nombre de una variable de iteración dentro de su ámbito (consulte <a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-2-of-2/#outputting-sequential-data" target="_blank" rel="nofollow noopener noreferrer">Salida de datos secuenciales</a> para obtener más información)
+*   El nombre de un parámetro de función lambda dentro del ámbito de dicha función lambda
+*   Un nombre totalmente o parcialmente calificado de un tipo conocido por el motor (consulte <a href="https://docs.groupdocs.com/assembly/net/groupdocs-assembly-engine-apis/#setting-up-known-external-types" target="_blank" rel="nofollow noopener noreferrer">Configuración de tipos externos conocidos</a> para obtener más información)
+*   El nombre de un miembro de un objeto determinado de la siguiente manera:
+    *   Inside a data band body, the object is resolved to the innermost iteration variable.
+    *   Outside a data band body, the object is resolved to a passed data source.
+
+La funcionalidad de omitir el identificador de un objeto al acceder a sus miembros también se conoce como acceso contextual a miembros de objetos. Consulte <a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-1-of-2/" target="_blank" rel="nofollow noopener noreferrer">Uso del acceso contextual a miembros de objetos</a> para obtener más información.
+
+### Uso de tipos {#using-types}
+
+El motor GroupDocs.Assembly le permite utilizar tipos externos visibles en expresiones de plantilla. Un `visible type` es un tipo público cuyos tipos externos (si los hay) también son públicos. Puede utilizar un objeto de origen de datos de cualquier tipo visible para pasarlo al motor.
+
+Sin embargo, solo puede utilizar el identificador de un tipo visible en expresiones de plantilla si se cumplen los requisitos adicionales siguientes:
+
+*   El tipo no es `void`.
+*   El tipo no representa una matriz.
+*   El tipo no es un tipo genérico abierto ni cerrado.
+
+**Nota:** Si bien está prohibido utilizar identificadores de tipos genéricos en expresiones de plantilla, sí puede utilizar identificadores de tipos anulables en la forma abreviada `"T?"`.
+
+Asimismo, el motor le permite utilizar tipos anónimos en expresiones de plantilla. Dichos tipos resultan útiles al componer expresiones con agrupación por múltiples claves. Consulte <a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-2-of-2/#enumeration-extension-methods" target="_blank" rel="nofollow noopener noreferrer">Métodos de extensión de enumeración</a> para ver ejemplos.
+
+#### Miembros de tipo {#type-members}
+
+El motor GroupDocs.Assembly le permite acceder a los siguientes miembros públicos (estáticos e instancias) de tipos accesibles en expresiones de plantilla:
+
+*   Campos
+*   Propiedades
+*   Accesos `get` de indexadores
+*   Métodos
+*   Constructores
+
+Sin embargo, solo puede utilizar un miembro funcional en expresiones de plantilla si se cumplen los requisitos adicionales siguientes:
+
+*   El miembro funcional devuelve un valor.
+*   El miembro funcional no tiene parámetros `ref` ni `out`.
+*   El miembro funcional no acepta argumentos de tipo genérico.
+
+El motor admite las siguientes funcionalidades al trabajar con miembros funcionales:
+
+*   Resolución de sobrecargas según <a href="http://www.microsoft.com/en-us/download/details.aspx?id=7029" target="_blank" rel="nofollow noopener noreferrer">Especificación del lenguaje C# 5.0</a>
+*   Uso de valores predeterminados de parámetros sin admitir parámetros con nombre
+*   Uso de parámetros que aceptan un número variable de argumentos
+
+### Uso de métodos de extensión {#using-extension-methods}
+
+El motor GroupDocs.Assembly le permite utilizar los siguientes métodos de extensión integrados en expresiones de plantilla:
+
+*   Métodos de extensión que imitan los de `IEnumerable<T>` (consulte <a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-2-of-2/#enumeration-extension-methods" target="_blank" rel="nofollow noopener noreferrer">Métodos de extensión de enumeración</a> para obtener más información)
+*   Métodos de extensión para variables de iteración (consulte <a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-2-of-2/#extension-methods-of-iteration-variables" target="_blank" rel="nofollow noopener noreferrer">Métodos de extensión de variables de iteración</a> para obtener más información)
+
+**Nota:** Los métodos de extensión distintos de los integrados solo pueden utilizarse en expresiones de plantilla en forma de métodos estáticos simples.
+
+### Uso de operadores {#using-operators}
+
+La siguiente lista contiene los operadores predefinidos y definidos por el usuario que Document Assembler le permite utilizar en expresiones de plantilla.
+
+*   **Primarios:**
+  
+    ```csharp
+    x.y f(x) a[x] new x?.y a?[x]  
+    ```
+    
+*   **Unario:**
+  
+    ```csharp
+    - ! ~ (T)x
+    ```
+    
+*   **Binario:**
+  
+    ```csharp
+    * / % + - << >> < > <= >= == != & ^ | && || ??
+    ```
+    
+*   **Ternario:**
+  
+    ```csharp
+    ?:
+    ```
+    
+
+El motor sigue las reglas de precedencia de operadores, asociatividad y resolución de sobrecargas declaradas en <a href="http://www.microsoft.com/en-us/download/details.aspx?id=7029" target="_blank" rel="nofollow noopener noreferrer">C# Language Specification 5.0</a> al evaluar expresiones de plantilla. Sin embargo, tenga en cuenta las siguientes limitaciones en su comportamiento en comparación con la especificación:
+
+*   Las conversiones definidas por el usuario implícitas solo se admiten cuando se especifican explícitamente.
+*   No se admite el acceso por índice a matrices multidimensionales.
+*   Aunque la sintaxis de inicialización de objetos sí se admite (incluidos los objetos de tipos anónimos), la sintaxis de inicialización de colecciones no se admite.
+
+Además, el motor le permite utilizar operadores elevados en expresiones de plantilla.
+
+### Uso de funciones lambda {#using-lambda-functions}
+
+El motor GroupDocs.Assembly le permite utilizar funciones lambda únicamente como argumentos de los métodos de extensión integrados de enumeración en expresiones de plantilla. Consulte <a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-2-of-2/#enumeration-extension-methods" target="_blank" rel="nofollow noopener noreferrer">Enumeration Extension Methods</a> para obtener más información.
+
+**Nota:** Las funciones lambda declaradas dentro de expresiones de plantilla no son intercambiables con delegados. Por lo tanto, no puede pasar delegados como argumentos a los métodos de extensión de enumeración integrados.
+
+Puede utilizar tanto firmas explícitas como implícitas de funciones lambda en expresiones de plantilla. Si no especifica explícitamente el tipo de un parámetro de una función lambda, el motor determina implícitamente dicho tipo según el tipo de la enumeración correspondiente.
+
+### Uso de orígenes de datos {#using-data-sources}
+
+#### Objetos DataSet {#dataset-objects}
+
+
+:::info
+<a href="https://docs.groupdocs.com/assembly/net/the-business-layer/#dataset-source" target="_blank" rel="nofollow noopener noreferrer">Este enlace</a> le explicará cómo utilizamos los objetos DataSet en la capa de negocio.
+:::
+
+
+El motor GroupDocs.Assembly le permite acceder a los objetos `DataTable` contenidos dentro de una instancia particular de `DataSet` mediante los nombres de las tablas, utilizando el operador "." en las expresiones de plantilla. Por ejemplo, si `ds` es una instancia de `DataSet` que contiene una `DataTable` denominada "Persons", puede acceder a la tabla utilizando la siguiente sintaxis.
+
+```csharp
+ds.Persons
+```
+
+**Nota:** Los nombres de las tablas no distinguen entre mayúsculas y minúsculas.
+
+#### Objetos DataTable y DataView {#datatable-and-dataview-objects}
+
+El motor GroupDocs.Assembly le permite tratar los objetos `DataTable` y `DataView` en las expresiones de plantilla como enumeraciones de sus filas. Es decir, puede utilizar expresiones de plantilla que se evalúen como dichos objetos dentro de etiquetas `foreach` (consulte <a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-2-of-2/#outputting-sequential-data" target="_blank" rel="nofollow noopener noreferrer">Generación de datos secuenciales</a> para obtener más información).
+
+Asimismo, puede aplicar normalmente métodos de extensión de enumeración (consulte <a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-2-of-2/#enumeration-extension-methods" target="_blank" rel="nofollow noopener noreferrer">Métodos de extensión de enumeración</a> para obtener más información) a los objetos `DataTable` y `DataView` en las expresiones de plantilla. Por ejemplo, dado que `persons` es una instancia de `DataTable` o `DataView`, puede contar sus filas utilizando la siguiente sintaxis.
+
+```csharp
+persons.Count()
+```
+
+#### Objetos DataRow y DataRowView {#datarow-and-datarowview-objects}
+
+El motor GroupDocs.Assembly le permite acceder a los datos asociados con una instancia particular de `DataRow` o `DataRowView` en expresiones de plantilla utilizando el operador ".". La siguiente tabla describe los identificadores que puede utilizar para acceder a distintos tipos de datos.
+
+| Tipo de datos | Identificador | Ejemplos de expresiones de plantilla |
+| --- | --- | --- |
+| **Valor de campo** | Nombre del campo | Dado que `r` es una fila que posee un campo denominado "Name", puede acceder al valor del campo utilizando la siguiente sintaxis:<br />`r.Name`. |
+| **Fila principal o secundaria única** | Nombre de la tabla principal (secundaria) | Dado que `r` es una fila de una `DataTable` que tiene una `DataTable` principal (secundaria) denominada "City", puede acceder a la fila principal (secundaria) única de `r` utilizando la siguiente sintaxis:<br />`r.City`.<br />Dado que la `DataTable` "City" posee un campo denominado "Name", puede acceder al valor del campo para la fila principal (secundaria) única utilizando la siguiente sintaxis:<br />`r.City.Name`. |
+| **Enumeración de filas secundarias o principales** | Nombre de la tabla secundaria (principal) | Dado que `r` es una fila de una `DataTable` que tiene una `DataTable` secundaria (principal) denominada "Persons", puede acceder a la enumeración de las filas secundarias (principales) de `r` utilizando la siguiente sintaxis:<br />`r.Persons`.<br />Dado que la `DataTable` "Persons" posee un campo denominado "Age", puede contar las filas secundarias (principales) correspondientes a personas mayores de treinta años utilizando la siguiente sintaxis:<br />`r.Persons.Count(p => p.Age > 30)`. |
+
+
+:::warning
+Los nombres de campos y tablas no distinguen entre mayúsculas y minúsculas.
+:::
+
+
+Para determinar las relaciones de padre-hijo para un `DataTable` instancia, el motor utiliza *<a href="http://msdn.microsoft.com/en-us/library/system.data.datarelation(v=vs.110" target="_blank" rel="nofollow noopener noreferrer">DataRelation</a>.aspx)* objetos contenidos dentro del correspondiente `DataSet` instancia. Por lo tanto, puede gestionar estas relaciones de forma común.
+
+
+:::warning
+En lugar de utilizar los nombres de las tablas para acceder a los datos de las filas secundarias o principales, también puedes utilizar los nombres de las relaciones, lo cual resulta útil cuando trabajas con múltiples relaciones hacia la misma tabla.
+:::
+
+
+  
+
+#### Implementadores de IDataReader {#idatareader-implementors}
+
+El motor de GroupDocs.Assembly le permite tratar a los implementadores de `IDataReader` como enumeraciones de implementadores de `IDataRecord` en expresiones de plantilla. Es decir, puede utilizar implementadores de `IDataReader` en expresiones de plantilla de la misma manera que objetos `DataTable`. Consulte <a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-1-of-2/" target="_blank" rel="nofollow noopener noreferrer">Trabajo con objetos DataTable y DataView</a> para obtener más información.
+
+Sin embargo, no puede utilizar implementadores de IDataReader en expresiones de plantilla junto con operaciones de enumeración que requieran el almacenamiento en caché de los elementos de la enumeración. Ejemplos de dichas operaciones incluyen agrupación y ordenación. Para superar esta limitación, utilice objetos DataTable en su lugar.
+
+#### Implementadores de IDataRecord {#idatarecord-implementors}
+
+Document Assembler le permite acceder a los valores de campo de un implementador específico de `IDataRecord` mediante nombres de campo, utilizando el operador "." en expresiones de plantilla. Para utilizar esta funcionalidad, debe cumplirse una de las siguientes condiciones:
+
+*   El implementador de `IDataRecord` representa una variable de iteración al enumerar un implementador de `IDataReader` (consulte <a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-2-of-2/#outputting-sequential-data" target="_blank" rel="nofollow noopener noreferrer">Generación de datos secuenciales</a> para obtener más información).
+*   El implementador de `IDataRecord` no implementa la interfaz `IDataReader`.
+
+El siguiente ejemplo muestra cómo utilizar esta funcionalidad. Dado que `r` es un implementador de `IDataRecord` que posee un campo denominado "Name", puede acceder al valor de dicho campo utilizando la siguiente sintaxis.
+
+```csharp
+r.Name
+```
+
+**Nota:** Los nombres de los campos no distinguen entre mayúsculas y minúsculas.
+
+### Uso de imágenes {#using-images}
+
+Puede insertar imágenes en sus informes de forma dinámica mediante etiquetas de imagen. Para declarar una imagen insertada dinámicamente en su plantilla, siga estos pasos:
+
+1.  Añada un cuadro de texto en la ubicación de su plantilla donde desee insertar una imagen.
+2.  Configure los atributos comunes de la imagen, como el marco, el tamaño y otros, para el cuadro de texto, de modo que este último tenga el aspecto de una imagen insertada en blanco.
+3.  Especifique una etiqueta de imagen dentro del cuadro de texto utilizando la siguiente sintaxis.
+  
+    ```csharp
+    <<image [image_expression]>>
+    
+    ```
+    
+
+La expresión declarada dentro de una etiqueta de imagen es utilizada por el motor para construir una imagen que será insertada. La expresión debe devolver un valor de uno de los siguientes tipos:
+
+*   Una matriz de bytes que contiene los datos de la imagen
+*   Una instancia de <a href="http://msdn.microsoft.com/en-us/library/system.io.stream(v=vs.110" target="_blank" rel="nofollow noopener noreferrer">Stream</a>.aspx) capaz de leer los datos de la imagen
+*   Un objeto <a href="http://msdn.microsoft.com/en-us/library/system.drawing.image(v=vs.110" target="_blank" rel="nofollow noopener noreferrer">Image</a>.aspx)
+*   Una cadena que contiene un URI de imagen, una ruta de acceso o datos de imagen codificados en Base64
+
+Durante la generación de un informe, se aplica el siguiente procedimiento a una etiqueta de imagen:
+
+*   Se evalúa la expresión declarada dentro de la etiqueta y su resultado se utiliza para formar la imagen.
+*   La caja de texto correspondiente se rellena con esta imagen.
+*   La etiqueta se elimina de la caja de texto.
+
+**Nota:** Si la expresión declarada dentro de una etiqueta de imagen devuelve un objeto de tipo flujo (*stream*), este será cerrado por el motor tan pronto como se construya la imagen correspondiente.
+
+De forma predeterminada, el ensamblador estira la imagen que rellena una caja de texto hasta ajustarla al tamaño de dicha caja. Sin embargo, puede modificar este comportamiento de las siguientes maneras:
+
+*   Para conservar el tamaño de la caja de texto y estirar la imagen dentro de los límites de la caja, manteniendo la relación de aspecto de la imagen, utilice el modificador *keepRatio* como sigue:
+  
+    ```csharp
+    <<image [image_expression] -keepRatio>>
+    ```
+    
+*   Para mantener el ancho del cuadro de texto y cambiar su altura preservando la proporción de la imagen, utilice el modificador `fitHeight` de la siguiente manera:
+  
+    ```csharp
+    <<image [image_expression] -fitHeight>>
+    ```
+    
+*   Para mantener la altura del cuadro de texto y cambiar su ancho preservando la relación de aspecto de la imagen, utilice el modificador `fitWidth` de la siguiente manera.
+  
+    ```csharp
+    <<image [image_expression] -fitWidth>>
+    ```
+    
+*   Para cambiar el tamaño del cuadro de texto según el tamaño de la imagen, utilice el interruptor `fitSize` de la siguiente manera:
+  
+    ```csharp
+    <<image [image_expression] -fitSize>>
+    ```
+    
+*   Para cambiar el tamaño del cuadro de texto según el tamaño de la imagen sin aumentar el tamaño del cuadro de texto, utilice el interruptor `fitSizeLim` de la siguiente manera.
+  
+    ```csharp
+    <<image [image_expression] -fitSizeLim>>
+    ```
+    
+    
+:::warning
+Si el tamaño de la imagen es mayor que el tamaño del cuadro de texto, entonces el interruptor `fitSizeLim` actúa como `fitHeight` o `fitWidth`. De lo contrario, el interruptor `fitSizeLim` actúa como `fitSize`.
+:::
+
+    
+
+### Inserción de documentos {#inserting-documents}
+
+Puede insertar dinámicamente el contenido de documentos externos en sus informes utilizando etiquetas de documento (doc tags). Una etiqueta de documento representa un marcador de posición dentro de una plantilla para un documento que se insertará en tiempo de ejecución.
+
+La sintaxis de una etiqueta de documento se define de la siguiente manera.
+
+```csharp
+<<doc [document_expression]>>
+```
+
+
+:::warning
+Una etiqueta de documento (`doc tag`) se puede usar casi en cualquier lugar de un documento de plantilla, excepto en cuadros de texto y gráficos.
+:::
+
+
+Una expresión declarada dentro de una etiqueta `doc` es utilizada por el ensamblador para cargar un documento que será insertado durante el tiempo de ejecución. La expresión debe devolver un valor de uno de los siguientes tipos:
+
+*   Una matriz de bytes que contiene los datos del documento
+*   Una instancia de <a href="http://msdn.microsoft.com/en-us/library/system.io.stream(v=vs.110" target="_blank" rel="nofollow noopener noreferrer">Stream</a>.aspx) capaz de leer los datos del documento
+*   Una instancia de la clase `Document`
+*   Una cadena que contiene una URI, ruta o datos del documento codificados en Base64
+
+Al generar un informe, la expresión declarada dentro de la etiqueta `doc` se evalúa y su resultado se utiliza para cargar un documento cuyo contenido reemplaza la etiqueta `doc` en ese momento.
+
+
+:::warning
+Si una expresión declarada dentro de una etiqueta de documento devuelve un objeto de flujo (*stream*), entonces el ensamblador cierra dicho flujo tan pronto como se carga el documento correspondiente.
+:::
+
+
+De forma predeterminada, un documento que se está insertando no se verifica contra la sintaxis de plantilla ni se rellena con datos. Sin embargo, puedes habilitar esta funcionalidad mediante un modificador de compilación, como se muestra a continuación.
+
+```csharp
+<<doc [document_expression] -build>>
+```
+
+Cuando se utiliza un interruptor de compilación, el ensamblador trata el documento que se va a insertar como una plantilla que puede acceder a los siguientes datos disponibles en el ámbito de la etiqueta `doc` correspondiente:
+
+*   Fuentes de datos
+*   Variables
+*   Un objeto contextual
+*   Tipos externos conocidos 
+
+### Establecimiento dinámico de valores de casillas de verificación {#setting-checkbox-values-dynamically}
+
+Puede establecer dinámicamente los valores de las casillas de verificación como seleccionadas o no seleccionadas en sus informes siguiendo los pasos siguientes:
+
+1.  Añada un control de contenido de casilla de verificación en su plantilla en el lugar donde desee que aparezca en el documento resultante.
+2.  Mediante la edición de las propiedades del control de contenido, añada una etiqueta de verificación al título del control de contenido de casilla de verificación utilizando la siguiente sintaxis.
+
+```csharp
+<<check [conditional_expression]>>
+```
+
+Aquí, `conditional_expression` define una condición según la cual el valor del control de contenido de casilla de verificación se establecerá como seleccionado (o no seleccionado, si no se cumple la condición). La expresión condicional debe devolver un valor booleano.
+
+Al generar un informe, se evalúa una expresión condicional declarada dentro de una etiqueta `check`, y el valor del control de contenido de casilla de verificación que la contiene se establece en consecuencia. Posteriormente, la etiqueta `check` se elimina.
+
+
+:::warning
+La configuración dinámica del valor de las casillas de verificación solo está disponible para documentos de procesamiento de textos.
+:::
+
+
+### Añadir elementos dinámicamente a cuadros combinados y listas desplegables {#adding-combobox-and-dropdown-list-items-dynamically}
+
+Puede añadir dinámicamente elementos a cuadros combinados y listas desplegables definidos en su plantilla siguiendo los pasos siguientes:
+
+1. Añada un control de contenido de cuadro combinado o lista desplegable en su plantilla en el lugar donde desee que aparezca en el documento resultante.
+2. Mediante la edición de las propiedades del control de contenido, añada una etiqueta `item` al título de este control de contenido utilizando la siguiente sintaxis.
+
+```csharp
+<<item [value_expression] [display_name_expression]>>
+```
+
+Aquí, `value_expression` define el valor de un elemento de un cuadro combinado o lista desplegable que se agregará dinámicamente. Esta expresión es obligatoria y debe devolver un valor no vacío.
+
+A su vez, `display_name_expression` define el nombre para mostrar del elemento del cuadro combinado o lista desplegable que se va a agregar. Esta expresión es opcional. Si se omite, durante el tiempo de ejecución, un valor de `value_expression` se utiliza también como nombre para mostrar.
+
+**Nota:** Valores de ambos `value_expression` y `display_name_expression` puede ser de cualquier tipo. Durante el tiempo de ejecución, `Object.ToString()` se invoca para obtener representaciones textuales de los valores de estas expresiones.
+
+Al crear un informe, `value_expression` y `display_name_expression` se evalúan y se agrega un elemento correspondiente en un cuadro combinado o lista desplegable. Una declaración `item` Entonces se elimina la etiqueta.
+
+Un solo `item` `<tag>` provoca la adición de un único elemento de cuadro combinado o lista desplegable durante el tiempo de ejecución. Puede agregar múltiples elementos de cuadro combinado o lista desplegable mediante múltiples `item` etiquetas como se muestra en el siguiente fragmento.
+
+```csharp
+<<item ...>><<item ...>>
+```
+
+Además, normalmente puedes usar `item` etiquetas dentro de bandas de datos para agregar un elemento de cuadro combinado o lista desplegable por cada elemento de una colección de datos. Por ejemplo, dado que `clients` es una `DataTable` instancia que tiene un campo llamado "Name", puede usar la siguiente plantilla para cubrir dicho escenario.
+
+```csharp
+<<foreach [client in clients]>><<item [client.Name]>><</foreach>>
+```
+
+Un `item` `tag` también se puede combinar con un `if` etiqueta para agregar un elemento de cuadro combinado o lista desplegable según una condición, como se muestra en el siguiente fragmento.
+
+```csharp
+<<if ...>><<item ...>><</if>>
+```
+
+Los elementos existentes del cuadro combinado y de la lista desplegable no se ven afectados por las etiquetas `item`. Por lo tanto, puede combinar ambos métodos para agregar elementos a cuadros combinados y listas desplegables mediante una plantilla: estático y dinámico.
+
+**Nota:** Al insertar un cuadro combinado o una lista desplegable, Microsoft Word agrega automáticamente un elemento predeterminado que debe eliminarse manualmente si dicho elemento no es necesario.
+
+### Uso de hipervínculos {#using-hyperlinks}
+
+Con GroupDocs.Assembly, puede insertar hipervínculos a URI o marcadores en sus informes de forma dinámica mediante etiquetas de enlace. A continuación se define la sintaxis de una etiqueta de enlace para distintos tipos de documentos:
+
+#### Procesamiento de documentos y correos electrónicos {#word-processing-and-emails}
+
+```csharp
+<<link [uri_or_bookmark_expression][display_text_expression]>>
+```
+
+#### Hojas de cálculo {#spreadsheets}
+
+Si se requiere la inserción del enlace a la celda A1:
+
+```csharp
+<<link ["A1"] ["Home"]>>
+```
+
+#### Presentaciones {#presentations}
+
+```csharp
+<<link ["Slide1"] ["Home"]>>
+```
+
+### Uso del acceso contextual a miembros de objetos {#using-contextual-object-member-access}
+
+Puede simplificar sus plantillas mediante la característica de acceso contextual a miembros de objetos. Esta característica le permite acceder a los miembros de ciertos objetos sin especificar sus identificadores en las expresiones de plantilla. El objeto al que se puede aplicar esta característica se determina según el contexto, como se indica a continuación:
+
+*   Dentro del cuerpo de una banda de datos, el objeto se resuelve a la variable de iteración más interna.
+*   Fuera del cuerpo de una banda de datos, el objeto se resuelve a la fuente de datos pasada.
+
+Obviamente, dentro del cuerpo de una banda de datos, no puede utilizar esta característica para acceder a los miembros de una variable de iteración externa ni al objeto de la fuente de datos pasada. Con excepción de esta restricción, puede utilizar indistintamente las sintaxis de acceso contextual y de acceso común a miembros de objetos, según sus necesidades y preferencias.
+
+Considere el siguiente ejemplo. Dado que `ds` es una instancia de `DataSet` que contiene un objeto `DataTable` denominado "Persons" con campos llamados "Name" y "Age", puede utilizar la siguiente plantilla para enumerar el contenido de la tabla.
+
+| No. | Name | Age |
+| --- | --- | --- |
+| `<<foreach [p in ds.Persons]>><<[p.NumberOf()]>>` | `<<[p.Name]>>` | `<<[p.Age]>><</foreach>>` |
+| `Count: <<[ds.Persons.Count()]>>` |  |  |
+
+Alternativamente, puede utilizar la siguiente plantilla que emplea la sintaxis de acceso contextual a miembros de objetos para obtener los mismos resultados.
+
+| No. | Name | Age |
+| --- | --- | --- |
+| `<<foreach [in Persons]>><<[NumberOf()]>>` | `<<[Name]>>` | `<<[Age]>><</foreach>>` |
+| `Count: <<[Persons.Count()]>>` |  |  |
+
+### Uso de bloques condicionales {#using-conditional-blocks}
+
+Puede utilizar distintos bloques de documento para representar los mismos datos según una condición, mediante bloques condicionales. Un bloque condicional representa un conjunto de opciones de plantilla, cada una de las cuales está asociada a una expresión condicional. En tiempo de ejecución, estas expresiones condicionales se evalúan secuencialmente hasta que se alcanza una expresión que devuelve `true`. A continuación, el bloque condicional se reemplaza por la opción de plantilla correspondiente, poblada con los datos.  
+Un bloque condicional puede incluir una opción de plantilla predeterminada que no esté asociada a ninguna expresión condicional. En tiempo de ejecución, esta opción de plantilla se utiliza cuando ninguna de las expresiones condicionales devuelve `true`. Si falta la opción de plantilla predeterminada y ninguna de las expresiones condicionales devuelve `true`, el bloque condicional completo se elimina en tiempo de ejecución.
+
+Puede utilizar la siguiente sintaxis para declarar un bloque condicional:
+
+```csharp
+<<if [conditional_expression1]>>
+template_option1
+<<elseif [conditional_expression2]>>
+template_option2
+...
+<<else>>
+default_template_option
+<</if>>
+```
+
+**Nota:** Una expresión condicional debe devolver un valor booleano.
+
+#### Bloques condicionales comunes {#common-conditional-blocks}
+
+Un bloque condicional común es un bloque condicional cuyo cuerpo comienza y termina dentro de párrafos que pertenecen a una única historia o celda de tabla.  
+Si un bloque condicional pertenece a un único párrafo, puede utilizarse como sustituto de una etiqueta de expresión que implique el operador ternario "?:". Por ejemplo, dado que `items` es una enumeración, puede utilizar la siguiente plantilla para representar la cantidad de elementos de la enumeración:
+
+```csharp
+You have chosen <<if [!items.Any()]>>no items<<else>><<[items.Count()]>> item(s)<</if>>.
+```
+
+**Nota:** Una opción de plantilla para un bloque condicional común puede estar compuesta por varios párrafos, si es necesario.
+
+Normalmente, puede utilizar bloques condicionales comunes dentro de bandas de datos. Por ejemplo, dado que `items` es una enumeración de las cadenas `"item1"`, `"item2"` y `"item3"`, puede utilizar la siguiente plantilla para enumerarlos y aplicar un formato distinto a los elementos pares e impares:
+
+```csharp
+<<foreach \[item in items\]>><<if \[IndexOf() % 2 == 0\]>><<\[item\]>>  
+<<else>><<\[item\]>>  
+<</if>><</foreach>>
+```
+
+En este caso, el motor genera un informe de la siguiente manera:
+
+item1  
+item2  
+item3
+
+También puedes utilizar bandas de datos dentro de bloques condicionales comunes. Por ejemplo, dada la declaración previa de `items`, puedes verificar si la enumeración contiene algún elemento antes de mostrar su lista:
+
+```csharp
+<<if [!items.Any()]>>No data.
+<<else>><<foreach [item in items]>><<[item]>>
+<</foreach>><</if>>
+```
+
+#### Bloque condicional de fila de tabla {#table-row-conditional-block}
+
+Un bloque condicional de fila de tabla es un bloque condicional cuyo cuerpo ocupa una o varias filas de una única tabla del documento. El cuerpo de dicho bloque (así como el cuerpo de cada una de sus opciones de plantilla) comienza al inicio de la primera fila ocupada y termina al final de la última fila ocupada, como se muestra a continuación:  
+**Nota:** Las filas de la tabla ocupadas por distintas opciones de plantilla en la siguiente plantilla están resaltadas con colores distintos.
+
+<table cellspacing="0" cellpadding="0"><tbody><tr><td><p><span>&nbsp;</span></p></td><td><p><span>&nbsp;</span></p></td><td><p><span>&nbsp;</span></p></td></tr><tr><td><p><span>&lt;&lt;if ...&gt;&gt; ...</span></p></td><td><p><span>...</span></p></td><td><p><span>...</span></p></td></tr><tr><td><p><span>...</span></p></td><td><p><span>...</span></p></td><td><p><span>...</span></p></td></tr><tr><td><p><span>&lt;&lt;elseif ...&gt;&gt; ...</span></p></td><td><p><span>...</span></p></td><td><p><span>...</span></p></td></tr><tr><td><p><span>...</span></p></td><td><p><span>...</span></p></td><td><p><span>...</span></p></td></tr><tr><td><p><span>&lt;&lt;else&gt;&gt; ...</span></p></td><td><p><span>...</span></p></td><td><p><span>...</span></p></td></tr><tr><td><p><span>...</span></p></td><td><p><span>...</span></p></td><td><p><span>...</span></p></td></tr><tr><td><p><span>...</span></p></td><td><p><span>...</span></p></td><td><p><span>... &lt;&lt;/if&gt;&gt;</span></p></td></tr><tr><td><p><span>&nbsp;</span></p></td><td><p><span>&nbsp;</span></p></td><td><p><span>&nbsp;</span></p></td></tr></tbody></table>
+Los siguientes ejemplos de esta sección se presentan utilizando `client`, una instancia de la clase `Client`, y `clients`, una enumeración de instancias de la clase `Client` definida de la siguiente manera:
+
+```csharp
+public class Client
+{
+    public String Name { get { ... } }
+    public String Country { get { ... } }
+    public String LocalAddress { get { ... } }
+    ...
+}
+```
+
+Mediante bloques condicionales por fila de tabla, puede elegir generar una única fila entre varias filas de una tabla de documento único, según una condición, como se muestra en el siguiente ejemplo:
+
+<table cellspacing="0" cellpadding="0"><tbody><tr><td><p><span>...</span></p></td><td><p><span>...</span></p></td><td><p><span>...</span></p></td></tr><tr><td><p><span>&lt;&lt;if [client.</span><span>Country</span><span> == "New Zealand"]&gt;&gt;&lt;&lt;[client.</span><span>Name</span><span>]&gt;&gt;</span></p></td><td colspan="2"><p><span>&lt;&lt;[client.</span><span>LocalAddress</span><span>]&gt;&gt;</span></p></td></tr><tr><td><p><span>&lt;&lt;else&gt;&gt;</span><span>&lt;&lt;[client.</span><span>Name</span><span>]&gt;&gt;</span></p></td><td><p><span>&lt;&lt;[client.</span><span>Country</span><span>]&gt;&gt;</span></p></td><td><p><span>&lt;&lt;[client.</span><span>LocalAddress</span><span>]&gt;&gt;</span><span>&lt;&lt;/if&gt;&gt;</span></p></td></tr><tr><td><p><span>...</span></p></td><td><p><span>...</span></p></td><td><p><span>...</span></p></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+Normalmente, puede utilizar bloques condicionales por fila de tabla dentro de bandas de datos para que los elementos de una enumeración se muestren de forma distinta según una condición. Considere la siguiente plantilla:
+
+<table cellspacing="0" cellpadding="0"><tbody><tr><td><p><span>&lt;&lt;foreach [in clients]&gt;&gt;&lt;&lt;if [</span><span>Country</span><span> == "New Zealand"]&gt;&gt;&lt;&lt;[</span><span>Name</span><span>]&gt;&gt;</span></p></td><td colspan="2"><p><span>&lt;&lt;[</span><span>LocalAddress</span><span>]&gt;&gt;</span></p></td></tr><tr><td><p><span>&lt;&lt;else&gt;&gt;&lt;&lt;[</span><span>Name</span><span>]&gt;&gt;</span></p></td><td><p><span>&lt;&lt;[</span><span>Country</span><span>]&gt;&gt;</span></p></td><td><p><span>&lt;&lt;[</span><span>LocalAddress</span><span>]&gt;&gt;&lt;&lt;/if&gt;&gt;&lt;&lt;/foreach&gt;&gt;</span></p></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+En este caso, el motor genera el informe como se muestra a continuación:
+
+<table cellspacing="0" cellpadding="0"><tbody><tr><td><p><span>A Company</span></p></td><td><p><span>Australia</span></p></td><td><p><span>219-241 Cleveland St</span></p><p><span>STRAWBERRY HILLS&nbsp; NSW&nbsp; 1427</span></p></td></tr><tr><td><p><span>B Ltd.</span></p></td><td><p><span>Brazil</span></p></td><td><p><span>Avenida João Jorge, 112, ap. 31</span></p><p><span>Vila Industrial</span></p><p><span>Campinas - SP</span></p><p><span>13035-680</span></p></td></tr><tr><td><p><span>C &amp; D</span></p></td><td><p><span>Canada</span></p></td><td><p><span>101-3485 RUE DE LA MONTAGNE</span></p><p><span>MONTRÉAL (QUÉBEC) h2G 2A6</span></p></td></tr><tr><td><p><span>E Corp.</span></p></td><td colspan="2"><p><span>445 Mount Eden Road</span></p><p><span>Mount Eden</span></p><p><span>Auckland 1024</span></p></td></tr><tr><td><p><span>F &amp; Partners</span></p></td><td colspan="2"><p><span>20 Greens Road</span></p><p><span>Tuahiwi</span></p><p><span>Kaiapoi 7691</span></p></td></tr><tr><td><p><span>G &amp; Co.</span></p></td><td><p><span>Greece</span></p></td><td><p><span>Karkisias 6</span></p><p><span>GR-111 42&nbsp; ATHINA</span></p><p><span>GRÉCE</span></p></td></tr><tr><td><p><span>H Group</span></p></td><td><p><span>Hungary</span></p></td><td><p><span>Budapest</span></p><p><span>Fiktív utca 82., IV. em./28.</span></p><p><span>2806</span></p></td></tr><tr><td><p><span>I &amp; Sons</span></p></td><td colspan="2"><p><span>43 Vogel Street</span></p><p><span>Roslyn</span></p><p><span>Palmerston North 4414</span></p></td></tr><tr><td><p><span>J Ent.</span></p></td><td><p><span>Japan</span></p></td><td><p><span>Hakusan 4-Ch?me 3-2</span></p><p><span>Bunky?-ku, T?KY?</span></p><p><span>112-0001</span></p><p><span>Japan</span></p></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+
+:::info
+**Nota:** También puedes utilizar bloques condicionales comunes dentro de las bandas de datos de filas de tabla.
+:::
+
+
+Además, puedes utilizar bandas de datos dentro de bloques condicionales de filas de tabla. Por ejemplo, puedes proporcionar un contenido alternativo para una banda de datos de fila de tabla vacía utilizando la siguiente plantilla:
+
+<table cellspacing="0" cellpadding="0"><tbody><tr><td><p><span>Cliente</span></p></td><td><p><span>País</span></p></td><td><p><span>Dirección local</span></p></td></tr><tr><td colspan="3"><p><span>&lt;&lt;si [!clients.</span><span>Cualquiera</span><span>()]&gt;&gt;No hay datos</span></p></td></tr><tr><td><p><span>&lt;&lt;de lo contrario&gt;&gt;&lt;&lt;foreach [en clientes]&gt;&gt;&lt;&lt;[</span><span>Nombre</span><span>]&gt;&gt;</span></p></td><td><p><span>&lt;&lt;[</span><span>País</span><span>]&gt;&gt;</span></p></td><td><p><span>&lt;&lt;[</span><span>DirecciónLocal</span><span>]&gt;&gt;&lt;&lt;/foreach&gt;&gt;&lt;&lt;/si&gt;&gt;</span></p></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+En caso de que la enumeración correspondiente esté vacía, el motor genera un informe como el siguiente:
+
+<table cellspacing="0" cellpadding="0"><tbody><tr><td><p><span>Cliente</span></p></td><td><p><span>País</span></p></td><td><p><span>Dirección local</span></p></td></tr><tr><td colspan="3"><p><span>Sin datos</span></p></td></tr><tr><td></td><td></td><td></td></tr></tbody></table>
+
+:::info
+**Nota:** Si las etiquetas que delimitan una opción de plantilla se encuentran dentro de una única celda de tabla, dicha opción se considera una opción de plantilla común, y no una opción de fila de tabla. Es decir, la opción se considera que ocupa el contenido dentro de la celda, y no la fila completa. Por esta razón, en el ejemplo anterior, el contenido alternativo de una sola celda se encuentra entre las etiquetas de apertura `if` y `else`, y no entre las etiquetas `else` y de cierre `if`.
+:::

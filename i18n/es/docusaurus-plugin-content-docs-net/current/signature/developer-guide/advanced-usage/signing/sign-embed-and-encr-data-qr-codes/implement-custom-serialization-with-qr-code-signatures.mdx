@@ -1,0 +1,136 @@
+---
+title: "Implementar serialización personalizada con firmas de código QR"
+sidebar_label: "✎ Serialización personalizada"
+sidebar_key: "net-signature-signing-sign-embed-and-encr-data-qr-codes-implement-custom-serialization-with-qr-code-signatures"
+sidebar_position: 2
+description: "Este artículo explica cómo implementar la serialización personalizada para firmas electrónicas de código QR."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/signing/sign-embed-and-encr-data-qr-codes/implement-custom-serialization-with-qr-code-signatures.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "388c8fd0737daa7631d43e17247a0f9ad48536c417dc88e94a7223bb180b82d6"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "16456b05d11288f3daf02f11181a2e8fc3b968b2924dbfd278acd8a8ba9e368a"
+translation_updated_at: "2026-11-16T13:38:45.141Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> permite incrustar objetos personalizados dentro de firmas de código QR. Esta funcionalidad se implementa mediante serialización del objeto a una cadena y posterior cifrado. Asimismo, se ofrece la posibilidad de proporcionar un cifrado personalizado. Este procedimiento requiere la implementación de la interfaz <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/idataencryption" target="_blank" rel="nofollow noopener noreferrer">IDataEncryption</a>, la cual consta de dos métodos: uno para cifrar y otro para descifrar los datos.
+
+A continuación se detallan los pasos para incrustar texto en un código QR mediante cifrado personalizado con GroupDocs.Signature:
+
+* Defina una clase personalizada de cifrado de datos que implemente la interfaz <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/idataencryption" target="_blank" rel="nofollow noopener noreferrer">IDataEncryption</a>. De forma predeterminada, GroupDocs.Signature incluye varias implementaciones de cifrado que puede utilizar, aunque también permite al usuario personalizarlas.
+* Implemente una clase con propiedades y, si es necesario, especifique atributos de clase (por ejemplo, atributo de serialización personalizado, atributo de cifrado personalizado), así como atributos para las propiedades, como <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/formatattribute" target="_blank" rel="nofollow noopener noreferrer">FormatAttribute</a> para especificar el nombre de serialización y el formato de visualización, y <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain.extensions/skipserializationattribute" target="_blank" rel="nofollow noopener noreferrer">SkipSerializationAttribute</a> para marcar una propiedad de la clase como no serializable.
+* Cree una nueva instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pase la ruta del documento de origen como parámetro en el constructor.
+* Cree uno o varios objetos del tipo <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/qrcodesignoptions" target="_blank" rel="nofollow noopener noreferrer">QrCodeSignOptions</a> con el valor <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/qrcodesignoptions/data" target="_blank" rel="nofollow noopener noreferrer">Data</a>.
+* Instancie el objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/qrcodesignoptions" target="_blank" rel="nofollow noopener noreferrer">QrCodeSignOptions</a> según sus requisitos y asigne el objeto personalizado a la propiedad <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/qrcodesignoptions/data" target="_blank" rel="nofollow noopener noreferrer">Data</a>.
+* Llame al método <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/sign/" target="_blank" rel="nofollow noopener noreferrer">Sign</a> de la instancia de la clase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> y pase <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/qrcodesignoptions" target="_blank" rel="nofollow noopener noreferrer">QrCodeSignOptions</a> como argumento.
+
+Este ejemplo muestra cómo especificar una clase de serialización personalizada. Dicha clase también puede implementarse como atributo (opcional) para especificarla como atributo de clase.
+
+```csharp
+class CustomSerializationAttribute : Attribute, IDataSerializer
+{
+    public T Deserialize<T>(string source) where T : class
+    {
+        return JsonConvert.DeserializeObject<T>(source);
+    }
+    public string Serialize(object data)
+    {
+        var serializerSettings = new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
+        return JsonConvert.SerializeObject(data, serializerSettings);
+    }
+}
+```
+
+## Definición de la clase {#definition-of-class}
+
+Este ejemplo muestra cómo definir una clase personalizada con propiedades de serialización y cifrado, y cómo configurar los atributos de formato para las propiedades.
+
+```csharp
+// setup CustomSerialization Attribute to setup customer serialization(see example above)
+[CustomSerialization]
+public class DocumentSignatureData
+{
+    [Format("SignID")]
+    public string ID { get; set; }
+    [Format("SAuth")]
+    public string Author { get; set; }
+    [Format("SDate", "yyyy-MM-dd")]
+    public DateTime Signed { get; set; }
+    [Format("SDFact", "N2")]
+    public decimal DataFactor { get; set; }
+    [SkipSerialization]
+    public string Comments { get; set; }
+}
+```
+
+## Firmar documentos con objetos y valores personalizados cifrados en firmas QR {#sign-documents-with-custom-encrypted-objects-and-values-into-qr-code-signatures}
+
+Este ejemplo muestra cómo agregar un objeto personalizado a la metadatos de la firma en un documento de imagen.
+
+```csharp
+using (Signature signature = new Signature("sample.pdf"))
+{
+    // create data encryption
+    IDataEncryption encryption = new CustomXOREncryption();
+    // create custom object
+    DocumentSignatureData documentSignatureData = new DocumentSignatureData()
+    {
+        ID = Guid.NewGuid().ToString(),
+        Author = Environment.UserName,
+        Signed = DateTime.Now,
+        DataFactor = 11.22M
+    };
+    // setup QR-Code options
+    QrCodeSignOptions options = new QrCodeSignOptions()
+    {
+        // set custom object to serialize to QR Code
+        Data = documentSignatureData,
+        // QR-code type
+        EncodeType = QrCodeTypes.QR,
+        // specify serialization encryption
+        DataEncryption = encryption,
+        // locate and aligh signature
+        Height = 100,
+        Width = 100,
+        VerticalAlignment = VerticalAlignment.Bottom,
+        HorizontalAlignment = HorizontalAlignment.Right,
+        Margin = new Padding() { Right = 10, Bottom = 10 }
+    };
+    // sign document to file
+    signature.Sign("QRCodeCustomSerialization.pdf", options);
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con UI MVC</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con UI WebForms</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con UI Dropwizard</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con UI Spring</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para generar códigos QR y/o firmar sus archivos con códigos QR de forma gratuita, puede utilizar la aplicación en línea <a href="https://products.groupdocs.app/signature/generate/qrcode" target="_blank" rel="nofollow noopener noreferrer">Generador de Código QR</a>.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las demás aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

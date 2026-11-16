@@ -1,0 +1,136 @@
+---
+title: "Inserción dinámica de hipervínculos"
+sidebar_label: "Inserción dinámica de hipervínculos"
+sidebar_key: "net-assembly-inserting-hyperlinks-or-bookmarks-inserting-hyperlinks-dynamically"
+sidebar_position: 2
+description: ""
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/advanced-usage/inserting-hyperlinks-or-bookmarks/inserting-hyperlinks-dynamically.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "e1c9fb012d4ce316214f387726bd5df7211265f89e7b36c668e95e94fa59cf9e"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "fb9d9996238750b71b7b8f1bb29c557b65fa6d441b9b47837f060be4eb2c7fa0"
+translation_updated_at: "2026-11-16T11:09:52.215Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+:::info
+Esta función es compatible con la versión 18.7 o superior.
+:::
+
+:::info
+El código utiliza algunos de los objetos definidos en <a href="https://docs.groupdocs.com/assembly/net/the-business-layer/" target="_blank" rel="nofollow noopener noreferrer">La Capa de Negocio</a>.
+:::
+
+
+## Inserción dinámica de hipervínculos {#inserting-hyperlinks-dynamically}
+
+Con GroupDocs.Assembly, puede insertar hipervínculos en sus informes de forma dinámica mediante etiquetas de enlace. La sintaxis de una etiqueta de enlace se define de la siguiente manera:
+
+```csharp
+<<link [uri_expression][display_text_expression]>>
+```
+
+Aquí, **uri_expression** define la URI de un hipervínculo que se insertará dinámicamente. Esta expresión es obligatoria y debe devolver un valor no vacío. Por su parte, **display_text_expression** define el texto que se mostrará para el hipervínculo. Esta expresión es opcional. Si se omite o devuelve un valor vacío, durante el tiempo de ejecución se utilizará el valor de **uri_expression** también como texto de visualización. Los valores de **uri_expression** y **display_text_expression** pueden ser de cualquier tipo. Durante el tiempo de ejecución, se invoca **Object.ToString()** para obtener las representaciones textuales de los valores de estas expresiones, lo cual resulta útil, por ejemplo, para expresiones de tipos como **Uri**, al construir un informe. En ese momento, **uri_expression** y **display_text_expression** se evalúan y sus resultados se utilizan para construir un hipervínculo que reemplaza la etiqueta de enlace correspondiente.
+
+### Inserción dinámica de enlaces a marcadores {#dynamic-insertion-of-links-to-bookmarks}
+
+
+:::info
+Esta función es compatible con la versión 19.11 o superior.
+:::
+
+
+#### Inserción de vínculos en documentos de procesamiento de texto y correos electrónicos {#insertion-of-links-for-word-processing-documents-and-emails}
+
+También puede insertar vínculos a marcadores en sus informes de forma dinámica mediante etiquetas de vínculo. La sintaxis de una etiqueta de vínculo se define de la siguiente manera:
+
+```csharp
+<<link [uri_or_bookmark_expression][display_text_expression]>>
+```
+
+Aquí, **uri\_or\_bookmark\_expression** define la URI o el nombre de un marcador dentro del mismo documento para insertar dinámicamente un hipervínculo. Esta expresión es obligatoria y debe devolver un valor distinto de vacío. Por su parte, **display\_text\_expression** define el texto que se mostrará para el hipervínculo. Esta expresión es opcional. Si se omite o devuelve un valor vacío, durante el tiempo de ejecución se utilizará el valor de **uri\_or\_bookmark\_expression** también como texto de visualización.
+
+
+:::warning
+* Los valores tanto de `uri_or_bookmark_expression` como de `display_text_expression` pueden ser de cualquier tipo. En tiempo de ejecución, se invoca `Object.ToString()` para obtener las representaciones textuales de los valores de estas expresiones, lo cual resulta útil, por ejemplo, para expresiones de tipos como `Uri`. Al generar un informe, se evalúan `uri_or_bookmark_expression` y `display_text_expression`, y sus resultados se utilizan para construir un hipervínculo que reemplaza la etiqueta de enlace correspondiente. Si `uri_or_bookmark_expression` devuelve el nombre de una marca de posición (bookmark) en el mismo documento, el hipervínculo navega hacia dicha marca de posición. De lo contrario, el hipervínculo navega hacia el recurso externo correspondiente.
+
+* Una etiqueta de enlace no puede utilizarse dentro de un gráfico.
+:::
+
+
+#### Inserción de enlaces a celdas en documentos de hojas de cálculo {#insertion-of-links-to-cells-for-spreadsheet-documents}
+
+En los documentos de hojas de cálculo, el comportamiento de las etiquetas de enlace se modifica de la siguiente manera: si una expresión definida dentro de una etiqueta de enlace se evalúa como una referencia a una celda o rango de celdas durante el tiempo de ejecución, la etiqueta se reemplaza por un enlace a la celda o rango de celdas correspondiente.
+
+La siguiente tabla describe los formatos admitidos para referencias a celdas y rangos de celdas.
+
+| Descripción | Formato | Ejemplo |
+| --- | --- | --- |
+| Referencia a una celda dentro de la misma hoja de cálculo | nombre\_celda | A1 |
+| Referencia a una celda en otra hoja de cálculo | nombre\_hoja!nombre\_celda | Hoja1!A1 |
+| Referencia a un rango de celdas dentro de la misma hoja de cálculo | celda\_inicial:celda\_final | A1:B2 |
+| Referencia a un rango de celdas en otra hoja de cálculo | nombre\_hoja!celda\_inicial:celda\_final | Hoja1!A1:B2 |
+
+A continuación se muestra un ejemplo de sintaxis, si se requiere insertar un enlace a la celda A1:
+
+```csharp
+<<link ["A1"] ["Home"]>>
+```
+
+#### Inserción de enlaces a diapositivas para documentos de presentación {#insertion-of-links-to-slides-for-presentation-documents}
+
+En los documentos de presentación, el comportamiento de las etiquetas de enlace se modifica de la siguiente manera: si una expresión definida dentro de una etiqueta de enlace se evalúa como un valor “SlideN”, donde N es un índice basado en 1 de una diapositiva dentro del mismo documento de presentación, entonces la etiqueta se reemplaza por un enlace a la diapositiva correspondiente durante el tiempo de ejecución.
+
+Consulte el siguiente ejemplo de sintaxis:
+
+```csharp
+<<link ["Slide1"] ["Home"]>>
+```
+
+## Ejemplos de código y plantillas {#code-examples-and-templates}
+
+### Documentos de procesamiento de texto {#word-processing-documents}
+
+<a href="https://gist.github.com/GroupDocsGists/4087b38f9a93682ffa191599eaacac83" target="_blank" rel="nofollow noopener noreferrer">Ver ejemplo de código en GitHub Gist</a>
+
+#### Descargar {#download}
+
+*   <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET/blob/master/Examples/Data/Source/Word%20Templates/Dynamic%20Hyperlink.docx" target="_blank" rel="nofollow noopener noreferrer">Dynamic Hyperlink.docx</a>
+
+### Documentos de presentación {#presentation-documents}
+
+<a href="https://gist.github.com/GroupDocsGists/38e274938c8b7328e250a5d8f1d15092" target="_blank" rel="nofollow noopener noreferrer">Ver ejemplo de código en GitHub Gist</a>
+
+#### Descargar {#download-1}
+
+*   <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET/blob/master/Examples/Data/Source/Presentation%20Templates/Dynamic%20Hyperlink.pptx" target="_blank" rel="nofollow noopener noreferrer">Dynamic Hyperlink.pptx</a>
+
+### Documentos de hojas de cálculo {#spreadsheet-documents}
+
+<a href="https://gist.github.com/GroupDocsGists/78df21c7cc456a544d46d5b0af95c263" target="_blank" rel="nofollow noopener noreferrer">Ver ejemplo de código en GitHub Gist</a>
+
+#### Descargar {#download-2}
+
+*   <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET/blob/master/Examples/Data/Source/Spreadsheet%20Templates/Dynamic%20Hyperlink.xlsx" target="_blank" rel="nofollow noopener noreferrer">Dynamic Hyperlink.xlsx</a>
+
+### Documentos de correo electrónico {#email-documents}
+
+<a href="https://gist.github.com/GroupDocsGists/e5bd8e2bb7406f93ad39dc10eb9f8eb7" target="_blank" rel="nofollow noopener noreferrer">Ver ejemplo de código en GitHub Gist</a>
+
+#### Descargar {#download-3}
+
+*   <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET/blob/master/Examples/Data/Source/Email%20Templates/Dynamic%20Hyperlink.msg" target="_blank" rel="nofollow noopener noreferrer">Dynamic Hyperlink.msg</a>

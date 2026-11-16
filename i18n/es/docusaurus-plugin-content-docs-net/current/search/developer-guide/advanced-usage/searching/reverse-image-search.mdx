@@ -1,0 +1,102 @@
+---
+title: "Búsqueda inversa de imágenes"
+sidebar_label: "Búsqueda inversa de imágenes"
+sidebar_position: 17.5
+description: "Este artículo brinda conocimientos sobre la búsqueda inversa de imágenes, que permite buscar imágenes similares en archivos ZIP, diversos documentos y archivos individuales."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/searching/reverse-image-search.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "d79cdc2c2dd6c420391417e1bd231e31f5cfd7d9a4da3ba6d1699c8e05cb7dbf"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "39b082178042a4d2e9530f56abdedb5dfacbc826beb31b38dbea42a95b06bb60"
+translation_updated_at: "2026-11-16T11:53:08.524Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+La búsqueda inversa de imágenes es una búsqueda de imágenes similares a una imagen de referencia dada.
+
+En el índice de GroupDocs.Search, la búsqueda inversa de imágenes permite buscar imágenes similares en archivos ZIP, diversos documentos y archivos individuales.
+La búsqueda de imágenes se realiza comparando el *hash* perceptual de la imagen de referencia con los *hashes* de las imágenes presentes en el índice. La idea detrás del *hash* perceptual es que, para imágenes muy similares, este presenta un valor con un número mínimo de bits diferentes, mientras que para imágenes muy distintas, produce un gran número de bits diferentes.
+
+En el motor GroupDocs.Search, la búsqueda inversa de imágenes, al igual que la búsqueda de texto completo, consta de dos etapas: la etapa de indexación y la etapa de búsqueda propiamente dicha.
+
+Para buscar imágenes en el índice, debe habilitar al menos una de las siguientes banderas en las opciones durante la etapa de indexación:
+* **EnabledForSeparateImages**: para indexar imágenes en archivos independientes.
+* **EnabledForEmbeddedImages**: para indexar imágenes incrustadas en diversos documentos.
+* **EnabledForContainerItemImages**: para indexar imágenes que forman parte de documentos contenedor, como archivos ZIP o almacenamientos OST/PST.
+Para obtener más información, consulte la página [Opciones de indexación](/net/search/developer-guide/advanced-usage/indexing/indexing-options/).
+
+Durante la etapa de búsqueda, están disponibles las siguientes opciones:
+* **HashDifferences**: establece el número máximo de bits diferentes permitidos entre los *hashes* de las imágenes encontradas. Este valor oscila entre 0 y 32.
+* **MaxResultCount**: establece el número máximo de imágenes encontradas.
+* **SearchDocumentFilter**: define un filtro para los documentos encontrados.
+Para obtener más información, consulte la página [Opciones de búsqueda de imágenes](/net/search/developer-guide/advanced-usage/searching/image-search-options/).
+
+El siguiente ejemplo de código demuestra todas las etapas de la búsqueda inversa de imágenes:
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex";
+string documentFolder = @"c:\MyDocuments";
+
+// Creating an index
+Index index = new Index(indexFolder);
+
+// Setting the image indexing options
+IndexingOptions indexingOptions = new IndexingOptions();
+indexingOptions.ImageIndexingOptions.EnabledForContainerItemImages = true;
+indexingOptions.ImageIndexingOptions.EnabledForEmbeddedImages = true;
+indexingOptions.ImageIndexingOptions.EnabledForSeparateImages = true;
+
+// Indexing documents in a document folder
+index.Add(documentFolder, indexingOptions);
+
+// Setting the image search options
+ImageSearchOptions imageSearchOptions = new ImageSearchOptions();
+imageSearchOptions.HashDifferences = 10;
+imageSearchOptions.MaxResultCount = 100;
+imageSearchOptions.SearchDocumentFilter = SearchDocumentFilter.CreateFileExtension(".zip", ".png", ".jpg");
+
+// Creating a reference image for search
+SearchImage searchImage = SearchImage.Create(@"c:\MyDocuments\image.png");
+
+// Searching in the index
+ImageSearchResult result = index.Search(searchImage, imageSearchOptions);
+
+Console.WriteLine("Images found: " + result.ImageCount);
+for (int i = 0; i < result.ImageCount; i++)
+{
+    FoundImageFrame image = result.GetFoundImage(i);
+    Console.WriteLine(image.DocumentInfo.ToString());
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le damos la bienvenida a realizar búsquedas en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita de búsqueda de documentos en línea</a>.

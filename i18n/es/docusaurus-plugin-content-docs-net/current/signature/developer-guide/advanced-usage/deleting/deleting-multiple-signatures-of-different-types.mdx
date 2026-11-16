@@ -1,0 +1,117 @@
+---
+title: "Eliminación de múltiples firmas de diferentes tipos"
+sidebar_label: "✖ Múltiple"
+sidebar_key: "net-signature-deleting-deleting-multiple-signatures-of-different-types"
+sidebar_position: 3
+description: "Este artículo muestra cómo eliminar múltiples firmas electrónicas de distintas formas mediante la API de GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/deleting/deleting-multiple-signatures-of-different-types.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "f104ebf11997866db9dd7387c445aa929c9ee2a2932960142a94778273b58611"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "7623d9d1b2208e8b0b2342e1ec20fbd0e91095d683b0b28b31ce335d78aecc24"
+translation_updated_at: "2026-11-16T12:35:14.816Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> proporciona diferentes clases de firmas para manipularlas y eliminarlas de los documentos. <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/delete" target="_blank" rel="nofollow noopener noreferrer">Delete</a> método.
+
+Tenga en cuenta que <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/delete" target="_blank" rel="nofollow noopener noreferrer">Delete</a> El método modifica el mismo documento que se pasó al constructor de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase. Este método devuelve <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/deleteresult" target="_blank" rel="nofollow noopener noreferrer">DeleteResult</a> objeto que contiene una lista de firmas actualizadas correctamente y de las que fallaron. La firma podría haber fallado al eliminarse por varias razones:
+
+* si el objeto de firma se inicializó mediante el constructor con un identificador de firma incorrecto;
+* si el objeto de firma no se encontró;
+* se produjo un error al eliminar la firma en el documento;
+* el tipo de firma no es compatible con la eliminación en la versión actual (para la versión 19.12, estas firmas son de tipo Digital, Campo de formulario o Firma de metadatos).
+
+Aquí están los pasos para eliminar varias firmas en el documento con GroupDocs.Signature:
+
+* Crear nueva instancia de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase y pasar la ruta del documento fuente como parámetro del constructor;
+* Instanciar una o varias opciones de búsqueda con las propiedades deseadas;
+* Llamada <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a> método y pasar la lista creada de Opciones de Búsqueda para obtener la lista de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/basesignature" target="_blank" rel="nofollow noopener noreferrer">BaseSignatures</a>;
+* Seleccionar de la lista <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/basesignature" target="_blank" rel="nofollow noopener noreferrer">BaseSignatures</a> objeto(s) que deben eliminarse;
+* Llamada <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> objeto <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/delete" target="_blank" rel="nofollow noopener noreferrer">Delete</a> método y pasarle una o varias firmas.
+* Analizar <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.domain/deleteresult" target="_blank" rel="nofollow noopener noreferrer">DeleteResult</a> resultado para verificar si las firmas se actualizaron o no.
+
+## Eliminar múltiples firmas en el documento {#delete-multiple-signatures-in-the-document}
+
+Este ejemplo muestra cómo eliminar múltiples firmas que se encontraron utilizando <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/search" target="_blank" rel="nofollow noopener noreferrer">Search</a> método.
+
+```csharp
+// initialize Signature instance
+using (Signature signature = new Signature("signed.docx"))
+{
+    // define few search options
+    BarcodeSearchOptions barcodeOptions = new BarcodeSearchOptions();
+    QrCodeSearchOptions qrCodeOptions = new QrCodeSearchOptions();
+    // add options to list
+    List<SearchOptions> listOptions = new List<SearchOptions>();
+    listOptions.Add(barcodeOptions);
+    listOptions.Add(qrCodeOptions);
+    // search for signatures in document
+    SearchResult result = signature.Search(listOptions);
+    if (result.Signatures.Count > 0)
+    {
+        Console.WriteLine("Trying to delete signatures...");
+        List<BaseSignature> signaturesToDelete = new List<BaseSignature>();
+        // collect image signatures to delete
+        foreach (BaseSignature temp in result.Signatures)
+        {
+            if (temp.SignatureType == SignatureType.Image)
+            {
+                signaturesToDelete.Add(temp);
+            }
+        }
+        // delete signatures
+        DeleteResult deleteResult = signature.Delete(signaturesToDelete);
+        if (deleteResult.Succeeded.Count == signaturesToDelete.Count)
+        {
+            Console.WriteLine("All signatures were successfully deleted!");
+        }
+        else
+        {
+            Console.WriteLine($"Successfully deleted signatures : {deleteResult.Succeeded.Count}");
+            Console.WriteLine($"Not deleted signatures : {deleteResult.Failed.Count}");
+        }
+        Console.WriteLine("List of deleted signatures:");
+        foreach (BaseSignature temp in deleteResult.Succeeded)
+        {
+            Console.WriteLine($"Signature# Id:{temp.SignatureId}, Location: {temp.Left}x{temp.Top}. Size: {temp.Width}x{temp.Height}");
+        }
+    }
+    else
+    {
+        Console.WriteLine("No one signature was found.");
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con interfaz MVC</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con interfaz WebForms</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con interfaz Dropwizard</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con interfaz Spring</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

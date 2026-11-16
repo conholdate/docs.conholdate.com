@@ -1,0 +1,252 @@
+---
+title: "Firma de documentos en un contenedor Linux con .NET: Guía de integración"
+sidebar_label: "Firma de documentos en un contenedor Linux con .NET: Guía de integración"
+sidebar_key: "net-signature-signing-documents-linux-container-fonts"
+sidebar_position: 1
+description: "Hacer que GroupDocs.Signature funcione dentro de un contenedor Linux: qué imágenes base incluyen fuentes, por qué una familia faltante falla en lugar de recurrir a una alternativa, cómo resolver una familia en tiempo de ejecución y la capa del Dockerfile que lo soluciona."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/use-cases/signing-documents-linux-container-fonts.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "a84cc07c34e12dd674e426b5517f959b3306300c5e8ca70d5193aba36796c1bf"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "4dce0547d86d24a3f0f662d7a13c40446eb4d992dfde2087c372cc55718ee477"
+translation_updated_at: "2026-11-16T14:53:15.881Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+
+:::info
+💡 Ejemplo funcional completo disponible en GitHub:
+<a href="https://github.com/groupdocs-signature/sign-pdf-in-linux-container-fonts-dotnet" target="_blank" rel="nofollow noopener noreferrer">firmar-pdf-en-contenedor-linux-fuentes-dotnet</a>
+:::
+
+
+## Visión general {#overview}
+
+La provisión de fuentes para contenedores es un requisito de GroupDocs.Signature para .NET que determina si las firmas de texto funcionan o no una vez que su servicio abandona la máquina del desarrollador. La biblioteca resuelve una familia de fuentes mediante la plataforma, y no realiza sustituciones cuando dicha familia no está presente: nombrar una fuente que no esté instalada genera `Sign document error: Font <name> was not found` y no se escribe ningún documento. Ommitir `SignatureFont` tampoco ayuda, ya que en ese caso la biblioteca solicita su propia fuente predeterminada, Times New Roman, y falla de forma idéntica.
+
+Esto es relevante porque las imágenes base no son entornos de escritorio. Según mediciones realizadas sobre las imágenes en las que se ejecuta el ejemplo de esta guía: `mcr.microsoft.com/dotnet/runtime:8.0` incluye **cero** archivos de fuente, `eclipse-temurin:17-jre` incluye 8 (DejaVu), `node:18-bookworm` incluye 6, y `python:3.11-slim` incluye cero. Por lo tanto, en la imagen del entorno de ejecución de .NET, una firma de texto falla por completo hasta que se agrega una capa de fuentes. No existe una solución alternativa a nivel de código.
+
+Esta guía aborda el aspecto de integración de este problema: qué instalar, cómo elegir una familia en tiempo de ejecución en lugar de codificarla de forma rígida, cómo manejar el caso de que un script no tenga fuentes disponibles y cómo verificar el resultado en lugar de asumirlo.
+
+## Guía de inicio rápido {#quickstart}
+
+**Paso 1: agregar el paquete**
+
+```bash
+dotnet add package GroupDocs.Signature --version 26.6.0
+```
+
+**Paso 2: agregar la capa de fuente a tu imagen**
+
+Esta es la parte que no es opcional en una imagen de .NET runtime:
+
+```dockerfile
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        fontconfig \
+        fonts-dejavu-core \
+        fonts-liberation \
+        fonts-noto-cjk \
+    && fc-cache -f \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+```
+
+**Paso 3: firme con una familia que haya resuelto, no con una que haya asumido**
+
+```csharp
+var options = new TextSignOptions(text)
+{
+    Left = 50,
+    Top = top,
+    Width = 280,
+    Height = 40,
+};
+
+if (familyName is not null)
+{
+    options.Font = new SignatureFont { FamilyName = familyName, Size = 16 };
+}
+
+return options;
+```
+
+Ejecute la misma imagen dos veces: una con la capa de fuentes y otra sin ella, y compare los registros. El repositorio de ejemplo incluye ambos Dockerfiles precisamente por esta razón.
+
+## Requisitos previos {#prerequisites}
+
+El ejemplo está orientado a `net8.0` y se ejecuta en `mcr.microsoft.com/dotnet/runtime:8.0`, con GroupDocs.Signature 26.6.0 o posterior. Una licencia es opcional para seguir el ejemplo: sin ella, la ejecución sigue firmando, pero en modo de evaluación, y agrega texto de prueba a la página.
+
+## Conceptos fundamentales {#core-concepts}
+
+Un **nombre de familia** es lo que `SignatureFont.FamilyName` recibe, y no es el nombre del archivo. El paquete `fonts-noto-cjk` de Debian instala `NotoSansCJK-Regular.ttc`, cuya familia es `Noto Sans CJK JP`. Detectar fuentes escaneando `/usr/share/fonts` en busca de nombres de archivos, por tanto, omite fuentes presentes e informa familias que no podrán resolverse.
+
+**Resolución mediante sondeo** es la alternativa portátil: realice una firma descartable por cada familia candidata y mantenga la primera que no genere una excepción. Esto plantea a la biblioteca la misma pregunta que lo hará la llamada real, por lo que la respuesta no puede ser incorrecta por la razón antes mencionada.
+
+**Dos clases de fallos** requieren manejo distinto. No tener ninguna fuente latina implica que la imagen no puede firmarse, lo cual es fatal. No tener fuentes CJK implica que el texto no latino no se puede incrustar, lo cual implica omitirlo y mostrar una advertencia, pero no un bloqueo.
+
+### ¿Qué fuentes necesito instalar realmente? {#which-fonts-do-i-actually-need-to-install}
+
+Una es el mínimo: `fonts-dejavu-core` permite que funcione la firma en latín, griego y cirílico. Añada `fonts-liberation` cuando sus documentos hagan referencia a Arial, Times New Roman o Courier New, ya que proporciona sustitutos compatibles métricamente bajo nombres resolubles. Añada `fonts-noto-cjk` para texto en chino, japonés o coreano. Instale `fontconfig` junto con ellas, tanto para el propio resolutor como para `fc-list` durante la depuración.
+
+## Patrones de integración {#integration-patterns}
+
+### Patrón 1: Inventario primero, resolución después {#pattern-1-inventory-first-resolve-second}
+
+Registre lo que tiene la imagen antes de solicitar nada. El inventario convierte “fuente no encontrada” en un diagnóstico, porque una cuenta de cero y una cuenta de 24 apuntan a correcciones completamente distintas. El escaneo evita deliberadamente `System.Drawing`: `System.Drawing.Common` es exclusivo de Windows a partir de .NET 7 y lanza una excepción en Linux, lo cual constituye un fallo común en contenedores.
+
+```csharp
+string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+string[] roots =
+{
+    "/usr/share/fonts",
+    "/usr/local/share/fonts",
+    Path.Combine(home, ".fonts"),
+    Path.Combine(home, ".local/share/fonts"),
+    Environment.GetFolderPath(Environment.SpecialFolder.Fonts),
+    "/System/Library/Fonts",
+    "/Library/Fonts",
+};
+```
+
+La resolución recorre luego una lista de candidatos, comenzando por los más portátiles, y devuelve `null` cuando nada funciona:
+
+```csharp
+foreach (string candidate in candidates)
+{
+    if (TryFamily(sourcePath, candidate).Ok)
+    {
+        return candidate;
+    }
+}
+
+return null;
+```
+
+La muestra utiliza `DejaVu Sans`, `Liberation Sans`, `Arial`, `Verdana` para el alfabeto latino y coloca `Noto Sans CJK JP` primero para CJK, de modo que un contenedor se resuelve en la primera sonda y un equipo de desarrollo de Windows recurre a `Arial`.
+
+### Patrón 2: Sonda con una firma desechable {#pattern-2-probe-with-a-throwaway-signature}
+
+La sonda es una llamada real a `Sign` hacia un archivo temporal, por lo que su respuesta es fiable. El archivo de trabajo siempre se elimina, por lo que la sonda nunca toca su directorio de salida.
+
+```csharp
+string scratch = Path.Combine(Path.GetTempPath(), $"gd-font-probe-{Guid.NewGuid():N}.pdf");
+try
+{
+    using var signature = new Signature(sourcePath);
+    var options = new TextSignOptions("probe")
+    {
+        Left = 10,
+        Top = 10,
+        Width = 60,
+        Height = 20,
+        Font = new SignatureFont { FamilyName = familyName, Size = 10 },
+    };
+
+    signature.Sign(scratch, options);
+    return (true, "ok");
+}
+```
+
+La captura se limita a la propia excepción de la biblioteca y devuelve el mensaje en lugar de relanzarla, lo que permite que el llamador imprima la causa real:
+
+```csharp
+catch (GroupDocsSignatureException ex)
+{
+    return (false, ex.Message);
+}
+finally
+{
+    if (File.Exists(scratch))
+    {
+        File.Delete(scratch);
+    }
+}
+```
+
+Hágalo una sola vez al inicio y almacene en caché el resultado. La detección por solicitud cuesta una escritura en PDF por candidato.
+
+### Patrón 3: Firme lo que pueda, verifique lo que usted firmó {#pattern-3-sign-what-you-can-verify-what-you-signed}
+
+Ambas firmas pasan por una única llamada a `Sign`, y la firma CJK se agrega únicamente cuando se resuelve una familia CJK:
+
+```csharp
+using var signature = new Signature(sourcePath);
+
+var options = new List<SignOptions>
+{
+    BuildTextOptions(LatinText, latinFamily, top: 50),
+};
+
+if (cjkFamily is not null)
+{
+    options.Add(BuildTextOptions(CjkText, cjkFamily, top: 120));
+}
+
+SignResult result = signature.Sign(outputPath, options);
+return result.Succeeded.Count;
+```
+
+Luego, lea el archivo de nuevo. Renderizar CJK como cajas vacías no es una excepción, por lo que la búsqueda es el único paso que distingue una firma real de una visualmente rota:
+
+```csharp
+using var signature = new Signature(signedPath);
+
+var options = new TextSearchOptions { AllPages = true };
+List<TextSignature> found = signature.Search<TextSignature>(options);
+```
+
+## Manejo de errores {#error-handling}
+
+| Síntoma | Causa | Solución |
+| --- | --- | --- |
+| `Sign document error: Font <name> was not found` | familia no instalada en la imagen | instalar la capa de fuentes; resolver la familia en tiempo de ejecución en lugar de codificarla directamente |
+| El mismo error sin ninguna fuente configurada | GroupDocs recurría a Times New Roman, que también estaba ausente | misma solución; omitir `SignatureFont` no constituye una solución alternativa en una imagen sin fuentes |
+| `CultureNotFoundException: ... en-US is an invalid culture identifier` | `InvariantGlobalization=true` en el archivo csproj | mantener la globalización activa e instalar ICU en la imagen; `SignatureSettings` compila `CultureInfo("en-US")` |
+| Firma CJK escrita pero mostrada como cajas | Se resolvió una fuente latina, pero faltaba la fuente CJK | instalar `fonts-noto-cjk` y verificar la lectura de retorno, no el valor devuelto |
+
+Trate un error fatal de fuente como un código de salida, no como una advertencia. El ejemplo captura `GroupDocsSignatureException` alrededor de la llamada real de firma, imprime la solución mínima (`apt-get install -y fonts-dejavu-core`) y devuelve el código 3.
+
+## Lista de verificación para producción {#production-readiness-checklist}
+
+- [ ] La imagen de ejecución instala al menos `fontconfig` y `fonts-dejavu-core`
+- [ ] La resolución de fuentes se ejecuta una sola vez al inicio, registra las familias resueltas y hace fallar el contenedor si no se resuelve ninguna familia latina
+- [ ] El texto no latino tiene `fonts-noto-cjk` instalado y se verifica la lectura de retorno
+- [ ] `InvariantGlobalization` no está configurado como true, y la licencia se monta en lugar de integrarse en la imagen
+
+## Preguntas frecuentes {#frequently-asked-questions}
+
+**P: ¿Puedo incluir un archivo de fuente con la aplicación en lugar de instalar paquetes?**
+R: Puede colocar archivos de fuente en un directorio que la imagen lea, pero la familia sigue teniendo que resolverse mediante la plataforma, por lo que `fc-cache` y un directorio de fuentes conocido por el resolutor son lo que hacen que funcione. Instalar los paquetes de Debian es simplemente el camino más rápido hacia ese objetivo.
+
+**P: ¿Por qué realizar una sondeo si ya sé qué fuentes instala mi Dockerfile?**
+R: Porque el mismo código también se ejecuta en una máquina de desarrollo, en CI y en la siguiente imagen base que alguien actualice. Mantuve un `DejaVu Sans` codificado durante un tiempo y funcionó hasta que un colega ejecutó el mismo servicio en Windows, donde esa familia no está instalada y la ejecución falló en la primera firma.
+
+**P: ¿Esto también aplica a las firmas de imagen y código de barras?**
+R: No. El requisito de fuente es específico para las firmas basadas en texto, donde se resuelve un nombre de familia. Las firmas de imagen, código de barras y QR no requieren que se instale una fuente, aunque una firma de sello con una etiqueta de texto sí lo requiere.
+
+## Conclusión {#conclusion}
+
+Instale al menos una fuente, resuelva la familia solicitándosela a la biblioteca, omita lo que no se puede incrustar y lea el resultado antes de considerar exitoso el trabajo. El repositorio de ejemplo construye ambas imágenes, por lo que la diferencia es reproducible con dos comandos en lugar de una afirmación en un documento.
+
+## Véase también {#see-also}
+
+- <a href="https://blog.groupdocs.com/signature/signing-documents-linux-container-fonts-net/" target="_blank" rel="nofollow noopener noreferrer">Artículo de blog detallado sobre este proyecto</a> – el recorrido por la imagen sin fuentes y los paquetes que lo solucionan
+- <a href="https://docs.groupdocs.com/signature/net/signing/" target="_blank" rel="nofollow noopener noreferrer">Firmar documentos</a> – superficie completa de opciones detrás de `TextSignOptions` y `SignatureFont`
+- <a href="https://docs.groupdocs.com/signature/net/searching/" target="_blank" rel="nofollow noopener noreferrer">Buscar firmas</a> – referencia para el paso de lectura de retorno
+- <a href="https://docs.groupdocs.com/signature/net/system-requirements/" target="_blank" rel="nofollow noopener noreferrer">Requisitos del sistema</a> – entornos de ejecución compatibles y notas sobre Linux
+- <a href="https://docs.groupdocs.com/signature/net/" target="_blank" rel="nofollow noopener noreferrer">Documentación del producto</a> – guía de inicio y temas avanzados
+- <a href="https://reference.groupdocs.com/signature/net/" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API</a> – detalles completos de la API de GroupDocs.Signature para .NET

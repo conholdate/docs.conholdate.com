@@ -1,0 +1,97 @@
+---
+title: "Extractores de texto personalizados"
+sidebar_label: "Extractores de texto personalizados"
+sidebar_position: 3
+description: "GroupDocs.Search admite la indexación de muchos formatos de documento. Sin embargo, también existe la posibilidad de implementar el soporte para cualquier otro formato distinto de los ya existentes."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/indexing/custom-text-extractors.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "4b798dcb85a23bf16da8564ca4c14342a69548ab86309fd13efef2df796d130c"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "b8ed4239c9fe97b02dfffa6036129e0f6e1c8409ed448ae7e21014f97d242a0b"
+translation_updated_at: "2026-11-16T11:08:42.499Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Search admite la indexación de muchos formatos de documento. Sin embargo, también existe la posibilidad de implementar el soporte para cualquier otro formato distinto de los ya existentes.
+
+El siguiente ejemplo demuestra cómo implementar un extractor de texto personalizado.
+
+**C#**
+
+```csharp
+public class LogExtractor : IFieldExtractor
+{
+    private readonly string[] extensions = new string[] { ".log" };
+ 
+    public string[] Extensions
+    {
+        get { return extensions; }
+    }
+ 
+    public DocumentField[] GetFields(string filePath)
+    {
+        FileInfo fileInfo = new FileInfo(filePath);
+        DocumentField[] fields = new DocumentField[]
+        {
+            new DocumentField("FileName", fileInfo.FullName),
+            new DocumentField("CreationDate", fileInfo.CreationTime.ToString(CultureInfo.InvariantCulture)),
+            new DocumentField("Content", ExtractContent(filePath)),
+        };
+        return fields;
+    }
+ 
+    private string ExtractContent(string filePath)
+    {
+        string text = File.ReadAllText(filePath);
+        return text;
+    }
+}
+```
+
+El siguiente ejemplo muestra cómo usar el extractor personalizado para la indexación.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\"; // Specify path to the index folder
+string documentsFolder = @"c:\MyDocuments\"; // Specify path to a folder containing documents to search
+ 
+IndexSettings settings = new IndexSettings();
+settings.CustomExtractors.Add(new LogExtractor()); // Adding custom text extractor to the index settings
+ 
+Index index = new Index(indexFolder, settings); // Creating or loading an index
+ 
+index.Add(documentsFolder); // Indexing documents from the specified folder
+```
+
+Tenga en cuenta que los extractores personalizados no se guardan en un índice y deben crearse y agregarse cada vez que se crea o carga el índice. Sin embargo, se puede utilizar el mismo código tanto para crear un nuevo índice como para abrir uno existente. En este último caso, al abrir un índice existente, se utilizarán los extractores personalizados definidos en la configuración del índice pasada al constructor; el resto de la configuración del índice se cargará desde el disco.
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Junto con la completa biblioteca de .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.
+
+Le invitamos a buscar en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita de búsqueda de documentos en línea</a>.

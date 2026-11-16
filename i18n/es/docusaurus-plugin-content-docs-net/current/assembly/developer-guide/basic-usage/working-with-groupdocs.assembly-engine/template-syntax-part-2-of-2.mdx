@@ -1,0 +1,635 @@
+---
+title: "Sintaxis de plantillas – Parte 2 de 2"
+sidebar_label: "Sintaxis de plantillas – Parte 2 de 2"
+sidebar_key: "net-assembly-working-with-groupdocs-assembly-engine-template-syntax-part-2-of-2"
+sidebar_position: 2
+description: ""
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/working-with-groupdocs.assembly-engine/template-syntax-part-2-of-2.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "20cda803b5d025bd4eeac51855d13bb3729c43be9393c3720d0d85c629649abd"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "c059922a722059cb7397ca9c5ee9e3740690d72ee638a07819c1a6098ec25512"
+translation_updated_at: "2026-11-16T14:26:39.694Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+:::info
+Este artículo es la segunda parte de la serie de artículos sobre Sintaxis de Plantillas. Para la primera parte, visite Sintaxis de Plantillas – Parte 1 de 2.
+:::
+
+
+## Generación de resultados de expresiones {#outputting-expression-results}
+
+Puede generar resultados de expresiones en sus informes utilizando etiquetas de expresión. Una etiqueta de expresión representa un marcador de posición para el resultado de una expresión dentro de una plantilla. Al construir un informe, se evalúa la expresión correspondiente y este marcador de posición se reemplaza por el resultado formateado de la expresión.
+
+Una etiqueta de expresión no tiene nombre y está compuesta por los siguientes elementos:
+
+*   Una expresión encerrada entre corchetes
+*   Una cadena de formato opcional, encerrada entre comillas dobles y precedida por el carácter “:”
+*   Un modificador `html` opcional
+
+```csharp
+<<[expression]:"format" -html>>
+```
+
+Si `html` si el elemento `switch` no está presente, el resultado de la expresión correspondiente se escribe en un documento como texto sin formato en tiempo de ejecución. Los atributos de fuente se derivan del primer carácter de la etiqueta correspondiente en este caso.
+
+Si `html` si el conmutador está presente, el resultado de la expresión se considera un bloque HTML y se escribe como tal. Esta característica es útil cuando necesitas formatear diferentes partes del texto del resultado de una expresión de distintas maneras. Por ejemplo, la siguiente etiqueta se reemplaza en tiempo de ejecución por un contenido como `**Negrita** y *cursiva*`.
+
+```csharp
+<<["<b>Bold</b> and <i>italic</i> text"] -html>>
+```
+
+Para dar formato al resultado de una expresión numérica o de fecha y hora, puede especificar una cadena de formato como elemento de la etiqueta de expresión correspondiente. Estas cadenas de formato son las mismas que las que pasa a <a href="http://msdn.microsoft.com/en-us/library/system.iformattable.tostring(v=vs.110" target="_blank" rel="nofollow noopener noreferrer">`IFormattable.ToString`</a>.aspx) implementadores del método. Es decir, por ejemplo, dado que `d` es una `DateTime` valor, puede utilizar la siguiente plantilla para formatear el valor con el patrón "yyyy.MM.dd".
+
+```csharp
+<<[d]:"yyyy.MM.dd">>
+```
+
+## Generación de datos secuenciales {#outputting-sequential-data}
+
+Puede generar una secuencia de elementos del mismo tipo en su informe mediante una banda de datos. Una `data band` posee un cuerpo que representa una plantilla para un único elemento de dicha secuencia. Al construir el informe, se recorren los elementos de la secuencia y se lleva a cabo el siguiente procedimiento para cada uno de ellos:
+
+1.  El cuerpo de la banda de datos se duplica y se agrega al informe.
+2.  El cuerpo de la banda de datos agregado se rellena con los datos del elemento.
+
+**Nota:** el cuerpo de una banda de datos puede contener bandas de datos anidadas.
+
+El cuerpo de una banda de datos se define entre las etiquetas de apertura y cierre correspondientes `foreach` dentro de una plantilla, como se muestra a continuación.
+
+```csharp
+<<foreach ...>>
+data_band_body
+<</foreach>>
+```
+
+Puede hacer referencia a un elemento de la secuencia correspondiente dentro de expresiones de plantilla ubicadas en el cuerpo de una banda de datos, utilizando una variable de iteración. En tiempo de ejecución, una variable de iteración representa un elemento de la secuencia sobre el cual se está realizando actualmente una iteración. Puede declarar una variable de iteración dentro de la etiqueta de apertura `foreach` correspondiente.
+
+Una etiqueta de apertura `foreach` define una instrucción `foreach` encerrada entre paréntesis. La siguiente tabla describe los elementos de esta instrucción.
+
+| Elemento | ¿Opcional? | Observaciones |
+| --- | --- | --- |
+| **Tipo de variable de iteración** | Sí | Puede especificar explícitamente el tipo de una variable de iteración. Dicho tipo debe ser conocido por el motor (consulte <a href="https://docs.groupdocs.com/assembly/net/groupdocs-assembly-engine-apis/#setting-up-known-external-types" target="_blank" rel="nofollow noopener noreferrer">Configuración de tipos externos conocidos</a> para obtener más información). Si no especifica explícitamente el tipo, este se determina implícitamente por el motor según el tipo de la secuencia correspondiente. |
+| **Nombre de variable de iteración** | Sí | Puede especificar el nombre de una variable de iteración para poder acceder a sus miembros durante su uso. Dicho nombre debe ser único dentro del ámbito de la etiqueta `foreach` correspondiente. Si no especifica un nombre, puede acceder a los miembros de la variable mediante la sintaxis de acceso a miembros de objeto contextual (consulte <a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-1-of-2/#using-contextual-object-member-access" target="_blank" rel="nofollow noopener noreferrer">Uso del objeto contextual</a> para obtener más información sobre el acceso a miembros). |
+| **Palabra clave "in"** | No |  |
+| **Expresión de secuencia** | No | Una expresión de secuencia debe devolver un implementador de <a href="http://msdn.microsoft.com/en-us/library/system.collections.ienumerable(v=vs.110" target="_blank" rel="nofollow noopener noreferrer">IEnumerable</a>.aspx). |
+
+La sintaxis completa de una etiqueta `foreach` (incluidos los elementos opcionales) es la siguiente.
+
+```csharp
+<<foreach [variable_type variable_name in sequence_expression]>>
+data_band_body
+<</foreach>>
+```
+
+### Banda de datos común {#common-data-bands}
+
+Una banda de datos común es una banda de datos cuyo cuerpo comienza y termina dentro de párrafos que pertenecen a una única historia o celda de tabla.
+
+En particular, una banda de datos común puede estar completamente ubicada dentro de un único párrafo. En este caso, al generar un informe, la banda se reemplaza por contenido que también se encuentra completamente dentro del mismo párrafo. El siguiente ejemplo ilustra tal escenario. Dado que *items* es una enumeración de las cadenas "item1", "item2" y "item3", puede utilizar la siguiente plantilla para enumerarlas separadas por comas en un único párrafo.
+
+```csharp
+The items are: <<foreach [item in items]>><<[item]>>, <</foreach>>and others.
+```
+
+En este caso, el motor genera un informe como el siguiente.
+
+```csharp
+The items are: item1, item2, item3, and others.
+```
+
+Cuando el cuerpo de una banda de datos común comienza y termina en párrafos distintos, el motor duplica, durante la iteración, únicamente los saltos de párrafo que se encuentran dentro del cuerpo. La siguiente tabla ilustra los casos relevantes.
+
+**Nota:** Los ejemplos de la tabla se presentan con los signos de párrafo mostrados según el editor de Microsoft Word®.
+
+| Plantilla | Informe |
+| --- | --- |
+| `prefix <<foreach [item in items]>><<[item]>>¶`<br/>`<</foreach>>suffix` | `prefix item1¶`<br/>`item2¶`<br/>`item3¶`<br/>`suffix` |
+| `prefix<<foreach [item in items]>>¶`<br/>`<<[item]>><</foreach>> suffix` | `prefix¶`<br/>`item1¶`<br/>`item2¶`<br/>`item3 suffix` |
+| `prefix¶`<br/>`<<foreach [item in items]>><<[item]>>¶`<br/>`<</foreach>>suffix` | `prefix¶`<br/>`item1¶`<br/>`item2¶`<br/>`item3¶`<br/>`suffix` |
+| `prefix<<foreach [item in items]>>¶`<br/>`<<[item]>><</foreach>>¶`<br/>`suffix` | `prefix¶`<br/>`item1¶`<br/>`item2¶`<br/>`item3¶`<br/>`suffix` |
+| `prefix¶`<br/>`<<foreach [item in items]>>¶`<br/>`<<[item]>>¶`<br/>`<</foreach>>¶`<br/>`suffix` | `prefix¶`<br/>`¶`<br/>`item1¶`<br/>`¶`<br/>`item2¶`<br/>`¶`<br/>`item3¶`<br/>`¶`<br/>`suffix` |
+
+Al generar un informe, los saltos de párrafo duplicados heredan sus atributos comunes de sus prototipos en la plantilla. En particular, esto permite construir dinámicamente listas numeradas o con viñetas en los informes. Por ejemplo, dada la declaración anterior de elementos, puede obtener un informe con su lista numerada utilizando la siguiente plantilla.
+
+### Fusión dinámica de celdas de tabla {#merging-table-cells-dynamically}
+
+Puede fusionar dinámicamente celdas de tabla cuyo contenido textual sea igual en sus informes utilizando etiquetas `cellMerge`. La sintaxis de una etiqueta `cellMerge` se define como sigue.
+
+```
+<<cellMerge>>
+```
+
+De forma predeterminada, una etiqueta `cellMerge` provoca una operación de fusión de celdas únicamente en dirección vertical durante el tiempo de ejecución. Sin embargo, puede modificar este comportamiento de las siguientes maneras:
+
+- Para fusionar celdas únicamente en dirección horizontal, utilice el modificador `horz` como se indica a continuación.
+  `<<cellMerge -horz>>`
+
+- Para fusionar celdas en ambas direcciones —vertical y horizontal—, utilice el modificador `both` como se indica a continuación.
+  `<<cellMerge -both>>`
+
+Para que dos o más celdas contiguas de una tabla se fusionen dinámicamente en cualquier dirección por parte del motor, deben cumplirse los siguientes requisitos:
+
+- Cada una de las celdas debe contener una etiqueta `cellMerge` que indique una operación de fusión de celdas en la misma dirección (o direcciones).
+- Cada una de las celdas no debe estar ya fusionada en otra dirección. Este requisito no se aplica cuando se utiliza el modificador `both`.
+- Las celdas deben contener el mismo texto, ignorando los espacios en blanco iniciales y finales.
+
+Considere la siguiente plantilla:
+
+| **...** | **...** | **...** |
+| ------- | ----------------------------- | ------- |
+| **...** | **&lt;&lt;cellMerge&gt;&gt;&lt;&lt;[value1]&gt;&gt;** | **...** |
+| **...** | **&lt;&lt;cellMerge&gt;&gt;&lt;&lt;[value2]&gt;&gt;** | **...** |
+| **...** | **...** | **...** |
+
+Si `value1` y `value2` tienen el mismo valor, por ejemplo “Hello”, las celdas de la tabla que contienen las etiquetas `cellMerge` se fusionan correctamente durante el tiempo de ejecución, y el informe resultante tiene el siguiente aspecto:
+
+<table>
+	<tbody>
+		<tr>
+			<td>...</td>
+			<td>...</td>
+			<td>...</td>
+		</tr>
+		<tr>
+			<td>...</td>
+			<td rowspan="2">Hello</td>
+			<td>...</td>
+		</tr>
+		<tr>
+			<td>...</td>
+			<td>...</td>
+		</tr>
+		<tr>
+			<td>...</td>
+			<td>...</td>
+			<td>...</td>
+		</tr>
+	</tbody>
+</table>
+
+Si `value1` y `value2` tienen valores distintos, por ejemplo “Hello” y “World”, las celdas de la tabla que contienen etiquetas `cellMerge` no se fusionan en tiempo de ejecución, y el informe resultante se verá como sigue:
+
+| **...** | **...** | **...** |
+| ------- | --------- | ------- |
+| **...** | **Hello** | **...** |
+| **...** | **World** | **...** |
+| **...** | **...** | **...** |
+
+**Nota:** una etiqueta `cellMerge` puede utilizarse normalmente dentro de una banda de datos de tabla.
+
+Puede definir una restricción adicional sobre la fusión dinámica de celdas de tabla proporcionando una expresión para la etiqueta `cellMerge` mediante la siguiente sintaxis.
+
+```
+<<cellMerge [expression]>>
+```
+
+Durante el tiempo de ejecución, las expresiones definidas para `cellMerge` Las etiquetas se evalúan y se descarta la fusión dinámica de celdas para esas etiquetas, cuyas expresiones devuelven valores desiguales, incluso si se cumplen todas las demás condiciones para la fusión, como el hecho de que el contenido textual de las celdas sea igual. En particular, esta funcionalidad resulta útil cuando se desea que las celdas correspondientes a elementos distintos de una secuencia de bandas de datos no se fusionen, como se muestra en el siguiente ejemplo.
+
+Suponga que tiene el `Invoice` y `InvoiceItem` clases definidas en su aplicación de la siguiente manera.
+
+```csharp
+public class Invoice
+{
+	public int Number { get { ... } }
+	public IEnumerable<InvoiceItem> Items { get { ... } }
+	...
+}
+public class InvoiceItem
+{
+	public String Ware { get { ... } }
+	public String Pack { get { ... } }
+	public int Quantity { get { ... } }
+	...
+}
+```
+
+Dado que `invoices` es una enumeración de instancias de `Invoice`, puede utilizar la siguiente plantilla para mostrar información sobre varias facturas en una sola tabla.
+
+| **#** | **Mercancía** | **Empaque** | **Cantidad** |
+| ------------------------------------------------------------ | -------------------------------- | ------------------- | ----------------------------------------------- |
+| **&lt;&lt;foreach [invoice in invoices]&gt;&gt;&lt;&lt;foreach [item in invoice.Items]&gt;&gt;&lt;&lt;[invoice.Number]&gt;&gt;&lt;&lt;cellMerge&gt;&gt;** | **&lt;&lt;[item.Ware]&gt;&gt;&lt;&lt;cellMerge&gt;&gt;** | **&lt;&lt;[item.Pack]&gt;&gt;** | **&lt;&lt;[item.Quantity]&gt;&gt;&lt;&lt;/foreach&gt;&gt;&lt;&lt;/foreach&gt;&gt;** |
+
+Un documento resultante tendría el siguiente aspecto.
+
+<table>
+	<tbody>
+		<tr>
+			<td>#</td>
+			<td>Ware</td>
+			<td>Pack</td>
+			<td>Quantity</td>
+		</tr>
+		<tr>
+			<td rowspan="2">11342</td>
+			<td rowspan="3">Natural Mineral Water</td>
+			<td>Bottle 1.0 L</td>
+			<td>30</td>
+		</tr>
+		<tr>
+			<td>Bottle 0.5 L</td>
+			<td>50</td>
+		</tr>
+		<tr>
+			<td>15385</td>
+			<td>Bottle 1.0 L</td>
+			<td>110</td>
+		</tr>
+	</tbody>
+</table>
+
+Es decir, las celdas correspondientes al mismo producto en facturas distintas se fusionarían, lo cual no es deseable. Para evitar que esto ocurra, puede utilizar la siguiente plantilla en su lugar.
+
+| **#** | **Producto** | **Empaque** | **Cantidad** |
+| ------------------------------------------------------------ | ---------------------------------------------------- | ------------------- | ----------------------------------------------- |
+| **&lt;&lt;foreach [invoice in invoices]&gt;&gt;&lt;&lt;foreach [item in invoice.Items]&gt;&gt;&lt;&lt;[invoice.Number]&gt;&gt;&lt;&lt;cellMerge&gt;&gt;** | **&lt;&lt;[item.Ware]&gt;&gt;&lt;&lt;cellMerge [invoice.IndexOf()]&gt;&gt;** | **&lt;&lt;[item.Pack]&gt;&gt;** | **&lt;&lt;[item.Quantity]&gt;&gt;&lt;&lt;/foreach&gt;&gt;&lt;&lt;/foreach&gt;&gt;** |
+
+A continuación, se muestra un documento resultante de ejemplo.
+
+<table>
+	<tbody>
+		<tr>
+			<td>#</td>
+			<td>Ware</td>
+			<td>Pack</td>
+			<td>Quantity</td>
+		</tr>
+		<tr>
+			<td rowspan="2">11342</td>
+			<td rowspan="2">Natural Mineral Water</td>
+			<td>Bottle 1.0 L</td>
+			<td>30</td>
+		</tr>
+		<tr>
+			<td>Bottle 0.5 L</td>
+			<td>50</td>
+		</tr>
+		<tr>
+			<td>15385</td>
+      <td>Natural Mineral Water</td>
+			<td>Bottle 1.0 L</td>
+			<td>110</td>
+		</tr>
+	</tbody>
+</table>
+
+### Listas numeradas {#numbered-lists}
+
+ "1. " en la plantilla anterior representa una etiqueta de lista numerada.
+
+```csharp
+1. <<foreach [item in items]>><<[item]>>
+<</foreach>>
+```
+
+En este caso, el motor genera un informe como el siguiente.
+
+```csharp
+1. item1
+2. item2
+3. item3
+```
+
+#### Reinicio de numeración de listas dinámicas {#dynamic-list-numbering-restart}
+
+Esta funcionalidad resulta útil al trabajar con una lista numerada anidada dentro de un bloque de datos, como se muestra en el siguiente ejemplo.
+
+Suponga que tiene definidas en su aplicación las clases `Order` y `Service` de la siguiente manera.
+
+```csharp
+public class Order
+{
+    public String ClientName { get { ... } }
+    public String ClientAddress { get { ... } }
+    public IEnumerable<Service> Services { get { ... } }
+    ...
+}
+ 
+public class Service
+{
+    public String Name { get { ... } }
+    ...
+}
+```
+
+Dado que `orders` es una enumeración de instancias de `Order`, podría intentar utilizar la siguiente plantilla para generar información sobre varios pedidos en un solo documento.
+
+```csharp
+<<foreach [order in orders]>><<[order.ClientName]>> (<<[order.ClientAddress]>>)
+1. <<foreach [service in order.Services]>><<[service.Name]>>
+<</foreach>><</foreach>>
+```
+
+Pero entonces, un documento de resultado tendría el siguiente aspecto.
+
+```csharp
+Jane Doe (445 Mount Eden Road Mount Eden Auckland 1024)
+
+   1. Regular Cleaning
+   2. Oven Cleaning
+
+John Smith (43 Vogel Street Roslyn Palmerston North 4414)
+
+   3. Regular Cleaning
+   4. Oven Cleaning
+   5. Carpet Cleaning
+```
+
+Es decir, habría una única lista numerada para todos los pedidos, lo cual no es aplicable en este escenario. Sin embargo, puedes hacer que la numeración de la lista se reinicie para cada pedido colocando una etiqueta `restartNum` en tu plantilla justo antes de la etiqueta `foreach` correspondiente, como se muestra a continuación.
+
+```csharp
+<<foreach [order in orders]>><<[order.ClientName]>> (<<[order.ClientAddress]>>)
+1. <<restartNum>><<foreach [service in order.Services]>><<[service.Name]>>
+<</foreach>><</foreach>>
+```
+
+
+:::warning
+Al utilizarlo con una banda de datos, es obligatorio colocar una etiqueta `restartNum` antes de la etiqueta `foreach` correspondiente en el mismo párrafo numerado.
+:::
+
+
+Luego, un documento de resultado tiene el siguiente aspecto.
+
+```csharp
+Jane Doe (445 Mount Eden Road Mount Eden Auckland 1024)
+
+   1. Regular Cleaning
+   2. Oven Cleaning
+
+John Smith (43 Vogel Street Roslyn Palmerston North 4414)
+
+   1. Regular Cleaning
+   2. Oven Cleaning
+   3. Carpet Cleaning
+```
+
+
+:::warning
+Puede utilizar una etiqueta `restartNum` sin una banda de datos para reiniciar dinámicamente la numeración de la lista en un párrafo contenedor; por ejemplo, esta etiqueta puede utilizarse para reiniciar la numeración de la lista en un documento insertado dinámicamente.
+:::
+
+
+### Banda de datos de fila de tabla {#table-row-data-bands}
+
+Una banda de datos de fila de tabla es una banda de datos cuyo cuerpo ocupa una o varias filas de una única tabla del documento. El cuerpo de dicha banda comienza al inicio de la primera fila ocupada y termina al final de la última fila ocupada, como se muestra a continuación.
+
+<table className="confluenceTable"><tbody><tr><td className="confluenceTd"><p>&nbsp;</p></td><td className="confluenceTd"><p>&nbsp;</p></td><td className="confluenceTd"><p>&nbsp;</p></td></tr><tr><td className="confluenceTd"><p><code>&lt;&lt;foreach ...&gt;&gt;</code> ...</p></td><td className="confluenceTd"><p>...</p></td><td className="confluenceTd"><p>...</p></td></tr><tr><td className="confluenceTd"><p>...</p></td><td className="confluenceTd"><p>...</p></td><td className="confluenceTd"><p>...</p></td></tr><tr><td className="confluenceTd"><p>...</p></td><td className="confluenceTd"><p>...</p></td><td className="confluenceTd"><p><code>... &lt;&lt;/foreach&gt;&gt;</code></p></td></tr><tr><td className="confluenceTd"><p>&nbsp;</p></td><td className="confluenceTd"><p>&nbsp;</p></td><td className="confluenceTd"><p>&nbsp;</p></td></tr></tbody></table>
+Los siguientes ejemplos de esta sección se presentan utilizando `ds`, una instancia de `DataSet` que contiene objetos `DataTable` y `DataRelation` según el siguiente modelo de datos.
+
+&lt;enlace al diagrama de base de datos&gt;
+
+El caso de uso más habitual de una banda de datos de fila de tabla es la generación de una tabla de documento que representa una lista de elementos. Para lograrlo, puede utilizar una plantilla como la siguiente.
+
+| Cliente | Gestor | Contrato Precio |
+| --- | --- | --- |
+| `<<foreach [c in ds.Contracts]>><<[c.Clients.Name]>>` | `<<[c.Managers.Name]>>` | `<<[c.Price]>><</foreach>>` |
+| Total: |  | `<<[ds.Contracts.Sum(c => c.Price)]>>` |
+
+En este caso, el motor genera un informe como el siguiente.
+
+| Cliente | Gestor | Contrato Precio |
+| --- | --- | --- |
+| A Company | John Smith | 1200000 |
+| B Ltd. | John Smith | 750000 |
+| C & D | John Smith | 350000 |
+| E Corp. | Tony Anderson | 650000 |
+| F & Partners | Tony Anderson | 550000 |
+| G & Co. | July James | 350000 |
+| H Group | July James | 250000 |
+| I & Sons | July James | 100000 |
+| J Ent. | July James | 100000 |
+| Total: |  | 4300000 |
+
+Para poblar una tabla de documento con datos maestro-detalle, puede utilizar bandas de datos de fila de tabla anidadas, como en la siguiente plantilla.
+
+| Gestor/Cliente | Contrato Precio |
+| --- | --- |
+| `<<foreach [m in ds.Managers]>><<[m.Name]>>` | `<<[m.Contracts.Sum(c => c.Price)]>>` |
+| `<<foreach [c in m.Contracts]>>   <<[c.Clients.Name]>>` | `<<[c.Price]>><</foreach>><</foreach>>` |
+| Total: | `<<[ds.Contracts.Sum(c => c.Price)]>>` |
+
+En este caso, el motor genera un informe como el siguiente.
+
+| Gestor/Cliente | Contrato Precio |
+| --- | --- |
+| John Smith | 2300000 |
+| A Company | 1200000 |
+| B Ltd. | 750000 |
+| C & D | 350000 |
+| Tony Anderson | 1200000 |
+| E Corp. | 650000 |
+| F & Partners | 550000 |
+| July James | 800000 |
+| G & Co. | 350000 |
+| H Group | 250000 |
+| I & Sons | 100000 |
+| J Ent. | 100000 |
+| Total: | 4300000 |
+
+También puede utilizar normalmente bandas de datos comunes anidadas dentro de bandas de datos de fila de tabla, como en la siguiente plantilla.
+
+| Gestor | Clientes |
+| --- | --- |
+| `<<foreach [m in ds.Managers]>><<[m.Name]>>` | `<<foreach [c in m.Contracts]>><<[c.Clients.Name]>><br/><</foreach>><</foreach>>` |
+
+En este caso, el motor genera un informe como el siguiente.
+
+| Gestor | Clientes |
+| --- | --- |
+| John Smith | A Company<br/>B Ltd.<br/>C & D<br/> |
+| Tony Anderson | E Corp.<br/>F & Partners<br/> |
+| July James | G & Co.<br/>H Group<br/>I & Sons<br/>J Ent.<br/> |
+
+### Métodos de extensión para variables de iteración {#extension-methods-of-iteration-variables}
+
+El motor GroupDocs.Assembly proporciona métodos de extensión especiales para variables de iteración de cualquier tipo. Puede utilizar normalmente estos métodos de extensión en expresiones de plantilla. A continuación se describe la lista de métodos de extensión.
+
+*   `IndexOf()`
+
+Devuelve el índice de base cero del elemento de una secuencia representado por la variable de iteración correspondiente. Puede utilizar este método de extensión para distinguir elementos de secuencia con índices distintos y, a continuación, procesarlos de formas diferentes. Por ejemplo, dado que `items` es una enumeración de las cadenas "item1", "item2" e "item3", puede utilizar la siguiente plantilla para enumerarlas, anteponiendo comas a todas excepto la primera.
+
+```csharp
+The items are: <<foreach [
+    item in items]>><<[item.IndexOf() != 0
+        ? ", "
+        : ""]>><<[item]>><</foreach>>.
+```
+
+En este caso, el motor genera un informe como el siguiente.
+
+```csharp
+The items are: item1, item2, item3.
+```
+
+*   `NumberOf()`
+
+Devuelve el índice basado en uno (1) de un elemento de una secuencia representado por la variable de iteración correspondiente. Puede utilizar este método de extensión para numerar secuencias `items` sin necesidad de recurrir a listas de Microsoft Word®. Por ejemplo, dada la declaración previa de los elementos, puede enumerarlos y numerarlos en una tabla de documento utilizando la siguiente plantilla.
+
+| N.º | Elemento |
+| --- | --- |
+| `<<foreach [item in items]>><<[item.NumberOf()]>>` | `<<[item]>><</foreach>>` |
+
+En este caso, el motor genera un informe como el siguiente.
+
+| N.º | Elemento |
+| --- | --- |
+| 1 | item1 |
+| 2 | item2 |
+| 3 | item3 |
+
+### Gráficos que representan datos secuenciales {#charts-representing-sequential-data}
+
+El motor GroupDocs.Assembly le permite utilizar gráficos para representar sus datos secuenciales. Para declarar un gráfico que se llenará dinámicamente con datos dentro de su plantilla, siga los pasos siguientes:
+
+1.  Añada un gráfico a su plantilla en el lugar donde desee que aparezca en el documento resultante.
+2.  Configure la apariencia del gráfico.
+3.  Añada las series de gráfico necesarias y configure también su apariencia.
+4.  Añada un título al gráfico, si no lo tiene ya.
+5.  Añada una etiqueta de apertura foreach al título del gráfico.
+6.  En función del tipo de gráfico, añada etiquetas x al título del gráfico o a los nombres de las series del gráfico, como se indica a continuación.
+  
+    ```csharp
+    <<x [x_value_expression]>>
+    ```
+    
+    * For a scatter or bubble chart, you can go one of the following ways:
+        - To use the same x-value expression for all chart series, add a single x tag to the chart title after the corresponding foreachtag.
+        - To use different x-value expressions for every chart series, add multiple x tags to chart series' names - one for each chart series. An x-value expression for a scatter or bubble chart must return a numeric value.
+    * For a chart of another type, add a single x tag to the chart title after the corresponding foreach tag. In this case, an x-value expression must return a numeric, date, or string value.
+7. Para un gráfico de cualquier tipo, agregue etiquetas `y` a los nombres de las series del gráfico de la siguiente manera.
+  
+    ```csharp
+    <<y [y_value_expression]>>
+    ```
+    
+    An y-value expression must return a numeric value.
+    
+8. Para un gráfico de burbujas, agregue etiquetas de tamaño a los nombres de las series del gráfico de la siguiente manera.
+  
+    ```csharp
+    <<size [bubble_size_expression]>>
+    ```
+    
+    A bubble-size expression must return a numeric value.
+    
+9. Para un gráfico con datos dinámicos, puede seleccionar dinámicamente qué series incluir en él según ciertas condiciones. En particular, esta funcionalidad resulta útil cuando necesita restringir el acceso a datos confidenciales en las series del gráfico para algunos usuarios de su aplicación. Para utilizar esta funcionalidad, siga los siguientes pasos:
+  
+    * Declare a chart with dynamic data in the usual way
+    * For series to be removed from the chart based upon conditions dynamically, define the conditions in names of these series using removeif tags having the following syntax
+    
+    ```csharp
+    <<removeif [conditional_expression]>>
+    ```
+    
+    A conditional expression must return a Boolean value.
+    
+
+**Nota:** No se utiliza una etiqueta `foreach` de cierre para un gráfico.  
+Al redactar expresiones para las etiquetas `x`, `y` y `size`, normalmente puede hacer referencia a la variable de iteración declarada en la etiqueta `foreach` correspondiente en el título del gráfico, de la misma manera que si pretendiera generar los resultados de las expresiones dentro de un bloque de datos.
+
+**Nota:** Normalmente puede utilizar gráficos con datos dinámicos dentro de bloques de datos.  
+Durante el tiempo de ejecución, el motor procesa un gráfico que contiene una etiqueta `foreach` en su título de la siguiente manera:
+
+1.  Se evalúa y se itera la expresión de secuencia declarada en la etiqueta `foreach`.
+2.  Para cada elemento de la secuencia, se evalúan las expresiones declaradas en las etiquetas `x`, `y` y `size`.
+3.  Los resultados de estas expresiones se utilizan para poblar las series correspondientes del gráfico.
+4.  Todas las etiquetas `foreach`, `x`, `y` y `size` se eliminan del título del gráfico y de los nombres de las series del gráfico.  
+    Consider the following example. Assume that you have the Manager and Contract classes defined in your application as follows.
+    
+    ```csharp
+    public class Manager
+    {
+        public String Name { get { ... } }
+        public IEnumerable<Contract> Contracts { get { ... } }
+        ...
+    }
+    
+    public class Contract
+    {
+        public float Price { get { ... } }
+        ...
+    }
+    ```
+    
+    Given that managers is an enumeration of Manager instances, you can use the following template to represent total contract prices achieved by managers in a column chart.  
+    &lt;link to the template&gt;  
+    In this case, the engine produces a report as follows.  
+    &lt;link to the report&gt;
+    
+
+## Métodos de extensión para enumeraciones {#enumeration-extension-methods}
+
+### La clase Enumeration {#the-enumeration}
+
+El motor de GroupDocs.Assembly le permite realizar operaciones comunes sobre datos secuenciales mediante los métodos de extensión integrados para `IEnumerable`. Estos métodos de extensión imitan algunos métodos de extensión de <a href="http://msdn.microsoft.com/en-us/library/9eekhta0(v=vs.110" target="_blank" rel="nofollow noopener noreferrer">IEnumerable&lt;T&gt;</a>.aspx), ofreciendo las mismas firmas y características de comportamiento. Por lo tanto, puede agrupar, ordenar y realizar otras manipulaciones sobre datos secuenciales en expresiones de plantilla de forma familiar.
+
+### Los métodos de extensión para enumeraciones {#the-enumeration-extension}
+
+La siguiente tabla describe los métodos de extensión integrados. En la tabla se utilizan las siguientes convenciones de notación:
+
+*   `Selector` representa una función lambda que devuelve un valor y toma un elemento de la enumeración como único argumento. Consulte <a href="https://docs.groupdocs.com/assembly/net/template-syntax-part-1-of-2/#using-lambda-functions" target="_blank" rel="nofollow noopener noreferrer">Uso de funciones lambda</a> para obtener más información.
+*   `ComparableSelector` representa `Selector` que devuelve <a href="http://msdn.microsoft.com/en-US/library/system.icomparable(v=vs.110" target="_blank" rel="nofollow noopener noreferrer">IComparable</a>.aspx).
+*   `Predicate` representa `Selector` que devuelve un valor booleano.
+
+Los ejemplos de esta tabla se proporcionan utilizando `persons` y `otherPersons`, que son enumeraciones de instancias de la clase `Person`, definida de la siguiente manera.
+
+```csharp
+public class Person
+{
+    public String Name { get { ... } }
+    public int Age { get { ... } }
+    public IEnumerable<Person> Children { get { ... } }
+    ...
+}
+```
+
+| Método de extensión | Ejemplos y notas |
+| --- | --- |
+| `All(Predicate)` | `persons.All(p => p.Age < 50)` |
+| `Any()` | `persons.Any()` |
+| `Any(Predicate)` | `persons.Any(p => p.Name == "John Smith")` |
+| `Average(Selector)` | `persons.Average(p => p.Age)`<br/>El selector de entrada debe devolver un valor de cualquier tipo que tenga operadores de suma y división predefinidos o definidos por el usuario. |
+| `Concat(IEnumerable)` | `persons.Concat(otherPersons)`<br/>Debe existir una conversión implícita de referencia entre los tipos de los elementos de las enumeraciones concatenadas. |
+| `Contains(Object)` | `persons.Contains(otherPersons.First())` |
+| `Count()` | `persons.Count()` |
+| `Count(Predicate)` | `persons.Count(p => p.Age > 30)` |
+| `Distinct()` | `persons.Distinct()` |
+| `First()` | `persons.First()` |
+| `First(Predicate)` | `persons.First(p => p.Age > 30)` |
+| `FirstOrDefault()` | `persons.FirstOrDefault()` |
+| `FirstOrDefault(Predicate)` | `persons.FirstOrDefault(p => p.Age > 30)` |
+| `GroupBy(Selector)` | `persons.GroupBy(p => p.Age)`<br/>O <br/>`persons.GroupBy(p => new { Age = p.Age, Count = p.Children.Count() })`<br/>Este método devuelve una enumeración de objetos de grupo. Cada grupo tiene una clave única definida por el selector de entrada y contiene los elementos de la enumeración de origen asociados a dicha clave. Puede acceder a la clave de una instancia de grupo mediante la propiedad `Key`. Puede tratar al propio grupo como una enumeración de los elementos que contiene. |
+| `Last()` | `persons.Last()` |
+| `Last(Predicate)` | `persons.Last(p => p.Age > 100)` |
+| `LastOrDefault()` | `persons.LastOrDefault()` |
+| `LastOrDefault(Predicate)` | `persons.LastOrDefault(p => p.Age > 100)` |
+| `Max(ComparableSelector)` | `persons.Max(p => p.Age)` |
+| `Min(ComparableSelector)` | `persons.Min(p => p.Age)` |
+| `OrderBy(ComparableSelector)` | `persons.OrderBy(p => p.Age)`<br/>O <br/>`persons.OrderBy(p => p.Age).ThenByDescending(p => p.Name)`<br/>O <br/>`persons.OrderBy(p => p.Age).ThenByDescending(p => p.Name).ThenBy(p => p.Children.Count())`<br/>Este método devuelve una enumeración ordenada por una única clave. Para especificar claves adicionales de ordenación, puede utilizar los siguientes métodos de extensión de una enumeración ordenada: `ThenBy(ComparableSelector)`; `ThenByDescending(ComparableSelector)` |
+| `OrderByDescending(ComparableSelector)` | `persons.OrderByDescending(p => p.Age)`<br/>O <br/>`persons.OrderByDescending(p => p.Age).ThenByDescending(p => p.Name)`<br/>O <br/>`persons.OrderByDescending(p => p.Age).ThenByDescending(p => p.Name).ThenBy(p => p.Children.Count())`<br/>Consulte la nota anterior. |
+| `Single()` | `persons.Single()` |
+| `Single(Predicate)` | `persons.Single(p => p.Name == "John Smith")` |
+| `SingleOrDefault()` | `persons.SingleOrDefault()` |
+| `SingleOrDefault(Predicate)` | `persons.SingleOrDefault(p => p.Name == "John Smith")` |
+| `Skip(int)` | `persons.Skip(10)` |
+| `SkipWhile(Predicate)` | `persons.SkipWhile(p => p.Age < 21)` |
+| `Sum(Selector)` | `persons.Sum(p => p.Children.Count())`<br/>El selector de entrada debe devolver un valor de cualquier tipo que tenga un operador de suma predefinido o definido por el usuario. |
+| `Take(int)` | `persons.Take(5)` |
+| `TakeWhile(Predicate)` | `persons.TakeWhile(p => p.Age < 50)` |
+| `Union(IEnumerable)` | `persons.Union(otherPersons)`<br/>Debe existir una conversión implícita de referencia entre los tipos de los elementos de las enumeraciones unidas. |
+| `Where(Predicate)` | `persons.Where(p => p.Age > 18)` |

@@ -1,0 +1,413 @@
+---
+title: "Firma digital con hash personalizado"
+sidebar_label: "✎ Firma digital con hash personalizado"
+sidebar_key: "net-signature-signing-electronic-signatures-digital-signing-with-custom-hash"
+sidebar_position: 2
+description: "Este artículo explica cómo aplicar firmas digitales con algoritmos de hash personalizados utilizando la API de GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/signing/electronic-signatures/digital-signing-with-custom-hash.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "1c19e821f356bb8c39a2345f1cd20af680bf1f90cb59277c71b0eea16d3d770d"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "e43e52e7b981dbe86aca4b6c9ca917f950a7d941a8a8336fb863987dee79c939"
+translation_updated_at: "2026-11-16T13:16:31.454Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+### Cómo aplicar una firma digital con un algoritmo de hash personalizado {#how-to-apply-digital-signature-with-custom-hash-algorithm}
+
+<a href="https://products.groupdocs.com/signature/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Signature**</a> ofrece la capacidad de personalizar el algoritmo de hash utilizado para las firmas digitales. Esto resulta especialmente útil cuando es necesario utilizar estándares criptográficos específicos o cumplir con requisitos de conformidad.
+
+A continuación se explica cómo implementar la firma digital con un algoritmo de hash personalizado:
+
+```csharp
+public void SignDocument()
+{
+    string certFilePath = "cert.pfx";
+    string sampleFilePath = "sample.pdf";
+    string sampleOutputFilePath = "signed.pdf";
+    using (Signature.Signature signature = new Signature.Signature(sampleFilePath))
+    {
+        // initialize digital option with certificate file path
+        DigitalSignOptions options = new DigitalSignOptions(certFilePath)
+        {
+            // certificate password
+            Password = "1234567890",
+            // digital certificate details
+            Reason = "Sign",
+            Contact = "JohnSmith",
+            Location = "Office1",
+            AllPages = true,
+            Width = 80,
+            Height = 60,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Margin = new Padding() { Bottom = 10, Right = 10 },
+            HashAlgorithm = HashAlgorithm.Sha256
+        };
+        options.CustomSignHash = new CustomDigitalSigner();
+        
+        signature.Sign(sampleOutputFilePath, options);
+    }
+}
+
+public class CustomDigitalSigner : ICustomSignHash
+{
+    public byte[] CustomSignHash(
+        byte[] signableHash, 
+        HashAlgorithm hashAlgorithm, 
+        SignatureContext signatureContext)
+    {
+        string inputP12 = "";
+        var inputPfxPassword = "1234567890";
+        X509Certificate2 signerCert = new X509Certificate2(
+            inputP12, 
+            inputPfxPassword, 
+            X509KeyStorageFlags.Exportable);
+        RSACryptoServiceProvider rsaCSP = new RSACryptoServiceProvider();
+        var xmlString = signerCert.PrivateKey.ToXmlString(true);
+        rsaCSP.FromXmlString(xmlString);
+        byte[] signedData = rsaCSP.SignData(signableHash, hashAlgorithm);
+        return signedData;
+    }
+}
+```
+
+### Guía de implementación paso a paso {#step-by-step-implementation-guide}
+
+Desglosamos la implementación en pasos claros:
+
+1. **Configuración del entorno de firma**
+   ```csharp
+   string certFilePath = "cert.pfx";
+   string sampleFilePath = "sample.pdf";
+   string sampleOutputFilePath = "signed.pdf";
+   using (Signature.Signature signature = new Signature.Signature(sampleFilePath))
+   ```
+   - Defina las rutas para su certificado, el documento de entrada y el archivo de salida
+   - Cree una nueva instancia de `Signature` con su documento de entrada
+
+2. **Configure las opciones de firma digital**
+   ```csharp
+   DigitalSignOptions options = new DigitalSignOptions(certFilePath)
+   {
+       Password = "1234567890",
+       Reason = "Sign",
+       Contact = "JohnSmith",
+       Location = "Office1",
+       AllPages = true,
+       Width = 80,
+       Height = 60,
+       VerticalAlignment = VerticalAlignment.Bottom,
+       HorizontalAlignment = HorizontalAlignment.Right,
+       Margin = new Padding() { Bottom = 10, Right = 10 },
+       HashAlgorithm = HashAlgorithm.Sha256
+   };
+   ```
+   - Crear `DigitalSignOptions` con su archivo de certificado
+   - Configurar propiedades básicas de la firma (contraseña, motivo, contacto, ubicación)
+   - Configurar apariencia visual (tamaño, posición, alineación)
+   - Especificar el algoritmo de hash (SHA-256 en este ejemplo)
+
+3. **Implementar firma con hash personalizado**
+   ```csharp
+   options.CustomSignHash = new CustomDigitalSigner();
+   ```
+   - Asigne su implementación personalizada de hash a las opciones
+
+4. **Crear una implementación personalizada de hash**
+   ```csharp
+   public class CustomDigitalSigner : ICustomSignHash
+   {
+       public byte[] CustomSignHash(
+           byte[] signableHash, 
+           HashAlgorithm hashAlgorithm, 
+           SignatureContext signatureContext)
+       {
+           // Load certificate
+           string inputP12 = "";
+           var inputPfxPassword = "1234567890";
+           X509Certificate2 signerCert = new X509Certificate2(
+               inputP12, 
+               inputPfxPassword, 
+               X509KeyStorageFlags.Exportable);
+           
+           // Setup RSA provider
+           RSACryptoServiceProvider rsaCSP = new RSACryptoServiceProvider();
+           var xmlString = signerCert.PrivateKey.ToXmlString(true);
+           rsaCSP.FromXmlString(xmlString);
+           
+           // Sign the hash
+           byte[] signedData = rsaCSP.SignData(signableHash, hashAlgorithm);
+           return signedData;
+       }
+   }
+   ```
+   - Implemente la interfaz `ICustomSignHash`
+   - Cargue su certificado con la contraseña y las banderas adecuadas
+   - Configure el proveedor RSA con la clave privada del certificado
+   - Firma el hash utilizando el algoritmo especificado
+
+5. **Aplicar la firma**
+   ```csharp
+   signature.Sign(sampleOutputFilePath, options);
+   ```
+   - Llame al método `Sign` con su ruta de salida y opciones
+   - El documento se firmará utilizando su implementación personalizada de hash
+
+### Notas importantes {#important-notes}
+
+* Asegúrese de que el archivo de certificado sea válido y esté accesible
+* Mantenga la contraseña del certificado segura y nunca la codifique directamente en el código de producción
+* La implementación personalizada del hash debe manejar el proceso de firma de forma segura
+* Considere implementar un manejo adecuado de errores en el código de producción
+* El algoritmo de hash especificado en las opciones debe coincidir con sus requisitos de seguridad
+
+### Comprensión de los algoritmos de hash {#understanding-hash-algorithms}
+
+Los algoritmos de hash son funciones criptográficas que convierten datos de cualquier tamaño en una salida de tamaño fijo (valor de hash). En las firmas digitales, los algoritmos de hash desempeñan un papel crucial para garantizar la integridad y autenticidad del documento. A continuación se explica cómo funcionan:
+
+1. El contenido del documento se procesa mediante el algoritmo de hash para generar un valor de hash único
+2. Este valor de hash se cifra luego con la clave privada del firmante
+3. El hash cifrado forma parte de la firma digital
+4. Al verificar la firma, se utiliza el mismo algoritmo de hash para asegurarse de que el documento no haya sido modificado
+
+### Algoritmos de hash disponibles {#available-hash-algorithms}
+
+GroupDocs.Signature proporciona varios algoritmos de hash para la firma digital, cada uno con distintos niveles de seguridad y rendimiento. A continuación se presentan las opciones disponibles:
+
+* **Selección automática**: El sistema elige automáticamente el algoritmo de hash más adecuado según el tipo de documento y los requisitos de seguridad.
+
+* **SHA-1**:
+  - Genera un valor de hash de 160 bits (20 bytes)
+  - Ampliamente compatible, pero considerado menos seguro para aplicaciones modernas
+  - Recomendado para compatibilidad con sistemas heredados
+
+* **SHA-256**:
+  - Genera un valor de hash de 256 bits (32 bytes)
+  - Actualmente recomendado para la mayoría de las aplicaciones
+  - Ofrece un buen equilibrio entre seguridad y rendimiento
+  - Ampliamente compatible en sistemas modernos
+
+* **SHA-384**:
+  - Genera un valor de hash de 384 bits (48 bytes)
+  - Ofrece mayor seguridad en comparación con SHA-256
+  - Adecuado para aplicaciones de alta seguridad
+  - Puede requerir más recursos computacionales
+
+* **SHA-512**:
+  - Genera un valor de hash de 512 bits (64 bytes)
+  - Proporciona el nivel más alto de seguridad entre las opciones disponibles
+  - Ideal para aplicaciones que requieren la máxima seguridad
+  - Requiere la mayor cantidad de recursos computacionales
+
+### Firmado de archivos PDF mediante Azure Key Vault {#signing-pdf-files-using-azure-key-vault}
+
+GroupDocs.Signature admite la integración con Azure Key Vault para la firma digital segura. Este enfoque es especialmente útil para aplicaciones basadas en la nube, donde se desea mantener las claves de firma seguras en Azure Key Vault.
+
+A continuación se explica cómo implementar el firmado de PDF mediante Azure Key Vault:
+
+```csharp
+public static void SignUsingAzureKeyVault()
+{
+    string sampleFilePath = "sample.pdf";
+    string sampleOutputFilePath = "signed.pdf";
+    
+    using (Signature signature = new Signature(sampleFilePath))
+    {
+        // initialize digital option with certificate file path
+        DigitalSignOptions options = new DigitalSignOptions()
+        {
+            Signature = new DigitalSignature(),
+            // certificate password
+            Password = "1234567890",
+            // digital certificate details
+            Reason = "Sign",
+            Contact = "JohnSmith",
+            Location = "Office1",
+            AllPages = true,
+            Width = 80,
+            Height = 60,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Margin = new Padding() { Bottom = 10, Right = 10 },
+            HashAlgorithm = HashAlgorithm.Sha256
+        };
+        var azureSigner = new AzureSigner();
+        options.CustomSignHash = azureSigner;
+        options.Signature.Certificate = azureSigner.GetPublicCertificateFromAzureStorage();
+            
+        signature.Sign(sampleOutputFilePath, options);
+    }
+}
+
+public class AzureSigner : ICustomSignHash
+{
+    public byte[] CustomSignHash(
+        byte[] hash, 
+        HashAlgorithm hashAlgorithm, 
+        SignatureContext signatureContext)
+    {
+        return SignWithAzure(hash);
+    }
+
+    private static byte[] SignWithAzure(byte[] signableHash)
+    {
+        var credential = GetAzureSecretCredential();
+        var certificateKeyId = "https://...";
+        CryptographyClient client = new CryptographyClient(
+            new Uri(certificateKeyId), 
+            credential);
+        var result = client.Sign(SignatureAlgorithm.RS256, signableHash);
+        return result.Signature;
+    }
+
+    static ClientSecretCredential GetAzureSecretCredential()
+    {
+        string tenantId = "your tenantId";
+        string clientId = "your clientId";
+        string secret = "your secret";
+        ClientSecretCredential credential = new ClientSecretCredential(
+            tenantId, 
+            clientId, 
+            secret);
+        return credential;
+    }
+
+    public X509Certificate2 GetPublicCertificateFromAzureStorage()
+    {
+        string vaultUri = "https://test.vault.azure.net/";
+        var credential = GetAzureSecretCredential();
+        X509Certificate2 pubCertificate = GetPublicCertificateFromAzureStorage(
+            credential, 
+            vaultUri);
+        return pubCertificate;
+    }
+
+    static X509Certificate2 GetPublicCertificateFromAzureStorage(
+        ClientSecretCredential credential, 
+        string uri)
+    {
+        //Create certificate client.
+        CertificateClient certificateClient = new CertificateClient(
+            new Uri(uri), 
+            credential);
+        //Get the certificate with public key.
+        KeyVaultCertificateWithPolicy certificate = certificateClient
+            .GetCertificateAsync("Certificate")
+            .Result;
+        //Create and return the X509Certificate2.
+        return new X509Certificate2(certificate.Cer);
+    }
+}
+```
+
+### Pasos de implementación de Azure Key Vault {#azure-key-vault-implementation-steps}
+
+1. **Configuración de Azure Key Vault**
+   - Crear una instancia de Azure Key Vault
+   - Cargar su certificado de firma en Key Vault
+   - Configurar políticas de acceso para su aplicación
+
+2. **Configuración de credenciales de Azure**
+   ```csharp
+   static ClientSecretCredential GetAzureSecretCredential()
+   {
+       string tenantId = "your tenantId";
+       string clientId = "your clientId";
+       string secret = "your secret";
+       return new ClientSecretCredential(tenantId, clientId, secret);
+   }
+   ```
+   - Registre su aplicación en Azure AD
+   - Obtenga el ID de inquilino, el ID de cliente y el secreto de cliente
+   - Cree un objeto de credenciales para el acceso a Azure Key Vault
+
+3. **Recuperar certificado**
+   ```csharp
+   public X509Certificate2 GetPublicCertificateFromAzureStorage()
+   {
+       string vaultUri = "https://test.vault.azure.net/";
+       var credential = GetAzureSecretCredential();
+       return GetPublicCertificateFromAzureStorage(credential, vaultUri);
+   }
+   ```
+   - Conéctese a su Azure Key Vault
+   - Recupere el certificado público para la verificación de la firma
+
+4. **Implemente la firma personalizada**
+   ```csharp
+   private static byte[] SignWithAzure(byte[] signableHash)
+   {
+       var credential = GetAzureSecretCredential();
+       var certificateKeyId = "https://...";
+       CryptographyClient client = new CryptographyClient(new Uri(certificateKeyId), credential);
+       var result = client.Sign(SignatureAlgorithm.RS256, signableHash);
+       return result.Signature;
+   }
+   ```
+   - Crear un cliente de criptografía
+   - Firmar el hash utilizando la clave de Azure Key Vault
+   - Devolver los datos firmados
+
+### Consideraciones de seguridad de Azure Key Vault {#azure-key-vault-security-considerations}
+
+1. **Control de acceso**
+   - Utilizar identidades administradas siempre que sea posible
+   - Implementar el principio de privilegios mínimos
+   - Rotar periódicamente las credenciales
+
+2. **Gestión de certificados**
+   - Mantener los certificados actualizados
+   - Monitorear la caducidad de los certificados
+   - Implementar procedimientos de rotación de certificados
+
+3. **Seguridad de red**
+   - Utilizar puntos de conexión privados siempre que sea posible
+   - Implementar grupos de seguridad de red adecuados
+   - Monitorear los registros de acceso
+
+4. **Gestión de errores**
+   - Implementar un manejo adecuado de excepciones
+   - Registrar eventos de seguridad
+   - Monitorear actividades sospechosas
+
+### Consideraciones de seguridad {#security-considerations}
+
+Al elegir un algoritmo de hash para firmas digitales, considere lo siguiente:
+
+1. **Nivel de seguridad**: Se recomiendan SHA256 y superiores para aplicaciones modernas, ya que ofrecen una mejor seguridad que SHA1 o MD5.
+2. **Compatibilidad**: Asegúrese de que el algoritmo elegido sea compatible con sus sistemas de destino y con los requisitos de cumplimiento.
+3. **Rendimiento**: Aunque los algoritmos más robustos ofrecen una mayor seguridad, pueden requerir más recursos computacionales.
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con UI MVC</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con UI WebForms</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con UI Dropwizard</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con UI Spring</a>
+
+### Aplicaciones gratuitas en línea {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes en línea.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/signature" target="_blank">Conholdate.Signature App</a>**.

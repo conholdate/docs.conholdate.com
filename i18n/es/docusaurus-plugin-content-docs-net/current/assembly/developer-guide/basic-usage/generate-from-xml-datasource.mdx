@@ -1,0 +1,259 @@
+---
+title: "Generar documento desde fuente de datos XML"
+sidebar_label: "Generar documento desde fuente de datos XML"
+sidebar_key: "net-assembly-generate-from-xml-datasource"
+sidebar_position: 7
+description: "Cree informes a partir de fuentes de datos XML utilizando la clase `XmlDataSource` para cargar y enlazar datos XML a plantillas."
+product: "assembly"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "assembly-net"
+source_path: "net/developer-guide/basic-usage/generate-from-xml-datasource.md"
+source_commit: "110b986ad18aed0d87ecba6188f70cab0aadd69c"
+source_sha256: "40bc56eb23444b9969cf4955b914c8070d0bcf95c696d9b0a9f5a32957492d7b"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "5adc9d4c60621897d2824d50a437074926b8bd5d7006fc0427718169e20b0d8d"
+translation_updated_at: "2026-11-16T13:50:42.011Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Assembly para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Vista general {#overview}
+
+GroupDocs.Assembly para .NET proporciona la clase `XmlDataSource` para trabajar directamente con datos XML en plantillas. A diferencia del uso de DataSet, XmlDataSource reconoce automáticamente los tipos de datos (números, fechas, valores booleanos) a partir del XML, lo que facilita la realización de cálculos y formatos.
+
+Las clases principales involucradas son:
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/xmldatasource/" target="_blank" rel="nofollow noopener noreferrer">XmlDataSource</a>: carga y analiza los datos XML
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/documentassembler/" target="_blank" rel="nofollow noopener noreferrer">DocumentAssembler</a>: ensambla los documentos
+- <a href="https://reference.groupdocs.com/assembly/net/groupdocs.assembly/xmldataloadoptions/" target="_blank" rel="nofollow noopener noreferrer">XmlDataLoadOptions</a>: configura el comportamiento de carga de XML
+
+A continuación se presentan los pasos para generar documentos a partir de XML:
+
+* Crear u obtener datos XML (desde un archivo, una cadena o un flujo)
+* Instanciar XmlDataSource con los datos XML
+* Crear un documento plantilla con etiquetas de expresión que hagan referencia a elementos XML
+* Utilizar DocumentAssembler para ensamblar la plantilla con XmlDataSource
+* Guardar el documento ensamblado
+
+
+:::info
+XmlDataSource reconoce automáticamente los valores Int64, Double, Boolean y DateTime a partir de cadenas XML, lo que permite realizar operaciones numéricas y dar formato a fechas en plantillas sin necesidad de una conversión de tipo explícita.
+:::
+
+
+## Generar documento a partir de un archivo XML {#generate-document-from-xml-file}
+
+La forma más sencilla de utilizar datos XML es desde un archivo:
+
+```csharp
+using GroupDocs.Assembly;
+using GroupDocs.Assembly.Data;
+
+public static void GenerateFromXmlFile()
+{
+    XmlDataSource xmlDataSource = new XmlDataSource("data.xml");
+
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx",
+        new DataSourceInfo(xmlDataSource, "data"));
+}
+```
+
+## Ejemplo de archivo XML {#xml-file-example}
+
+Su archivo XML (data.xml) podría verse así:
+
+```xml
+<Person>
+    <Name>John Doe</Name>
+    <Age>30</Age>
+    <Birth>1989-04-01 4:00:00 pm</Birth>
+    <Email>john.doe@example.com</Email>
+</Person>
+```
+
+## Ejemplo de plantilla para objeto XML {#template-example-for-xml-object}
+
+Para el XML anterior, su plantilla puede hacer referencia directamente a los elementos:
+
+```
+Name: <<[data.Name]>>
+Age: <<[data.Age]>>
+Date of Birth: <<[data.Birth]:"dd.MM.yyyy">>
+Email: <<[data.Email]>>
+```
+
+## Generar documento a partir de una cadena XML {#generate-document-from-xml-string}
+
+También puede crear un XmlDataSource a partir de una cadena XML:
+
+```csharp
+using GroupDocs.Assembly;
+using GroupDocs.Assembly.Data;
+
+public static void GenerateFromXmlString()
+{
+    string xmlString = @"<Person>
+        <Name>Jane Smith</Name>
+        <Age>28</Age>
+        <Birth>1992-01-31 07:00:00 am</Birth>
+        <Email>jane.smith@example.com</Email>
+    </Person>";
+    
+    XmlDataSource xmlDataSource = new XmlDataSource(xmlString);
+
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx",
+        new DataSourceInfo(xmlDataSource, "person"));
+}
+```
+
+## Trabajo con matrices XML {#working-with-xml-arrays}
+
+Cuando el elemento raíz de su XML contiene una matriz de elementos, XmlDataSource la trata como una colección:
+
+```csharp
+using GroupDocs.Assembly;
+using GroupDocs.Assembly.Data;
+
+public static void GenerateFromXmlArray()
+{
+    string xmlArray = @"<Persons>
+        <Person>
+            <Name>John Doe</Name>
+            <Age>30</Age>
+        </Person>
+        <Person>
+            <Name>Jane Smith</Name>
+            <Age>28</Age>
+        </Person>
+        <Person>
+            <Name>Bob Johnson</Name>
+            <Age>35</Age>
+        </Person>
+    </Persons>";
+    
+    XmlDataSource xmlDataSource = new XmlDataSource(xmlArray);
+
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx",
+        new DataSourceInfo(xmlDataSource, "persons"));
+}
+```
+
+## Ejemplo de plantilla para matriz XML {#template-example-for-xml-array}
+
+Para matrices XML, utilice una banda de datos `foreach`:
+
+```
+<<foreach [in persons]>>
+Name: <<[Name]>>, Age: <<[Age]>>
+<</foreach>>
+
+Average age: <<[persons.Average(p => p.Age)]>>
+```
+
+## Trabajo con elementos XML anidados {#working-with-nested-xml-elements}
+
+XmlDataSource maneja automáticamente estructuras XML anidadas:
+
+```csharp
+using GroupDocs.Assembly;
+using GroupDocs.Assembly.Data;
+
+public static void GenerateFromNestedXml()
+{
+    string nestedXml = @"<Company>
+        <Name>ABC Corp</Name>
+        <Address>
+            <Street>123 Main St</Street>
+            <City>New York</City>
+            <Zip>10001</Zip>
+        </Address>
+        <Employees>
+            <Employee>
+                <Name>John Doe</Name>
+                <Position>Developer</Position>
+            </Employee>
+            <Employee>
+                <Name>Jane Smith</Name>
+                <Position>Manager</Position>
+            </Employee>
+        </Employees>
+    </Company>";
+    
+    XmlDataSource xmlDataSource = new XmlDataSource(nestedXml);
+
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx",
+        new DataSourceInfo(xmlDataSource, "company"));
+}
+```
+
+Plantilla para XML anidado:
+
+```
+Company: <<[company.Name]>>
+Address: <<[company.Address.Street]>>, <<[company.Address.City]>> <<[company.Address.Zip]>>
+
+Employees:
+<<foreach [in company.Employees]>>
+- <<[Name]>>, <<[Position]>>
+<</foreach>>
+```
+
+## Configurar opciones de carga de datos XML {#configure-xml-data-load-options}
+
+Puede configurar cómo XmlDataSource analiza el XML:
+
+```csharp
+using GroupDocs.Assembly;
+using GroupDocs.Assembly.Data;
+
+public static void GenerateWithXmlOptions()
+{
+    XmlDataLoadOptions options = new XmlDataLoadOptions();
+    options.AlwaysGenerateRootObject = true; // Always create root object
+    
+    XmlDataSource xmlDataSource = new XmlDataSource("data.xml", options);
+
+    DocumentAssembler assembler = new DocumentAssembler();
+    assembler.AssembleDocument("Template.docx", "Output.docx",
+        new DataSourceInfo(xmlDataSource, "data"));
+}
+```
+
+
+:::warning
+De forma predeterminada, si un elemento raíz XML contiene únicamente una secuencia de elementos de un solo tipo, el motor omite el objeto raíz. Establezca `AlwaysGenerateRootObject` a `true` para incluirlo siempre.
+:::
+
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre el trabajo con esquemas XML, estructuras XML complejas, atributos XML y opciones avanzadas de XmlDataSource, consulte la [sección de uso avanzado](/net/assembly/developer-guide/advanced-usage/).
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para .NET</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Java</a>
+* <a href="https://github.com/groupdocs-assembly/GroupDocs.Assembly-for-Python-via-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demos de GroupDocs.Assembly para Python mediante .NET</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes.
+
+Para ensamblar documentos a partir de plantillas y fuentes de datos, puede utilizar las aplicaciones en línea de la familia de productos **<a href="https://products.conholdate.app/assembly" target="_blank">Conholdate.Assembly App</a>**.

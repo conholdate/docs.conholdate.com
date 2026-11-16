@@ -1,0 +1,125 @@
+---
+title: "Filtrado de documentos en los resultados de búsqueda"
+sidebar_label: "Filtrado de documentos en los resultados de búsqueda"
+sidebar_position: 4
+description: "Este artículo proporciona el conocimiento sobre cómo se utilizan los filtros de documentos durante la búsqueda."
+product: "search"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "search-net"
+source_path: "net/developer-guide/advanced-usage/searching/document-filtering-in-search-result.md"
+source_commit: "317e9e9efc13d3cac31121f79ed723a45ab24f80"
+source_sha256: "78cd4e02721b8f8fc99330a2abc7094335cc036f370509b88d02235e65fcd0ba"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "9ea4ba6ac5525663be3b0003e07b375384c6c8b8af4f59a2284a3f1ac51a6e5d"
+translation_updated_at: "2026-11-16T11:36:00.302Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Search para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Esta página contiene una descripción de los filtros de documentos utilizados durante la búsqueda.
+
+## Configuración de un filtro {#setting-a-filter}
+
+Para especificar cuáles de los documentos encontrados deben devolverse como resultado de la búsqueda, se utiliza la propiedad <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/searchoptions/properties/searchdocumentfilter" target="_blank" rel="nofollow noopener noreferrer">SearchDocumentFilter</a> de la clase <a href="https://reference.groupdocs.com/net/search/groupdocs.search.options/searchoptions" target="_blank" rel="nofollow noopener noreferrer">SearchOptions</a>. Si el documento encontrado no cumple con el filtro, no se devolverá. El valor predeterminado es `null`, lo que significa que se devolverán todos los documentos encontrados. El siguiente ejemplo muestra cómo configurar un filtro de documentos para la búsqueda.
+
+**C#**
+
+```csharp
+string indexFolder = @"c:\MyIndex\";
+string documentsFolder = @"c:\MyDocuments\";
+ 
+// Creating an index in the specified folder
+Index index = new Index(indexFolder);
+ 
+// Indexing documents from the specified folder
+index.Add(documentsFolder);
+ 
+// Creating a search options object
+SearchOptions options = new SearchOptions();
+options.SearchDocumentFilter = SearchDocumentFilter.CreateFileExtension(".txt"); // Setting a document filter
+ 
+// Search in the index
+// Only text documents will be returned as the result of the search
+SearchResult result = index.Search("relativity", options);
+```
+
+## Filtros de rutas de archivo {#file-path-filters}
+
+El primer tipo de filtros de documentos de búsqueda admitido le permite establecer una expresión regular para obtener aquellos documentos cuyas rutas completas coincidan con el patrón especificado. Este tipo de filtros utiliza la clase **System.Text.RegularExpressions.Regex** para comparar con un patrón.
+
+**C#**
+
+```csharp
+// The filter returns only files that contain the word 'Einstein' in their paths, not case sensitive
+ISearchDocumentFilter filter = SearchDocumentFilter.CreateFilePathRegularExpression("Einstein", RegexOptions.IgnoreCase);
+```
+
+## Filtro por extensión de archivo {#file-extension-filter}
+
+El siguiente tipo de filtros de documentos admitidos permite especificar una lista de extensiones de archivo válidas para la indexación.
+
+**C#**
+
+```csharp
+// This filter returns only FB2 and EPUB documents
+ISearchDocumentFilter filter = SearchDocumentFilter.CreateFileExtension(".fb2", ".epub");
+```
+
+## Filtro de atributo {#attribute-filter}
+
+El siguiente tipo de filtro de documentos admitido le permite buscar únicamente aquellos documentos con los que está asociado el atributo de texto especificado. Puede obtener más información sobre los atributos en la página [Atributos de documento](/net/search/developer-guide/advanced-usage/indexing/document-attributes/).
+
+**C#**
+
+```csharp
+// This filter returns only documents that have attribute "main"
+ISearchDocumentFilter filter = SearchDocumentFilter.CreateAttribute("main");
+```
+
+## Combinación de filtros {#combining-filters}
+
+Los filtros de búsqueda de documentos pueden combinarse mediante filtros compuestos AND, OR y NOT. El siguiente ejemplo muestra cómo combinar filtros de búsqueda de documentos.
+
+**C#**
+
+```csharp
+// Creating an AND composite filter that returns all FB2 and EPUB documents that have the word 'Einstein' in their full paths
+ISearchDocumentFilter filter1 = SearchDocumentFilter.CreateFilePathRegularExpression("Einstein", RegexOptions.IgnoreCase);
+ISearchDocumentFilter filter2 = SearchDocumentFilter.CreateFileExtension(".fb2", ".epub");
+ISearchDocumentFilter andFilter = SearchDocumentFilter.CreateAnd(filter1, filter2);
+ 
+// Creating an OR composite filter that returns all DOC, DOCX, PDF and all documents that have the word Einstein in their full paths
+ISearchDocumentFilter filter3 = SearchDocumentFilter.CreateFilePathRegularExpression("Einstein", RegexOptions.IgnoreCase);
+ISearchDocumentFilter filter4 = SearchDocumentFilter.CreateFileExtension(".doc", ".docx", ".pdf");
+ISearchDocumentFilter orFilter = SearchDocumentFilter.CreateOr(filter3, filter4);
+ 
+// Creating a filter that returns all found documents except of TXT documents
+ISearchDocumentFilter filter5 = SearchDocumentFilter.CreateFileExtension(".txt");
+ISearchDocumentFilter notFilter = SearchDocumentFilter.CreateNot(filter5);
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código de los artículos de documentación y ver las funcionalidades en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-search/GroupDocs.Search-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Search para Java</a>
+    
+
+### Aplicación gratuita de búsqueda de documentos en línea {#free-online-document-search-app}
+
+Además de la completa biblioteca .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le invitamos a buscar en sus archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y más con nuestra <a href="https://products.groupdocs.app/search" target="_blank" rel="nofollow noopener noreferrer">Aplicación gratuita de búsqueda de documentos en línea</a>.

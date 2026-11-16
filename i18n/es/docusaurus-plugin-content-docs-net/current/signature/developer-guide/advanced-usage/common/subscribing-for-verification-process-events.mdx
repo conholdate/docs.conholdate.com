@@ -1,0 +1,144 @@
+---
+title: "Suscripción a eventos del proceso de verificación"
+sidebar_label: "Suscripción a eventos del proceso de verificación"
+sidebar_key: "net-signature-common-subscribing-for-verification-process-events"
+sidebar_position: 6
+description: "Este artículo explica cómo suscribirse a eventos de verificación de firmas electrónicas, como inicio, progreso y finalización, con la API de GroupDocs.Signature."
+product: "signature"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "signature-net"
+source_path: "net/developer-guide/advanced-usage/common/subscribing-for-verification-process-events.md"
+source_commit: "e5b394bbf3c3e737afbdb53df23e8add10f94457"
+source_sha256: "797053457044fdb33c0e49cb24acf80c66637ce23ceb7b25292385837439ef60"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "2f35455145741c9dd2003eeb26390283fd83ea1adc058bdef63f8db3c2ff86c1"
+translation_updated_at: "2026-11-16T12:31:32.297Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Signature para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+<a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> La clase contiene varios eventos que se invocan en diferentes etapas del proceso de verificación.
+
+* <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/verifystarted" target="_blank" rel="nofollow noopener noreferrer">VerifyStarted</a> para manejar el evento de inicio del proceso. Este evento ocurre una sola vez. <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/verify" target="_blank" rel="nofollow noopener noreferrer">Verify</a> se llama el método
+* <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/verifyprogress" target="_blank" rel="nofollow noopener noreferrer">VerifyProgress</a> para manejar el evento de progreso. Este evento se produce cada vez que se completa la verificación de una firma.
+* <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/verifycompleted" target="_blank" rel="nofollow noopener noreferrer">VerifyCompleted</a> para manejar el evento de finalización. Este evento ocurre una vez <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/verify" target="_blank" rel="nofollow noopener noreferrer">Verify</a> el proceso se completó.
+
+Aquí están los pasos para suscribirse al proceso de verificación con GroupDocs.Signature:
+
+* Defina los delegados de controladores necesarios para procesar eventos de firma.
+* Crear nueva instancia de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase y pase la ruta del documento fuente o el flujo como parámetro del constructor.
+* Suscribirse a los eventos requeridos
+* `required` debe ser instanciado <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature.options/verifyoptions" target="_blank" rel="nofollow noopener noreferrer">VerifyOptions</a> objeto
+* Llamada <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/verify" target="_blank" rel="nofollow noopener noreferrer">Verify</a> método de <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature" target="_blank" rel="nofollow noopener noreferrer">Signature</a> clase de instancia y pasar opciones de verificación en ella
+
+## Implementar método para el evento `VerifyStarted` {#implement-method-for-verifystarted-event}
+
+GroupDocs.Signature espera <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/processprogresseventhandler" target="_blank" rel="nofollow noopener noreferrer">ProcessStartEventHandler</a> delegar para suscribirse a <a href="https://reference.groupdocs.com/signature/net/groupdocs.signature/signature/verifystarted" target="_blank" rel="nofollow noopener noreferrer">VerifyStarted</a> evento
+
+```csharp
+private static void OnVerifyStarted(Signature signature, ProcessStartEventArgs args)
+{
+    Console.WriteLine("Verify process started at {0} with {1} total signatures to be put in document", args.Started, args.TotalSignatures);
+}
+```
+
+## Implementar método para el evento VerifyProgress {#implement-method-for-verifyprogress-event}
+
+```csharp
+ private static void OnVerifyProgress(Signature signature, ProcessProgressEventArgs args)
+ {
+     Console.WriteLine("Verify progress. Processed {0} signatures. Time spent {1} mlsec", args.ProcessedSignatures, args.Ticks);
+ }
+```
+
+## Implementar método para el evento VerifyCompleted {#implement-method-for-verifycompleted-event}
+
+```csharp
+private static void OnVerifyCompleted(Signature signature, ProcessCompleteEventArgs args)
+{
+    Console.WriteLine("Verify process completed at {0} with {1} total signatures. Process took {2} mlsec", args.Completed, args.TotalSignatures, args.Ticks);
+}
+```
+
+## Suscripción a eventos del proceso de verificación {#subscribing-for-verification-process-events}
+
+```csharp
+private static void OnVerifyStarted(Signature sender, ProcessStartEventArgs args)
+{
+    Console.WriteLine("Verify process started at {0} with {1} total signatures to be put in document", args.Started, args.TotalSignatures);
+}
+/// <summary>
+/// Defines on progress event
+/// </summary>
+/// <param name="sender"></param>
+/// <param name="args"></param>
+private static void OnVerifyProgress(Signature sender, ProcessProgressEventArgs args)
+{
+    Console.WriteLine("Verify progress. Processed {0} signatures. Time spent {1} mlsec", args.ProcessedSignatures, args.Ticks);
+}
+/// <summary>
+/// Defines on completed event
+/// </summary>
+/// <param name="sender"></param>
+/// <param name="args"></param>
+private static void OnVerifyCompleted(Signature sender, ProcessCompleteEventArgs args)
+{
+    Console.WriteLine("Verify process completed at {0} with {1} total signatures. Process took {2} mlsec", args.Completed, args.TotalSignatures, args.Ticks);
+}
+/// <summary>
+/// Verify document with text signature applying specific options and subscribe for events
+/// </summary>
+public static void Run()
+{
+    // The path to the documents directory.
+    string filePath = Constants.SAMPLE_PDF;
+    using (Signature signature = new Signature(filePath))
+    {
+        signature.VerifyStarted += OnVerifyStarted;
+        signature.VerifyProgress += OnVerifyProgress;
+        signature.VerifyCompleted += OnVerifyCompleted;
+        TextVerifyOptions options = new TextVerifyOptions("John Smith")
+        {
+           AllPages = true
+        };
+        // verify document
+        VerificationResult result = signature.Verify(options);
+        if (result.IsValid)
+        {
+            Console.WriteLine("\nDocument was verified successfully!");
+        }
+        else
+        {
+            Console.WriteLine("\nDocument failed verification process.");
+        }
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para .NET</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos, complementos y demostraciones de GroupDocs.Signature para Java</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-MVC" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con UI MVC</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-.NET-WebForms" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para .NET con UI WebForms</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Dropwizard" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con UI Dropwizard</a>
+* <a href="https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring" target="_blank" rel="nofollow noopener noreferrer">Ejemplo de firma de documentos para Java con UI Spring</a>
+
+### Aplicaciones en línea gratuitas {#free-online-apps}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones en línea sencillas pero potentes de forma gratuita.
+
+Para firmar documentos PDF, Word, Excel, PowerPoint y otros formatos, puede utilizar las aplicaciones en línea de la **<a href="https://products.conholdate.app/signature" target="_blank">familia de productos Conholdate.Signature App</a>**.
