@@ -1,0 +1,618 @@
+---
+title: "Sistema de coordenadas"
+sidebar_label: "Sistema de coordenadas"
+sidebar_key: "net-pdf-coordinate-system"
+sidebar_position: 100
+description: ""
+product: "pdf"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/pdf/net"
+source_path: "pdf/net/coordinate-system.html"
+source_commit: ""
+source_sha256: "b211d09798d643eca8cb19b1e078da22d68238d5635b1662cebc42f44f7c1b77"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/pdf/net/coordinate-system/"
+source_snapshot_sha256: "273b77f2f674e8ef765ee355d641aeeb37984679c6ec484f30239d8784e41405"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-10-22-mdx-protection-v5"
+translation_source_sha256: "3853af37b42330fda65446548fd1b56480313185f3e09e4f8ba1e7368f68df5a"
+translation_updated_at: "2026-11-16T03:16:18.091Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+Aspose.PDF para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+En tanto en un documento PDF como al trabajar con la biblioteca Aspose.PDF, el sistema de coordenadas comienza en la esquina inferior izquierda de la página. El punto (0,0) corresponde a dicha esquina inferior izquierda. Esto implica que, al colocar imágenes, texto u otros objetos, es importante recordar que el eje Y aumenta hacia arriba, a diferencia de algunos otros sistemas de coordenadas. Cada página posee su propio sistema de coordenadas. Las coordenadas se especifican en unidades independientes de la plataforma. La especificación PDF establece que PDF opera con múltiples espacios de coordenadas.
+
+## Espacio del dispositivo {#device-space}
+
+Cada dispositivo de salida —ya sea una pantalla, una impresora, etc.— utiliza su propio sistema de coordenadas para representar imágenes. Este sistema se denomina *espacio del dispositivo*. El origen (punto 0,0) puede ubicarse en distintas posiciones según el dispositivo. Además, la orientación de los ejes coordenados puede variar: el eje vertical Y puede aumentar ya sea de abajo hacia arriba o de arriba hacia abajo. Las resoluciones del dispositivo también varían. Las pantallas suelen tener una resolución de 72 o 96 píxeles por pulgada, mientras que las impresoras pueden alcanzar 300, 600 o incluso más puntos por pulgada. Algunos dispositivos también pueden tener resoluciones distintas en los ejes horizontal y vertical. Si los elementos gráficos se especifican directamente en coordenadas del espacio del dispositivo, el resultado depende de las características particulares de dicho dispositivo. Esto puede provocar una representación distorsionada: el mismo objeto puede aparecer de forma distinta en pantalla y en impresión. Por ejemplo, una línea de 8 pulgadas de longitud, especificada en coordenadas de pantalla con una resolución de 72 ppp, ocuparía menos de una pulgada al imprimirse en una impresora de 600 ppp.
+
+## Espacio del usuario {#user-space}
+
+Para evitar estos problemas, PDF utiliza un sistema de coordenadas independiente del dispositivo (*espacio del usuario*), que garantiza una representación gráfica coherente independientemente del dispositivo de salida. Durante la representación de la página, el contenido se transforma desde el espacio del usuario al espacio del dispositivo, teniendo en cuenta las características específicas del dispositivo de salida. Cada página del documento posee su propio sistema de coordenadas del espacio del usuario. La longitud de una unidad a lo largo de ambos ejes equivale a 1/72 de pulgada. Puede cambiar las unidades de medida estableciendo el valor *UserUnit*, que por defecto es 1. Este valor puede especificarse mediante la propiedad *UserUnit* del objeto de página. El *UserUnit* actúa como un multiplicador de 1/72 de pulgada.
+
+La transformación desde el espacio del usuario al espacio del dispositivo queda definida por la Matriz de Transformación Actual (CTM, *Current Transformation Matrix*).
+
+![Matrix transformation of coordinate space. Taken from the ISO 32000-2:2020 specification](/net/pdf/images/c247537cc7dbedc9-matrix_transforms.png)
+
+Imagen 1. Transformación matricial del espacio de coordenadas. Tomado de la especificación ISO 32000-2:2020
+
+Si está creando contenido de página utilizando operadores de PDF, puede modificar la CTM (Matriz de Transformación Actual) utilizando el operador `Aspose.Pdf.ConcatenateMatrix`, que concatena la matriz actual con la que usted proporciona. Esto le permite realizar rotación, traslación y escalado del contenido renderizado.
+
+![Transformation to device space.](/net/pdf/images/1291eff41ff2cc6e-user_to_device.png)
+
+Imagen 2. Transformación al espacio del dispositivo. Tomado de la especificación ISO 32000-2:2020.
+
+Además del espacio del usuario y del espacio del dispositivo, PDF utiliza varios otros sistemas de coordenadas, cada uno con propósitos específicos:
+
+## Espacio de texto {#text-space}
+  
+El texto se posiciona en su propio sistema de coordenadas: el espacio de texto. La transformación desde el espacio de texto al espacio del usuario se realiza mediante una matriz de texto dedicada junto con diversos ajustes de renderizado de texto.
+
+## Espacio de glifo {#glyph-space}
+  
+Los caracteres de fuente (glifos) se definen en el espacio de glifo. Este espacio se transforma en el espacio de texto mediante la matriz de fuente. Para la mayoría de las fuentes, se utiliza una escala de 1000 unidades del espacio de glifo = 1 unidad del espacio de texto. En algunas fuentes, como las fuentes de tipo 3, esta matriz se define explícitamente.
+
+## Espacio de imagen {#image-space}
+  
+Las imágenes raster se definen en su propio espacio de imagen. Este espacio siempre se transforma automáticamente al espacio del usuario: las imágenes se consideran que tienen un ancho y una altura de 1 unidad, independientemente de su resolución real. Para mostrar correctamente una imagen, su escala y posición se establecen modificando la matriz de transformación (escalado, rotación).
+
+## Espacio de forma {#form-space}
+  
+Las formas (objetos XObject de forma) son fragmentos de contenido independientes que pueden incrustarse como elementos gráficos. Cada forma se define en su propio espacio de forma, que luego se transforma en el espacio del usuario mediante una matriz de forma.
+
+![Relationships between coordinate spaces.](/net/pdf/images/7401bd8cafd817d2-spaces.png)
+
+Imagen 3. Relaciones entre los espacios de coordenadas. Tomado de la especificación ISO 32000-2:2020
+
+## Matriz de transformación {#transform-matrix}
+  
+Esta matriz permite operaciones como escalado, rotación, traslación, distorsión y reflexión de objetos en la página. Es una matriz bidimensional de 3×3, pero en PDF solo se utilizan 6 parámetros numéricos: \[a b c d e f]. Esta matriz se aplica a cada punto (x, y) del espacio transformado mediante las siguientes fórmulas:  
+x' = a \* x + c \* y + e  
+y' = b \* x + d \* y + f
+
+![Coordinate transformation equation](/net/pdf/images/2f5ad68745a9d8ae-equation.png)
+
+Imagen 4. Ecuación de transformación de coordenadas. Tomada de la especificación ISO 32000-2:2020.
+
+Fórmula de transformación de coordenadas — tomada de la especificación ISO 32000-2:2020. Dependiendo de los valores de los elementos de la matriz, se pueden definir distintos tipos de transformaciones:  
+
+- Traslación: \[1 0 0 1 e f\] — traslada un objeto en *e* unidades a lo largo del eje X y *f* unidades a lo largo del eje Y.  
+
+- Escala: \[a 0 0 d 0 0\] — escala un objeto por un factor *a* en X y por un factor *d* en Y.  
+
+- Rotación: \[cos(θ) sin(θ) -sin(θ) cos(θ) 0 0\] — rota un objeto un ángulo *θ* (en radianes).  
+
+- Cizallamiento: A lo largo del eje X \[1 0 c 1 0 0\], a lo largo del eje Y \[1 b 0 1 0 0\].  
+
+- Reflexión: A través del eje X \[1 0 0 -1 0 0\], a través del eje Y \[-1 0 0 1 0 0\].
+
+Ejemplo de configuración de una matriz de transformación:
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+var matrix = new Aspose.Pdf.Matrix(new double[]{a, b, c, d, e, f});
+page.Contents.Add(new Aspose.Pdf.Operators.ConcatenateMatrix(matrix));
+```
+
+En el Ejemplo 1, puede observar que al intentar renderizar texto en las coordenadas de la esquina de la página, solo es visible el texto en el origen. El resto del texto queda fuera del área visible y se recorta.
+
+<Tabs groupId="frameworks">
+
+<TabItem value="net-core-3-1" label=".NET Core 3.1" default>
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static string CoordinatesExample1()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+    string outputFilePath = dataDir + "coordinates1.pdf";
+    
+    // Create new document
+    using (var document = new Aspose.Pdf.Document())
+    {
+        // Get particular page
+        var page = document.Pages.Add();
+    
+        // Create TextBuilder object
+        var textBuilder = new Aspose.Pdf.Text.TextBuilder(page);
+    
+        DrawText("Low left", 0, 0, textBuilder);
+        DrawText("Low right", (int)page.CropBox.URX, 0, textBuilder);
+        DrawText("Upper left", 0, (int)page.CropBox.URY, textBuilder);
+        DrawText("Upper right", (int)page.CropBox.URX, (int)page.CropBox.URY, textBuilder);
+    
+        // Save PDF document
+        document.Save(outputFilePath);
+    }
+
+    return outputFilePath;
+}
+
+private static void DrawText(string text, int x, int y, TextBuilder textBuilder)
+{
+    // Create text fragment
+    var textFragment = new Aspose.Pdf.Text.TextFragment(text);
+    textFragment.Position = new Aspose.Pdf.Text.Position(x, y);
+
+    // Set text properties
+    textFragment.TextState.FontSize = 12;
+    textFragment.TextState.Font = Aspose.Pdf.Text.FontRepository.FindFont("TimesNewRoman");
+
+    // Append the text fragment to the PDF page
+    textBuilder.AppendText(textFragment);
+}
+```
+
+</TabItem>
+
+<TabItem value="net-8" label=".NET 8">
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static string CoordinatesExample1()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+    string outputFilePath = dataDir + "coordinates1.pdf";
+    
+    // Create new document
+    using var document = new Aspose.Pdf.Document();
+    
+    // Get particular page
+    var page = document.Pages.Add();
+
+    // Create TextBuilder object
+    var textBuilder = new Aspose.Pdf.Text.TextBuilder(page);
+
+    DrawText("Low left", 0, 0, textBuilder);
+    DrawText("Low right", (int)page.CropBox.URX, 0, textBuilder);
+    DrawText("Upper left", 0, (int)page.CropBox.URY, textBuilder);
+    DrawText("Upper right", (int)page.CropBox.URX, (int)page.CropBox.URY, textBuilder);
+
+    // Save PDF document
+    document.Save(outputFilePath);    
+
+    return outputFilePath;
+}
+
+private static void DrawText(string text, int x, int y, TextBuilder textBuilder)
+{
+    // Create text fragment
+    var textFragment = new Aspose.Pdf.Text.TextFragment(text);
+    textFragment.Position = new Aspose.Pdf.Text.Position(x, y);
+
+    // Set text properties
+    textFragment.TextState.FontSize = 12;
+    textFragment.TextState.Font = Aspose.Pdf.Text.FontRepository.FindFont("TimesNewRoman");
+
+    // Append the text fragment to the PDF page
+    textBuilder.AppendText(textFragment);
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+![](/net/pdf/images/f2b03ef697dfb33c-example1_result.png)
+
+Imagen 5. El resultado de la ejecución del ejemplo 1.
+
+En el Ejemplo 2, escalamos el sistema de coordenadas y lo desplazamos al centro de la página.
+
+<Tabs groupId="frameworks">
+
+<TabItem value="net-core-3-1" label=".NET Core 3.1" default>
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void Example2()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+
+    string sourcePdf = Example1();
+
+    // Open document
+    using (var document = new Aspose.Pdf.Document(sourcePdf))
+    {
+        Page page = document.Pages[1];
+		
+        // Get the page's dimensions
+        double pageWidth = page.CropBox.Width;
+        double pageHeight = page.CropBox.Height;
+
+        // Set the scale factor
+        double scale = 0.5;
+
+        // Calculate the offset
+        double offsetX = (pageWidth - pageWidth * scale) / 2;
+        double offsetY = (pageHeight - pageHeight * scale) / 2;
+		
+        // Get the page's contents
+        var contents = page.Contents;
+
+        // Add the current graphical state to the content's beginning
+        contents.Insert(1, new Aspose.Pdf.Operators.GSave());
+        // Scale and move the coordinate system to fit the content in the center of the page
+        contents.Insert(2,
+            new Aspose.Pdf.Operators.ConcatenateMatrix(scale, 0, 0, scale, offsetX, offsetY));
+	   
+        contents.Add(new Aspose.Pdf.Operators.GRestore());
+
+        // Save PDF document
+        document.Save(dataDir + "coordinates2.pdf");
+      }
+}
+```
+
+</TabItem>
+
+<TabItem value="net-8" label=".NET 8">
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void Example2()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+
+    string sourcePdf = Example1();
+
+    // Open document
+    using var document = new Aspose.Pdf.Document(sourcePdf);
+    
+    Page page = document.Pages[1];
+    
+    // Get the page's dimensions
+    double pageWidth = page.CropBox.Width;
+    double pageHeight = page.CropBox.Height;
+
+    // Set the scale factor
+    double scale = 0.5;
+
+    // Calculate the offset
+    double offsetX = (pageWidth - pageWidth * scale) / 2;
+    double offsetY = (pageHeight - pageHeight * scale) / 2;
+    
+    // Get the page's contents
+    var contents = page.Contents;
+
+    // Add the current graphical state to the content's beginning
+    contents.Insert(1, new Aspose.Pdf.Operators.GSave());
+    // Scale and move the coordinate system to fit the content in the center of the page
+    contents.Insert(2,
+        new Aspose.Pdf.Operators.ConcatenateMatrix(scale, 0, 0, scale, offsetX, offsetY));
+   
+    contents.Add(new Aspose.Pdf.Operators.GRestore());
+
+    // Save PDF document
+    document.Save(dataDir + "coordinates2.pdf");
+      
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+![](/net/pdf/images/dda9710372c4b034-example2_result.png)
+
+Imagen 6. El resultado de la ejecución del ejemplo 2.
+
+## Comprender los sistemas de coordenadas y la posicionamiento en Aspose.PDF {#understanding-coordinate-systems-and-positioning-in-aspose-pdf}
+  
+Al trabajar con Aspose.PDF, es importante comprender las diferencias entre los objetos utilizados para el posicionamiento y sus respectivos sistemas de coordenadas. A continuación se presenta una explicación detallada de los objetos clave (TextFragment, TextStamp, FloatingBox, Rectangle), sus casos de uso, así como sus ventajas y desventajas.
+
+## TextFragment {#textfragment}
+  
+**Sistema de coordenadas:** Posicionamiento absoluto (origen en la esquina inferior izquierda).  
+**Descripción:** La clase TextFragment le permite agregar texto en una posición específica de la página utilizando coordenadas absolutas.  
+**Ventajas:**  
+
+- Simple y eficiente para agregar texto en posiciones precisas.
+- Operación ligera en comparación con TextStamp.  
+**Desventajas:**  
+
+- No admite transformaciones avanzadas, como rotación o escalado.  
+**Caso de uso:** Úselo cuando necesite agregar texto en una posición específica de la página sin complejidad adicional.
+
+<Tabs groupId="frameworks">
+
+<TabItem value="net-core-3-1" label=".NET Core 3.1" default>
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void AddTextFragmentWithPosition()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+    // Create PDF document
+    using (var document = new Aspose.Pdf.Document())
+    {
+        //Add the page
+        var page = document.Pages.Add();
+        //Create TextFragment object 
+        var textFragment = new Aspose.Pdf.Text.TextFragment("Hello, World!");
+        //Set absolute positions
+        textFragment.Position = new Aspose.Pdf.Text.Position(0, 200);
+        //Adding TextFragment to page
+        page.Paragraphs.Add(textFragment);
+        // Save PDF document
+        document.Save(dataDir + "AddTextFragmentWithPosition.pdf");
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="net-8" label=".NET 8">
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void AddTextFragmentWithPosition()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+    // Create PDF document
+    using var document = new Aspose.Pdf.Document();
+    //Add the page
+    var page = document.Pages.Add();
+    //Create TextFragment object 
+    var textFragment = new Aspose.Pdf.Text.TextFragment("Hello, World!");
+    //Set absolute positions
+    textFragment.Position = new Aspose.Pdf.Text.Position(0, 200);
+    //Adding TextFragment to page
+    page.Paragraphs.Add(textFragment);
+    // Save PDF document
+    document.Save(dataDir + "AddTextFragmentWithPosition.pdf");
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+## TextStamp {#textstamp}
+  
+Sistema de coordenadas: Posicionamiento absoluto (origen en la esquina inferior izquierda). Descripción: La clase TextStamp agrega texto como una marca de agua a la página. Internamente, crea una forma dentro de los recursos de la página, lo que constituye una operación más compleja que TextFragment. Ventajas:  
+
+- Admite transformaciones avanzadas, como rotación, escalado y opacidad.
+- Ideal para agregar marcas de agua o texto repetido. Desventajas:
+- Más intensivo en recursos en comparación con TextFragment. Ligeramente más complejo de configurar. Caso de uso: Utilícelo para agregar marcas de agua, encabezados o pies de página donde se requieran transformaciones o uso repetido.
+
+<Tabs groupId="frameworks">
+
+<TabItem value="net-core-3-1" label=".NET Core 3.1" default>
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void AddTextStamp()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+    // Create PDF document
+    using (var document = new Aspose.Pdf.Document())
+    {
+        //Add the page
+        var page = document.Pages.Add();
+        //Create TextStamp object 
+        var textStamp = new Aspose.Pdf.TextStamp("Hello, TextStamp!");
+        //Set absolute positions
+        textStamp.XIndent = 0; 
+        textStamp.YIndent = 200;
+        //Adding TextStamp to page
+        page.AddStamp(textStamp);
+        // Save PDF document
+        document.Save(dataDir + "AddTextStamp.pdf");
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="net-8" label=".NET 8">
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void AddTextStamp()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+    // Create PDF document
+    using var document = new Aspose.Pdf.Document();
+    //Add the page
+    var page = document.Pages.Add();
+    //Create TextStamp object 
+    var textStamp = new Aspose.Pdf.TextStamp("Hello, TextStamp!");
+    //Set absolute positions
+    textStamp.XIndent = 0; 
+    textStamp.YIndent = 200;
+    //Adding TextStamp to page
+    page.AddStamp(textStamp);
+    // Save PDF document
+    document.Save(dataDir + "AddTextStamp");
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+## FloatingBox {#floatingbox}
+  
+Sistema de coordenadas: Posicionamiento relativo (basado en los márgenes de la página).  
+Descripción: La clase `FloatingBox` es un contenedor que puede contener texto u otros elementos. Su posición se define en relación con los márgenes de la página.  
+Ventajas:  
+
+- Fácil de posicionar elementos en relación con el diseño de la página.
+- Admite el redimensionamiento dinámico y el ajuste automático del contenido.  
+Desventajas:  
+
+- No es adecuado para colocaciones precisas y exactas a nivel de píxeles.
+- Requiere ajustes adicionales para diseños complejos.  
+Caso de uso: Úselo para crear diseños donde el contenido deba fluir dinámicamente, como encabezados, pies de página o barras laterales.
+
+<Tabs groupId="frameworks">
+
+<TabItem value="net-core-3-1" label=".NET Core 3.1" default>
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void AddFloatingBox()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+    // Create PDF document
+    using (var document = new Aspose.Pdf.Document())
+    {
+        //Add the page
+        var page = document.Pages.Add();
+        //Create FloatingBox object 
+        var floatingBox = new Aspose.Pdf.FloatingBox(200, 100); 
+        //Positioning relative to page margin
+        floatingBox.Left = 50; 
+        floatingBox.Top = 50;
+        floatingBox.Paragraphs.Add(new Aspose.Pdf.Text.TextFragment("Hello FloatingBox!"));
+        //Adding FloatingBox to page
+        page.Paragraphs.Add(floatingBox);
+        // Save PDF document
+        document.Save(dataDir + "AddFloatingBox.pdf");
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="net-8" label=".NET 8">
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void AddFloatingBox()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+    // Create PDF document
+    using var document = new Aspose.Pdf.Document();
+    //Add the page
+    var page = document.Pages.Add();
+    //Create FloatingBox object 
+    var floatingBox = new Aspose.Pdf.FloatingBox(200, 100); 
+    //Positioning relative to page margin
+    floatingBox.Left = 50; 
+    floatingBox.Top = 50;
+    floatingBox.Paragraphs.Add(new Aspose.Pdf.Text.TextFragment("Hello, FloatingBox!"));
+    //Adding FloatingBox to page
+    page.Paragraphs.Add(floatingBox);
+    // Save PDF document
+    document.Save(dataDir + "AddFloatingBox.pdf");
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+## Rectangle {#rectangle}
+  
+Sistema de coordenadas: Posicionamiento absoluto (origen en la esquina inferior izquierda).  
+Descripción: La clase Rectangle se utiliza para dibujar áreas o formas en la página. También puede utilizarse junto con TextFragmentAbsorber para buscar texto dentro de un área rectangular específica.  
+Ventajas:  
+
+- Útil para dibujar elementos gráficos como marcos o resaltados.
+- Puede combinarse con otros elementos como texto o imágenes.  
+Desventajas:  
+
+- Limitado a formas rectangulares. Requiere pasos adicionales para integrarse con otro contenido.  
+Caso de uso: Úsese para dibujar marcos alrededor de elementos o resaltar áreas en la página. Úsese junto con TextFragmentAbsorber para buscar texto dentro de un área específica.
+
+<Tabs groupId="frameworks">
+
+<TabItem value="net-core-3-1" label=".NET Core 3.1" default>
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void DrawRectangle()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+    // Create PDF document
+    using (var document = new Aspose.Pdf.Document())
+    {
+        //Add the page
+        var page = document.Pages.Add();
+        //Save graphicState
+        page.Contents.Add(new Aspose.Pdf.Operators.GSave());
+        //Colorize rectangle
+        var colorStroke = new Aspose.Pdf.Operators.SetRGBColorStroke(0.7, 0, 0);
+        page.Contents.Add(colorStroke);
+        //Create and add Rectangle on page
+        var rectangle = new Aspose.Pdf.Rectangle(100, 100, 200, 150);
+        page.Contents.Add(
+            new Aspose.Pdf.Operators.Re(rectangle.LLX,
+                rectangle.LLY,
+                rectangle.Width,
+                rectangle.Height));
+        //Close path
+        page.Contents.Add(new Aspose.Pdf.Operators.ClosePathStroke());
+        //Restore graphic state
+        page.Contents.Add(new Aspose.Pdf.Operators.GRestore());
+        // Save PDF document
+        document.Save(dataDir + "DrawRectangle.pdf");
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="net-8" label=".NET 8">
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void DrawRectangle()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+    // Create PDF document
+    using var document = new Aspose.Pdf.Document();
+    //Add the page
+    var page = document.Pages.Add();
+    //Save graphicState
+    page.Contents.Add(new Aspose.Pdf.Operators.GSave());
+    //Colorize rectangle
+    var colorStroke = new Aspose.Pdf.Operators.SetRGBColorStroke(0.7, 0, 0);
+    page.Contents.Add(colorStroke);
+    //Create and add Rectangle on page
+    var rectangle = new Aspose.Pdf.Rectangle(100, 100, 200, 150);
+    page.Contents.Add(
+        new Aspose.Pdf.Operators.Re(rectangle.LLX,
+            rectangle.LLY,
+            rectangle.Width,
+            rectangle.Height));
+    //Close path
+    page.Contents.Add(new Aspose.Pdf.Operators.ClosePathStroke());
+    //Restore graphic state
+    page.Contents.Add(new Aspose.Pdf.Operators.GRestore());
+    // Save PDF document
+    document.Save(dataDir + "DrawRectangle");
+}
+```
+
+</TabItem>
+
+</Tabs>
