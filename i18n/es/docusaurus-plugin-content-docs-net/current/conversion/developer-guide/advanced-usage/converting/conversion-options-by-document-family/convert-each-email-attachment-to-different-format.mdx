@@ -1,0 +1,74 @@
+---
+title: "Convertir cada archivo adjunto de correo electrónico a un formato diferente"
+sidebar_label: "Convertir cada archivo adjunto de correo electrónico a un formato diferente"
+sidebar_key: "net-conversion-converting-conversion-options-by-document-family-convert-each-email-attachment-to-different-format"
+sidebar_position: 2
+description: "Siga esta guía y aprenda cómo convertir archivos adjuntos de correo electrónico a diferentes formatos según el tipo de adjunto utilizando GroupDocs.Conversion para .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-each-email-attachment-to-different-format.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "3d9bca757b869b42ad0fa3ace09a8c3a7b876cb878ab2ab9548d41f77d07c370"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "e51cd0752009b0dc4bad81569a91e52b02062cf739766a9cfd8c11f339ad9062"
+translation_updated_at: "2026-11-16T07:14:25.043Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Conversion ofrece una API flexible para controlar la conversión de documentos que contienen otros documentos.
+
+El siguiente fragmento de código muestra cómo convertir cada adjunto a un formato diferente según el tipo de adjunto:
+
+```csharp
+var index = 1;
+LoadOptions LoadOptionsProvider(LoadContext loadContext)
+{
+    if (loadContext.SourceFormat == EmailFileType.Eml)
+    {
+        return new EmailLoadOptions
+        {
+            ConvertOwned = true,
+            ConvertOwner = true,
+            Depth = 2
+        };
+    }
+    return null;
+}
+
+Stream ConvertedStreamProvider(SaveContext saveContext)
+{
+    string outputFile = $"converted-{index++}.{saveContext.TargetFormat.Extension}";
+    return new FileStream(outputFile, FileMode.Create);
+}
+
+ConvertOptions ConvertOptionsProvider(ConvertContext convertContext)
+{
+    if (convertContext.SourceFormat == EmailFileType.Eml)
+    {
+        return new WordProcessingConvertOptions();
+    }
+
+    if (convertContext.SourceFormat == WordProcessingFileType.Txt)
+    {
+        return new PdfConvertOptions();
+    }
+    return new ImageConvertOptions();
+}
+
+using (var converter = new Converter("sample_with_attachments.eml", LoadOptionsProvider))
+{
+    converter.Convert(ConvertedStreamProvider, ConvertOptionsProvider);
+}
+
+```

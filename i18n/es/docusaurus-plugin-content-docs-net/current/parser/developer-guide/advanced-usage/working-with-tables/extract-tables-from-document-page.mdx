@@ -1,0 +1,130 @@
+---
+title: "Extraer tablas de la página del documento"
+sidebar_label: "Extraer tablas de la página del documento"
+sidebar_key: "net-parser-working-with-tables-extract-tables-from-document-page"
+sidebar_position: 4
+description: "Aprenda cómo extraer tablas de una página específica de un documento utilizando GroupDocs.Parser para .NET. Extraiga tablas de páginas de Excel, Word y PDF por índice de página en C#."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/working-with-tables/extract-tables-from-document-page.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "c48d62e9dd719c362c5e4ba80b1777f289be37996e0c1f063650bdc038ff3132"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "e545464284ce145585a6564b3f8fa3b7370d055e26fc3e54ae3f12f47b9f6429"
+translation_updated_at: "2026-11-16T07:56:21.822Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+GroupDocs.Parser proporciona la funcionalidad para extraer tablas de una página del documento mediante el método <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.parser/gettables/methods/1" target="_blank" rel="nofollow noopener noreferrer">GetTables(Int32, PageTableAreaOptions)</a>:
+
+```csharp
+IEnumerable<PageTableArea> GetTables(int pageIndex, PageTableAreaOptions options);
+```
+
+Este método devuelve una colección de objetos <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.data/pagetablearea" target="_blank" rel="nofollow noopener noreferrer">PageTableArea</a>:
+
+| Miembro | Descripción |
+| ------------------------------------------------------------ | ----------------------------------------------- |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagearea/properties/rectangle" target="_blank" rel="nofollow noopener noreferrer">Rectangle</a> | El área rectangular que delimita el área de texto. |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagearea/properties/page" target="_blank" rel="nofollow noopener noreferrer">Page</a> | La información de la página (índice de página y tamaño de página). |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetablearea/properties/rowcount" target="_blank" rel="nofollow noopener noreferrer">RowCount</a> | El número total de filas de la tabla. |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetablearea/properties/columncount" target="_blank" rel="nofollow noopener noreferrer">ColumnCount</a> | El número total de columnas de la tabla. |
+| PageTableAreaCell <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetablearea/properties/item" target="_blank" rel="nofollow noopener noreferrer">Item</a> | La celda de la tabla según los índices de fila y columna. |
+| double <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetablearea/methods/getrowheight" target="_blank" rel="nofollow noopener noreferrer">GetRowHeight(int)</a> | La altura de la fila. |
+| double <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/pagetablearea/methods/getcolumnwidth" target="_blank" rel="nofollow noopener noreferrer">GetColumnWidth(int)</a> | Devuelve el ancho de la columna. |
+
+<a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.parser/gettables/methods/1" target="_blank" rel="nofollow noopener noreferrer">GetTables(Int32, PageTableAreaOptions)</a> acepta un objeto <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/pagetableareaoptions" target="_blank" rel="nofollow noopener noreferrer">PageTableAreaOptions</a> que contiene un objeto <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.templates/templatetablelayout" target="_blank" rel="nofollow noopener noreferrer">TemplateTableLayout</a> con el diseño de la tabla (consulte [este artículo](/net/parser/developer-guide/advanced-usage/working-with-templates/) para obtener más detalles).
+
+A continuación se indican los pasos para extraer tablas de una página específica de un documento:
+
+1. Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para el documento;
+2. Comprobar si el documento admite la **extracción de tablas** mediante la propiedad `Features.Tables`;
+3. Obtener la información del documento para determinar el número total de páginas;
+4. Llamar al método <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.parser/gettables/methods/1" target="_blank" rel="nofollow noopener noreferrer">GetTables(Int32, PageTableAreaOptions)</a> con el índice de página y obtener la colección de objetos <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.data/pagetablearea" target="_blank" rel="nofollow noopener noreferrer">PageTableArea</a>;
+5. Recorrer la colección y acceder a las celdas de la tabla.
+
+El siguiente ejemplo muestra cómo extraer tablas de una página del documento:
+
+```csharp
+// Create an instance of Parser class
+using (Parser parser = new Parser(filePath))
+{
+    // Check if the document supports table extraction
+    if (!parser.Features.Tables)
+    {
+        Console.WriteLine("Document isn't supports tables extraction.");
+        return;
+    }
+    // Create the layout of tables
+    TemplateTableLayout layout = new TemplateTableLayout(
+        new double[] { 50, 95, 275, 415, 485, 545 },
+        new double[] { 325, 340, 365, 395 });
+    // Create the options for table extraction
+    PageTableAreaOptions options = new PageTableAreaOptions(layout);
+    // Get the document info
+    IDocumentInfo documentInfo = parser.GetDocumentInfo();
+    // Check if the document has pages
+    if (documentInfo.PageCount == 0)
+    {
+        Console.WriteLine("Document hasn't pages.");
+        return;
+    }
+    // Iterate over pages
+    for (int pageIndex = 0; pageIndex < documentInfo.PageCount; pageIndex++)
+    {
+        // Print a page number 
+        Console.WriteLine(string.Format("Page {0}/{1}", pageIndex + 1, documentInfo.PageCount));
+        // Extract tables from the document page
+        IEnumerable<PageTableArea> tables = parser.GetTables(pageIndex, options);
+        // Iterate over tables
+        foreach (PageTableArea t in tables)
+        {
+            // Iterate over rows
+            for (int row = 0; row < t.RowCount; row++)
+            {
+                // Iterate over columns
+                for (int column = 0; column < t.ColumnCount; column++)
+                {
+                    // Get the table cell
+                    PageTableAreaCell cell = t[row, column];
+                    if (cell != null)
+                    {
+                        // Print the table cell text
+                        Console.Write(cell.Text);
+                        Console.Write(" | ");
+                    }
+                }
+                Console.WriteLine();
+            }
+            Console.WriteLine();
+        }
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+- <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+- <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>
+
+### Aplicación gratuita en línea para extraer imágenes {#free-online-image-extractor-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones sencillas pero potentes gratuitas.
+
+Le invitamos a extraer imágenes de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">GroupDocs Parser App</a>.

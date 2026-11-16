@@ -1,0 +1,66 @@
+---
+title: "Cargar archivo desde FTP"
+sidebar_label: "Cargar archivo desde FTP"
+sidebar_key: "net-conversion-loading-loading-files-from-different-sources-load-file-from-ftp"
+sidebar_position: 4
+description: "Este artículo demuestra cómo convertir archivos almacenados en un almacenamiento FTP utilizando la API de GroupDocs.Conversion para .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/loading/loading-files-from-different-sources/load-file-from-ftp.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "9cda1400d36c911747266bc619f3f608911447dafd2b451973b8e5ab92dd256b"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "3f47218563f1c01e2ee7a46b1e6d205b5fe68f71fe3dc3f55f35b7c1c9df7b1f"
+translation_updated_at: "2026-11-16T07:50:09.886Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+El siguiente fragmento de código muestra cómo convertir un archivo desde FTP:
+
+```csharp
+public static void Run()
+{
+    string outputFile = Path.Combine(@"c:\output", "converted.pdf");
+    string filePath = "ftp://localhost/sample.doc";
+    using (Converter converter = new Converter(() => GetFileFromFtp(filePath)))
+    {
+        PdfConvertOptions options = new PdfConvertOptions();
+        converter.Convert(outputFile, options);
+    }
+}
+
+private static Stream GetFileFromFtp(string filePath)
+{
+    Uri uri = new Uri(filePath);
+    FtpWebRequest request = CreateRequest(uri);
+    using (WebResponse response = request.GetResponse())
+        return GetFileStream(response);
+}
+
+private static FtpWebRequest CreateRequest(Uri uri)
+{
+    FtpWebRequest request = (FtpWebRequest)WebRequest.Create(uri);
+    request.Method = WebRequestMethods.Ftp.DownloadFile;
+    return request;
+}
+
+private static Stream GetFileStream(WebResponse response)
+{
+    MemoryStream fileStream = new MemoryStream();
+    using (Stream responseStream = response.GetResponseStream())
+        responseStream.CopyTo(fileStream);
+    fileStream.Position = 0;
+    return fileStream;
+}
+```

@@ -1,0 +1,199 @@
+---
+title: "Convertir imágenes con reconocimiento óptico de caracteres (OCR)"
+sidebar_label: "OCR de imágenes"
+sidebar_key: "net-conversion-convert-image-ocr"
+sidebar_position: 55
+description: "En este artículo, aprenderá cómo convertir un archivo de imagen a texto o PDF mediante OCR con GroupDocs.Conversion para .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/basic-usage/convert/image-ocr.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "6167acc98929004fabee61ccf59f7547a59d1eaf748437ac630b7ec021700a6d"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "da4dc965f4095c187131d5b484afc7b5d8d91a6562a1ad37f68bdf75bb4a372f"
+translation_updated_at: "2026-11-16T09:14:31.726Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Sobre los formatos de archivo de imagen {#about-image-file-formats}
+
+Un formato de archivo de imagen es un método estándar para organizar y almacenar imágenes en dispositivos como computadoras, tabletas y teléfonos inteligentes. Las imágenes digitales almacenan datos de imagen en una cuadrícula bidimensional de píxeles, donde cada píxel representa un color mediante un número determinado de bits. Los tipos de archivo de imagen se clasifican en formatos de imagen vectorial y formatos de imagen rasterizada. Las imágenes 3D constituyen otro tipo de formato de archivo de imagen vectorial que se utiliza para gestionar imágenes tridimensionales.
+
+### Formatos rasterizados {#raster-formats}
+
+Las **gráficas rasterizadas** son imágenes digitales compuestas por datos de píxeles para representar colores. Son los tipos de imagen más comunes para gráficos utilizados en la web, así como para fotos digitales. Algunas imágenes rasterizadas pueden comprimirse para reducir el tamaño del archivo de imagen. Entre las extensiones y formatos de archivo de imagen rasterizada más comunes se incluyen **BMP** (archivo de imagen de mapa de bits), **PNG** (Gráficos de Red Portátil) y **GIF** (Formato de Intercambio de Gráficos).
+
+### Formatos vectoriales {#vector-formats}
+
+Las **imágenes vectoriales** se definen mediante puntos bidimensionales, en lugar de píxeles, que se conectan para otorgar una forma geométrica a la imagen. Los puntos poseen propiedades que definen la dirección de las rutas, el color, la forma, la curvatura, el grosor y el relleno. Entre las extensiones y formatos de archivo de imagen vectorial más comunes se incluyen **SVG** (Gráficos Vectoriales Escalables), **EPS** (Lenguaje PostScript Encapsulado) y **PDF** (Formato de Documento Portátil).
+
+## Convertir una imagen mediante OCR {#convert-from-an-image-using-ocr}
+
+Con <a href="https://products.groupdocs.com/conversion/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Conversion</a> puede convertir fácilmente sus archivos de imagen mediante OCR.  
+
+Para permitir conversiones OCR, GroupDocs.Conversion proporciona un punto de extensibilidad que delega el proceso real de OCR en una biblioteca de procesamiento OCR, al tiempo que le ofrece la simplicidad de configuración de conversión. El punto de extensibilidad es la interfaz <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.integration.ocr/iocrconnector" target="_blank" rel="nofollow noopener noreferrer">IOcrConnector</a>. 
+
+En primer lugar, debe decidir qué biblioteca de procesamiento OCR utilizará. Distintas bibliotecas tienen distintos procesos de configuración.
+
+En nuestro ejemplo, utilizaremos Aspose.OCR. Instale el paquete NuGet <a href="https://www.nuget.org/packages/Aspose.OCR" target="_blank" rel="nofollow noopener noreferrer">Aspose.OCR</a> en su proyecto. A continuación, implemente <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.integration.ocr/iocrconnector" target="_blank" rel="nofollow noopener noreferrer">IOcrConnector</a>. El siguiente fragmento de código proporciona un ejemplo de implementación:
+
+```csharp
+public class OcrConnector : IOcrConnector
+{
+    public RecognizedImage Recognize(Stream imageStream)
+    {
+        try
+        {
+            var api = new AsposeOcr();
+            var ocrInput = new OcrInput(InputType.SingleImage);
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                imageStream.Position = 0;
+                imageStream.CopyTo(ms);
+                ms.Position = 0;
+                ocrInput.Add(ms);
+
+                var detectedRectangles = api.DetectRectangles(ocrInput, AreasType.LINES, false).First();
+                var result = api.Recognize(ocrInput, new RecognitionSettings
+                    {
+                        DetectAreasMode = DetectAreasMode.COMBINE,
+                        RecognitionAreas = detectedRectangles.Rectangles
+                    })
+                    .First();
+                return CreateRecognizedImageFromResult(result);
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Console.WriteLine("Aspose.OCR Recognition failed: {0}", ex);
+        }
+
+        return RecognizedImage.Empty;
+    }
+
+    private RecognizedImage CreateRecognizedImageFromResult(RecognitionResult result)
+    {
+        var lines = new List<TextLine>();
+
+        for (var i = 0; i < result.RecognitionAreasText.Count; i++)
+        {
+            var rectangle = result.RecognitionAreasRectangles[i];
+            var s = result.RecognitionAreasText[i].Trim('\r', '\n');
+            var fragments = SplitToFragments(s, rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height);
+            lines.Add(new TextLine(fragments));
+        }
+
+        return new RecognizedImage(lines);
+    }
+
+    private static List<TextFragment> SplitToFragments(string lineText, int rectangleX, int rectangleY,
+        int rectangleWidth, int rectangleHeight)
+    {
+        var fragments = new List<TextFragment>();
+        if (!string.IsNullOrEmpty(lineText))
+        {
+            int index = 0, fragIndex = 0;
+            bool isWhitespace = false;
+            List<char> frag = new List<char>();
+            int previousWidth = 0;
+            float fixWidthChar = rectangleWidth / GetEquivalentLength(lineText);
+            while (index < lineText.Length)
+            {
+                if (frag.Count == 0)
+                {
+                    isWhitespace = (lineText[index] == ' ');
+                }
+                else
+                {
+                    bool altIsWhitespace = (lineText[index] == ' ');
+                    if (index == lineText.Length - 1) frag.Add(lineText[index]);
+                    if (altIsWhitespace != isWhitespace || (index == lineText.Length - 1))
+                    {
+                        string fragment = new string(frag.ToArray());
+                        int fragWidth = (int)Math.Round(GetEquivalentLength(fragment) * fixWidthChar);
+                        int actualLength = (index == lineText.Length - 1) ? lineText.Length : index;
+                        previousWidth =
+                            (int)Math.Round(GetEquivalentLength(lineText.Substring(0, actualLength - frag.Count)) *
+                                            fixWidthChar);
+                        fragments.Add(new TextFragment(fragment, new System.Drawing.Rectangle(
+                            rectangleX + previousWidth,
+                            rectangleY, fragWidth, rectangleHeight)));
+                        fragIndex += fragment.Length;
+                        frag.Clear();
+                        isWhitespace = altIsWhitespace;
+                    }
+                }
+
+                frag.Add(lineText[index]);
+                index++;
+            }
+        }
+
+        return fragments;
+    }
+
+    private static readonly List<char> NarrowChars = new List<char>(new char[]
+    {
+        ',', '.', ':', ';', '!', '|', '(', ')', '{', '}',
+        'l', 'i', 'I', '-', '+', 'f', 't', 'r'
+    });
+
+    private static readonly List<char> WideChars = new List<char>(new char[] { '\t', 'm', 'w', 'M', 'W' });
+
+    private static float GetEquivalentLength(string lineText)
+    {
+        var length = 0F;
+        foreach (var c in lineText)
+        {
+            if (c == ' ')
+                length += 0.6F;
+            else if (NarrowChars.Contains(c))
+                length += 0.5F;
+            else if (WideChars.Contains(c) || char.IsUpper(c))
+                length += 1.5F;
+            else
+                length += 1F;
+        }
+
+        return length;
+    }
+}
+```
+
+Una vez que `IOcrConnector` 
+interface se implementa, el fragmento de código para convertir JPG a DOCX se ve así:
+
+
+```csharp
+// Load the source JPG file
+RasterImageLoadOptions loadOptions = new RasterImageLoadOptions();
+loadOptions.SetOcrConnector(new OcrConnector());
+
+using (Converter converter = new Converter("sample.jpg", (LoadContext loadContext) => loadOptions))
+{
+    // Set the convert options for DOCX format
+    WordProcessingConvertOptions options = new WordProcessingConvertOptions();
+    // Convert to DOCX format
+    converter.Convert("converted.docx", options);
+}
+```
+
+Póngalo simplemente: instala una biblioteca de procesamiento OCR, implementa la `IOcrConnector` interfaz, cargue un archivo de imagen en el `Converter` clase que proporciona la `IOcrConnector` instancia, seleccione el formato de salida deseado y **GroupDocs.Conversion** se encarga del resto.  
+
+
+:::info
+Consulte el <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API</a> para más opciones de conversión y personalizaciones.
+:::

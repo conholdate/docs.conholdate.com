@@ -1,0 +1,387 @@
+---
+title: "# Cómo compilar en Docker
+
+## Tabla de contenido
+
+1. [Requisitos previos](#requisitos-previos)
+2. [Conceptos básicos de Docker](#conceptos-básicos-de-docker)
+3. [Estructura básica de un Dockerfile](#estructura-básica-de-un-dockerfile)
+4. [Compilación de una imagen](#compilación-de-una-imagen)
+5. [Ejemplos prácticos](#ejemplos-prácticos)
+6. [Consejos y buenas prácticas](#consejos-y-buenas-prácticas)
+7. [Resolución de problemas comunes](#resolución-de-problemas-comunes)
+
+## Requisitos previos
+
+- [Docker Engine](https://docs.docker.com/get-docker/) instalado en su sistema
+- Un entorno de desarrollo con acceso a la línea de comandos
+- Un archivo `Dockerfile` (o la intención de crear uno)
+
+## Conceptos básicos de Docker
+
+- **Imagen**: Archivo inmutable que contiene las instrucciones para crear un contenedor.
+- **Contenedor**: Instancia ejecutable de una imagen.
+- **Dockerfile**: Archivo de texto que contiene una serie de comandos para construir una imagen.
+
+## Estructura básica de un Dockerfile
+
+```dockerfile
+# Utilizar una imagen base
+FROM ubuntu:22.04
+
+# Establecer el directorio de trabajo
+WORKDIR /app
+
+# Copiar archivos del proyecto
+COPY . .
+
+# Instalar dependencias
+RUN apt-get update && apt-get install -y \\
+    build-essential \\
+    && rm -rf /var/lib/apt/lists/*
+
+# Exponer el puerto
+EXPOSE 8080
+
+# Comando por defecto al ejecutar el contenedor
+CMD [\"./start.sh\"]
+```
+
+## Compilación de una imagen
+
+Para compilar una imagen desde un Dockerfile:
+
+```bash
+docker build -t nombre-de-tu-imagen:etiqueta .
+```
+
+Ejemplo:
+
+```bash
+docker build -t mi-app:latest .
+```
+
+Parámetros comunes:
+
+- `-t`: Asigna un nombre y etiqueta a la imagen (`nombre:etiqueta`)
+- `-f`: Especifica una ruta alternativa al Dockerfile (`-f Dockerfile.prod`)
+- `--no-cache`: Omite el uso de capas en caché
+- `--build-arg`: Define variables de compilación
+
+## Ejemplos prácticos
+
+### Ejemplo 1: Aplicación Node.js
+
+```dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm ci --only=production
+
+COPY . .
+
+EXPOSE 3000
+
+CMD [\"npm\", \"start\"]
+```
+
+### Ejemplo 2: Aplicación Python
+
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD [\"python\", \"app.py\"]
+```
+
+### Ejemplo 3: Aplicación Go
+
+```dockerfile
+# Fase de compilación
+FROM golang:1.21-alpine AS builder
+
+WORKDIR /build
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+
+# Fase final
+FROM alpine:latest
+
+WORKDIR /app
+
+COPY --from=builder /build/main .
+
+EXPOSE 8080
+
+CMD [\"./main\"]
+```
+
+## Consejos y buenas prácticas
+
+- **Usar imágenes oficiales** como base cuando sea posible
+- **Minimizar el tamaño de la imagen**:
+  - Usar imágenes `slim` o `alpine`
+  - Eliminar dependencias innecesarias
+  - Usar multi-stage builds para compilaciones complejas
+- **Evitar secretos en la imagen**: No incluir claves API, tokens, etc.
+- **Usar `.dockerignore`** para excluir archivos innecesarios
+- **Especificar etiquetas explícitas** en lugar de `latest`
+- **Agrupar comandos `RUN`** con `&&` para reducir capas
+- **Usar `COPY` en lugar de `ADD`** a menos que necesites descompresión automática
+
+## Resolución de problemas comunes
+
+| Problema | Solución |
+|---------|----------|
+| `permission denied` al ejecutar `docker` | Agregar usuario al grupo `docker` (`sudo usermod -aG docker $USER`) |
+| `no space left on device` | Limpiar contenedores e imágenes no utilizados (`docker system prune -a`) |
+| `file not found` durante `COPY` | Verificar la ruta relativa y el contexto de compilación |
+| `connection refused` al acceder al contenedor | Verificar `EXPOSE`, `-p` y `CMD`/`ENTRYPOINT` |
+| Errores de red durante la compilación | Configurar proxy si es necesario (`--build-arg HTTP_PROXY=...`) |
+
+Para más información, consulta la [documentación oficial de Docker](https://docs.docker.com/)."
+sidebar_label: "# Cómo compilar en Docker
+
+## Tabla de contenido
+
+1. [Requisitos previos](#requisitos-previos)
+2. [Conceptos básicos de Docker](#conceptos-básicos-de-docker)
+3. [Estructura básica de un Dockerfile](#estructura-básica-de-un-dockerfile)
+4. [Compilación de una imagen](#compilación-de-una-imagen)
+5. [Ejemplos prácticos](#ejemplos-prácticos)
+6. [Consejos y buenas prácticas](#consejos-y-buenas-prácticas)
+7. [Resolución de problemas comunes](#resolución-de-problemas-comunes)
+
+## Requisitos previos
+
+- [Docker Engine](https://docs.docker.com/get-docker/) instalado en su sistema
+- Un entorno de desarrollo con acceso a la línea de comandos
+- Un archivo `Dockerfile` (o la intención de crear uno)
+
+## Conceptos básicos de Docker
+
+- **Imagen**: Archivo inmutable que contiene las instrucciones para crear un contenedor.
+- **Contenedor**: Instancia ejecutable de una imagen.
+- **Dockerfile**: Archivo de texto que contiene una serie de comandos para construir una imagen.
+
+## Estructura básica de un Dockerfile
+
+```dockerfile
+# Utilizar una imagen base
+FROM ubuntu:22.04
+
+# Establecer el directorio de trabajo
+WORKDIR /app
+
+# Copiar archivos del proyecto
+COPY . .
+
+# Instalar dependencias
+RUN apt-get update && apt-get install -y \\
+    build-essential \\
+    && rm -rf /var/lib/apt/lists/*
+
+# Exponer el puerto
+EXPOSE 8080
+
+# Comando por defecto al ejecutar el contenedor
+CMD [\"./start.sh\"]
+```
+
+## Compilación de una imagen
+
+Para compilar una imagen desde un Dockerfile:
+
+```bash
+docker build -t nombre-de-tu-imagen:etiqueta .
+```
+
+Ejemplo:
+
+```bash
+docker build -t mi-app:latest .
+```
+
+Parámetros comunes:
+
+- `-t`: Asigna un nombre y etiqueta a la imagen (`nombre:etiqueta`)
+- `-f`: Especifica una ruta alternativa al Dockerfile (`-f Dockerfile.prod`)
+- `--no-cache`: Omite el uso de capas en caché
+- `--build-arg`: Define variables de compilación
+
+## Ejemplos prácticos
+
+### Ejemplo 1: Aplicación Node.js
+
+```dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm ci --only=production
+
+COPY . .
+
+EXPOSE 3000
+
+CMD [\"npm\", \"start\"]
+```
+
+### Ejemplo 2: Aplicación Python
+
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD [\"python\", \"app.py\"]
+```
+
+### Ejemplo 3: Aplicación Go
+
+```dockerfile
+# Fase de compilación
+FROM golang:1.21-alpine AS builder
+
+WORKDIR /build
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+
+# Fase final
+FROM alpine:latest
+
+WORKDIR /app
+
+COPY --from=builder /build/main .
+
+EXPOSE 8080
+
+CMD [\"./main\"]
+```
+
+## Consejos y buenas prácticas
+
+- **Usar imágenes oficiales** como base cuando sea posible
+- **Minimizar el tamaño de la imagen**:
+  - Usar imágenes `slim` o `alpine`
+  - Eliminar dependencias innecesarias
+  - Usar multi-stage builds para compilaciones complejas
+- **Evitar secretos en la imagen**: No incluir claves API, tokens, etc.
+- **Usar `.dockerignore`** para excluir archivos innecesarios
+- **Especificar etiquetas explícitas** en lugar de `latest`
+- **Agrupar comandos `RUN`** con `&&` para reducir capas
+- **Usar `COPY` en lugar de `ADD`** a menos que necesites descompresión automática
+
+## Resolución de problemas comunes
+
+| Problema | Solución |
+|---------|----------|
+| `permission denied` al ejecutar `docker` | Agregar usuario al grupo `docker` (`sudo usermod -aG docker $USER`) |
+| `no space left on device` | Limpiar contenedores e imágenes no utilizados (`docker system prune -a`) |
+| `file not found` durante `COPY` | Verificar la ruta relativa y el contexto de compilación |
+| `connection refused` al acceder al contenedor | Verificar `EXPOSE`, `-p` y `CMD`/`ENTRYPOINT` |
+| Errores de red durante la compilación | Configurar proxy si es necesario (`--build-arg HTTP_PROXY=...`) |
+
+Para más información, consulta la [documentación oficial de Docker](https://docs.docker.com/)."
+sidebar_key: "net-conversion-known-issues-build-in-docker"
+sidebar_position: 7
+description: "Esta es una guía sobre cómo crear una API web que utilice GroupDocs.Conversion para .NET en un contenedor Docker."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/troubleshooting/known-issues/build-in-docker.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "780e28ae0612d1037c97e6d9ef6de70fbd928107285695ea3532cf7fe45f57bd"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "2cd779c5673662dba2e383373be0c1e9503b547e6588424a5449a97557bc8236"
+translation_updated_at: "2026-11-16T08:16:31.656Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Compilar proyecto de API web con GroupDocs.Conversion en Docker {#build-web-api-project-with-groupdocs-conversion-in-docker}
+
+Para compilar una API web que utilice GroupDocs.Conversion para .NET en un contenedor Docker, utilice el siguiente archivo Docker de ejemplo:
+
+```docker
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+RUN apt-get update && apt-get install -y ffmpeg libgdiplus
+
+RUN sed -i'.bak' 's/$/ contrib/' /etc/apt/sources.list
+RUN apt-get update; apt-get install -y ttf-mscorefonts-installer fontconfig
+RUN fc-cache -f -v
+
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+COPY ["YourApi/YourApi.csproj", "TestApi/"]
+RUN dotnet restore "YourApi/YourApi.csproj"
+COPY . .
+WORKDIR "/src/YourApi"
+RUN dotnet build "YourApi.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "YourApi.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "YourApi.dll"]
+```
+
+Como puedes ver, el proceso es el mismo que al construir un proyecto de API web normal en Docker. La principal diferencia radica en la instalación de las bibliotecas necesarias, lo que permite que GroupDocs.Conversion para .NET funcione correctamente dentro de un contenedor Docker:
+
+```docker
+RUN apt-get update && apt-get install -y ffmpeg libgdiplus
+
+RUN sed -i'.bak' 's/$/ contrib/' /etc/apt/sources.list
+RUN apt-get update; apt-get install -y ttf-mscorefonts-installer fontconfig
+RUN fc-cache -f -v
+```
+
+Tampoco olvide añadir el archivo `runtimeconfig.template.json` junto al archivo de su proyecto con el siguiente contenido:
+
+```json
+{
+    "configProperties": {
+        "System.Drawing.EnableUnixSupport": true
+    }
+}
+```
+
+Esto evitará la excepción «El inicializador de tipo para `gdip` lanza una excepción". Para obtener más información sobre esto <a href="https://docs.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/6.0/system-drawing-common-windows-only" target="_blank" rel="nofollow noopener noreferrer">leer aquí</a>.

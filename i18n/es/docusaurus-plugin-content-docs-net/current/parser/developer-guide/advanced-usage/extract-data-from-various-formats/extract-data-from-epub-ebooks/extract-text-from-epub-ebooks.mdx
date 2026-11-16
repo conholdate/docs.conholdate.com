@@ -1,0 +1,126 @@
+---
+title: "Extraer texto de libros electrónicos EPUB"
+sidebar_label: "Extraer texto de libros electrónicos EPUB"
+sidebar_key: "net-parser-extract-data-from-various-formats-extract-data-from-epub-ebooks-extract-text-from-epub-ebooks"
+sidebar_position: 1
+description: "Para extraer texto de libros electrónicos EPUB, se utilizan los métodos `GetText` y `GetText(pageIndex)`. Estos métodos permiten extraer el texto de todo el documento o bien el texto de una página seleccionada. El modo sin procesar (raw mode) no es compatible con EPUB."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/extract-data-from-various-formats/extract-data-from-epub-ebooks/extract-text-from-epub-ebooks.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "dc89f044bd018759b5d5fb78d53b504cf905de2ec50bd86873e483059c57755d"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "3b1ae4d6ae33565a9d8db96d2722f4892c860b68341259bbfde43641432575cb"
+translation_updated_at: "2026-11-16T07:16:07.325Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Para extraer texto de libros electrónicos EPUB, se utilizan los métodos <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> y <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/2" target="_blank" rel="nofollow noopener noreferrer">GetText(pageIndex)</a>. Estos métodos permiten extraer el texto del documento completo o del texto de la página seleccionada. El modo sin procesar no es compatible con EPUB.
+
+A continuación se indican los pasos para extraer texto de un libro electrónico EPUB:
+
+*   Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para el libro electrónico inicial;
+*   Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> y obtener el objeto <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">TextReader</a>;
+*   Leer el texto desde *reader*.
+
+
+:::warning
+<a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> el método devuelve un valor *null* si la extracción de texto no es compatible con el documento. Por ejemplo, la extracción de texto no es compatible con archivos ZIP. Por lo tanto, para un archivo ZIP <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> El método devuelve `*null*`. Para un libro electrónico EPUB vacío. <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> El método devuelve un valor vacío <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">Lector de texto</a> objeto (<a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader.readtoend?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">reader.ReadToEnd</a> el método devuelve una cadena vacía).
+:::
+
+
+El siguiente ejemplo demuestra cómo extraer texto de un libro electrónico en formato EPUB:
+
+```csharp
+// Create an instance of Parser class
+using(Parser parser = new Parser(filePath))
+{
+    // Extract a text into the reader
+    using(TextReader reader = parser.GetText())
+    {
+        // Print a text from the e-book
+        Console.WriteLine(reader.ReadToEnd());
+    }
+}
+```
+
+A continuación se indican los pasos para extraer texto de una página de un libro electrónico en formato EPUB:
+
+*   Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para el libro electrónico inicial;
+*   Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">GetDocumentInfo</a> y obtener un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo" target="_blank" rel="nofollow noopener noreferrer">IDocumentInfo</a> con el <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo/properties/pagecount" target="_blank" rel="nofollow noopener noreferrer">número de páginas</a>;
+*   Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/2" target="_blank" rel="nofollow noopener noreferrer">GetText(pageIndex)</a> pasando el índice de página y obtener un objeto <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">TextReader</a>;
+*   Leer el texto desde *reader*.
+
+El siguiente ejemplo muestra cómo extraer texto de una página de un libro electrónico en formato EPUB:
+
+```csharp
+// Create an instance of Parser class
+using(Parser parser = new Parser(filePath))
+{
+    // Get the document info
+    IDocumentInfo documentInfo = parser.GetDocumentInfo();
+   
+    // Iterate over pages
+    for(int p = 0; p < documentInfo.PageCount; p++)
+    {
+        // Print a page number 
+        Console.WriteLine(string.Format("Page {0}/{1}", p + 1, documentInfo.PageCount));
+   
+        // Extract a text into the reader
+        using(TextReader reader = parser.GetText(p))
+        {
+            // Print a text from the e-book
+            Console.WriteLine(reader.ReadToEnd());
+        }
+    }
+}
+```
+
+GroupDocs.Parser también permite extraer texto de libros electrónicos EPUB como HTML, Markdown y texto sin formato con formato. Para más detalles, consulte [Extraer texto con formato](/net/parser/developer-guide/advanced-usage/working-with-text/working-with-formatted-text/extract-formatted-text-from-document/).
+
+A continuación se indican los pasos para extraer texto de un libro electrónico EPUB como HTML:
+
+*   Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para el libro electrónico inicial;
+*   Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getformattedtext" target="_blank" rel="nofollow noopener noreferrer">GetFormattedText</a> y obtener un objeto <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">TextReader</a>;
+*   Leer el texto desde *reader*.
+
+El siguiente ejemplo muestra cómo extraer texto de un libro electrónico EPUB como HTML:
+
+```csharp
+// Create an instance of Parser class
+using (Parser parser = new Parser(filePath))
+{
+    // Extract a formatted text into the reader
+    using (TextReader reader = parser.GetFormattedText(new FormattedTextOptions(FormattedTextMode.Html)))
+    {
+        // Print a formatted text from the e-book
+        Console.WriteLine(reader.ReadToEnd());
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>    
+
+### Aplicación gratuita de análisis de documentos en línea {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.
+
+Le invitamos a analizar documentos y extraer datos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

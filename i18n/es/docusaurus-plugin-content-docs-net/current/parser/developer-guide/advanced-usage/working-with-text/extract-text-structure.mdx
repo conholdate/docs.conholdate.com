@@ -1,0 +1,247 @@
+---
+title: "Extraer estructura de texto"
+sidebar_label: "Extraer estructura de texto"
+sidebar_key: "net-parser-working-with-text-extract-text-structure"
+sidebar_position: 6
+description: "Este artículo explica cómo extraer la estructura de texto de documentos."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/working-with-text/extract-text-structure.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "9aab368bd4a426b03f1cb1333f288763879349cccaa13c2f8a9f110247f50181"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "68d1a21910f2c72c9d87319e59802c5042b298657e08b06b2c390468467df631"
+translation_updated_at: "2026-11-16T10:55:19.364Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Parser proporciona la funcionalidad para extraer la estructura de texto de los documentos mediante el método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getstructure" target="_blank" rel="nofollow noopener noreferrer">GetStructure</a>:
+
+```csharp
+XmlReader GetStructure();
+```
+
+Este método devuelve la representación XML de un documento. Un documento tiene la siguiente estructura:
+
+![](/net/parser/images/extract-text-structure.png)
+
+
+| Etiqueta | Descripción |
+| --- | --- |
+| document | Etiqueta raíz |
+| section | Representa una sección del documento. Dependiendo del tipo de documento, puede representar una hoja de cálculo, una diapositiva, etc. Puede contener los siguientes atributos: **style**: el estilo de la sección; **name**: el nombre de la sección (por ejemplo, el nombre de la hoja) |
+| p | Representa un párrafo de texto. Puede contener el siguiente atributo: **style**: el estilo del párrafo |
+| ul | Representa una lista desordenada |
+| ol | Representa una lista ordenada |
+| li | Representa un elemento de lista |
+| shape | Representa un objeto de forma |
+| table | Representa una tabla |
+| tr | Representa una fila de tabla |
+| td | Representa una celda de tabla. Puede contener los siguientes atributos: **rowIndex**: índice de fila (base cero); **columnIndex**: índice de columna (base cero); **rowSpan**: número total de filas que contiene la celda; **columnSpan**: número total de columnas que contiene la celda |
+
+Las etiquetas tienen las siguientes relaciones:
+
+*   **document** puede contener cualquier número de etiquetas **section**
+*   **section** puede contener cualquier número de etiquetas **p**, **ul**, **ol** o **table**, en cualquier orden
+*   **table** puede contener cualquier número de etiquetas **tr**
+*   **tr** puede contener cualquier número de etiquetas **td**
+*   **td** puede contener una etiqueta **p**
+
+Las etiquetas **p** y **li** pueden contener las etiquetas **hyperlink**, **strong**, **em** y el valor que representa un texto:
+
+![](/net/parser/images/extract-text-structure_1.png))![](/net/parser/images/extract-text-structure_2.png)
+
+| Etiqueta | Descripción |
+| --- | --- |
+| hyperlink | Representa un hipervínculo. Puede contener el siguiente atributo: link — URL |
+| strong | Representa un énfasis fuerte (texto en negrita) |
+| em | Representa un énfasis normal (texto en cursiva) |
+| br | Representa un salto de línea (etiqueta vacía) |
+
+## Características de la extracción de texto para distintos formatos {#features-of-text-extraction-for-different-formats}
+
+### Documentos de procesamiento de texto {#word-processing-documents}
+
+Los documentos de procesamiento de texto presentan una estructura más compleja: una celda de tabla puede contener un número arbitrario de formas, y un párrafo también puede contener un número arbitrario de formas.
+
+Una celda de tabla puede contener un número arbitrario de párrafos, listas y tablas:
+
+![](/net/parser/images/extract-text-structure_3.png)
+
+Una forma puede contener un único hipervínculo (etiqueta vacía) para toda la forma, así como cualquier número de párrafos, listas o tablas:
+
+![](/net/parser/images/extract-text-structure_4.png)
+
+### Presentaciones {#presentations}
+
+Las presentaciones tienen celdas de tabla y secciones más complejas, y una sección puede contener cualquier número de formas.
+
+Una celda de tabla puede contener cualquier número de párrafos o listas:
+
+![](/net/parser/images/extract-text-structure_5.png)
+
+Una forma puede contener un único hipervínculo (etiqueta vacía) para toda la forma y cualquier número de párrafos o listas:
+
+![](/net/parser/images/extract-text-structure_6.png)
+
+### Hojas de cálculo {#spreadsheets}
+
+Las hojas de cálculo tienen la siguiente estructura de documento:
+
+![](/net/parser/images/extract-text-structure_7.png)
+
+Es más simple que otros. Una sección puede contener cualquier número de formas y únicamente una tabla. Una forma puede contener un único hipervínculo (etiqueta vacía) para toda la forma y cualquier número de párrafos.
+
+## Ejemplos {#examples}
+
+A continuación se indican los pasos para extraer los hipervínculos del documento:
+
+*   Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para el documento inicial;
+*   Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getstructure" target="_blank" rel="nofollow noopener noreferrer">GetStructure</a> y obtener el objeto <a href="https://docs.microsoft.com/en-us/dotnet/api/system.xml.xmlreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">XmlReader</a>;
+*   Verificar que *reader* no sea nulo (la extracción de la estructura de texto está soportada para el documento);
+*   Procesar el documento XML.
+
+El siguiente ejemplo muestra cómo extraer los hipervínculos del documento:
+
+```csharp
+// Create an instance of Parser class
+using (Parser parser = new Parser(filePath))
+{
+    // Extract text structure to the XML reader
+    using (XmlReader reader = parser.GetStructure())
+    {
+        // Check if text structure extraction is supported
+        if (reader == null)
+        {
+            Console.WriteLine("Text structure extraction isn't supported.");
+            return;
+        }
+
+		// Process the XML document
+        // Read the XML document to search hyperlinks
+        while (reader.Read())
+        {
+            // Check if this is a start element with "hyperlink" name
+            if (reader.NodeType == XmlNodeType.Element && reader.IsStartElement() && reader.Name.ToLowerInvariant() == "hyperlink")
+            {
+                // Extract "link" attribute
+                string value = reader.GetAttribute("link");
+                if (value != null)
+                {
+                    Console.WriteLine(value);
+                }
+            }
+        }
+    }
+}
+```
+
+El siguiente documento:
+
+![](/net/parser/images/extract-text-structure_8.png)
+
+tiene la siguiente estructura de texto:
+
+```xml
+<?xml version="1.0"?>
+<document>
+  <section>
+    <p>
+      <shape>
+        <p>
+          Lorem ipsum dolor sit amet, <hyperlink link="google.com">consectetuer</hyperlink> adipiscing elit. Maecenas porttitor congue massa.
+        </p>
+      </shape>Lorem
+    </p>
+    <p>
+      Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed <hyperlink link="bing.com">pulvinar ultricies</hyperlink>, purus lectus <strong>malesuada</strong> libero, sit amet commodo magna eros quis urna.
+    </p>
+    <ol>
+      <li>Nunc viverra imperdiet enim. </li>
+      <li>Fusce est.</li>
+    </ol>
+    <p>Vivamus a tellus. </p>
+    <ul>
+      <li>
+        Pellentesque <em>
+          <strong>habitant morbi tristique senectus et netus et</strong>
+        </em> malesuada fames ac turpis egestas.
+      </li>
+      <li>Proin pharetra nonummy pede. </li>
+      <li>Mauris et orci. </li>
+      <li>Aenean nec lorem.</li>
+    </ul>
+    <table>
+      <tr>
+        <td rowIndex="0" columnIndex="0" rowSpan="1" columnSpan="1">
+          <p>In porttitor.</p></td>
+        <td rowIndex="0" columnIndex="1" rowSpan="1" columnSpan="1">
+          <p>
+            Donec laoreet <strong>nonummy</strong> augue.
+          </p></td>
+        <td rowIndex="0" columnIndex="2" rowSpan="1" columnSpan="1">
+          <p>
+            Suspendisse dui purus, <em>
+              <strong>scelerisque</strong>
+            </em> at, vulputate vitae, pretium mattis, nunc.
+          </p></td>
+        <td rowIndex="0" columnIndex="3" rowSpan="1" columnSpan="1">
+          <p>Mauris eget neque at sem venenatis eleifend. </p></td>
+      </tr>
+      <tr>
+        <td rowIndex="1" columnIndex="0" rowSpan="1" columnSpan="1">
+          <p>Ut nonummy.</p></td>
+        <td rowIndex="1" columnIndex="1" rowSpan="1" columnSpan="1">
+          <p>
+            Fusce <hyperlink link="google.com">aliquet pede</hyperlink> non pede.
+          </p></td>
+        <td rowIndex="1" columnIndex="2" rowSpan="1" columnSpan="1">
+          <p>Suspendisse dapibus lorem pellentesque magna.</p></td>
+        <td rowIndex="1" columnIndex="3" rowSpan="1" columnSpan="1">
+          <p>Integer nulla.</p></td>
+      </tr>
+      <tr>
+        <td rowIndex="2" columnIndex="0" rowSpan="3" columnSpan="1">
+          <p>Donec blandit feugiat ligula.</p></td>
+        <td rowIndex="4" columnIndex="1" rowSpan="1" columnSpan="1">
+          <p>
+            Donec hendrerit, felis et <em>imperdiet</em> euismod, purus ipsum pretium metus, in lacinia nulla nisl eget sapien.
+          </p></td>
+        <td rowIndex="2" columnIndex="2" rowSpan="3" columnSpan="1">
+          <p>
+            <strong>Donec</strong> ut est in lectus consequat consequat.
+          </p></td>
+        <td rowIndex="2" columnIndex="3" rowSpan="3" columnSpan="1">
+          <p>Etiam eget dui. Aliquam erat volutpat.</p></td>
+      </tr>
+    </table>
+    <p>Sed at lorem in nunc porta tristique. Proin nec augue.</p>
+  </section>
+</document>
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>    
+
+### Aplicación gratuita de análisis de documentos en línea {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas simples pero potentes.
+
+Le invitamos a analizar documentos y extraer datos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

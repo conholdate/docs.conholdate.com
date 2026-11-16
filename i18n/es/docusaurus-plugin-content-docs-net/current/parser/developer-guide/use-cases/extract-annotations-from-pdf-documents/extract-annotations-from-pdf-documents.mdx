@@ -1,0 +1,318 @@
+---
+title: "Extraer anotaciones de documentos PDF"
+sidebar_label: "Extraer anotaciones de documentos PDF"
+sidebar_key: "net-parser-extract-annotations-from-pdf-documents-extract-annotations-from-pdf-documents"
+sidebar_position: 20
+description: "Guía paso a paso para extraer anotaciones de PDF en .NET utilizando GroupDocs.Parser, con extracción por página, salida de texto combinada y opciones de exportación."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/use-cases/extract-annotations-from-pdf-documents/extract-annotations-from-pdf-documents.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "e8455477e342d76713e8d9b0d2836bfe3d423745b3aa14444e196ddbbfe64c30"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "221fdd4cdd33d04f006ffe698ddef55e03a59068e9b2a03eaf0f157561ad2458"
+translation_updated_at: "2026-11-16T08:22:19.307Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+
+:::info
+💡 Ejemplo completo funcional disponible en GitHub:
+<a href="https://github.com/groupdocs-parser/extract-annotations-from-pdf-using-groupdocs-parser-dotnet/" target="_blank" rel="nofollow noopener noreferrer">Extraer anotaciones de documentos PDF utilizando GroupDocs.Parser para .NET</a>
+:::
+
+
+**Extraer anotaciones de documentos PDF** es una funcionalidad de GroupDocs.Parser para .NET que lee comentarios de revisores, notas adhesivas y otros elementos de marcado dejados en un archivo PDF y los devuelve como datos estructurados. La guía a continuación muestra cómo convertir ese marcado en algo realmente utilizable, ya sea que necesites un volcado plano de todos los comentarios, un desglose página por página o una transcripción combinada de texto y anotaciones.
+
+---
+
+## Escenario empresarial: Recopilación de comentarios de revisores {#business-scenario-collecting-reviewer-feedback}
+
+Los equipos de publicación y jurídico suelen pasar un documento PDF por varios revisores antes de su finalización. Cada revisor deja comentarios directamente en el archivo en lugar de redactar un resumen por separado, lo que significa que los comentarios pueden pasarse por alto a menos que alguien abra cada página en un visor de PDF. Extraer las anotaciones programáticamente convierte esa retroalimentación dispersa en una lista de tareas que el editor puede revisar sistemáticamente.
+
+Me encontré con este caso al desarrollar un rastreador ligero de revisiones para un equipo de documentación: una nota de lanzamiento de 40 páginas pasó por tres revisores, y revisar manualmente cada página para encontrar todas las notas adhesivas llevó más tiempo que abordar los comentarios en sí. Extraer las anotaciones con unas pocas líneas de código redujo ese proceso a dos minutos.
+
+---
+
+## Por qué importan las anotaciones PDF {#why-pdf-annotations-matter}
+
+Las anotaciones constituyen el único registro de *quién* solicitó un cambio y *por qué*, ya que el PDF final, una vez resueltos los comentarios o aplanado el archivo, suele ocultar ese contexto. Leerlas programáticamente permite:
+
+- Construir una lista de tareas con los comentarios de revisión pendientes sin necesidad de abrir el archivo.
+- Archivar los comentarios de los revisores junto con el documento para auditorías futuras.
+- Enviar automáticamente los comentarios a un sistema de gestión de tickets.
+
+GroupDocs.Parser introdujo la extracción nativa de anotaciones para documentos PDF en la versión 26.7 mediante el método <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/getannotations/" target="_blank" rel="nofollow noopener noreferrer">GetAnnotations</a>: consulte las <a href="https://releases.groupdocs.com/parser/net/release-notes/2026/groupdocs-parser-for-net-26-7-release-notes/" target="_blank" rel="nofollow noopener noreferrer">notas de la versión 26.7</a> para obtener la lista completa de cambios en la API.
+
+---
+
+## Requisitos previos {#prerequisites}
+
+- SDK de .NET 6.0 o posterior instalado en su máquina.
+- Una clave de licencia temporal (válida 30 días) obtenida desde el portal de GroupDocs [Licencia temporal][TEMP_LICENSE].
+- GroupDocs.Parser para .NET versión 26.7 o posterior.
+- Un archivo PDF que contenga anotaciones existentes, por ejemplo, `document-with-annotations.pdf`.
+
+## Instalación {#installation}
+
+```bash
+# Add the GroupDocs.Parser NuGet package to your project
+dotnet add package GroupDocs.Parser
+```
+
+## Descripción general del repositorio {#repository-overview}
+
+El repositorio de ejemplo sigue una estructura limpia y modular:
+
+```
+extract-annotations-from-pdf-documents-net/
+│
+├── Methods
+│   ├── CheckAnnotationSupport.cs        # Feature-support check
+│   ├── ExtractAllAnnotations.cs         # Whole-document extraction
+│   ├── ExtractAnnotationsByPage.cs      # Page-by-page extraction
+│   ├── ExtractTextWithAnnotations.cs    # Combined text + annotations
+│   ├── ExportAnnotationsToCsv.cs        # CSV exporter
+│   └── ExportAnnotationsToJson.cs       # JSON exporter
+├── resources
+│   └── document-with-annotations.pdf
+├── ExtractAnnotationsFromPdf.csproj
+└── Program.cs                          # Orchestrates the workflow
+```
+
+Cada método está deliberadamente reducido (menos de 25 líneas) para que puedas copiarlo y pegarlo directamente en tu propio proyecto sin incluir dependencias innecesarias.
+
+---
+
+## Implementación paso a paso {#step-by-step-implementation}
+
+### 1. Comprobar el soporte de anotaciones (Foundation) {#1-check-annotation-support-foundation}
+
+No todos los formatos de archivo admiten anotaciones, y `GetAnnotations` devuelve `null` cuando no lo hace. Comprobar `Features.Annotations` desde el principio permite fallar rápidamente con un mensaje claro, en lugar de tener que proteger cada llamada con una comprobación de nulo.
+
+```csharp
+using (var parser = new Parser(path))
+{
+    return parser.Features.Annotations;
+}
+```
+
+**Cómo funciona:** `Parser.Features` expone una bandera `Boolean Annotations` que refleja si el formato de documento cargado admite la extracción de anotaciones.
+
+---
+
+### 2. Extraer todas las anotaciones (volcado de todo el documento) {#2-extract-all-annotations-whole-document-dump}
+
+Utilice la sobrecarga de `GetAnnotations()` sin parámetros cuando solo necesite todos los comentarios del archivo, independientemente de la página en la que aparezcan.
+
+```csharp
+var result = new List<string>();
+using (var parser = new Parser(path))
+{
+    IEnumerable<AnnotationItem> annotations = parser.GetAnnotations();
+    if (annotations == null)
+    {
+        return result;
+    }
+
+    foreach (var item in annotations)
+    {
+        result.Add(item.Value);
+    }
+}
+return result;
+```
+
+**Puntos clave:**
+- `GetAnnotations()` devuelve `null` cuando la extracción de anotaciones no es compatible, y una colección vacía cuando el documento simplemente no tiene anotaciones: ambos casos son distinguibles.
+- Cada `AnnotationItem` expone su texto mediante la propiedad `Value`.
+- Ideal para una comprobación rápida: «¿este archivo tiene comentarios abiertos en absoluto?».
+
+---
+
+### 3. Extraer anotaciones página por página (¿dónde se dejó?) {#3-extract-annotations-page-by-page-where-was-it-left}
+
+Cuando necesite saber a qué página pertenece un comentario, invoque `GetAnnotations(pageIndex)` en un bucle controlado por `GetDocumentInfo().PageCount`.
+
+```csharp
+var result = new List<AnnotationRecord>();
+using (var parser = new Parser(path))
+{
+    if (!parser.Features.Annotations)
+    {
+        return result;
+    }
+
+    var info = parser.GetDocumentInfo();
+    if (info == null || info.PageCount == 0)
+    {
+        return result;
+    }
+
+    for (int pageIndex = 0; pageIndex < info.PageCount; pageIndex++)
+    {
+        IEnumerable<AnnotationItem> pageAnnotations = parser.GetAnnotations(pageIndex);
+        if (pageAnnotations == null)
+        {
+            continue;
+        }
+
+        foreach (var item in pageAnnotations)
+        {
+            result.Add(new AnnotationRecord { PageIndex = pageIndex, Value = item.Value });
+        }
+    }
+}
+return result;
+```
+
+**Por qué usarlo:** La salida es una lista plana de pares *página → comentario*, que es exactamente la estructura que requiere una exportación a CSV o JSON.
+
+---
+
+### 4. Extraer el texto del documento junto con las anotaciones {#4-extract-document-text-together-with-annotations}
+
+A veces es más útil ver un comentario en el flujo del texto circundante, en lugar de como una lista independiente. Al establecer `IncludeAnnotations` en `TextOptions`, el texto de la anotación se integra en la salida regular de `GetText`.
+
+```csharp
+using (var parser = new Parser(path))
+{
+    var options = new TextOptions
+    {
+        IncludeAnnotations = true
+    };
+
+    using (TextReader reader = parser.GetText(options))
+    {
+        return reader?.ReadToEnd() ?? string.Empty;
+    }
+}
+```
+
+**Cuando brilla:** Generar un único documento estilo transcripción que un revisor pueda leer de principio a fin, incluidos los comentarios, sin necesidad de hacer referencia cruzada a una lista aparte.
+
+---
+
+## Exportación de las anotaciones {#exporting-the-annotations}
+
+### ¿Cómo puedo exportar las anotaciones extraídas a CSV? {#how-can-i-export-extracted-annotations-to-csv}
+
+Una exportación a CSV permite que los revisores abran directamente la lista de comentarios en Excel o la integren en una hoja de seguimiento. El exportador recorre los registros etiquetados por página generados en el paso 3 y escribe un archivo de dos columnas (`page,value`).
+
+```csharp
+var sb = new StringBuilder();
+sb.AppendLine("page,value");
+
+foreach (var record in records)
+{
+    sb.AppendLine($"{record.PageIndex},{CsvEscape(record.Value)}");
+}
+
+File.WriteAllText(outputPath, sb.ToString());
+```
+
+### ¿Cómo exporto las anotaciones a JSON para una canalización? {#how-do-i-export-the-annotations-to-json-for-a-pipeline}
+
+JSON es más adecuado cuando un servicio aguas abajo necesita consumir directamente los comentarios, sin necesidad de analizar una hoja de cálculo. El exportador genera una matriz simple de objetos `{ page, value }`.
+
+```csharp
+var sb = new StringBuilder();
+sb.AppendLine("[");
+
+for (int i = 0; i < records.Count; i++)
+{
+    var comma = i < records.Count - 1 ? "," : string.Empty;
+    sb.AppendLine($"  {{ \"page\": {records[i].PageIndex}, \"value\": \"{Escape(records[i].Value)}\" }}{comma}");
+}
+
+sb.AppendLine("]");
+File.WriteAllText(outputPath, sb.ToString());
+```
+
+Ambos exportadores pueden llamarse inmediatamente después de que `ExtractAnnotationsByPage.Run` finalice.
+
+---
+
+## Elección de la estrategia de extracción adecuada {#choosing-the-right-extraction-strategy}
+
+| Estrategia | Cuándo usarla | Formato de salida | Público típico |
+| ---------- | -------------- | -------------- | ------------------- |
+| **Extracción de todo el documento** | Verificación rápida de la presencia de comentarios | Lista plana de texto de comentarios | Editores que realizan una primera revisión |
+| **Extracción página por página** | Necesita saber dónde se encuentra cada comentario | Lista de pares (página + comentario) | Revisores, flujos de trabajo de tickets |
+| **Texto combinado + anotaciones** | Desea una transcripción legible única | Un único flujo de texto | Cualquier persona que lea el documento de principio a fin |
+
+Comience con la extracción de todo el documento para confirmar que el archivo contiene comentarios dignos de acción; luego cambie a la extracción página por página una vez que necesite redirigir los comentarios a la sección correspondiente.
+
+---
+
+## Errores comunes y cómo evitarlos {#common-pitfalls-how-to-avoid-them}
+
+- **Tratar `null` y una colección vacía de la misma manera** - `GetAnnotations` devuelve `null` cuando el formato no admite anotaciones, y una colección vacía `IEnumerable` cuando sí lo admite pero el documento no contiene ninguna. Registrar estos casos de forma distinta evita futuras sesiones de depuración confusas.
+- **Omitir la comprobación de funcionalidad** - Llamar a `GetAnnotations` en un formato que no admite anotaciones es seguro (simplemente devuelve `null`), pero comprobar `Features.Annotations` primero hace explícita la intención de su código.
+- **Olvidar bloques `using`** - `Parser` posee recursos nativos; siempre debe liberarse mediante un bloque `using`, especialmente al extraer de muchos archivos en lotes.
+- **Suponer que la extracción de anotaciones funciona para todos los formatos** - hasta la versión GroupDocs.Parser 26.7, esta funcionalidad está orientada a documentos PDF; el soporte para otros formatos depende de lo que permita el formato subyacente.
+- **Mezclar resultados de extracción a nivel de documento y a nivel de página** - `GetAnnotations()` no informa un número de página, por lo que no debe intentar correlacionarlo con la lista etiquetada por página; elija una única estrategia de extracción por caso de uso.
+
+---
+
+## Consejos y notas {#tips-notes}
+
+- Envuelva cada uso de `Parser` en un bloque `using` para liberar los identificadores de archivo de forma inmediata.
+- Reutilice los registros etiquetados por página obtenidos mediante `ExtractAnnotationsByPage` como única fuente de verdad para las exportaciones tanto en CSV como en JSON, para evitar que ambas salidas se desvíen entre sí.
+- Almacene la clave de licencia temporal en una variable de entorno en lugar de codificarla directamente.
+- Para lotes grandes, paralelice la extracción entre archivos, pero mantenga el paso de exportación secuencial para evitar colisiones de escritura en archivos.
+- Combine la extracción de anotaciones con `GetText` en modo raw cuando solo necesite una verificación rápida del volumen de comentarios.
+
+---
+
+## Preguntas frecuentes {#frequently-asked-questions}
+
+### P: ¿Qué ocurre si el PDF no contiene anotaciones en absoluto? {#q-what-happens-if-the-pdf-has-no-annotations-at-all}
+**R:** `GetAnnotations()` devuelve una colección vacía, no `null`. El código de iteración se ejecuta normalmente y simplemente produce cero resultados; no es necesario realizar comprobaciones adicionales de valores nulos más allá de la comprobación inicial de compatibilidad.
+
+### P: ¿Puedo extraer anotaciones de un PDF protegido con contraseña? {#q-can-i-extract-annotations-from-a-password-protected-pdf}
+**R:** Sí, siempre que proporcione la contraseña correcta al cargar el documento, de la misma manera que lo haría para cualquier otra operación de extracción con `GroupDocs.Parser`. La extracción de anotaciones funciona sobre el contenido descifrado una vez que el objeto `Parser` se ha creado correctamente.
+
+### P: ¿Me informa `GetAnnotations` quién dejó el comentario y cuándo? {#q-does-getannotations-tell-me-who-left-the-comment-or-when}
+**R:** No. `AnnotationItem` actualmente solo expone el texto de la anotación mediante la propiedad `Value`. Si necesita la identidad del revisor o las marcas de tiempo, deberá extraer esa información del propio texto de la anotación, si el revisor la incluyó allí.
+
+### P: ¿Puedo obtener el texto de la anotación integrado automáticamente en el texto del documento? {#q-can-i-get-the-annotation-text-mixed-into-the-document-text-automatically}
+**R:** Sí: configure `IncludeAnnotations = true` en `TextOptions` y páselo a `GetText`. Esto evita un segundo recorrido del documento cuando solo necesita una transcripción combinada.
+
+---
+
+## Conclusión {#conclusion}
+
+GroupDocs.Parser para .NET le ofrece una forma directa y programática de extraer los comentarios de los revisores de un PDF, en lugar de desplazarse manualmente por el archivo. Ya sea que necesite una verificación rápida de tipo sí/no, un informe etiquetado por página o una transcripción combinada de texto y anotaciones, los métodos de ejemplo anteriores cubren los flujos de trabajo de revisión más comunes. Exporte los resultados a CSV o JSON, integrelos en su sistema de gestión de tickets y deje de perder comentarios en un PDF que nadie vuelve a abrir.
+
+¿Listo para integrar? Revise el código fuente completo en GitHub, adapte los fragmentos a la estructura de su proyecto y comience a convertir los comentarios del PDF en listas de verificación accionables hoy mismo.
+
+---
+
+## Consulte también {#see-also}
+
+- [Extraer anotaciones de documentos PDF en C# .NET][DOCS_URL]
+- [Referencia de la API GetAnnotations][API_REF_URL]
+- [Notas de la versión de GroupDocs.Parser para .NET 26.7][RELEASE_NOTES_URL]
+- [Solicitud de licencia temporal][TEMP_LICENSE]
+- [Repositorio de proyectos de ejemplo][EXAMPLES_REPO]
+- [Categoría del blog de Parser][BLOG_CATEGORY]
+
+[DOCS_URL]: https://docs.groupdocs.com/parser/net/extract-annotations-from-pdf-documents/
+[API_REF_URL]: https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/getannotations/
+[RELEASE_NOTES_URL]: https://releases.groupdocs.com/parser/net/release-notes/2026/groupdocs-parser-for-net-26-7-release-notes/
+[TEMP_LICENSE]: https://purchase.conholdate.com/temporary-license/
+[EXAMPLES_REPO]: https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET
+[BLOG_CATEGORY]: https://blog.groupdocs.com/categories/groupdocs.parser-product-family/

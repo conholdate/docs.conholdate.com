@@ -1,0 +1,154 @@
+---
+title: "Convierte a Markdown con opciones avanzadas"
+sidebar_label: "Convierte a Markdown con opciones avanzadas"
+sidebar_key: "net-conversion-converting-conversion-options-by-document-family-convert-to-markdown-with-advanced-options"
+sidebar_position: 23
+description: "Sigue esta guía y aprende cómo convertir documentos al formato Markdown con un manejo avanzado de imágenes: incrusta imágenes como base64, escríbelas como archivos externos o redirígelas a un destino personalizado mediante la devolución de llamada para guardar imágenes, utilizando GroupDocs.Conversion para .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-to-markdown-with-advanced-options.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "2b2e6cbc62f496ac2d3d49be82551da0b91179bad8415acabd12e95c0eef645f"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "39a66720577f7b43dd1308a9feaa82778208f011e535dd8f870c242a82fce519"
+translation_updated_at: "2026-11-16T07:26:42.595Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Al convertir documentos a Markdown (`WordProcessingFileType.Md`), las imágenes del documento original pueden manejarse de dos formas:
+
+- **Incrustadas en base64** – las imágenes se incrustan directamente en el `.md` como URIs de datos, generando un único archivo autocontenido. Este es el comportamiento predeterminado.
+- **Destino personalizado mediante devolución de llamada** – usted controla cada imagen: adónde van los bytes (disco, memoria, almacenamiento en la nube, etc.) y qué URI se escribe en el archivo Markdown.
+
+Ambas opciones se configuran mediante <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert/markdownoptions" target="_blank" rel="nofollow noopener noreferrer">MarkdownOptions</a> en <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert/wordprocessingconvertoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingConvertOptions</a>.
+
+## Imágenes incrustadas en base64 (predeterminado) {#inline-images-as-base64-default}
+
+De forma predeterminada, <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert/markdownoptions/exportimagesasbase64" target="_blank" rel="nofollow noopener noreferrer">MarkdownOptions.ExportImagesAsBase64</a> es `true`, por lo que las imágenes se codifican en el archivo Markdown como URIs de datos; el resultado es un único archivo `.md` autocontenido sin imágenes generadas por separado.
+
+```csharp
+using (Converter converter = new Converter("sample.pdf"))
+{
+    WordProcessingConvertOptions options = new WordProcessingConvertOptions
+    {
+        Format = WordProcessingFileType.Md
+        // MarkdownOptions.ExportImagesAsBase64 is true by default
+    };
+    converter.Convert("converted.md", options);
+}
+```
+
+El Markdown resultante se ve así:
+
+```markdown
+![](data:image/png;base64,iVBORw0KGgoAAAANSUhEUg...)
+```
+
+Utilícelo cuando necesite una salida portátil en un único archivo, por ejemplo, al almacenar Markdown en una base de datos, enviarlo a través de un canal de mensajería o renderizarlo en un visor que no pueda resolver rutas de imágenes relativas.
+
+## Personalizar la salida de imágenes mediante una devolución de llamada {#customize-image-output-with-a-callback}
+
+*Disponible en GroupDocs.Conversion para .NET 26.6 y versiones posteriores.*
+
+Para tener control total sobre dónde se escriben las imágenes y qué URI aparece en el Markdown, implemente <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert/imarkdownimagesavingcallback" target="_blank" rel="nofollow noopener noreferrer">IMarkdownImageSavingCallback</a> y asígnela a <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert/markdownoptions/imagesavingcallback" target="_blank" rel="nofollow noopener noreferrer">MarkdownOptions.ImageSavingCallback</a>. La devolución de llamada se invoca una vez por imagen, independientemente del formato de origen (PDF, DOCX, PPTX, etc.).
+
+Cuando se asigna una devolución de llamada, esta tiene prioridad automáticamente: las imágenes se escriben a través de la devolución de llamada incluso si `ExportImagesAsBase64` se deja en su valor predeterminado.
+
+La devolución de llamada recibe una instancia de <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert/markdownimagesavingargs" target="_blank" rel="nofollow noopener noreferrer">MarkdownImageSavingArgs</a> con tres propiedades mutables:
+
+- **ImageFileName** – el URI que se escribe en el Markdown como referencia de la imagen. Establézcalo con un nombre de archivo, un identificador de marcador de posición o cualquier cadena.
+- **ImageStream** – el flujo de destino en el que el convertidor escribe los bytes de la imagen. Sustitúyalo para redirigir los bytes.
+- **KeepImageStreamOpen** – cuando `false` (valor predeterminado), el convertidor vacía y cierra el flujo; cuando `true`, el llamador conserva la propiedad y puede leer el flujo tras la finalización de `Convert()`.
+
+### Escenario 1: capturar imágenes en memoria con identificadores de marcador de posición {#scenario-1-capture-images-in-memory-with-placeholder-ids}
+
+Redirija todas las imágenes a un búfer en memoria y escriba un identificador único de marcador de posición en el Markdown en lugar de una ruta de archivo. Esto resulta útil cuando desea procesar posteriormente las imágenes, cargarlas en un almacenamiento externo o hacer referencia a ellas desde otro sistema.
+
+```csharp
+class CaptureImagesCallback : IMarkdownImageSavingCallback
+{
+    private int _index;
+    private readonly Dictionary<string, MemoryStream> _images;
+
+    public CaptureImagesCallback(Dictionary<string, MemoryStream> images) => _images = images;
+
+    public void ImageSaving(MarkdownImageSavingArgs args)
+    {
+        var id = $"image{_index++}";
+        var buffer = new MemoryStream();
+        _images[id] = buffer;
+        args.ImageStream = buffer;            // redirect image bytes into our buffer
+        args.ImageFileName = id;              // placeholder URI written into the .md
+        args.KeepImageStreamOpen = true;      // keep buffer readable after Convert() returns
+    }
+}
+
+var captured = new Dictionary<string, MemoryStream>();
+try
+{
+    var options = new WordProcessingConvertOptions { Format = WordProcessingFileType.Md };
+    options.MarkdownOptions.ImageSavingCallback = new CaptureImagesCallback(captured);
+
+    using var converter = new Converter("source.pdf");
+    converter.Convert("output.md", options);
+    // captured["image0"], captured["image1"], ... now hold the image bytes
+}
+finally
+{
+    foreach (var s in captured.Values) s.Dispose();   // caller owns the streams
+}
+```
+
+El Markdown resultante hace referencia a los identificadores de marcador de posición:
+
+```markdown
+![](image0)
+![](image1)
+```
+
+### Escenario 2: persistir imágenes en disco junto con el `.md` {#scenario-2-persist-images-to-disk-alongside-the-md}
+
+Escriba cada imagen en una carpeta específica con un esquema de nomenclatura elegido y permita que el convertidor cierre cada archivo cuando haya terminado.
+
+```csharp
+class FileImagesCallback : IMarkdownImageSavingCallback
+{
+    private readonly string _outputFolder;
+    private int _index;
+
+    public FileImagesCallback(string outputFolder) => _outputFolder = outputFolder;
+
+    public void ImageSaving(MarkdownImageSavingArgs args)
+    {
+        var fileName = $"image{_index++}.png";
+        args.ImageStream = new FileStream(Path.Combine(_outputFolder, fileName), FileMode.Create);
+        args.ImageFileName = fileName;        // written into the .md as ![](image0.png)
+        // KeepImageStreamOpen left at default (false) → the converter flushes and closes the file.
+    }
+}
+
+var options = new WordProcessingConvertOptions { Format = WordProcessingFileType.Md };
+options.MarkdownOptions.ImageSavingCallback = new FileImagesCallback("./out");
+
+using var converter = new Converter("source.pdf");
+converter.Convert("./out/output.md", options);
+// ./out/image0.png, ./out/image1.png, ... are written and closed by the converter.
+```
+
+## Más recursos {#more-resources}
+
+- <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert/markdownoptions" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API: MarkdownOptions</a>
+- <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert/imarkdownimagesavingcallback" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API: IMarkdownImageSavingCallback</a>
+- <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert/markdownimagesavingargs" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API: MarkdownImageSavingArgs</a>
+- [Convertir a WordProcessing con opciones avanzadas](/net/conversion/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-to-wordprocessing-with-advanced-options/)

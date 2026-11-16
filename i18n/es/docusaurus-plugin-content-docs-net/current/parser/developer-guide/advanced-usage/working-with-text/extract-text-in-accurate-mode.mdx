@@ -1,0 +1,130 @@
+---
+title: "Extraer texto en modo preciso"
+sidebar_label: "Extraer texto en modo preciso"
+sidebar_key: "net-parser-working-with-text-extract-text-in-accurate-mode"
+sidebar_position: 1
+description: "Aprenda cómo extraer texto en modo preciso de documentos utilizando GroupDocs.Parser para .NET. Extracción de texto de alta calidad con la máxima precisión desde PDF, Word, Excel y más de 50 formatos en C#."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/working-with-text/extract-text-in-accurate-mode.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "6474b418a22fa65290d01a56d922dfdf1ef37aa8b468947624a010a97e143c84"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "8ce03ca058c33533149f93852b0f42b2bad6f6d10eab84137f86ceb7f81b9462"
+translation_updated_at: "2026-11-16T08:02:43.466Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Parser proporciona la funcionalidad para extraer texto de documentos.
+
+El modo **Preciso** es el modo predeterminado de extracción de texto y significa que la calidad del texto será la mejor posible.
+
+Puede extraer el texto completo del documento o únicamente el texto de una página del documento.
+
+Para extraer texto del documento en el modo Preciso, se utilizan los métodos <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> y <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/2" target="_blank" rel="nofollow noopener noreferrer">GetText(int)</a> de la clase <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a>:
+
+```csharp
+TextReader GetText();
+TextReader GetText(int pageIndex);
+```
+
+Los métodos devuelven una instancia de la clase <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">TextReader</a> con el texto extraído. El primer método extrae el texto de todo el documento. El segundo método extrae el texto de una página del documento. Para obtener el número total de páginas del documento, se utiliza el método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">GetDocumentIn</a>[fo](https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getdocumentinfo) (véase a continuación).
+
+## Extraer texto {#extract-text}
+
+A continuación se indican los pasos para extraer texto del documento:
+
+*   Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para el documento inicial;
+*   Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> y obtener el objeto <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">TextReader</a>;
+*   Comprobar que *reader* no es nulo (la extracción de texto es compatible con el documento);
+*   Leer el texto desde *reader*.
+
+El siguiente ejemplo muestra cómo extraer texto de un documento:
+
+```csharp
+// Create an instance of Parser class
+using(Parser parser = new Parser(filePath))
+{
+    // Extract a text into the reader
+    using(TextReader reader = parser.GetText())
+    {
+        // Print a text from the document
+        // If text extraction isn't supported, a reader is null
+        Console.WriteLine(reader == null ? "Text extraction isn't supported" : reader.ReadToEnd());
+    }
+}
+```
+
+## Extraer texto de una página de documento {#extract-text-from-a-document-page}
+
+A continuación se indican los pasos para extraer texto de una página de documento:
+
+*   Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para el documento inicial;
+*   Llamar a la propiedad <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/features/properties/text" target="_blank" rel="nofollow noopener noreferrer">Features.Text</a> para verificar si la extracción de texto es compatible con el documento;
+*   Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/2" target="_blank" rel="nofollow noopener noreferrer">GetText(int)</a> pasando el índice de página y obtener un objeto <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">TextReader</a>;
+*   Leer el texto del *lector*.
+
+El siguiente ejemplo muestra cómo extraer texto de una página del documento:
+
+```csharp
+// Create an instance of Parser class
+using(Parser parser = new Parser(filePath))
+{
+    // Check if the document supports text extraction
+    if(!parser.Features.Text)
+    {
+        Console.WriteLine("Document isn't supports text extraction.");
+        return;   
+	}
+
+    // Get the document info
+    IDocumentInfo documentInfo = parser.GetDocumentInfo();
+    // Check if the document has pages
+    if(documentInfo.PageCount == 0)
+    {
+        Console.WriteLine("Document hasn't pages.");
+        return;
+    }
+ 
+    // Iterate over pages
+    for(int p = 0; p < documentInfo.PageCount; p++)
+    {
+        // Print a page number 
+        Console.WriteLine(string.Format("Page {0}/{1}", p + 1, documentInfo.PageCount));
+ 
+        // Extract a text into the reader
+        using(TextReader reader = parser.GetText(p))
+        {
+            // Print a text from the document
+            // We ignore null-checking as we have checked text extraction feature support earlier
+            Console.WriteLine(reader.ReadToEnd());
+        }
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>    
+
+### Aplicación gratuita de análisis de documentos en línea {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas simples pero potentes.
+
+Le invitamos a analizar documentos y extraer datos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

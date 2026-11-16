@@ -1,0 +1,217 @@
+---
+title: "Extraer tablas de documentos de Microsoft Office Word"
+sidebar_label: "Extraer tablas de documentos de Microsoft Office Word"
+sidebar_key: "net-parser-extract-data-from-various-formats-extract-data-from-microsoft-office-word-documents-extract-tables-from-microsoft-office-word-documents"
+sidebar_position: 5
+description: "Aprenda cómo extraer fácilmente el contenido de tablas desde documentos de Word (.doc, .docx) utilizando GroupDocs.Parser para .NET."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/extract-data-from-various-formats/extract-data-from-microsoft-office-word-documents/extract-tables-from-microsoft-office-word-documents.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "aebde0adfde15f90195c661dbdcfe326cfe7d91afad1646e7dbe9f48543eb21d"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "6105c439c2bd6f42bc4f16354b4f02c42812a8ab236ae871d3b7722920ee48c5"
+translation_updated_at: "2026-11-16T07:35:00.298Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+Esta guía explica cómo extraer tablas de documentos de Microsoft Office Word (`.doc`, `.docx`) utilizando GroupDocs.Parser para .NET.
+
+## Cómo funciona la extracción de tablas {#how-table-extraction-works}
+
+GroupDocs.Parser convierte el diseño de un documento en un formato XML estructurado. Las tablas se representan mediante etiquetas `<table>` dentro de este XML. El proceso de extracción implica leer esta estructura XML para identificar y procesar el contenido de las tablas.
+
+
+:::warning
+<a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getstructure" target="_blank" rel="nofollow noopener noreferrer">GetStructure</a> el método devuelve un valor *null* si la extracción de estructura de texto no es compatible con el documento. Por ejemplo, la extracción de estructura de texto no es compatible con archivos TXT. Por lo tanto, para un archivo TXT <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getstructure" target="_blank" rel="nofollow noopener noreferrer">GetStructure</a> el método devuelve *null*. Si el documento de Microsoft Office Word no tiene texto, <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getstructure" target="_blank" rel="nofollow noopener noreferrer">GetStructure</a>[] (https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getmetadata) método devuelve un valor vacío <a href="https://docs.microsoft.com/en-us/dotnet/api/system.xml.xmlreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">XmlReader</a> objeto.
+:::
+
+
+## Guía paso a paso {#step-by-step-guide}
+
+### 1. Crear una instancia del analizador {#1-create-a-parser-instance}
+Comience inicializando el analizador con la ruta de su documento.
+
+```csharp
+using (Parser parser = new Parser("YourDocument.docx"))
+{
+    // Extraction code goes here
+}
+```
+
+### 2. Recuperar la estructura del documento {#2-retrieve-document-structure}
+Obtiene la representación XML de la estructura del documento.
+
+```csharp
+using (XmlReader reader = parser.GetStructure())
+{
+    if (reader == null)
+    {
+        Console.WriteLine("Text structure extraction isn't supported for this document.");
+        return;
+    }
+    // Process the XML structure
+}
+``` 
+
+### 3. Encontrar y procesar tablas {#3-find-and-process-tables}
+Iterar a través del XML para localizar y procesar los elementos de tabla.
+
+```csharp
+while (reader.Read())
+{
+    // Look for table start elements
+    if (reader.NodeType == XmlNodeType.Element && reader.Name == "table")
+    {
+        Console.WriteLine("Found a table:");
+        ProcessTable(reader);
+    }
+}
+```
+
+### 4. Método de procesamiento de tablas {#4-table-processing-method}
+Este método maneja la extracción de filas y celdas de cada tabla.
+
+```csharp
+private static void ProcessTable(XmlReader reader)
+{
+    StringBuilder cellValue = new StringBuilder();
+    int rowIndex = 0;
+
+    while (reader.Read())
+    {
+        // Exit when table ends
+        if (reader.NodeType == XmlNodeType.EndElement && reader.Name == "table")
+        {
+            break;
+        }
+
+        // Detect new rows
+        if (reader.NodeType == XmlNodeType.Element && reader.Name == "tr")
+        {
+            rowIndex++;
+            Console.WriteLine($"[Row {rowIndex}]");
+        }
+
+        // Reset cell value at cell start
+        if (reader.NodeType == XmlNodeType.Element && reader.Name == "td")
+        {
+            cellValue.Clear();
+        }
+
+        // Output cell value at cell end
+        if (reader.NodeType == XmlNodeType.EndElement && reader.Name == "td")
+        {
+            Console.WriteLine($"  {cellValue}");
+        }
+
+        // Accumulate cell text content
+        if (reader.NodeType == XmlNodeType.Text)
+        {
+            cellValue.Append(reader.Value);
+        }
+    }
+}
+```
+
+### Ejemplo completo {#complete-example}
+A continuación se presenta un ejemplo completo y funcional que extrae y muestra tablas de un documento de Word:
+
+```csharp
+using System;
+using System.Text;
+using System.Xml;
+using GroupDocs.Parser;
+
+public static class WordTableExtractor
+{
+    public static void ExtractTables(string filePath)
+    {
+        using (Parser parser = new Parser(filePath))
+        {
+            using (XmlReader reader = parser.GetStructure())
+            {
+                if (reader == null)
+                {
+                    Console.WriteLine("Text structure extraction isn't supported for this document.");
+                    return;
+                }
+
+                Console.WriteLine($"Analyzing: {filePath}");
+                Console.WriteLine("----------------------------------------");
+
+                while (reader.Read())
+                {
+                    if (reader.NodeType == XmlNodeType.Element && reader.Name == "table")
+                    {
+                        Console.WriteLine("\n>>> TABLE FOUND");
+                        ProcessTable(reader);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void ProcessTable(XmlReader reader)
+    {
+        StringBuilder cellValue = new StringBuilder();
+        int rowIndex = 0;
+
+        while (reader.Read())
+        {
+            if (reader.NodeType == XmlNodeType.EndElement && reader.Name == "table")
+            {
+                break;
+            }
+
+            if (reader.NodeType == XmlNodeType.Element && reader.Name == "tr")
+            {
+                rowIndex++;
+                Console.WriteLine($"[Row {rowIndex}]");
+            }
+
+            if (reader.NodeType == XmlNodeType.Element && reader.Name == "td")
+            {
+                cellValue.Clear();
+            }
+
+            if (reader.NodeType == XmlNodeType.EndElement && reader.Name == "td")
+            {
+                Console.WriteLine($"  {cellValue}");
+            }
+
+            if (reader.NodeType == XmlNodeType.Text)
+            {
+                cellValue.Append(reader.Value);
+            }
+        }
+    }
+}
+``` 
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>    
+
+### Aplicación gratuita de análisis de documentos en línea {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.
+
+Le invitamos a analizar documentos y extraer datos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

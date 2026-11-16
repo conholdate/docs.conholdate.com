@@ -1,0 +1,154 @@
+---
+title: "Extraer y convertir el contenido de un archivo comprimido"
+sidebar_label: "Extraer y convertir el contenido de un archivo comprimido"
+sidebar_key: "net-conversion-converting-conversion-options-by-document-family-convert-contents-of-rar-or-zip-document-to-different-formats-and-compress"
+sidebar_position: 12
+description: "Aprenda cómo extraer archivos de archivos comprimidos (ZIP, RAR, 7z, TAR) y convertirlos a distintos formatos mediante GroupDocs.Conversion para .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-contents-of-rar-or-zip-document-to-different-formats-and-compress.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "dca75f84580c9d400cbc527c7342b3f982e2c043c57d46f4d70ae6a0ce4e6466"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "a481a2c31fa8231ed2b7925ea433a50b578ad937644a799271ea8d02862ea0cb"
+translation_updated_at: "2026-11-16T07:14:18.205Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+GroupDocs.Conversion puede extraer archivos de archivos comprimidos (ZIP, RAR, 7z, TAR) y convertir cada archivo a un formato diferente. Esta guía cubre dos flujos de trabajo para procesar el contenido de archivos comprimidos.
+
+**Para convertir formatos de archivos comprimidos** (ZIP a 7z, etc.) **sin extraer su contenido**, consulte [Convertir formatos de archivos comprimidos](/net/conversion/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-to-compression-with-advanced-options/).
+
+## Dos flujos de trabajo para la extracción de contenido {#two-content-extraction-workflows}
+
+| Flujo de trabajo | Qué hace | Resultado |
+| ---------- | ------------- | -------- |
+| **[Flujo de trabajo 1](#workflow-1-extract-and-convert-to-individual-files)** | Extraer y convertir cada archivo por separado | Archivos convertidos individuales (por ejemplo, doc-1.pdf, doc-2.pdf) |
+| **[Flujo de trabajo 2](#workflow-2-convert-contents-and-re-compress)** | Convertir el contenido Y crear un nuevo archivo comprimido | Nuevo archivo comprimido con el contenido convertido |
+
+## Flujo de trabajo 1: Extraer y convertir a archivos individuales {#workflow-1-extract-and-convert-to-individual-files}
+
+Extraer archivos de un archivo comprimido y convertir cada uno por separado (sin recomprimir).
+
+```csharp
+using GroupDocs.Conversion.Fluent;
+using GroupDocs.Conversion.Options.Convert;
+using GroupDocs.Conversion.Contracts;
+using System.IO;
+
+// ZIP contains: report.docx, summary.docx, analysis.docx
+FluentConverter.Load("documents.zip")
+    .ConvertTo((SaveContext saveContext) =>
+    {
+        // Create separate output file for each document
+        string fileName = $"converted-document-{saveContext.ItemIndex}.pdf";
+        return File.Create(Path.Combine(@"C:\output", fileName));
+    })
+    .WithOptions(new PdfConvertOptions())
+    .Convert();
+
+// Output: converted-document-1.pdf, converted-document-2.pdf, converted-document-3.pdf
+```
+
+**Uso de nombres de archivo originales:**
+
+```csharp
+FluentConverter.Load("documents.zip")
+    .ConvertTo((SaveContext saveContext) =>
+    {
+        string originalName = saveContext.SourceFileName ?? $"document-{saveContext.ItemIndex}";
+        string fileName = Path.ChangeExtension(originalName, ".pdf");
+        return File.Create(Path.Combine(@"C:\output", fileName));
+    })
+    .WithOptions(new PdfConvertOptions())
+    .Convert();
+
+// Output: report.pdf, summary.pdf, analysis.pdf
+```
+
+## Flujo de trabajo 2: Convertir contenidos y volver a comprimir {#workflow-2-convert-contents-and-re-compress}
+
+Extraer archivos, convertirlos y empaquetarlos en un nuevo archivo:
+
+```csharp
+using GroupDocs.Conversion.Fluent;
+using GroupDocs.Conversion.Options.Convert;
+using GroupDocs.Conversion.Contracts;
+using GroupDocs.Conversion.FileTypes;
+using System.IO;
+
+FluentConverter
+    .WithEvents(e => e.OnCompressionCompleted = compressedStream =>
+    {
+        using (var fileStream = File.Create("converted-documents.zip"))
+        {
+            compressedStream.CopyTo(fileStream);
+        }
+    })
+    .Load("documents.rar")
+    .ConvertTo((SaveContext saveContext) => new MemoryStream())
+    .WithOptions(new PdfConvertOptions())
+    .Compress(new CompressionConvertOptions
+    {
+        Format = CompressionFileType.Zip
+    })
+    .Convert();
+
+// Output: converted-documents.zip containing PDFs
+```
+
+A partir de la versión v26.6, el flujo de archivo comprimido se entrega a través del agregador [ConversionEvents](/net/conversion/developer-guide/advanced-usage/conversion-events/) mediante la llamada `WithEvents(...)` entry-stage. El método `.OnCompressionCompleted(...)` chain anterior, colocado tras `.Compress(...)`, sigue funcionando, pero está obsoleto y previsto para su eliminación en la versión v26.9.
+
+**Con protección por contraseña:**
+
+```csharp
+FluentConverter
+    .WithEvents(e => e.OnCompressionCompleted = compressedStream =>
+    {
+        using (var fileStream = File.Create("protected-archive.zip"))
+        {
+            compressedStream.CopyTo(fileStream);
+        }
+    })
+    .Load("sensitive-files.zip")
+    .ConvertTo((SaveContext saveContext) => new MemoryStream())
+    .WithOptions(new PdfConvertOptions())
+    .Compress(new CompressionConvertOptions
+    {
+        Format = CompressionFileType.Zip,
+        Password = "SecurePassword123"
+    })
+    .Convert();
+```
+
+## Elección del flujo de trabajo adecuado {#choosing-the-right-workflow}
+
+| Su objetivo | Utilice |
+| ---------------------- | ----------- |
+| Extraer y convertir cada archivo por separado | **Flujo de trabajo 1** |
+| Convertir el contenido Y crear un nuevo archivo comprimido | **Flujo de trabajo 2** |
+| Cambiar únicamente el formato del archivo comprimido (sin conversión) | Consulte [Convertir formatos de archivo comprimido](/net/conversion/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-to-compression-with-advanced-options/) |
+
+## Formatos de archivo comprimido admitidos {#supported-archive-formats}
+
+**Entrada (lectura):** ZIP, RAR, 7z, TAR, TAR.GZ, TAR.BZ2, TAR.XZ, CAB, LZ, CPIO, ISO
+
+**Salida (escritura):** ZIP, 7z, TAR, TAR.GZ, TAR.BZ2, TAR.XZ (la salida en formato RAR no está soportada debido a restricciones de licencia)
+
+## Consulte también {#see-also}
+
+- [Convertir formatos de archivo comprimido (ZIP, 7z, TAR, RAR)](/net/conversion/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-to-compression-with-advanced-options/) – Cambiar el formato del archivo comprimido sin extraer su contenido
+- [Opciones comunes de conversión](/net/conversion/developer-guide/advanced-usage/converting/common-conversion-options/)
+- <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.fluent/fluentconverter/" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API FluentConverter</a>

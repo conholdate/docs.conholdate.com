@@ -1,0 +1,146 @@
+---
+title: "Analizar datos de documentos"
+sidebar_label: "Analizar datos de documentos"
+sidebar_position: 4
+description: "Aprenda cómo analizar y extraer datos estructurados de documentos mediante extracción basada en plantillas con GroupDocs.Parser para .NET. Extraiga datos de facturas, tablas y campos en C#."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/basic-usage/parse-data-from-documents.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "0ca49ab862e25dac80dc5009a6b0673851231dfc43ef50dc19574feb8be786f7"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "ce036522426d64a0ad8c6700c04978e21d570f088c497f7cb5c0923769197ab0"
+translation_updated_at: "2026-11-16T08:18:20.180Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Parser proporciona la función de Procesador de Documentos que le permite extraer datos de documentos de diversos formatos, incluidos PDF, Microsoft Word, Excel, formatos de LibreOffice, etc. (ver [Lista completa compatible](/net/parser/getting-started/supported-document-formats/))).
+
+Con la función de Procesamiento de Documentos, puede resolver fácilmente tareas de automatización empresarial con los datos extraídos de sus documentos.
+
+Usar esta función es sencillo. Simplemente defina una plantilla de forma programática y aplíquela.
+
+## Analizar datos de documentos {#parse-data-from-documents}
+
+GroupDocs.Parser proporciona <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/template" target="_blank" rel="nofollow noopener noreferrer">Template</a> objeto para definir una plantilla y <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/parsebytemplate" target="_blank" rel="nofollow noopener noreferrer">ParseByTemplate</a> Método para aplicar la plantilla a un documento existente.
+
+```csharp
+DocumentData ParseByTemplate(Template template)
+```
+
+A continuación se indican los pasos para analizar los datos del documento mediante una plantilla generada por el usuario:
+
+*   Instanciar el objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para el documento existente;
+*   Instanciar el objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/template" target="_blank" rel="nofollow noopener noreferrer">Template</a> con la plantilla generada por el usuario;
+*   Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/parsebytemplate" target="_blank" rel="nofollow noopener noreferrer">ParseByTemplate</a> y obtener el objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/documentdata" target="_blank" rel="nofollow noopener noreferrer">DocumentData</a>;
+*   Verificar si *data* no es *null* (lo que indica que la función de análisis por plantilla es compatible con el documento);
+*   Iterar sobre los datos de los campos para obtener los datos del documento.
+
+El siguiente ejemplo muestra cómo analizar los datos del documento mediante una plantilla generada por el usuario:
+
+```csharp
+// Create an instance of Parser class
+using (Parser parser = new Parser(Constants.SampleInvoicePdf))
+{
+    // Parse the document by the template
+    DocumentData data = parser.ParseByTemplate(GetTemplate());
+    // Check if parsing document by template is supported
+    if (data == null)
+    {
+        Console.WriteLine("Parsing Document by Template isn't supported.");
+        return;
+    }
+    // Print extracted fields
+    for (int i = 0; i < data.Count; i++)
+    {
+        Console.Write(data[i].Name + ": ");
+        PageTextArea area = data[i].PageArea as PageTextArea;
+        Console.WriteLine(area == null ? "Not a template field" : area.Text);
+    }
+}
+private static Template GetTemplate()
+{
+    // Create detector parameters for "Details" table
+    TemplateTableParameters detailsTableParameters = new TemplateTableParameters(new Rectangle(new Point(35, 320), new Size(530, 55)), null);
+    // Create detector parameters for "Summary" table
+    TemplateTableParameters summaryTableParameters = new TemplateTableParameters(new Rectangle(new Point(330, 385), new Size(220, 65)), null);
+    // Create a collection of template items
+    TemplateItem[] templateItems = new TemplateItem[]
+    {
+        new TemplateField(new TemplateFixedPosition(new Rectangle(new Point(35, 135), new Size(100, 10))), "FromCompany"),
+        new TemplateField(new TemplateFixedPosition(new Rectangle(new Point(35, 150), new Size(100, 35))), "FromAddress"),
+        new TemplateField(new TemplateFixedPosition(new Rectangle(new Point(35, 190), new Size(150, 2))), "FromEmail"),
+        new TemplateField(new TemplateFixedPosition(new Rectangle(new Point(35, 250), new Size(100, 2))), "ToCompany"),
+        new TemplateField(new TemplateFixedPosition(new Rectangle(new Point(35, 260), new Size(100, 15))), "ToAddress"),
+        new TemplateField(new TemplateFixedPosition(new Rectangle(new Point(35, 290), new Size(150, 2))), "ToEmail"),
+        new TemplateField(new TemplateRegexPosition("Invoice Number"), "InvoiceNumber"),
+        new TemplateField(new TemplateLinkedPosition(
+            "InvoiceNumber",
+            new Size(200, 15),
+            new TemplateLinkedPositionEdges(false, false, true, false)),
+            "InvoiceNumberValue"),
+        new TemplateField(new TemplateRegexPosition("Order Number"), "InvoiceOrder"),
+        new TemplateField(new TemplateLinkedPosition(
+            "InvoiceOrder",
+            new Size(200, 15),
+            new TemplateLinkedPositionEdges(false, false, true, false)),
+            "InvoiceOrderValue"),
+        new TemplateField(new TemplateRegexPosition("Invoice Date"), "InvoiceDate"),
+        new TemplateField(new TemplateLinkedPosition(
+            "InvoiceDate",
+            new Size(200, 15),
+            new TemplateLinkedPositionEdges(false, false, true, false)),
+            "InvoiceDateValue"),
+        new TemplateField(new TemplateRegexPosition("Due Date"), "DueDate"),
+        new TemplateField(new TemplateLinkedPosition(
+            "DueDate",
+            new Size(200, 15),
+            new TemplateLinkedPositionEdges(false, false, true, false)),
+            "DueDateValue"),
+        new TemplateField(new TemplateRegexPosition("Total Due"), "TotalDue"),
+        new TemplateField(new TemplateLinkedPosition(
+            "TotalDue",
+            new Size(200, 15),
+            new TemplateLinkedPositionEdges(false, false, true, false)),
+            "TotalDueValue"),
+        new TemplateTable(detailsTableParameters, "details", null),
+        new TemplateTable(summaryTableParameters, "summary", null)
+    };
+    // Create a document template
+    Template template = new Template(templateItems);
+    return template;
+}
+```
+
+## Más recursos {#more-resources}
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre la creación de plantillas y el trabajo con datos extraídos, consulte las siguientes guías:
+
+*   [Trabajar con plantillas](/net/parser/developer-guide/advanced-usage/working-with-templates/)
+*   [Trabajar con datos extraídos por plantilla](/net/parser/developer-guide/advanced-usage/working-with-data-extracted-by-template/)
+
+### Ejemplos de GitHub {#github-examples}
+
+Puedes ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>    
+
+### Aplicación gratuita de análisis de documentos en línea {#free-online-document-parser-app}
+
+Además de una biblioteca .NET completa, proporcionamos aplicaciones gratuitas simples pero potentes.
+
+¡Bienvenido a analizar documentos y extraer datos de PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra herramienta gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Aplicación Gratuita de Procesamiento de Documentos en Línea</a>.

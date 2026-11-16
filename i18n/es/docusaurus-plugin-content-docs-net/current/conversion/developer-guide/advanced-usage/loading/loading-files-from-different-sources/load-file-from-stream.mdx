@@ -1,0 +1,98 @@
+---
+title: "Cargar archivo desde un flujo"
+sidebar_label: "Cargar archivo desde un flujo"
+sidebar_key: "net-conversion-loading-loading-files-from-different-sources-load-file-from-stream"
+sidebar_position: 2
+description: "Este artículo demuestra cómo convertir un archivo presentado como un flujo utilizando la API de GroupDocs.Conversion para .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/loading/loading-files-from-different-sources/load-file-from-stream.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "0f931e08d1129c3f1f55608e88441a0c59d03b5f3ae90f2aea5eb7b438e24ac2"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "d1c79f61de333f8094ae3411d3ab41129c7adefe45d2d8d9454a1ec2072d4f06"
+translation_updated_at: "2026-11-16T07:50:59.856Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Puede darse el caso de que su archivo no se encuentre físicamente en el disco. En su lugar, dispone del archivo en forma de flujo (stream). En este caso, para evitar la sobrecarga de guardar el flujo como archivo en el disco, <a href="https://products.groupdocs.com/conversion/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Conversion**</a> le permite convertir directamente los flujos de archivos.
+
+Para cargar un archivo desde un flujo, siga estos pasos:
+
+1.  Especifique el método para obtener el flujo del archivo.
+2.  Pase el nombre del método al constructor de la clase <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter" target="_blank" rel="nofollow noopener noreferrer">Converter</a>.
+
+El siguiente fragmento de código cumple esta finalidad:
+
+```csharp
+public static void Run()
+{
+    // Pass the source stream as parameter
+    using (Converter converter = new Converter(GetFileStream)) 
+    {
+        PdfConvertOptions options = new PdfConvertOptions();
+        converter.Convert("converted.pdf", options);
+    }
+}
+
+// Obtain the stream for the source file
+private static Stream GetFileStream() => File.OpenRead("sample.docx");
+```
+El fragmento anterior utiliza `FileStream` clase de instancia. Del mismo modo, puedes utilizar cualquier otro tipo de flujo. Solo asegúrate de que el flujo de origen contenga alguno de los [Formatos de archivo compatibles](/net/conversion/getting-started/supported-document-formats/). Por ejemplo, el siguiente código carga un archivo utilizando el `MemoryStream` clase instancia:
+
+```csharp
+public static void Run()
+{
+    // Pass the source stream as parameter
+    using (Converter converter = new Converter(GetMemoryStream)) 
+    {
+        PdfConvertOptions options = new PdfConvertOptions();
+        converter.Convert("converted.pdf", options);
+    }
+}
+
+// Obtain the stream for the source file
+private static Stream GetMemoryStream()
+{
+    MemoryStream memStream = new MemoryStream();
+
+    using (FileStream fStream = File.Open("sample.docx", FileMode.Open))
+    {
+        fStream.CopyTo(memStream);
+    }
+    return memStream;
+}
+```
+
+## Obtener información sobre archivos desde un flujo {#get-information-about-files-from-a-stream}
+Al cargar archivos desde un flujo, es posible que no sepa de antemano los tipos exactos de archivos que está recibiendo. Sin embargo, para obtener esta y otra información sobre el archivo de origen, puede utilizar el método <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter/getdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">Converter.GetDocumentInfo()</a>, como se describe en el artículo [Obtener información del documento](/net/conversion/developer-guide/basic-usage/get-document-info/).
+
+El siguiente código muestra el formato del archivo de origen cargado desde un flujo:
+```csharp
+public static void Run()
+{
+    // Pass the source stream as parameter
+    using (Converter converter = new Converter(GetFileStream)) 
+    {
+        IDocumentInfo docInfo = converter.GetDocumentInfo();
+        Console.WriteLine("Source file format: {0}", docInfo.Format);
+
+        PdfConvertOptions options = new PdfConvertOptions();
+        converter.Convert("converted.pdf", options);
+    }
+}
+
+// Obtain the stream for the source file
+private static Stream GetFileStream() => File.OpenRead("sample.docx");
+```

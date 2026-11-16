@@ -1,0 +1,99 @@
+---
+title: "Manejo de la carga de documentos de recursos externos"
+sidebar_label: "Manejo de la carga de documentos de recursos externos"
+sidebar_key: "net-parser-loading-handle-loading-of-external-resources"
+sidebar_position: 4
+description: "Aprende cómo manejar la carga de recursos externos."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/loading/handle-loading-of-external-resources.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "6ae1914f9f3734a481dd44914eafbb343a98eb97172180dc1251af02aeb829d9"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "409287c0346dc18fd6a0546152b7d7ae73259623d487e259b801a5b6aca01d02"
+translation_updated_at: "2026-11-16T07:44:27.605Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Parser proporciona la funcionalidad para manejar la carga de recursos externos en HTML.
+
+A continuación se indican los pasos para manejar la carga de recursos externos en HTML.
+
+*   Instanciar el objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/parsersettings" target="_blank" rel="nofollow noopener noreferrer">ParserSettings</a> y pasarle el controlador de recursos externos;
+*   Crear el objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> y llamar al método <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/getimages/" target="_blank" rel="nofollow noopener noreferrer">GetImages</a>.
+
+El siguiente ejemplo de código muestra cómo manejar la carga de recursos externos en HTML.
+
+```csharp
+// Create an instance of ParserSettings to pass External Resource Handler
+ParserSettings settings = new ParserSettings(new Handler());
+
+// Create an instance of Parser class to generate spreadsheet page previews
+using (Parser parser = new Parser(Constants.SampleHtmlWithImages, settings))
+{
+    // Extract images from HTML document
+    IEnumerable<PageImageArea> images = parser.GetImages();
+
+    // Iterate over extracted images
+    foreach (PageImageArea i in images)
+    {
+        // Print the type of image
+        Console.WriteLine(i.FileType);
+    }
+}
+
+/// <summary>
+/// This class provides the ability to filter extracted images.
+/// </summary>
+private class Handler : ExternalResourceHandler
+{
+    /// <summary>
+    /// Called before any external resource loads. It allows to skip unnesesary file loading.
+    /// </summary>
+    public override void OnLoading(ExternalResourceLoadingArgs args)
+    {
+        // Check if the file name ends with installation.png
+        if (!args.Uri.EndsWith("installation.png"))
+        {
+            // Otherwise skip this file
+            args.Skipped = true;
+        }
+
+        base.OnLoading(args);
+    }
+}
+```
+
+
+:::warning
+La carga de recursos externos está habilitada de forma predeterminada, lo que significa que el análisis de un documento procedente de una fuente no confiable puede provocar solicitudes HTTP salientes a hosts especificados dentro de dicho documento, por ejemplo, imágenes remotas o hojas de estilos a las que se hace referencia en un archivo HTML o MHTML, o en el cuerpo HTML de un correo electrónico, imágenes vinculadas en documentos de procesamiento de texto y campos `INCLUDEPICTURE`.
+
+A partir de la versión 26.6.1, `ExternalResourceHandler` intercepta únicamente la extracción de imágenes desde HTML y MHTML; otros métodos de extracción y otros formatos no pasan por este mecanismo. Para garantizar que no se realice ninguna solicitud saliente, bloquee el tráfico saliente a nivel de red o de proceso. Consulte [Acceso a la red y privacidad de los datos](/net/parser/getting-started/network-access-and-data-privacy/) para conocer el comportamiento medido por formato.
+:::
+
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>    
+
+### Aplicación gratuita de análisis de documentos en línea {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas simples pero potentes.
+
+Le invitamos a analizar documentos y extraer datos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

@@ -1,0 +1,149 @@
+---
+title: "Extraer texto de documentos PDF"
+sidebar_label: "Extraer texto de documentos PDF"
+sidebar_key: "net-parser-extract-data-from-various-formats-extract-data-from-pdf-documents-extract-text-from-pdf-documents"
+sidebar_position: 1
+description: "Aprenda cómo extraer texto de documentos PDF utilizando GroupDocs.Parser para .NET. Extraiga texto de todo el PDF o de páginas específicas, con manejo de errores. Incluye ejemplos en C# de la biblioteca para extracción de texto de PDF."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/extract-data-from-various-formats/extract-data-from-pdf-documents/extract-text-from-pdf-documents.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "8f870b5b0a9025eb0aa66381c1f0ceee052b955a6849594e676f79d81bee4063"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "45b07b123e6702d09287c19d37be08ddc1119b7f3064ce1024b32882b554441d"
+translation_updated_at: "2026-11-16T07:41:57.573Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Para extraer texto de documentos PDF, se utiliza el método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> y el método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/2" target="_blank" rel="nofollow noopener noreferrer">GetText(pageIndex)</a>. Estos métodos permiten extraer el texto de todo el documento o bien el texto de una página seleccionada.
+
+A continuación se presentan los pasos para extraer texto de un documento PDF:
+
+*   Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para el documento inicial;
+*   Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> y obtener un objeto <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">TextReader</a>;
+*   Leer el texto desde *reader*.
+
+
+:::warning
+<a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> el método devuelve un valor *null* si la extracción de texto no es compatible con el documento. Por ejemplo, la extracción de texto no es compatible con archivos ZIP. Por lo tanto, para un archivo ZIP <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> el método devuelve `*null*`. Para un documento PDF vacío <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> El método devuelve un valor vacío <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">Lector de texto</a> objeto (<a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader.readtoend?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">reader.ReadToEnd</a> el método devuelve una cadena vacía).
+:::
+
+
+El siguiente ejemplo demuestra cómo extraer texto de un documento PDF:
+
+```csharp
+// Create an instance of Parser class
+using (Parser parser = new Parser(filePath))
+{
+    // Extract text into the reader
+    using (TextReader reader = parser.GetText())
+    {
+        // If text extraction isn't supported, reader is null
+        Console.WriteLine(reader == null ? "Text extraction isn't supported" : reader.ReadToEnd());
+    }
+}
+```
+
+A continuación se indican los pasos para extraer texto de una página de un documento PDF:
+
+*   Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para el documento inicial;
+*   Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">GetDocumentInfo</a> y obtener un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo" target="_blank" rel="nofollow noopener noreferrer">IDocumentInfo</a> con <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo/properties/pagecount" target="_blank" rel="nofollow noopener noreferrer">el número de páginas</a>;
+*   Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/2" target="_blank" rel="nofollow noopener noreferrer">GetText(pageIndex)</a> pasando el índice de página y obtener un objeto <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">TextReader</a>;
+*   Leer el texto desde *reader*.
+
+El siguiente ejemplo muestra cómo extraer texto de una página de un documento PDF:
+
+```csharp
+// Create an instance of Parser class
+using(Parser parser = new Parser(filePath))
+{
+    // Get the document info
+    IDocumentInfo documentInfo = parser.GetDocumentInfo();
+   
+    // Iterate over pages
+    for(int p = 0; p < documentInfo.PageCount; p++)
+    {
+        // Print a page number 
+        Console.WriteLine(string.Format("Page {0}/{1}", p + 1, documentInfo.PageCount));
+   
+        // Extract a text into the reader
+        using(TextReader reader = parser.GetText(p))
+        {
+            // Print a text from the document
+            Console.WriteLine(reader.ReadToEnd());
+        }
+    }
+}
+```
+
+El modo sin procesar permite aumentar la velocidad de extracción de texto debido a la baja precisión del formato. <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/1" target="_blank" rel="nofollow noopener noreferrer">ObtenerTexto(OpcionesDeTexto)</a> y <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/3" target="_blank" rel="nofollow noopener noreferrer">ObtenerTexto(páginaÍndice, OpcionesTexto)</a> Los métodos se utilizan para extraer texto en modo sin procesar.
+
+
+:::warning
+Algunos documentos pueden tener números de página diferentes en los modos en bruto y preciso. Utilice <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo/properties/rawpagecount" target="_blank" rel="nofollow noopener noreferrer">DocumentInfo.RawPageCount</a> en lugar de <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo/properties/pagecount" target="_blank" rel="nofollow noopener noreferrer">IDocumentInfo.PageCount</a> en el modo en bruto.
+:::
+
+
+A continuación se indican los pasos para extraer texto sin formato desde una página de un documento PDF:
+
+*   Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para el documento inicial;
+*   Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/textoptions" target="_blank" rel="nofollow noopener noreferrer">TextOptions</a> con el parámetro *true*;
+*   Llamar a <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">GetDocumentInfo</a>;
+*   Utilizar <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo/properties/rawpagecount" target="_blank" rel="nofollow noopener noreferrer">RawPageCount</a> en lugar de <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo/properties/pagecount" target="_blank" rel="nofollow noopener noreferrer">PageCount</a> para evitar cálculos adicionales;
+*   Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/3" target="_blank" rel="nofollow noopener noreferrer">GetText(pageIndex, TextOptions)</a> pasando el índice de la página y obtener el objeto <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">TextReader</a>;
+*   Leer el texto desde *reader*.
+
+El siguiente ejemplo muestra cómo extraer texto sin formato desde una página de un documento PDF:
+
+```csharp
+// Create an instance of Parser class
+using (Parser parser = new Parser(filePath))
+{
+    // Get the document info
+    IDocumentInfo documentInfo = parser.GetDocumentInfo();
+    // Check if the document has pages
+    if (documentInfo == null || documentInfo.RawPageCount == 0)
+    {
+        Console.WriteLine("Document hasn't pages.");
+        return;
+    }
+    // Iterate over pages
+    for (int p = 0; p < documentInfo.RawPageCount; p++)
+    {
+        // Print a pagenumber 
+        Console.WriteLine(string.Format("Slide {0}/{1}", p + 1, documentInfo.RawPageCount));
+        // Extract a text into the reader
+        using (TextReader reader = parser.GetText(p, new TextOptions(true)))
+        {
+            // Print a text from the document page
+            Console.WriteLine(reader.ReadToEnd());
+        }
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>    
+
+### Aplicación gratuita en línea para analizar documentos {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.
+
+Le invitamos a analizar documentos y extraer datos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

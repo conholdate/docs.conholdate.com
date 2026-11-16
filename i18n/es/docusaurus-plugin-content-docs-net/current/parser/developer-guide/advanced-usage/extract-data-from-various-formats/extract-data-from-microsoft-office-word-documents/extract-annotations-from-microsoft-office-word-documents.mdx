@@ -1,0 +1,148 @@
+---
+title: "Extraer anotaciones de documentos de Microsoft Office Word"
+sidebar_label: "Extraer anotaciones de documentos de Microsoft Office Word"
+sidebar_key: "net-parser-extract-data-from-various-formats-extract-data-from-microsoft-office-word-documents-extract-annotations-from-microsoft-office-word-documents"
+sidebar_position: 2
+description: "Este artículo explica cómo extraer anotaciones de documentos de Microsoft Office Word (.doc, .docx)."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/extract-data-from-various-formats/extract-data-from-microsoft-office-word-documents/extract-annotations-from-microsoft-office-word-documents.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "96181d7d4a8f13f98dca4ce513424d8ad675be21ef54c56003c161b53b6447f7"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "d11d6bf672001defcb3f76448b29bb4899937f300b7f6586955d0a3a56202178"
+translation_updated_at: "2026-11-16T07:29:57.350Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+Los documentos de Microsoft Office Word (.doc, .docx) suelen contener **anotaciones**: comentarios, cambios rastreados o notas incrustadas dejadas por los revisores. Con **GroupDocs.Parser for .NET**, puede leer fácilmente estas anotaciones mediante programación utilizando el método <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/getannotations/#getannotations" target="_blank" rel="nofollow noopener noreferrer">GetAnnotations</a>.
+
+Esta guía muestra paso a paso cómo extraer anotaciones de documentos de Microsoft Office Word en C#.
+---
+## ¿Qué son las anotaciones de Word? {#what-are-word-annotations}
+
+Las anotaciones son comentarios, cambios rastreados u otras notas incrustadas que los revisores adjuntan a un documento de Word (.doc, .docx) durante una revisión. El método `GetAnnotations` lee esta marca y la devuelve como una colección de objetos `AnnotationItem`, cada uno expone una `Value` con el texto de la anotación, junto con metadatos como el autor y la marca de tiempo.
+
+El método tiene dos sobrecargas:
+
+| Sobrecarga | Descripción |
+| --- | --- |
+| **GetAnnotations()** | Extrae anotaciones del documento de Word completo |
+| **GetAnnotations(int pageIndex)** | Extrae anotaciones de una página específica (índice basado en cero) |
+
+⚡ *Nota: La extracción de anotaciones es compatible con documentos de texto electrónicos, incluido el formato Open XML (.docx), el formato binario heredado (.doc), RTF y TXT.*
+---
+## Cómo extraer anotaciones de un documento de Word en C# {#how-to-extract-annotations-from-a-word-document-in-c}
+
+Siga estos pasos para obtener las anotaciones de un archivo .doc o .docx:
+
+1. **Cree un objeto `Parser`** y cargue el documento de Word.
+2. **Llame al método `GetAnnotations`** para recuperar la colección de anotaciones.
+3. **Itere a través de la colección** y lea el valor de cada anotación.
+
+### Ejemplo: Extraer anotaciones de Word en C# {#example-extract-word-annotations-in-c}
+
+```csharp
+using (Parser parser = new Parser(@"MyDocument.docx"))
+{
+    // Extract annotations
+    IEnumerable<AnnotationItem> annotations = parser.GetAnnotations();
+
+    // Display annotations
+    foreach (AnnotationItem item in annotations)
+    {
+        Console.WriteLine(item.Value);
+    }
+}
+```
+
+
+:::warning
+<a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/getannotations/#getannotations" target="_blank" rel="nofollow noopener noreferrer">GetAnnotations</a> el método devuelve *null* si la extracción de anotaciones no es compatible con el documento. Si el documento de Word no tiene comentarios, <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/getannotations/#getannotations" target="_blank" rel="nofollow noopener noreferrer">GetAnnotations</a> El método devuelve una colección vacía.
+:::
+
+
+## Extraer texto de Word junto con anotaciones {#extract-word-text-together-with-annotations}
+
+A veces resulta útil obtener el texto del documento y sus comentarios en una sola operación, en lugar de llamar a `GetAnnotations` por separado. Establezca `IncludeAnnotations` en `true` en `TextOptions` y páselo al método `GetText`: el texto de las anotaciones se incluirá en la salida extraída junto con el texto normal del documento.
+
+### Ejemplo: Extraer texto con anotaciones en C# {#example-extract-text-with-annotations-in-c}
+
+```csharp
+using (Parser parser = new Parser(@"MyDocument.docx"))
+{
+    TextOptions options = new TextOptions
+    {
+        IncludeAnnotations = true
+    };
+
+    using (TextReader reader = parser.GetText(options))
+    {
+        string text = reader.ReadToEnd();
+        Console.WriteLine(text);
+    }
+}
+```
+
+## Lectura de metadatos de anotaciones de palabras {#reading-word-annotation-metadata}
+
+Cada `AnnotationItem` también expone metadatos que ayudan a rastrear quién dejó un comentario en un documento y cuándo:
+
+| Propiedad | Tipo | Descripción |
+| --- | --- | --- |
+| `AnnotationType` | `string` | El tipo de anotación. |
+| `PageIndex` | `int` | Índice basado en cero de la página donde se encuentra la anotación. |
+| `Timestamp` | `DateTime?` | Fecha y hora en que se creó o modificó por última vez la anotación. |
+| `AuthorName` | `string` | Nombre del autor que creó o modificó por última vez la anotación. |
+| `AuthorInitials` | `string` | Iniciales del autor que creó o modificó por última vez la anotación. |
+
+### Ejemplo: Lectura de metadatos de anotaciones en C# {#example-reading-annotation-metadata-in-c}
+
+```csharp
+using (Parser parser = new Parser(@"MyDocument.docx"))
+{
+    IEnumerable<AnnotationItem> annotations = parser.GetAnnotations();
+
+    foreach (AnnotationItem annotation in annotations)
+    {
+        Console.WriteLine($"Page: {annotation.PageIndex}, Author: {annotation.AuthorName} ({annotation.AuthorInitials})");
+        Console.WriteLine($"Created/Modified: {annotation.Timestamp}, Type: {annotation.AnnotationType}");
+        Console.WriteLine($"Comment: {annotation.Value}");
+    }
+}
+```
+
+## ¿Por qué extraer anotaciones de documentos de Word? {#why-extract-annotations-from-word-documents}
+
+Extraer comentarios de documentos de Microsoft Office Word resulta útil para:
+
+*   Flujos de trabajo de revisión: recopilar los comentarios de los revisores dejados en los documentos durante un ciclo de revisión.
+*   Colaboración: mostrar los comentarios del documento sin necesidad de abrir Word.
+*   Auditoría: rastrear quién comentó un documento y cuándo, a lo largo del tiempo.
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>
+
+### Aplicación gratuita de procesamiento de documentos en línea {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.
+
+Le invitamos a procesar documentos y extraer datos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">aplicación gratuita de procesamiento de documentos en línea</a>.

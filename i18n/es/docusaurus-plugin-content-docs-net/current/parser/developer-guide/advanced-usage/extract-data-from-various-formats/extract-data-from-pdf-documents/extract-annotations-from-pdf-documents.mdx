@@ -1,0 +1,152 @@
+---
+title: "Extraer anotaciones de documentos PDF en C# .NET"
+sidebar_label: "Extraer anotaciones de documentos PDF en C# .NET"
+sidebar_key: "net-parser-extract-data-from-various-formats-extract-data-from-pdf-documents-extract-annotations-from-pdf-documents"
+sidebar_position: 2
+description: "Aprende cómo extraer anotaciones de archivos PDF en C# utilizando GroupDocs.Parser para .NET."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/extract-data-from-various-formats/extract-data-from-pdf-documents/extract-annotations-from-pdf-documents.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "c6136c2fbc3efb902ad80732d90d0ebeae347eab1a6e9434a80fbef6ea149668"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "f62fd688ef4516f118d6d9c677f136bd357d202821b3b8ab0f32abdad8f4374e"
+translation_updated_at: "2026-11-16T07:39:32.425Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+Los archivos PDF a menudo contienen **anotaciones**: comentarios, notas, resaltados y otras marcas añadidas por revisores. Con **GroupDocs.Parser para .NET**, puede extraer fácilmente estas anotaciones mediante programación utilizando el método <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/getannotations/#getannotations" target="_blank" rel="nofollow noopener noreferrer">GetAnnotations</a>.
+
+Esta guía muestra paso a paso cómo extraer anotaciones de documentos PDF en C#.
+
+---
+
+## ¿Qué son las anotaciones PDF? {#what-are-pdf-annotations}
+
+Las anotaciones son notas, comentarios y marcas que los revisores añaden sobre el contenido de un documento PDF, por ejemplo, notas adhesivas, comentarios de texto o observaciones resaltadas. El método `GetAnnotations` lee estas marcas y las devuelve como una colección de objetos `AnnotationItem`, cada uno expone una `Value` con el texto de la anotación.
+
+El método tiene dos sobrecargas:
+
+| Sobrecarga | Descripción |
+| --- | --- |
+| **GetAnnotations()** | Extrae anotaciones del documento completo |
+| **GetAnnotations(int pageIndex)** | Extrae anotaciones de una página específica (índice basado en cero) |
+
+⚡ *Nota: El soporte para anotaciones depende del formato del documento. No todos los formatos de archivo permiten anotaciones.*
+
+---
+
+## Cómo extraer anotaciones PDF en C# {#how-to-extract-pdf-annotations-in-c}
+
+Siga estos pasos para obtener las anotaciones de un documento PDF:
+
+1. **Cree un objeto `Parser`** y cargue el archivo PDF.
+2. **Llame al método `GetAnnotations`** para recuperar la colección de anotaciones.
+3. **Itere a través de la colección** y lea el valor de cada anotación.
+
+### Ejemplo: Extraer anotaciones PDF en C# {#example-extract-pdf-annotations-in-c}
+
+```csharp
+using (Parser parser = new Parser(@"MyDocument.pdf"))
+{
+    // Extract annotations
+    IEnumerable<AnnotationItem> annotations = parser.GetAnnotations();
+
+    // Display annotations
+    foreach (AnnotationItem item in annotations)
+    {
+        Console.WriteLine(item.Value);
+    }
+}
+```
+
+
+:::warning
+<a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/getannotations/#getannotations" target="_blank" rel="nofollow noopener noreferrer">GetAnnotations</a> el método devuelve `*null*` si la extracción de anotaciones no es compatible con el documento. Si el documento PDF no tiene anotaciones, <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/getannotations/#getannotations" target="_blank" rel="nofollow noopener noreferrer">GetAnnotations</a> El método devuelve una colección vacía.
+:::
+
+
+## Metadatos adicionales de anotaciones {#additional-annotation-metadata}
+
+A partir de la versión 26.8, la clase `AnnotationItem` expone metadatos adicionales que proporcionan más contexto sobre cada anotación:
+
+| Propiedad | Tipo | Descripción |
+| --- | --- | --- |
+| `AnnotationType` | `string` | Tipo de anotación. |
+| `PageIndex` | `int` | Índice basado en cero de la página (o diapositiva) donde se encuentra la anotación. |
+| `Timestamp` | `DateTime?` | Fecha y hora en que se creó o modificó por última vez la anotación. |
+| `AuthorName` | `string` | Nombre del autor que creó o modificó por última vez la anotación. |
+| `AuthorInitials` | `string` | Iniciales del autor que creó o modificó por última vez la anotación. |
+
+### Ejemplo: Leer metadatos de anotaciones en C# {#example-read-annotation-metadata-in-c}
+
+```csharp
+using (Parser parser = new Parser(@"MyDocument.pdf"))
+{
+    foreach (AnnotationItem annotation in parser.GetAnnotations())
+    {
+        Console.WriteLine($"Type: {annotation.AnnotationType}");
+        Console.WriteLine($"Author: {annotation.AuthorName} ({annotation.AuthorInitials})");
+        Console.WriteLine($"Created/Modified: {annotation.Timestamp}");
+        Console.WriteLine($"Page: {annotation.PageIndex}");
+        Console.WriteLine($"Content: {annotation.Value}");
+    }
+}
+```
+
+Este metadato facilita la filtración de anotaciones por autor o tipo, su ordenación por fecha u la asociación con una página específica sin necesidad de búsquedas adicionales.
+
+## Extraer el texto del documento PDF junto con las anotaciones {#extract-pdf-document-text-together-with-annotations}
+
+En ocasiones resulta útil obtener tanto el texto del documento como sus anotaciones en una única operación, en lugar de invocar `GetAnnotations` por separado. Establezca `IncludeAnnotations` en `true` sobre `TextOptions` y páselo al método `GetText`: el texto de las anotaciones se incluirá en la salida extraída junto con el texto normal del documento.
+
+### Ejemplo: Extraer texto con anotaciones en C# {#example-extract-text-with-annotations-in-c}
+
+```csharp
+using (Parser parser = new Parser(@"MyDocument.pdf"))
+{
+    TextOptions options = new TextOptions
+    {
+        IncludeAnnotations = true
+    };
+    using (TextReader reader = parser.GetText(options))
+    {
+        string text = reader.ReadToEnd();
+        Console.WriteLine(text);
+    }
+}
+```
+
+## ¿Por qué extraer anotaciones de PDF? {#why-extract-pdf-annotations}
+
+Extraer anotaciones de PDF resulta útil para:
+
+*   Flujos de revisión: recopilar comentarios y retroalimentación de los revisores en un documento.
+*   Colaboración: mostrar secciones resaltadas o con notas sin necesidad de abrir el PDF.
+*   Auditoría: registrar las marcas realizadas en un documento a lo largo del tiempo.
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>
+
+### Aplicación gratuita de análisis de documentos en línea {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas simples pero potentes.
+
+Le invitamos a analizar documentos y extraer datos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

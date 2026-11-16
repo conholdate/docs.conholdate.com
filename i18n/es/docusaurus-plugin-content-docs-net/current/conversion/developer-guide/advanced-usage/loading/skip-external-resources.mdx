@@ -1,0 +1,239 @@
+---
+title: "Omitir la carga de recursos externos"
+sidebar_label: "Omitir la carga de recursos externos"
+sidebar_key: "net-conversion-loading-skip-external-resources"
+sidebar_position: 4
+description: "Aprenda este artículo y verifique cómo restringir la carga de recursos externos durante la conversión."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/loading/skip-external-resources.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "a38d509da5bd0c8eb52dec62d81341fc6a8028373a32d9bb88e034170db1399d"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "66b84efa496d8acd71693ed46e6b4ba94964f76e003970916fdbaaf55356b762"
+translation_updated_at: "2026-11-16T07:52:02.731Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## ¿Qué son los recursos externos? {#what-are-external-resources}
+
+Los *recursos externos* hacen referencia a diversos tipos de contenido o archivos que no están incrustados directamente en el documento, sino que se hacen referencia a ellos y se cargan desde ubicaciones externas. Estos recursos mejoran la funcionalidad, apariencia e interactividad del documento. Entre los recursos externos más comunes se incluyen imágenes, audio, video, fuentes, CSS, scripts, marcos de trabajo (frameworks), entre otros. **GroupDocs.Conversion** considera como externo cualquier recurso que un documento intente cargar desde una URL externa.
+
+El uso de recursos externos optimiza el rendimiento, la mantenibilidad y la escalabilidad de las páginas web y otros documentos. Estos recursos suelen almacenarse en caché por los navegadores, lo que puede reducir el tiempo de carga en visitas posteriores a un sitio web. Sin embargo, depender excesivamente de recursos externos también puede introducir dependencias y posibles puntos de fallo si las fuentes externas dejan de estar disponibles.
+
+## Consideraciones de seguridad {#security-considerations}
+
+La carga de recursos externos desde documentos no confiables puede suponer riesgos de seguridad:
+
+* **Falsificación de solicitudes del lado del servidor (SSRF)**: Un documento malicioso podría contener referencias a recursos de red interna, lo que permitiría potencialmente a los atacantes sondear o acceder a servicios internos.
+* **Fuga de credenciales NTLM**: Los documentos con rutas UNC (por ejemplo, `\\server\share`) podrían activar la autenticación NTLM automática, lo que podría provocar la fuga de credenciales.
+* **Exfiltración de datos**: Los recursos externos podrían utilizarse para rastrear el acceso al documento o exfiltrar datos.
+
+Para mitigar estos riesgos, <a href="https://products.groupdocs.com/conversion/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Conversion**</a> adopta un enfoque **seguro por defecto**: la propiedad `SkipExternalResources` se establece en `true` de forma predeterminada en todas las clases de opciones de carga compatibles.
+
+## Tipos de documento admitidos {#supported-document-types}
+
+El control de carga de recursos externos está disponible para los siguientes tipos de documento:
+
+| Tipo de documento | Clase LoadOptions |
+| --------------- | ------------------- |
+| Web/HTML | <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/webloadoptions" target="_blank" rel="nofollow noopener noreferrer">WebLoadOptions</a> |
+| Procesamiento de textos | <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/wordprocessingloadoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingLoadOptions</a> |
+| Presentaciones | <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/presentationloadoptions" target="_blank" rel="nofollow noopener noreferrer">PresentationLoadOptions</a> |
+| Hojas de cálculo | <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/spreadsheetloadoptions" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetLoadOptions</a> |
+| Correo electrónico | <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/emailloadoptions" target="_blank" rel="nofollow noopener noreferrer">EmailLoadOptions</a> |
+| SVG | <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/svgloadoptions" target="_blank" rel="nofollow noopener noreferrer">SvgLoadOptions</a> |
+
+Todas estas clases implementan la interfaz <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/iresourceloadingoptions" target="_blank" rel="nofollow noopener noreferrer">IResourceLoadingOptions</a>, que define las propiedades `SkipExternalResources` y `WhitelistedResources`.
+
+## Restricción de recursos externos {#restricting-external-resources}
+
+De forma predeterminada, `SkipExternalResources` está establecido en `true`, lo que significa que los recursos externos ya están bloqueados. Si anteriormente habilitó la carga de recursos externos y desea volver a restringirla, establezca la propiedad `SkipExternalResources` en `true`.
+
+Los fragmentos de código siguientes muestran cómo omitir la carga de recursos externos para distintos tipos de documento:
+
+### Documentos web/HTML {#web-html-documents}
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Options.Convert;
+using GroupDocs.Conversion.Options.Load;
+
+var loadOptions = new WebLoadOptions
+{
+    SkipExternalResources = true
+};
+using (var converter = new Converter("sample.html", (LoadContext loadContext) => loadOptions))
+{
+    var options = new PdfConvertOptions();
+    converter.Convert("converted.pdf", options);
+}
+```
+
+### Documentos de procesamiento de texto {#word-processing-documents}
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Options.Convert;
+using GroupDocs.Conversion.Options.Load;
+
+var loadOptions = new WordProcessingLoadOptions
+{
+    SkipExternalResources = true
+};
+using (var converter = new Converter("sample.docx", (LoadContext loadContext) => loadOptions))
+{
+    var options = new PdfConvertOptions();
+    converter.Convert("converted.pdf", options);
+}
+```
+
+### Documentos de presentación {#presentation-documents}
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Options.Convert;
+using GroupDocs.Conversion.Options.Load;
+
+var loadOptions = new PresentationLoadOptions
+{
+    SkipExternalResources = true
+};
+using (var converter = new Converter("sample.pptx", (LoadContext loadContext) => loadOptions))
+{
+    var options = new PdfConvertOptions();
+    converter.Convert("converted.pdf", options);
+}
+```
+
+### Documentos de hojas de cálculo {#spreadsheet-documents}
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Options.Convert;
+using GroupDocs.Conversion.Options.Load;
+
+var loadOptions = new SpreadsheetLoadOptions
+{
+    SkipExternalResources = true
+};
+using (var converter = new Converter("sample.xlsx", (LoadContext loadContext) => loadOptions))
+{
+    var options = new PdfConvertOptions();
+    converter.Convert("converted.pdf", options);
+}
+```
+
+### Documentos por correo electrónico {#email-documents}
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Options.Convert;
+using GroupDocs.Conversion.Options.Load;
+
+var loadOptions = new EmailLoadOptions
+{
+    SkipExternalResources = true
+};
+using (var converter = new Converter("sample.eml", (LoadContext loadContext) => loadOptions))
+{
+    var options = new PdfConvertOptions();
+    converter.Convert("converted.pdf", options);
+}
+```
+
+### Documentos SVG {#svg-documents}
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Options.Convert;
+using GroupDocs.Conversion.Options.Load;
+
+var loadOptions = new SvgLoadOptions
+{
+    SkipExternalResources = true
+};
+using (var converter = new Converter("sample.svg", (LoadContext loadContext) => loadOptions))
+{
+    var options = new PdfConvertOptions();
+    converter.Convert("converted.pdf", options);
+}
+```
+
+## Permitir recursos externos específicos {#allowlisting-specific-external-resources}
+
+A veces puede que desee omitir la carga de la mayoría de los recursos externos, pero aún así cargar algunos recursos específicos procedentes de fuentes de confianza.
+
+Para permitir recursos externos específicos durante la conversión, utilice la propiedad `WhitelistedResources`. Esta propiedad acepta una lista de cadenas que contienen fragmentos de URL que se permitirán. La propiedad `WhitelistedResources` solo es efectiva cuando la propiedad `SkipExternalResources` está establecida en `true`.
+
+El siguiente fragmento de código muestra cómo cargar imágenes JPG y JPEG, así como cualquier recurso procedente del dominio `example.com`, mientras se restringen todos los demás recursos externos:
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Options.Convert;
+using GroupDocs.Conversion.Options.Load;
+
+var loadOptions = new WebLoadOptions
+{
+    SkipExternalResources = true,
+    WhitelistedResources = new List<string> { "jpg", "jpeg", "example.com" }
+};
+using (var converter = new Converter("sample.html", (LoadContext loadContext) => loadOptions))
+{
+    var options = new PdfConvertOptions();
+    converter.Convert("converted.pdf", options);
+}
+```
+
+El mismo enfoque funciona para todos los tipos de documentos admitidos. Por ejemplo, para permitir recursos específicos al convertir un documento de correo electrónico:
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Options.Convert;
+using GroupDocs.Conversion.Options.Load;
+
+var loadOptions = new EmailLoadOptions
+{
+    SkipExternalResources = true,
+    WhitelistedResources = new List<string> { "trusted-domain.com", ".png", ".jpeg" }
+};
+using (var converter = new Converter("newsletter.eml", (LoadContext loadContext) => loadOptions))
+{
+    var options = new PdfConvertOptions();
+    converter.Convert("converted.pdf", options);
+}
+```
+
+Los recursos que coincidan con alguna entrada de la lista blanca se cargarán normalmente, mientras que todos los demás recursos externos se omitirán.
+
+## Habilitar la carga de recursos externos {#enabling-external-resources-loading}
+
+Si necesita cargar todos los recursos externos (no se recomienda para documentos no confiables), configure `SkipExternalResources` en `false`:
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Options.Convert;
+using GroupDocs.Conversion.Options.Load;
+
+var loadOptions = new WebLoadOptions
+{
+    SkipExternalResources = false
+};
+using (var converter = new Converter("trusted-document.html", (LoadContext loadContext) => loadOptions))
+{
+    var options = new PdfConvertOptions();
+    converter.Convert("converted.pdf", options);
+}
+```

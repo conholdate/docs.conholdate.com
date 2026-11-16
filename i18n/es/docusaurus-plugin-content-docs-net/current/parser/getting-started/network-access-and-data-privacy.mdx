@@ -1,0 +1,301 @@
+---
+title: "Acceso a la red y privacidad de los datos"
+sidebar_label: "Acceso a la red y privacidad de los datos"
+sidebar_key: "net-parser-network-access-and-data-privacy"
+sidebar_position: 6
+description: "Explica cuándo GroupDocs.Parser para .NET accede a la red, qué datos salen de su máquina, qué métodos de extracción cargan recursos externos y cómo evitar solicitudes salientes en entornos aislados o despliegues con requisitos de seguridad estrictos."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/getting-started/network-access-and-data-privacy.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "32d91685dc09d01c7c0675d8fcd7e1d447c2e4580c6614cb16cce0f107dbfa71"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "6627b77b1ad9c7087113a158c5d97ab2cc3d66c48dbee2a87cc98673170bb93a"
+translation_updated_at: "2026-11-16T08:34:05.308Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## Resumen {#summary}
+
+GroupDocs.Parser para .NET es una **biblioteca local (on-premise)**. Se ejecuta completamente dentro de su propio proceso, en su propia máquina y red. No envía sus documentos, los datos extraídos ni ninguna información del cliente a GroupDocs.
+
+Como se indica en la <a href="https://about.groupdocs.com/security/customer-data-and-security/" target="_blank" rel="nofollow noopener noreferrer">política de datos y seguridad del cliente de GroupDocs</a>:
+
+> Los productos de GroupDocs se ejecutan en las máquinas, infraestructura y red propias del cliente, y no envían ningún archivo de vuelta a GroupDocs para su procesamiento; por lo tanto, no tienen acceso a dichos archivos.
+
+Sin embargo, «nunca recibimos sus datos» y «la biblioteca nunca abre un socket» son dos afirmaciones distintas, y solo la primera es incondicionalmente cierta. GroupDocs.Parser puede realizar solicitudes de red salientes, y una de esas situaciones no es solicitada en absoluto por su código. Este tema describe cada una de ellas para que pueda auditarlas y restringirlas.
+
+
+:::warning
+**Versión breve.** GroupDocs.Parser nunca transmite el contenido de sus documentos a ninguna parte. Sin embargo, *recupera* los recursos a los que hace referencia el documento que usted suministra: imágenes y hojas de estilo remotas referenciadas mediante una URL absoluta. Esta funcionalidad está habilitada de forma predeterminada.
+
+`ExternalResourceHandler` actualmente **no** suprime esta acción en todas las rutas de código. Si debe garantizar que no se realice ninguna solicitud saliente, bloquee el tráfico saliente a nivel de red o de proceso. Consulte [Prevención de solicitudes salientes](#preventing-outbound-requests).
+:::
+
+
+## Nunca abandona su máquina {#what-never-leaves-your-machine}
+
+Independientemente de la configuración, GroupDocs.Parser **no**:
+
+* sube documentos, fragmentos de documentos ni texto/metadata/imágenes extraídos a GroupDocs ni a terceros;
+* transmite nombres de archivos, rutas de archivos ni listados de directorios;
+* recopila telemetría, análisis ni estadísticas de uso relacionadas con el *contenido* de sus documentos.
+
+Esto coincide con los <a href="https://about.groupdocs.com/legal/terms-of-use/" target="_blank" rel="nofollow noopener noreferrer">Términos de uso de GroupDocs</a>:
+
+> No se recopila ninguna información mediante el producto; la información técnica debe ser proporcionada a GroupDocs por usted a través del proceso de soporte.
+
+Cuando ocurren solicitudes salientes, estas se dirigen ya sea a hosts especificados dentro del documento que usted proporcionó, a hosts que suministre su propio código (`Parser(Uri)`, `Parser(EmailConnection)`, `Parser(DbConnection)`), o —si utiliza una licencia basada en medición— al endpoint de licenciamiento. En ninguno de estos casos se transmite el contenido de su documento.
+
+
+:::info
+Una licencia basada en archivos o en flujos se valida completamente sin conexión, en el mismo proceso y no requiere conectividad en ningún momento. Una licencia **basada en medición** es distinta: informa el volumen de uso a un punto final de facturación, tal como se describe en *Licencias basadas en medición* a continuación.
+:::
+
+
+## Cuando GroupDocs.Parser accede a la red {#when-groupdocs-parser-accesses-the-network}
+
+Existen cinco situaciones. Cuatro son una consecuencia directa de algo que su código eligió hacer. La primera es implícita y es la más probable que le sorprenda.
+
+### 1. Carga de recursos externos referenciados por un documento: implícita, habilitada de forma predeterminada {#1-loading-external-resources-referenced-by-a-document-implicit-enabled-by-default}
+
+Cuando un documento hace referencia a un recurso mediante una URL absoluta, GroupDocs.Parser emite una solicitud HTTP(S) para recuperarlo mientras construye su modelo interno del documento. Lo siguiente se sabe que desencadena una solicitud:
+
+* `<img src="http://…">` en un archivo HTML o MHTML, o en el **cuerpo HTML de un mensaje de correo electrónico** (medido para MSG y EML; EMLX y mensajes dentro de PST/OST son manejados por los mismos analizadores, pero no se midieron por separado);
+* `<link rel="stylesheet" href="http://…">` en el mismo contenido;
+* **imágenes vinculadas (no incrustadas)** en documentos de procesamiento de texto;
+* **campos `INCLUDEPICTURE`**, por ejemplo en RTF.
+
+Lo siguiente se sabe que **no** desencadena una solicitud:
+
+* hipervínculos clicables: `<a href="http://…">` nunca se sigue;
+* `background-image` declarados en CSS en línea.
+
+
+:::warning
+**Este es el único comportamiento de red que no se solicita explícitamente mediante su código.** Si procesa documentos no confiables —en particular, correos electrónicos entrantes—, tenga en cuenta las consecuencias siguientes:
+
+* **Los píxeles de seguimiento se activan.** Una imagen remota en un correo electrónico de marketing o de phishing confirma al remitente que el mensaje fue procesado y revela la dirección IP pública de su servidor y el tiempo aproximado de procesamiento.
+* **Falsificación de solicitudes del lado del servidor (SSRF).** Un documento manipulado puede especificar un host interno —`http://169.254.169.254/`, `http://10.0.0.5:8080/`— y provocar que su servidor realice una solicitud hacia él desde dentro del perímetro de su red.
+* **Negación de servicio.** Un documento que haga referencia a un host lento o inalcanzable puede retrasar la extracción.
+
+Si analiza documentos que provienen de fuera de su organización, restringa el tráfico saliente del proceso de análisis, tal como se describe en [Prevención de solicitudes salientes](#preventing-outbound-requests).
+:::
+
+
+### 2. Análisis directo de un documento desde una URL — explícito {#2-parsing-a-document-directly-from-a-url-explicit}
+
+Los constructores sobrecargados [Parser(Uri)](/net/parser/developer-guide/advanced-usage/loading/load-document-from-url/) indican a GroupDocs.Parser que descargue el documento en sí:
+
+```csharp
+using (Parser parser = new Parser(new Uri("https://example.com/sample.docx")))
+{
+    // ...
+}
+```
+
+La descarga la realiza la biblioteca, pero solo porque usted proporcionó un `Uri`. Si nunca llama a estas sobrecargas, esta ruta nunca se ejecuta.
+
+
+:::warning
+<a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/loadoptions/properties/timeout" target="_blank" rel="nofollow noopener noreferrer">LoadOptions.Timeout</a> está diseñado para limitar el tiempo máximo que la biblioteca espera durante la descarga. En la versión 26.6.1, esta limitación no se aplica de forma fiable: un servidor que acepte la conexión y luego se quede colgado puede bloquear el constructor más allá del tiempo de espera establecido. No confíe en este parámetro como un límite estricto; en su lugar, aplique sus propios controles de tiempo de espera o de tráfico saliente.
+
+Si la URL proviene de una entrada no confiable, validela contra una lista blanca antes de construir el `Parser`. GroupDocs.Parser no restringe por sí mismo los esquemas, hosts, puertos ni los rangos de direcciones IP privadas.
+:::
+
+
+### 3. Conexión a un servidor de correo o una base de datos: explícita {#3-connecting-to-a-mail-server-or-a-database-explicit}
+
+Las sobrecargas de [Parser(EmailConnection)](/net/parser/developer-guide/advanced-usage/extract-data-from-various-formats/extract-data-from-emails/extract-emails-from-remote-server-via-pop-imap-or-exchange-web-services-protocols/) se conectan a un servidor POP3, IMAP o Exchange Web Services que **usted** especifica mediante `EmailPopConnection`, `EmailImapConnection` o `EmailEwsConnection`. Asimismo, [Parser(DbConnection)](/net/parser/developer-guide/advanced-usage/extract-data-from-databases/) se conecta al servidor al que apunte la conexión que usted proporcione, el cual podría ser remoto.
+
+En ambos casos, el host, el puerto y las credenciales provienen de su código, nunca del contenido de un documento procesado.
+
+### 4. Licencia por medición: explícita y opt-in {#4-metered-licensing-explicit-opt-in}
+
+Si —y solo si— activa una [licencia por medición](/net/parser/getting-started/evaluation-limitations-and-licensing/) mediante `SetMeteredKey`, la biblioteca se comunica con el punto final de licencias y facturación. La clave se valida a través de la red al establecerla, y los datos de consumo se cargan periódicamente a partir de entonces.
+
+Lo que se transmite es el **volumen de uso**: la cantidad de operaciones realizadas y el tamaño total de los archivos procesados, no el contenido de los documentos ni los datos del cliente.
+
+
+:::warning
+Si los datos de consumo no se pueden cargar durante más de 24 horas, la licencia vuelve al estado de evaluación. **Por lo tanto, una licencia basada en medición no es adecuada para implementaciones aisladas (air-gapped)**: utilice una licencia basada en archivo o en flujo, que no requiere conectividad en ningún momento.
+:::
+
+
+### 5. Descarga de un archivo de licencia mediante HTTP: explícita y con opción activa {#5-downloading-a-license-file-over-http-explicit-opt-in}
+
+Si la variable de entorno `GROUPDOCS_LIC_PATH` está configurada con una URL `http://` o `https://` **y** la ruta que se pasa a `SetLicense` no existe en disco, la biblioteca descarga la licencia desde dicha URL. Si la variable de entorno no está definida o el archivo local ya existe, no se realiza ninguna solicitud.
+
+## Qué métodos de extracción cargan recursos externos {#which-extraction-methods-load-external-resources}
+
+La realización o no de una solicitud depende **tanto** del formato de entrada como del método que se invoque, y no existe una regla sencilla aplicable a todos los formatos. La tabla siguiente recoge el comportamiento observado en la **versión 26.6.1** frente a documentos que hacen referencia a una hoja de estilos remota y a una imagen remota; las filas correspondientes al correo electrónico se revalidaron en la versión 26.7.0.
+
+En términos generales, cualquier método que deba materializar un modelo completo de documento de procesamiento de texto —incluidos `GetTables()`, `GetToc()` y `GetHyperlinks()`, en tales entradas— puede desencadenar la obtención de los recursos externos a los que hace referencia el documento, independientemente de si el método en sí se refiere o no a dichos recursos.
+
+| Formato | Método | Solicitud saliente |
+| --- | --- | :-: |
+| MSG, EML | `GetText` | No |
+|  | `GetFormattedText` | **Sí** |
+|  | `GetStructure` | **Sí** |
+|  | `GetImages`, `GetContainer`, `GetMetadata`, `GetDocumentInfo` | No |
+| HTML | `GetText`, `GetFormattedText`, `GetStructure` | **Sí** |
+|  | `GetImages` | **Sí**, se puede suprimir (véase más abajo) |
+|  | `GetDocumentInfo` | No |
+| MHTML | `GetText`, `GetFormattedText`, `GetStructure` | **Sí** |
+|  | `GetImages` | **Sí**, se puede suprimir (véase más abajo) |
+|  | `GetDocumentInfo` | **Sí** |
+| Documento de procesamiento de texto con imagen vinculada | `GetImages` | **Sí** |
+|  | `GetText`, `GetFormattedText`, `GetStructure` | No |
+| RTF, con `INCLUDEPICTURE` | `GetText` | **Sí** |
+|  | `GetFormattedText`, `GetStructure`, `GetImages` | No |
+
+Se realiza una solicitud por cada recurso referenciado, por cada llamada. Los resultados no se almacenan en caché entre llamadas, por lo que analizar el mismo documento dos veces provoca dos solicitudes.
+
+
+:::info
+`GetHyperlinks()` se interpreta frecuentemente de forma errónea. Extrae los *destinos de hipervínculos como texto*: no los resuelve, sigue, valida ni los solicita. Los propios hipervínculos nunca se solicitan; sin embargo, otros recursos externos presentes en el mismo documento podrían solicitarse, ya que extraer hipervínculos de un documento de procesamiento de texto implica cargar primero todo el documento. En el caso de entrada HTML, el método devuelve `null` y no se realiza ninguna solicitud.
+:::
+
+
+
+:::warning
+**`GetDocumentInfo()` no es una sonda segura.** Al procesar entrada MHTML, solicitar al documento su número de páginas ya es suficiente para desencadenar una recuperación. No existe una secuencia fiable de “inspeccionar primero y luego decidir si analizarla”.
+
+Los formatos de hoja de cálculo, presentación y PDF **no han sido caracterizados**. Considere la tabla anterior como una lista de casos confirmados, no como una lista exhaustiva de formatos seguros.
+:::
+
+
+## Límites de ExternalResourceHandler {#limits-of-externalresourcehandler}
+
+[ExternalResourceHandler](/net/parser/developer-guide/advanced-usage/loading/handle-loading-of-external-resources/), proporcionado mediante <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/parsersettings" target="_blank" rel="nofollow noopener noreferrer">ParserSettings</a>, le permite inspeccionar cada URI de recurso antes de que se recupere y omitirlo estableciendo `args.Skipped = true`.
+
+
+:::danger
+A partir de la versión 26.6.1, el controlador se respeta **solo en la extracción de imágenes desde HTML y MHTML**. En cualquier otro caso —incluyendo `GetText`, `GetFormattedText` y `GetStructure`, cuerpos de correo electrónico, imágenes vinculadas en documentos de procesamiento de texto y `INCLUDEPICTURE` campos - <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/externalresourcehandler/methods/onloading" target="_blank" rel="nofollow noopener noreferrer">OnLoading</a> nunca se invoca y la solicitud sigue realizándose.
+
+No confíe únicamente en el controlador para garantizar que no se produzca tráfico saliente. Esta limitación se espera que se elimine en una versión futura; consulte las notas de la versión de la versión que utiliza.
+:::
+
+
+Dentro de su ámbito de soporte, el controlador funciona según lo documentado. Utilícelo para filtrar qué imágenes remotas se recuperan durante la extracción de imágenes en HTML y MHTML:
+
+```csharp
+using System.Collections.Generic;
+using GroupDocs.Parser;
+using GroupDocs.Parser.Data;
+using GroupDocs.Parser.Options;
+
+class DenyAllExternalResources : ExternalResourceHandler
+{
+    public override void OnLoading(ExternalResourceLoadingArgs args)
+    {
+        // Refuse every external resource, whatever its URI.
+        args.Skipped = true;
+    }
+}
+
+ParserSettings settings = new ParserSettings(new DenyAllExternalResources());
+
+using (Parser parser = new Parser(filePath, settings))
+{
+    IEnumerable<PageImageArea> images = parser.GetImages();
+
+    // For HTML and MHTML input, only images embedded in the document are
+    // returned; externally hosted images are skipped and no request is made.
+}
+```
+
+### Permitir solo hosts de confianza {#allowing-only-trusted-hosts}
+
+Si necesita recursos externos provenientes de ubicaciones confiables, pero no de ubicaciones arbitrarias, filtre por URI:
+
+```csharp
+using System;
+using System.Linq;
+using GroupDocs.Parser.Options;
+
+class AllowListHandler : ExternalResourceHandler
+{
+    private static readonly string[] AllowedPrefixes =
+    {
+        "https://cdn.contoso.com/",
+        "https://intranet.contoso.local/assets/"
+    };
+
+    public override void OnLoading(ExternalResourceLoadingArgs args)
+    {
+        args.Skipped = !AllowedPrefixes.Any(prefix =>
+            args.Uri.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+    }
+}
+```
+
+Prefiera una lista de permisos (allow-list) frente a una lista de bloqueo (deny-list). Bloquear `http://169.254.169.254/` mediante patrones es frágil: los nombres DNS, las redirecciones, las direcciones IPv6 literales y las direcciones IP codificadas en decimal invalidan los filtros simples.
+
+## Prevención de solicitudes salientes {#preventing-outbound-requests}
+
+**Bloquee la salida de red (egress) a nivel de red o de proceso.** Ejecute el componente de análisis dentro de un contenedor, un espacio de nombres de red, una máquina virtual (VM) o una subred que no tenga ninguna ruta de salida, o aplique una regla de firewall saliente al proceso. Este es el único control que cubre todas las rutas posibles, incluidas aquellas que `ExternalResourceHandler` no alcanza, y el único que no puede evitarse mediante un error de análisis. En despliegues aislados (air-gapped), esto es tanto necesario como suficiente.
+
+Además, reduzca la superficie de ataque en el código de la aplicación:
+
+**1. Elija un método sin red donde exista para su formato.** Para entradas MSG y EML, `GetText()` extrae el cuerpo del mensaje sin realizar ninguna solicitud saliente; `GetFormattedText()` y `GetStructure()` no lo hacen.
+
+**2. Instale un `ExternalResourceHandler`** que omita todo. Esto es efectivo para la extracción de imágenes en HTML y MHTML, e inofensivo en otros casos, por lo que no hay razón para omitirlo; sin embargo, consulte [Límites de ExternalResourceHandler](#limits-of-externalresourcehandler) para saber qué no cubre.
+
+**3. No utilice `Parser(Uri)`.** Cargue desde una ruta local o desde un `Stream`. Si su aplicación debe aceptar URLs, descárguelas en su propio código, donde pueda aplicar su propia validación y su propio tiempo de espera (timeout), y luego pase el `Stream` resultante a [Parser(Stream)](/net/parser/developer-guide/advanced-usage/loading/load-document-from-stream/).
+
+**4. No utilice `Parser(EmailConnection)` ni `Parser(DbConnection)`** a menos que la conexión a un servidor de correo o a una base de datos remota sea una característica prevista de su aplicación.
+
+**5. Utilice una licencia basada en archivo o en flujo (stream), no una licencia basada en uso (metered)**, y deje `GROUPDOCS_LIC_PATH` sin configurar o apuntando a una ruta local, en lugar de a una URL.
+
+## Diagnóstico de solicitudes HTTP inesperadas {#diagnosing-unexpected-http-requests}
+
+Si observa tráfico HTTP saliente desde una aplicación que utiliza GroupDocs.Parser y desea determinar si la biblioteca es la responsable:
+
+1. **Capture las solicitudes** con Fiddler, Wireshark o un proxy con registro, y registre las URLs de destino.
+2. **Compare dichas URLs con los documentos de entrada.** Si una URL capturada aparece literalmente dentro de un archivo analizado —como fuente `<img>`, hoja de estilos `href`, imagen enlazada o campo `INCLUDEPICTURE`—, la solicitud proviene de la carga de recursos externos.
+3. **Vuelva a ejecutar con el tráfico saliente bloqueado.** Si el análisis sigue produciendo la salida que necesita, las solicitudes provienen de la carga de recursos externos, y bloquear la salida (egress) constituye una solución completa.
+4. **Verifique los destinos frente a los puntos finales de licencia** si utiliza una licencia basada en uso o si ha configurado `GROUPDOCS_LIC_PATH` con una URL. Esas solicitudes no tienen relación con los documentos que se están analizando.
+
+
+:::info
+**La solicitud no aparecerá debajo de su propio código en un seguimiento de pila ni en una vista de perfilador.** Los recursos externos se recuperan en un subproceso de trabajo interno, no en el subproceso que llamó al método de extracción. Correlacione por tiempo, o bloqueando la salida y observando si el tráfico se detiene, en lugar de buscar en su pila de llamadas.
+:::
+
+
+## Más recursos {#more-resources}
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre las funciones mencionadas anteriormente, consulte los siguientes artículos:
+
+*   [Manejo de la carga de recursos externos](/net/parser/developer-guide/advanced-usage/loading/handle-loading-of-external-resources/)
+*   [Cargar documento desde una URL](/net/parser/developer-guide/advanced-usage/loading/load-document-from-url/)
+*   [Cargar documento desde un flujo (stream)](/net/parser/developer-guide/advanced-usage/loading/load-document-from-stream/)
+*   [Extraer datos de correos electrónicos](/net/parser/developer-guide/advanced-usage/extract-data-from-various-formats/extract-data-from-emails/)
+*   [Limitaciones de evaluación y licencias](/net/parser/getting-started/evaluation-limitations-and-licensing/)
+*   <a href="https://about.groupdocs.com/security/customer-data-and-security/" target="_blank" rel="nofollow noopener noreferrer">Datos y seguridad del cliente de GroupDocs</a>
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la función en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>    
+
+### Aplicación gratuita en línea de analizador de documentos {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas simples pero potentes.
+
+Le invitamos a analizar documentos y extraer datos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

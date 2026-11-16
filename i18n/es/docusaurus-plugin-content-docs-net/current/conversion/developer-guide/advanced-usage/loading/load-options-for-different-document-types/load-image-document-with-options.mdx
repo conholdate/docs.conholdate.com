@@ -1,0 +1,219 @@
+---
+title: "Cargar documentos de imagen con opciones"
+sidebar_label: "Cargar documentos de imagen con opciones"
+sidebar_key: "net-conversion-loading-load-options-for-different-document-types-load-image-document-with-options"
+sidebar_position: 13
+description: "Aprenda cómo utilizar `ImageLoadOptions` para configurar la carga de documentos de imagen en GroupDocs.Conversion para .NET. Controle la especificación de formato, el manejo de fuentes y más."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/loading/load-options-for-different-document-types/load-image-document-with-options.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "0eaff64b093bcdc3bbc9a3df4280d4567880fc4fada5f192d2278738afb68abb"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "c21dfdb214fed1527f162d072396b079cf376c4c9a618846621c535daf01b090"
+translation_updated_at: "2026-11-16T07:42:24.629Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Introducción {#introduction}
+
+La clase **ImageLoadOptions** le permite configurar cómo se cargan los documentos de imagen en GroupDocs.Conversion. Esto resulta especialmente útil cuando necesita especificar explícitamente el formato, configurar el manejo de fuentes para imágenes vectoriales o controlar el comportamiento de las carpetas de fuentes.
+
+ImageLoadOptions funciona con todos los formatos de imagen comunes, incluidos PNG, JPG, GIF, BMP, TIFF, WEBP, PSD y más.
+
+## Propiedades {#properties}
+
+| Propiedad | Tipo | Descripción |
+| ---------- | ------ | ------------- |
+| `Format` | `ImageFileType` | Especifica explícitamente el formato de la imagen de entrada (get; set;) |
+| `DefaultFont` | `string` | Fuente predeterminada para imágenes PSD, EMF y WMF que contienen texto (get; set;) |
+| `ResetFontFolders` | `bool` | Restablece las carpetas de fuentes antes de cargar el documento (get; set;) |
+
+## Uso básico {#basic-usage}
+
+En la mayoría de los escenarios, GroupDocs.Conversion detecta automáticamente el formato de la imagen. Sin embargo, puede especificarlo explícitamente mediante ImageLoadOptions:
+
+```csharp
+using (var converter = new Converter(
+    "product-photo.png",
+    (LoadContext loadContext) => new ImageLoadOptions
+    {
+        Format = ImageFileType.Png
+    }))
+{
+    converter.Convert("product-photo.pdf", new PdfConvertOptions());
+}
+```
+
+## Ejemplos de Propiedades {#property-examples}
+
+### Especificación del Formato {#specifying-format}
+
+Especifique explícitamente el formato de la imagen de entrada cuando la detección automática pueda ser ambigua o cuando desee garantizar que se utilice un formato específico:
+
+```csharp
+using (var converter = new Converter(
+    "company-logo.png",
+    (LoadContext loadContext) => new ImageLoadOptions
+    {
+        Format = ImageFileType.Png
+    }))
+{
+    converter.Convert("company-logo.pdf", new PdfConvertOptions());
+}
+```
+
+**Formatos compatibles:** JPG, PNG, GIF, BMP, TIFF, WebP, JPEG, ICO, PSD, HEIC y más.
+
+### Fuente predeterminada para imágenes vectoriales {#defaultfont-for-vector-images}
+
+Al convertir imágenes vectoriales (PSD, EMF, WMF) que contienen texto, puede especificar una fuente de respaldo que se utilizará si la fuente original no está disponible:
+
+```csharp
+using (var converter = new Converter(
+    "design-mockup.psd",
+    (LoadContext loadContext) => new ImageLoadOptions
+    {
+        DefaultFont = "Arial"
+    }))
+{
+    converter.Convert("design-mockup.pdf", new PdfConvertOptions());
+}
+```
+
+**Cuándo usarlo:**
+- Convertir archivos de Photoshop (PSD) que contienen capas de texto
+- Convertir Metaarchivos mejorados (EMF) que contienen texto
+- Convertir Metaarchivos de Windows (WMF) con texto incrustado
+- Garantizar un renderizado coherente cuando no estén disponibles las fuentes
+
+### ResetFontFolders {#resetfontfolders}
+
+Controla la configuración de carpetas de fuentes al cargar imágenes:
+
+```csharp
+using (var converter = new Converter(
+    "banner-ad.png",
+    (LoadContext loadContext) => new ImageLoadOptions
+    {
+        ResetFontFolders = true
+    }))
+{
+    converter.Convert("banner-ad.pdf", new PdfConvertOptions());
+}
+```
+
+**Caso de uso:** Cuando necesita garantizar un entorno de fuentes limpio para un renderizado coherente en distintos sistemas.
+
+## Uso conjunto de todas las propiedades {#using-all-properties-together}
+
+Combine todas las propiedades de `ImageLoadOptions` para un control completo:
+
+```csharp
+using (var converter = new Converter(
+    "banner-ad.png",
+    (LoadContext loadContext) => new ImageLoadOptions
+    {
+        Format = ImageFileType.Png,
+        DefaultFont = "Calibri",
+        ResetFontFolders = true
+    }))
+{
+    converter.Convert("banner-ad.docx", new WordProcessingConvertOptions());
+}
+```
+
+## Escenarios Comunes {#common-scenarios}
+
+### Conversión entre Diferentes Formatos de Imagen {#converting-different-image-formats}
+
+GroupDocs.Conversion admite la conversión de imágenes a diversos formatos de salida:
+
+#### Imagen a PDF {#image-to-pdf}
+
+```csharp
+using (var converter = new Converter(
+    "profile-picture.png",
+    (LoadContext loadContext) => new ImageLoadOptions { Format = ImageFileType.Png }))
+{
+    converter.Convert("profile-picture.pdf", new PdfConvertOptions());
+}
+```
+
+#### Imagen a documento de Word {#image-to-word-document}
+
+```csharp
+using (var converter = new Converter(
+    "screenshot.png",
+    (LoadContext loadContext) => new ImageLoadOptions { Format = ImageFileType.Png }))
+{
+    converter.Convert("screenshot.docx", new WordProcessingConvertOptions());
+}
+```
+
+#### Imagen a hoja de cálculo de Excel {#image-to-excel-spreadsheet}
+
+```csharp
+using (var converter = new Converter(
+    "thumbnail.png",
+    (LoadContext loadContext) => new ImageLoadOptions { Format = ImageFileType.Png }))
+{
+    converter.Convert("thumbnail.xlsx", new SpreadsheetConvertOptions());
+}
+```
+
+## Cuándo usar ImageLoadOptions {#when-to-use-imageloadoptions}
+
+Utilice `ImageLoadOptions` cuando necesite:
+
+1. **Especificar explícitamente el formato**: cuando la detección automática podría ser insuficiente o cuando desee imponer un formato específico.
+2. **Manejar fuentes faltantes**: al convertir imágenes vectoriales (PSD, EMF, WMF) que podrían tener problemas de disponibilidad de fuentes.
+3. **Controlar el comportamiento de las fuentes**: cuando necesite restablecer las carpetas de fuentes para lograr un renderizado consistente.
+4. **Procesar archivos ambiguos**: cuando los archivos tengan extensiones incorrectas o no tengan extensión alguna.
+
+## Sin usar ImageLoadOptions {#without-imageloadoptions}
+
+Para conversiones sencillas, puede confiar en la detección automática de formato:
+
+```csharp
+using (var converter = new Converter("product-photo.png"))
+{
+    converter.Convert("product-photo.pdf", new PdfConvertOptions());
+}
+```
+
+GroupDocs.Conversion detecta automáticamente el formato en la mayoría de los casos, por lo que **ImageLoadOptions** es opcional, a menos que necesite la configuración específica que proporciona.
+
+## Formatos de imagen compatibles {#supported-image-formats}
+
+**ImageLoadOptions** funciona con:
+- **Formatos rasterizados**: PNG, JPG/JPEG, GIF, BMP, TIFF, WEBP, HEIC
+- **Formatos vectoriales**: EMF, WMF, SVG
+- **Formatos profesionales**: PSD (Photoshop), ICO (Iconos)
+
+## Resumen {#summary}
+
+**ImageLoadOptions** proporciona un control detallado sobre la carga de documentos de imagen:
+- **Format**: Especificar explícitamente el formato de la imagen de entrada
+- **DefaultFont**: Establecer la fuente de respaldo para imágenes vectoriales que contengan texto
+- **ResetFontFolders**: Controlar la configuración de carpetas de fuentes
+
+Todos los ejemplos de esta página han sido verificados mediante pruebas automatizadas para garantizar su precisión.
+
+## Véase también {#see-also}
+
+- [Objetos de contexto: guía completa](/net/conversion/developer-guide/basic-usage/context-objects-complete-guide/)
+- <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.filetypes/imagefiletype/" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API ImageFileType</a>
+- <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/imageloadoptions/" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API ImageLoadOptions</a>

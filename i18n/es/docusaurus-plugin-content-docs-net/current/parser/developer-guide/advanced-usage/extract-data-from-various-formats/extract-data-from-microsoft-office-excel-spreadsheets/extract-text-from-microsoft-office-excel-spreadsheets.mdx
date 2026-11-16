@@ -1,0 +1,249 @@
+---
+title: "Extraer texto de hojas de cálculo de Microsoft Office Excel"
+sidebar_label: "Extraer texto de hojas de cálculo de Microsoft Office Excel"
+sidebar_key: "net-parser-extract-data-from-various-formats-extract-data-from-microsoft-office-excel-spreadsheets-extract-text-from-microsoft-office-excel-spreadsheets"
+sidebar_position: 1
+description: "Aprenda cómo extraer texto de hojas de cálculo de Excel (.xls, .xlsx) utilizando GroupDocs.Parser para .NET. Incluye ejemplos para la extracción de todo el documento, el procesamiento hoja por hoja, la extracción en modo sin formato y la salida de texto con formato."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/extract-data-from-various-formats/extract-data-from-microsoft-office-excel-spreadsheets/extract-text-from-microsoft-office-excel-spreadsheets.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "62b1dd93b26e7652e34da8c4399c0534fe175922614dd01e7cef1fd6ed940cf8"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "bdf64490c7586506550e456fe6fe9f0122357c768e8a984179a847189794282a"
+translation_updated_at: "2026-11-16T07:22:59.905Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Visión general {#overview}
+
+Esta guía muestra cómo extraer contenido de texto de hojas de cálculo de Microsoft Office Excel (.xls, .xlsx) mediante la API GroupDocs.Parser para .NET. Aprenderá distintos métodos de extracción de texto adecuados para diversos escenarios de procesamiento de documentos, desde la recuperación sencilla de texto de Excel hasta operaciones avanzadas de análisis hoja por hoja.
+
+## Comparación de métodos de extracción {#extraction-methods-comparison}
+
+| Método | Caso de uso | Rendimiento | Calidad de salida |
+| -------- | ---------- | ------------- | ---------------- |
+| **Documento completo** | Extraer todo el texto a la vez | Rápido | Estándar |
+| **Hoja por hoja** | Procesar hojas de cálculo individuales | Medio | Estándar |
+| **Modo sin procesar** | Procesamiento masivo a alta velocidad | Más rápido | Precisión de formato reducida |
+| **Texto con formato** | Preservar formato (HTML/Markdown) | Más lento | Más alta |
+
+## Método 1: Extraer texto de la hoja de cálculo completa {#method-1-extract-text-from-entire-spreadsheet}
+
+**Cuándo usarlo:** Cuando necesite todo el contenido de texto del libro de Excel y no necesite distinguir entre hojas de cálculo distintas en su flujo de trabajo de análisis de documentos.
+
+Para extraer texto de hojas de cálculo de Microsoft Office Excel mediante la biblioteca de analizador .NET, se utiliza el método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a>. Este método de la API de extracción de texto recupera el contenido de todo el documento.
+
+### Pasos: {#steps}
+1. Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para la hoja de cálculo inicial
+2. Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> y obtener un objeto <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">TextReader</a>
+3. Leer el texto desde el lector
+
+
+:::warning
+<a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> el método devuelve un valor *null* si la extracción de texto no es compatible con el documento. Por ejemplo, la extracción de texto no es compatible con archivos ZIP. Por lo tanto, para un archivo ZIP <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> el método devuelve *null*. Para hojas de cálculo vacías de Microsoft Office Excel <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettext" target="_blank" rel="nofollow noopener noreferrer">GetText</a> El método devuelve un valor vacío <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">Lector de texto</a> objeto (<a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader.readtoend?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">reader.ReadToEnd</a> el método devuelve una cadena vacía).
+:::
+
+
+**Ejemplo:**
+```csharp
+// Create an instance of Parser class
+using(Parser parser = new Parser(filePath))
+{
+    // Extract a text into the reader
+    using(TextReader reader = parser.GetText())
+    {
+        // Print a text from the spreadsheet
+        Console.WriteLine(reader.ReadToEnd());
+    }
+}
+```
+
+## Método 2: Extraer texto de hojas individuales {#method-2-extract-text-from-individual-sheets}
+
+**Cuándo usarlo:** Cuando necesite procesar cada hoja de cálculo de Excel por separado en su aplicación de análisis de hojas de cálculo en C#, mantener la organización por hojas o realizar operaciones de extracción de datos específicas por hoja.
+
+Este método de análisis de Excel utiliza <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/2" target="_blank" rel="nofollow noopener noreferrer">GetText(pageIndex)</a> para extraer texto de hojas específicas. Cada hoja de cálculo se trata como una página independiente en el proceso de análisis del documento.
+
+### Pasos: {#steps-1}
+1. Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para la hoja de cálculo inicial
+2. Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">GetDocumentInfo</a> y obtener un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo" target="_blank" rel="nofollow noopener noreferrer">IDocumentInfo</a> con el <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo/properties/pagecount" target="_blank" rel="nofollow noopener noreferrer">número de páginas</a>
+3. Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/2" target="_blank" rel="nofollow noopener noreferrer">GetText(pageIndex)</a> pasando el índice de la hoja y obtener un objeto <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">TextReader</a>
+4. Leer el texto desde el lector
+
+**Ejemplo:**
+```csharp
+// Create an instance of Parser class
+using(Parser parser = new Parser(filePath))
+{
+    // Get the document info
+    IDocumentInfo documentInfo = parser.GetDocumentInfo();
+   
+    // Iterate over sheets
+    for(int p = 0; p < documentInfo.PageCount; p++)
+    {
+        // Print a sheet number 
+        Console.WriteLine(string.Format("Page {0}/{1}", p + 1, documentInfo.PageCount));
+   
+        // Extract a text into the reader
+        using(TextReader reader = parser.GetText(p))
+        {
+            // Print a text from the spreadsheet sheet
+            Console.WriteLine(reader.ReadToEnd());
+        }
+    }
+}
+```
+
+##  Método 3: Extracción de texto sin formato de alta velocidad {#method-3-high-speed-raw-text-extraction}
+
+**Cuándo usarlo:** Al procesar archivos Excel grandes o múltiples hojas de cálculo, donde la velocidad de procesamiento es más importante que la precisión del formato. Ideal para minería de datos de Excel, indexación de contenido o procesamiento masivo de documentos en aplicaciones empresariales.
+
+El modo sin formato mejora el rendimiento de la extracción de texto al sacrificar la precisión del formato en el analizador de .NET. Utilice los métodos <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/1" target="_blank" rel="nofollow noopener noreferrer">GetText(TextOptions)</a> y <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/3" target="_blank" rel="nofollow noopener noreferrer">GetText(pageIndex, TextOptions)</a> para la extracción en modo sin formato de alta velocidad.
+
+
+:::warning
+Algunas hojas de cálculo pueden tener números de hoja diferentes en los modos sin procesar y preciso. Utilice <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo/properties/rawpagecount" target="_blank" rel="nofollow noopener noreferrer">IDocumentInfo.RawPageCount</a> en lugar de <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo/properties/pagecount" target="_blank" rel="nofollow noopener noreferrer">IDocumentInfo.PageCount</a> en el modo sin procesar.
+:::
+
+
+### Pasos: {#steps-2}
+1. Instanciar el objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para la hoja de cálculo inicial
+2. Instanciar el objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/textoptions" target="_blank" rel="nofollow noopener noreferrer">TextOptions</a> con el parámetro *true*
+3. Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getdocumentinfo" target="_blank" rel="nofollow noopener noreferrer">GetDocumentInfo</a>
+4. Utilizar <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo/properties/rawpagecount" target="_blank" rel="nofollow noopener noreferrer">RawPageCount</a> en lugar de <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/idocumentinfo/properties/pagecount" target="_blank" rel="nofollow noopener noreferrer">PageCount</a> para evitar cálculos adicionales
+5. Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/3" target="_blank" rel="nofollow noopener noreferrer">GetText(pageIndex, TextOptions)</a> con el índice de la hoja y obtener el objeto <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">TextReader</a>
+6. Leer el texto desde el lector
+
+**Ejemplo:**
+```csharp
+// Create an instance of Parser class
+using (Parser parser = new Parser(filePath))
+{
+    // Get the document info
+    IDocumentInfo documentInfo = parser.GetDocumentInfo();
+    // Check if the document has pages
+    if (documentInfo == null || documentInfo.RawPageCount == 0)
+    {
+        Console.WriteLine("Document hasn't pages.");
+        return;
+    }
+    // Iterate over sheets
+    for (int p = 0; p < documentInfo.RawPageCount; p++)
+    {
+        // Print a sheet number 
+        Console.WriteLine(string.Format("Page {0}/{1}", p + 1, documentInfo.RawPageCount));
+        // Extract a text into the reader
+        using (TextReader reader = parser.GetText(p, new TextOptions(true)))
+        {
+            // Print a text from the spreadsheet sheet
+            Console.WriteLine(reader.ReadToEnd());
+        }
+    }
+}
+```
+
+##  Método 4: Extraer texto con formato (HTML) {#method-4-extract-formatted-text-html}
+
+**Cuándo usarlo:** Cuando necesite conservar la estructura visual y el formato de los datos de una hoja de cálculo de Excel mediante el analizador de documentos de .NET, o al integrar el contenido extraído en aplicaciones web o informes con formato.
+
+La biblioteca GroupDocs.Parser para extracción de texto permite extraer texto de hojas de cálculo de Microsoft Office Excel en formatos HTML, Markdown y texto sin formato con formato. Para obtener más detalles, consulte [Extraer texto con formato](/net/parser/developer-guide/advanced-usage/working-with-text/working-with-formatted-text/extract-formatted-text-from-document/).
+
+###  Pasos: {#steps-3}
+1. Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para la hoja de cálculo inicial
+2. Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getformattedtext" target="_blank" rel="nofollow noopener noreferrer">GetFormattedText</a> y obtener un objeto <a href="https://docs.microsoft.com/en-us/dotnet/api/system.io.textreader?view=netframework-2.0" target="_blank" rel="nofollow noopener noreferrer">TextReader</a>
+3. Leer el texto desde el lector
+
+**Ejemplo:**
+```csharp
+// Create an instance of Parser class
+using (Parser parser = new Parser(filePath))
+{
+    // Extract a formatted text into the reader
+    using (TextReader reader = parser.GetFormattedText(new FormattedTextOptions(FormattedTextMode.Html)))
+    {
+        // Print a formatted text from the sheet
+        Console.WriteLine(reader.ReadToEnd());
+    }
+}
+```
+
+## Formatos de Excel compatibles {#supported-excel-formats}
+
+- **.xls** – Libro de Microsoft Excel 97-2003
+- **.xlsx** – Libro de Microsoft Excel Open XML
+
+## Casos de uso comunes {#common-use-cases}
+
+### Procesamiento de documentos empresariales {#enterprise-document-processing}
+- **Minería de datos en Excel**: Extracción de texto para indexación en búsquedas y análisis de contenido mediante métodos del analizador en C#
+- **Generación de informes en hojas de cálculo**: Conversión de datos de libros de Excel a informes basados en texto
+- **Migración de contenido**: Transferencia de datos de hojas de cálculo entre distintos sistemas de gestión documental
+
+### Inteligencia empresarial y análisis {#business-intelligence-analytics}
+- **Análisis de texto en archivos de Excel**: Análisis de comentarios, notas y datos textuales dentro de hojas de cálculo .xls/.xlsx
+- **Procesamiento de documentos para cumplimiento normativo**: Extracción de contenido textual para informes regulatorios a partir de documentos de Excel
+- **Auditoría de registros**: Registro de cambios en el contenido textual a lo largo del tiempo en flujos de trabajo del analizador de hojas de cálculo
+
+### Escenarios de integración {#integration-scenarios}
+- **Sistemas de búsqueda empresarial**: Indexación del contenido de hojas de cálculo de Excel para capacidades de búsqueda de texto completo
+- **Tuberías automatizadas de datos**: Extracción de texto como parte de flujos de trabajo automatizados de procesamiento de documentos
+- **Sistemas de gestión de contenido**: Procesamiento automático de archivos de Excel cargados mediante la API de análisis de .NET
+
+## Consideraciones de rendimiento {#performance-considerations}
+
+### Impacto del tamaño del archivo {#file-size-impact}
+- **Archivos pequeños** (&lt; 1 MB): Todos los métodos presentan un rendimiento similar
+- **Archivos medianos** (1–10 MB): El modo en bruto ofrece una mejora notable en velocidad
+- **Archivos grandes** (&gt; 10 MB): Se recomienda el modo en bruto para procesamiento por lotes
+
+### Uso de memoria {#memory-usage}
+- El procesamiento hoja por hoja consume menos memoria que la extracción del documento completo
+- El modo en bruto es más eficiente en el uso de memoria para archivos grandes
+- Considere procesar las hojas individualmente para libros de trabajo muy grandes
+
+## Solución de problemas {#troubleshooting}
+
+### Problemas comunes {#common-issues}
+
+**Respuesta nula de TextReader**
+- Verifique que el formato del archivo sea compatible (.xls, .xlsx)
+- Compruebe si el archivo está dañado o protegido con contraseña
+- Asegúrese de que la ruta del archivo sea correcta y esté accesible
+
+**Salida de texto vacía**
+- Confirme que la hoja de cálculo contenga datos textuales (no solo números o fórmulas)
+- Verifique si las hojas contienen contenido visible
+- Asegúrese de que el archivo no esté completamente vacío
+
+**Problemas de rendimiento**
+- Utilice el modo en bruto para archivos grandes o procesamiento por lotes
+- Procese las hojas individualmente en lugar de extraer todo el documento
+- Tenga en cuenta las limitaciones de tamaño de archivo en su entorno
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>    
+
+### Aplicación gratuita de analizador de documentos en línea {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.
+
+Le invitamos a analizar documentos y extraer datos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

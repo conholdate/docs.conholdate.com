@@ -1,0 +1,92 @@
+---
+title: "Usar el conector OCR"
+sidebar_label: "Usar el conector OCR"
+sidebar_key: "net-parser-using-ocr-use-ocr-connector"
+sidebar_position: 2
+description: "Este artículo explica cómo integrar una solución OCR en GroupDocs.Parser"
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/using-ocr/use-ocr-connector.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "df12b23445d2013d30310c44b876710ac5a71bcd2eb8ba8c5cf24fba0ed06e03"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "fcfe27716ac3444bf2fe1b78ba09c20be162c57dcbff7b21cc94fcb1ae34ae35"
+translation_updated_at: "2026-11-16T07:48:46.716Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Parser incluye una funcionalidad OCR integrada que permite reconocer texto desde imágenes y PDF escaneados. Esta funcionalidad OCR integrada se incluye con la biblioteca y no requiere paquetes ni configuraciones adicionales para su uso básico: simplemente debes solicitar explícitamente la OCR al extraer texto o analizar un documento. Para archivos de imagen, la OCR se aplica automáticamente durante la extracción de texto.
+
+
+:::info
+**Nota:** El OCR integrado admite los idiomas representados por <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/language/" target="_blank" rel="nofollow noopener noreferrer">Language</a> clase y es adecuada para la mayoría de los escenarios básicos de reconocimiento de texto. Para necesidades avanzadas de OCR, múltiples idiomas o requisitos de mayor precisión, puede integrar soluciones OCR de terceros opcionales mediante el mecanismo de conectores descrito a continuación.
+:::
+
+
+Si las capacidades del OCR integrado no son suficientes, puede utilizar el mecanismo para conectar un OCR de terceros. Para ello, debe escribir su propio conector de OCR y pasarlo al crear la clase `Parser`:
+
+* Instanciar el objeto <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/parsersettings" target="_blank" rel="nofollow noopener noreferrer">ParserSettings</a> con una instancia de la clase que implementa la funcionalidad OCR;
+* Instanciar el objeto <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/" target="_blank" rel="nofollow noopener noreferrer">Parser</a> con el objeto <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/parsersettings" target="_blank" rel="nofollow noopener noreferrer">ParserSettings</a>.
+
+El siguiente ejemplo muestra cómo crear una instancia de la clase <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/" target="_blank" rel="nofollow noopener noreferrer">Parser</a> con el conector personalizado:
+
+```C#
+// Create an instance of ParserSettings class with the custom ocr connector
+ParserSettings settings = new ParserSettings(new YourCustomOcrConnector());
+// Create an instance of Parser class with the parser settings
+Parser parser = new Parser(fileName, settins);
+```
+
+Todos los conectores de OCR heredan de la clase base. <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/ocrconnectorbase/" target="_blank" rel="nofollow noopener noreferrer">OcrConnectorBase</a> (incluyendo la integrada en el analizador). Esta clase contiene dos propiedades y tres métodos:
+
+```C#
+public abstract class OcrConnectorBase
+{
+    public virtual bool IsTextSupported { get; }
+
+    public virtual bool IsTextAreasSupported { get; }
+
+    public virtual string RecognizeText(Stream imageStream, OcrOptions options);
+
+    public virtual IList<PageTextArea> RecognizeTextAreas(Stream imageStream, Page page, OcrOptions options);
+
+    public virtual IList<PageTextArea> RecognizeTextAreas(Stream imageStream, IEnumerable<Rectangle> rectangles, string allowedSymbols, Page page, OcrOptions options);
+}
+```
+
+El analizador divide el reconocimiento de texto en dos flujos de trabajo independientes: texto plano y áreas de texto. El primero se encarga de extraer texto de un documento, el cual puede obtenerse, por ejemplo, mediante `Parser.GetText`. Las áreas de texto se utilizan en la funcionalidad de análisis basado en plantillas. Estos dos flujos de trabajo son independientes entre sí, y al crear un conector personalizado, solo es necesario implementar la funcionalidad requerida.
+
+La propiedad `IsTextSupported` responde a la pregunta: ¿Puede el conector extraer texto plano? Si devuelve `false`, no es necesario sobrescribir el método `RecognizeText`, ya que el analizador no lo invocará y devolverá inmediatamente `null` cuando se solicite texto.
+
+Si esta propiedad devuelve `true`, entonces debe implementar el método `RecognizeText`. Este método recibe dos parámetros: un flujo con la imagen (`imageStream`) y la configuración de OCR (`options`).
+
+La configuración de OCR está representada por la clase <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/ocroptions/" target="_blank" rel="nofollow noopener noreferrer">OcrOptions</a> y puede incluir:
+
+* <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/ocroptions/handler" target="_blank" rel="nofollow noopener noreferrer">OcrEventHandler</a> para enviar mensajes que se produzcan durante el procesamiento del documento.
+* Un <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/ocroptions/rectangle" target="_blank" rel="nofollow noopener noreferrer">área rectangular</a> de la imagen de la cual se debe extraer texto; en este caso, no es necesario extraer texto de toda la imagen, limitándose al área especificada.
+* Un <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/ocroptions/usespellchecker" target="_blank" rel="nofollow noopener noreferrer">flag</a> para utilizar la corrección ortográfica (si es compatible con el OCR).
+
+La propiedad `IsTextAreasSupported` responde a la pregunta: ¿Puede el conector extraer áreas de texto? Las áreas de texto son rectángulos en una página que contienen texto. Normalmente, estas áreas representan palabras individuales (esta suposición es la base de la funcionalidad de análisis basado en plantillas). Si la propiedad devuelve `false`, significa que esta funcionalidad no es compatible y no es necesario realizar ninguna acción adicional.
+
+Si esta propiedad devuelve `true`, entonces debe implementar los métodos `RecognizeTextAreas`. Además de la imagen y la configuración de OCR, estos métodos reciben la <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.data/page" target="_blank" rel="nofollow noopener noreferrer">clase de página del documento</a> y, en una versión más avanzada, una lista de áreas rectangulares a reconocer y una lista de caracteres permitidos.
+
+Ambos métodos deben devolver una colección de objetos <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.data/pagetextarea" target="_blank" rel="nofollow noopener noreferrer">PageTextArea</a>. Estos objetos contienen la página del documento, el texto y el área rectangular en la página donde se encontró el texto. Puede pasar el parámetro `page` como la página correspondiente.
+
+Las coordenadas de los rectángulos se calculan en función del valor `Rectangle` de <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/ocroptions" target="_blank" rel="nofollow noopener noreferrer">OcrOptions</a>. Esto significa que, si el rectángulo de la configuración de OCR tiene su esquina superior izquierda en (10; 10) y el texto en la página tiene coordenadas (12; 15), entonces debe devolver (2; 5). En otras palabras, primero se recorta la imagen al rectángulo especificado y luego se aplica OCR.
+
+Es importante destacar que estos dos métodos son independientes y debe implementar ambos.
+
+La lista de áreas rectangulares especifica las coordenadas dentro de la imagen ya recortada, desde las cuales se debe extraer texto. Esta funcionalidad se utiliza en el análisis basado en plantillas para campos simples: el usuario define un campo mediante un rectángulo. Luego, esta lista de rectángulos se envía al conector para extraer los datos de texto según estas coordenadas.
+
+La lista de caracteres permitidos es una cadena que contiene los caracteres que el analizador espera encontrar en estas áreas. Esto puede utilizarse, por ejemplo, para extraer únicamente dígitos (si existe ambigüedad entre "O" y "0", el sistema favorecerá este último) o para definir explícitamente separadores decimales (por ejemplo, especificar un punto en lugar de una coma), entre otros casos. Actualmente, esta funcionalidad no está soportada, y el parámetro se ha añadido para posibles ampliaciones en futuras versiones.

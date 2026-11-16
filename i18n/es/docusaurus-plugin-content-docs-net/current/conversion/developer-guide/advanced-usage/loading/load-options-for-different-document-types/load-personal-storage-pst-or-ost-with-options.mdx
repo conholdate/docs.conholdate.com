@@ -1,0 +1,105 @@
+---
+title: "Cargar almacenamiento personal PST u OST con opciones"
+sidebar_label: "Cargar almacenamiento personal PST u OST con opciones"
+sidebar_key: "net-conversion-loading-load-options-for-different-document-types-load-personal-storage-pst-or-ost-with-options"
+sidebar_position: 7
+description: "Aprenda este artículo y verifique cómo cargar y convertir documentos PST/OST con opciones avanzadas utilizando la API de GroupDocs.Conversion para .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/loading/load-options-for-different-document-types/load-personal-storage-pst-or-ost-with-options.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "061428c3f76e301c69c0081c5dc1138694a6e38c8d3187ab50678ba079594468"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "c1c9b3104b3ff5c687a6f4d14314582ab1ce90adb5e0ad49ca37d5e0ab2a92d1"
+translation_updated_at: "2026-11-16T07:44:30.262Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Conversion proporciona <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/personalstorageloadoptions" target="_blank" rel="nofollow noopener noreferrer">PersonalStorageLoadOptions</a> para permitirle controlar cómo se procesará el documento de almacenamiento personal (PST/OST) de origen. Las siguientes opciones pueden configurarse:
+| Opción | Descripción |
+| -------- | ------------- |
+| **<a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/personalstorageloadoptions/convertowned" target="_blank" rel="nofollow noopener noreferrer">ConvertOwned</a>** | Controla si los documentos propiedad del contenedor de documentos deben convertirse. |
+| **<a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/personalstorageloadoptions/convertowner" target="_blank" rel="nofollow noopener noreferrer">ConvertOwner</a>** | Controla si el propio contenedor de documentos debe convertirse. Si esta propiedad es `true`, el contenedor de documentos se convertirá en el primer documento. |
+| **<a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/personalstorageloadoptions/depth" target="_blank" rel="nofollow noopener noreferrer">Depth</a>** | Controla cuántos niveles de profundidad se procesarán en la conversión. |
+| **<a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/personalstorageloadoptions/folder" target="_blank" rel="nofollow noopener noreferrer">Folder</a>** | Carpeta que se procesará. El valor predeterminado es "Bandeja de entrada". |
+
+### Obtener carpetas del almacenamiento personal {#get-folders-from-personal-storage}
+
+El siguiente fragmento de código muestra cómo obtener las carpetas dentro del documento de almacenamiento personal:
+
+```csharp
+using (Converter converter = new Converter("sample.pst"))
+{
+    var documentInfo = converter.GetDocumentInfo();
+    var ostInfo = (PersonalStorageDocumentInfo) documentInfo;
+    Console.WriteLine(ostInfo.RootFolderName);
+    foreach (var folder in ostInfo.Folders)
+    {
+        Console.WriteLine(folder);
+    }
+}
+```
+
+### Convertir cada contenido de almacenamiento personal a distintos formatos {#convert-each-personal-storage-content-to-different-formats}
+
+El siguiente fragmento de código muestra cómo convertir cada contenido de almacenamiento personal a un formato distinto según el tipo de contenido:
+
+*   Los archivos adjuntos JPG se convertirán a PNG
+*   Los archivos adjuntos DOCX se convertirán a PDF
+*   Los correos electrónicos y todos los demás tipos se convertirán a HTML
+
+```csharp
+using (Converter converter = new Converter("sample.pst", (LoadContext loadContext) =>
+       {
+           if (loadContext.SourceFormat == EmailFileType.Ost)
+           {
+               return new PersonalStorageLoadOptions
+               {
+                   Folder = "Inbox",
+               };
+           }
+           if (loadContext.SourceFormat == EmailFileType.Msg)
+           {
+               return new EmailLoadOptions
+               {
+                   ConvertOwner = true,
+                   ConvertOwned = true,
+                   Depth = 2
+               };
+           }
+           return null;
+       }))
+{
+    int index = 0;
+    converter.Convert((SaveContext saveContext) =>
+    {
+        string fileName = $"converted_{++index}.{saveContext.TargetFormat.Extension}";
+        return new FileStream(fileName, FileMode.Create);
+    }, (ConvertContext convertContext) =>
+    {
+        if (convertContext.SourceFormat == ImageFileType.Jpg)
+        {
+            return new ImageConvertOptions
+            {
+                Format = ImageFileType.Png
+            };
+        }
+        if (convertContext.SourceFormat == WordProcessingFileType.Docx)
+        {
+            return new PdfConvertOptions();
+        }
+        return new WebConvertOptions();
+    });
+}
+```

@@ -1,0 +1,233 @@
+---
+title: "Cargar documentos de base de datos con opciones"
+sidebar_label: "Cargar documentos de base de datos con opciones"
+sidebar_key: "net-conversion-loading-load-options-for-different-document-types-load-database-document-with-options"
+sidebar_position: 15
+description: "Aprenda cómo utilizar `DatabaseLoadOptions` para configurar la carga de documentos de base de datos en GroupDocs.Conversion para .NET. Admite formatos NSF (Lotus Notes) y SQL."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/loading/load-options-for-different-document-types/load-database-document-with-options.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "654263da6f19a4e0ee8eeff2949db1dfd0e99a5ac0616a274ced7434ba185871"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "d3f329570d9a7839fdf9f237cd4150f9ef9099268be208f9ced8717704180598"
+translation_updated_at: "2026-11-16T07:38:19.688Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Introducción {#introduction}
+
+La clase **DatabaseLoadOptions** le permite configurar cómo se cargan los documentos y scripts de base de datos en GroupDocs.Conversion. Esta clase admite formatos de base de datos empresariales utilizados en entornos corporativos y administración de bases de datos.
+
+DatabaseLoadOptions funciona con formatos de base de datos, incluidos NSF (almacenamiento de Lotus Notes/IBM Notes) y SQL (scripts de lenguaje de consulta estructurado).
+
+## Propiedades {#properties}
+
+| Propiedad | Tipo | Descripción |
+| ---------- | ------ | ------------- |
+| `Format` | `DatabaseFileType` | El formato de base de datos de entrada (get; set;) |
+
+## Uso básico {#basic-usage}
+
+En la mayoría de los escenarios, GroupDocs.Conversion detecta automáticamente el formato de base de datos:
+
+```csharp
+using (var converter = new Converter("customer-records.nsf"))
+{
+    converter.Convert("customer-records.pdf", new PdfConvertOptions());
+}
+```
+
+## Uso de DatabaseLoadOptions con LoadContext {#using-databaseloadoptions-with-loadcontext}
+
+Cuando necesite un control explícito sobre el comportamiento de carga, utilice DatabaseLoadOptions con el patrón de delegado LoadContext:
+
+```csharp
+using (var converter = new Converter(
+    "email-archive.nsf",
+    (LoadContext loadContext) => new DatabaseLoadOptions()))
+{
+    converter.Convert("email-archive.pdf", new PdfConvertOptions());
+}
+```
+
+## Trabajo con distintos formatos de base de datos {#working-with-different-database-formats}
+
+GroupDocs.Conversion admite múltiples formatos de base de datos mediante `DatabaseLoadOptions`. Cada formato debe especificarse explícitamente:
+
+### NSF (Lotus Notes Storage Facility) {#nsf-lotus-notes-storage-facility}
+
+NSF es el formato de archivo de base de datos utilizado por IBM Notes (anteriormente Lotus Notes), comúnmente empleado para almacenar correos electrónicos, calendarios, documentos y formularios en entornos empresariales:
+
+```csharp
+using (var converter = new Converter(
+    "project-notes.nsf",
+    (LoadContext loadContext) => new DatabaseLoadOptions
+    {
+        Format = DatabaseFileType.Nsf
+    }))
+{
+    converter.Convert("project-notes.pdf", new PdfConvertOptions());
+}
+```
+
+**Casos de uso comunes:**
+- Archivos de correo electrónico y exportaciones de buzón
+- Sistemas corporativos de gestión de documentos
+- Bases de datos de colaboración en proyectos
+- Calendarios y sistemas de programación de equipos
+
+### SQL (Lenguaje de Consulta Estructurado) {#sql-structured-query-language}
+
+Los archivos SQL contienen scripts y consultas de base de datos utilizados para crear, modificar o consultar bases de datos relacionales:
+
+```csharp
+using (var converter = new Converter(
+    "schema-definition.sql",
+    (LoadContext loadContext) => new DatabaseLoadOptions
+    {
+        Format = DatabaseFileType.Sql
+    }))
+{
+    converter.Convert("schema-definition.pdf", new PdfConvertOptions());
+}
+```
+
+**Casos de uso comunes:**
+- Documentación del esquema de base de datos
+- Archivos de scripts de migración
+- Documentación de consultas SQL
+- Scripts de copia de seguridad de base de datos en PDF
+
+## Conversión de múltiples formatos de base de datos {#converting-multiple-database-formats}
+
+Convierta distintos formatos de base de datos en un único flujo de trabajo:
+
+```csharp
+// NSF to PDF
+using (var converter = new Converter(
+    "team-calendar.nsf",
+    (LoadContext loadContext) => new DatabaseLoadOptions
+    {
+        Format = DatabaseFileType.Nsf
+    }))
+{
+    converter.Convert("team-calendar.pdf", new PdfConvertOptions());
+}
+
+// SQL to PDF
+using (var converter = new Converter(
+    "migration-script.sql",
+    (LoadContext loadContext) => new DatabaseLoadOptions
+    {
+        Format = DatabaseFileType.Sql
+    }))
+{
+    converter.Convert("migration-script.pdf", new PdfConvertOptions());
+}
+```
+
+## Formatos de base de datos compatibles {#supported-database-formats}
+
+`DatabaseLoadOptions` funciona con:
+- **NSF** – Notes Storage Facility (formato de base de datos de IBM Notes/Lotus Notes)
+- **SQL** – Scripts y consultas del Lenguaje de Consulta Estructurado
+
+## Casos de uso comunes {#common-use-cases}
+
+Utilice `DatabaseLoadOptions` cuando necesite:
+
+1. **Archivar sistemas de correo electrónico** – Convertir buzones de Lotus Notes a PDF para almacenamiento a largo plazo
+2. **Documentar esquemas de base de datos** – Crear documentación en PDF a partir de scripts SQL
+3. **Cumplimiento y auditoría** – Convertir documentos de base de datos para cumplir con regulaciones
+4. **Gestión del conocimiento** – Extraer y convertir conocimiento corporativo desde bases de datos de Notes
+5. **Documentación de base de datos** – Generar documentación legible a partir de scripts SQL
+6. **Migración de sistemas heredados** – Convertir bases de datos antiguas de Lotus Notes a formatos modernos
+
+## Cuándo usar `DatabaseLoadOptions` {#when-to-use-databaseloadoptions}
+
+Utilice `DatabaseLoadOptions` cuando:
+
+- Convierta bases de datos de Lotus Notes/IBM Notes (NSF)
+- Procese scripts SQL y consultas de base de datos
+- Trabaje con documentación corporativa de bases de datos
+- Archive correo corporativo y datos de colaboración
+- Necesite un control explícito sobre la carga de documentos de base de datos
+
+## Sin `DatabaseLoadOptions` {#without-databaseloadoptions}
+
+Para conversiones sencillas, puede confiar en la detección automática de formato:
+
+```csharp
+using (var converter = new Converter("customer-records.nsf"))
+{
+    converter.Convert("customer-records.pdf", new PdfConvertOptions());
+}
+```
+
+GroupDocs.Conversion detecta automáticamente el formato de la base de datos en la mayoría de los casos, por lo que DatabaseLoadOptions es opcional, a menos que necesite una configuración específica de carga.
+
+## Compatibilidad con formatos de salida {#output-format-compatibility}
+
+Los documentos de base de datos pueden convertirse en diversos formatos de salida:
+
+- **Formatos de documento**: PDF, DOCX, TXT, RTF
+- **Formatos web**: HTML, MHTML
+- **Formatos de hojas de cálculo**: XLSX, XLS
+- **Formatos de presentación**: PPTX, PPT
+- **Formatos de imagen**: PNG, JPG, TIFF (conversión página por página)
+
+## Detalles del formato NSF {#nsf-format-details}
+
+El formato NSF es un contenedor que puede incluir:
+- Mensajes de correo electrónico
+- Entradas de calendario
+- Información de contactos
+- Documentos y archivos adjuntos
+- Formularios y vistas
+- Listas de control de acceso
+
+Al convertir archivos NSF, GroupDocs.Conversion procesa la estructura y el contenido de la base de datos, lo que lo hace adecuado para fines de archivo y documentación.
+
+## Detalles del formato SQL {#sql-format-details}
+
+Los archivos SQL suelen contener:
+- Sentencias CREATE TABLE
+- Modificaciones ALTER TABLE
+- Operaciones INSERT/UPDATE/DELETE
+- Consultas SELECT
+- Procedimientos almacenados
+- Restricciones e índices de base de datos
+
+La conversión de archivos SQL a PDF genera documentación legible de esquemas y operaciones de base de datos, útil para:
+- Revisión de código
+- Documentación de diseño de base de datos
+- Materiales de capacitación
+- Registros de gestión de cambios
+
+## Resumen {#summary}
+
+DatabaseLoadOptions proporciona control sobre la carga de documentos de base de datos:
+- **Formato**: Especificar explícitamente el formato NSF o SQL
+- **Soporta**: Bases de datos de IBM Notes (NSF) y scripts SQL
+- **Caso de uso**: Archivado empresarial de datos, cumplimiento normativo y documentación de bases de datos
+
+Todos los ejemplos de esta página han sido verificados mediante pruebas automatizadas para garantizar su precisión.
+
+## Véase también {#see-also}
+
+- [Objetos de contexto: guía completa](/net/conversion/developer-guide/basic-usage/context-objects-complete-guide/)
+- <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.filetypes/databasefiletype/" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API DatabaseFileType</a>
+- <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.load/databaseloadoptions/" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API DatabaseLoadOptions</a>

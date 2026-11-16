@@ -1,0 +1,132 @@
+---
+title: "Extraer celdas de hojas de cálculo de Microsoft Office Excel"
+sidebar_label: "Extraer celdas de hojas de cálculo de Microsoft Office Excel"
+sidebar_key: "net-parser-extract-data-from-various-formats-extract-data-from-microsoft-office-excel-spreadsheets-extract-cells-from-microsoft-office-excel-spreadsheets"
+sidebar_position: 5
+description: "Este artículo explica cómo extraer celdas de hojas de cálculo de Microsoft Office Excel (.xls, .xlsx)."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/extract-data-from-various-formats/extract-data-from-microsoft-office-excel-spreadsheets/extract-cells-from-microsoft-office-excel-spreadsheets.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "ad847c6f4cb7cd09764d3572eebf33107327638a514ee4801a457770165e44b8"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "6ec7cf54f431561a860da91de5301f865998e48db58ebfe1714ef0e6835ec7fc"
+translation_updated_at: "2026-11-16T07:19:53.040Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Parser proporciona la funcionalidad para extraer celdas de hojas de cálculo. Los siguientes métodos se utilizan para este propósito:
+
+* <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/getworksheetinfo#getworksheetinfo_1" target="_blank" rel="nofollow noopener noreferrer">GetWorksheetInfo</a>() – devuelve la información sobre la hoja de cálculo
+* <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/getworksheetinfo#getworksheetinfo" target="_blank" rel="nofollow noopener noreferrer">GetWorksheetInfo</a>(int) – devuelve la información sobre todas las hojas de cálculo presentes en la hoja de cálculo
+* <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/getworksheetcells#getworksheetcells" target="_blank" rel="nofollow noopener noreferrer">GetWorksheetCells</a>(int) – devuelve la colección de celdas
+* <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/getworksheetcells#getworksheetcells_1" target="_blank" rel="nofollow noopener noreferrer">GetWorksheetCells</a>(int, WorksheetOptions) – devuelve una colección de celdas contenidas en los rangos especificados.
+
+A continuación se indican los pasos para extraer celdas de una hoja de cálculo de Microsoft Office Excel:
+
+*   Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para la hoja de cálculo inicial;
+*   Llamar al método <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/getworksheetcells#getworksheetcells" target="_blank" rel="nofollow noopener noreferrer">GetWorksheetCells</a>(int) y obtener la colección de objetos []();
+*   Recorrer la colección de <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.data/worksheetcell" target="_blank" rel="nofollow noopener noreferrer">WorksheetCell</a> y obtener el valor de texto de cada celda.
+
+El siguiente ejemplo muestra cómo extraer celdas de una hoja de cálculo de Microsoft Office Excel.
+
+```csharp
+// Create an instance of Parser class
+using (Parser parser = new Parser(Constants.SampleXlsx))
+{
+    // Check if worksheet cells extraction is supported
+    if (!parser.Features.Worksheet)
+    {
+        throw new NotSupportedException("Worksheet cells extraction isn't supported");
+    }
+
+    // Get the information about worksheets
+    IEnumerable<WorksheetInfo> info = parser.GetWorksheetInfo();
+   
+    // Iterate over worksheet information
+    foreach(WorksheetInfo i in info)
+    {
+        // Print the worksheet name
+        Console.WriteLine(i.Name);
+        Console.WriteLine();
+
+        // Get the worksheet cells
+        IEnumerable<WorksheetCell> cells = parser.GetWorksheetCells(i.Index);
+
+        // Iterate over cells
+        foreach (WorksheetCell c in cells)
+        {
+            // Print the cell information and text value
+            Console.WriteLine($"Row: {c.RowIndex} Column: {c.ColumnIndex} RowSpan: {c.RowSpan} ColumnSpan: {c.ColumnSpan}");
+            Console.WriteLine(c.Text);
+            Console.WriteLine();
+        }
+    }
+}
+```
+
+El siguiente ejemplo muestra cómo extraer celdas de una hoja de cálculo de Microsoft Office Excel con personalización:
+
+```csharp
+// Create an instance of Parser class
+using (Parser parser = new Parser(Constants.SampleXlsx))
+{
+    // Check if worksheet cells extraction is supported
+    if (!parser.Features.Worksheet)
+    {
+        throw new NotSupportedException("Worksheet cells extraction isn't supported");
+    }
+
+    // Get the information about the first worksheet
+    WorksheetInfo info = parser.GetWorksheetInfo(0);
+
+    // Print the worksheet name
+    Console.WriteLine(info.Name);
+    Console.WriteLine();
+
+    // Create the range that represents the first two rows
+    WorksheetRange range = new WorksheetRange(
+        info.MinRowIndex,
+        Math.Min(info.MinRowIndex + 1, info.MaxRowIndex),
+        info.MinColumnIndex,
+        info.MaxColumnIndex);
+
+    // Get the worksheet cells from the first two rows
+    IEnumerable<WorksheetCell> cells = parser.GetWorksheetCells(0, new WorksheetOptions(range));
+
+    // Iterate over cells
+    foreach (WorksheetCell c in cells)
+    {
+        // Print the cell information and text value
+        Console.WriteLine($"Row: {c.RowIndex} Column: {c.ColumnIndex} RowSpan: {c.RowSpan} ColumnSpan: {c.ColumnSpan}");
+        Console.WriteLine(c.Text);
+        Console.WriteLine();
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>    
+
+### Aplicación gratuita en línea para analizar documentos {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas simples pero potentes.
+
+Le invitamos a analizar documentos y extraer datos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

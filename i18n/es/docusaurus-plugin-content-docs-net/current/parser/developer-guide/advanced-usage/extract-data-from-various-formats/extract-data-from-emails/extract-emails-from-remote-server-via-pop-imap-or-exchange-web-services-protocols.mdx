@@ -1,0 +1,112 @@
+---
+title: "Extraer correos electrónicos desde un servidor remoto mediante los protocolos POP, IMAP o Exchange Web Services"
+sidebar_label: "Extraer correos electrónicos desde un servidor remoto mediante los protocolos POP, IMAP o Exchange Web Services"
+sidebar_key: "net-parser-extract-data-from-various-formats-extract-data-from-emails-extract-emails-from-remote-server-via-pop-imap-or-exchange-web-services-protocols"
+sidebar_position: 6
+description: "GroupDocs.Parser le permite extraer correos electrónicos desde servidores remotos y extraer datos de dichos correos electrónicos. Admite los protocolos POP, IMAP y EWS."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/extract-data-from-various-formats/extract-data-from-emails/extract-emails-from-remote-server-via-pop-imap-or-exchange-web-services-protocols.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "0b79a046b839137d09719d8e8bb04bbad4811d763bffd70991c2618b9038c2b9"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "c3d6412602cdb0dc742a87386133c8621a3a04a03e80a303481ec154ba5ba74c"
+translation_updated_at: "2026-11-16T07:11:08.752Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Parser le permite extraer correos electrónicos desde servidores remotos y extraer datos de dichos correos electrónicos. Los siguientes protocolos de correo electrónico son compatibles:
+
+*   Protocolo de oficina postal (POP)
+*   Protocolo de acceso a mensajes de Internet (IMAP)
+*   Servicios web de Exchange (EWS)
+
+Para crear una instancia de la clase <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> con el fin de extraer correos electrónicos desde un servidor remoto, se utilizan los siguientes constructores:
+
+```csharp
+Parser(EmailConnection connection);
+Parser(EmailConnection connection, ParserSettings parserSettings);
+```
+
+El segundo constructor permite utilizar el objeto <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/parsersettings" target="_blank" rel="nofollow noopener noreferrer">ParserSettings</a> para controlar el proceso; por ejemplo, agregando funcionalidad de [registro (logging)](/net/parser/developer-guide/advanced-usage/logging/).
+
+<a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/emailconnection" target="_blank" rel="nofollow noopener noreferrer">EmailConnection</a> es una clase base. Las siguientes clases de conexión se utilizan:
+
+| Protocolo | Clase |
+| --- | --- |
+| POP | <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/emailpopconnection" target="_blank" rel="nofollow noopener noreferrer">EmailPopConnection</a> |
+| IMAP | <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/emailimapconnection" target="_blank" rel="nofollow noopener noreferrer">EmailImapConnection</a> |
+| Exchange Web Services | <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/emailewsconnection" target="_blank" rel="nofollow noopener noreferrer">EmailEwsConnection</a> |
+
+A continuación se indican los pasos para extraer correos electrónicos desde el servidor remoto:
+
+*   Preparar la cadena de conexión (consulte la tabla a continuación);
+*   Instanciar el objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> con la cadena de conexión;
+*   Llamar a la propiedad <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/features/properties/container" target="_blank" rel="nofollow noopener noreferrer">Features.Container</a> para verificar si la extracción de contenedores está soportada;
+*   Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getcontainer" target="_blank" rel="nofollow noopener noreferrer">GetContainer</a> y obtener la colección de objetos de elemento de contenedor de documentos;
+*   Iterar a través de la colección y obtener el objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para cada elemento.
+
+El siguiente ejemplo muestra cómo extraer correos electrónicos desde un servidor Exchange:
+
+```csharp
+// Create the connection object for Exchange Web Services protocol 
+EmailConnection connection = new EmailEwsConnection(
+    "https://outlook.office365.com/ews/exchange.asmx",
+    "email@server",
+    "password");
+ 
+// Create an instance of Parser class to extract emails from the remote server
+using (Parser parser = new Parser(connection))
+{
+    // Check if container extraction is supported
+    if (!parser.Features.Container)
+    {
+        Console.WriteLine("Container extraction isn't supported.");
+        return;
+    }
+ 
+    // Extract email messages from the server
+    IEnumerable<ContainerItem> emails = parser.GetContainer();
+ 
+    // Iterate over attachments
+    foreach (ContainerItem item in emails)
+    {
+        // Create an instance of Parser class for email message
+        using (Parser emailParser = item.OpenParser())
+        {
+            // Extract the email text
+            using (TextReader reader = emailParser.GetText())
+            {
+                // Print the email text
+                Console.WriteLine(reader == null ? "Text extraction isn't supported." : reader.ReadToEnd());
+            }
+        }
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>    
+
+### Aplicación gratuita de análisis de documentos en línea {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas simples pero potentes.
+
+Le invitamos a analizar documentos y extraer datos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

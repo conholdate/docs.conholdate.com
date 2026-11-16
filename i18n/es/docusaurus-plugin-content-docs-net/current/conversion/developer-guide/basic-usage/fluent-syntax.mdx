@@ -1,0 +1,168 @@
+---
+title: "Sintaxis Fluent"
+sidebar_label: "Sintaxis Fluent"
+sidebar_key: "net-conversion-fluent-syntax"
+sidebar_position: 5
+description: "Componer conversiones con la API FluentConverter en GroupDocs.Conversion para .NET: configuración inicial, etapas de carga y conversión, salida página por página e inspección del documento."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/basic-usage/fluent-syntax.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "a5da311ee0610fb5349d0ef32fb8c7a2cd01cc66bf9d4bd566074c97c2847831"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "b53127dd173bb286b81f68b641fc6f97708b88a030ee2ad4d8c9452a60e80a62"
+translation_updated_at: "2026-11-16T08:11:37.950Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+La API fluida compone una conversión como una única expresión encadenada. Está implementada por la clase <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/fluentconverter/" target="_blank" rel="nofollow noopener noreferrer">FluentConverter</a> y las interfaces en etapas del espacio de nombres <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.fluent/" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Conversion.Fluent</a>: cada llamada devuelve una nueva interfaz de etapa que expone únicamente los métodos válidos para el paso siguiente.
+
+## Etapas del pipeline {#pipeline-stages}
+
+Una cadena fluida atraviesa cuatro etapas:
+
+| Etapa | Propósito | Métodos |
+| --- | --- | --- |
+| **Entrada** | Configurar el convertidor antes de abrir cualquier fuente | `WithSettings(...)`, `WithEvents(...)` |
+| **Carga** | Especificar la fuente y (opcionalmente) las opciones de carga | `Load(...)`, `WithOptions(LoadOptions)` |
+| **Conversión** | Especificar el destino y las opciones de conversión | `ConvertTo(...)`, `ConvertByPageTo(...)`, `WithOptions(ConvertOptions)`, `Compress(...)` |
+| **Terminal** | Ejecutar la operación | `Convert()`, `GetDocumentInfo()`, `GetPossibleConversions()` |
+
+Las llamadas en la etapa de entrada son opcionales; la cadena válida más corta salta directamente a `Load(...)`.
+
+## Conversión básica {#basic-conversion}
+
+La cadena mínima: cargar un archivo, especificar el destino y ejecutar:
+
+```csharp
+FluentConverter
+    .Load("sample.docx")
+    .ConvertTo("converted.pdf")
+    .Convert();
+```
+
+Agregue opciones de carga y conversión cuando las necesite:
+
+```csharp
+FluentConverter
+    .Load("sample.pdf").WithOptions(new PdfLoadOptions())
+    .ConvertTo("converted.docx").WithOptions(new WordProcessingConvertOptions())
+    .Convert();
+```
+
+## Configuración del convertidor (etapa de entrada) {#configuring-the-converter-entry-stage}
+
+Utilice `WithSettings(...)` para personalizar el <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/convertersettings/" target="_blank" rel="nofollow noopener noreferrer">ConverterSettings</a>, por ejemplo, para configurar un registrador o una caché:
+
+```csharp
+FluentConverter
+    .WithSettings(() => new ConverterSettings { Logger = new ConsoleLogger() })
+    .Load("sample.docx")
+    .ConvertTo("converted.pdf")
+    .Convert();
+```
+
+Utilice `WithEvents(...)` para registrar controladores en el agregador [ConversionEvents](/net/conversion/developer-guide/advanced-usage/conversion-events/) — consulte [Suscripción a eventos de conversión](#subscribing-to-conversion-events) a continuación.
+
+Ambas llamadas en la etapa de entrada son opcionales y pueden combinarse en cualquier orden:
+
+```csharp
+FluentConverter
+    .WithSettings(() => new ConverterSettings { Logger = new ConsoleLogger() })
+    .WithEvents(e => e.OnDocumentConverted = ctx => Console.WriteLine($"Done: {ctx.SourceFileName}"))
+    .Load("sample.docx")
+    .ConvertTo("converted.pdf")
+    .Convert();
+```
+
+## Salida página por página {#page-by-page-output}
+
+Utilice `ConvertByPageTo(...)` para escribir cada página de origen en su propio flujo:
+
+```csharp
+FluentConverter
+    .Load("sample.pdf").WithOptions(new PdfLoadOptions())
+    .ConvertByPageTo((SavePageContext ctx) => new FileStream($"converted-{ctx.Page}.docx", FileMode.Create))
+        .WithOptions(new WordProcessingConvertOptions())
+    .Convert();
+```
+
+La fábrica de flujos recibe un [SavePageContext](/net/conversion/developer-guide/basic-usage/context-objects-complete-guide/#savepagecontext) con el número de página y el formato de origen; devuelve un nuevo flujo en cada llamada.
+
+## Inspección de un documento {#inspecting-a-document}
+
+Dos métodos terminales reemplazan a `Convert()` cuando necesita información sobre la fuente en lugar de una salida convertida:
+
+```csharp
+// Available target formats for this source
+IReadOnlyList<PossibleConversions> possible = FluentConverter
+    .Load("sample.pdf")
+    .GetPossibleConversions();
+
+// Format-specific metadata (page count, properties, etc.)
+IDocumentInfo info = FluentConverter
+    .Load("sample.pdf")
+    .GetDocumentInfo();
+```
+
+Ambos aceptan una etapa de opciones de carga si la fuente lo requiere:
+
+```csharp
+FluentConverter.Load("sample.pdf").WithOptions(new PdfLoadOptions()).GetPossibleConversions();
+FluentConverter.Load("sample.pdf").WithOptions(new PdfLoadOptions()).GetDocumentInfo();
+```
+
+## Cancelar una conversión {#cancelling-a-conversion}
+
+`Convert()` acepta un `CancellationToken` para cancelación por tiempo de espera o por acción del usuario; consulte [Cancelación](/net/conversion/developer-guide/advanced-usage/cancellation/) para obtener el patrón completo:
+
+```csharp
+using var cts = new CancellationTokenSource();
+cts.CancelAfter(TimeSpan.FromSeconds(60));
+
+FluentConverter
+    .Load("sample.dwg")
+    .ConvertTo("converted.pdf").WithOptions(new PdfConvertOptions())
+    .Convert(cts.Token);
+```
+
+## Suscripción a eventos de conversión {#subscribing-to-conversion-events}
+
+Desde la versión 26.6, los controladores de eventos se registran mediante el agregador [ConversionEvents](/net/conversion/developer-guide/advanced-usage/conversion-events/) a través del método de etapa de entrada `WithEvents(...)`. El agregador cubre tanto los eventos del **ciclo de vida del pipeline** (`OnConversionStarted` / `OnConversionProgress` / `OnConversionCompleted`) como los eventos **por resultado** (`OnDocumentConverted` / `OnDocumentFailed` / `OnPageConverted` / `OnPageFailed` / `OnCompressionCompleted`):
+
+```csharp
+FluentConverter
+    .WithEvents(e =>
+    {
+        e.OnConversionStarted  = ()         => Console.WriteLine("Conversion started");
+        e.OnConversionProgress = percent    => Console.WriteLine($"... {percent}% ...");
+
+        e.OnDocumentConverted  = ctx        => Console.WriteLine($"Done: {ctx.SourceFileName}");
+        e.OnDocumentFailed     = (ctx, ex)  => Console.WriteLine($"Failed: {ex.Message}");
+        e.OnPageFailed         = (ctx, ex)  => Console.WriteLine($"Page failed: {ex.Message}");
+    })
+    .Load("sample.docx")
+    .ConvertTo("converted.pdf").WithOptions(new PdfConvertOptions())
+    .Convert();
+```
+
+Los métodos anteriores de la cadena en etapas finales (`.OnConversionCompleted(...).OnConversionFailed(...)` colocado tras `WithOptions(...)`, y `.OnCompressionCompleted(...)` colocado tras `.Compress(...)`) siguen funcionando, pero están obsoletos y previstos para su eliminación en la versión 26.9. Consulte la guía [Eventos de conversión](/net/conversion/developer-guide/advanced-usage/conversion-events/) para obtener la historia completa de migración, incluida la redenominación de los controladores por resultado de `OnConversion*` a `OnDocument*` / `OnPage*`.
+
+## Véase también {#see-also}
+
+- [Eventos de conversión](/net/conversion/developer-guide/advanced-usage/conversion-events/) – referencia completa para `WithEvents(...)` y `ConversionEvents`
+- [Objetos de contexto – Guía completa](/net/conversion/developer-guide/basic-usage/context-objects-complete-guide/) – propiedades expuestas por `SaveContext`, `SavePageContext`, `ConvertedContext`, etc.
+- [Cancelación](/net/conversion/developer-guide/advanced-usage/cancellation/) – paso de `CancellationToken` a través de la cadena fluida
+- [Extracción y conversión del contenido de archivos comprimidos](/net/conversion/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-contents-of-rar-or-zip-document-to-different-formats-and-compress/) – `Compress(...)` y `OnCompressionCompleted`

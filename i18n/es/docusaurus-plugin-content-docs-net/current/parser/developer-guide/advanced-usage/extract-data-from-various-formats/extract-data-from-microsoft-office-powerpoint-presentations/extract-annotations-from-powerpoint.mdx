@@ -1,0 +1,148 @@
+---
+title: "Extraer anotaciones de presentaciones de Microsoft Office PowerPoint"
+sidebar_label: "Extraer anotaciones de presentaciones de Microsoft Office PowerPoint"
+sidebar_key: "net-parser-extract-data-from-various-formats-extract-data-from-microsoft-office-powerpoint-presentations-extract-annotations-from-powerpoint"
+sidebar_position: 2
+description: "Este artículo explica cómo extraer anotaciones de presentaciones de Microsoft Office PowerPoint (.ppt, .pptx)."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/extract-data-from-various-formats/extract-data-from-microsoft-office-powerpoint-presentations/extract-annotations-from-powerpoint.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "458f15c28c66ecd4cc64806cc2a6cb2178e9ea9732ab185b12ca16a239121aef"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "4318789562fcc39468415ae11d24b65b3c710c1306f3a42bd31bf79dd922d247"
+translation_updated_at: "2026-11-16T07:25:20.260Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+Las presentaciones de Microsoft Office PowerPoint (.ppt, .pptx) suelen contener **anotaciones**: comentarios en las diapositivas dejados por revisores durante una revisión. Con **GroupDocs.Parser for .NET**, puede leer fácilmente estas anotaciones mediante programación utilizando el método <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/getannotations/#getannotations" target="_blank" rel="nofollow noopener noreferrer">GetAnnotations</a>.
+
+Esta guía muestra paso a paso cómo extraer anotaciones de presentaciones de Microsoft Office PowerPoint en C#.
+---
+## ¿Qué son las anotaciones de PowerPoint? {#what-are-powerpoint-annotations}
+
+Las anotaciones son comentarios que los revisores adjuntan a las diapositivas de una presentación de PowerPoint (.ppt, .pptx); por ejemplo, observaciones dejadas sobre una forma o diapositiva específica durante una revisión. El método `GetAnnotations` lee esta marca y la devuelve como una colección de objetos `AnnotationItem`, cada uno expone una `Value` con el texto del comentario, junto con metadatos como el autor y la marca de tiempo.
+
+El método tiene dos sobrecargas:
+
+| Sobrecarga | Descripción |
+| --- | --- |
+| **GetAnnotations()** | Extrae anotaciones de toda la presentación de PowerPoint |
+| **GetAnnotations(int pageIndex)** | Extrae anotaciones de una diapositiva específica (índice basado en cero) |
+
+⚡ *Nota: La extracción de anotaciones es compatible tanto con el formato binario heredado (.ppt) como con el formato Open XML (.pptx).*
+---
+## Cómo extraer anotaciones de una presentación de PowerPoint en C# {#how-to-extract-annotations-from-a-powerpoint-presentation-in-c}
+
+Siga estos pasos para obtener las anotaciones de un archivo .ppt o .pptx:
+
+1. **Cree un objeto `Parser`** y cargue la presentación de PowerPoint.
+2. **Llame al método `GetAnnotations`** para recuperar la colección de anotaciones.
+3. **Itere a través de la colección** y lea el valor de cada anotación.
+
+### Ejemplo: Extraer anotaciones de PowerPoint en C# {#example-extract-powerpoint-annotations-in-c}
+
+```csharp
+using (Parser parser = new Parser(@"MyPresentation.pptx"))
+{
+    // Extract annotations
+    IEnumerable<AnnotationItem> annotations = parser.GetAnnotations();
+
+    // Display annotations
+    foreach (AnnotationItem item in annotations)
+    {
+        Console.WriteLine(item.Value);
+    }
+}
+```
+
+
+:::warning
+<a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/getannotations/#getannotations" target="_blank" rel="nofollow noopener noreferrer">GetAnnotations</a> el método devuelve *null* si la extracción de anotaciones no es compatible con el documento. Si la presentación de PowerPoint no tiene comentarios, <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser/parser/getannotations/#getannotations" target="_blank" rel="nofollow noopener noreferrer">GetAnnotations</a> El método devuelve una colección vacía.
+:::
+
+
+## Extraer texto de PowerPoint junto con anotaciones {#extract-powerpoint-text-together-with-annotations}
+
+A veces resulta útil obtener el texto de la presentación y sus comentarios en una sola operación, en lugar de llamar a `GetAnnotations` por separado. Establezca `IncludeAnnotations` en `true` en `TextOptions` y páselo al método `GetText`: el texto de los comentarios se incluirá en la salida extraída junto con el texto normal de las diapositivas.
+
+### Ejemplo: Extraer texto con anotaciones en C# {#example-extract-text-with-annotations-in-c}
+
+```csharp
+using (Parser parser = new Parser(@"MyPresentation.pptx"))
+{
+    TextOptions options = new TextOptions
+    {
+        IncludeAnnotations = true
+    };
+
+    using (TextReader reader = parser.GetText(options))
+    {
+        string text = reader.ReadToEnd();
+        Console.WriteLine(text);
+    }
+}
+```
+
+## Lectura de metadatos de comentarios en PowerPoint {#reading-powerpoint-comment-metadata}
+
+Cada `AnnotationItem` también expone metadatos que ayudan a rastrear quién dejó un comentario en una diapositiva y cuándo:
+
+| Propiedad | Tipo | Descripción |
+| --- | --- | --- |
+| `AnnotationType` | `string` | El tipo de anotación. |
+| `PageIndex` | `int` | Índice basado en cero de la diapositiva donde se encuentra el comentario. |
+| `Timestamp` | `DateTime?` | Fecha y hora en que se creó o modificó por última vez el comentario. |
+| `AuthorName` | `string` | Nombre del autor que creó o modificó por última vez el comentario. |
+| `AuthorInitials` | `string` | Iniciales del autor que creó o modificó por última vez el comentario. |
+
+### Ejemplo: Lectura de metadatos de comentarios en C# {#example-reading-comment-metadata-in-c}
+
+```csharp
+using (Parser parser = new Parser(@"MyPresentation.pptx"))
+{
+    IEnumerable<AnnotationItem> annotations = parser.GetAnnotations();
+
+    foreach (AnnotationItem annotation in annotations)
+    {
+        Console.WriteLine($"Slide: {annotation.PageIndex}, Author: {annotation.AuthorName} ({annotation.AuthorInitials})");
+        Console.WriteLine($"Created/Modified: {annotation.Timestamp}, Type: {annotation.AnnotationType}");
+        Console.WriteLine($"Comment: {annotation.Value}");
+    }
+}
+```
+
+## ¿Por qué extraer anotaciones de presentaciones de PowerPoint? {#why-extract-annotations-from-powerpoint-presentations}
+
+Extraer comentarios de presentaciones de Microsoft Office PowerPoint resulta útil para:
+
+*   Flujos de trabajo de revisión: recopilar los comentarios de los revisores dejados en las diapositivas durante un ciclo de revisión.
+*   Colaboración: mostrar los comentarios de las diapositivas sin necesidad de abrir PowerPoint.
+*   Auditoría: rastrear quién comentó en una presentación y cuándo, a lo largo del tiempo.
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>
+
+### Aplicación gratuita de análisis de documentos en línea {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.
+
+Le invitamos a analizar documentos y extraer datos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

@@ -1,0 +1,79 @@
+---
+title: "Escucha de eventos del proceso de conversión"
+sidebar_label: "Escuchando eventos"
+sidebar_key: "net-conversion-listening"
+sidebar_position: 5
+description: "Sigue esta guía y aprende cómo rastrear el proceso de conversión suscribiéndote a eventos específicos de la API de GroupDocs.Conversion para .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/listening.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "7afd5d790019dcb3d0acf4d6a58bf2a17cfc83de16ec9924170b19b50f9e5be6"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "af842dff0327f0caad9bbb3b26e1672a9b4325e56c6e79bca2475001f53a85ea"
+translation_updated_at: "2026-11-16T07:34:04.280Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+:::important[Obsoleto desde la v26.6 – utilice ConversionEvents en su lugar]
+La interfaz `IConverterListener` y la propiedad `ConverterSettings.Listener` están marcadas como obsoletas en la v26.6 y están programadas para su eliminación en la v26.9. El código nuevo debe suscribirse a `OnConversionStarted` / `OnConversionProgress` / `OnConversionCompleted` en el agregador [ConversionEvents](/net/conversion/developer-guide/advanced-usage/conversion-events/) en su lugar.
+
+El código existente que asigna un detector sigue funcionando en la v26.6: los callbacks `Started` / `Progress` / `Completed` se reenvían a los controladores `ConversionEvents` correspondientes durante la construcción del convertidor.
+:::
+
+
+En algunos casos, es necesario monitorear el proceso de conversión y recibir actualizaciones sobre el inicio, el progreso y la finalización de una conversión. Para tales situaciones, <a href="https://products.groupdocs.com/conversion/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Conversion**</a> expone un punto de extensión donde la aplicación cliente puede suscribirse y recibir actualizaciones. 
+
+Para habilitar la escucha, siga estos pasos:
+
+1.  Cree su propia implementación de la interfaz <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.reporting/iconverterlistener" target="_blank" rel="nofollow noopener noreferrer">IConverterListener</a>.
+2.  Instancie la clase <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/convertersettings" target="_blank" rel="nofollow noopener noreferrer">ConverterSettings</a> y pase una instancia de la clase creada en el primer paso.
+3.  Pase el objeto fábrica <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/convertersettings" target="_blank" rel="nofollow noopener noreferrer">ConverterSettings</a> al constructor de la clase <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter" target="_blank" rel="nofollow noopener noreferrer">Converter</a>.
+4.  Llame al método <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter/convert/#convert_3" target="_blank" rel="nofollow noopener noreferrer">Convert</a> de la clase <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter" target="_blank" rel="nofollow noopener noreferrer">Converter</a>.
+
+El siguiente fragmento de código muestra cómo habilitar la escucha para los eventos de GroupDocs.Conversion:
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Options.Convert;
+using GroupDocs.Conversion.Reporting;
+
+IConverterListener listener = new ConverterListener();
+Func<ConverterSettings> settingsFactory = () => new ConverterSettings
+{
+    Listener = listener
+};
+using (Converter converter = new Converter("sample.docx", settingsFactory))
+{
+    PdfConvertOptions options = new PdfConvertOptions();
+    converter.Convert("converted.pdf", options);
+}
+
+public class ConverterListener : IConverterListener
+{
+    public void Started()
+    {
+        Console.WriteLine("Conversion started...");
+    }
+    public void Progress(byte current)
+    {
+        Console.WriteLine($"... {current} % ...");
+    }
+    public void Completed()
+    {
+        Console.WriteLine("... conversion completed");
+    }
+}
+```

@@ -1,0 +1,557 @@
+---
+title: "Objetos de contexto: Guía completa"
+sidebar_label: "Objetos de contexto: Guía completa"
+sidebar_key: "net-conversion-context-objects-complete-guide"
+sidebar_position: 6
+description: "Aprenda cómo usar objetos Context en GroupDocs.Conversion para .NET v24.10+. Los objetos Context son fundamentales para todos los patrones basados en delegados."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/basic-usage/context-objects-complete-guide.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "fac1f510fd4fd571ba371cfb3521e8a6c27e61eccb83836864f0e7e174d3d1a8"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "ca82c800881f9589758610d27133db5a257ef0861672d69d65149ad36b785347"
+translation_updated_at: "2026-11-16T07:56:52.280Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Introducción {#introduction}
+
+A partir de **GroupDocs.Conversion para .NET v24.10**, todos los patrones basados en delegados utilizan **objetos de contexto**. Estos objetos proporcionan información detallada sobre el proceso de conversión y permiten configuraciones dinámicas y conscientes del contexto.
+
+Los objetos de contexto son **fundamentales** para comprender cómo funcionan los delegados en GroupDocs.Conversion. Si observa patrones como `Func<LoadContext, LoadOptions>` o `Action<ConvertedContext>`, estará trabajando con objetos de contexto.
+
+## ¿Por qué objetos de contexto? {#why-context-objects}
+
+Los objetos de contexto proporcionan:
+
+- **Información de origen**: nombre del archivo, formato, nivel de jerarquía
+- **Estado de conversión**: página actual en proceso, formato de destino
+- **Configuración dinámica**: configurar opciones según las propiedades reales del documento
+- **Llamadas de retorno del ciclo de vida**: monitorear el progreso de la conversión página por página o a nivel de documento
+
+## Tipos de contexto {#the-context-types}
+
+GroupDocs.Conversion proporciona seis tipos de contexto de **configuración/resultado** que impulsan los patrones basados en delegados, además de un tipo de contexto **diagnóstico** (`FontSubstitutionContext`, disponible desde la v26.6) que se entrega a un evento de conversión:
+
+| Tipo de contexto | Utilizado en | Propósito |
+| -------------- | --------- | --------- |
+| <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/loadcontext/" target="_blank" rel="nofollow noopener noreferrer">LoadContext</a> | `Func<LoadContext, LoadOptions>` | Proporciona información de origen al cargar documentos |
+| <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/convertcontext/" target="_blank" rel="nofollow noopener noreferrer">ConvertContext</a> | `Func<ConvertContext, ConvertOptions>` | Proporciona información de conversión y control de cancelación |
+| <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/savecontext/" target="_blank" rel="nofollow noopener noreferrer">SaveContext</a> | `Func<SaveContext, Stream>` | Proporciona información de destino para salida en flujo personalizado |
+| <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/savepagecontext/" target="_blank" rel="nofollow noopener noreferrer">SavePageContext</a> | `Func<SavePageContext, Stream>` | Proporciona información específica de página para salida en flujo |
+| <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/convertedcontext/" target="_blank" rel="nofollow noopener noreferrer">ConvertedContext</a> | `Action<ConvertedContext>` | Llamada de retorno tras completarse la conversión de todo el documento |
+| <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/convertedpagecontext/" target="_blank" rel="nofollow noopener noreferrer">ConvertedPageContext</a> | `Action<ConvertedPageContext>` | Llamada de retorno tras completarse la conversión de cada página |
+| [FontSubstitutionContext](#fontsubstitutioncontext) | `Action<FontSubstitutionContext>` | Diagnóstico: informa una fuente sustituida durante el procesamiento del documento de origen |
+
+---
+
+## LoadContext {#loadcontext}
+
+**Utilizado en**: Sobrecargas del constructor de Converter con parámetro `Func<LoadContext, LoadOptions>`
+
+**Propósito**: Proporciona información sobre el documento de origen durante la carga, permitiendo configurar dinámicamente las opciones de carga según las propiedades del archivo.
+
+### Propiedades {#properties}
+
+| Propiedad | Tipo | Descripción |
+| ---------- | ------ | ------------- |
+| `SourceFileName` | `string` | Nombre del archivo de origen (solo lectura) |
+| `SourceFormat` | `FileType` | Formato del documento de origen (solo lectura) |
+| `SourceStream` | `Stream` | Flujo del documento de origen (solo lectura) |
+| `HierarchyLevel` | `int` | Profundidad de anidamiento del documento actual en la jerarquía de contenedores (solo lectura) * |
+| `ItemIndex` | `int` | Contador secuencial absoluto en todos los elementos (solo lectura) * |
+
+\* `HierarchyLevel` muestra la profundidad de anidamiento (0 = raíz, 1 = incrustado en la raíz, etc.). `ItemIndex` es un contador absoluto (1, 2, 3...) en todos los elementos, independientemente de la jerarquía. En documentos normales, estos valores siempre son 0 y 1, respectivamente.
+
+### Ejemplo {#example}
+
+```csharp
+using (var converter = new Converter(
+    "invoice-2024.pdf",
+    (LoadContext loadContext) =>
+    {
+        // Access source information
+        Console.WriteLine($"Loading file: {loadContext.SourceFileName}");
+        Console.WriteLine($"Format: {loadContext.SourceFormat}");
+
+        // Return appropriate load options based on format
+        return new PdfLoadOptions();
+    }))
+{
+    converter.Convert("invoice-2024.docx", new WordProcessingConvertOptions());
+}
+```
+
+---
+
+## ConvertContext {#convertcontext}
+
+**Utilizado en**: sobrecargas del método `Convert()` con el parámetro `Func<ConvertContext, ConvertOptions>`
+
+**Propósito**: Proporciona información de conversión y permite establecer el token de cancelación para el proceso de conversión.
+
+### Propiedades {#properties-1}
+
+| Propiedad | Tipo | Descripción |
+| ---------- | ------ | ------------- |
+| `CancellationToken` | `CancellationToken` | Token de cancelación (**get; set;** ¡solo propiedad establecible!) |
+| `SourceFileName` | `string` | Nombre del archivo de origen (solo lectura) |
+| `SourceFormat` | `FileType` | Formato del documento de origen (solo lectura) |
+
+### Ejemplo {#example-1}
+
+```csharp
+using (var converter = new Converter("quarterly-report.pdf"))
+{
+    converter.Convert(
+        (ConvertContext convertContext) =>
+        {
+            // Access conversion information
+            Console.WriteLine($"Converting: {convertContext.SourceFileName}");
+            Console.WriteLine($"From format: {convertContext.SourceFormat}");
+
+            // Can set cancellation token
+            convertContext.CancellationToken = CancellationToken.None;
+
+            return new WordProcessingConvertOptions();
+        },
+        (ConvertedContext convertedContext) =>
+        {
+            // Save the converted stream to file
+            using (var fileStream = File.Create("quarterly-report.docx"))
+            {
+                convertedContext.ConvertedStream.CopyTo(fileStream);
+            }
+        });
+}
+```
+
+---
+
+## SaveContext {#savecontext}
+
+**Utilizado en**: sobrecargas del método `Convert()` con el parámetro `Func<SaveContext, Stream>`
+
+**Propósito**: Proporciona información sobre la salida de conversión, permitiendo un manejo personalizado de flujos (streams) para el documento convertido.
+
+### Propiedades {#properties-2}
+
+| Propiedad | Tipo | Descripción |
+| ---------- | ------ | ------------- |
+| `SourceFileName` | `string` | Nombre del archivo de origen (solo lectura) |
+| `SourceFormat` | `FileType` | Formato del documento de origen (solo lectura) |
+| `TargetFormat` | `string` | Formato de destino para la conversión (solo lectura) |
+| `HierarchyLevel` | `int` | Profundidad de anidamiento del documento actual en la jerarquía de contenedores (solo lectura) * |
+| `ItemIndex` | `int` | Contador secuencial absoluto en todos los elementos (solo lectura) * |
+
+\* `HierarchyLevel` muestra la profundidad de anidamiento (0 = raíz, 1 = incrustado, etc.). `ItemIndex` es un contador absoluto (1, 2, 3...) en todos los elementos. Solo es relevante para documentos contenedor (por ejemplo, PST, OST, PDF con archivos incrustados).
+
+### Ejemplo {#example-2}
+
+```csharp
+using (var converter = new Converter("balance-sheet.pdf"))
+{
+    converter.Convert(
+        (SaveContext saveContext) =>
+        {
+            // Access output information
+            Console.WriteLine($"Source: {saveContext.SourceFileName}");
+            Console.WriteLine($"From: {saveContext.SourceFormat}");
+            Console.WriteLine($"To: {saveContext.TargetFormat}");
+
+            // Return custom stream for output
+            return File.Create("balance-sheet.xlsx");
+        },
+        new SpreadsheetConvertOptions());
+}
+```
+
+---
+
+## SavePageContext {#savepagecontext}
+
+**Utilizado en**: sobrecargas del método `Convert()` con el parámetro `Func<SavePageContext, Stream>`
+
+**Propósito**: Proporciona información específica de página para la conversión página por página, permitiendo el manejo personalizado de flujos para cada página convertida.
+
+### Propiedades {#properties-3}
+
+| Propiedad | Tipo | Descripción |
+| ---------- | ------ | ------------- |
+| `Page` | `int` | Número de página del documento de origen (solo lectura) |
+| `SourceFileName` | `string` | Nombre del archivo de origen (solo lectura) |
+| `SourceFormat` | `FileType` | Formato del documento de origen (solo lectura) |
+| `TargetFormat` | `string` | Formato de destino para la conversión (solo lectura) |
+
+### Ejemplo {#example-3}
+
+```csharp
+using (var converter = new Converter("contract-2024.pdf"))
+{
+    converter.Convert(
+        (SavePageContext savePageContext) =>
+        {
+            // Access page-specific information
+            Console.WriteLine($"Processing page: {savePageContext.Page}");
+            Console.WriteLine($"Source: {savePageContext.SourceFileName}");
+            Console.WriteLine($"From: {savePageContext.SourceFormat}");
+            Console.WriteLine($"To: {savePageContext.TargetFormat}");
+
+            // Return stream for this specific page
+            return File.Create($"contract-2024-page-{savePageContext.Page}.png");
+        },
+        new ImageConvertOptions());
+}
+```
+
+---
+
+## ConvertedContext {#convertedcontext}
+
+**Utilizado en**: sobrecargas del método `Convert()` con el parámetro `Action<ConvertedContext>`
+
+**Propósito**: Devolución de llamada invocada tras completarse la conversión completa del documento, proporcionando acceso al flujo convertido y a los detalles de la conversión.
+
+### Propiedades {#properties-4}
+
+| Propiedad | Tipo | Descripción |
+| ---------- | ------ | ------------- |
+| `ConvertedFormat` | `string` | Formato del documento convertido (solo lectura) |
+| `ConvertedStream` | `Stream` | Flujo que contiene el documento convertido (solo lectura) |
+| `SourceFileName` | `string` | Nombre del archivo de origen (solo lectura) |
+| `SourceFormat` | `FileType` | Formato del documento de origen (solo lectura) |
+| `HierarchyLevel` | `int` | Profundidad de anidamiento del documento actual en la jerarquía de contenedores (solo lectura) * |
+| `ItemIndex` | `int` | Contador secuencial absoluto en todos los elementos (solo lectura) * |
+
+\* `HierarchyLevel` muestra la profundidad de anidamiento (0 = raíz, 1 = incrustado, etc.). `ItemIndex` es un contador absoluto (1, 2, 3...) en todos los elementos. Solo es relevante para documentos contenedor (por ejemplo, PST, OST, PDF con archivos incrustados).
+
+### Ejemplo {#example-4}
+
+```csharp
+using (var converter = new Converter("sales-report.pdf"))
+{
+    converter.Convert(
+        new WordProcessingConvertOptions(),
+        (ConvertedContext convertedContext) =>
+        {
+            // Access conversion result information
+            Console.WriteLine($"Converted: {convertedContext.SourceFileName}");
+            Console.WriteLine($"From: {convertedContext.SourceFormat}");
+            Console.WriteLine($"To: {convertedContext.ConvertedFormat}");
+            Console.WriteLine("Conversion completed!");
+
+            // Save the converted stream to file
+            using (var fileStream = File.Create("sales-report.docx"))
+            {
+                convertedContext.ConvertedStream.CopyTo(fileStream);
+            }
+        });
+}
+```
+
+---
+
+## ConvertedPageContext {#convertedpagecontext}
+
+**Utilizado en**: sobrecargas del método `Convert()` con el parámetro `Action<ConvertedPageContext>`
+
+**Propósito**: Devolución de llamada invocada tras completarse cada conversión de página, lo que permite el monitoreo y manejo página por página.
+
+### Propiedades {#properties-5}
+
+| Propiedad | Tipo | Descripción |
+| ---------- | ------ | ------------- |
+| `ConvertedFormat` | `string` | Formato de la página convertida (solo lectura) |
+| `ConvertedStream` | `Stream` | Flujo que contiene la página convertida (solo lectura) |
+| `Page` | `int` | Número de página en el documento original (solo lectura) |
+| `SourceFileName` | `string` | Nombre del archivo de origen (solo lectura) |
+| `SourceFormat` | `FileType` | Formato del documento de origen (solo lectura) |
+
+### Ejemplo {#example-5}
+
+```csharp
+using (var converter = new Converter("monthly-report.pdf"))
+{
+    converter.Convert(
+        new WordProcessingConvertOptions(),
+        (ConvertedPageContext convertedPageContext) =>
+        {
+            // Access page conversion result
+            Console.WriteLine($"Page {convertedPageContext.Page} converted");
+            Console.WriteLine($"Format: {convertedPageContext.ConvertedFormat}");
+            Console.WriteLine($"Source: {convertedPageContext.SourceFileName}");
+            Console.WriteLine($"From: {convertedPageContext.SourceFormat}");
+
+            // Save each page's stream to file
+            using (var fileStream = File.Create($"monthly-report-page-{convertedPageContext.Page}.docx"))
+            {
+                convertedPageContext.ConvertedStream.CopyTo(fileStream);
+            }
+        });
+}
+```
+
+---
+
+## FontSubstitutionContext {#fontsubstitutioncontext}
+
+**Utilizado en**: el controlador `OnFontSubstituted` del evento <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/conversionevents/" target="_blank" rel="nofollow noopener noreferrer">ConversionEvents</a> (`Action<FontSubstitutionContext>`)
+
+**Propósito**: A diferencia de los seis tipos de contexto anteriores —que configuran delegados o informan un resultado producido—, `FontSubstitutionContext` es un contexto **diagnóstico**. A partir de **GroupDocs.Conversion para .NET v26.6**, se entrega al evento `OnFontSubstituted` cada vez que una fuente referenciada en el documento de origen no está disponible y se sustituye durante la conversión (una fuente del sistema ausente o una regla <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/fontsubstitute/" target="_blank" rel="nofollow noopener noreferrer">FontSubstitute</a> que haya configurado).
+
+### Propiedades {#properties-6}
+
+| Propiedad | Tipo | Descripción |
+| ---------- | ------ | ------------- |
+| `SourceFileName` | `string` | Nombre del archivo de origen (un identificador generado cuando el origen es un flujo no basado en archivo) (solo lectura) |
+| `OriginalFontName` | `string` | Fuente referenciada por el documento pero no disponible. Puede ser `null` en formatos que solo informan texto descriptivo (solo lectura) |
+| `SubstituteFontName` | `string` | Fuente utilizada como sustituta. Puede ser `null` — lea `Reason` (solo lectura) |
+| `Reason` | `string` | Mensaje de sustitución tal como se informó, literalmente. Nombra ambas fuentes cuando los miembros tipificados son `null` (solo lectura) |
+
+### Ejemplo {#example-6}
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Contracts;
+using GroupDocs.Conversion.Options.Convert;
+
+var events = new ConversionEvents
+{
+    OnFontSubstituted = (FontSubstitutionContext context) =>
+    {
+        var detail = context.OriginalFontName != null
+            ? $"{context.OriginalFontName} -> {context.SubstituteFontName}"
+            : context.Reason;
+        Console.WriteLine($"Font substituted in '{context.SourceFileName}': {detail}");
+    }
+};
+
+using (var converter = new Converter("source.docx", () => new ConverterSettings(), () => events))
+{
+    converter.Convert("output.pdf", new PdfConvertOptions());
+}
+```
+
+Consulte [Eventos de conversión: notificaciones de sustitución de fuentes](/net/conversion/developer-guide/advanced-usage/conversion-events/#font-substitution-notifications) para obtener la matriz de documentos admitidos y las notas sobre el comportamiento.
+
+---
+
+## Trabajo con documentos contenedor {#working-with-container-documents}
+
+Las propiedades `HierarchyLevel` y `ItemIndex` cobran relevancia al convertir **documentos contenedor**, los cuales pueden contener múltiples elementos en una estructura jerárquica.
+
+### Comprensión de HierarchyLevel y ItemIndex {#understanding-hierarchylevel-and-itemindex}
+
+- **HierarchyLevel** (Nivel jerárquico): muestra la **profundidad de anidamiento** del documento actual
+  - `0` = documento raíz/principal
+  - `1` = incrustado directamente en el documento principal
+  - `2` = incrustado dentro de un documento incrustado, etc.
+
+- **ItemIndex** (Índice de elemento): **Contador secuencial absoluto** para todos los elementos
+  - Comienza en 1 e incrementa para cada elemento
+  - NO por nivel jerárquico (es global)
+
+**Ejemplo de jerarquía:**
+```
+Main PDF (Level 0, Index 1)
+├─ Attachment 1 (Level 1, Index 2)
+├─ Attachment 2 (Level 1, Index 3)
+└─ Attachment 3 (Level 1, Index 4)
+    └─ Sub-attachment (Level 2, Index 5)
+```
+
+### Tipos de documentos contenedor {#container-document-types}
+
+- **Contenedores de correo electrónico**: archivos PST y OST (archivos de datos de Outlook)
+- **Almacenamiento de correo electrónico**: archivos MBOX, NSF y OLM
+- **PDF con archivos adjuntos**: archivos PDF que contienen documentos incrustados
+- **Formatos de archivo comprimido**: archivos ZIP (cuando se extraen y convierten)
+
+### Ejemplo: Conversión de un archivo PST con información de jerarquía {#example-converting-pst-file-with-hierarchy-information}
+
+```csharp
+using (var converter = new Converter("mailbox-archive.pst"))
+{
+    int itemCount = 0;
+
+    converter.Convert(
+        (SaveContext saveContext) =>
+        {
+            itemCount++;
+
+            // Access hierarchy information for container items
+            Console.WriteLine($"Item #{itemCount}");
+            Console.WriteLine($"  Source: {saveContext.SourceFileName}");
+            Console.WriteLine($"  Hierarchy Level: {saveContext.HierarchyLevel}");
+            Console.WriteLine($"  Item Index: {saveContext.ItemIndex}");
+            Console.WriteLine($"  Target Format: {saveContext.TargetFormat}");
+
+            // Create output file with hierarchy info in name
+            var outputName = $"email-L{saveContext.HierarchyLevel}-I{saveContext.ItemIndex}.pdf";
+            return File.Create(outputName);
+        },
+        new PdfConvertOptions());
+
+    Console.WriteLine($"Total items converted: {itemCount}");
+}
+```
+
+### Ejemplo: PDF con archivos incrustados {#example-pdf-with-embedded-files}
+
+```csharp
+// LoadContext is called for EACH document in the hierarchy
+using (var converter = new Converter(
+    "contract-with-attachments.pdf",
+    (LoadContext loadContext) =>
+    {
+        // HierarchyLevel shows WHERE in the hierarchy this document is
+        // Level 0 = main document
+        // Level 1 = directly embedded in main document
+        // Level 2 = embedded within an embedded document, etc.
+
+        Console.WriteLine($"Loading: {loadContext.SourceFileName}");
+        Console.WriteLine($"  Hierarchy Level: {loadContext.HierarchyLevel}");
+        Console.WriteLine($"  Item Index: {loadContext.ItemIndex}");
+
+        if (loadContext.HierarchyLevel == 0)
+        {
+            Console.WriteLine("  -> This is the main document");
+        }
+        else if (loadContext.HierarchyLevel == 1)
+        {
+            Console.WriteLine("  -> This is an embedded file in the main document");
+        }
+        else
+        {
+            Console.WriteLine($"  -> This is nested {loadContext.HierarchyLevel} levels deep");
+        }
+
+        // Return appropriate load options for the document type
+        return new PdfLoadOptions();
+    }))
+{
+    int itemCount = 0;
+
+    converter.Convert(
+        (SaveContext saveContext) =>
+        {
+            itemCount++;
+
+            // SaveContext shows hierarchy level during conversion
+            var outputName = $"contract-L{saveContext.HierarchyLevel}-I{saveContext.ItemIndex}.pdf";
+            Console.WriteLine($"Saving: {outputName}");
+
+            return File.Create(outputName);
+        },
+        new PdfConvertOptions());
+
+    Console.WriteLine($"Total items converted: {itemCount}");
+}
+```
+
+**Puntos clave:**
+- **LoadContext se invoca una vez por cada documento** en la jerarquía de contenedores (documento principal + cada documento incrustado)
+- **HierarchyLevel indica la profundidad de anidamiento** del documento que actualmente se está cargando o convirtiendo:
+  - `HierarchyLevel = 0` → Documento principal/raíz
+  - `HierarchyLevel = 1` → Incrustado directamente en el documento principal
+  - `HierarchyLevel = 2` → Incrustado dentro de un documento incrustado, etc.
+- **ItemIndex es un contador secuencial absoluto**: cuenta todos los elementos a lo largo de toda la conversión (1, 2, 3, 4…), independientemente del nivel de jerarquía
+- Para documentos normales (DOCX, XLSX, PDF simple sin archivos incrustados), `HierarchyLevel` siempre es 0 y `ItemIndex` siempre es 1
+
+---
+
+## Patrones comunes {#common-patterns}
+
+### Patrón 1: Opciones de carga dinámicas según el origen {#pattern-1-dynamic-load-options-based-on-source}
+
+```csharp
+using (var converter = new Converter(
+    "annual-report.pdf",
+    (LoadContext loadContext) =>
+    {
+        // Choose load options based on actual file format
+        if (loadContext.SourceFormat == FileType.Pdf)
+            return new PdfLoadOptions { RemoveEmbeddedFiles = true };
+
+        if (loadContext.SourceFormat == FileType.Docx)
+            return new WordProcessingLoadOptions { DefaultFont = "Arial" };
+
+        return null; // Auto-detect
+    }))
+{
+    converter.Convert("annual-report.xlsx", new SpreadsheetConvertOptions());
+}
+```
+
+### Patrón 2: Conversión página por página con nombres personalizados {#pattern-2-page-by-page-conversion-with-custom-names}
+
+```csharp
+using (var converter = new Converter("employee-handbook.pdf"))
+{
+    converter.Convert(
+        (SavePageContext savePageContext) =>
+        {
+            // Create separate file for each page with custom naming
+            var fileName = $"handbook-section-{savePageContext.Page:D3}.docx";
+            return File.Create(fileName);
+        },
+        new WordProcessingConvertOptions());
+}
+```
+
+### Patrón 3: Monitoreo del Progreso de Conversión {#pattern-3-conversion-progress-monitoring}
+
+```csharp
+int processedPages = 0;
+
+using (var converter = new Converter("product-catalog.pdf"))
+{
+    converter.Convert(
+        new ImageConvertOptions { Format = ImageFileType.Png },
+        (ConvertedPageContext convertedPageContext) =>
+        {
+            processedPages++;
+            Console.WriteLine($"Progress: Page {processedPages} of product catalog converted");
+
+            // Save page stream
+            using (var fileStream = File.Create($"catalog-page-{convertedPageContext.Page:D3}.png"))
+            {
+                convertedPageContext.ConvertedStream.CopyTo(fileStream);
+            }
+        });
+}
+```
+
+---
+
+## Resumen {#summary}
+
+Los objetos de contexto son fundamentales para los patrones basados en delegados de GroupDocs.Conversion. Comprenderlos le permite:
+
+- **LoadContext**: Configurar opciones de carga dinámicas según las propiedades de la fuente
+- **ConvertContext**: Controlar el proceso de conversión y acceder a la información de la fuente
+- **SaveContext**: Manejar flujos de salida personalizados con información completa del destino
+- **SavePageContext**: Procesar páginas individualmente con contexto específico por página
+- **ConvertedContext**: Realizar postprocesamiento del documento convertido completo
+- **ConvertedPageContext**: Supervisar y manejar resultados de conversión página por página
+
+Todos los ejemplos de esta página han sido verificados mediante pruebas automatizadas para garantizar su precisión.
+
+## Véase también {#see-also}
+
+- <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter/" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API del convertidor</a>
+- [Sintaxis fluida](/net/conversion/developer-guide/basic-usage/fluent-syntax/)
+- [Resumen de opciones de carga](/../advanced-usage/loading/load-options-for-different-document-types)

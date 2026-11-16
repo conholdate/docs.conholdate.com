@@ -1,0 +1,491 @@
+---
+title: "# Cómo compilar en Docker con Alpine Linux
+
+Este documento describe cómo compilar software dentro de un contenedor Docker basado en Alpine Linux. Alpine Linux es una distribución ligera basada en musl libc y BusyBox, diseñada para entornos de contenedores.
+
+## Tabla de contenido
+
+- [Por qué usar Alpine Linux en Docker](#por-qué-usar-alpine-linux-en-docker)
+- [Estructura básica de un Dockerfile para Alpine](#estructura-básica-de-un-dockerfile-para-alpine)
+- [Instalación de dependencias de compilación](#instalación-de-dependencias-de-compilación)
+- [Ejemplos de compilación para diferentes lenguajes](#ejemplos-de-compilación-para-diferentes-lenguajes)
+  - [C/C++](#cc)
+  - [Go](#go)
+  - [Node.js](#nodejs)
+  - [Python](#python)
+  - [Rust](#rust)
+- [Consejos para imágenes finales más pequeñas](#consejos-para-imágenes-finales-más-pequeñas)
+- [Resolución de problemas comunes](#resolución-de-problemas-comunes)
+
+## Por qué usar Alpine Linux en Docker
+
+- **Tamaño reducido**: Las imágenes de Alpine son aproximadamente 5 MB, comparado con cientos de MB en distribuciones completas.
+- **Seguridad mejorada**: Menos paquetes instalados significa una superficie de ataque más pequeña.
+- **Velocidad de inicio**: Las imágenes ligeras se descargan y arrancan más rápido.
+
+## Estructura básica de un Dockerfile para Alpine
+
+```dockerfile
+# Usar una imagen base de Alpine
+FROM alpine:latest
+
+# Instalar dependencias necesarias para la compilación
+RUN apk add --no-cache build-dependencies
+
+# Copiar el código fuente
+COPY . /app
+WORKDIR /app
+
+# Compilar la aplicación
+RUN make
+
+# Opcional: crear una imagen final más pequeña usando multi-stage build
+FROM alpine:latest
+COPY --from=0 /app/myapp /usr/local/bin/myapp
+CMD [\"myapp\"]
+```
+
+## Instalación de dependencias de compilación
+
+Alpine usa `apk` como su gestor de paquetes. Para instalar herramientas de compilación:
+
+```bash
+# Instalar herramientas básicas de compilación
+RUN apk add --no-cache \\
+    build-base \\
+    musl-dev \\
+    linux-headers \\
+    git \\
+    make \\
+    gcc \\
+    g++
+```
+
+- `build-base`: metapaquete que incluye gcc, g++, make, libc-dev, etc.
+- `musl-dev`: cabeceras para musl libc (necesario para compilar C/C++)
+- `linux-headers`: cabeceras del kernel de Linux
+
+## Ejemplos de compilación para diferentes lenguajes
+
+### C/C++
+
+```dockerfile
+FROM alpine:latest AS builder
+RUN apk add --no-cache build-base
+COPY . /app
+WORKDIR /app
+RUN make
+
+FROM alpine:latest
+RUN apk add --no-cache libc6-compat
+COPY --from=builder /app/myapp /usr/local/bin/myapp
+CMD [\"myapp\"]
+```
+
+> Nota: Alpine usa `musl libc`, mientras que la mayoría de software C/C++ se compila contra `glibc`. Para mayor compatibilidad, instala `libc6-compat` en la imagen final.
+
+### Go
+
+```dockerfile
+FROM golang:1.21-alpine AS builder
+RUN apk add --no-cache git
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o myapp .
+
+FROM alpine:latest
+RUN apk add --no-cache ca-certificates
+COPY --from=builder /app/myapp /usr/local/bin/myapp
+CMD [\"myapp\"]
+```
+
+> Nota: `CGO_ENABLED=0` deshabilita CGO, creando un binario estático que no depende de `musl`.
+
+### Node.js
+
+```dockerfile
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+CMD [\"node\", \"dist/index.js\"]
+```
+
+### Python
+
+```dockerfile
+FROM python:3.11-alpine AS builder
+RUN apk add --no-cache build-base
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+RUN pip install --no-cache-dir .
+
+FROM python:3.11-alpine
+WORKDIR /app
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /app /app
+CMD [\"python\", \"main.py\"]
+```
+
+### Rust
+
+```dockerfile
+FROM rust:1.74-alpine AS builder
+RUN apk add --no-cache musl-dev
+WORKDIR /app
+COPY Cargo.toml Cargo.lock ./
+RUN cargo fetch
+COPY . .
+RUN cargo build --release
+
+FROM alpine:latest
+RUN apk add --no-cache libc6-compat
+COPY --from=builder /app/target/release/myapp /usr/local/bin/myapp
+CMD [\"myapp\"]
+```
+
+## Consejos para imágenes finales más pequeñas
+
+1. **Usa multi-stage builds**: Compila en una imagen con herramientas de compilación y copia solo el binario final a una imagen ligera.
+2. **Elimina dependencias innecesarias**: Usa `--no-cache` con `apk add` y limpia el caché con `rm -rf /var/cache/apk/*`.
+3. **Usa imágenes oficiales**: Las imágenes oficiales suelen estar optimizadas.
+4. **Evita herramientas de desarrollo en producción**: No instales `gcc`, `make`, etc. en la imagen final.
+
+## Resolución de problemas comunes
+
+### Error: `error: can't find the -lstdc++ library`
+
+Solución: Instala `libstdc++` o usa `build-base` que lo incluye.
+
+```dockerfile
+RUN apk add --no-cache libstdc++
+```
+
+### Error: `error while loading shared libraries: libssl.so.1.1: cannot open shared object file`
+
+Solución: Instala la biblioteca correspondiente (por ejemplo, `libssl1.1` o `openssl`).
+
+```dockerfile
+RUN apk add --no-cache openssl
+```
+
+### Error: `sh: make: not found`
+
+Solución: Instala `make` y `build-base`.
+
+```dockerfile
+RUN apk add --no-cache build-base
+```
+
+### Error: `error: command 'gcc' failed with exit status 1`
+
+Solución: Asegúrate de tener instalado `build-base` y `musl-dev`.
+
+```dockerfile
+RUN apk add --no-cache build-base musl-dev linux-headers
+```
+
+### Error: `No such file or directory` al ejecutar binarios estáticos
+
+Solución: Alpine usa `musl`, pero algunos binarios están compilados contra `glibc`. Usa `libc6-compat` o compila con CGO deshabilitado (si es posible).
+
+```dockerfile
+RUN apk add --no-cache libc6-compat
+```"
+sidebar_label: "# Cómo compilar en Docker con Alpine Linux
+
+Este documento describe cómo compilar software dentro de un contenedor Docker basado en Alpine Linux. Alpine Linux es una distribución ligera basada en musl libc y BusyBox, diseñada para entornos de contenedores.
+
+## Tabla de contenido
+
+- [Por qué usar Alpine Linux en Docker](#por-qué-usar-alpine-linux-en-docker)
+- [Estructura básica de un Dockerfile para Alpine](#estructura-básica-de-un-dockerfile-para-alpine)
+- [Instalación de dependencias de compilación](#instalación-de-dependencias-de-compilación)
+- [Ejemplos de compilación para diferentes lenguajes](#ejemplos-de-compilación-para-diferentes-lenguajes)
+  - [C/C++](#cc)
+  - [Go](#go)
+  - [Node.js](#nodejs)
+  - [Python](#python)
+  - [Rust](#rust)
+- [Consejos para imágenes finales más pequeñas](#consejos-para-imágenes-finales-más-pequeñas)
+- [Resolución de problemas comunes](#resolución-de-problemas-comunes)
+
+## Por qué usar Alpine Linux en Docker
+
+- **Tamaño reducido**: Las imágenes de Alpine son aproximadamente 5 MB, comparado con cientos de MB en distribuciones completas.
+- **Seguridad mejorada**: Menos paquetes instalados significa una superficie de ataque más pequeña.
+- **Velocidad de inicio**: Las imágenes ligeras se descargan y arrancan más rápido.
+
+## Estructura básica de un Dockerfile para Alpine
+
+```dockerfile
+# Usar una imagen base de Alpine
+FROM alpine:latest
+
+# Instalar dependencias necesarias para la compilación
+RUN apk add --no-cache build-dependencies
+
+# Copiar el código fuente
+COPY . /app
+WORKDIR /app
+
+# Compilar la aplicación
+RUN make
+
+# Opcional: crear una imagen final más pequeña usando multi-stage build
+FROM alpine:latest
+COPY --from=0 /app/myapp /usr/local/bin/myapp
+CMD [\"myapp\"]
+```
+
+## Instalación de dependencias de compilación
+
+Alpine usa `apk` como su gestor de paquetes. Para instalar herramientas de compilación:
+
+```bash
+# Instalar herramientas básicas de compilación
+RUN apk add --no-cache \\
+    build-base \\
+    musl-dev \\
+    linux-headers \\
+    git \\
+    make \\
+    gcc \\
+    g++
+```
+
+- `build-base`: metapaquete que incluye gcc, g++, make, libc-dev, etc.
+- `musl-dev`: cabeceras para musl libc (necesario para compilar C/C++)
+- `linux-headers`: cabeceras del kernel de Linux
+
+## Ejemplos de compilación para diferentes lenguajes
+
+### C/C++
+
+```dockerfile
+FROM alpine:latest AS builder
+RUN apk add --no-cache build-base
+COPY . /app
+WORKDIR /app
+RUN make
+
+FROM alpine:latest
+RUN apk add --no-cache libc6-compat
+COPY --from=builder /app/myapp /usr/local/bin/myapp
+CMD [\"myapp\"]
+```
+
+> Nota: Alpine usa `musl libc`, mientras que la mayoría de software C/C++ se compila contra `glibc`. Para mayor compatibilidad, instala `libc6-compat` en la imagen final.
+
+### Go
+
+```dockerfile
+FROM golang:1.21-alpine AS builder
+RUN apk add --no-cache git
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o myapp .
+
+FROM alpine:latest
+RUN apk add --no-cache ca-certificates
+COPY --from=builder /app/myapp /usr/local/bin/myapp
+CMD [\"myapp\"]
+```
+
+> Nota: `CGO_ENABLED=0` deshabilita CGO, creando un binario estático que no depende de `musl`.
+
+### Node.js
+
+```dockerfile
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+CMD [\"node\", \"dist/index.js\"]
+```
+
+### Python
+
+```dockerfile
+FROM python:3.11-alpine AS builder
+RUN apk add --no-cache build-base
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+RUN pip install --no-cache-dir .
+
+FROM python:3.11-alpine
+WORKDIR /app
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /app /app
+CMD [\"python\", \"main.py\"]
+```
+
+### Rust
+
+```dockerfile
+FROM rust:1.74-alpine AS builder
+RUN apk add --no-cache musl-dev
+WORKDIR /app
+COPY Cargo.toml Cargo.lock ./
+RUN cargo fetch
+COPY . .
+RUN cargo build --release
+
+FROM alpine:latest
+RUN apk add --no-cache libc6-compat
+COPY --from=builder /app/target/release/myapp /usr/local/bin/myapp
+CMD [\"myapp\"]
+```
+
+## Consejos para imágenes finales más pequeñas
+
+1. **Usa multi-stage builds**: Compila en una imagen con herramientas de compilación y copia solo el binario final a una imagen ligera.
+2. **Elimina dependencias innecesarias**: Usa `--no-cache` con `apk add` y limpia el caché con `rm -rf /var/cache/apk/*`.
+3. **Usa imágenes oficiales**: Las imágenes oficiales suelen estar optimizadas.
+4. **Evita herramientas de desarrollo en producción**: No instales `gcc`, `make`, etc. en la imagen final.
+
+## Resolución de problemas comunes
+
+### Error: `error: can't find the -lstdc++ library`
+
+Solución: Instala `libstdc++` o usa `build-base` que lo incluye.
+
+```dockerfile
+RUN apk add --no-cache libstdc++
+```
+
+### Error: `error while loading shared libraries: libssl.so.1.1: cannot open shared object file`
+
+Solución: Instala la biblioteca correspondiente (por ejemplo, `libssl1.1` o `openssl`).
+
+```dockerfile
+RUN apk add --no-cache openssl
+```
+
+### Error: `sh: make: not found`
+
+Solución: Instala `make` y `build-base`.
+
+```dockerfile
+RUN apk add --no-cache build-base
+```
+
+### Error: `error: command 'gcc' failed with exit status 1`
+
+Solución: Asegúrate de tener instalado `build-base` y `musl-dev`.
+
+```dockerfile
+RUN apk add --no-cache build-base musl-dev linux-headers
+```
+
+### Error: `No such file or directory` al ejecutar binarios estáticos
+
+Solución: Alpine usa `musl`, pero algunos binarios están compilados contra `glibc`. Usa `libc6-compat` o compila con CGO deshabilitado (si es posible).
+
+```dockerfile
+RUN apk add --no-cache libc6-compat
+```"
+sidebar_key: "net-conversion-known-issues-build-in-docker-alpine-linux"
+sidebar_position: 8
+description: "Esta es una guía sobre cómo construir una API web que utiliza GroupDocs.Conversion para .NET en un contenedor Docker con Alpine Linux."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/troubleshooting/known-issues/build-in-docker-alpine-linux.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "d3577b670f2a3c6c56d9612362951c92fbe7c8d9a3009643f196d85114fcdec1"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "72f4c41b4206aa928490d3cabeadb0f7b91d35d07f38502ac4432626c8be78a6"
+translation_updated_at: "2026-11-16T08:15:46.432Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Compilar proyecto de API web con GroupDocs.Conversion en Docker {#build-web-api-project-with-groupdocs-conversion-in-docker}
+
+Para compilar una API web que utilice GroupDocs.Conversion para .NET en un contenedor Docker con Alpine Linux, utilice el siguiente archivo Docker de ejemplo:
+
+```docker
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-alpine AS base
+WORKDIR /app
+EXPOSE 80
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
+RUN apk add --no-cache icu-libs krb5-libs libgcc libintl libssl1.1 libstdc++ zlib
+RUN apk add --no-cache ffmpeg libgdiplus
+
+RUN apk add --no-cache msttcorefonts-installer fontconfig
+RUN update-ms-fonts && fc-cache fc-cache -f
+
+FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS build
+WORKDIR /src
+COPY ["YourApi/YourApi.csproj", "TestApi/"]
+RUN dotnet restore "YourApi/YourApi.csproj"
+COPY . .
+WORKDIR "/src/YourApi"
+RUN dotnet build "YourApi.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "YourApi.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "YourApi.dll"]
+```
+
+Como puedes ver, el proceso es el mismo que al construir un proyecto de API web normal en Docker. La principal diferencia radica en la instalación de las bibliotecas necesarias, lo que permite que GroupDocs.Conversion para .NET funcione correctamente en un contenedor Docker:
+
+```docker
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+
+RUN apk add --no-cache icu-libs krb5-libs libgcc libintl libssl1.1 libstdc++ zlib
+RUN apk add --no-cache ffmpeg libgdiplus
+
+RUN apk add --no-cache msttcorefonts-installer fontconfig
+RUN update-ms-fonts && fc-cache fc-cache -f
+```
+
+Tampoco olvide agregar el archivo `runtimeconfig.template.json` junto al archivo de su proyecto con el siguiente contenido:
+
+```json
+{
+    "configProperties": {
+        "System.Drawing.EnableUnixSupport": true
+    }
+}
+```
+
+Esto evitará la excepción «El inicializador de tipo para `gdip` lanza una excepción". Para obtener más información sobre esto <a href="https://docs.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/6.0/system-drawing-common-windows-only" target="_blank" rel="nofollow noopener noreferrer">leer aquí</a>.

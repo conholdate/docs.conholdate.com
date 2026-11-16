@@ -1,0 +1,112 @@
+---
+title: "Tabla de contenido"
+sidebar_label: "Tabla de contenido"
+sidebar_position: 11
+description: "Aprenda cómo extraer la tabla de contenido (TOC) de documentos de Word, archivos PDF y libros electrónicos utilizando GroupDocs.Parser para .NET. Extraiga los elementos de la TOC con números de página y niveles de profundidad en C#."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/basic-usage/extract-table-of-contents.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "dfeea0e5ef0de7c7658351723f2ed1f979b0ec9f3a07af1632ac2b803961eef2"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "f506e6310ef4a06b3080b40c6b6017fc8480ef098cee77e67171f2f094fbbea4"
+translation_updated_at: "2026-11-16T08:14:26.584Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Parser permite extraer la tabla de contenidos de documentos de Microsoft Word (DOC, DOCX, etc.), documentos PDF y libros electrónicos.
+
+## Extraer tabla de contenidos {#extract-table-of-contents}
+
+Para extraer la tabla de contenidos de los documentos, utilice el método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettoc" target="_blank" rel="nofollow noopener noreferrer">GetToc</a>:
+
+```csharp
+IEnumerable<TocItem> GetToc()
+
+```
+
+La clase <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/tocitem" target="_blank" rel="nofollow noopener noreferrer">TocItem</a> tiene los siguientes miembros:
+
+| Miembro | Descripción |
+| --- | --- |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/tocitem/properties/depth" target="_blank" rel="nofollow noopener noreferrer">Depth</a> | El nivel de profundidad. |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/tocitem/properties/pageindex" target="_blank" rel="nofollow noopener noreferrer">PageIndex</a> | El índice de página. |
+| <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/tocitem/properties/text" target="_blank" rel="nofollow noopener noreferrer">Text</a> | El texto. |
+| TextReader <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/tocitem/methods/extracttext" target="_blank" rel="nofollow noopener noreferrer">ExtractText()</a> | Extrae texto del documento al que hace referencia el objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/tocitem" target="_blank" rel="nofollow noopener noreferrer">TocItem</a>. Para más detalles, consulte [Extraer texto mediante un elemento del índice](/net/parser/developer-guide/advanced-usage/working-with-text/extract-text-by-table-of-contents-item/) |
+
+A continuación se indican los pasos para extraer el índice del documento:
+
+*   Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para el documento inicial;
+*   Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettoc" target="_blank" rel="nofollow noopener noreferrer">GetToc</a> y obtener la colección de objetos <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/tocitem" target="_blank" rel="nofollow noopener noreferrer">TocItem</a>;
+*   Verificar que la *colección* no sea *nula* (la extracción del índice está admitida para el documento);
+*   Iterar a través de la colección y obtener el índice de página para extraer el texto de dicha página del documento.
+
+El siguiente ejemplo muestra cómo extraer el índice de un archivo CHM:
+
+```csharp
+// Create an instance of Parser class
+using (Parser parser = new Parser(filePath))
+{
+    // Check if text extraction is supported
+    if (!parser.Features.Text)
+    {
+        Console.WriteLine("Text extraction isn't supported.");
+        return;
+    }
+    // Check if toc extraction is supported
+    if (!parser.Features.Toc)
+    {
+        Console.WriteLine("Toc extraction isn't supported.");
+        return;
+    }
+    // Get table of contents
+    IEnumerable<TocItem> toc = parser.GetToc();
+    // Iterate over items
+    foreach (TocItem i in toc)
+    {
+        // Print the Toc text
+        Console.WriteLine(i.Text);
+        // Check if page index has a value
+        if (i.PageIndex == null)
+        {
+            continue;
+        }
+        // Extract a page text
+        using (TextReader reader = parser.GetText(i.PageIndex.Value))
+        {
+            Console.WriteLine(reader.ReadToEnd());
+        }
+    }
+}
+
+```
+
+## Más recursos {#more-resources}
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre las funciones de extracción de datos de documentos y familiarizarse con cómo extraer texto, imágenes, formularios y más, consulte la [sección de uso avanzado](/net/parser/developer-guide/advanced-usage/).
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>    
+
+### Aplicación gratuita de procesamiento de documentos en línea {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.
+
+Le invitamos a extraer texto, metadatos e imágenes de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

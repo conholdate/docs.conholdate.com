@@ -1,0 +1,226 @@
+---
+title: "Obtener información del documento"
+sidebar_label: "Obtener información del documento"
+sidebar_key: "net-conversion-get-document-info"
+sidebar_position: 2
+description: "Este artículo explica cómo detectar el tipo de archivo del documento y calcular el número de páginas al convertir un archivo con GroupDocs.Conversion para .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/basic-usage/get-document-info.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "8e69962b198965b12c8148673b80ce35e1a8da8bc721a4724c03f331df986ed1"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "5290154cfc3b9e4c0c2ada38672f0e697114ffe8170c4d342f6a49c0d09561fb"
+translation_updated_at: "2026-11-16T08:12:22.877Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Conversion proporciona una forma estándar de obtener información sobre el documento de origen. Funciona independientemente de cómo se haya cargado el documento: desde un disco, un flujo o un almacenamiento en la nube.
+
+Para obtener la información del documento, utilice el método <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter/getdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">Converter.GetDocumentInfo()</a>. Este método devuelve un objeto <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/documentinfo/" target="_blank" rel="nofollow noopener noreferrer">DocumentInfo</a> que contiene información común a todos los documentos admitidos: formato, fecha de creación, tamaño y número de páginas. 
+
+Para recorrer las propiedades de la información del documento, utilice los enumeradores `PropertyNames` y `Item`. El siguiente fragmento de código muestra cómo enumerar todas las propiedades de información del documento disponibles:
+
+```csharp
+using (Converter converter = new Converter("sample.txt"))
+{
+    IDocumentInfo info = converter.GetDocumentInfo();
+    
+    foreach (var propertyName in info.PropertyNames)
+    {
+        Console.WriteLine(propertyName + ": "+ info[propertyName]);
+    }
+}
+```
+Según el tipo de formato, el objeto `DocumentInfo` resultante también contiene cierta información adicional:
+
+* <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/pdfdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">Documentos PDF</a>: título, tabla de contenido, autor, si está cifrado, etc.;
+* <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/wordprocessingdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">Documentos de procesamiento de texto</a>: título, tabla de contenido, autor, número de líneas, número de palabras, si está protegido con contraseña, etc.;
+* <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/projectmanagementdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">Documentos de gestión de proyectos</a>: fechas de inicio y finalización del proyecto, número de tareas;
+* <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/imagedocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">Images</a>: ancho, alto, bits por píxel;
+* <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/presentationdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">Presentations</a>: título, autor, si está protegido con contraseña;
+* <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/spreadsheetdocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">Spreadsheets</a>: título, autor, número de hojas de cálculo, si está protegido con contraseña;
+* <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/caddocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">Dibujos CAD</a>: ancho, alto, colecciones de diseños y capas;
+* <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/emaildocumentinfo/" target="_blank" rel="nofollow noopener noreferrer">Emails</a>: número y nombres de archivos adjuntos, si está cifrado, si está firmado, si su cuerpo está en formato HTML;
+
+Consulte la <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/" target="_blank" rel="nofollow noopener noreferrer">referencia de la API</a> para obtener una lista completa de los metadatos específicos por formato de documento.
+
+Los ejemplos siguientes muestran cómo obtener la información del documento para diversos formatos.
+
+### Documentos PDF {#pdf-documents}
+
+```csharp
+using (Converter converter = new Converter("sample-toc.pdf"))
+{
+    IDocumentInfo info = converter.GetDocumentInfo();
+    PdfDocumentInfo docInfo = (PdfDocumentInfo) info;
+
+    Console.WriteLine("Author: {0}", docInfo.Author);
+    Console.WriteLine("Creation date: {0}", docInfo.CreationDate);
+    Console.WriteLine("Title: {0}", docInfo.Title);
+    Console.WriteLine("Version: {0}", docInfo.Version);
+    Console.WriteLine("Pages count: {0}", docInfo.PagesCount);
+    Console.WriteLine("Width: {0}", docInfo.Width);
+    Console.WriteLine("Height: {0}", docInfo.Height);
+    Console.WriteLine("Is landscaped: {0}", docInfo.IsLandscape);
+    Console.WriteLine("Is Encrypted: {0}", docInfo.IsEncrypted);
+    foreach (var tocItem in docInfo.TableOfContents)
+    {
+        Console.WriteLine($"{tocItem.Title}: {tocItem.Page}");
+    }
+}
+```
+
+### Documentos de procesamiento de texto {#wordprocessing-documents}
+
+```csharp
+using (Converter converter = new Converter("sample.doc"))
+{
+    IDocumentInfo info = converter.GetDocumentInfo();
+    WordProcessingDocumentInfo docInfo = (WordProcessingDocumentInfo) info;
+
+    Console.WriteLine("Author: {0}", docInfo.Author);
+    Console.WriteLine("Creation date: {0}", docInfo.CreationDate);
+    Console.WriteLine("Format: {0}", docInfo.Format);
+    Console.WriteLine("Is Password Protected: {0}", docInfo.IsPasswordProtected);
+    Console.WriteLine("Lines: {0}", docInfo.Lines);
+    Console.WriteLine("Pages count: {0}", docInfo.PagesCount);
+    Console.WriteLine("Size: {0}", docInfo.Size);
+    Console.WriteLine("Title: {0}", docInfo.Title);               
+    Console.WriteLine("Words: {0}", docInfo.Words);
+    foreach (var tocItem in docInfo.TableOfContents)
+    {
+        Console.WriteLine($"{tocItem.Title}: {tocItem.Page}");
+    }
+}
+```
+
+### Documentos de gestión de proyectos {#project-management-documents}
+
+```csharp
+using (Converter converter = new Converter("foobar.mpp"))
+{
+    IDocumentInfo info = converter.GetDocumentInfo();
+    ProjectManagementDocumentInfo docInfo = (ProjectManagementDocumentInfo) info;
+
+    Console.WriteLine("Creation date: {0}", docInfo.CreationDate);
+    Console.WriteLine("Start date: {0}", docInfo.StartDate);
+    Console.WriteLine("End date: {0}", docInfo.EndDate);
+    Console.WriteLine("Format: {0}", docInfo.Format);
+    Console.WriteLine("Size: {0}", docInfo.Size);
+    Console.WriteLine("Tasks count: {0}", docInfo.TasksCount);        
+}
+```
+
+### Imágenes {#images}
+
+```csharp
+using (Converter converter = new Converter("image.png"))
+{
+    IDocumentInfo info = converter.GetDocumentInfo();
+    ImageDocumentInfo docInfo = (ImageDocumentInfo) info;
+
+    Console.WriteLine("Bits per pixel: {0}", docInfo.BitsPerPixel);
+    Console.WriteLine("Creation date: {0}", docInfo.CreationDate);
+    Console.WriteLine("Format: {0}", docInfo.Format);
+    Console.WriteLine("Height: {0}", docInfo.Height);
+    Console.WriteLine("Width: {0}", docInfo.Width);    
+    Console.WriteLine("Size: {0}", docInfo.Size);
+}
+```
+
+### Presentaciones {#presentations}
+
+```csharp
+using (Converter converter = new Converter("presentation.ppt"))
+{
+    IDocumentInfo info = converter.GetDocumentInfo();
+    PresentationDocumentInfo docInfo = (PresentationDocumentInfo) info;
+
+    Console.WriteLine("Author: {0}", docInfo.Author);
+    Console.WriteLine("Creation date: {0}", docInfo.CreationDate);
+    Console.WriteLine("Format: {0}", docInfo.Format);
+    Console.WriteLine("Is Password Protected: {0}", docInfo.IsPasswordProtected);    
+    Console.WriteLine("Pages count: {0}", docInfo.PagesCount);
+    Console.WriteLine("Size: {0}", docInfo.Size);
+    Console.WriteLine("Title: {0}", docInfo.Title);               
+}
+```
+
+### Hojas de cálculo {#spreadsheets}
+
+```csharp
+using (Converter converter = new Converter("table.xlsx"))
+{
+    IDocumentInfo info = converter.GetDocumentInfo();
+    SpreadsheetDocumentInfo docInfo = (SpreadsheetDocumentInfo) info;
+
+    Console.WriteLine("Author: {0}", docInfo.Author);
+    Console.WriteLine("Creation date: {0}", docInfo.CreationDate);
+    Console.WriteLine("Format: {0}", docInfo.Format);
+    Console.WriteLine("Is Password Protected: {0}", docInfo.IsPasswordProtected);    
+    Console.WriteLine("Pages count: {0}", docInfo.PagesCount);
+    Console.WriteLine("Size: {0}", docInfo.Size);
+    Console.WriteLine("Title: {0}", docInfo.Title);
+    Console.WriteLine("Worksheets Count : {0}", docInfo.WorksheetsCount);
+}
+```
+### Dibujos CAD {#cad-drawings}
+
+```csharp
+using (Converter converter = new Converter("sample.dwg"))
+{
+    IDocumentInfo info = converter.GetDocumentInfo();
+    CadDocumentInfo docInfo = (CadDocumentInfo) info;
+
+    Console.WriteLine("Creation date: {0}", docInfo.CreationDate);
+    Console.WriteLine("Format: {0}", docInfo.Format);
+    Console.WriteLine("Height: {0}", docInfo.Height);
+    Console.WriteLine("Width: {0}", docInfo.Width);
+    Console.WriteLine("Size: {0}", docInfo.Size);
+    
+    foreach (var layout in docInfo.Layouts)
+    {
+        Console.WriteLine($"Layout: {layout}");
+    }
+
+    foreach (var layer in docInfo.Layers)
+    {
+        Console.WriteLine($"Layer: {layer}");
+    }
+}
+```
+
+### Correos electrónicos {#emails}
+
+```csharp
+using (Converter converter = new Converter("sample.msg"))
+{
+    IDocumentInfo info = converter.GetDocumentInfo();
+    EmailDocumentInfo docInfo = (EmailDocumentInfo) info;
+
+    Console.WriteLine("Creation date: {0}", docInfo.CreationDate);
+    Console.WriteLine("Format: {0}", docInfo.Format);
+    Console.WriteLine("Is Encrypted: {0}", docInfo.IsEncrypted);
+    Console.WriteLine("Is body in HTML: {0}", docInfo.IsHtml);
+    Console.WriteLine("Is Signed: {0}", docInfo.IsSigned);
+    Console.WriteLine("Size: {0}", docInfo.Size);
+    Console.WriteLine("Attachments Count: {0}", docInfo.AttachmentsCount);
+    foreach (var attachmentName in docInfo.AttachmentsNames)
+    {
+        Console.WriteLine($"Attachment Name: {attachmentName}");
+    }
+
+}
+```

@@ -1,0 +1,80 @@
+---
+title: "Guardar archivo en flujo"
+sidebar_label: "Guardar archivo en flujo"
+sidebar_key: "net-conversion-saving-save-file-to-stream"
+sidebar_position: 4
+description: "Este artículo demuestra cómo convertir un archivo y guardarlo como un flujo utilizando la API de GroupDocs.Conversion para .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/saving/save-file-to-stream.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "0547a7f5d68a652c18eadd21f75fe4b53707845d907105728619ee33e0132b76"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "e4ee37cb59b063feb253f5a40fb73661fae28ae5846f2dfff0ea3f4c0f74bf1e"
+translation_updated_at: "2026-11-16T07:53:00.741Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Para guardar los resultados de la conversión en un flujo, siga estos pasos:
+
+1.   Especifique el método para obtener el flujo en el que se enviará el archivo convertido.
+2.   Pase el nombre del método como el parámetro `document` a las implementaciones del método <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter/convert/" target="_blank" rel="nofollow noopener noreferrer">Convert()</a>. 
+
+El parámetro `document` puede ser de tipo `Func<Stream>`, `Func<FileType, Stream>`, `Func<int, Stream>` o `Func<int, FileType, Stream>`.
+
+El siguiente fragmento de código muestra cómo guardar un archivo en un flujo:
+
+```csharp
+public static void Run()
+{
+    Func<SaveContext, Stream> getOutputStream = saveContext => GetFileStream($"c:\\files\\converted.{saveContext.TargetFormat.Extension}");
+
+    using (Converter converter = new Converter("c:\\files\\sample.docx"))
+    {
+        PdfConvertOptions options = new PdfConvertOptions();
+        // Pass the output stream as parameter
+        converter.Convert(getOutputStream, options);
+    }
+
+    Console.WriteLine($"\nSource file converted successfully.\nSent file to stream.");
+}
+
+// Obtain the stream for the conversion output
+public static Stream GetFileStream(string outFile)
+{
+    return new FileStream(outFile, FileMode.OpenOrCreate);
+}
+```
+
+También puedes utilizar el <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.fluent/iconversionto/convertto/#convertto" target="_blank" rel="nofollow noopener noreferrer">ConvertirA(Func&lt;Stream&gt; `convertedStreamProvider`</a> [sintaxis fluida](/net/conversion/developer-guide/basic-usage/fluent-syntax/) método para guardar un archivo en un flujo:
+
+```csharp
+public static void Run()
+{
+    Func<SaveContext, Stream> getOutputStream = saveContext => GetFileStream($"c:\\files\\converted.{saveContext.TargetFormat.Extension}");
+
+    FluentConverter
+        // Specify source file location
+        .Load("c:\\files\\sample.docx")
+        // Pass the output stream as parameter
+        .ConvertTo(getOutputStream)
+        .Convert();
+}
+
+// Obtain the stream for the conversion output
+public static Stream GetFileStream(string outFile)
+{
+    return new FileStream(outFile, FileMode.OpenOrCreate);
+}
+```

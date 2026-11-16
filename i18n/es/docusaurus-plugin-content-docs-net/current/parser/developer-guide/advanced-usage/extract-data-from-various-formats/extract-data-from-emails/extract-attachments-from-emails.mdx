@@ -1,0 +1,135 @@
+---
+title: "Extraer adjuntos de correos electrónicos"
+sidebar_label: "Extraer adjuntos de correos electrónicos"
+sidebar_key: "net-parser-extract-data-from-various-formats-extract-data-from-emails-extract-attachments-from-emails"
+sidebar_position: 4
+description: "Extraer adjuntos de correo electrónico con GroupDocs.Parser para .NET"
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/extract-data-from-various-formats/extract-data-from-emails/extract-attachments-from-emails.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "2c4973946b407d8694c80e9eb1eef8830f923562aeebe089225f97321f28d2df"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "77c66403ae9c60dca66f7d8bcc74fc7ab585579b12d462e4a9dda1a98f29c52e"
+translation_updated_at: "2026-11-16T07:09:57.886Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Para extraer adjuntos de correos electrónicos se utiliza el método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getcontainer" target="_blank" rel="nofollow noopener noreferrer">GetContainer</a>. Este método devuelve la colección de objetos <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/containeritem" target="_blank" rel="nofollow noopener noreferrer">ContainerItem</a>.
+
+Un adjunto de correo electrónico puede contener los siguientes metadatos:
+
+| Nombre | Descripción |
+| --- | --- |
+| tipo-contenido | El tipo MIME del contenido del adjunto |
+
+Estos metadatos hacen referencia al propio elemento contenedor, no al documento.
+
+A continuación se indican los pasos para extraer el texto de un correo electrónico desde sus adjuntos:
+
+*   Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para el documento inicial;
+*   Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/getcontainer" target="_blank" rel="nofollow noopener noreferrer">GetContainer</a> y obtener la colección de objetos <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/containeritem" target="_blank" rel="nofollow noopener noreferrer">ContainerItem</a>;
+*   Comprobar que la *colección* no sea *nula* (la extracción de contenedores es compatible con el documento);
+*   Recorrer la colección y obtener los nombres, tamaños y contenido de los elementos del contenedor.
+
+El siguiente ejemplo muestra cómo extraer texto de los adjuntos de un correo electrónico:
+
+```csharp
+// Create an instance of Parser class
+using(Parser parser = new Parser(filePath))
+{
+    // Extract attachments from the container
+    IEnumerable<ContainerItem> attachments = parser.GetContainer();
+    // Check if container extraction is supported
+    if(attachments == null)
+    {
+        Console.WriteLine("Container extraction isn't supported");
+    }
+
+    // Iterate over attachments
+    foreach(ContainerItem item in attachments)
+    {
+		// Print the file path
+		Console.WriteLine(item.FilePath);
+       
+        // Print metadata
+        foreach (MetadataItem metadata in item.Metadata)
+        {
+            Console.WriteLine(string.Format("{0}: {1}", metadata.Name, metadata.Value));
+        }
+
+		try
+        {
+            // Create Parser object for the email content
+            using (Parser attachmentParser = item.OpenParser())
+            {
+                // Extract an email text
+                using (TextReader reader = attachmentParser.GetText())
+                {
+                    Console.WriteLine(reader == null ? "No text" : reader.ReadToEnd());
+                }
+            }
+        }
+        catch (UnsupportedDocumentFormatException)
+        {
+            Console.WriteLine("Isn't supported.");
+        }
+	}
+}
+```
+
+## Detectar imágenes incrustadas {#detect-inline-images}
+
+Para detectar si un archivo adjunto de imagen está incrustado, se utiliza la metadato «disposición» («disposition»). Si este campo está presente, puede tomar los valores «inline» o «attachment».
+
+El siguiente ejemplo muestra cómo detectar archivos adjuntos incrustados:
+
+```csharp
+// Create an instance of Parser class
+using(Parser parser = new Parser(filePath))
+{
+    // Extract attachments from the container
+    IEnumerable<ContainerItem> attachments = parser.GetContainer();
+    // Check if container extraction is supported
+    if(attachments == null)
+    {
+        Console.WriteLine("Container extraction isn't supported");
+    }
+
+    // Iterate over attachments
+    foreach(ContainerItem item in attachments)
+    {
+        // Check metadata for 'disposition' item
+        if(item.GetMetadataValue("disposition") == "inline") {
+		    // If it's 'inline' then print the file path
+		    Console.WriteLine(item.FilePath);
+        }
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>    
+
+### Aplicación gratuita en línea para analizar documentos {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.
+
+Le invitamos a analizar documentos y extraer datos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

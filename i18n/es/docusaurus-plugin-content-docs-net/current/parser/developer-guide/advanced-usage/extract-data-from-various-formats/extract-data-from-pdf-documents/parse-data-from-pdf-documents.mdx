@@ -1,0 +1,191 @@
+---
+title: "Analizar datos de documentos PDF"
+sidebar_label: "Analizar datos de documentos PDF"
+sidebar_key: "net-parser-extract-data-from-various-formats-extract-data-from-pdf-documents-parse-data-from-pdf-documents"
+sidebar_position: 5
+description: "Este artículo explica cómo analizar datos a partir de documentos PDF."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/extract-data-from-various-formats/extract-data-from-pdf-documents/parse-data-from-pdf-documents.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "10b8f39dabc103f0d8f6c9fd1bab4db3cacf87fba9e08d6dc8391b791c9f53a8"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "221d86d3fdc1c810d6293c48b2a2a6944a07d923fb0b975ad0934186ae5aea13"
+translation_updated_at: "2026-11-16T07:42:29.374Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Para extraer datos de documentos PDF se utilizan los métodos <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/parseform" target="_blank" rel="nofollow noopener noreferrer">ParseForm</a> y <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/parsebytemplate" target="_blank" rel="nofollow noopener noreferrer">ParseByTemplate</a>. Ambos métodos devuelven un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/documentdata" target="_blank" rel="nofollow noopener noreferrer">DocumentData</a>. Para más detalles, consulte [Trabajo con datos extraídos](/net/parser/developer-guide/advanced-usage/working-with-data-extracted-by-template/).
+
+A continuación se presentan los pasos para extraer datos de un formulario PDF:
+
+*   Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para el documento inicial
+*   Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/parseform" target="_blank" rel="nofollow noopener noreferrer">ParseForm</a> y obtener el objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/documentdata" target="_blank" rel="nofollow noopener noreferrer">DocumentData</a>;
+*   Verificar que *data* no sea *null* (el análisis de formularios es compatible con el documento);
+*   Iterar sobre los datos de los campos para obtener los datos del formulario.
+
+El siguiente ejemplo muestra un caso de uso en el que un usuario completa un formulario PDF y lo envía por correo electrónico (por ejemplo). El software abre este PDF y extrae el registro preliminar:
+
+```csharp
+// Create an instance of Parser class
+using (Parser parser = new Parser(Constants.SampleCarWashPdf))
+{
+    // Extract data from PDF document
+    DocumentData data = parser.ParseForm();
+    // Check if form extraction is supported
+    if (data == null)
+    {
+        Console.WriteLine("Form extraction isn't supported.");
+        return;
+    }
+
+    // Create the preliminary record object
+    PreliminaryRecord rec = new PreliminaryRecord();
+    rec.Name = GetFieldText(data, "Name");
+    rec.Model = GetFieldText(data, "Model");
+    rec.Time = GetFieldText(data, "Time");
+    rec.Description = GetFieldText(data, "Description");
+
+    // We can save the preliminary record object to the database, 
+    // send it as the web response or just print it to the console
+    Console.WriteLine("Preliminary record");
+    Console.WriteLine("Name: {0}", rec.Name);
+    Console.WriteLine("Model: {0}", rec.Model);
+    Console.WriteLine("Time: {0}", rec.Time);
+    Console.WriteLine("Description: {0}", rec.Description);
+}
+
+private static string GetFieldText(DocumentData data, string fieldName)
+{
+    // Get the field from data collection
+    FieldData fieldData = data.GetFieldsByName(fieldName).FirstOrDefault();
+    // Check if the field data is not null (a field with the fieldName is contained in data collection)
+    // and check if the field data contains the text
+    return fieldData != null && fieldData.PageArea is PageTextArea
+        ? (fieldData.PageArea as PageTextArea).Text
+        : null;
+}
+
+/// <summary>
+/// Simple POCO object to store the extracted data.
+/// </summary>
+public class PreliminaryRecord
+{
+    public string Name { get; set; }
+    public string Model { get; set; }
+    public string Time { get; set; }
+    public string Description { get; set; }
+}
+```
+
+El método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/parsebytemplate" target="_blank" rel="nofollow noopener noreferrer">ParseByTemplate</a> se utiliza para analizar un documento PDF mediante una plantilla generada por el usuario. Para obtener más información sobre las plantillas, consulte [Trabajar con plantillas](/net/parser/developer-guide/advanced-usage/working-with-templates/).
+
+A continuación se indican los pasos para analizar datos de un documento PDF mediante una plantilla generada por el usuario:
+
+*   Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> para el documento existente;
+*   Instanciar un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/template" target="_blank" rel="nofollow noopener noreferrer">Template</a> con la plantilla generada por el usuario;
+*   Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/parsebytemplate" target="_blank" rel="nofollow noopener noreferrer">ParseByTemplate</a> y obtener un objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.data/documentdata" target="_blank" rel="nofollow noopener noreferrer">DocumentData</a>;
+*   Iterar sobre los datos de los campos para obtener los datos del documento.
+
+El siguiente ejemplo muestra cómo analizar datos de un documento PDF mediante una plantilla generada por el usuario:
+
+```csharp
+// Create an instance of Parser class
+using (Parser parser = new Parser(Constants.SampleInvoicePdf))
+{
+    // Parse the document by the template
+    DocumentData data = parser.ParseByTemplate(GetTemplate());
+    // Check if parsing document by template is supported
+    if (data == null)
+    {
+        Console.WriteLine("Parsing Document by Template isn't supported.");
+        return;
+    }
+    // Print extracted fields
+    for (int i = 0; i < data.Count; i++)
+    {
+        Console.Write(data[i].Name + ": ");
+        PageTextArea area = data[i].PageArea as PageTextArea;
+        Console.WriteLine(area == null ? "Not a template field" : area.Text);
+    }
+}
+
+private static Template GetTemplate()
+{
+    // Create detector parameters for "Details" table
+    TemplateTableParameters detailsTableParameters = new TemplateTableParameters(new Rectangle(new Point(35, 320), new Size(530, 55)), null);
+    // Create detector parameters for "Summary" table
+    TemplateTableParameters summaryTableParameters = new TemplateTableParameters(new Rectangle(new Point(330, 385), new Size(220, 65)), null);
+    // Create a collection of template items
+    TemplateItem[] templateItems = new TemplateItem[]
+    {
+        new TemplateField(new TemplateFixedPosition(new Rectangle(new Point(35, 135), new Size(100, 10))), "FromCompany"),
+        new TemplateField(new TemplateFixedPosition(new Rectangle(new Point(35, 150), new Size(100, 35))), "FromAddress"),
+        new TemplateField(new TemplateFixedPosition(new Rectangle(new Point(35, 190), new Size(150, 2))), "FromEmail"),
+        new TemplateField(new TemplateFixedPosition(new Rectangle(new Point(35, 250), new Size(100, 2))), "ToCompany"),
+        new TemplateField(new TemplateFixedPosition(new Rectangle(new Point(35, 260), new Size(100, 15))), "ToAddress"),
+        new TemplateField(new TemplateFixedPosition(new Rectangle(new Point(35, 290), new Size(150, 2))), "ToEmail"),
+        new TemplateField(new TemplateRegexPosition("Invoice Number"), "InvoiceNumber"),
+        new TemplateField(new TemplateLinkedPosition(
+            "InvoiceNumber",
+            new Size(200, 15),
+            new TemplateLinkedPositionEdges(false, false, true, false)),
+            "InvoiceNumberValue"),
+        new TemplateField(new TemplateRegexPosition("Order Number"), "InvoiceOrder"),
+        new TemplateField(new TemplateLinkedPosition(
+            "InvoiceOrder",
+            new Size(200, 15),
+            new TemplateLinkedPositionEdges(false, false, true, false)),
+            "InvoiceOrderValue"),
+        new TemplateField(new TemplateRegexPosition("Invoice Date"), "InvoiceDate"),
+        new TemplateField(new TemplateLinkedPosition(
+            "InvoiceDate",
+            new Size(200, 15),
+            new TemplateLinkedPositionEdges(false, false, true, false)),
+            "InvoiceDateValue"),
+        new TemplateField(new TemplateRegexPosition("Due Date"), "DueDate"),
+        new TemplateField(new TemplateLinkedPosition(
+            "DueDate",
+            new Size(200, 15),
+            new TemplateLinkedPositionEdges(false, false, true, false)),
+            "DueDateValue"),
+        new TemplateField(new TemplateRegexPosition("Total Due"), "TotalDue"),
+        new TemplateField(new TemplateLinkedPosition(
+            "TotalDue",
+            new Size(200, 15),
+            new TemplateLinkedPositionEdges(false, false, true, false)),
+            "TotalDueValue"),
+        new TemplateTable(detailsTableParameters, "details", null),
+        new TemplateTable(summaryTableParameters, "summary", null)
+    };
+    // Create a document template
+    Template template = new Template(templateItems);
+    return template;
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>    
+
+### Aplicación gratuita de análisis de documentos en línea {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.
+
+Le invitamos a analizar documentos y extraer datos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

@@ -1,0 +1,201 @@
+---
+title: "Extraer metadatos de presentaciones de Microsoft Office PowerPoint"
+sidebar_label: "Extraer metadatos de presentaciones de Microsoft Office PowerPoint"
+sidebar_key: "net-parser-extract-data-from-various-formats-extract-data-from-microsoft-office-powerpoint-presentations-extract-metadata-from-powerpoint"
+sidebar_position: 2
+description: "Aprenda cómo extraer metadatos de presentaciones de PowerPoint (.ppt, .pptx) utilizando GroupDocs.Parser para .NET. Extraiga propiedades del documento como autor, título, fecha de creación y comentarios desde archivos de presentación."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/extract-data-from-various-formats/extract-data-from-microsoft-office-powerpoint-presentations/extract-metadata-from-powerpoint.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "adac38b0ea32912872ecad165226c1b31954a0f5ea2372b153b5360e7968c897"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "3389b1ebc0041104a3e944b9a55ea78277dd5c18f31dbbfd433506862d60cb51"
+translation_updated_at: "2026-11-16T07:26:52.472Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## ¿Qué es el metadato de PowerPoint? {#what-is-powerpoint-metadata}
+
+El metadato de PowerPoint es como una "etiqueta digital" adjunta a los archivos de presentación. Contiene información sobre el archivo, como:
+
+- Quién lo creó
+- Cuándo se creó
+- El título y el asunto
+- Cuánto tiempo pasó alguien editándolo
+- Qué versión de PowerPoint se utilizó
+
+Piénsalo como las "Propiedades" que ves cuando haces clic derecho en un archivo, pero ahora puedes extraer esta información mediante programación usando código.
+
+## ¿Por qué extraer el metadato de PowerPoint? {#why-extract-powerpoint-metadata}
+
+Aquí tienes algunas razones comunes por las que los desarrolladores extraen metadatos de archivos de PowerPoint:
+
+- **Organización de archivos**: Ordenar automáticamente presentaciones por autor, fecha o empresa
+- **Seguimiento de documentos**: Determinar quién modificó por última vez una presentación y cuándo
+- **Gestión de contenido**: Crear bibliotecas de presentaciones buscables
+- **Cumplimiento normativo**: Rastrear el historial de documentos para fines de auditoría
+
+## Información de metadatos disponible {#available-metadata-information}
+
+Cuando extraes metadatos de una presentación de PowerPoint mediante GroupDocs.Parser, puedes obtener estos detalles:
+
+| Información | Qué indica |
+| --- | --- |
+| **title** | El título de la presentación |
+| **author** | Quién creó la presentación |
+| **subject** | De qué trata la presentación |
+| **keywords** | Etiquetas o palabras clave asociadas a la presentación |
+| **comments** | Cualquier comentario añadido a la presentación |
+| **company** | El nombre de la empresa asociado al archivo |
+| **created-time** | Cuándo se creó por primera vez la presentación |
+| **last-saved-time** | Cuándo se guardaron por última vez los cambios |
+| **total-editing-time** | Cuántos minutos se dedicaron a editar |
+| **revision-number** | Cuántas veces se ha revisado el archivo |
+
+*Y varios otros detalles técnicos...*
+
+## Cómo extraer los metadatos {#how-to-extract-the-metadata}
+
+¡Es realmente sencillo! Simplemente sigue estos 3 pasos:
+
+### Paso 1: Crear un objeto Parser {#step-1-create-a-parser}
+Primero, crea un objeto Parser y apúntalo a tu archivo de PowerPoint:
+
+```csharp
+using(Parser parser = new Parser("your-presentation.pptx"))
+{
+    // Your code goes here
+}
+```
+
+###  Paso 2: Obtener los metadatos {#step-2-get-the-metadata}
+Solicite al analizador que extraiga todos los metadatos:
+
+```csharp
+IEnumerable<MetadataItem> metadata = parser.GetMetadata();
+```
+
+### Paso 3: Leer la información {#step-3-read-the-information}
+Recorra los resultados e imprima lo que encontró:
+
+```csharp
+foreach(MetadataItem item in metadata)
+{
+    Console.WriteLine($"{item.Name}: {item.Value}");
+}
+```
+
+### Ejemplo completo {#complete-example}
+
+A continuación se presenta el ejemplo completo y funcional:
+
+```csharp
+// Create an instance of Parser class
+using(Parser parser = new Parser(filePath))
+{
+    // Extract metadata from the presentation
+    IEnumerable<MetadataItem> metadata = parser.GetMetadata();
+  
+    // Iterate over metadata items
+    foreach(MetadataItem item in metadata)
+    {
+        // Print the item name and value
+        Console.WriteLine(string.Format("{0}: {1}", item.Name, item.Value));
+    }
+}
+```
+
+## ¿Qué tipos de archivos son compatibles? {#what-file-types-work}
+
+Esto funciona con todos los formatos comunes de PowerPoint:
+- **.ppt** – Archivos antiguos de PowerPoint
+- **.pptx** – Archivos más recientes de PowerPoint
+- **.pps** – Archivos de presentación de PowerPoint
+- **.ppsx** – Archivos más recientes de presentación
+
+## Notas importantes {#important-notes}
+
+
+:::warning
+**Recuerde**: Si un archivo de PowerPoint no tiene metadatos o el tipo de archivo no es compatible, es posible que no obtenga resultados. Esto es normal: no todos los archivos tienen información de metadatos.
+:::
+
+
+## Ejemplo del mundo real {#real-world-example}
+
+Supongamos que tienes una carpeta llena de presentaciones de PowerPoint y deseas averiguar quién creó cada una:
+
+```csharp
+string[] presentations = Directory.GetFiles(@"C:\MyPresentations", "*.pptx");
+
+foreach (string presentation in presentations)
+{
+    using (Parser parser = new Parser(presentation))
+    {
+        var metadata = parser.GetMetadata();
+        var author = metadata.FirstOrDefault(m => m.Name == "author");
+        
+        Console.WriteLine($"File: {Path.GetFileName(presentation)}");
+        Console.WriteLine($"Author: {author?.Value ?? "Unknown"}");
+        Console.WriteLine("---");
+    }
+}
+```
+
+¡Esto le mostrará el autor de cada archivo de PowerPoint en su carpeta!
+
+## Casos de uso comunes {#common-use-cases}
+
+**Para empresas:**
+- Rastrear qué empleado creó qué presentación
+- Buscar presentaciones por tema o palabra clave
+- Monitorear cuándo se actualizó por última vez una presentación
+
+**Para desarrolladores:**
+- Construir sistemas de gestión de documentos
+- Crear herramientas automatizadas para organizar archivos
+- Añadir funcionalidad de búsqueda a bibliotecas de presentaciones
+
+**Para gestores de contenido:**
+- Organizar bibliotecas de presentaciones
+- Rastrear versiones y cambios en documentos
+- Asegurar la atribución y propiedad adecuadas
+
+## Solución de problemas {#troubleshooting}
+
+**Problema**: ¿No se devuelve ninguna metadato?
+- **Solución**: Es posible que el archivo no tenga metadatos o que el formato del archivo no sea compatible
+
+**Problema**: ¿No se puede leer el archivo?
+- **Solución**: Asegúrese de que la ruta del archivo sea correcta y de que el archivo no esté protegido con contraseña
+
+**Problema**: ¿Se produce un error?
+- **Solución**: Compruebe que el archivo no esté dañado y que sea un archivo de PowerPoint válido
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>    
+
+### Aplicación gratuita de análisis de documentos en línea {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.
+
+Le invitamos a analizar documentos y extraer datos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

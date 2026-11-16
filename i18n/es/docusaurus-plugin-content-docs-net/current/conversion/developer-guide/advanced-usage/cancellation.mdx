@@ -1,0 +1,137 @@
+---
+title: "Cancelación"
+sidebar_label: "Cancelación"
+sidebar_key: "net-conversion-cancellation"
+sidebar_position: 6
+description: "Aprende cómo cancelar o establecer un tiempo de espera para conversiones de documentos de larga duración utilizando `CancellationToken` en la API de GroupDocs.Conversion para .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/cancellation.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "c47f0766430a15418733af3cc6c96e26a482fa7bb133288bfe65fb97bc2aedbc"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "5a670cd019e0b12a179d267284503e659d20794add4465ef83c57077a7a87ddc"
+translation_updated_at: "2026-11-16T07:08:51.690Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+<a href="https://products.groupdocs.com/conversion/net" target="_blank" rel="nofollow noopener noreferrer">**GroupDocs.Conversion**</a> admite la cancelación de operaciones de conversión de larga duración mediante el mecanismo estándar de .NET <a href="https://learn.microsoft.com/en-us/dotnet/api/system.threading.cancellationtoken" target="_blank" rel="nofollow noopener noreferrer">CancellationToken</a>. Esto resulta especialmente útil al convertir documentos grandes o complejos, en cuyo caso es necesario:
+
+* Establecer un límite de tiempo máximo para la operación de conversión
+* Permitir que los usuarios cancelen una conversión en curso
+* Implementar aplicaciones responsivas que puedan abortar conversiones bajo demanda
+
+## Uso de CancellationToken con sintaxis clásica {#using-cancellationtoken-with-classic-syntax}
+
+Para cancelar o agotar el tiempo de espera de una operación de conversión, siga estos pasos:
+
+1. Crear una instancia de <a href="https://learn.microsoft.com/en-us/dotnet/api/system.threading.cancellationtokensource" target="_blank" rel="nofollow noopener noreferrer">CancellationTokenSource</a>.
+2. Opcionalmente, configurar la cancelación automática tras un tiempo determinado mediante el método `CancelAfter`.
+3. Crear una instancia de la clase <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter" target="_blank" rel="nofollow noopener noreferrer">Converter</a> y pasar la ruta del documento de origen como parámetro del constructor.
+4. Instanciar la clase <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert/convertoptions" target="_blank" rel="nofollow noopener noreferrer">ConvertOptions</a> adecuada (por ejemplo, <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert/pdfconvertoptions" target="_blank" rel="nofollow noopener noreferrer">PdfConvertOptions</a>, <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert/wordprocessingconvertoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingConvertOptions</a>, etc.).
+5. Llamar al método <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter/convert/#convert_3" target="_blank" rel="nofollow noopener noreferrer">Convert</a> pasando el parámetro `CancellationToken`.
+6. Manejar la excepción `OperationCanceledException` para gestionar adecuadamente los escenarios de cancelación.
+
+El siguiente fragmento de código muestra cómo establecer un tiempo de espera para una operación de conversión:
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Options.Convert;
+
+using (Converter converter = new Converter("sample.dwg"))
+{
+    using (CancellationTokenSource cts = new CancellationTokenSource())
+    {
+        // Auto-cancel after 60 seconds
+        cts.CancelAfter(TimeSpan.FromSeconds(60));
+
+        try
+        {
+            PdfConvertOptions options = new PdfConvertOptions();
+            converter.Convert("converted.pdf", options, cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            Console.WriteLine("Conversion was cancelled or timed out");
+        }
+    }
+}
+```
+
+## Uso de `CancellationToken` con sintaxis fluida {#using-cancellationtoken-with-fluent-syntax}
+
+También puedes usar [sintaxis fluida](/net/conversion/developer-guide/basic-usage/fluent-syntax/) para realizar conversiones cancelables.
+
+El siguiente fragmento de código muestra cómo usar `CancellationToken` con una sintaxis fluida:
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Options.Convert;
+
+using (CancellationTokenSource cts = new CancellationTokenSource())
+{
+    // Auto-cancel after 60 seconds
+    cts.CancelAfter(TimeSpan.FromSeconds(60));
+
+    try
+    {
+        FluentConverter
+            .Load("sample.dwg")
+            .ConvertTo("converted.pdf")
+            .WithOptions(new PdfConvertOptions())
+            .Convert(cts.Token);
+    }
+    catch (OperationCanceledException)
+    {
+        Console.WriteLine("Conversion was cancelled or timed out");
+    }
+}
+```
+
+## Cancelación manual {#manual-cancellation}
+
+También puedes activar la cancelación manualmente, por ejemplo, como respuesta a una acción del usuario:
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Options.Convert;
+
+CancellationTokenSource cts = new CancellationTokenSource();
+
+// Start conversion in a background task
+Task conversionTask = Task.Run(() =>
+{
+    using (Converter converter = new Converter("large-document.dwg"))
+    {
+        try
+        {
+            PdfConvertOptions options = new PdfConvertOptions();
+            converter.Convert("converted.pdf", options, cts.Token);
+            Console.WriteLine("Conversion completed successfully");
+        }
+        catch (OperationCanceledException)
+        {
+            Console.WriteLine("Conversion was cancelled by user");
+        }
+    }
+});
+
+// Simulate user cancellation after 10 seconds
+Thread.Sleep(TimeSpan.FromSeconds(10));
+cts.Cancel();
+
+await conversionTask;
+cts.Dispose();
+```

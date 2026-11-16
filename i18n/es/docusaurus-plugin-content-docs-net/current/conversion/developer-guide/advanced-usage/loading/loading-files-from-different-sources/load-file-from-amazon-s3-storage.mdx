@@ -1,0 +1,60 @@
+---
+title: "Cargar archivo desde el almacenamiento de Amazon S3"
+sidebar_label: "Cargar archivo desde el almacenamiento de Amazon S3"
+sidebar_key: "net-conversion-loading-loading-files-from-different-sources-load-file-from-amazon-s3-storage"
+sidebar_position: 5
+description: "Este artículo demuestra cómo convertir archivos almacenados en el almacenamiento de Amazon S3 utilizando la API de GroupDocs.Conversion para .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/loading/loading-files-from-different-sources/load-file-from-amazon-s3-storage.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "cebb81af0c266b13559ba6cba936792b12d6a8e6963c7dd7a96f9dd7662a84bc"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "138141e682de939e2978ae02d8721e897d889e09db867df53b8c6aef3f23495f"
+translation_updated_at: "2026-11-16T07:49:58.941Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+El siguiente fragmento de código muestra cómo convertir un archivo desde el almacenamiento de Amazon S3:
+
+```csharp
+public static void Run()
+{
+    string key = "sample.docx";
+    string outputFile = Path.Combine(@"c:\output" , "converted.pdf");
+    using (Converter converter = new Converter(() => DownloadFile(key)))
+    {
+        PdfConvertOptions options = new PdfConvertOptions();
+        converter.Convert(outputFile, options);
+    }
+}
+        
+public static Stream DownloadFile(string key)
+{
+    AmazonS3Client client = new AmazonS3Client();
+    string bucketName = "my-bucket";
+    GetObjectRequest request = new GetObjectRequest
+    {
+        Key = key,
+        BucketName = bucketName
+    };
+    using (GetObjectResponse response = client.GetObject(request))
+    {
+        MemoryStream stream = new MemoryStream();
+        response.ResponseStream.CopyTo(stream);
+        stream.Position = 0;
+        return stream;
+    }
+}
+```

@@ -1,0 +1,169 @@
+---
+title: "Convertir formatos de audio"
+sidebar_label: "Audios"
+sidebar_key: "net-conversion-convert-audio"
+sidebar_position: 140
+description: "En este artículo, aprenderá cómo convertir un archivo de audio a otro formato de audio con GroupDocs.Conversion para .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/basic-usage/convert/audio.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "05480e3937a7bc36785b56123d190131d060ae2bc9976be3cfcbac15f2f37950"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "b93b9deb3bd3838659d01b8c247aee408490a63356839234681953d79269295e"
+translation_updated_at: "2026-11-16T07:57:47.986Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Sobre los formatos de archivo de audio {#about-audio-file-formats}
+
+El formato de archivo de audio es una categoría de formatos de archivo digitales destinados a representar información de audio junto con sus metadatos. Existen múltiples formatos de archivo de audio, dependiendo de la naturaleza de los datos contenidos en el archivo. Estos archivos pueden almacenarse en formatos comprimidos o sin comprimir. Entre los formatos de archivo de audio más populares se incluyen MP3, WAV, PCM y WMA.
+
+## Conversiones de audio admitidas {#supported-audio-file-conversions}
+
+<!-- Falta incluir: /net/conversion/_includes/supported-conversions/audio/ -->
+
+## Convertir a otro formato de audio {#convert-to-another-audio-format}
+
+Con <a href="https://products.groupdocs.com/conversion/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Conversion</a>, puede convertir fácilmente su archivo de audio a otro formato de archivo de audio.
+
+Para permitir conversiones de audio, GroupDocs.Conversion proporciona un punto de extensibilidad que delega la conversión real de audio a una biblioteca de procesamiento de audio, al tiempo que le ofrece la simplicidad de la configuración de conversión. El punto de extensibilidad es la interfaz <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.integration.audio/iaudioconnector" target="_blank" rel="nofollow noopener noreferrer">IAudioConnector</a>. 
+
+En primer lugar, debe decidir qué biblioteca de procesamiento de audio utilizará. Distintas bibliotecas tienen procesos de configuración diferentes.
+
+En nuestro ejemplo, utilizaremos la biblioteca FFMPEG. Recomendamos utilizar <a href="https://chocolatey.org/" target="_blank" rel="nofollow noopener noreferrer">Chocolatey</a> para instalar la biblioteca <a href="https://ffmpeg.org/" target="_blank" rel="nofollow noopener noreferrer">FFMPG</a> y todas sus dependencias necesarias. 
+Para instalar FFMPEG con Chocolatey, ejecute el siguiente comando en la consola:
+```shell
+choco install ffmpeg
+```
+
+Una vez instalada la biblioteca de procesamiento de audio, debe implementar una interfaz <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.integration.audio/iaudioconnector" target="_blank" rel="nofollow noopener noreferrer">IAudioConnector</a>. Para esta implementación, se debe instalar el paquete NuGet <a href="https://www.nuget.org/packages/FFMpegCore" target="_blank" rel="nofollow noopener noreferrer">FFMpegCore</a> en su proyecto. El siguiente fragmento proporciona un ejemplo de implementación:
+
+```csharp
+public class AudioConnector : IAudioConnector
+{
+    private readonly Dictionary<AudioFileType, Action<FFMpegArgumentOptions>> _optionsMap = new Dictionary<AudioFileType, Action<FFMpegArgumentOptions>>();
+
+    public AudioConnector()
+    {
+        _optionsMap.Add(AudioFileType.Mp3, SetMp3ConvertOptions);
+        _optionsMap.Add(AudioFileType.Ogg, SetOggConvertOptions);
+        _optionsMap.Add(AudioFileType.Aac, SetAacConvertOptions);
+        _optionsMap.Add(AudioFileType.Ac3, SetAc3ConvertOptions);
+        _optionsMap.Add(AudioFileType.Flac, SetFlacConvertOptions);
+        _optionsMap.Add(AudioFileType.Wma, SetWmaConvertOptions);
+        _optionsMap.Add(AudioFileType.Wav, SetWavConvertOptions);
+        _optionsMap.Add(AudioFileType.M4a, SetM4aConvertOptions);
+        _optionsMap.Add(AudioFileType.Aiff, SetAiffConvertOptions);
+    }
+
+    public Stream ConvertAudio(Stream sourceStream, AudioConvertOptions convertOptions)
+    { 
+        var resultStream = new MemoryStream();
+
+        var arguments = FFMpegArguments
+            .FromPipeInput(new StreamPipeSource(sourceStream))
+            .OutputToPipe(new StreamPipeSink(resultStream), options =>
+            {
+                if (_optionsMap.ContainsKey(convertOptions.Format))
+                {
+                    _optionsMap[convertOptions.Format].Invoke(options);
+                }
+                else
+                {
+                    throw new InvalidOperationException(
+                        $"Conversion to {convertOptions.Format.Extension} is not supported at the moment");
+                }
+            });
+        arguments.ProcessSynchronously();
+            
+        return resultStream;
+    }
+
+    private void SetMp3ConvertOptions(FFMpegArgumentOptions options)
+    {
+        options.WithAudioCodec(AudioCodec.LibMp3Lame);
+        options.ForceFormat("mp3");
+    }
+
+    private void SetOggConvertOptions(FFMpegArgumentOptions options)
+    {
+        options.WithAudioCodec(AudioCodec.LibVorbis);
+        options.ForceFormat("ogg");
+    }
+
+    private void SetAacConvertOptions(FFMpegArgumentOptions options)
+    {
+        options.WithAudioCodec(AudioCodec.Aac);
+        options.ForceFormat("adts");
+    }
+
+    private void SetAc3ConvertOptions(FFMpegArgumentOptions options)
+    {
+        options.WithAudioCodec(AudioCodec.Ac3);
+        options.ForceFormat("ac3");
+    }
+
+    private void SetFlacConvertOptions(FFMpegArgumentOptions options)
+    {
+        options.ForceFormat("flac");
+    }
+
+    private void SetWmaConvertOptions(FFMpegArgumentOptions options)
+    {
+        options.ForceFormat("asf");
+    }
+
+    private void SetWavConvertOptions(FFMpegArgumentOptions options)
+    {
+        options.ForceFormat("wav");
+    }
+
+    private void SetM4aConvertOptions(FFMpegArgumentOptions options)
+    {
+        options.WithAudioCodec(AudioCodec.Aac);
+        options.ForceFormat("adts");
+    }
+
+    private void SetAiffConvertOptions(FFMpegArgumentOptions options)
+    {
+        options.ForceFormat("aiff");
+    }
+}
+```
+
+Una vez que `IAudioConnector` si se implementa la interfaz, el fragmento de código para convertir MP3 a FLAC se ve así:
+
+```csharp
+// Load the source MP3 file
+AudioLoadOptions loadOptions = new AudioLoadOptions();
+loadOptions.SetAudioConnector(new AudioConnector());
+using (Converter converter = new Converter("sample.mp3", (LoadContext loadContext) => loadOptions))
+{
+    // Set the convert options for FLAC format
+    AudioConvertOptions options = new AudioConvertOptions {
+        Format = AudioFileType.Flac
+    };
+    // Convert to FLAC format
+    converter.Convert("converted.flac", options);
+}
+```
+
+Póngalo de forma sencilla: instala la biblioteca de procesamiento de audio, implementa la `IAudioConnector` interfaz que enlaza `GroupDocs.Conversion` con la biblioteca de procesamiento de audio, cargue un archivo de audio en el `Converter` clase que proporciona la `IAudioConnector` instancia, seleccione el formato de salida deseado y **GroupDocs.Conversion** se encarga del resto.  
+
+
+:::info
+Consulte el <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API</a> para más opciones de conversión y personalizaciones.
+:::

@@ -1,0 +1,297 @@
+---
+title: "Extraer datos de bases de datos"
+sidebar_label: "Extraer datos de bases de datos"
+sidebar_key: "net-parser-extract-data-from-databases"
+sidebar_position: 100
+description: "Guía completa para extraer datos de bases de datos mediante ADO.NET utilizando GroupDocs.Parser para .NET. Aprenda cómo conectarse a proveedores de bases de datos como SQLite, SQL Server y otros para extraer datos de tablas."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/extract-data-from-databases.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "64e75ffcddfd47824c8297a25d50d9c9a8f99fd9b765909511e7e9c4272ec487"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "63885b66647ad645dc77d004229779aabdeaacf2ab77bb35762cd907eabbd028"
+translation_updated_at: "2026-11-16T07:09:30.377Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Parser ofrece la funcionalidad para extraer datos desde bases de datos mediante ADO.NET. Esta característica permite analizar tablas de bases de datos y extraer su contenido como texto, de forma similar a cómo se extraen datos desde archivos de documentos.
+
+## Descripción general de la API {#api-overview}
+
+### Constructores {#constructors}
+
+La clase `Parser` proporciona constructores específicamente diseñados para la extracción de datos desde bases de datos:
+
+```csharp
+// Constructor with DbConnection (recommended for .NET Core/.NET 5+)
+Parser(DbConnection connection);
+Parser(DbConnection connection, ParserSettings parserSettings);
+
+// Constructor with connection string (only for .NET Framework)
+Parser(string connectionString, LoadOptions loadOptions);
+```
+
+### Parámetros {#parameters}
+
+| Parámetro | Tipo | Descripción |
+| ----------- | ------ | ------------- |
+| `connection` | `DbConnection` | Objeto de conexión de base de datos ADO.NET activo |
+| `connectionString` | `string` | Cadena de conexión a la base de datos (única opción admitida en .NET Framework) |
+| `loadOptions` | `LoadOptions` | Debe establecerse en `FileFormat.Database` al usar una cadena de conexión |
+| `parserSettings` | `ParserSettings` | Configuraciones opcionales para registro y otras configuraciones del analizador |
+
+### Tipos devueltos {#return-types}
+
+- **GetToc()** devuelve `IEnumerable<TocItem>`, donde cada `TocItem` representa una tabla de base de datos
+- **GetText(int pageIndex)** devuelve `TextReader` que contiene los datos de la tabla para el índice de tabla especificado
+- Las propiedades **Features.Text** y **Features.Toc** indican si la extracción de texto y de tabla está admitida
+
+## Proveedores de base de datos admitidos {#supported-database-providers}
+
+GroupDocs.Parser funciona con cualquier proveedor de base de datos compatible con ADO.NET. Los proveedores más comunes incluyen:
+
+- **SQLite** – Requiere el paquete NuGet `System.Data.SQLite`
+- **SQL Server** – Soporte integrado mediante `System.Data.SqlClient`
+- **MySQL** – Requiere el paquete NuGet `MySql.Data`
+- **PostgreSQL** – Requiere el paquete NuGet `Npgsql`
+- **Oracle** – Requiere el paquete NuGet `Oracle.ManagedDataAccess`
+
+## Limitaciones {#limitations}
+
+- La extracción de base de datos está diseñada principalmente para contenido tabular basado en texto
+- Las relaciones complejas entre tablas no se resuelven automáticamente
+- Solo se pueden extraer datos de tablas, no vistas ni procedimientos almacenados
+- El método de cadena de conexión solo está disponible en .NET Framework
+
+## Extraer datos mediante objeto DbConnection (recomendado) {#extract-data-with-dbconnection-object-recommended}
+
+El enfoque `DbConnection` es el método recomendado y funciona en todas las plataformas .NET (.NET Framework, .NET Core, .NET 5+).
+
+### Firmas del constructor {#constructor-signatures}
+
+```csharp
+// Basic constructor
+Parser(DbConnection connection);
+
+// With parser settings (for logging, etc.)
+Parser(DbConnection connection, ParserSettings parserSettings)
+```
+
+El segundo constructor le permite utilizar el objeto <a href="https://reference.groupdocs.com/parser/net/groupdocs.parser.options/parsersettings" target="_blank" rel="nofollow noopener noreferrer">ParserSettings</a> para controlar el proceso; por ejemplo, agregando [funcionalidad de registro](/net/parser/developer-guide/advanced-usage/logging/).
+
+### Guía paso a paso {#step-by-step-guide}
+
+A continuación se indican los pasos para extraer datos de una base de datos:
+
+* Preparar el objeto <a href="https://docs.microsoft.com/en-us/dotnet/api/system.data.common.dbconnection?view=netcore-3.1" target="_blank" rel="nofollow noopener noreferrer">DbConnection</a>;
+* Instanciar el objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> con la cadena de conexión;
+* Llamar a la propiedad <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/features/properties/text" target="_blank" rel="nofollow noopener noreferrer">Features.Text</a> para verificar si la extracción de texto es compatible;
+* Llamar a la propiedad <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/features/properties/toc" target="_blank" rel="nofollow noopener noreferrer">Features.Toc</a> para verificar si la extracción de la tabla de contenidos es compatible;
+* Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettoc" target="_blank" rel="nofollow noopener noreferrer">GetToc</a> y obtener la colección de tablas;
+* Iterar a través de la colección y obtener el texto de las tablas.
+
+### Ejemplo completo: base de datos SQLite {#complete-example-sqlite-database}
+
+El siguiente ejemplo muestra cómo extraer datos de una base de datos SQLite:
+
+```csharp
+using System.Data.Common;
+using System.Data.SQLite;
+using GroupDocs.Parser;
+using GroupDocs.Parser.Data;
+
+// Connection string for SQLite database
+string dbPath = "sample.db";
+string connectionString = $"Data Source={dbPath};Version=3;";
+
+// Create DbConnection object
+using (DbConnection connection = new SQLiteConnection(connectionString))
+{
+    connection.Open();
+    
+    // Create an instance of Parser class to extract tables from the database
+    using (Parser parser = new Parser(connection))
+    {
+        // Check if text extraction is supported
+        if (!parser.Features.Text)
+        {
+            Console.WriteLine("Text extraction isn't supported for this database.");
+            return;
+        }
+        
+        // Check if table of contents (table list) extraction is supported
+        if (!parser.Features.Toc)
+        {
+            Console.WriteLine("Table of contents extraction isn't supported.");
+            return;
+        }
+        
+        // Get a list of all tables in the database
+        IEnumerable<TocItem> tables = parser.GetToc();
+        
+        // Iterate over each table
+        foreach (TocItem table in tables)
+        {
+            Console.WriteLine($"\n=== Table: {table.Text} ===");
+            
+            // Extract table content as text
+            // PageIndex represents the table index
+            using (TextReader reader = parser.GetText(table.PageIndex.Value))
+            {
+                if (reader != null)
+                {
+                    string tableContent = reader.ReadToEnd();
+                    Console.WriteLine(tableContent);
+                }
+                else
+                {
+                    Console.WriteLine("Unable to extract data from this table.");
+                }
+            }
+        }
+    }
+}
+```
+
+### Ejemplo: Base de datos de SQL Server {#example-sql-server-database}
+
+```csharp
+using System.Data.Common;
+using System.Data.SqlClient;
+using GroupDocs.Parser;
+
+string connectionString = "Server=localhost;Database=MyDatabase;Integrated Security=true;";
+
+using (DbConnection connection = new SqlConnection(connectionString))
+{
+    connection.Open();
+    
+    using (Parser parser = new Parser(connection))
+    {
+        if (parser.Features.Text && parser.Features.Toc)
+        {
+            foreach (TocItem table in parser.GetToc())
+            {
+                Console.WriteLine($"Extracting from table: {table.Text}");
+                using (TextReader reader = parser.GetText(table.PageIndex.Value))
+                {
+                    if (reader != null)
+                    {
+                        Console.WriteLine(reader.ReadToEnd());
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+## Extraer datos con cadena de conexión {#extract-data-with-connection-string}
+
+
+:::danger
+**Importante:** Esta funcionalidad solo está disponible en la versión de **.NET Framework** de GroupDocs.Parser para .NET. Para aplicaciones .NET Core, .NET 5+ o multiplataforma, utilice el enfoque `DbConnection` descrito anteriormente.
+:::
+
+
+### Constructor {#constructor}
+
+Para crear una instancia de la clase <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> y extraer datos de una base de datos utilizando una cadena de conexión, utilice:
+
+```csharp
+Parser(string connectionString, LoadOptions loadOptions);
+```
+
+### Parámetros {#parameters-1}
+
+- **connectionString**: La cadena de conexión a la base de datos (no una ruta de archivo)
+- **loadOptions**: Debe inicializarse con `FileFormat.Database`
+
+La lista de tablas se representa como un índice (TOC). Cada tabla puede extraerse mediante el método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.parser/gettext/methods/2" target="_blank" rel="nofollow noopener noreferrer">GetText(int)</a>, donde el parámetro entero corresponde al índice de la tabla en el TOC.
+
+A continuación se indican los pasos para extraer datos de una base de datos SQLite:
+
+*   Preparar la cadena de conexión;
+*   Instanciar el objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser" target="_blank" rel="nofollow noopener noreferrer">Parser</a> con la cadena de conexión;
+*   Llamar a la propiedad <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/features/properties/text" target="_blank" rel="nofollow noopener noreferrer">Features.Text</a> para verificar si la extracción de texto es compatible;
+*   Llamar a la propiedad <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.options/features/properties/toc" target="_blank" rel="nofollow noopener noreferrer">Features.Toc</a> para verificar si la extracción del índice (TOC) es compatible;
+*   Llamar al método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser/parser/methods/gettoc" target="_blank" rel="nofollow noopener noreferrer">GetToc</a> y obtener la colección de tablas;
+*   Iterar sobre la colección y extraer el texto de las tablas.
+
+### Ejemplo completo (solo .NET Framework) {#complete-example-net-framework-only}
+
+```csharp
+using GroupDocs.Parser;
+using GroupDocs.Parser.Options;
+
+string databasePath = "sample.db";
+string connectionString = string.Format(
+    "Provider=System.Data.Sqlite;Data Source={0};Version=3;", 
+    databasePath
+);
+
+// Create an instance of Parser class to extract tables from the database
+// Pass connection string as first parameter and LoadOptions with FileFormat.Database
+using (Parser parser = new Parser(connectionString, new LoadOptions(FileFormat.Database)))
+{
+    // Check if text extraction is supported
+    if (!parser.Features.Text)
+    {
+        Console.WriteLine("Text extraction isn't supported.");
+        return;
+    }
+    
+    // Check if table of contents extraction is supported
+    if (!parser.Features.Toc)
+    {
+        Console.WriteLine("Table of contents extraction isn't supported.");
+        return;
+    }
+    
+    // Get a list of all tables in the database
+    IEnumerable<TocItem> tables = parser.GetToc();
+    
+    // Iterate over tables
+    foreach (TocItem table in tables)
+    {
+        // Print the table name
+        Console.WriteLine($"\nTable: {table.Text}");
+        
+        // Extract table content as text using the table's page index
+        using (TextReader reader = parser.GetText(table.PageIndex.Value))
+        {
+            if (reader != null)
+            {
+                Console.WriteLine(reader.ReadToEnd());
+            }
+        }
+    }
+}
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>    
+
+### Aplicación gratuita en línea para analizar documentos {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.
+
+Le invitamos a analizar documentos y extraer datos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

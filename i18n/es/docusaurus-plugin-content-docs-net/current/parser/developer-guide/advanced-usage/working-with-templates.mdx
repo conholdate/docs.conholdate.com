@@ -1,0 +1,488 @@
+---
+title: "Trabajar con plantillas"
+sidebar_label: "Trabajar con plantillas"
+sidebar_key: "net-parser-working-with-templates"
+sidebar_position: 101
+description: "Guía completa para crear y utilizar plantillas para la extracción de datos estructurados con GroupDocs.Parser para .NET. Aprenda la extracción basada en plantillas para facturas, formularios y documentos en C#."
+product: "parser"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "parser-net"
+source_path: "net/developer-guide/advanced-usage/working-with-templates.md"
+source_commit: "e3b3a2df0663abc09348cedab04e0e649de093a4"
+source_sha256: "03fc6496643271a8124071cef4e898dc422437ebf0597f2d3b949711f1560774"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "a703710f818333ed9f5f4e46a9e7bf187633e2d52183c06e26f5888a8937eb04"
+translation_updated_at: "2026-11-16T09:29:39.325Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Parser para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+La plantilla de documento está definida por la clase <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/template" target="_blank" rel="nofollow noopener noreferrer">Template</a>. Contiene elementos de plantilla: campos y tablas. Cada elemento tiene un nombre único (dentro de los límites de la plantilla) y un índice de página opcional: valor que representa el índice de la página donde se encuentra el elemento de plantilla; *null* si el elemento de plantilla se encuentra en cualquier página.
+
+## Campos de plantilla {#template-fields}
+
+El campo de plantilla está definido por la clase <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/templatefield" target="_blank" rel="nofollow noopener noreferrer">TemplateField</a> con el siguiente constructor:
+
+```csharp
+TemplateField(TemplatePosition position, string name, int? pageIndex)
+```
+
+| Parámetro | Descripción |
+| --- | --- |
+| position | Define la forma en que se localiza el campo en una página. |
+| name | Un nombre único para el elemento de plantilla. |
+| pageIndex | El índice de página. Un valor entero que representa el índice de la página donde se encuentra el elemento de plantilla; *null* si el elemento de plantilla puede encontrarse en cualquier página. |
+
+<a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/templateposition" target="_blank" rel="nofollow noopener noreferrer">TemplatePosition</a> es una clase base abstracta. Las siguientes clases se utilizan para definir posiciones de campos de plantilla:
+
+*   <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/templatefixedposition" target="_blank" rel="nofollow noopener noreferrer">TemplateFixedPosition</a>. Proporciona una posición de campo de plantilla definida mediante un área rectangular.
+*   <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/templateregexposition" target="_blank" rel="nofollow noopener noreferrer">TemplateRegexPosition</a>. Proporciona una posición de campo de plantilla que utiliza una expresión regular.
+*   <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/templatelinkedposition" target="_blank" rel="nofollow noopener noreferrer">TemplateLinkedPosition</a>. Proporciona una posición de campo de plantilla que utiliza un campo vinculado.
+
+### TemplateFixedPosition {#templatefixedposition}
+
+Esta es la forma más sencilla de definir la posición del campo. Requiere establecer un área rectangular en la página que delimita el valor del campo. Todo el texto contenido (incluso parcialmente) dentro del área rectangular se extraerá como valor:
+
+```csharp
+// Create a fixed template field with "Address" name which is bounded by a rectangle
+// at the position (35, 160) and with the size (110, 20)
+TemplateField templateField = new TemplateField(
+    new TemplateFixedPosition(new Rectangle(new Point(35, 160), new Size(110, 20))),
+    "Address");
+```
+
+Se recomienda definir un área rectangular por encima (debajo) del centro de la línea que se encuentra por debajo (encima) del área seleccionada, a fin de evitar la extracción excesiva de texto. Por ejemplo:
+
+| Definición de plantilla | Resultado |
+| --- | --- |
+| ![](/net/parser/images/working-with-templates.png)) | Extrae solo una línea |
+67890 |
+|  ![](/net/parser/images/working-with-templates_1.png)) | Extrae dos líneas
+4321 First Street  
+Anytown, State ZIP |
+| ![](/net/parser/images/working-with-templates_2.png)) | Extrae cuatro líneas
+Nombre de la empresa  
+4321 First Street  
+Anytown, State ZIP  
+Fecha: 06/02/2019 |
+
+### TemplateRegexPosition {#templateregexposition}
+
+Esta forma de definir la posición del campo permite encontrar el valor del campo mediante una expresión regular. Por ejemplo, si el documento contiene «Invoice Number INV-12345», el campo de plantilla puede definirse de la siguiente manera:
+
+```csharp
+// Create a regex template field with "InvoiceNumber" name
+TemplateField templateField = new TemplateField(
+    new TemplateRegexPosition("Invoice Number\\s+[A-Z0-9\\-]+"), 
+    "InvoiceNumber");
+```
+
+En este caso, como valor se extrae la cadena completa. Para extraer solo una parte de la cadena, se utiliza el grupo de expresión regular `"value"`:
+
+```csharp
+// Create a regex template field with "InvoiceNumber" name with "value" group
+TemplateField templateField = new TemplateField(
+    new TemplateRegexPosition("Invoice Number\\s+(?<value>[A-Z0-9\\-]+)"),
+    "InvoiceNumber");
+```
+
+En este caso, se extrae el valor `"INV-3337"` como una cadena.
+
+Los campos de expresiones regulares pueden utilizarse como campos vinculados.
+
+### `TemplateLinkedPosition` {#templatelinkedposition}
+
+Esta forma de definir la posición del campo permite encontrar su valor extrayendo un área rectangular alrededor del campo vinculado. Por ejemplo, si se sabe que el campo con el número de factura se encuentra a la derecha de la cadena «Número de factura», se utiliza el siguiente código:
+
+```csharp
+// Create a regex template field to find "Invoice Number" text
+TemplateField invoice = new TemplateField(new TemplateRegexPosition("Invoice Number"), "Invoice");
+// Create a related template field associated with "Invoice" field and extract the value on the right of it
+TemplateField invoiceNumber = new TemplateField(
+    new TemplateLinkedPosition("invoice", new Size(100, 15), new TemplateLinkedPositionEdges(false, false, true, false)),
+    "InvoiceNumber");
+```
+
+| Definición de plantilla | Resultado |
+| --- | --- |
+| ![](/net/parser/images/working-with-templates_3.png)) | Extrae el texto ubicado a la derecha del campo «Número de factura»: INV-3337 |
+
+Para simplificar la configuración del tamaño del campo de plantilla, se utiliza la propiedad <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/templatelinkedposition/properties/autoscale" target="_blank" rel="nofollow noopener noreferrer">AutoScale</a>. El tamaño del campo de plantilla se escala según el campo relacionado si <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/templatelinkedposition/properties/autoscale" target="_blank" rel="nofollow noopener noreferrer">AutoScale</a> se establece en *true*. Esto resulta útil cuando el tamaño de fuente no se conoce de antemano, pero las proporciones del tamaño del valor (la relación entre altura y ancho) son aproximadamente conocidas:
+
+```csharp
+// Create a regex template field to find "Invoice Number" text
+TemplateField invoice = new TemplateField(new TemplateRegexPosition("Invoice Number"), "Invoice");
+// Create a related template field associated with "Invoice" field and extract the value on the right of it
+TemplateField invoiceNumber = new TemplateField(
+    new TemplateLinkedPosition("invoice", new Size(100, 15), new TemplateLinkedPositionEdges(false, false, true, false), true),
+    "InvoiceNumber");
+```
+
+| Definición de plantilla | Resultado |
+| --- | --- |
+| ![](/net/parser/images/working-with-templates_4.png)) | Extrae el texto ubicado a la derecha del campo «Número de factura»: INV-3337 |
+
+El valor del campo puede extraerse desde cualquiera de los lados del campo relacionado. El lado desde el cual se extrae el valor se define mediante la propiedad <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/templatelinkedposition/properties/edges" target="_blank" rel="nofollow noopener noreferrer">Edges</a>. El tamaño del área rectangular se establece mediante la propiedad <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/templatelinkedposition/properties/searcharea" target="_blank" rel="nofollow noopener noreferrer">SearchArea</a>. La posición del área rectangular depende del lado desde el cual se extrae el valor:
+
+```csharp
+Left: (LinkedField.Rectangle.Left - SearchAreaSize.Width; LinkedField.Rectangle.Top)
+Top: (LinkedField.Rectangle.Left; LinkedField.Rectangle.Top - SearchAreaSize.Height)
+Right: (LinkedField.Rectangle.Right; LinkedField.Rectangle.Top)
+Bottom: (LinkedField.Rectangle.Left; LinkedField.Rectangle.Bottom)
+```
+
+El campo relacionado puede ser cualquier campo que previamente se haya definido en la plantilla:
+
+```csharp
+// Create a regex template field
+TemplateField fromField = new TemplateField(new TemplateRegexPosition("From"), "From", 0);
+// Create a related template field linked to "From" regex field and placed under it
+TemplateField companyField = new TemplateField(
+    new TemplateLinkedPosition("From", new Size(100, 10), new TemplateLinkedPositionEdges(false, false, false, true)),
+    "FromCompany", 
+    0);
+// Create a related template field linked to "FromCompany" related field and placed under it
+TemplateField addressField = new TemplateField(
+    new TemplateLinkedPosition("FromCompany", new Size(100, 30), new TemplateLinkedPositionEdges(false, false, false, true)),
+    "FromAddress", 
+    0);
+```
+
+| Definición de plantilla | Resultado |
+| --- | --- |
+| ![](/net/parser/images/working-with-templates_5.png)) | La extracción se procesa de la siguiente manera: Extrae los datos del campo "From" (regex) (verde) |
+Extrae los datos del campo relacionado "FromCompany" (amarillo)  
+Extrae los datos del campo relacionado "FromAddress" (rojo) |
+
+El valor de un campo depende del campo relacionado. El campo siempre está vacío si el campo relacionado no tiene un valor. Si el campo tiene un valor, entonces contiene un enlace al campo relacionado.
+
+###  Plantilla de documento con campos {#document-template-with-fields}
+
+Una instancia de la clase <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/template" target="_blank" rel="nofollow noopener noreferrer">Template</a> se crea mediante el constructor:
+
+```csharp
+Template(IEnumerable<TemplateItem> items)
+```
+
+Este constructor acepta una colección de elementos de plantilla:
+
+```csharp
+// Create an array of template fields
+TemplateItem[] fields = new TemplateItem[]
+{
+    new TemplateField(new TemplateRegexPosition("From"), "From", 0),
+    new TemplateField(
+        new TemplateLinkedPosition("From", new Size(100, 10), new TemplateLinkedPositionEdges(false, false, false, true)),
+        "FromCompany",
+        0),
+    new TemplateField(
+        new TemplateLinkedPosition("FromCompany", new Size(100, 30), new TemplateLinkedPositionEdges(false, false, false, true)),
+        "FromAddress",
+        0)
+};
+// Create a document template
+Template template = new Template(fields);
+```
+
+El nombre del campo no distingue entre mayúsculas y minúsculas (por ejemplo, *Field* y *FIELD* se consideran el mismo nombre) y debe ser único dentro de la plantilla. El campo relacionado debe estar asociado con un campo previamente definido. Si no se cumplen estas condiciones, se lanza una excepción.
+
+## Tablas de plantilla {#template-tables}
+
+La tabla de plantilla se define mediante la clase <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/templatetable" target="_blank" rel="nofollow noopener noreferrer">TemplateTable</a>, utilizando los siguientes constructores:
+
+```csharp
+TemplateTable(TemplateTableLayout layout, string name, int? pageIndex)
+TemplateTable(TemplateTableParameters parameters, string name, int? pageIndex)
+```
+
+La tabla de plantilla puede configurarse mediante parámetros del detector o mediante el diseño de la tabla. Si se omite el índice de página, se extraen tablas de todas las páginas del documento. Esto resulta útil en los casos en que el documento contiene páginas con el mismo diseño (las páginas difieren únicamente en los datos).
+
+<a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/templatetableparameters" target="_blank" rel="nofollow noopener noreferrer">TemplateTableParameters</a> posee los siguientes constructores:
+
+```csharp
+TemplateTableParameters(Rectangle rectangle, IEnumerable<double> verticalSeparators)
+TemplateTableParameters(Rectangle rectangle, IEnumerable<double> verticalSeparators, bool? hasMergedCells, int? minRowCount, int? minColumnCount, int? minVerticalSpace)
+```
+
+Cada uno de los parámetros es opcional. La forma más sencilla de definir una tabla es establecer el área rectangular de la tabla y los separadores de columnas:
+
+```csharp
+TemplateTableParameters parameters = new TemplateTableParameters(
+    new Rectangle(new Point(175, 350), new Size(400, 200)),
+    new double[] { 185, 370, 425, 485, 545 });
+```
+
+Si una tabla de plantilla se establece mediante parámetros del detector, la tabla se detecta automáticamente:
+
+```csharp
+TemplateTableParameters parameters = new TemplateTableParameters(
+    new Rectangle(new Point(175, 350), new Size(400, 200)),
+    new double[] { 185, 370, 425, 485, 545 });
+
+TemplateTable table = new TemplateTable(parameters, "Details", 0);
+
+// Create a document template
+Template template = new Template(new TemplateItem[] { table });
+```
+
+La tabla de plantilla se establece mediante el diseño de la tabla si no se puede detectar automáticamente:
+
+```csharp
+TemplateTableLayout layout = new TemplateTableLayout(
+    new double[] { 50, 95, 275 },
+    new double[] { 325, 340, 365 });
+
+TemplateTable table = new TemplateTable(layout, "Details", null);
+Template template = new Template(new TemplateItem[] { table });
+```
+
+Estas colecciones representan los límites de columnas y filas. Por ejemplo, para una tabla de 2×2 existen 3 separadores verticales y 3 separadores horizontales:
+
+```
+---------
+|   |   |
+---------
+|   |   |
+---------
+```
+
+El método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/templatetablelayout/methods/moveto" target="_blank" rel="nofollow noopener noreferrer">MoveTo</a> se utiliza para mover el diseño de la tabla. 
+
+Por ejemplo, un documento contiene tablas en cada página (o un conjunto de documentos con una tabla por página). Estas tablas difieren en posición y contenido, pero tienen las mismas columnas y filas. En este caso, el usuario puede definir una vez el objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/templatetablelayout" target="_blank" rel="nofollow noopener noreferrer">TemplateTableLayout</a> en la posición (0, 0) y luego moverlo a la ubicación de la tabla específica.
+
+Si la posición de la tabla depende de otro objeto de la página, el usuario puede definir el objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/templatetablelayout" target="_blank" rel="nofollow noopener noreferrer">TemplateTableLayout</a> basándose en un documento plantilla y luego moverlo según un objeto de anclaje. Por ejemplo, si se trata de una tabla resumen y le sigue una tabla de detalles (que puede contener un número diferente de filas). En este caso, el usuario puede definir el objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/templatetablelayout" target="_blank" rel="nofollow noopener noreferrer">TemplateTableLayout</a> en el documento plantilla (con el rectángulo conocido de la tabla de detalles) y luego mover el objeto <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/templatetablelayout" target="_blank" rel="nofollow noopener noreferrer">TemplateTableLayout</a> según la diferencia entre el rectángulo de la tabla de detalles del documento plantilla y el documento real.
+
+El método <a href="https://reference.groupdocs.com/net/parser/groupdocs.parser.templates/templatetablelayout/methods/moveto" target="_blank" rel="nofollow noopener noreferrer">MoveTo</a> devuelve una copia del objeto actual. El usuario puede pasar cualquier coordenada (incluso negativas — en cuyo caso el diseño se moverá hacia la izquierda/superior).
+
+## Códigos de barras de plantilla {#template-barcodes}
+
+Los códigos de barras de plantilla funcionan de la misma manera que un campo de plantilla con posición fija. El siguiente ejemplo muestra cómo definir un campo de código de barras de plantilla:
+
+```csharp
+// Define a barcode field
+TemplateBarcode barcode = new TemplateBarcode(
+    new Rectangle(new Point(590, 80), new Size(150, 150)),
+    "QR");
+
+// Create a template
+Template template = new Template(new TemplateItem[] { barcode });
+
+// Create an instance of Parser class
+using (Parser parser = new Parser(Constants.SamplePdfWithBarcodes))
+{
+    // Parse the document by the template
+    DocumentData data = parser.ParseByTemplate(template);
+
+    // Print all extracted data
+    for (int i = 0; i < data.Count; i++)
+    {
+        Console.Write(data[i].Name + ": ");
+        PageBarcodeArea area = data[i].PageArea as PageBarcodeArea;
+        Console.WriteLine(area == null ? "Not a template barcode field" : area.Value);
+    }
+}
+```
+
+## Ejemplo de plantilla compleja {#complex-template-example}
+
+Este ejemplo muestra la plantilla utilizada para analizar la siguiente factura:
+
+![](/net/parser/images/working-with-templates_6.jpg)
+
+```csharp
+// Create detector parameters for "Details" table
+TemplateTableParameters detailsTableParameters = new TemplateTableParameters(new Rectangle(new Point(35, 320), new Size (530, 55)), null);
+ 
+// Create detector parameters for "Summary" table
+TemplateTableParameters summaryTableParameters = new TemplateTableParameters(new Rectangle(new Point(330, 385), new Size(220, 65)), null);
+ 
+// Create a collection of template items
+TemplateItem[] templateItems = new TemplateItem[]
+{
+    new TemplateField(new TemplateFixedPosition(new Rectangle(new Point(35, 135), new Size(100, 10))), "FromCompany"),
+    new TemplateField(new TemplateFixedPosition(new Rectangle(new Point(35, 150), new Size(100, 35))), "FromAddress"),
+    new TemplateField(new TemplateFixedPosition(new Rectangle(new Point(35, 190), new Size(150, 2))), "FromEmail"),
+    new TemplateField(new TemplateFixedPosition(new Rectangle(new Point(35, 250), new Size(100, 2))), "ToCompany"),
+    new TemplateField(new TemplateFixedPosition(new Rectangle(new Point(35, 260), new Size(100, 15))), "ToAddress"),
+    new TemplateField(new TemplateFixedPosition(new Rectangle(new Point(35, 290), new Size(150, 2))), "ToEmail"),
+
+    new TemplateField(new TemplateRegexPosition("Invoice Number"), "InvoiceNumber"),
+    new TemplateField(new TemplateLinkedPosition(
+        "InvoiceNumber",
+        new Size(200, 15),
+        new TemplateLinkedPositionEdges(false, false, true, false)),
+        "InvoiceNumberValue"),
+
+    new TemplateField(new TemplateRegexPosition("Order Number"), "InvoiceOrder"),
+    new TemplateField(new TemplateLinkedPosition(
+        "InvoiceOrder",
+        new Size(200, 15),
+        new TemplateLinkedPositionEdges(false, false, true, false)),
+        "InvoiceOrderValue"),
+
+    new TemplateField(new TemplateRegexPosition("Invoice Date"), "InvoiceDate"),
+    new TemplateField(new TemplateLinkedPosition(
+        "InvoiceDate",
+        new Size(200, 15),
+        new TemplateLinkedPositionEdges(false, false, true, false)),
+        "InvoiceDateValue"),
+
+    new TemplateField(new TemplateRegexPosition("Due Date"), "DueDate"),
+    new TemplateField(new TemplateLinkedPosition(
+        "DueDate",
+        new Size(200, 15),
+        new TemplateLinkedPositionEdges(false, false, true, false)),
+        "DueDateValue"),
+
+    new TemplateField(new TemplateRegexPosition("Total Due"), "TotalDue"),
+    new TemplateField(new TemplateLinkedPosition(
+        "TotalDue",
+        new Size(200, 15),
+        new TemplateLinkedPositionEdges(false, false, true, false)),
+        "TotalDueValue"),
+
+    new TemplateTable(detailsTableParameters, "details", null),
+    new TemplateTable(summaryTableParameters, "summary", null)
+};
+ 
+// Create a document template
+Template template = new Template(templateItems); 
+```
+
+## Imágenes y PDF escaneados {#images-and-scanned-pdfs}
+
+A partir de la versión 25.2, GroupDocs.Parser para .NET admite el análisis basado en plantillas para imágenes y documentos PDF escaneados. De forma predeterminada, utiliza OCR integrado, que puede ser <a href="https://docs.groupdocs.com/parser/net/use-ocr-connector/" target="_blank" rel="nofollow noopener noreferrer">reemplazado</a> por cualquier otro motor OCR. El OCR se habilita automáticamente para las imágenes, pero para los PDF escaneados es necesario utilizar los métodos con ParseByTemplateOptions.
+
+```C#
+// Load a document template from the file
+Template template = Template.Load("template.xml");
+
+// Create an instance of Parser class
+using (Parser parser = new Parser(Constants.SamplePdfWithBarcodes))
+{
+    // Parse the document by the template (force OCR usage)
+    DocumentData data = parser.ParseByTemplate(template, new ParseByTemplateOptions(true));
+
+    // Print all extracted data
+    for (int i = 0; i < data.Count; i++)
+    {
+        // Print the field's name and text
+        Console.WriteLine(data[i].Name + ": " + data[i].Text);
+    }
+}
+```
+
+Esta funcionalidad presenta algunas limitaciones: solo se admiten campos simples, tablas y códigos de barras. Los demás tipos de campos se ignorarán.
+
+## Serialización de plantillas {#template-serialization}
+
+A partir de GroupDocs.Parser para .NET 23.12, es posible cargar plantillas desde archivos XML en lugar de crearlas directamente en el código.
+
+```c#
+// Load a document template from the file
+Template template = Template.Load("template.xml");
+
+// Create an instance of Parser class
+using (Parser parser = new Parser(Constants.SamplePdfWithBarcodes))
+{
+    // Parse the document by the template
+    DocumentData data = parser.ParseByTemplate(template);
+
+    // Print all extracted data
+    for (int i = 0; i < data.Count; i++)
+    {
+        // Print the field's name and text
+        Console.WriteLine(data[i].Name + ": " + data[i].Text);
+    }
+}
+```
+
+Las plantillas se pueden guardar desde el código:
+
+```C#
+// Create a collection of template items
+TemplateItem[] templateItems = new TemplateItem[]
+{
+    // ... items were omitted, see samples above
+};
+
+// Create a document template
+Template template = new Template(templateItems);
+// Save the document template to the file
+template.Save("template.xml");
+```
+
+También puedes crear plantillas en cualquier editor de texto. El archivo DTD XML es el siguiente:
+
+```XML
+<!ELEMENT template (items)>
+<!ATTLIST template version CDATA #REQUIRED>
+<!ATTLIST template rectangleTolerance CDATA #IMPLIED>
+
+<!ELEMENT items (barcode|field|table)*>
+
+<!ELEMENT barcode EMPTY>
+<!ATTLIST barcode name CDATA #REQUIRED>
+<!ATTLIST barcode pageIndex CDATA #IMPLIED>
+<!ATTLIST barcode position CDATA #REQUIRED>
+<!ATTLIST barcode size CDATA #REQUIRED>
+
+<!ELEMENT field (fixed|regex|link)>
+<!ATTLIST field name CDATA #REQUIRED>
+<!ATTLIST field pageIndex CDATA #IMPLIED>
+
+<!ELEMENT fixed EMPTY>
+<!ATTLIST fixed position CDATA #REQUIRED>
+<!ATTLIST fixed size CDATA #REQUIRED>
+
+<!ELEMENT regex EMPTY>
+<!ATTLIST regex expression CDATA #REQUIRED>
+<!ATTLIST regex matchCase CDATA #IMPLIED>
+
+<!ELEMENT link EMPTY>
+<!ATTLIST link fieldName CDATA #REQUIRED>
+<!ATTLIST link searchArea CDATA #REQUIRED>
+<!ATTLIST link edges CDATA #REQUIRED>
+<!ATTLIST link autoScale CDATA #IMPLIED>
+
+<!ELEMENT table (layout|parameters)>
+<!ATTLIST table name CDATA #REQUIRED>
+<!ATTLIST table pageIndex CDATA #IMPLIED>
+
+<!ELEMENT layout EMPTY>
+<!ATTLIST layout verticalSeparators CDATA #REQUIRED>
+<!ATTLIST layout horizontalSeparators CDATA #REQUIRED>
+
+<!ELEMENT parameters EMPTY>
+<!ATTLIST parameters position CDATA #REQUIRED>
+<!ATTLIST parameters size CDATA #REQUIRED>
+<!ATTLIST parameters verticalSeparators CDATA #IMPLIED>
+<!ATTLIST parameters hasMergedCells CDATA #IMPLIED>
+<!ATTLIST parameters minRowCount CDATA #IMPLIED>
+<!ATTLIST parameters minColumnCount CDATA #IMPLIED>
+<!ATTLIST parameters minVerticalSpace CDATA #IMPLIED>
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para .NET</a>
+*   <a href="https://github.com/groupdocs-parser/GroupDocs.Parser-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Parser para Java</a>    
+
+### Aplicación gratuita de análisis de documentos en línea {#free-online-document-parser-app}
+
+Además de la biblioteca completa para .NET, ofrecemos aplicaciones gratuitas sencillas pero potentes.
+
+Le invitamos a analizar documentos y extraer datos de archivos PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/parser" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Parser App</a>.

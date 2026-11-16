@@ -1,0 +1,310 @@
+---
+title: "Eventos de conversión"
+sidebar_label: "Eventos de conversión"
+sidebar_key: "net-conversion-conversion-events"
+sidebar_position: 4
+description: "Suscribirse a los eventos del ciclo de vida del pipeline y a los eventos de conversión por resultado mediante el agregador tipificado `ConversionEvents` en GroupDocs.Conversion para .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/conversion-events.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "199adb0953c6cc05623e00bdc4cd68d9b94f32fda54dc13bd66144592ee0a3eb"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "f5c70cd16a1d10df83e3d1db8ca32f45f118fe414e25f4cd3cf372433c1a4815"
+translation_updated_at: "2026-11-16T07:11:29.831Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+A partir de **GroupDocs.Conversion for .NET v26.6**, los controladores de eventos de conversión se agrupan en un único objeto tipado: <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/conversionevents/" target="_blank" rel="nofollow noopener noreferrer">ConversionEvents</a>. Esto reemplaza los tres mecanismos previos de registro independientes:
+
+* La interfaz <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.reporting/iconverterlistener/" target="_blank" rel="nofollow noopener noreferrer">IConverterListener</a> asignada a <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/convertersettings/listener/" target="_blank" rel="nofollow noopener noreferrer">ConverterSettings.Listener</a>: para devoluciones de llamada del ciclo de vida de la canalización.
+* Propiedades de controlador por resultado en `ConverterSettings` (`OnConversionFailed`, `OnConversionByPageFailed`, `OnCompressionCompleted`).
+* Métodos en cadena fluida situados tras `WithOptions(...)` o `Compress(...)` (`.OnConversionCompleted(...)`, `.OnConversionFailed(...)`, `.OnCompressionCompleted(...)`).
+
+El agrupador se registra en el constructor de <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/converter/" target="_blank" rel="nofollow noopener noreferrer">Converter</a> mediante un nuevo parámetro de fábrica `events:`, o bien mediante la API fluida mediante el método `FluentConverter.WithEvents(...)`, en la etapa inicial.
+
+## Grupos de eventos {#event-groups}
+
+`ConversionEvents` expone tres grupos distintos de controladores.
+
+### Ciclo de vida de la canalización {#pipeline-lifecycle}
+
+Se activan **una sola vez por ejecución de conversión**, independientemente de la cantidad de documentos o páginas que genere dicha ejecución. Estos reemplazan las devoluciones de llamada `Started` / `Progress` / `Completed` de `IConverterListener`.
+
+| Controlador | Firma | Momento de activación |
+| --------- | ----------- | --------------- |
+| `OnConversionStarted` | `Action` | Una única vez, al iniciar la canalización de conversión |
+| `OnConversionProgress` | `Action<byte>` | Mientras la canalización se ejecuta, con el porcentaje de progreso actual (0–100) |
+| `OnConversionCompleted` | `Action` | Una única vez al finalizar la canalización, independientemente de si tuvo éxito o falló |
+
+
+:::warning[Reutilización de nombres – leer antes de actualizar]
+El nombre `OnConversionCompleted` se **reutiliza con nuevas semánticas** en v26.6. El método de cadena fluida previo a v26.6 `.OnConversionCompleted(Action<ConvertedContext>)` (por documento) ahora es `OnDocumentConverted` en el agrupador. El nuevo `ConversionEvents.OnConversionCompleted` es un controlador del ciclo de vida: su firma es `Action` (sin parámetros) y se activa una única vez al finalizar la canalización. Si copia un ejemplo de v26.5 o anterior esperando contexto por documento, cambie a `OnDocumentConverted`.
+:::
+
+
+### Por resultado {#per-result}
+
+Se dispara **una vez por cada elemento producido**: cada documento convertido, cada página convertida, cada archivo comprimido, incluidos los casos de error.
+
+| Controlador | Firma | Momento en que se dispara |
+| --------- | ----------- | --------------- |
+| `OnDocumentConverted` | `Action<ConvertedContext>` | Tras completarse correctamente la conversión de cada documento |
+| `OnDocumentFailed` | `Action<ConvertContext, Exception>` | Cuando la conversión de un documento genera una excepción |
+| `OnPageConverted` | `Action<ConvertedPageContext>` | Tras convertirse cada página en conversiones página por página |
+| `OnPageFailed` | `Action<ConvertContext, Exception>` | Cuando una única página falla durante la conversión página por página |
+| `OnCompressionCompleted` | `Action<Stream>` | Tras convertirse el contenido y empaquetarse en un archivo comprimido (véase [Extraer y convertir contenidos de un archivo](/net/conversion/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-contents-of-rar-or-zip-document-to-different-formats-and-compress/)) |
+
+Consulte [Objetos de contexto: guía completa](/net/conversion/developer-guide/basic-usage/context-objects-complete-guide/) para conocer las propiedades expuestas por `ConvertedContext`, `ConvertContext` y `ConvertedPageContext`.
+
+### Diagnóstico {#diagnostics}
+
+Informa de una condición detectada durante el procesamiento del documento de origen, en lugar del resultado de un elemento producido.
+
+| Controlador | Firma | Momento en que se dispara |
+| --------- | ----------- | --------------- |
+| `OnFontSubstituted` | `Action<FontSubstitutionContext>` | Una vez por cada fuente ausente distinta en un documento de origen, cuando dicha fuente se sustituye durante la conversión |
+
+Consulte [Notificaciones de sustitución de fuentes](#font-substitution-notifications) a continuación para obtener la referencia completa del controlador.
+
+## Registro de eventos con la API clásica {#registering-events-with-the-classic-api}
+
+Pase una fábrica `ConversionEvents` como tercer argumento al constructor `Converter`:
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Contracts;
+using GroupDocs.Conversion.Options.Convert;
+
+var events = new ConversionEvents
+{
+    // Pipeline lifecycle
+    OnConversionStarted   = ()      => Console.WriteLine("Conversion started"),
+    OnConversionProgress  = percent => Console.WriteLine($"... {percent}% ..."),
+    OnConversionCompleted = ()      => Console.WriteLine("Conversion finished"),
+
+    // Per-result
+    OnDocumentConverted = ctx       => Console.WriteLine($"Done: {ctx.SourceFileName} -> {ctx.ConvertedFormat}"),
+    OnDocumentFailed    = (ctx, ex) => Console.WriteLine($"Failed: {ctx.SourceFileName} ({ex.Message})"),
+    OnPageFailed        = (ctx, ex) => Console.WriteLine($"Page failed: {ex.Message}"),
+};
+
+using (var converter = new Converter(
+    "sample.docx",
+    () => new ConverterSettings(),
+    () => events))
+{
+    converter.Convert("converted.pdf", new PdfConvertOptions());
+}
+```
+
+## Registro de eventos con la API fluida {#registering-events-with-the-fluent-api}
+
+La API fluida expone un único método de entrada inicial: <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion/fluentconverter/withevents/" target="_blank" rel="nofollow noopener noreferrer">WithEvents</a>, que acepta una acción de constructor y reemplaza la cadena de métodos por método que anteriormente se colocaba tras `ConvertTo(...).WithOptions(...)`:
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Options.Convert;
+
+FluentConverter
+    .WithEvents(e =>
+    {
+        e.OnConversionStarted   = ()         => Console.WriteLine("Conversion started");
+        e.OnConversionProgress  = percent    => Console.WriteLine($"... {percent}% ...");
+        e.OnConversionCompleted = ()         => Console.WriteLine("Conversion finished");
+
+        e.OnDocumentConverted   = ctx        => Console.WriteLine($"Done: {ctx.SourceFileName}");
+        e.OnDocumentFailed      = (ctx, ex)  => Console.WriteLine($"Failed: {ex.Message}");
+        e.OnPageFailed          = (ctx, ex)  => Console.WriteLine($"Page failed: {ex.Message}");
+    })
+    .Load("sample.docx")
+    .ConvertTo("converted.pdf").WithOptions(new PdfConvertOptions())
+    .Convert();
+```
+
+`WithEvents` es una llamada temprana en el ciclo de vida: debe aparecer antes que `Load(...)`. Puede combinarse con `WithSettings(...)` en cualquier orden.
+
+## Controladores globales frente a controladores por llamada {#global-vs-per-call-handlers}
+
+Los controladores registrados en `ConversionEvents` son **globales**: su ciclo de vida se extiende durante toda la duración de la instancia de `Converter` y se activan en cada llamada a `Convert(...)`:
+
+```csharp
+using (var converter = new Converter("source.docx", () => new ConverterSettings(), () => events))
+{
+    converter.Convert("page1.pdf",  new PdfConvertOptions());   // events.OnDocumentConverted fires
+    converter.Convert("page2.tiff", new TiffConvertOptions());  // same global handler fires again
+}
+```
+
+`Convert(...)` sobrecargas que aceptan un `Action<ConvertedContext>` registra un manejador de resultados **por llamada** que tenga prioridad sobre el global `OnDocumentConverted` para esa única llamada:
+
+```csharp
+using (var converter = new Converter("source.docx", () => new ConverterSettings(), () => events))
+{
+    // Per-call handler - overrides events.OnDocumentConverted for THIS call only
+    converter.Convert(
+        new PdfConvertOptions(),
+        (ConvertedContext ctx) =>
+        {
+            using (var fileStream = File.Create("custom.pdf"))
+            {
+                ctx.ConvertedStream.CopyTo(fileStream);
+            }
+        });
+
+    // No per-call handler - events.OnDocumentConverted fires
+    converter.Convert("page2.pdf", new PdfConvertOptions());
+}
+```
+
+La regla de precedencia es `(perCall ?? global)?.Invoke(...)`: si se proporciona un controlador por llamada, el `OnDocumentConverted` global no se dispara para esa llamada. El resto de controladores por resultado (`OnDocumentFailed`, `OnPageConverted`, `OnPageFailed`, `OnCompressionCompleted`) y todos los controladores del ciclo de vida siempre son globales: no existe una sobrescritura por llamada.
+
+Entre llamadas consecutivas a `Convert(...)` sobre el mismo `Converter`, únicamente se restablece la ranura por llamada. La bolsa global `ConversionEvents` se conserva entre ejecuciones.
+
+## Manejo de la salida de archivo comprimido {#handling-compressed-archive-output}
+
+Al convertir y volver a comprimir el contenido del archivo (véase [Extraer y convertir el contenido de un archivo](/net/conversion/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-contents-of-rar-or-zip-document-to-different-formats-and-compress/)), `OnCompressionCompleted` se invoca una vez que el nuevo flujo de archivo esté listo:
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.FileTypes;
+using GroupDocs.Conversion.Options.Convert;
+
+FluentConverter
+    .WithEvents(e => e.OnCompressionCompleted = stream =>
+    {
+        using (var fileStream = File.Create("converted-documents.zip"))
+        {
+            stream.CopyTo(fileStream);
+        }
+    })
+    .Load("documents.rar")
+    .ConvertTo((SaveContext _) => new MemoryStream()).WithOptions(new PdfConvertOptions())
+    .Compress(new CompressionConvertOptions { Format = CompressionFileType.Zip })
+    .Convert();
+```
+
+La versión anterior de `.OnCompressionCompleted(stream => ...)`, colocada tras `.Compress(...)`, sigue funcionando, pero está obsoleta: la interfaz `IConversionCompressResultCompleted` que la declara está prevista para su eliminación en la versión v26.9.
+
+## Notificaciones de sustitución de fuentes {#font-substitution-notifications}
+
+`OnFontSubstituted` le notifica cada vez que una fuente referenciada en el documento de origen no está disponible y se sustituye durante la conversión, ya sea porque la fuente no está instalada en el equipo o porque ha configurado una regla <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.contracts/fontsubstitute/" target="_blank" rel="nofollow noopener noreferrer">FontSubstitute</a> (consulte [Especificar sustitución de fuentes](/net/conversion/developer-guide/advanced-usage/loading/load-options-for-different-document-types/load-wordprocessing-document-with-options/#specify-font-substitution)). El controlador recibe un `FontSubstitutionContext` que describe la sustitución.
+
+### Suscripción (API clásica) {#subscribe-classic-api}
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Contracts;
+using GroupDocs.Conversion.Options.Convert;
+
+var events = new ConversionEvents
+{
+    OnFontSubstituted = context =>
+    {
+        // Prefer the typed names when present; otherwise use the verbatim Reason.
+        var detail = context.OriginalFontName != null
+            ? $"{context.OriginalFontName} -> {context.SubstituteFontName}"
+            : context.Reason;
+        Console.WriteLine($"Font substituted in '{context.SourceFileName}': {detail}");
+    }
+};
+
+using (var converter = new Converter("source.docx", () => new ConverterSettings(), () => events))
+{
+    converter.Convert("output.pdf", new PdfConvertOptions());
+}
+```
+
+### Suscribirse (API fluida) {#subscribe-fluent-api}
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Options.Convert;
+
+FluentConverter
+    .WithEvents(e => e.OnFontSubstituted = ctx =>
+        Console.WriteLine($"Font substituted: {ctx.Reason ?? ctx.OriginalFontName}"))
+    .Load("source.docx")
+    .ConvertTo("output.pdf").WithOptions(new PdfConvertOptions())
+    .Convert();
+```
+
+### Notificar sobre una regla de sustitución proporcionada por el cliente {#notify-on-a-customer-supplied-substitution-rule}
+
+Cuando usted proporciona sus propias reglas de sustitución mediante las opciones de carga (compatible con documentos de procesamiento de texto, hojas de cálculo y PDF), `OnFontSubstituted` notifica cada regla que se aplica:
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Contracts;
+using GroupDocs.Conversion.Options.Convert;
+using GroupDocs.Conversion.Options.Load;
+
+using (var converter = new Converter(
+    "source.docx",
+    _ => new WordProcessingLoadOptions
+    {
+        FontSubstitutes = new List<FontSubstitute> { FontSubstitute.Create("MissingFont", "Arial") }
+    },
+    () => new ConverterSettings(),
+    () => events))
+{
+    converter.Convert("output.pdf", new PdfConvertOptions());
+}
+```
+
+### `FontSubstitutionContext` miembros {#fontsubstitutioncontext-members}
+
+| Miembro | Descripción |
+| -------- | ------------- |
+| `SourceFileName` | Nombre de archivo del documento de origen (un ID generado cuando el origen es un flujo no basado en archivo). |
+| `OriginalFontName` | Fuente referenciada por el documento pero no disponible. Puede ser `null` en formatos que solo informan texto descriptivo. |
+| `SubstituteFontName` | Fuente utilizada como sustitución. Puede ser `null` — lectura `Reason`. |
+| `Reason` | Mensaje de sustitución tal como se informó exactamente, literalmente. Incluye los nombres de ambas fuentes cuando los miembros tipificados son `null`. |
+
+Consulte [Objetos Contexto — Guía completa](/net/conversion/developer-guide/basic-usage/context-objects-complete-guide/#fontsubstitutioncontext) para obtener más detalles.
+
+### Documentos admitidos {#supported-documents}
+
+| Familia de documento | Sustitución de fuentes faltantes | Sustitución basada en reglas |
+| ----------------- | :-------------------------: | :------------------------: |
+| Procesamiento de textos, hojas de cálculo, PDF | ✔ | ✔ |
+| Presentaciones, diagramas, PCL, TeX | ✔ | - |
+
+Las conversiones de imágenes están fuera del alcance; consulte las notas de comportamiento a continuación.
+
+### Notas de comportamiento {#behavior-notes}
+
+- Se dispara una vez por fuente faltante distinta por documento de origen dentro de una única llamada a `Convert(...)` (deduplicado).
+- Se genera de forma síncrona en el hilo de conversión.
+- No se dispara para conversiones de *origen* de imagen (las imágenes rasterizadas no contienen fuentes). La conversión *hacia* una imagen sí informa sustituciones procedentes del documento de origen.
+- Para documentos de presentación, la detección de sustitución solo ocurre en Windows.
+
+## Compatibilidad con la API anterior {#compatibility-with-the-previous-api}
+
+Los mecanismos de registro anteriores siguen funcionando, pero están obsoletos y previstos para su eliminación en la versión **v26.9**:
+
+| Obsoleto (sigue funcionando en v26.6) | Reemplazo |
+| --------------------------------- | ------------- |
+| `ConverterSettings.Listener` (`IConverterListener.Started` / `Progress` / `Completed`) | `ConversionEvents.OnConversionStarted` / `OnConversionProgress` / `OnConversionCompleted` |
+| `ConverterSettings.OnConversionFailed` | `ConversionEvents.OnDocumentFailed` |
+| `ConverterSettings.OnConversionByPageFailed` | `ConversionEvents.OnPageFailed` |
+| `ConverterSettings.OnCompressionCompleted` | `ConversionEvents.OnCompressionCompleted` |
+| Cadena fluida `.OnConversionCompleted(...)` tras `WithOptions(...)` | `FluentConverter.WithEvents(e => e.OnDocumentConverted = ...)` |
+| Cadena fluida `.OnConversionFailed(...)` tras `WithOptions(...)` | `FluentConverter.WithEvents(e => e.OnDocumentFailed = ...)` |
+| Cadena fluida `.OnCompressionCompleted(...)` tras `.Compress(...)` (`IConversionCompressResultCompleted`) | `FluentConverter.WithEvents(e => e.OnCompressionCompleted = ...)` |
+
+Cuando se establecen valores tanto en ubicaciones obsoletas como en `ConversionEvents`, prevalece el agregador. Los controladores establecidos en `ConverterSettings` (incluido una instancia de `Listener`) se reenvían al interior del contenedor de eventos interno durante la construcción del convertidor.
+
+Consulte las [notas de migración](/net/conversion/developer-guide/migration-notes/) para obtener una guía paso a paso de actualización.

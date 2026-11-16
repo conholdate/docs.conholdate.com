@@ -1,0 +1,69 @@
+---
+title: "Convertir documentos PST o OST a distintos formatos"
+sidebar_label: "Convertir documentos PST o OST a distintos formatos"
+sidebar_key: "net-conversion-converting-conversion-options-by-document-family-convert-contents-of-pst-or-ost-document-to-different-formats"
+sidebar_position: 1
+description: "Siga esta guía y aprenda cómo convertir el contenido de documentos PST/OST a diferentes formatos según el tipo de contenido, utilizando GroupDocs.Conversion para .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-contents-of-pst-or-ost-document-to-different-formats.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "5702c317bec6d72d96426d177e0e66be6cf4e4fdf1871b881bcdd3ea5ba61f65"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "3b4703f2da12695c8e20b95b4bbc471f376d1bb68dfbecd9ad05023b28316be2"
+translation_updated_at: "2026-11-16T07:13:31.370Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Conversion ofrece una API flexible para controlar la conversión de documentos que contienen otros documentos. 
+
+El siguiente fragmento de código muestra cómo convertir cada archivo constituyente
+ del archivo de datos sin conexión de Outlook (OST) a un formato diferente según su tipo de contenido:
+
+```csharp
+var index = 1;
+LoadOptions LoadOptionsProvider(LoadContext loadContext)
+{
+    if (loadContext.SourceFormat == EmailFileType.Ost)
+    {
+        return new PersonalStorageLoadOptions
+        {
+            Folder = @"Root - Mailbox",
+            Depth = 2
+        };
+    }
+    return null;
+}
+
+Stream ConvertedStreamProvider(SaveContext saveContext)
+{
+    string outputFile = $"converted-{index++}.{saveContext.TargetFormat.Extension}";
+    return new FileStream(outputFile, FileMode.Create);
+}
+
+ConvertOptions ConvertOptionsProvider(ConvertContext convertContext)
+{
+    if (convertContext.SourceFormat == EmailFileType.Msg)
+    {
+        return new PdfConvertOptions();
+    }
+    return new WordProcessingConvertOptions();
+}
+
+using (var converter = new Converter("sample.ost", LoadOptionsProvider))
+{
+    converter.Convert(ConvertedStreamProvider, ConvertOptionsProvider);
+}
+
+```

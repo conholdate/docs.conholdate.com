@@ -1,0 +1,217 @@
+---
+title: "Convertir formatos de archivo (ZIP, 7z, TAR, RAR)"
+sidebar_label: "Convertir formatos de archivo (ZIP, 7z, TAR, RAR)"
+sidebar_key: "net-conversion-converting-conversion-options-by-document-family-convert-to-compression-with-advanced-options"
+sidebar_position: 19
+description: "Aprenda cómo convertir entre formatos de archivo comprimido (ZIP a 7z, TAR, etc.) utilizando `CompressionConvertOptions` en GroupDocs.Conversion para .NET."
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-to-compression-with-advanced-options.md"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "5ac8ba437b45d98c9098eadd5a5d12921d0a4931afebbca39545383f480a78a7"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "38a511764a27ff4cdc74632483aa898c45ab1ee6c33e504e5f8f411808258f3d"
+translation_updated_at: "2026-11-16T07:17:56.092Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+Esta guía muestra cómo convertir archivos comprimidos entre formatos (ZIP a 7z, ZIP a TAR, etc.) sin modificar los archivos que contienen. El formato del archivo comprimido cambia, pero su contenido permanece sin alterar.
+
+**Para extraer y convertir los archivos dentro de los archivos comprimidos**, consulte [Extraer y convertir el contenido de archivos comprimidos](/net/conversion/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-contents-of-rar-or-zip-document-to-different-formats-and-compress/).
+
+## Conversión básica de formato de archivo comprimido {#basic-archive-format-conversion}
+
+Convertir ZIP a 7z:
+
+```csharp
+using GroupDocs.Conversion;
+using GroupDocs.Conversion.Options.Convert;
+using GroupDocs.Conversion.FileTypes;
+
+using (var converter = new Converter("archive.zip"))
+{
+    var options = new CompressionConvertOptions
+    {
+        Format = CompressionFileType.SevenZ
+    };
+    converter.Convert("archive.7z", options);
+}
+```
+
+Convertir ZIP a TAR:
+
+```csharp
+using (var converter = new Converter("documents.zip"))
+{
+    var options = new CompressionConvertOptions
+    {
+        Format = CompressionFileType.Tar
+    };
+    converter.Convert("documents.tar", options);
+}
+```
+
+## Protección con contraseña {#password-protection}
+
+Añadir contraseña al archivo de salida:
+
+```csharp
+using (var converter = new Converter("data.zip"))
+{
+    var options = new CompressionConvertOptions
+    {
+        Format = CompressionFileType.SevenZ,
+        Password = "SecurePassword123"
+    };
+    converter.Convert("data-protected.7z", options);
+}
+```
+
+## Propiedades de CompressionConvertOptions {#compressionconvertoptions-properties}
+
+| Propiedad | Tipo | Descripción |
+| ---------- | ------ | ------------- |
+| <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert/convertoptions-1/format/" target="_blank" rel="nofollow noopener noreferrer">Format</a> | `CompressionFileType` | Formato de archivo de destino (ZIP, 7z, TAR, etc.) |
+| <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert/compressionconvertoptions/password" target="_blank" rel="nofollow noopener noreferrer">Password</a> | `string` | Contraseña opcional para proteger el archivo de salida |
+
+## Formatos de archivo admitidos {#supported-archive-formats}
+
+**Entrada (lectura):** ZIP, RAR, 7z, TAR, TAR.GZ, TAR.BZ2, TAR.XZ, CAB, LZ, CPIO, ISO
+
+**Salida (escritura):** ZIP, 7z, TAR, TAR.GZ, TAR.BZ2, TAR.XZ
+
+
+:::warning
+**Limitación de salida de RAR:** Los archivos RAR pueden leerse como entrada, pero **no pueden crearse como salida** debido a restricciones de licencia. Utilice ZIP, 7z o TAR como alternativas.
+:::
+
+
+## Comparación de formatos {#format-comparison}
+
+**ZIP** - Máxima compatibilidad, buena compresión, soporte universal
+**7z (SevenZ)** - Mejor relación de compresión, código abierto, requiere 7-Zip
+**TAR** - Estándar en Unix/Linux, preserva permisos, comúnmente se usa con compresión (TAR.GZ)
+**RAR** - Solo entrada, no se puede crear como salida
+
+## Procesamiento por lotes {#batch-processing}
+
+Convertir múltiples archivos comprimidos:
+
+```csharp
+string[] zipFiles = Directory.GetFiles(@"C:\archives", "*.zip");
+
+foreach (var zipFile in zipFiles)
+{
+    string outputFile = Path.Combine(
+        @"C:\converted",
+        Path.GetFileNameWithoutExtension(zipFile) + ".7z"
+    );
+
+    using (var converter = new Converter(zipFile))
+    {
+        var options = new CompressionConvertOptions
+        {
+            Format = CompressionFileType.SevenZ,
+            Password = "Batch2024"
+        };
+        converter.Convert(outputFile, options);
+    }
+}
+```
+
+## Escenarios comunes {#common-scenarios}
+
+**Distribución multiplataforma** (ZIP a TAR.GZ):
+
+```csharp
+using (var converter = new Converter("windows-software.zip"))
+{
+    var options = new CompressionConvertOptions
+    {
+        Format = CompressionFileType.Gz  // TAR.GZ
+    };
+    converter.Convert("unix-software.tar.gz", options);
+}
+```
+
+**Compresión máxima** (de ZIP a 7z):
+
+```csharp
+using (var converter = new Converter("large-dataset.zip"))
+{
+    var options = new CompressionConvertOptions
+    {
+        Format = CompressionFileType.SevenZ
+    };
+    converter.Convert("large-dataset.7z", options);
+}
+```
+
+**Conversión heredada de RAR** (RAR a ZIP):
+
+```csharp
+using (var converter = new Converter("old-archive.rar"))
+{
+    var options = new CompressionConvertOptions
+    {
+        Format = CompressionFileType.Zip
+    };
+    converter.Convert("new-archive.zip", options);
+}
+```
+
+## Alternativa a FluentConverter {#fluentconverter-alternative}
+
+También puede utilizar FluentConverter para la conversión de formatos de archivo:
+
+```csharp
+using GroupDocs.Conversion.Fluent;
+using GroupDocs.Conversion.Contracts;
+
+FluentConverter.Load("archive.zip")
+    .ConvertTo((SaveContext saveContext) => File.Create("archive.7z"))
+    .WithOptions(new CompressionConvertOptions
+    {
+        Format = CompressionFileType.SevenZ
+    })
+    .Convert();
+```
+
+La API de conversión estándar mostrada anteriormente es más sencilla para conversiones de formato básicas.
+
+## Limitaciones {#limitations}
+
+**No se pueden convertir documentos normales en archivos comprimidos:**
+
+```csharp
+// ❌ THIS WILL FAIL
+using (var converter = new Converter("document.pdf"))
+{
+    var options = new CompressionConvertOptions
+    {
+        Format = CompressionFileType.Zip
+    };
+    converter.Convert("output.zip", options);
+}
+```
+
+Los archivos comprimidos contienen múltiples archivos. Para extraer y convertir el contenido de los archivos comprimidos, consulte [Trabajar con archivos comprimidos](/net/conversion/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-contents-of-rar-or-zip-document-to-different-formats-and-compress/).
+
+## Véase también {#see-also}
+
+- [Trabajar con archivos comprimidos (ZIP, RAR, 7z, TAR)](/net/conversion/developer-guide/advanced-usage/converting/conversion-options-by-document-family/convert-contents-of-rar-or-zip-document-to-different-formats-and-compress/)
+- [Opciones comunes de conversión](/net/conversion/developer-guide/advanced-usage/converting/common-conversion-options/)
+- <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.options.convert/compressionconvertoptions/" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API CompressionConvertOptions</a>
+- <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.filetypes/compressionfiletype/" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API CompressionFileType</a>

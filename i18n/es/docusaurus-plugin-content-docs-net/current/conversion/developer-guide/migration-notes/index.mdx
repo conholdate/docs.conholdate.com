@@ -1,0 +1,179 @@
+---
+title: "Notas de migración"
+sidebar_label: "Notas de migración"
+sidebar_key: "net-conversion-tab"
+sidebar_position: 5
+description: "# Cómo migrar desde versiones anteriores de GroupDocs.Conversion para .NET"
+product: "conversion"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.8.0"
+version: "v26.8.0"
+source_repo: "conversion-net"
+source_path: "net/developer-guide/migration-notes.md/"
+source_commit: "ae53e8b8df19b14cb813176a9a94df272f6779aa"
+source_sha256: "6bb93ecf8bbb3c04532641b1e619a5e9451c4a2499387a2b9b9670e783d87049"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "a3296430a35d56d0c2b7d42a0d7bbdc022e85a8a7c1194ceff9e997f1060a6bc"
+translation_updated_at: "2026-11-16T08:14:41.933Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Conversion para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Migración a ConversionEvents (v26.6) {#migrating-to-conversionevents-v26-6}
+
+La versión 26.6 introduce el agregador [ConversionEvents](/net/conversion/developer-guide/advanced-usage/conversion-events/): un único objeto tipado que reemplaza tres rutas de registro previamente separadas: las propiedades por controlador en `ConverterSettings`, el `IConverterListener` asignado a `ConverterSettings.Listener` y los métodos encadenados de estilo fluido colocados tras `WithOptions(...)` o `Compress(...)`. Las interfaces anteriores siguen funcionando, pero están obsoletas y están programadas para su eliminación en la **v26.9**.
+
+Al mismo tiempo, se renombraron los eventos por resultado: el sustantivo pasó de “Conversion” a “Document” o “Page”, para que el grupo del ciclo de vida de la canalización pudiera reutilizar “Conversion”:
+
+| Nombre anterior | Nombre nuevo |
+| --- | --- |
+| `OnConversionCompleted` (por documento) | `OnDocumentConverted` |
+| `OnConversionFailed` (por documento) | `OnDocumentFailed` |
+| `OnConversionByPageCompleted` | `OnPageConverted` |
+| `OnConversionByPageFailed` | `OnPageFailed` |
+| `OnCompressionCompleted` | (sin cambios) |
+
+El nombre `OnConversionCompleted` se **reutiliza** para el nuevo evento del ciclo de vida (`Action`, sin parámetros, se dispara una vez al finalizar la canalización). La variante anterior por documento ahora es `OnDocumentConverted`.
+
+### API clásica {#classic-api}
+
+**Antes**: los controladores se establecían como propiedades individuales en `ConverterSettings`:
+
+```csharp
+var settings = new ConverterSettings();
+settings.OnConversionFailed       = (ctx, ex) => Log(ex);
+settings.OnConversionByPageFailed = (ctx, ex) => Log(ex);
+
+using (var converter = new Converter("sample.docx", () => settings))
+{
+    converter.Convert("converted.pdf", new PdfConvertOptions());
+}
+```
+
+**Después** - los controladores se agrupan en `ConversionEvents` y se pasa como la tercera fábrica:
+
+```csharp
+var events = new ConversionEvents
+{
+    OnDocumentConverted = ctx       => Console.WriteLine($"Done: {ctx.SourceFileName}"),
+    OnDocumentFailed    = (ctx, ex) => Log(ex),
+    OnPageFailed        = (ctx, ex) => Log(ex),
+};
+
+using (var converter = new Converter(
+    "sample.docx",
+    () => new ConverterSettings(),
+    () => events))
+{
+    converter.Convert("converted.pdf", new PdfConvertOptions());
+}
+```
+
+Se conservan las firmas existentes del constructor `Converter`: la fábrica `events:` se expone como una sobrecarga adicional, no se añade a las ya existentes.
+
+### API fluida {#fluent-api}
+
+**Antes**: los controladores se registraban mediante métodos encadenados en etapas tardías, colocados tras `ConvertTo(...).WithOptions(...)`:
+
+```csharp
+FluentConverter
+    .Load("sample.docx")
+    .ConvertTo("converted.pdf").WithOptions(new PdfConvertOptions())
+    .OnConversionCompleted(ctx => Console.WriteLine($"Done: {ctx.SourceFileName}"))
+    .OnConversionFailed((ctx, ex) => Log(ex))
+    .Convert();
+```
+
+**Después** - los controladores se agrupan en uno solo `WithEvents(...)` llamada de etapa de entrada colocada antes `Load(...)`:
+
+```csharp
+FluentConverter
+    .WithEvents(e =>
+    {
+        e.OnDocumentConverted = ctx       => Console.WriteLine($"Done: {ctx.SourceFileName}");
+        e.OnDocumentFailed    = (ctx, ex) => Log(ex);
+    })
+    .Load("sample.docx")
+    .ConvertTo("converted.pdf").WithOptions(new PdfConvertOptions())
+    .Convert();
+```
+
+### API fluida: resultado de compresión y entrega {#fluent-api-compression-result-delivery}
+
+**Antes** - el flujo del archivo comprimido se manejaba mediante `.OnCompressionCompleted(...)` colocado después de `.Compress(...)`:
+
+```csharp
+FluentConverter
+    .Load("documents.rar")
+    .ConvertTo((SaveContext _) => new MemoryStream()).WithOptions(new PdfConvertOptions())
+    .Compress(new CompressionConvertOptions { Format = CompressionFileType.Zip })
+    .OnCompressionCompleted(stream => HandleArchive(stream))
+    .Convert();
+```
+
+**Después** - el controlador se registra en la etapa de entrada mediante `WithEvents(...)`:
+
+```csharp
+FluentConverter
+    .WithEvents(e => e.OnCompressionCompleted = stream => HandleArchive(stream))
+    .Load("documents.rar")
+    .ConvertTo((SaveContext _) => new MemoryStream()).WithOptions(new PdfConvertOptions())
+    .Compress(new CompressionConvertOptions { Format = CompressionFileType.Zip })
+    .Convert();
+```
+
+El método chain sigue funcionando en la versión 26.6, pero la interfaz `IConversionCompressResultCompleted` que lo declara está marcada como obsoleta y está prevista su eliminación en la versión 26.9.
+
+### Ciclo de vida del pipeline: reemplazo de IConverterListener {#pipeline-lifecycle-replacing-iconverterlistener}
+
+**Antes** – implemente <a href="https://reference.groupdocs.com/conversion/net/groupdocs.conversion.reporting/iconverterlistener/" target="_blank" rel="nofollow noopener noreferrer">IConverterListener</a> y asigne la instancia a `ConverterSettings.Listener`:
+
+```csharp
+public class MyListener : IConverterListener
+{
+    public void Started()              => Console.WriteLine("Conversion started");
+    public void Progress(byte percent) => Console.WriteLine($"Progress: {percent}%");
+    public void Completed()            => Console.WriteLine("Conversion finished");
+}
+
+var settings = new ConverterSettings { Listener = new MyListener() };
+using (var converter = new Converter("sample.docx", () => settings))
+{
+    converter.Convert("converted.pdf", new PdfConvertOptions());
+}
+```
+
+**Después de** - registrar controladores de ciclo de vida directamente en `ConversionEvents`:
+
+```csharp
+var events = new ConversionEvents
+{
+    OnConversionStarted   = ()      => Console.WriteLine("Conversion started"),
+    OnConversionProgress  = percent => Console.WriteLine($"Progress: {percent}%"),
+    OnConversionCompleted = ()      => Console.WriteLine("Conversion finished"),
+};
+
+using (var converter = new Converter(
+    "sample.docx",
+    () => new ConverterSettings(),
+    () => events))
+{
+    converter.Convert("converted.pdf", new PdfConvertOptions());
+}
+```
+
+`ConverterSettings.Listener` sigue reenviando los callbacks `Started` / `Progress` / `Completed` al interior del contenedor de eventos en la versión 26.6; tanto `ConverterSettings.Listener` como la interfaz `IConverterListener` están marcados como obsoletos y están programados para su eliminación en la versión 26.9.
+
+### Prioridad por llamada frente a global {#per-call-vs-global-precedence}
+
+Los controladores registrados mediante `ConversionEvents` son **globales** y se ejecutan en cada llamada a `Convert(...)`. Las sobrecargas de `Convert(...)` que aceptan un `Action<ConvertedContext>` registran un controlador **por llamada**, el cual tiene prioridad sobre el `OnDocumentConverted` global únicamente para esa llamada específica; la regla de prioridad es `(perCall ?? global)?.Invoke(...)`. Entre ejecuciones consecutivas sobre el mismo convertidor, solo se restablece la ranura por llamada; el contenedor de eventos globales se conserva.
+
+Consulte [Eventos de conversión](/net/conversion/developer-guide/advanced-usage/conversion-events/) para obtener la referencia completa.
