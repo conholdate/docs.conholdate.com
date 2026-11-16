@@ -1,0 +1,147 @@
+---
+title: "Trabajar con encabezados y pies de página de hojas de cálculo"
+sidebar_label: "Trabajar con encabezados y pies de página"
+sidebar_key: "net-watermark-adding-watermarks-add-watermarks-to-spreadsheet-documents-working-with-worksheet-headers-and-footers"
+sidebar_position: 4
+description: "Este artículo explica cómo trabajar con encabezados y pies de página de hojas de cálculo al utilizar la API de GroupDocs para marcas de agua."
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-spreadsheet-documents/working-with-worksheet-headers-and-footers.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "a5b8bfc1c529302b7dd5b955032300c11dc191d685ed3bbb6f153a112b0cb45f"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "a94605875dbd13dbabec70237ef38a4cf73d4e9259e0bb8118008df6bad6460f"
+translation_updated_at: "2026-11-16T06:19:02.448Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Watermark para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## Extrayendo información sobre todas las cabeceras y pies de página en un documento de Excel {#extracting-information-about-all-headers-and-footers-in-an-excel-document}
+
+Puede extraer <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetworksheet/properties/headersfooters" target="_blank" rel="nofollow noopener noreferrer">information</a> información sobre todas las cabeceras y pies de página de un documento de Excel, como se muestra en el siguiente ejemplo de código.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetGetHeaderFooterInformation**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    foreach (SpreadsheetWorksheet worksheet in content.Worksheets)
+    {
+        foreach (SpreadsheetHeaderFooter headerFooter in worksheet.HeadersFooters)
+        {
+            Console.WriteLine(headerFooter.HeaderFooterType);
+            foreach (SpreadsheetHeaderFooterSection section in headerFooter.Sections)
+            {
+                Console.WriteLine(section.SectionType);
+                if (section.Image != null)
+                {
+                    Console.WriteLine(section.Image.Width);
+                    Console.WriteLine(section.Image.Height);
+                    Console.WriteLine(section.Image.GetBytes().Length);
+                }
+
+                Console.WriteLine(section.Script);
+            }
+        }
+    }
+}
+```
+
+## Borrar un encabezado o pie de página específico {#clearing-a-particular-header-or-footer}
+
+También puede borrar un <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetheaderfootersection" target="_blank" rel="nofollow noopener noreferrer">encabezado o pie de página específico</a> utilizando GroupDocs.Watermark, como se muestra en el siguiente ejemplo de código.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetClearHeaderFooter**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    foreach (SpreadsheetHeaderFooterSection section in content
+        .Worksheets[0].HeadersFooters[OfficeHeaderFooterType.HeaderPrimary]
+        .Sections)
+    {
+        section.Script = null;
+        section.Image = null;
+    }
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+## Borrar una sección específica del encabezado o pie de página {#clearing-a-particular-section-of-header-or-footer}
+
+Con GroupDocs.Watermark, también puede borrar una sección específica del <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetheaderfootersection" target="_blank" rel="nofollow noopener noreferrer">encabezado o pie de página</a>, como se muestra en el siguiente código de ejemplo.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetClearSectionOfHeaderFooter**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    SpreadsheetHeaderFooterSection section = content.Worksheets[0]
+        .HeadersFooters[OfficeHeaderFooterType.HeaderEven]
+        .Sections[SpreadsheetHeaderFooterSectionType.Left];
+        
+    section.Image = null;
+    section.Script = null;
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+## Agregar marca de agua a todas las imágenes en el encabezado y el pie de página {#adding-watermark-to-all-images-in-header-and-footer}
+
+GroupDocs.Watermark le permite agregar una marca de agua a <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetheaderfootersection/properties/image" target="_blank" rel="nofollow noopener noreferrer">images</a> dentro de cualquier encabezado o pie de página. Puede utilizar el siguiente ejemplo de código para lograrlo.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetAddWatermarkToImagesInHeaderFooter**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    // Initialize image or text watermark
+    TextWatermark watermark = new TextWatermark("Protected image", new Font("Arial", 8));
+    watermark.HorizontalAlignment = HorizontalAlignment.Center;
+    watermark.VerticalAlignment = VerticalAlignment.Center;
+    watermark.RotateAngle = 45;
+    watermark.SizingType = SizingType.ScaleToParentDimensions;
+    watermark.ScaleFactor = 1;
+
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    foreach (SpreadsheetWorksheet worksheet in content.Worksheets)
+    {
+        foreach (SpreadsheetHeaderFooter headerFooter in worksheet.HeadersFooters)
+        {
+            foreach (SpreadsheetHeaderFooterSection section in headerFooter.Sections)
+            {
+                if (section.Image != null)
+                {
+                    // Add watermark to the image
+                    section.Image.Add(watermark);
+                }
+            }
+        }
+    }
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```

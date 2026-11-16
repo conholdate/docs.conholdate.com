@@ -1,0 +1,108 @@
+---
+title: "Utilice políticas de redacción"
+sidebar_label: "Utilice políticas de redacción"
+sidebar_position: 4
+description: "Aprenda cómo abordarlo. Si tiene una política corporativa de eliminación de datos confidenciales en forma de una lista de reglas de redacción, no necesita especificarlas en su código. Puede especificar un documento XML que contenga una lista de redacciones preconfiguradas."
+product: "redaction"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "redaction-net"
+source_path: "net/developer-guide/advanced-usage/use-redaction-policies.md"
+source_commit: "7f9ba3f7099e7e45c9dcc8d1241caf5c3e6029ec"
+source_sha256: "1055a9256fb109d2c21f32b3c713169900275e8bfe0a087299be84a880e9d8d5"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "7d390476ae973ed66e70720646524296f1b3fcffff0e3a99de6ddc29663625bc"
+translation_updated_at: "2026-11-16T05:40:09.060Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Redaction para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Si dispone de una política corporativa de eliminación de datos confidenciales en forma de una lista de reglas de redacción, no es necesario que las especifique en su código. Puede especificar un documento XML que contenga una lista de redacciones preconfiguradas.
+
+A continuación se muestra un ejemplo de archivo XML de política de redacción (la asignación de propiedades de código es evidente):
+
+**RedactionPolicy.xml**
+
+```csharp
+<?xml version="1.0" encoding="utf-8"?>  
+<redactionPolicy xmlns="http://www.groupdocs.com/redaction">  
+  <regexRedaction regularExpression="(dolor)" actionType="ReplaceString" replacement="foobar" />  
+  <exactPhraseRedaction searchPhrase="dolor" caseSensitive="true" actionType="DrawBox" color="Red" />   
+  
+  <cellColumnRedaction regularExpression="(foo)bar1" replacement="[red1]" columnIndex="1" worksheetIndex="2" /> 
+  <cellColumnRedaction regularExpression="(foo)bar2" replacement="[red2]" wokrsheetName="Sample" /> 
+  
+  <eraseMetadataRedaction filter="All" />  
+  <metadataSearchRedaction filter="Title, Author" replacement="foobar" valueExpression="(metasearch)" keyExpression="" />  
+  
+  <annotationRedaction regularExpression="(anno1)" replacement="foobar" />  
+  <deleteAnnotationRedaction regularExpression="(anno2)" />  
+  
+  <imageAreaRedaction pointX="15" pointY="17" width="200" height="10" color="#AA50FC"  />  
+  <imageAreaRedaction pointX="110" pointY="120" width="60" height="20" color="Magenta"  />  
+</redactionPolicy> 
+```
+Puede utilizar el método RedactionPolicy.Save() para crear documentos XML con esta estructura, configurando las redacciones en tiempo de ejecución.
+
+El siguiente ejemplo muestra cómo guardar un <a href="https://reference.groupdocs.com/redaction/net/groupdocs.redaction/redactionpolicy" target="_blank" rel="nofollow noopener noreferrer">RedactionPolicy</a> en un archivo XML.
+ 
+**C#**
+
+```csharp
+RedactionPolicy policy = new RedactionPolicy(new Redaction[] {
+    new ExactPhraseRedaction("Redaction", new ReplacementOptions("[Product]")),
+    //new RegexRedaction("\\d{2}\\s*\\d{2}[^\\d]*\\d{6}", new ReplacementOptions(System.Drawing.Color.Blue)),
+    // Use GroupDocs.Redaction.Options.Drawing types instead of System.Drawing, which is scheduled for removal in future versions.    
+    new RegexRedaction("\\d{2}\\s*\\d{2}[^\\d]*\\d{6}", new ReplacementOptions(GroupDocs.Redaction.Options.Drawing.Color.Blue)),
+    new DeleteAnnotationRedaction(),
+    new EraseMetadataRedaction(MetadataFilters.All)
+});
+policy.Save(".\\MyPolicyFile.xml");
+```
+
+Puede tener tantas políticas como necesite, cargándolas para redactar sus documentos.
+
+El ejemplo siguiente muestra cómo aplicar una política de redacción a todos los archivos dentro de una carpeta de entrada determinada y guardarlos en una de las carpetas de salida: una para los archivos actualizados correctamente y otra para los archivos cuya actualización falló. La fecha y hora actuales se utilizan como parte del nombre del archivo de salida:
+
+**C#**
+
+```csharp
+RedactionPolicy policy = RedactionPolicy.Load("RedactionPolicy.xml");
+foreach (var fileEntry in Directory.GetFileNames("C:\\Inbound")) 
+{
+    using (Redactor redactor = new Redactor(Path.Combine("C:\\Inbound\\", fileEntry)))
+	{
+    	RedactorChangeLog result = redactor.Apply(policy);
+        String resultFolder = result.Status != RedactionStatus.Failed ? "C:\\Outbound\\Done\\" : "C:\\Outbound\\Failed\\";
+		using (Stream fileStream = File.Open(Path.Combine(resultFolder, fileEntry), FileMode.Open, FileAccess.ReadWrite))
+   		{
+      		redactor.Save(fileStream, new RasterizationOptions() { Enabled = false });
+   		}        
+	}
+}   
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para Java</a>
+    
+
+### Aplicación gratuita en línea para redactar documentos {#free-online-document-redaction-app}
+
+Junto con la completa biblioteca de .NET, ofrecemos aplicaciones sencillas pero potentes y gratuitas.
+
+Le damos la bienvenida a realizar redacciones en diversos formatos de documentos, como PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más, con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/redaction" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Redaction App</a>.

@@ -1,0 +1,284 @@
+---
+title: "Añadir marcas de agua de texto"
+sidebar_label: "Marcas de agua de texto"
+sidebar_key: "net-watermark-adding-watermarks-adding-text-watermarks"
+sidebar_position: 1
+description: "GroupDocs.Watermark permite agregar marcas de agua de texto a documentos que pueden estar compuestos por páginas, hojas de cálculo, diapositivas o marcos."
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/advanced-usage/adding-watermarks/adding-text-watermarks.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "bf60201f6c0a1aedec2594e551dccb3bc70b998827015f21d3ed8a2240727f97"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "500c75395795074e5d530f35a93c69d8ce8eb30bbc8deffd8a2f4b5ba19af881"
+translation_updated_at: "2026-11-16T06:23:50.737Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Watermark para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+Utilizar marcas de agua de texto es una estrategia inteligente para proteger la integridad del contenido de los documentos. Al superponer marcas de agua como “Confidencial” o “Borrador” sobre documentos sensibles, las organizaciones pueden disuadir su distribución no autorizada y reforzar los protocolos de seguridad de los datos. Esta indicación visual actúa como un recordatorio constante de la naturaleza restringida del documento, incentivando a las personas a manejarlo con la debida cautela. 
+
+El siguiente fragmento de código muestra cómo agregar una marca de agua de texto a un documento. 
+
+```csharp
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\sample.pdf"
+using (Watermarker watermarker = new Watermarker("sample.pdf"))
+{
+    // Initialize the font to be used for watermark
+    Font font = new Font("Arial", 19, FontStyle.Bold | FontStyle.Italic);
+
+    // Create the watermark object
+    TextWatermark watermark = new TextWatermark("Test watermark", font);
+
+    // Set watermark properties
+    watermark.ForegroundColor = Color.Red;
+    watermark.BackgroundColor = Color.Blue;
+    watermark.TextAlignment = TextAlignment.Right;
+    watermark.Opacity = 0.5;
+
+    // Add watermark
+    watermarker.Add(watermark);
+    watermarker.Save("output.pdf");
+}
+```
+
+Si el documento consta de varias partes (páginas, hojas de cálculo, diapositivas, marcos, etc.), la marca de agua se agregará a cada una de ellas. Puede configurar este comportamiento mediante la propiedad <a href="https://reference.groupdocs.com/watermark/net/groupdocs.watermark.watermarks/pagessetup/" target="_blank" rel="nofollow noopener noreferrer">PageSetup</a>:
+
+```csharp
+
+var pages = new System.Collections.Generic.List<int>() { 1, 3 };
+
+watermark.PagesSetup = new PagesSetup
+{
+    Pages = pages
+};
+
+```
+
+## Tamaño y posicionamiento de la marca de agua {#sizing-and-positioning-of-watermark}
+
+### Posicionamiento absoluto de la marca de agua {#absolute-watermark-positioning}
+
+Con GroupDocs.Watermark, también puede agregar una marca de agua en una posición absoluta dentro del documento. El siguiente ejemplo muestra cómo agregar una marca de agua de texto con posicionamiento absoluto utilizando las propiedades <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark/watermark/properties/x" target="_blank" rel="nofollow noopener noreferrer">X</a>, <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark/watermark/properties/y" target="_blank" rel="nofollow noopener noreferrer">Y</a>, <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark/watermark/properties/width" target="_blank" rel="nofollow noopener noreferrer">Width</a> y <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark/watermark/properties/height" target="_blank" rel="nofollow noopener noreferrer">Height</a>. Los valores de todas estas propiedades para el tamaño y posicionamiento absolutos se expresan en las unidades predeterminadas del documento.
+
+```csharp
+// Specify an absolute or relative path to your image. Ex: @"C:\Docs\image.png"
+using (Watermarker watermarker = new Watermarker("image.png"))
+{
+    Font font = new Font("Times New Roman", 8);
+    TextWatermark watermark = new TextWatermark("Test watermark", font);
+
+    // Set watermark coordinates
+    watermark.X = 10;
+    watermark.Y = 20;
+
+    // Set watermark size
+    watermark.Width = 100;
+    watermark.Height = 40;
+
+    watermarker.Add(watermark);
+    watermarker.Save("image.png");
+}
+```
+
+
+:::warning
+Tenga en cuenta que el origen de coordenadas puede ser distinto para distintos tipos de documentos (la posicionamiento relativo no tiene estas especificaciones y puede utilizarse como un enfoque unificado de posicionamiento).
+:::
+
+
+A continuación se indican los orígenes de coordenadas para distintos formatos de documentos.
+
+| Formato de documento | Unidad de medida | Origen de coordenadas |
+| --- | --- | --- |
+| PDF | Punto | Esquina inferior izquierda de la página |
+| Procesamiento de textos | Punto | Esquina superior izquierda de la página |
+| Hojas de cálculo | Punto | Esquina superior izquierda de la hoja de cálculo |
+| Presentaciones | Punto | Esquina superior izquierda de la diapositiva |
+| Imagen | Píxel | Esquina superior izquierda de la imagen (marco) |
+| Diagrama | Punto | Esquina superior izquierda de la página |
+
+###  Posicionamiento relativo de la marca de agua {#relative-watermark-positioning}
+
+En lugar de coordenadas exactas, también puede utilizar la alineación relativa al elemento primario. Además, puede establecer un desplazamiento respecto a los bordes del elemento primario mediante la propiedad <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark/watermark/properties/margins" target="_blank" rel="nofollow noopener noreferrer">Margins</a>, como se muestra en el ejemplo siguiente. El ejemplo siguiente muestra cómo alinear la marca de agua vertical y horizontalmente.
+
+```csharp
+// Specify an absolute or relative path to your image. Ex: @"C:\Docs\image.png"
+using (Watermarker watermarker = new Watermarker("image.png"))
+{
+    Font font = new Font("Calibri", 12);
+    TextWatermark watermark = new TextWatermark("Test watermark", font);
+    watermark.HorizontalAlignment = HorizontalAlignment.Right;
+    watermark.VerticalAlignment = VerticalAlignment.Bottom;
+
+    // Set absolute margins. Values are measured in document units.
+    watermark.Margins.Right = 10;
+    watermark.Margins.Bottom = 5;
+
+    watermarker.Add(watermark);
+    watermarker.Save("image.png");
+}
+```
+
+
+:::warning
+Las hojas de cálculo de Excel no tienen bordes explícitos; por lo tanto, se utiliza la celda no vacía más a la derecha y más abajo para determinar el tamaño del área de trabajo.
+:::
+
+
+### Uso de la propiedad MarginType {#using-the-margintype-property}
+
+En el ejemplo anterior se utilizan valores de margen absolutos. Esto significa que los márgenes se miden en unidades de documento. Sin embargo, también puede establecer márgenes relativos para una marca de agua (como se muestra en el ejemplo siguiente), utilizando la propiedad <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.watermarks/margins/properties/margintype" target="_blank" rel="nofollow noopener noreferrer">MarginType</a>
+
+```csharp
+// Specify an absolute or relative path to your image. Ex: @"C:\Docs\image.png"
+using (Watermarker watermarker = new Watermarker("image.png"))
+{
+    Font font = new Font("Calibri", 12);
+    TextWatermark watermark = new TextWatermark("Test watermark", font);
+    watermark.HorizontalAlignment = HorizontalAlignment.Right;
+    watermark.VerticalAlignment = VerticalAlignment.Bottom;
+
+    // Set relative margins. Margin value will be interpreted as a portion
+    // of appropriate parent dimension. If this type is chosen, margin value
+    // must be between 0.0 and 1.0.
+    watermark.Margins.MarginType = MarginType.RelativeToParentDimensions;
+    watermark.Margins.Right = 0.1;
+    watermark.Margins.Bottom = 0.2;
+
+    watermarker.Add(watermark);
+    watermarker.Save("image.png");
+}
+```
+
+### Tipos de tamaño {#size-types}
+
+En la mayoría de los casos, para agregar una marca de agua con buen aspecto, debe considerar el tamaño de la página/diapositiva/marco en el que se colocará. Las propiedades <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark/watermark/properties/sizingtype" target="_blank" rel="nofollow noopener noreferrer">SizingType</a> y <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark/watermark/properties/scalefactor" target="_blank" rel="nofollow noopener noreferrer">ScaleFactor</a> pueden utilizarse para escalar la marca de agua según el tamaño del elemento primario.
+
+```csharp
+// Specify an absolute or relative path to your image. Ex: @"C:\Docs\image.png"
+using (Watermarker watermarker = new Watermarker("image.png"))
+{
+    Font font = new Font("Calibri", 12);
+    TextWatermark watermark = new TextWatermark("This is a test watermark", font);
+
+    // Set sizing type
+    watermark.SizingType = SizingType.ScaleToParentDimensions;
+
+    // Set watermark scale
+    watermark.ScaleFactor = 0.5;
+
+    watermarker.Add(watermark);
+    watermarker.Save("image.png");
+}
+```
+
+
+:::info
+El uso de tamaños y posiciones relativas es la forma más sencilla de agregar una marca de agua a un documento de cualquier tipo.
+:::
+
+
+### Rotación de la marca de agua {#watermark-rotation}
+
+La API de GroupDocs.Watermark también admite la rotación de la marca de agua. Puede utilizar la propiedad <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark/watermark/properties/rotateangle" target="_blank" rel="nofollow noopener noreferrer">RotateAngle</a> para definir el ángulo de rotación de la marca de agua en grados. Un valor positivo indica una rotación en sentido horario.
+
+```csharp
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\test.docx"
+using (Watermarker watermarker = new Watermarker("test.docx"))
+{
+    Font font = new Font("Calibri", 8);
+    TextWatermark watermark = new TextWatermark("Test watermark", font);
+    watermark.HorizontalAlignment = HorizontalAlignment.Right;
+    watermark.VerticalAlignment = VerticalAlignment.Top;
+    watermark.SizingType = SizingType.ScaleToParentDimensions;
+    watermark.ScaleFactor = 0.5;
+
+    // Set rotation angle
+    watermark.RotateAngle = 45;
+
+    watermarker.Add(watermark);
+    watermarker.Save("test.docx");
+}
+```
+
+Si se establece un ángulo de rotación, se asume que el tamaño de la marca de agua es igual al tamaño del cuadro delimitador alineado con los ejes. La siguiente imagen ilustra qué es el cuadro delimitador de la marca de agua y cómo se utiliza para dimensionarla y posicionarla. La imagen muestra el resultado de la ejecución del fragmento de código anterior. Los límites reales de la marca de agua están coloreados en azul y el cuadro delimitador en rojo. Como puede verse, el tamaño del cuadro delimitador se utiliza para calcular el tamaño relativo de la marca de agua.
+
+![adding-text-watermarks](/net/watermark/images/adding-text-watermarks.png)
+
+### Uso de fuentes personalizadas {#using-custom-fonts}
+
+La API de GroupDocs.Watermark permite utilizar fuentes TrueType personalizadas. Para ello, puede configurar la propiedad <a href="https://reference.groupdocs.com/watermark/net/groupdocs.watermark.watermarks/font/folderpath/" target="_blank" rel="nofollow noopener noreferrer">FolderPath</a> mediante el constructor de la clase Font, pasando como parámetro la ruta de una carpeta que contenga los archivos de fuentes.
+
+```csharp
+var fontsFolder = @"c:\CustomFonts\";
+using (Watermarker watermarker = new Watermarker("test.pdf"))
+{
+    // Initialize the font to be used for watermark and a folder which contains that font
+    Font font = new Font("CustomFontName", fontsFolder, 36);
+
+    // Create the watermark object
+    TextWatermark watermark = new TextWatermark("Test watermark", font);
+
+    // Set watermark properties
+    watermark.ForegroundColor = Color.Blue;                
+    watermark.Opacity = 0.5;
+
+    watermark.X = 10;
+    watermark.Y = 10;
+
+    // Add watermark
+    watermarker.Add(watermark);
+
+    watermarker.Save("result.pdf");
+}
+```
+
+### Considerando los márgenes del documento padre {#considering-parent-margins}
+
+En la mayoría de los formatos de documento, puede establecer los márgenes de página al trabajar con un documento. De forma predeterminada, GroupDocs.Watermark ignora los márgenes del documento y utiliza el espacio máximo disponible para la inserción de marcas de agua, como se muestra en la imagen siguiente.
+
+![adding-text-watermarks_1](/net/watermark/images/adding-text-watermarks_1.png)
+
+Como puede verse, la marca de agua se extiende más allá de los márgenes de la página. Para modificar este comportamiento, establezca la propiedad <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark/watermark/properties/considerparentmargins" target="_blank" rel="nofollow noopener noreferrer">ConsiderParentMargins</a> en `true` (como se muestra en el ejemplo siguiente).
+
+
+```csharp
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\input.vsdx"
+using (Watermarker watermarker = new Watermarker("input.vsdx"))
+{
+    TextWatermark watermark = new TextWatermark("Test watermark", new Font("Arial", 42));
+    watermark.HorizontalAlignment = HorizontalAlignment.Right;
+    watermark.VerticalAlignment = VerticalAlignment.Top;
+    watermark.SizingType = SizingType.ScaleToParentDimensions;
+    watermark.ScaleFactor = 1;
+    watermark.RotateAngle = 45;
+    watermark.ForegroundColor = Color.Red;
+    watermark.BackgroundColor = Color.Aqua;
+
+    // Add watermark considering parent margins
+    watermark.ConsiderParentMargins = true;
+
+    watermarker.Add(watermark);
+    watermarker.Save("input.vsdx");
+}
+```
+
+Ahora, la marca de agua está alineada con respecto a los márgenes de la página.
+
+![adding-text-watermarks_2](/net/watermark/images/adding-text-watermarks_2.png)
+
+## Marcas de agua en documentos de distintos tipos {#watermark-in-documents-of-different-types}
+
+Las marcas de agua en documentos de distintos tipos se representan mediante objetos diferentes. Algunos de estos objetos no admiten ciertas propiedades de marca de agua. Por ejemplo, no se puede establecer el color de fondo para el objeto WordArt, que se utiliza como marca de agua de texto en un documento de Word. La lista completa de propiedades admitidas para todos los tipos de documentos está disponible en [Resumen de características](/net/watermark/getting-started/features-overview/).

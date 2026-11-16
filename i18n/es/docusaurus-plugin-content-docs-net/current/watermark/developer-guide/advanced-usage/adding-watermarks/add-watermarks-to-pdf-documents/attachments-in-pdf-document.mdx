@@ -1,0 +1,119 @@
+---
+title: "Adjuntos en documentos PDF"
+sidebar_label: "Adjuntos en documentos PDF"
+sidebar_key: "net-watermark-adding-watermarks-add-watermarks-to-pdf-documents-attachments-in-pdf-document"
+sidebar_position: 1
+description: "Este artículo explica cómo trabajar con archivos adjuntos PDF al utilizar la API de GroupDocs Watermarking."
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-pdf-documents/attachments-in-pdf-document.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "50ab58a5fe0d9b0c9c2b426e23593a723651c645fd1c0cb2bb853438cce87a1a"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "0a66b11be9e6153f0c7a0a573a7ab066bffbde4aa21a833f05e20878b4338248"
+translation_updated_at: "2026-11-16T06:09:08.984Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Watermark para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## Extraer todos los adjuntos de un documento PDF {#extract-all-attachments-from-pdf-document}
+
+La API de GroupDocs.Watermark le permite extraer <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfcontent/properties/attachments" target="_blank" rel="nofollow noopener noreferrer">attachments</a> de un documento PDF. El siguiente código realiza esta funcionalidad.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfExtractAllAttachments**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    foreach (PdfAttachment attachment in pdfContent.Attachments)
+    {
+        Console.WriteLine("Name: {0}", attachment.Name);
+        Console.WriteLine("Description: {0}", attachment.Description);
+        Console.WriteLine("File type: {0}", attachment.GetDocumentInfo().FileType);
+
+        // Save the attached file on disk
+        File.WriteAllBytes(Path.Combine("SampleFiles\Output", attachment.Name), attachment.Content);
+    }
+}
+```
+
+## Agregar un archivo adjunto a un documento PDF {#add-an-attachment-to-pdf-document}
+
+La API también le permite agregar archivos adjuntos al documento PDF. El siguiente fragmento de código muestra cómo eliminar un archivo adjunto
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfAddAttachment**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+
+    // Add the attachment
+    pdfContent.Attachments.Add(File.ReadAllBytes("sample.docx"), "sample doc", "sample doc as attachment");
+
+    // Save changes
+    watermarker.Save("document.pdf");
+}
+```
+
+## Eliminar adjunto de un documento PDF {#remove-attachment-from-pdf-document}
+
+La API también le permite eliminar adjuntos del documento PDF. El siguiente fragmento de código muestra cómo eliminar un adjunto.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfRemoveAttachment**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    for (int i = pdfContent.Attachments.Count - 1; i >= 0; i--)
+    {
+        PdfAttachment attachment = pdfContent.Attachments[i];
+
+        // Remove all attached pdf files with a particular name
+        if (attachment.Name.Contains("sample") && attachment.GetDocumentInfo().FileType == FileType.DOCX)
+        {
+            pdfContent.Attachments.RemoveAt(i);
+        }
+    }
+
+    watermarker.Save("document.pdf");
+}
+```
+
+## Buscar adjuntos de imágenes {#search-for-images-attachments}
+
+En caso de que desee buscar todos los adjuntos de imágenes en un documento PDF, puede utilizar GroupDocs.Watermark. El siguiente ejemplo de código muestra cómo buscar los adjuntos de imágenes de un documento PDF.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfSearchImageInAttachment**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    // Consider only the attached images
+    watermarker.SearchableObjects.PdfSearchableObjects = PdfSearchableObjects.AttachedImages;
+
+    // Search for similar images
+    WatermarkableImageCollection possibleWatermarks = watermarker.GetImages();
+    Console.WriteLine("Found {0} image(s).", possibleWatermarks.Count);
+}
+```

@@ -1,0 +1,142 @@
+---
+title: "Redacción de texto"
+sidebar_label: "Redacción de texto"
+sidebar_key: "net-redaction-text-redactions"
+sidebar_position: 5
+description: "Este artículo explica cómo la API de redacción en C# le permite redactar fácilmente datos de naturaleza sensible o privada en sus documentos. Puede aplicar redacción de texto mediante una frase exacta o una expresión regular para documentos de distintos formatos, como PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y otros."
+product: "redaction"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "redaction-net"
+source_path: "net/developer-guide/basic-usage/text-redactions.md"
+source_commit: "7f9ba3f7099e7e45c9dcc8d1241caf5c3e6029ec"
+source_sha256: "f623607de4055b1e3f522ed34981db21e0acf50f65117e319a91e76fdd64e582"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "a91c43f2e9c2f718d889251a3692334263756e6d8ff82fa91ec01f6f4ff35f61"
+translation_updated_at: "2026-11-16T05:58:20.565Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Redaction para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Redaction permite redactar fácilmente datos de naturaleza confidencial o privada en sus documentos. El caso de redacción más común es eliminar un texto de un documento.
+
+Con la API de GroupDocs.Redaction puede aplicar redacción de texto mediante una frase exacta o una <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expressions" target="_blank" rel="nofollow noopener noreferrer">expresión regular</a> para documentos de distintos formatos, como PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y otros. Consulte la lista completa en el artículo sobre [formatos de documento admitidos](/net/redaction/getting-started/supported-document-formats/).
+
+## Utilizar la redacción por frase exacta {#use-exact-phrase-redaction}
+
+En el siguiente ejemplo, aplicamos una redacción de texto, reemplazando la frase exacta personal "John Doe" por "\[personal\]" (o cualquier código de excepción):
+
+**C#**
+
+```csharp
+using (Redactor redactor = new Redactor(@"sample.docx"))
+{
+  redactor.Apply(new ExactPhraseRedaction("John Doe", new ReplacementOptions("[personal]")));
+  redactor.Save();
+}
+```
+
+De forma predeterminada, la búsqueda de fases exactas no distingue entre mayúsculas y minúsculas. Para una redacción sensible a mayúsculas y minúsculas, existe un parámetro de constructor y una propiedad pública correspondiente:
+
+**C#**
+
+```csharp
+using (Redactor redactor = new Redactor(@"sample.docx"))
+{
+  redactor.Apply(new ExactPhraseRedaction("John Doe", true /*isCaseSensitive*/, new ReplacementOptions("[personal]")));
+  redactor.Save();
+}
+```
+
+Si necesita un recuadro de color sobre el texto censurado, puede utilizar un color en lugar de una cadena de reemplazo. La censura eliminará el texto coincidente y colocará un rectángulo del color especificado en su lugar:
+
+**C#**
+
+```csharp
+using GroupDocs.Redaction.Options.Drawing;
+
+using (Redactor redactor = new Redactor(@"sample.docx"))
+{
+  //redactor.Apply(new ExactPhraseRedaction("John Doe", new ReplacementOptions(System.Drawing.Color.Black)));
+  // Use GroupDocs.Redaction.Options.Drawing types instead of System.Drawing, which is scheduled for removal in future versions.
+  redactor.Apply(new ExactPhraseRedaction("John Doe", new ReplacementOptions(Color.Black)));
+  redactor.Save();
+}
+```
+
+Es posible que necesite aplicar redacción a un documento de derecha a izquierda, como árabe o hebreo. El siguiente ejemplo demuestra cómo aplicar `ExactPhraseRedaction` a un documento PDF en árabe:
+
+**C#**
+
+```csharp
+using (Redactor redactor = new Redactor("Arabic.pdf"))
+{
+    ExactPhraseRedaction red = new ExactPhraseRedaction("أﺑﺠﺪ", new ReplacementOptions("[test]"));
+    red.IsRightToLeft = true;
+    
+    redactor.Apply(red);
+    redactor.Save();
+}
+```
+
+## Utilizar expresiones regulares {#use-regular-expression}
+
+En segundo plano, la redacción de «frase exacta» se realiza mediante expresiones regulares, que constituyen el enfoque básico para la redacción. En el ejemplo siguiente, se redacta cualquier texto que coincida con el patrón «2 dígitos, espacio o nada, 2 dígitos, de nuevo espacio y 6 dígitos», utilizando un recuadro de color azul:
+
+**C#**
+
+```csharp
+using GroupDocs.Redaction.Options.Drawing;
+
+using (Redactor redactor = new Redactor(@"sample.docx"))
+{
+  //redactor.Apply(new RegexRedaction("\\d{2}\\s*\\d{2}[^\\d]*\\d{6}", new ReplacementOptions(System.Drawing.Color.Blue)));
+  redactor.Apply(new RegexRedaction("\\d{2}\\s*\\d{2}[^\\d]*\\d{6}", new ReplacementOptions(Color.Blue)));
+  redactor.Save();
+}
+```
+
+Si necesita aplicar una redacción a un párrafo completo, también podría necesitar utilizar RegexRedaction. El siguiente ejemplo demuestra cómo redactar todo un párrafo en un documento PDF:
+
+**C#**
+
+```csharp
+using GroupDocs.Redaction.Options.Drawing;
+
+using (Redactor redactor = new Redactor("LoremIpsum.pdf"))
+{
+    //redactor.Apply(new RegexRedaction("(Lorem(\n|.)+?urna)", new ReplacementOptions(System.Drawing.Color.Red)));
+    redactor.Apply(new RegexRedaction("(Lorem(\n|.)+?urna)", new ReplacementOptions(Color.Red)));
+    redactor.Save();
+}
+```
+
+
+## Más recursos {#more-resources}
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre las funciones de redacción de documentos, consulte la [sección de uso avanzado](/net/redaction/developer-guide/advanced-usage/).
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para Java</a>
+    
+
+### Aplicación gratuita en línea para redactar documentos {#free-online-document-redaction-app}
+
+Junto con la completa biblioteca de .NET, ofrecemos aplicaciones sencillas pero potentes y gratuitas.
+
+Le damos la bienvenida a realizar redacciones en diversos formatos de documentos, como PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más, con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/redaction" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Redaction App</a>.

@@ -1,0 +1,84 @@
+---
+title: "Notas de migración"
+sidebar_label: "Notas de migración"
+sidebar_key: "net-redaction-tab"
+sidebar_position: 3
+description: ""
+product: "redaction"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "redaction-net"
+source_path: "net/developer-guide/migration-notes.md/"
+source_commit: "7f9ba3f7099e7e45c9dcc8d1241caf5c3e6029ec"
+source_sha256: "72a01bbaffd3c9d2b9bcd12c790d363080c96d5aaf03304264569e28ee0a803a"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "774d91fe93e4cb8c364502060db8a8b32f4bae78c45d28dc1ae4f924f86ab781"
+translation_updated_at: "2026-11-16T05:58:43.028Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Redaction para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+### ¿Por qué migrar? {#why-to-migrate}
+
+  
+A continuación se presentan las principales razones para utilizar la nueva API actualizada proporcionada por GroupDocs.Redaction para .NET desde la versión 19.9:
+
+*   **Clase Redactor** introducida como **único punto de entrada** para gestionar el proceso de redacción de documentos (en lugar de la **clase Document** de versiones anteriores).
+    
+*   Los métodos **RedactWith()** de la clase **Document** se reemplazaron por métodos similares **Apply()** en la clase **Redactor**.
+    
+*   El método **Document.Save(Stream, SaveOptions)** se reemplazó por **Redactor.Save(Stream, RasterizationOptions)**.
+*   El constructor **LoadOptions(DocumentFormatConfiguration)** se eliminó.  
+    
+*   Las clases de excepción y opción se colocaron en espacios de nombres separados.   
+    
+*   **RedactionSummary** se renombró a **RedactorChangeLog**, **RedactionLogEntry** a **RedactorLogEntry** y **MetadataFilter** a **MetadataFilters**.  
+    
+*   Se eliminaron los miembros obsoletos de la API pública.
+    
+*   Se agregaron varias clases de excepciones nuevas y una clase base de excepción para las excepciones de GroupDocs.Redaction.  
+    
+
+### ¿Cómo migrar? {#how-to-migrate}
+
+El siguiente ejemplo demuestra cómo redactar un documento de Microsoft Office Word y volcar los estados de las redacciones aplicadas utilizando la API antigua y la nueva:  
+
+**Estilo de codificación antiguo**
+
+```csharp
+using (Document doc = Redactor.Load(@"Documents/Doc/sample.docx"))
+{
+    // Here we can use document instance to perform redactions
+	RedactionSummary summary = doc.RedactWith(new ExactPhraseRedaction("John Doe", new ReplacementOptions("[personal]")));
+	foreach (RedactionLogEntry entry in summary.RedactionLog)
+	{
+		Console.WriteLine(entry.Status.ToString());
+	}
+    doc.Save();
+}
+```
+
+**Nuevo estilo de codificación**
+
+```csharp
+using (Redactor redactor = new Redactor(@"Documents/Doc/sample.docx"))
+{
+    // Here we can use document instance to perform redactions
+    RedactorChangeLog result = redactor.Apply(new ExactPhraseRedaction("John Doe", new ReplacementOptions("[personal]")));
+	foreach (RedactorLogEntry entry in result.RedactionLog)
+	{
+		Console.WriteLine(entry.Status.ToString());
+	}
+	redactor.Save();
+}
+```
+
+Para obtener más ejemplos de código y casos de uso específicos, consulte nuestra [Guía para desarrolladores](/net/redaction/developer-guide/) o los ejemplos y casos de uso en <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GitHub</a>.

@@ -1,0 +1,158 @@
+---
+title: "Redacciones de imágenes"
+sidebar_label: "Redacciones de imágenes"
+sidebar_key: "net-redaction-image-redactions"
+sidebar_position: 9
+description: "Este artículo muestra cómo redactar datos de naturaleza confidencial en imágenes de diversos formatos, como JPG, PNG, TIFF y otros."
+product: "redaction"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "redaction-net"
+source_path: "net/developer-guide/basic-usage/image-redactions.md"
+source_commit: "7f9ba3f7099e7e45c9dcc8d1241caf5c3e6029ec"
+source_sha256: "7a4d21ce0c1a1ad92bd590a56992f092de742a3098db8c908e30d7aa59686b42"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "938ed2449bca9bcee482bc2931da41f1892568b3e8118dfa2d1c206ef9cdeecf"
+translation_updated_at: "2026-11-16T05:45:02.279Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Redaction para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Redactions proporciona un conjunto de funcionalidades para redactar datos de naturaleza confidencial en imágenes de diversos formatos, como JPG, PNG, TIFF y otros. Consulte la lista completa en el artículo [formatos de documento admitidos](/net/redaction/getting-started/supported-document-formats/).
+
+Desde la versión 21.3, GroupDocs.Redaction admite dos métodos para redactar imágenes, tanto en archivos de imagen independientes como en imágenes incrustadas:
+*   Puede colocar un rectángulo de color sobre un área determinada, como un encabezado, un pie de página o una zona donde se espera que aparezcan los datos del cliente.
+*   Puede utilizar cualquier motor OCR de terceros para procesar la imagen, buscar texto en ella y redactar los datos confidenciales presentes en la imagen.   
+
+GroupDocs.Redaction para .NET también le permite modificar los metadatos de la imagen (por ejemplo, editar los datos EXIF de una imagen o actuar como un “borrador de EXIF”).
+
+## Redactar un área de imagen {#redact-image-area}
+
+Para redactar un área de imagen, debe utilizar la clase <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/imagearearedaction" target="_blank" rel="nofollow noopener noreferrer">ImageAreaRedaction</a>:
+
+**C#**
+
+```csharp
+using GroupDocs.Redaction.Options.Drawing;
+
+using (Redactor redactor = new Redactor("D:\\test.jpg"))
+{
+   //System.Drawing.Point samplePoint = new System.Drawing.Point(516, 311);
+   //System.Drawing.Size sampleSize = new System.Drawing.Size(170, 35);
+   // Use GroupDocs.Redaction.Options.Drawing types instead of System.Drawing, which is scheduled for removal in future versions.
+   Point samplePoint = new Point(516, 311);
+   Size sampleSize = new Size(170, 35);
+   RedactorChangeLog result = redactor.Apply(new ImageAreaRedaction(samplePoint,
+                new RegionReplacementOptions(Color.Blue, sampleSize)));
+   if (result.Status != RedactionStatus.Failed)
+   {
+      redactor.Save();
+   };
+}
+```
+
+Si la redacción no se puede aplicar a este tipo de archivos, por ejemplo, un documento de MS Word sin imágenes incrustadas, <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactorchangelog/properties/status" target="_blank" rel="nofollow noopener noreferrer">RedactorChangeLog.Status</a> se <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactionstatus" target="_blank" rel="nofollow noopener noreferrer">RedactionStatus.Skipped</a>.
+
+## Redactar texto reconocido en una imagen {#redact-recognized-text-from-an-image}
+
+Para habilitar el procesamiento OCR y buscar texto mediante expresiones regulares, debe implementar la interfaz <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.integration.ocr/iocrconnector" target="_blank" rel="nofollow noopener noreferrer">IOcrConnector</a> y pasar la instancia al constructor de <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.options/redactorsettings" target="_blank" rel="nofollow noopener noreferrer">RedactorSettings</a>. Para obtener más detalles, consulte el artículo [Conceptos básicos de uso de OCR](/net/redaction/developer-guide/advanced-usage/using-ocr/ocr-usage-basics/).
+
+**C#**
+
+```csharp
+using GroupDocs.Redaction.Options.Drawing;
+
+using (Redactor redactor = new Redactor("D:\\test.jpg", new LoadOptions(), new RedactorSettings(new MyCustomOcrConnector())))
+{
+   //RedactorChangeLog result = redactor.Apply(new RegexRedaction("\\d{4}", new ReplacementOptions(System.Drawing.Color.Blue)));
+   RedactorChangeLog result = redactor.Apply(new RegexRedaction("\\d{4}", new ReplacementOptions(Color.Blue)));
+   if (result.Status != RedactionStatus.Failed)
+   {
+      redactor.Save();
+   };
+}
+```
+
+En el ejemplo anterior, la clase **MyCustomOcrConnector** implementa la interfaz <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.integration.ocr/iocrconnector" target="_blank" rel="nofollow noopener noreferrer">IOcrConnector</a>.
+
+## Limpiar metadatos de la imagen {#clean-image-metadata}
+
+El siguiente ejemplo muestra cómo editar los datos EXIF (borrarlos) de una foto o cualquier otra imagen:
+
+**C#**
+
+```csharp
+using (Redactor redactor = new Redactor("D:\\photo.jpg"))
+{
+    redactor.Apply(new EraseMetadataRedaction(MetadataFilters.All));
+    // Save the document to "*_Redacted.*" file in original format
+    redactor.Save(new SaveOptions() { AddSuffix = true, RasterizeToPDF = false });
+}
+```
+
+Si la redacción no se puede aplicar a este tipo de archivos, por ejemplo, imágenes BMP, <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactorchangelog/properties/status" target="_blank" rel="nofollow noopener noreferrer">RedactorChangeLog.Status</a> se <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactionstatus" target="_blank" rel="nofollow noopener noreferrer">RedactionStatus.Skipped</a>.
+
+## Redactar imágenes incrustadas {#redact-embedded-images}
+
+Puede redactar el área de imágenes dentro de todo tipo de imágenes incrustadas en un documento. Puede utilizar tanto la clase <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/imagearearedaction" target="_blank" rel="nofollow noopener noreferrer">ImageAreaRedaction</a> como cualquier tipo de <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/textredaction" target="_blank" rel="nofollow noopener noreferrer">TextRedaction</a> (expresión regular, frase exacta), siempre que la OCR esté habilitada en **RedactorSettings** (consulte el artículo [Básicos del uso de OCR](/net/redaction/developer-guide/advanced-usage/using-ocr/ocr-usage-basics/)). 
+
+El siguiente ejemplo muestra cómo redactar todas las imágenes incrustadas dentro de un documento de Microsoft Word:
+
+**C#**
+
+```csharp
+using GroupDocs.Redaction.Options.Drawing;
+
+using (Redactor redactor = new Redactor("D:\\sample.docx"))
+{
+   //System.Drawing.Point samplePoint = new System.Drawing.Point(516, 311);
+   //System.Drawing.Size sampleSize = new System.Drawing.Size(170, 35);
+   Point samplePoint = new Point(516, 311);
+   Size sampleSize = new Size(170, 35);
+   //RedactorChangeLog result = redactor.Apply(new ImageAreaRedaction(samplePoint,
+   //             new RegionReplacementOptions(System.Drawing.Color.Blue, sampleSize)));
+   RedactorChangeLog result = redactor.Apply(new ImageAreaRedaction(samplePoint,
+                new RegionReplacementOptions(Color.Blue, sampleSize)));
+   if (result.Status != RedactionStatus.Failed)
+   {
+      redactor.Save();
+   };
+}
+```
+
+Si la redacción no se puede aplicar a este tipo de archivos, por ejemplo, un documento de hoja de cálculo, <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactorchangelog/properties/status" target="_blank" rel="nofollow noopener noreferrer">RedactorChangeLog.Status</a> se <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactionstatus" target="_blank" rel="nofollow noopener noreferrer">RedactionStatus.Skipped</a>.
+
+## Imágenes de múltiples fotogramas {#multi-frame-images}
+
+Puede eliminar fotogramas de una imagen de múltiples fotogramas con un origen y una cantidad de fotogramas determinados. Para obtener información adicional, consulte el artículo [redacción de páginas eliminadas](/net/redaction/developer-guide/basic-usage/remove-page-redactions/).
+
+Algunos formatos de imagen, como los documentos DjVu, requieren [rasterización previa](/net/redaction/developer-guide/advanced-usage/loading-documents/pre-rasterize/) y posterior guardado en formato PDF. 
+
+## Más recursos {#more-resources}
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre las funciones de redacción de documentos, consulte la [sección de uso avanzado](/net/redaction/developer-guide/advanced-usage/).
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para Java</a>
+    
+
+### Aplicación gratuita en línea para redactar documentos {#free-online-document-redaction-app}
+
+Junto con la completa biblioteca de .NET, ofrecemos aplicaciones sencillas pero potentes y gratuitas.
+
+Le damos la bienvenida a realizar redacciones en diversos formatos de documentos, como PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más, con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/redaction" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Redaction App</a>.

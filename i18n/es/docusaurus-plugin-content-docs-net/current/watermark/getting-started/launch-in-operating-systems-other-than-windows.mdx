@@ -1,0 +1,80 @@
+---
+title: "Lanzamiento en sistemas operativos distintos de Windows"
+sidebar_label: "Lanzamiento en sistemas operativos distintos de Windows"
+sidebar_key: "net-watermark-launch-in-operating-systems-other-than-windows"
+sidebar_position: 7
+description: ""
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/getting-started/launch-in-operating-systems-other-than-windows.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "91c8e23111e98a5be7088c0c8f6bdf6d8877674735a76dd082f9ba659ac58b30"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "dbaae8243a07863785a45977a97410422f284750f790be5caa19f5ec7cf06fd3"
+translation_updated_at: "2026-11-16T06:42:09.374Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Watermark para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## Limitaciones {#limitations}
+
+1. Debido a la falta de fuentes de Windows en el sistema operativo de destino (Android, macOS, Linux, etc.), las fuentes utilizadas en los documentos se sustituyen por fuentes disponibles, lo que podría provocar un diseño impreciso del documento al renderizarlo en formatos PNG, JPG y PDF.
+2. Si GroupDocs.Watermark para .NET Standard va a utilizarse en un entorno Linux, debe hacer referencia a un paquete NuGet adicional para que funcione correctamente con gráficos: <a href="https://www.nuget.org/packages/SkiaSharp.NativeAssets.Linux" target="_blank" rel="nofollow noopener noreferrer">SkiaSharp.NativeAssets.Linux</a> para Ubuntu (también debería funcionar en la mayoría de las distribuciones Linux basadas en Debian) o <a href="https://www.nuget.org/packages/Goelze.SkiaSharp.NativeAssets.AlpineLinux" target="_blank" rel="nofollow noopener noreferrer">Goelze.SkiaSharp.NativeAssets.AlpineLinux</a> para Alpine Linux.
+3. Si el marco de destino es .NET 6, debido a las limitaciones de la biblioteca System.Drawing.Common en .NET 6 (consulte <a href="https://learn.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/6.0/system-drawing-common-windows-only#new-behavior" target="_blank" rel="nofollow noopener noreferrer">la documentación de Microsoft</a>), debe agregar la siguiente configuración al archivo `.csproj`.
+
+```csharp
+	<ItemGroup>
+		<RuntimeHostConfigurationOption Include="System.Drawing.EnableUnixSupport" Value="true" />
+	</ItemGroup>
+```
+
+## Recomendaciones {#recommendations}
+
+Al utilizar GroupDocs.Watermark en un entorno no Windows, se deben instalar los siguientes paquetes para mejorar los resultados de renderizado y evitar posibles errores en tiempo de ejecución:
+
+1. libgdiplus: es la biblioteca de Mono que proporciona una API compatible con GDI+ en sistemas operativos no Windows.
+2. libc6-dev: paquete que contiene los enlaces simbólicos, cabeceras y archivos objeto necesarios para compilar y vincular programas que utilizan la biblioteca estándar de C.
+3. ttf-mscorefonts-installer: paquete con fuentes compatibles con Microsoft.
+
+Para instalar paquetes en distribuciones Linux basadas en Debian, utilice la utilidad <a href="https://wiki.debian.org/apt-get" target="_blank" rel="nofollow noopener noreferrer">apt-get</a>:
+
+1. `sudo apt-get install libgdiplus`
+2. `sudo apt-get install libc6-dev`
+3. `sudo apt-get install ttf-mscorefonts-installer`
+
+4. 
+
+## Cómo ejecutar GroupDocs.Watermark para .NET en Docker {#how-to-run-net-groupdocs-watermark-in-the-docker}
+
+Ejecutar GroupDocs.Watermark en Docker es sencillo. Todo lo que debe hacer es agregar la instalación de los paquetes descritos en el párrafo anterior al archivo Dockerfile. Un ejemplo del comienzo de un Dockerfile podría ser el siguiente:
+
+```Dockerfile
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
+WORKDIR /app
+EXPOSE 80
+
+# Add libgdiplus, libc6-dev
+RUN apt-get update && apt-get install -y apt-utils libgdiplus libc6-dev
+
+# Add `contrib` archive area to package sources list
+RUN sed -i'.bak' 's/$/ contrib/' /etc/apt/sources.list
+# Add fonts
+RUN apt-get update; apt-get install -y ttf-mscorefonts-installer fontconfig
+RUN fc-cache -f -v
+
+# etc
+```
+
+**fontconfig:** Esta biblioteca configura y personaliza el acceso a las fuentes.
+
+**ttf-mscorefonts-installer:** Este paquete proporciona las fuentes TrueType principales de Microsoft. Está disponible en el área de repositorio <a href="https://www.debian.org/doc/debian-policy/ch-archive#s-contrib" target="_blank" rel="nofollow noopener noreferrer">contrib</a>. (Nota: El uso de fuentes no libres puede tener implicaciones de licencia; por lo tanto, asegúrese de revisar los términos de la licencia.)

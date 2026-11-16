@@ -1,0 +1,141 @@
+---
+title: "Use Aspose.OCR para Cloud SDK"
+sidebar_label: "Use Aspose.OCR para Cloud SDK"
+sidebar_position: 3
+description: "Este artículo explica cómo utilizar el SDK de Aspose.OCR para la nube."
+product: "redaction"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "redaction-net"
+source_path: "net/developer-guide/advanced-usage/using-ocr/use-aspose-ocr-for-cloud.md"
+source_commit: "7f9ba3f7099e7e45c9dcc8d1241caf5c3e6029ec"
+source_sha256: "bdd407fdd280597bd24ba4ee83ab9bf653ca5c0203cde37340b1e9f2d2200059"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "1f97a2be89d1835537f683b492284f61848768266ea8f05c463e3625e65480fe"
+translation_updated_at: "2026-11-16T05:41:06.328Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Redaction para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Esta implementación se basa en <a href="https://products.aspose.cloud/ocr/net" target="_blank" rel="nofollow noopener noreferrer">Aspose.OCR para Cloud SDK</a>. Aunque requiere una suscripción válida a Aspose.Cloud, siempre puede <a href="https://dashboard.aspose.cloud/" target="_blank" rel="nofollow noopener noreferrer">solicitar una versión de prueba</a>.
+
+Supongamos que el AppSid y el AppKey de Aspose.Cloud se almacenan en las variables de entorno del sistema ASPOSE_CLOUD_APPSID y ASPOSE_CLOUD_APPKEY, respectivamente. 
+
+**C#**
+
+```csharp
+using Aspose.Ocr.Cloud.Sdk;
+using Aspose.Ocr.Cloud.Sdk.Model;
+using Aspose.Ocr.Cloud.Sdk.Model.Requests;
+using Newtonsoft.Json.Linq;
+
+public class AsposeOCRForCloudConnector : IOcrConnector
+{
+    private readonly Configuration configuration;
+
+    public AsposeOCRForCloudConnector()
+    {
+        configuration = new Configuration();
+        configuration.AppSid = Environment.GetEnvironmentVariable("ASPOSE_CLOUD_APPSID");
+        configuration.AppKey = Environment.GetEnvironmentVariable("ASPOSE_CLOUD_APPKEY");
+        configuration.ApiBaseUrl = "https://api.aspose.cloud";
+        configuration.IdentityServerBaseUrl = "https://api.aspose.cloud";
+    }
+
+    public RecognizedImage Recognize(Stream imageStream)
+    {
+        try
+        {
+            OcrApi api = new OcrApi(configuration);
+            var request = new PostOcrFromUrlOrContentRequest(imageStream, resultType: ResultType.Internal, dsrMode: DsrMode.DsrAndFilter);
+            OCRResponse response = api.PostOcrFromUrlOrContent(request);
+            return CreateDtoFromResponse(JToken.Parse(response.Text));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Aspose.OCR for Cloud Recognition failed: {0}", ex.ToString());
+        }
+        return new RecognizedImage(new List<TextLine>());
+    }
+
+    protected virtual RecognizedImage CreateDtoFromResponse(JToken jToken)
+    {
+        return new RecognizedImage(LeafRecursion(jToken));
+    }
+
+    private TextLine[] LeafRecursion(JToken jToken)
+    {
+        List<TextLine> lines = new List<TextLine>();
+        if (jToken["leaves"].Count() > 0)
+        {
+            foreach (var node in jToken["leaves"])
+            {
+                if (node["leaves"].Count() > 0)
+                {
+                    lines.AddRange(LeafRecursion(node));
+                }
+                else
+                {
+                    TextLine textLine = CreateTextLine(node);
+                    if (textLine != null)
+                    {
+                        lines.Add(textLine);
+                    }
+                }
+            }
+        }
+        return lines.ToArray();
+    }
+
+    private TextLine CreateTextLine(JToken line)
+    {
+        string lineText = line["values"].ToString();
+        Rectangle lineRectangle = GetLineRectangle(line);
+        if (!string.IsNullOrEmpty(lineText) && !lineRectangle.IsEmpty)
+        {
+            return new TextLine(RegularTextLine.SplitToFragments(lineText, lineRectangle));
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private Rectangle GetLineRectangle(JToken line)
+    {
+        var rect = line["rect"];
+        return new Rectangle(rect[0].Value<int>(), rect[1].Value<int>(), rect[2].Value<int>() - rect[0].Value<int>(),
+            rect[3].Value<int>() - rect[1].Value<int>());
+    }
+}
+
+```
+
+El método `PostOcrFromUrlOrContent()` con `ResultType.Internal` devuelve un árbol de regiones de texto y líneas reconocidas, serializado en JSON, junto con rectángulos delimitadores. Cada línea de texto se representa mediante un único objeto.
+
+Puede encontrar la implementación completa y un ejemplo de su uso aquí: <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para .NET</a>.
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para Java</a>
+    
+
+### Aplicación gratuita en línea para redactar documentos {#free-online-document-redaction-app}
+
+Junto con la completa biblioteca de .NET, ofrecemos aplicaciones sencillas pero potentes y gratuitas.
+
+Le damos la bienvenida a realizar redacciones en diversos formatos de documentos, como PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más, con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/redaction" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Redaction App</a>.

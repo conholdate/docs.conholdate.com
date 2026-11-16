@@ -1,0 +1,134 @@
+---
+title: "Generar vista previa de páginas de documentos"
+sidebar_label: "Generar vista previa de páginas de documentos"
+sidebar_key: "net-merger-generate-document-pages-preview"
+sidebar_position: 7
+description: "Siguiendo esta guía, aprenderá cómo generar miniaturas de documentos PDF, Word (DOC, DOCX), Excel (XLS, XLSX) y PowerPoint (PPT, PPTX), así como cómo obtener una vista previa de las páginas de los documentos utilizando la API de GroupDocs.Merger para .NET."
+product: "merger"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "merger-net"
+source_path: "net/developer-guide/generate-document-pages-preview.md"
+source_commit: "a94e0e4d7474596613a34f623effd20176c5227b"
+source_sha256: "6924e69897e1d226e8fef09ab220feb4257082b60b9f0dce4b8f90023ce7077a"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "a705b9b8d9a6dbd0aeaa58c12ae9fe94ed16a759ec9a9e9104eb27eca95e8a5c"
+translation_updated_at: "2026-11-16T05:13:48.120Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Merger para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+**<a href="https://products.groupdocs.com/merger/net" target="_blank" rel="nofollow noopener noreferrer">GroupDocs.Merger</a>** proporciona la clase <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> para especificar distintas opciones para gestionar la vista previa de las páginas del documento.  
+  
+A continuación se indican los pasos para generar la vista previa del documento con GroupDocs.Merger:
+*   Crear una nueva instancia de la clase <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger" target="_blank" rel="nofollow noopener noreferrer">Merger</a> y pasar la ruta del documento de origen como parámetro del constructor.
+*   Instanciar el objeto <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> con:    
+    *   delegate for each page stream creation (see event handler <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.common/createpagestream" target="_blank" rel="nofollow noopener noreferrer">CreatePageStream</a>);         
+    *   image preview format - PNG / JPG / BMP;        
+    *   page numbers to process;        
+    *   custom size of preview images (if needed).           
+
+:::info
+Las secuencias creadas por el delegado <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.common/createpagestream" target="_blank" rel="nofollow noopener noreferrer">CreatePageStream</a> se liberarán automáticamente tras la generación de la imagen de vista previa. Si necesita implementar una liberación personalizada de la secuencia de vista previa de imágenes, debe pasar el argumento adicional <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.common/releasepagestream" target="_blank" rel="nofollow noopener noreferrer">ReleasePageStream</a> para limpiar los recursos.
+:::
+     
+*   Llame al método <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger/generatepreview" target="_blank" rel="nofollow noopener noreferrer">GeneratePreview</a> de la instancia de la clase <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger" target="_blank" rel="nofollow noopener noreferrer">Merger</a> y pase <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.options/previewoptions" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> como argumento.
+    
+
+## Implementación del delegado CreatePageStream {#createpagestream-delegate-implementation}
+
+GroupDocs.Merger espera el delegado <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.common/createpagestream" target="_blank" rel="nofollow noopener noreferrer">CreatePageStream</a> para obtener cada flujo de página durante el proceso de generación de vista previa de imágenes
+
+```csharp
+private static Stream CreatePageStream(int pageNumber)
+{
+    string imageFilePath = Path.Combine("GeneratePreviewFolder", "image-" + pageNumber.ToString() + ".jpg");
+    var folder = Path.GetDirectoryName(imageFilePath);
+    if(!Directory.Exists(folder))
+    {
+        Directory.CreateDirectory(folder);
+    }
+    return new System.IO.FileStream(imageFilePath, FileMode.Create);
+}
+```
+
+## Implementación del delegado ReleasePageStream {#releasepagestream-delegate-implementation}
+
+```csharp
+private static void ReleasePageStream(int pageNumber, Stream pageStream)
+{
+     pageStream.Dispose();
+     string imageFilePath = Path.Combine("GeneratePreviewFolder", "image-" + pageNumber.ToString() + ".jpg");
+     Console.WriteLine("Image file {0} is ready for preview", imageFilePath);
+}
+```
+
+## Generar vista previa del documento a partir de un archivo en el disco local {#generate-document-preview-from-file-on-local-disk}
+
+```csharp
+public static void GetPreview()
+{   
+    string filePath = @"c:\sample.xlsx";
+    using (Merger merger = new Merger(filePath))
+    {
+        IPreviewOptions previewOption = new PreviewOptions(CreatePageStream, PreviewMode.JPEG);
+        merger.GeneratePreview(previewOption);
+    }
+}
+ 
+private static Stream CreatePageStream(int pageNumber)
+{
+    string imageFilePath = Path.Combine("GeneratePreviewFolder", "image-" + pageNumber.ToString() + ".jpg");
+    var folder = Path.GetDirectoryName(imageFilePath);
+    if(!Directory.Exists(folder))
+    {
+        Directory.CreateDirectory(folder);
+    }
+    return new System.IO.FileStream(imageFilePath, FileMode.Create);
+}
+```
+
+## Generar vista previa de documento desde un flujo con un delegado personalizado para liberar el flujo {#generate-document-preview-from-stream-with-custom-stream-releasing-delegate}
+
+```csharp
+public static void GetPreview()
+{
+    string filePath = @"c:\sample.xlsx";
+    using (Merger merger = new Merger(filePath))
+    {
+        IPreviewOptions previewOption = new PreviewOptions(CreatePageStream, ReleasePageStream, PreviewMode.JPEG);
+        merger.GeneratePreview(previewOption);
+    }
+}
+ 
+private static Stream CreatePageStream(int pageNumber)
+{
+    string imageFilePath = Path.Combine("GeneratePreviewFolder", "image-" + pageNumber.ToString() + ".jpg");
+    var folder = Path.GetDirectoryName(imageFilePath);
+    if(!Directory.Exists(folder))
+    {
+        Directory.CreateDirectory(folder);
+    }
+    return new System.IO.FileStream(imageFilePath, FileMode.Create);
+}
+
+private static void ReleasePageStream(int pageNumber, Stream pageStream)
+{
+     pageStream.Dispose();
+     string imageFilePath = Path.Combine("GeneratePreviewFolder", "image-" + pageNumber.ToString() + ".jpg");
+     Console.WriteLine("Image file {0} is ready for preview", imageFilePath);
+}
+```
+
+
+:::info
+NOTA: La secuencia creada mediante el delegado <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.common/createpagestream" target="_blank" rel="nofollow noopener noreferrer">CreatePageStream</a> se liberará automáticamente una vez finalizada la generación de la imagen de vista previa. Si necesita implementar una liberación personalizada de la secuencia de vista previa de la imagen, debe pasar el argumento adicional <a href="https://reference.groupdocs.com/merger/net/groupdocs.merger.domain.common/releasepagestream" target="_blank" rel="nofollow noopener noreferrer">ReleasePageStream</a> para limpiar los recursos.
+:::

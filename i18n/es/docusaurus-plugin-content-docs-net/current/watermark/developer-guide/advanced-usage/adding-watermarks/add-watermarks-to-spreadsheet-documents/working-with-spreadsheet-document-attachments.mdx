@@ -1,0 +1,221 @@
+---
+title: "Trabajar con archivos adjuntos de documentos de hojas de cálculo"
+sidebar_label: "Trabajar con adjuntos"
+sidebar_key: "net-watermark-adding-watermarks-add-watermarks-to-spreadsheet-documents-working-with-spreadsheet-document-attachments"
+sidebar_position: 2
+description: "Este artículo explica cómo trabajar con archivos adjuntos de documentos de hojas de cálculo al utilizar la API de GroupDocs Watermarking."
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-spreadsheet-documents/working-with-spreadsheet-document-attachments.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "0b77558a8177ed400197987c2845b163fc673d7ecdfdf8e9796652b81e120ba1"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "502cc150f15afdb5d69158a71b5f1cc18f689f16927a94e0b0736661d630c327"
+translation_updated_at: "2026-11-16T06:18:20.633Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Watermark para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## Extraer todos los archivos adjuntos de un documento de Excel {#extract-all-attachments-from-excel-document}
+
+La API de GroupDocs.Watermark le permite extraer <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetworksheet/properties/attachments" target="_blank" rel="nofollow noopener noreferrer">attachments</a> de un documento de Excel. El siguiente código realiza esta funcionalidad.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetExtractAllAttachments**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    foreach (SpreadsheetWorksheet worksheet in content.Worksheets)
+    {
+        foreach (SpreadsheetAttachment attachment in worksheet.Attachments)
+        {
+            Console.WriteLine("Alternative text: {0}", attachment.AlternativeText);
+            Console.WriteLine("Attachment frame x-coordinate: {0}", attachment.X);
+            Console.WriteLine("Attachment frame y-coordinate: {0}", attachment.Y);
+            Console.WriteLine("Attachment frame width: {0}", attachment.Width);
+            Console.WriteLine("Attachment frame height: {0}", attachment.Height);
+            Console.WriteLine("Preview image size: {0}", attachment.PreviewImageContent != null 
+                ? attachment.PreviewImageContent.Length : 0);
+            if (attachment.IsLink)
+            {
+                // The document contains only a link to the attached file
+                Console.WriteLine("Full path to the attached file: {0}", attachment.SourceFullName);
+            }
+            else
+            {
+                // The attached file is stored in the document
+                Console.WriteLine("File type: {0}", attachment.GetDocumentInfo().FileType);
+                Console.WriteLine("Name of the source file: {0}", attachment.SourceFullName);
+                Console.WriteLine("File size: {0}", attachment.Content.Length);
+            }
+        }
+    }
+```
+
+## Agregar un archivo adjunto a un documento de Excel {#add-an-attachment-to-excel-document}
+
+ La API de GroupDocs.Watermark le permite <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetattachmentcollection/methods/addattachment" target="_blank" rel="nofollow noopener noreferrer">agregar archivos adjuntos</a> en un documento de Excel. El siguiente código implementa esta funcionalidad.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetAddAttachment**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    SpreadsheetWorksheet worksheet = content.Worksheets[0];
+    // Add the attachment
+    worksheet.Attachments.AddAttachment(File.ReadAllBytes("document.docx"), // File content
+        "sample document.docx", // Source file full name (the extension is used
+        // to determine appropriate application to open
+        // the file) 
+        File.ReadAllBytes("document_preview.png"), // Preview image content
+        50, // X-coordinate of the attachment frame
+        100, // Y-coordinate of the attachment frame
+        200, // Attachment frame width
+        400); // Attachment frame height
+
+    // Save changes
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+## Agregar archivo adjunto vinculado a un documento de Excel {#add-linked-attachment-to-excel-document}
+
+ La API de GroupDocs.Watermark le permite <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetattachmentcollection/methods/addlink" target="_blank" rel="nofollow noopener noreferrer">agregar archivos adjuntos vinculados</a> en un documento de Excel. El siguiente código realiza esta funcionalidad.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetAddLinkedAttachment**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    SpreadsheetWorksheet worksheet = content.Worksheets[0];
+
+    // Add the attachment
+    worksheet.Attachments.AddLink("document.docx", // Source file path
+        File.ReadAllBytes("document_preview.png"), // Preview image content
+        50, // X-coordinate of the attachment frame
+        100, // Y-coordinate of the attachment frame
+        200, // Attachment frame width
+        400); // Attachment frame height
+        
+    // Save changes
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+## Eliminar adjunto de un documento de Excel {#remove-attachment-from-excel-document}
+
+La API de GroupDocs.Watermark le permite eliminar <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetattachmentcollection" target="_blank" rel="nofollow noopener noreferrer">attachments</a> en un documento de Excel. El siguiente código realiza esta funcionalidad.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetRemoveAttachment**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    foreach (SpreadsheetWorksheet worksheet in content.Worksheets)
+    {
+        for (int i = worksheet.Attachments.Count - 1; i >= 0; i--)
+        {
+            SpreadsheetAttachment attachment = worksheet.Attachments[i];
+            if (attachment.IsLink &&
+                !File.Exists(attachment.SourceFullName) || // Linked file that is not available at this moment
+                attachment.GetDocumentInfo().IsEncrypted) // Attached file protected with a password
+            {
+                // Remove the file if it meets at least one of the conditions above
+                worksheet.Attachments.RemoveAt(i);
+            }
+        }
+    }
+
+    // Save changes
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+## Agregar marca de agua a todos los archivos adjuntos {#add-watermark-to-all-attachments}
+
+La API de GroupDocs.Watermark le permite agregar una marca de agua a todos los <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetattachmentcollection" target="_blank" rel="nofollow noopener noreferrer">attachments</a> en un documento de Excel. El siguiente código realiza esta funcionalidad.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetAddWatermarkToAttachment**
+
+```csharp
+TextWatermark watermark = new TextWatermark("Test watermark", new Font("Arial", 19));
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    foreach (SpreadsheetWorksheet worksheet in content.Worksheets)
+    {
+        foreach (SpreadsheetAttachment attachment in worksheet.Attachments)
+        {
+            // Check if the attached file is supported by GroupDocs.Watermark
+            IDocumentInfo info = attachment.GetDocumentInfo();
+            if (info.FileType != FileType.Unknown && !info.IsEncrypted)
+            {
+                // Load the attached document
+                using (Watermarker attachedWatermarker = attachment.CreateWatermarker())
+                {
+                    // Add wateramrk
+                    attachedWatermarker.Add(watermark);
+
+                    // Save changes in the attached file
+                    attachedWatermarker.Save();
+                }
+            }
+        }
+    }
+
+    // Save changes
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+## Buscar imágenes en archivos adjuntos {#search-for-images-in-attached-files}
+
+La API de GroupDocs.Watermark le permite buscar todas las <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.search.objects/spreadsheetsearchableobjects" target="_blank" rel="nofollow noopener noreferrer">imágenes y adjuntos que admitan marcas de agua</a> en un documento de Excel. El siguiente código realiza esta funcionalidad.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetSearchImageInAttachment**
+
+```csharp
+// Consider only the attached images
+WatermarkerSettings settings = new WatermarkerSettings();
+settings.SearchableObjects.SpreadsheetSearchableObjects = SpreadsheetSearchableObjects.AttachedImages;
+
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions, settings))
+{
+    // Specify sample image to compare document images with
+    ImageSearchCriteria criteria = new ImageDctHashSearchCriteria("attachment.png");
+
+    // Search for similar images
+    PossibleWatermarkCollection possibleWatermarks = watermarker.Search(criteria);
+
+    // Remove or modify found image watermarks
+    // ...
+
+    Console.WriteLine("Found {0} possible watermark(s).", possibleWatermarks.Count);
+}
+```

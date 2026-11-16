@@ -1,0 +1,162 @@
+---
+title: "Crear controlador de formato personalizado"
+sidebar_label: "Crear controlador de formato personalizado"
+sidebar_position: 7
+description: "Este artículo muestra cómo implementar una o varias interfaces para las características del documento y la redacción requerida."
+product: "redaction"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "redaction-net"
+source_path: "net/developer-guide/advanced-usage/create-custom-format-handler.md"
+source_commit: "7f9ba3f7099e7e45c9dcc8d1241caf5c3e6029ec"
+source_sha256: "2a0883bfbe357a8c7fab4b1c14eea067a93d67ec95c31e3ae5973cb4cbaff79b"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "f8396e39a209035bb4c02a70c14a5794fc81cf2283206ee8aa0691e3be41cc84"
+translation_updated_at: "2026-11-16T05:33:50.925Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Redaction para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Si el formato no es compatible, deberá implementar un controlador para él heredando de la clase <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.integration/documentformatinstance" target="_blank" rel="nofollow noopener noreferrer">DocumentFormatInstance</a>. Dependiendo de las características del documento y de las redacciones requeridas, también deberá implementar una o varias interfaces que permitan a GroupDocs.Redaction trabajar con este formato de documento.
+
+| Interfaz | Descripción |
+| --- | --- |
+| <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.integration/itextualformatinstance" target="_blank" rel="nofollow noopener noreferrer">ITextualFormatInstance</a> | Necesaria para que funcionen las redacciones de texto del documento; reemplaza las ocurrencias de la expresión regular dada por un texto o un bloque de color |
+| <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.integration/imetadataaccess" target="_blank" rel="nofollow noopener noreferrer">IMetadataAccess</a> | Necesaria para las redacciones de metadatos; lee los metadatos y modifica un elemento específico de metadatos |
+| <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.integration/iannotateddocument" target="_blank" rel="nofollow noopener noreferrer">IAnnotatedDocument</a> | Necesaria para las redacciones de anotaciones; modifica o elimina anotaciones que coincidan con la expresión regular dada |
+| <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.integration/irasterizabledocument" target="_blank" rel="nofollow noopener noreferrer">IRasterizableDocument</a> | Necesaria para rasterizar (guardar el documento como un PDF con imágenes de página) |
+| <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.integration/iimageformatinstance" target="_blank" rel="nofollow noopener noreferrer">IImageFormatInstance</a> | Necesaria para las redacciones en formatos de imagen rasterizada, basándose en las coordenadas de la esquina superior izquierda y el tamaño del área |
+| <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.integration/ipreviewable" target="_blank" rel="nofollow noopener noreferrer">IPreviewable</a> | Necesaria para proporcionar información general del documento y la funcionalidad de vista previa |
+
+Cada una de estas interfaces es opcional, es decir, no es necesario implementar todas ellas; por ejemplo, <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.integration/iimageformatinstance" target="_blank" rel="nofollow noopener noreferrer">IImageFormatInstance</a> — si no necesita su funcionalidad — o <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.integration/imetadataaccess" target="_blank" rel="nofollow noopener noreferrer">IMetadataAccess</a>, si su formato no admite metadatos.
+
+A continuación, creamos una clase <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.integration/documentformatinstance" target="_blank" rel="nofollow noopener noreferrer">DocumentFormatInstance</a> con lógica personalizada para el procesamiento de documentos de texto, que solo admite redacciones textuales:
+
+**C#**
+
+```csharp
+public class CustomTextualDocument : DocumentFormatInstance, ITextualFormatInstance
+{
+    private RedactorSettings Settings { get; set; }
+    private List<string> FileContent { get; set; }
+
+    public CustomTextualDocument()
+    {
+        FileContent = new List<string>();
+    }
+
+    public override void Initialize(DocumentFormatConfiguration config, RedactorSettings settings)
+    {
+        Settings = settings;
+    }
+
+    public override void Load(System.IO.Stream input)
+    {
+        FileContent.Clear();
+        using (var reader = new StreamReader(input))
+        {
+            while (!reader.EndOfStream)
+            {
+                FileContent.Add(reader.ReadLine());
+            }
+        }
+    }
+
+    public override void Save(System.IO.Stream output)
+    {
+        var writer = new StreamWriter(output);
+        foreach (var line in FileContent)
+        {
+            writer.WriteLine(line);
+        }
+        writer.Flush();
+    }
+
+    public RedactionResult ReplaceText(Regex regex, Redactions.ReplacementOptions options)
+    {
+        try
+        {
+            if (options.ActionType != Redactions.ReplacementType.ReplaceString)
+            {
+                return new RedactionResult.Failed("This format allows only ReplaceString redactions!");
+            }
+            for (int i = 0; i < FileContent.Count; i++)
+            {
+                FileContent[i] = regex.Replace(FileContent[i], options.Replacement);
+            }
+            return RedactionResult.Successful();
+        }
+        catch (Exception ex)
+        {
+            return RedactionResult.Failed(ex.ToString());
+        }
+    }
+}
+
+```
+
+Para utilizar esta clase, deberemos agregarla a los formatos preconfigurados, por ejemplo, como un controlador para archivos de volcado ("\*.dump"):
+
+**C#**
+
+```csharp
+var config = RedactorConfiguration.GetInstance();
+config.AvailableFormats.Add(new DocumentFormatConfiguration()
+{
+    ExtensionFilter = ".dump",
+    DocumentType = typeof(CustomTextualDocument)
+});
+```
+
+## Seguridad y protección con contraseña {#security-and-password-protection}
+
+Si su formato admite opciones de seguridad, como la protección con contraseña, deberá pasar `true` o `false` al método <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.integration/documentformatinstance/methods/setaccessgranted" target="_blank" rel="nofollow noopener noreferrer">SetAccessGranted</a> de la clase <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.integration/documentformatinstance" target="_blank" rel="nofollow noopener noreferrer">DocumentFormatInstance</a> dentro de la implementación que sobrescriba del método <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.integration/documentformatinstance/methods/load" target="_blank" rel="nofollow noopener noreferrer">Load</a>, y lanzar <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.exceptions/incorrectpasswordexception" target="_blank" rel="nofollow noopener noreferrer">IncorrectPasswordException</a> o <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.exceptions/passwordrequiredexception" target="_blank" rel="nofollow noopener noreferrer">PasswordRequiredException</a>, si corresponde. Por ejemplo:
+
+**C#**
+
+```csharp
+public override void Load(System.IO.Stream input)
+{
+    try
+    {
+		// check security and load document 
+
+        SetAccessGranted(true);
+    }
+    catch (SomeSecurityException)
+    {
+        SetAccessGranted(false);
+		// Password, provided with LoadOptions
+        if (string.IsNullOrEmpty(Password))
+            throw new Exceptions.PasswordRequiredException();
+        else
+            throw new Exceptions.IncorrectPasswordException();
+    }
+}
+
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para Java</a>
+    
+
+### Aplicación gratuita en línea para redactar documentos {#free-online-document-redaction-app}
+
+Junto con la completa biblioteca de .NET, ofrecemos aplicaciones sencillas pero potentes y gratuitas.
+
+Le damos la bienvenida a realizar redacciones en diversos formatos de documentos, como PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más, con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/redaction" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Redaction App</a>.

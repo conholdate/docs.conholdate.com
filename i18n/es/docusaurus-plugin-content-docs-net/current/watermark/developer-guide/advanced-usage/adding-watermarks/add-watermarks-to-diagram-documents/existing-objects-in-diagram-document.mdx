@@ -1,0 +1,324 @@
+---
+title: "Objetos existentes en diagramas"
+sidebar_label: "Objetos existentes en diagramas"
+sidebar_key: "net-watermark-adding-watermarks-add-watermarks-to-diagram-documents-existing-objects-in-diagram-document"
+sidebar_position: 1
+description: "Este artículo explica cómo encontrar y eliminar las marcas de agua de ambos tipos en un documento de Visio."
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-diagram-documents/existing-objects-in-diagram-document.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "394d432e13df1b9df88f345f104d3bb7c16b9cc6ed86bbd8beadca29297e2914"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "2f05fcf79a905e6cbe36be5bffe6d7a0a5cd706cdc7670487ddcb8dd5b245bc4"
+translation_updated_at: "2026-11-16T06:06:47.142Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Watermark para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Las marcas de agua en documentos de Visio suelen representarse mediante formas. Sin embargo, en ocasiones, los encabezados y pies de página del documento también pueden utilizarse para mostrar texto que se considere como marca de agua. La API de GroupDocs.Watermark le permite buscar y eliminar marcas de agua de ambos tipos en un documento de Visio.
+
+## Eliminar marca de agua de una página específica {#removing-watermark-from-a-particular-page}
+
+La eliminación de una marca de agua de una página concreta de un documento de Visio mediante GroupDocs.Watermark consta de los siguientes pasos.
+
+1. Cargar el documento
+2. Crear e inicializar los criterios de búsqueda de imagen o texto
+3. <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.contentpart/search/methods/1" target="_blank" rel="nofollow noopener noreferrer">Find</a> posibles marcas de agua
+4. Eliminar las marcas de agua encontradas
+5. Guardar el documento
+
+El siguiente ejemplo de código muestra cómo eliminar una marca de agua de una página específica.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToDiagrams.DiagramRemoveWatermark**
+
+```csharp
+DiagramLoadOptions loadOptions = new DiagramLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\diagram.vsdx"
+using (Watermarker watermarker = new Watermarker("diagram.vsdx", loadOptions))
+{
+    DiagramContent content = watermarker.GetContent<DiagramContent>();
+
+    // Initialize search criteria
+    ImageSearchCriteria imageSearchCriteria = new ImageDctHashSearchCriteria("logo.png");
+    TextSearchCriteria textSearchCriteria = new TextSearchCriteria("Company Name");
+
+    // Call FindWatermarks method for the first page
+    PossibleWatermarkCollection possibleWatermarks = content.Pages[0]
+        .Search(textSearchCriteria.Or(imageSearchCriteria));
+
+    // Remove all found watermarks
+    possibleWatermarks.Clear();
+    watermarker.Save("diagram.vsdx");
+}
+```
+
+## Trabajo con formas {#working-with-shapes}
+
+### Extracción de información sobre todas las formas {#extracting-information-about-all-shapes}
+
+*<a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.contentpart/search/methods/1" target="_blank" rel="nofollow noopener noreferrer">Search</a>* método busca marcas de agua de todos los tipos mencionados, pero en algunos casos es necesario analizar únicamente un tipo de objetos de Visio. El siguiente ejemplo de código muestra cómo obtener información sobre todas las formas en un documento de Visio.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToDiagrams.DiagramGetShapesInformation**
+
+```csharp
+DiagramLoadOptions loadOptions = new DiagramLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\diagram.vsdx"
+using (Watermarker watermarker = new Watermarker("diagram.vsdx", loadOptions))
+{
+    DiagramContent content = watermarker.GetContent<DiagramContent>();
+    foreach (DiagramPage page in content.Pages)
+    {
+        foreach (DiagramShape shape in page.Shapes)
+        {
+            if (shape.Image != null)
+            {
+                Console.WriteLine(shape.Image.Width);
+                Console.WriteLine(shape.Image.Height);
+                Console.WriteLine(shape.Image.GetBytes().Length);
+            }
+
+            Console.WriteLine(shape.Name);
+            Console.WriteLine(shape.X);
+            Console.WriteLine(shape.Y);
+            Console.WriteLine(shape.Width);
+            Console.WriteLine(shape.Height);
+            Console.WriteLine(shape.RotateAngle);
+            Console.WriteLine(shape.Text);
+            Console.WriteLine(shape.Id);
+        }
+    }
+}
+```
+
+### Eliminar una forma específica {#removing-a-particular-shape}
+
+También puede eliminar una forma específica de una página utilizando la API de GroupDocs.Watermark (como se muestra en el siguiente código de ejemplo).
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToDiagrams.DiagramRemoveShape()**
+
+```csharp
+DiagramLoadOptions loadOptions = new DiagramLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\diagram.vsdx"
+using (Watermarker watermarker = new Watermarker("diagram.vsdx", loadOptions))
+{
+    DiagramContent content = watermarker.GetContent<DiagramContent>();
+
+    // Remove shape by index
+    content.Pages[0].Shapes.RemoveAt(0);
+
+    // Remove shape by reference
+    content.Pages[0].Shapes.Remove(content.Pages[0].Shapes[0]);
+
+    watermarker.Save("diagram.vsdx");
+}
+```
+
+### Eliminación de formas con un formato de texto específico {#removing-shapes-with-particular-text-formatting}
+
+También puede buscar y eliminar las formas que tengan un formato de texto determinado en un documento de Visio, como se muestra en el siguiente ejemplo de código.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToDiagrams.DiagramRemoveTextShapesWithParticularTextFormatting**
+
+```csharp
+DiagramLoadOptions loadOptions = new DiagramLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\diagram.vsdx"
+using (Watermarker watermarker = new Watermarker("diagram.vsdx", loadOptions))
+{
+    DiagramContent content = watermarker.GetContent<DiagramContent>();
+    foreach (DiagramPage page in content.Pages)
+    {
+        for (int i = page.Shapes.Count - 1; i >= 0; i--)
+        {
+            foreach (FormattedTextFragment fragment in page.Shapes[i].FormattedTextFragments)
+            {
+                if (fragment.ForegroundColor == Color.Red && fragment.Font.FamilyName == "Arial")
+                {
+                    page.Shapes.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    watermarker.Save("diagram.vsdx");
+}
+```
+
+### Eliminar el hipervínculo asociado a una forma específica {#removing-hyperlink-associated-with-a-particular-shape}
+
+Con GroupDocs.Watermark para .NET, también puede eliminar el hipervínculo asociado a una forma específica dentro de un documento de Visio. Utilice el siguiente ejemplo de código para lograr esta funcionalidad.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToDiagrams.DiagramRemoveHyperlinks**
+
+```csharp
+DiagramLoadOptions loadOptions = new DiagramLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\diagram.vsdx"
+using (Watermarker watermarker = new Watermarker("diagram.vsdx", loadOptions))
+{
+    DiagramContent content = watermarker.GetContent<DiagramContent>();
+    DiagramShape shape = content.Pages[0].Shapes[0];
+    for (int i = shape.Hyperlinks.Count - 1; i >= 0; i--)
+    {
+        if (shape.Hyperlinks[i].Address.Contains("http://someurl.com"))
+        {
+            shape.Hyperlinks.RemoveAt(i);
+        }
+    }
+
+    watermarker.Save("diagram.vsdx");
+}
+```
+
+### Reemplazar texto para formas específicas {#replacing-text-for-particular-shapes}
+
+A partir de la versión 18.1, GroupDocs.Watermark permite reemplazar el texto de formas específicas. El siguiente ejemplo de código muestra cómo reemplazar el texto de las formas.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToDiagrams.DiagramReplaceTextForParticularShapes**
+
+```csharp
+DiagramLoadOptions loadOptions = new DiagramLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\diagram.vsdx"
+using (Watermarker watermarker = new Watermarker("diagram.vsdx", loadOptions))
+{
+    DiagramContent content = watermarker.GetContent<DiagramContent>();
+    foreach (DiagramShape shape in content.Pages[0].Shapes)
+    {
+        if (shape.Text != null && shape.Text.Contains("© Aspose 2016"))
+        {
+            shape.Text = "© GroupDocs 2017";
+        }
+    }
+
+    // Save changes
+    watermarker.Save("diagram.vsdx");
+}
+```
+
+### Reemplazar texto para formas específicas con texto con formato {#replacing-text-for-particular-shapes-with-formatted-text}
+
+También puede reemplazar el texto por texto con formato, como se muestra en el siguiente ejemplo de código.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToDiagrams.DiagramReplaceTextWithFormatting**
+
+```csharp
+DiagramLoadOptions loadOptions = new DiagramLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\diagram.vsdx"
+using (Watermarker watermarker = new Watermarker("diagram.vsdx", loadOptions))
+{
+    DiagramContent content = watermarker.GetContent<DiagramContent>();
+    foreach (DiagramShape shape in content.Pages[0].Shapes)
+    {
+        if (shape.Text != null && shape.Text.Contains("© Aspose 2016"))
+        {
+            shape.FormattedTextFragments.Clear();
+            shape.FormattedTextFragments.Add("© GroupDocs 2017", 
+                new Font("Calibri", 19, FontStyle.Bold), Color.Red, Color.Aqua);
+        }
+    }
+
+    // Save changes
+    watermarker.Save("diagram.vsdx");
+}
+```
+
+### Reemplazo de la imagen de una forma {#replacing-shape-image}
+
+A partir de la versión 18.1, GroupDocs.Watermark también le permite reemplazar la imagen de formas específicas, como se muestra en el siguiente ejemplo de código.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToDiagrams.DiagramReplaceShapeImage**
+
+```csharp
+DiagramLoadOptions loadOptions = new DiagramLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\diagram.vsdx"
+using (Watermarker watermarker = new Watermarker("diagram.vsdx", loadOptions))
+{
+    DiagramContent content = watermarker.GetContent<DiagramContent>();
+    foreach (DiagramShape shape in content.Pages[0].Shapes)
+    {
+        if (shape.Image != null)
+        {
+            shape.Image = new DiagramWatermarkableImage(File.ReadAllBytes("test.png"));
+        }
+    }
+
+    // Save changes
+    watermarker.Save("diagram.vsdx");
+}
+```
+
+## Trabajo con encabezados y pies de página {#working-with-headers-and-footers}
+
+### Extracción de información sobre todos los encabezados y pies de página {#extracting-information-about-all-headers-and-footers}
+
+La API le permite extraer información sobre todos los encabezados y pies de página de un documento de Visio mediante el siguiente código.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToDiagrams.DiagramGetHeaderFooterInformation**
+
+```csharp
+DiagramLoadOptions loadOptions = new DiagramLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\diagram.vsdx"
+using (Watermarker watermarker = new Watermarker("diagram.vsdx", loadOptions))
+{
+    DiagramContent content = watermarker.GetContent<DiagramContent>();
+
+    // Get header&footer font settings
+    Console.WriteLine(content.HeaderFooter.Font.FamilyName);
+    Console.WriteLine(content.HeaderFooter.Font.Size);
+    Console.WriteLine(content.HeaderFooter.Font.Bold);
+    Console.WriteLine(content.HeaderFooter.Font.Italic);
+    Console.WriteLine(content.HeaderFooter.Font.Underline);
+    Console.WriteLine(content.HeaderFooter.Font.Strikeout);
+
+    // Get text contained in headers&footers
+    Console.WriteLine(content.HeaderFooter.HeaderLeft);
+    Console.WriteLine(content.HeaderFooter.HeaderCenter);
+    Console.WriteLine(content.HeaderFooter.HeaderRight);
+    Console.WriteLine(content.HeaderFooter.FooterLeft);
+    Console.WriteLine(content.HeaderFooter.FooterCenter);
+    Console.WriteLine(content.HeaderFooter.FooterRight);
+
+    // Get text color
+    Console.WriteLine(content.HeaderFooter.TextColor.ToArgb());
+
+    // Get header&footer margins
+    Console.WriteLine(content.HeaderFooter.FooterMargin);
+    Console.WriteLine(content.HeaderFooter.HeaderMargin);
+}
+```
+
+### Eliminación o sustitución de un encabezado y pie de página específicos {#removing-or-replacing-a-particular-header-and-footer}
+
+El siguiente ejemplo de código muestra cómo eliminar y reemplazar un encabezado y pie de página específicos en un documento de Visio.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToDiagrams.DiagramRemoveOrReplaceHeaderFooter**
+
+```csharp
+DiagramLoadOptions loadOptions = new DiagramLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\diagram.vsdx"
+using (Watermarker watermarker = new Watermarker("diagram.vsdx", loadOptions))
+{
+    DiagramContent content = watermarker.GetContent<DiagramContent>();
+
+    // Remove header
+    content.HeaderFooter.HeaderCenter = null;
+
+    // Replace footer
+    content.HeaderFooter.FooterCenter = "Footer center";
+    content.HeaderFooter.Font.Size = 19;
+    content.HeaderFooter.Font.FamilyName = "Calibri";
+    content.HeaderFooter.TextColor = Color.Red;
+
+    watermarker.Save("diagram.vsdx");
+}
+```

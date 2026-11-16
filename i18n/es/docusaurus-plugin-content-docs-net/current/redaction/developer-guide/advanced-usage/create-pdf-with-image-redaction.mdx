@@ -1,0 +1,87 @@
+---
+title: "Crear PDF con redacción de imágenes"
+sidebar_label: "Crear PDF con redacción de imágenes"
+sidebar_position: 8
+description: "Este artículo muestra cómo redactar las páginas de un documento como imágenes, redactando áreas completas de la página, ya sea en lugar de o además de un texto específico."
+product: "redaction"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "redaction-net"
+source_path: "net/developer-guide/advanced-usage/create-pdf-with-image-redaction.md"
+source_commit: "7f9ba3f7099e7e45c9dcc8d1241caf5c3e6029ec"
+source_sha256: "072e9659bb14e7371cbe9ee582c38b2606a7e349f47ee2cf3d8a79891df14f58"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "35d7b0a0813872a95d18f1e76796414c012ddeecebbdcd4798e347a2a1e0df91"
+translation_updated_at: "2026-11-16T05:34:13.120Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Redaction para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+En algunos casos, es posible que necesite ocultar las páginas de un documento como imágenes, ocultando áreas completas de la página, ya sea en lugar de o además de un texto específico. Con GroupDocs.Redaction, puede utilizar el siguiente enfoque:  
+
+*   abrir el documento y aplicar todas las ocultaciones requeridas al cuerpo del documento (texto, anotaciones, etc.);
+    
+*   guardarlo como un archivo PDF rasterizado (que contiene imágenes de las páginas del documento original);
+    
+*   aplique `ImageAreaRedaction` para eliminar áreas específicas en las páginas del documento PDF.  
+    
+El siguiente ejemplo demuestra cómo crear un PDF rasterizado a partir de un documento de Microsoft Word y aplicar redacciones de imagen a sus páginas:
+
+**C#**
+
+```csharp
+using GroupDocs.Redaction.Options.Drawing;
+
+var stream = new MemoryStream();
+// Rasterize the document before applying redactions
+using (var redactor = new Redactor("C:\\Temp\\sample.docx"))
+{
+    // Perform annotation and textual redactions, if needed
+    redactor.Save(stream, new RasterizationOptions() { Enabled = true });
+    stream.Seek(0, SeekOrigin.Begin);
+}
+// Re-open the rasterized PDF document to redact its pages as images
+using (var redactor = new Redactor(stream))
+{
+    //RedactorChangeLog result = redactor.Apply(new Redactions.ImageAreaRedaction(new System.Drawing.Point(1160, 2375),
+    //    new RegionReplacementOptions(System.Drawing.Color.Aqua, new System.Drawing.Size(1050, 720))));
+    // Use GroupDocs.Redaction.Options.Drawing types instead of System.Drawing, which is scheduled for removal in future versions.
+    RedactorChangeLog result = redactor.Apply(new Redactions.ImageAreaRedaction(new Point(1160, 2375),
+        new RegionReplacementOptions(Color.FromArgb(255, 0, 255, 255), new Size(1050, 720))));
+    if (result.Status != RedactionStatus.Failed)
+    {
+        using (var fileStream = File.OpenWrite("C:\\Temp\\sample_docx_Raster.pdf"))
+        {
+            redactor.Save(fileStream, new RasterizationOptions() { Enabled = false });
+        }
+    }
+}
+```
+
+Tenga en cuenta que no es necesario utilizar GroupDocs.Redaction para crear un PDF rasterizado a partir de un documento de oficina. Podrá utilizarlo únicamente si no dispone de ninguna otra herramienta para ello.
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y observar la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para Java</a>
+    
+
+### Aplicación gratuita en línea para redactar documentos {#free-online-document-redaction-app}
+
+Además de la completa biblioteca de .NET, ofrecemos aplicaciones sencillas pero potentes y gratuitas.
+
+Le damos la bienvenida a realizar redacciones en diversos formatos de documentos, como PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más, con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/redaction" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Redaction App</a>.

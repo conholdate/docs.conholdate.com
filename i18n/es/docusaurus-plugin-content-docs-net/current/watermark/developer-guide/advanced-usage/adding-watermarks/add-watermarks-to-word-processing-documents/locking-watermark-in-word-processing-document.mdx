@@ -1,0 +1,117 @@
+---
+title: "Bloqueo de marca de agua en documentos de procesamiento de texto"
+sidebar_label: "Bloqueo de marca de agua en documentos de procesamiento de texto"
+sidebar_key: "net-watermark-adding-watermarks-add-watermarks-to-word-processing-documents-locking-watermark-in-word-processing-document"
+sidebar_position: 2
+description: "Este artículo explica cómo bloquear las marcas de agua en un documento de Word para restringir su edición."
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-word-processing-documents/locking-watermark-in-word-processing-document.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "3c037a2d16ddaf608aaf1b0363740a2f23b1a94bb14b8a09773c8a00573a9db9"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "3fb65dad62a640df69576442ba7bdb13e143005f638d3825b2df3731d3f039e0"
+translation_updated_at: "2026-11-16T06:21:39.965Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Watermark para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Puede darse el caso en que necesite bloquear las marcas de agua en un documento de Word para restringir su edición. Para abordar tales situaciones, GroupDocs.Watermark ofrece 5 variantes de bloqueo de documentos de Word al agregar una marca de agua.
+
+* **AllowOnlyRevisions**: el usuario solo puede agregar marcas de revisión al documento.
+* **AllowOnlyComments**: el usuario solo puede modificar los comentarios del documento.
+* **AllowOnlyFormFields**: el documento se divide en secciones de una página y se agrega una sección bloqueada con la marca de agua entre cada dos secciones adyacentes del documento.
+* **ReadOnly**: todo el documento es de solo lectura.
+* **ReadOnlyWithEditableContent**: el documento es de solo lectura, pero todo el contenido, excepto la marca de agua, se marca como editable.
+
+Se ha agregado la propiedad *<a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarkbaseoptions/properties/locktype" target="_blank" rel="nofollow noopener noreferrer">LockType</a>* a la clase *<a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarkbaseoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingWatermarkBaseOptions</a>* (y a todos sus descendientes) para establecer cualquiera de los tipos de bloqueo mencionados anteriormente. La enumeración *<a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessinglocktype" target="_blank" rel="nofollow noopener noreferrer">*WordProcessing*LockType</a>* en el espacio de nombres <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/" target="_blank" rel="nofollow noopener noreferrer">*GroupDocs.Watermark.Options.WordProcessing*</a> se utiliza para definir el tipo de bloqueo. Los siguientes ejemplos de código muestran cómo bloquear la marca de agua en distintos escenarios.
+
+## Agregar marca de agua a todas las páginas {#adding-watermark-to-all-pages}
+
+Este ejemplo utiliza <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarkpagesoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingWatermarkPagesOptions</a> con <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarkpagesoptions/properties/pagenumbers" target="_blank" rel="nofollow noopener noreferrer">PageNumbers</a> vacío.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToWordProcessing.WordProcessingAddLockedWatermarkToAllPages**
+
+```csharp
+WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.docx"
+using (Watermarker watermarker = new Watermarker("document.docx", loadOptions))
+{
+    TextWatermark watermark = new TextWatermark("Watermark text", new Font("Arial", 19));
+    watermark.ForegroundColor = Color.Red;
+
+    WordProcessingWatermarkPagesOptions options = new WordProcessingWatermarkPagesOptions();
+    options.IsLocked = true;
+    options.LockType = WordProcessingLockType.AllowOnlyFormFields;
+
+    // To protect with password
+    //options.Password = "7654321";
+
+    watermarker.Add(watermark, options);
+    watermarker.Save("document.docx");
+}
+```
+
+## Añadir marca de agua a páginas específicas {#adding-watermark-to-particular-pages}
+
+Este ejemplo utiliza <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarkpagesoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingWatermarkPagesOptions</a> con <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarkpagesoptions/properties/pagenumbers" target="_blank" rel="nofollow noopener noreferrer">PageNumbers</a> que contiene los números de dos páginas.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToWordProcessing.WordProcessingAddLockedWatermarkToParticularPages**
+
+```csharp
+WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.docx"
+using (Watermarker watermarker = new Watermarker("document.docx", loadOptions))
+{
+    TextWatermark watermark = new TextWatermark("Watermark text", new Font("Arial", 19));
+    watermark.ForegroundColor = Color.Red;
+
+    WordProcessingWatermarkPagesOptions options = new WordProcessingWatermarkPagesOptions();
+    options.PageNumbers = new int[] { 1, 3 };
+    options.IsLocked = true;
+    options.LockType = WordProcessingLockType.AllowOnlyComments;
+
+    // To protect with password
+    //options.Password = "7654321";
+
+    watermarker.Add(watermark, options);
+    watermarker.Save("document.docx");
+}
+```
+
+## Añadir una marca de agua a una sección {#adding-watermark-to-a-section}
+
+Este ejemplo utiliza <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarksectionoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingWatermarkSectionOptions</a> con <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarksectionoptions/properties/sectionindex" target="_blank" rel="nofollow noopener noreferrer">SectionIndex</a>.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToWordProcessing.WordProcessingAddLockedWatermarkToSection**
+
+```csharp
+WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.docx"
+using (Watermarker watermarker = new Watermarker("document.docx", loadOptions))
+{
+    TextWatermark watermark = new TextWatermark("Watermark text", new Font("Arial", 19));
+    watermark.ForegroundColor = Color.Red;
+
+    WordProcessingWatermarkSectionOptions options = new WordProcessingWatermarkSectionOptions();
+    options.SectionIndex = 0;
+    options.IsLocked = true;
+    options.LockType = WordProcessingLockType.ReadOnlyWithEditableContent;
+
+    // To protect with password
+    //options.Password = "7654321";
+
+    watermarker.Add(watermark, options);
+    watermarker.Save("document.docx");
+}
+```

@@ -1,0 +1,126 @@
+---
+title: "Use la API de Microsoft Azure Computer Vision"
+sidebar_label: "Use la API de Microsoft Azure Computer Vision"
+sidebar_position: 5
+description: "Este artículo explica cómo utilizar la API de Microsoft Azure Computer Vision."
+product: "redaction"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "redaction-net"
+source_path: "net/developer-guide/advanced-usage/using-ocr/use-microsoft-azure-computer-vision.md"
+source_commit: "7f9ba3f7099e7e45c9dcc8d1241caf5c3e6029ec"
+source_sha256: "6a2a5ebfe4db92f0db5122bafca77ce654b018dbfd3dda8e145cbdb763b37395"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "cf63338810df1eec1cc7ac9d834f1d6a684e048ff09949d38b09039b0a4a0690"
+translation_updated_at: "2026-11-16T05:41:48.395Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Redaction para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+Esta implementación se basa en la <a href="https://docs.microsoft.com/en-US/azure/cognitive-services/computer-vision/" target="_blank" rel="nofollow noopener noreferrer">API de Microsoft Azure Computer Vision</a>. El servicio es de pago, pero puedes <a href="https://azure.microsoft.com/free/cognitive-services/" target="_blank" rel="nofollow noopener noreferrer">crear una suscripción gratuita</a>. Una vez finalizado el proceso de suscripción, deberás <a href="https://portal.azure.com/#create/Microsoft.CognitiveServicesComputerVision" target="_blank" rel="nofollow noopener noreferrer">crear un recurso de Computer Vision</a> utilizando el plan gratuito (F0) para probar el servicio, y posteriormente actualizarlo a un plan de pago para entornos de producción. Como resultado, obtendrás el punto de conexión de Computer Vision y la clave de suscripción (supongamos que se almacenan en las variables de entorno COMPUTER_VISION_ENDPOINT y COMPUTER_VISION_SUBSCRIPTION_KEY, respectivamente). 
+
+**C#**
+
+```csharp
+using Newtonsoft.Json.Linq;
+
+public class ComputerVisionOcrConnector : IOcrConnector
+{
+    private const string OcrUri = "vision/v2.1/ocr";
+    private readonly string SubscriptionKey;
+    private readonly string Endpoint;
+
+    public ComputerVisionOcrConnector()
+    {
+        Endpoint = Environment.GetEnvironmentVariable("COMPUTER_VISION_ENDPOINT");
+        SubscriptionKey = Environment.GetEnvironmentVariable("COMPUTER_VISION_SUBSCRIPTION_KEY");
+    }
+
+    public string GetServiceUri(bool detectOrientation, string language)
+    {
+        // Request parameters. 
+        // The language parameter doesn't specify a language, so the 
+        // method detects it automatically.
+        // The detectOrientation parameter is set to true, so the method detects and
+        // and corrects text orientation before detecting text.
+
+        // Assemble the URI for the REST API method.
+        return string.Format("{0}{1}?language={2}&detectOrientation={3}", Endpoint, OcrUri,
+            string.IsNullOrEmpty(language) ? "unk" : language, detectOrientation).ToLower();
+    }
+
+    public RecognizedImage Recognize(Stream imageStream)
+    {
+        try
+        {
+            using (WebClient client = new WebClient())
+            {
+                client.Headers[HttpRequestHeader.Accept] = "application/json";
+                // authentication
+                client.Headers.Add("Ocp-Apim-Subscription-Key", SubscriptionKey);
+                // payload
+                BinaryReader binaryReader = new BinaryReader(imageStream);
+                var data = binaryReader.ReadBytes((int)imageStream.Length);
+                client.Headers[HttpRequestHeader.ContentType] = "application/octet-stream";
+                string stringResponse = string.Empty;
+                try
+                {
+                    byte[] result = client.UploadData(GetServiceUri(true, null), data);
+                    stringResponse = Encoding.UTF8.GetString(result);
+                }
+                catch (Exception ex)
+                {
+                    // MS Azure Cognintive services reports 400 Bad requests and other exceptions on small pictures and pictures with no text
+                    Console.WriteLine("Microsoft Azure Cognitive Services consider this image as wrong ({0})", ex.ToString());
+                }
+                if (!string.IsNullOrEmpty(stringResponse))
+                {
+                    return CreateDtoFromResponse(JToken.Parse(stringResponse));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Microsoft Azure Cognitive Services Text Recognition failed: {0}", ex.ToString());
+        }
+        return new RecognizedImage(new List<TextLine>());
+    }
+
+    protected virtual RecognizedImage CreateDtoFromResponse(JToken jToken)
+    {
+        // Parse json response to extract lines and words with the bounding rectangles.
+    }
+
+    ...
+}
+
+```
+El servicio devuelve un objeto JSON serializado que contiene regiones de texto y palabras reconocidas, cada palabra con su rectángulo delimitador.
+
+Puede encontrar la implementación completa y un ejemplo de su uso aquí: <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para .NET</a>.
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para Java</a>
+    
+
+### Aplicación gratuita en línea para redactar documentos {#free-online-document-redaction-app}
+
+Junto con la completa biblioteca de .NET, ofrecemos aplicaciones sencillas pero potentes y gratuitas.
+
+Le damos la bienvenida a realizar redacciones en diversos formatos de documentos, como PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más, con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/redaction" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Redaction App</a>.

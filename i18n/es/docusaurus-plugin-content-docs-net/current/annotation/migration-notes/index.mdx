@@ -1,0 +1,135 @@
+---
+title: "Notas de migración"
+sidebar_label: "Notas de migración"
+sidebar_key: "net-annotation-tab"
+sidebar_position: 4
+description: ""
+product: "annotation"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.6.0"
+version: "v26.6.0"
+source_repo: "annotation-net"
+source_path: "net/migration-notes.md/"
+source_commit: "fd3052cd673ad3cf5db70dca8c414bc586551cb3"
+source_sha256: "9e9dccde82df299caeef54b7f75cc3821a23a89c8ac9c2d163c4db4e249d51ea"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "522989da2d74bdcad1decef0826e0052ca3b5460f82ac402589dcffd1c1a16e6"
+translation_updated_at: "2026-11-16T05:33:02.830Z"
+translation_status: "ai-draft"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+GroupDocs.Annotation para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## ¿Por qué migrar? {#why-to-migrate}
+
+A continuación se presentan las principales razones para utilizar la nueva API actualizada proporcionada por GroupDocs.Annotation para .NET desde la versión 19.8:
+*   La clase `Annotator`, introducida como único punto de entrada para gestionar el proceso de anotación de documentos en cualquier formato de archivo admitido (en lugar de la clase `AnnotationImageHandler` en versiones anteriores).
+*   La velocidad general de renderizado se ha mejorado significativamente al guardar cada página renderizada tan pronto como se completa su renderizado, y no al finalizar el procesamiento de todas las páginas.
+*   Las opciones de guardado de documentos se han simplificado, facilitando la instanciación de la clase de opciones adecuada y permitiendo un mejor control sobre los procesos de anotación y guardado del documento.
+
+## ¿Cómo migrar? {#how-to-migrate}
+A continuación se muestra una breve comparación sobre cómo anotar un documento y guardarlo utilizando la API antigua y la nueva.
+
+### Estilo de codificación antiguo {#old-coding-style}
+
+
+<Tabs groupId="example1">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+// Creating annotation list
+List<AnnotationInfo> annotations = new List<AnnotationInfo>()
+{
+    new AnnotationInfo()
+    {
+        PageNumber = 0,
+        Box = new Rectangle(100, 100, 100, 100),
+        Type = Domain.AnnotationType.Area,
+        Text = "area"
+    },
+                
+    new AnnotationInfo()
+    {
+        PageNumber = 0,
+        Box = new Rectangle(200, 200, 80, 80),
+        Type = Domain.AnnotationType.Ellipse,
+        Text = "ellipse"
+    }
+};
+
+// Create annotation config
+AnnotationConfig config = new AnnotationConfig();
+// Set storage path
+config.StoragePath = "storage";
+// Create annotation handler
+AnnotationImageHandler annotator = new AnnotationImageHandler(config);
+// Create input file
+using (FileStream fs = new FileStream("input.pdf", FileMode.Open))
+{
+    // Export annotations and save result
+    Stream result = annotator.ExportAnnotationsToDocument(fs, annotations);
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+
+### Nuevo estilo de codificación {#new-coding-style}
+
+
+<Tabs groupId="example2">
+
+
+<TabItem value="c" label="C#" default>
+
+```csharp
+// Create list of annotations
+List<AnnotationBase> annotations = new List<AnnotationBase>()
+{
+    new AreaAnnotation()
+    {
+        PageNumber = 0,
+        Box = new Rectangle(100, 100, 100, 100),
+        Message = "area"
+    },
+                
+    new EllipseAnnotation()
+        {
+            PageNumber = 0,
+            Box = new Rectangle(200, 200, 80, 80),
+            Message = "ellipse"
+        }
+};
+
+// Create annotator
+using  (Annotator annotator = new Annotator("input.pdf"))
+{
+    // Add annotations
+    annotator.Add(annotations);
+    // Save result to "result.pdf"
+    annotator.Save("result.pdf", new SaveOptions());
+}
+```
+
+</TabItem>
+
+
+</Tabs>
+
+  
+Para obtener más fragmentos de código y casos de uso específicos, consulte nuestra [Guía del desarrollador](/net/annotation/advanced-usage/) o los <a href="https://github.com/groupdocs-annotation/GroupDocs.Annotation-for-.NET" target="_blank" rel="nofollow noopener noreferrer">ejemplos y casos de uso en GitHub</a>.

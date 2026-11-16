@@ -1,0 +1,102 @@
+---
+title: "Rasterizar documento o página"
+sidebar_label: "Rasterizar documento o página"
+sidebar_key: "net-watermark-adding-watermarks-add-watermarks-to-pdf-documents-rasterize-document-or-page"
+sidebar_position: 3
+description: "La marca de agua puede eliminarse de los documentos PDF utilizando herramientas de terceros. Sin embargo, si desea eliminar una marca de agua que es casi imposible de eliminar, puede rasterizar los documentos PDF. GroupDocs.Watermark ofrece la funcionalidad para convertir todas las páginas de un documento PDF en imágenes rasterizadas con tan solo una línea de código."
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-pdf-documents/rasterize-document-or-page.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "024d174d7362fc6d22c17dd18a355faa5c55368bb59ebe2340e1c061c053098e"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "e454bb6b9849a7e3d2eff1b84c30d992c0048aa7f02a2946c184d5aa8154e208"
+translation_updated_at: "2026-11-16T06:12:49.193Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Watermark para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## Cómo eliminar una marca de agua de un PDF {#how-to-remove-a-watermark-from-a-pdf}
+La marca de agua puede eliminarse de los documentos PDF mediante herramientas de terceros. Sin embargo, si desea eliminar una marca de agua que es casi imposible de eliminar, puede rasterizar los documentos PDF. GroupDocs.Watermark ofrece la funcionalidad para convertir todas las páginas de un documento PDF en imágenes rasterizadas con tan solo una línea de código.
+
+## Rasterizar documento PDF {#rasterize-pdf-document}
+
+El fragmento de código siguiente se utiliza para <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfcontent/methods/rasterize" target="_blank" rel="nofollow noopener noreferrer">rasterize</a> el documento PDF a fin de proteger las marcas de agua añadidas.  
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfRasterizeDocument**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    // Initialize image or text watermark
+    TextWatermark watermark = new TextWatermark("Do not copy", new Font("Arial", 8));
+    watermark.HorizontalAlignment = HorizontalAlignment.Center;
+    watermark.VerticalAlignment = VerticalAlignment.Center;
+    watermark.RotateAngle = 45;
+    watermark.SizingType = SizingType.ScaleToParentDimensions;
+    watermark.ScaleFactor = 1;
+    watermark.Opacity = 0.5;
+
+    // Add watermark of any type first
+    watermarker.Add(watermark);
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+
+    // Rasterize all pages
+    pdfContent.Rasterize(100, 100, PdfImageConversionFormat.Png);
+
+    // Content of all pages is replaced with raster images
+    watermarker.Save("document.pdf");
+}
+```
+
+
+:::warning
+No puede restaurar el contenido del documento tras guardarlo. La rasterización aumenta significativamente el tamaño del archivo PDF resultante.
+:::
+
+
+## Rasterizar una página específica del documento PDF {#rasterize-particular-page-of-the-pdf-document}
+
+La API también le permite <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfpage/methods/rasterize" target="_blank" rel="nofollow noopener noreferrer">rasterize</a> cualquier página específica del documento PDF. El siguiente fragmento de código se utiliza para rasterizar una página del documento PDF.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfRasterizePage**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    // Initialize image or text watermark
+    TextWatermark watermark = new TextWatermark("Do not copy", new Font("Arial", 8));
+    watermark.HorizontalAlignment = HorizontalAlignment.Center;
+    watermark.VerticalAlignment = VerticalAlignment.Center;
+    watermark.RotateAngle = 45;
+    watermark.SizingType = SizingType.ScaleToParentDimensions;
+    watermark.ScaleFactor = 1;
+    watermark.Opacity = 0.5;
+
+    // Add watermark of any type first
+    PdfArtifactWatermarkOptions options = new PdfArtifactWatermarkOptions();
+    options.PageIndex = 0;
+    watermarker.Add(watermark, options);
+
+    // Rasterize the first page
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    pdfContent.Pages[0].Rasterize(100, 100, PdfImageConversionFormat.Png);
+
+    // Content of the first page is replaced with raster image
+    watermarker.Save("document.pdf");
+}
+```

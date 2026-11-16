@@ -1,0 +1,694 @@
+---
+title: "Objetos existentes en el documento PDF"
+sidebar_label: "Objetos existentes en el documento PDF"
+sidebar_key: "net-watermark-adding-watermarks-add-watermarks-to-pdf-documents-existing-objects-in-pdf-document"
+sidebar_position: 2
+description: "Eliminar marca de agua de una página específica de un documento PDF utilizando C#."
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-pdf-documents/existing-objects-in-pdf-document.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "2f7b5c1cb379c3b8753027d25b85e30686796b560dfb3cd25bf067327c7eb6d1"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "063135cb23b3bcff6ff50740a523842995d28a26b8f0b3eb7a0ca42360bbd555"
+translation_updated_at: "2026-11-16T06:11:00.081Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Watermark para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## Eliminar marca de agua de una página específica {#removing-watermark-from-a-particular-page}
+
+Eliminar la marca de agua de una página específica de un documento PDF mediante GroupDocs.Watermark implica los siguientes pasos.
+
+1. Cargar el documento
+2. Crear e inicializar los criterios de búsqueda de imagen o texto
+3. Buscar marcas de agua
+4. Eliminar marcas de agua
+5. Guardar el documento
+
+El siguiente ejemplo de código elimina las marcas de agua de una página específica.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfRemoveWatermark**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    // Initialize search criteria
+    ImageSearchCriteria imageSearchCriteria = new ImageDctHashSearchCriteria("logo.png");
+    TextSearchCriteria textSearchCriteria = new TextSearchCriteria("Company Name");
+
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    PossibleWatermarkCollection possibleWatermarks = pdfContent.Pages[0]
+        .Search(imageSearchCriteria.Or(textSearchCriteria));
+
+    // Remove all found watermarks
+    for (int i = possibleWatermarks.Count - 1; i >= 0; i--)
+    {
+        possibleWatermarks.RemoveAt(i);
+    }
+
+    watermarker.Save("document.pdf");
+}
+```
+
+<a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.watermarker/search/methods/1" target="_blank" rel="nofollow noopener noreferrer">*Buscar*</a> método busca marcas de agua de todos los tipos mencionados, pero en algunos casos es necesario analizar únicamente una clase de entidades PDF. Los siguientes artículos tratan específicamente sobre los distintos tipos de objetos de marca de agua en un documento PDF.
+
+## Trabajo con XObjects {#working-with-xobjects}
+
+### Extracción de información sobre todos los XObjects en un documento PDF {#extracting-information-about-all-xobjects-in-pdf-document}
+
+Utilizando GroupDocs.Watermark para .NET, puede extraer información sobre todos los <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfxobject" target="_blank" rel="nofollow noopener noreferrer">XObjects</a> presentes en un documento PDF. El siguiente ejemplo de código realiza esta funcionalidad.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfExtractXObjectInformation**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    foreach (PdfPage page in pdfContent.Pages)
+    {
+        foreach (PdfXObject xObject in page.XObjects)
+        {
+            if (xObject.Image != null)
+            {
+                Console.WriteLine(xObject.Image.Width);
+                Console.WriteLine(xObject.Image.Height);
+                Console.WriteLine(xObject.Image.GetBytes().Length);
+            }
+
+            Console.WriteLine(xObject.Text);
+            Console.WriteLine(xObject.X);
+            Console.WriteLine(xObject.Y);
+            Console.WriteLine(xObject.Width);
+            Console.WriteLine(xObject.Height);
+            Console.WriteLine(xObject.RotateAngle);
+        }
+    }
+}
+```
+
+### Eliminación de un objeto XObject específico {#removing-a-particular-xobject}
+
+También puede eliminar un objeto XObject de una página utilizando GroupDocs.Watermark. El siguiente ejemplo de código elimina un objeto XObject de una página determinada.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfRemoveXObject**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+
+    // Remove XObject by index
+    pdfContent.Pages[0].XObjects.RemoveAt(0);
+
+    // Remove XObject by reference
+    pdfContent.Pages[0].XObjects.Remove(pdfContent.Pages[0].XObjects[0]);
+
+    watermarker.Save("document.pdf");
+}
+```
+
+### Eliminación de XObjects que contienen texto con un formato de texto específico {#removing-xobjects-containing-text-with-particular-text-formatting}
+
+También puede buscar y eliminar todos los XObjects que contienen <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfshape/properties/formattedtextfragments" target="_blank" rel="nofollow noopener noreferrer">texto con un formato determinado</a> en un documento PDF, como se muestra en el siguiente ejemplo de código.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfRemoveXObjectWithParticularTextFormatting**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    foreach (PdfPage page in pdfContent.Pages)
+    {
+        for (int i = page.XObjects.Count - 1; i >= 0; i--)
+        {
+            foreach (FormattedTextFragment fragment in page.XObjects[i].FormattedTextFragments)
+            {
+                if (fragment.ForegroundColor == Color.Red)
+                {
+                    page.XObjects.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    watermarker.Save("document.pdf");
+}
+```
+
+### Añadir marca de agua a todos los objetos X de imagen {#adding-watermark-to-all-image-xobjects}
+
+La API de GroupDocs.Watermark le permite añadir una marca de agua a todos los <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfshape/properties/image" target="_blank" rel="nofollow noopener noreferrer">image</a> XObjects de un documento PDF. El siguiente ejemplo de código cumple con este propósito.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfAddWatermarkToXObjects**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+
+    // Initialize image or text watermark
+    TextWatermark watermark = new TextWatermark("Protected image", new Font("Arial", 8));
+    watermark.HorizontalAlignment = HorizontalAlignment.Center;
+    watermark.VerticalAlignment = VerticalAlignment.Center;
+    watermark.RotateAngle = 45;
+    watermark.SizingType = SizingType.ScaleToParentDimensions;
+    watermark.ScaleFactor = 1;
+
+    foreach (PdfPage page in pdfContent.Pages)
+    {
+        foreach (PdfXObject xObject in page.XObjects)
+        {
+            if (xObject.Image != null)
+            {
+                // Add watermark to the image
+                xObject.Image.Add(watermark);
+            }
+        }
+    }
+
+    watermarker.Save("document.pdf");
+}
+```
+
+### Reemplazo de texto para XObjects específicos {#replacing-text-for-particular-xobjects}
+
+GroupDocs.Watermark le permite editar y reemplazar el texto de un XObject específico. También puede reemplazar el <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfshape/properties/text" target="_blank" rel="nofollow noopener noreferrer">text</a> del XObject manteniendo el formato, como se muestra en los ejemplos de código a continuación.
+
+#### Reemplazo de texto {#replacing-text}
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfReplaceTextForParticularXObject**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    foreach (PdfXObject xObject in pdfContent.Pages[0].XObjects)
+    {
+        // Replace text
+        if (xObject.Text.Contains("Test"))
+        {
+            xObject.Text = "Passed";
+        }
+    }
+
+    // Save document
+    watermarker.Save("document.pdf");
+}
+```
+
+#### Reemplazar texto con formato {#replacing-text-with-formatting}
+
+**AdvancedUsage.AddWatermarksToPdf.ReplaceTextForParticularXObjectWithFormatting**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    foreach (PdfXObject xObject in pdfContent.Pages[0].XObjects)
+    {
+        // Replace text
+        if (xObject.Text.Contains("Test"))
+        {
+            xObject.FormattedTextFragments.Clear();
+            xObject.FormattedTextFragments
+                .Add("Passed", new Font("Calibri", 19, FontStyle.Bold), Color.Red, Color.Aqua);
+        }
+    }
+
+    // Save document
+    watermarker.Save("document.pdf");
+}
+```
+
+### Reemplazo de imagen para XObjects específicos {#replacing-image-for-particular-xobjects}
+
+Con GroupDocs.Watermark, también puede reemplazar la imagen de un XObject específico. GroupDocs.Watermark le permite recorrer todos los <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfpage/properties/xobjects" target="_blank" rel="nofollow noopener noreferrer">XObjects</a> de una página determinada y reemplazar la <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfshape/properties/image" target="_blank" rel="nofollow noopener noreferrer">image</a> de XObjects específicos mediante alguna condición, como se muestra en el siguiente ejemplo de código.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfReplaceImageForParticularXObject**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+
+    // Replace image
+    foreach (PdfXObject xObject in pdfContent.Pages[0].XObjects)
+    {
+        if (xObject.Image != null)
+        {
+            xObject.Image = new PdfWatermarkableImage(File.ReadAllBytes("test.png"));
+        }
+    }
+
+    // Save document
+    watermarker.Save("document.pdf");
+}
+```
+
+### Trabajo con artefactos {#working-with-artifacts}
+
+#### Extracción de información sobre todos los artefactos en un documento PDF {#extracting-information-about-all-artifacts-in-pdf-document}
+
+GroupDocs.Watermark le permite extraer la información sobre los <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfpage/properties/artifacts" target="_blank" rel="nofollow noopener noreferrer">artifacts</a> en un documento PDF, como se muestra en el siguiente ejemplo de código.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfExtractArtifactInformation**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    foreach (PdfPage page in pdfContent.Pages)
+    {
+        foreach (PdfArtifact artifact in page.Artifacts)
+        {
+            Console.WriteLine(artifact.ArtifactType);
+            Console.WriteLine(artifact.ArtifactSubtype);
+            if (artifact.Image != null)
+            {
+                Console.WriteLine(artifact.Image.Width);
+                Console.WriteLine(artifact.Image.Height);
+                Console.WriteLine(artifact.Image.GetBytes().Length);
+            }
+
+            Console.WriteLine(artifact.Text);
+            Console.WriteLine(artifact.Opacity);
+            Console.WriteLine(artifact.X);
+            Console.WriteLine(artifact.Y);
+            Console.WriteLine(artifact.Width);
+            Console.WriteLine(artifact.Height);
+            Console.WriteLine(artifact.RotateAngle);
+        }
+    }
+}
+```
+
+#### Eliminación de un artefacto específico {#removing-a-particular-artifact}
+
+El siguiente ejemplo de código muestra cómo eliminar un <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfartifact" target="_blank" rel="nofollow noopener noreferrer">artifact</a> de una página concreta del documento PDF.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfRemoveArtifact**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+
+    // Remove Artifact by index
+    pdfContent.Pages[0].Artifacts.RemoveAt(0);
+
+    // Remove Artifact by reference
+    pdfContent.Pages[0].Artifacts.Remove(pdfContent.Pages[0].Artifacts[0]);
+
+    watermarker.Save("document.pdf");
+}
+```
+
+#### Eliminación de artefactos que contienen texto con un formato específico {#removing-artifacts-containing-text-with-particular-text-formatting}
+
+También puede buscar y eliminar todos los artefactos que contengan <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfshape/properties/formattedtextfragments" target="_blank" rel="nofollow noopener noreferrer">texto con un formato determinado</a> en un documento PDF, tal como se muestra en el siguiente ejemplo de código.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfRemoveArtifactsWithParticularTextFormatting**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    foreach (PdfPage page in pdfContent.Pages)
+    {
+        for (int i = page.Artifacts.Count - 1; i >= 0; i--)
+        {
+            foreach (FormattedTextFragment fragment in page.Artifacts[i].FormattedTextFragments)
+            {
+                if (fragment.Font.Size > 42)
+                {
+                    page.Artifacts.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    watermarker.Save("document.pdf");
+}
+```
+
+#### Añadir marca de agua a todos los artefactos de imagen {#adding-watermark-to-all-image-artifacts}
+
+La API de GroupDocs.Watermark también proporciona la funcionalidad para añadir una marca de agua a todos los artefactos de imagen de un documento PDF. El siguiente ejemplo de código añade una marca de agua a todos los <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfshape/properties/image" target="_blank" rel="nofollow noopener noreferrer">image</a>.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfAddWatermarkToImageArtifacts**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+
+    // Initialize image or text watermark
+    TextWatermark watermark = new TextWatermark("Protected image", new Font("Arial", 8));
+    watermark.HorizontalAlignment = HorizontalAlignment.Center;
+    watermark.VerticalAlignment = VerticalAlignment.Center;
+    watermark.RotateAngle = 45;
+    watermark.SizingType = SizingType.ScaleToParentDimensions;
+    watermark.ScaleFactor = 1;
+
+    foreach (PdfPage page in pdfContent.Pages)
+    {
+        foreach (PdfArtifact artifact in page.Artifacts)
+        {
+            if (artifact.Image != null)
+            {
+                // Add watermark to the image
+                artifact.Image.Add(watermark);
+            }
+        }
+    }
+
+    watermarker.Save("document.pdf");
+}
+```
+
+#### Reemplazo de texto para artefactos específicos {#replacing-text-for-particular-artifacts}
+
+GroupDocs.Watermark le permite editar y reemplazar el <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfartifact/properties/text" target="_blank" rel="nofollow noopener noreferrer">text</a> de artefactos específicos. También puede reemplazar el <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfshape/properties/formattedtextfragments" target="_blank" rel="nofollow noopener noreferrer">texto con formato</a> del artefacto, como se muestra en los ejemplos de código a continuación.
+
+##### Reemplazo del texto del artefacto {#replacing-artifact-text}
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfReplaceTextForParticularArtifact**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    foreach (PdfArtifact artifact in pdfContent.Pages[0].Artifacts)
+    {
+        // Replace text
+        if (artifact.Text.Contains("Test"))
+        {
+            artifact.Text = "Passed";
+        }
+    }
+
+    // Save document
+    watermarker.Save("document.pdf");
+}
+```
+
+##### Reemplazar texto del artefacto con formato {#replacing-artifact-text-with-formatting}
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfReplaceTextForParticularArtifactWithFormatting**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    foreach (PdfArtifact artifact in pdfContent.Pages[0].Artifacts)
+    {
+        // Replace text
+        if (artifact.Text.Contains("Test"))
+        {
+            artifact.FormattedTextFragments.Clear();
+            artifact.FormattedTextFragments.Add("Passed",
+                new Font("Calibri", 19, FontStyle.Bold), Color.Red, Color.Aqua);
+        }
+    }
+
+    // Save document
+    watermarker.Save("document.pdf");
+}
+```
+
+#### Reemplazo de imagen para artefactos específicos {#replacing-image-for-particular-artifacts}
+
+Con GroupDocs.Watermark, también puede reemplazar la imagen de un artefacto específico. GroupDocs.Watermark le permite recorrer todos los <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfpage/properties/artifacts" target="_blank" rel="nofollow noopener noreferrer">artifacts</a> de una página determinada y reemplazar la <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfshape/properties/image" target="_blank" rel="nofollow noopener noreferrer">image</a> de artefactos específicos mediante alguna condición, como se muestra en el siguiente ejemplo de código.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfReplaceImageForParticularArtifact**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+
+    // Replace image
+    foreach (PdfArtifact artifact in pdfContent.Pages[0].Artifacts)
+    {
+        if (artifact.Image != null)
+        {
+            artifact.Image = new PdfWatermarkableImage(File.ReadAllBytes("test.png"));
+        }
+    }
+
+    // Save document
+    watermarker.Save("document.pdf");
+}
+```
+
+### Trabajo con anotaciones {#working-with-annotations}
+
+#### Extracción de información sobre todas las anotaciones en un documento PDF {#extracting-information-about-all-annotations-in-pdf-document}
+
+También puede extraer información sobre todas las <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfpage/properties/annotations" target="_blank" rel="nofollow noopener noreferrer">annotations</a> presentes en un documento PDF utilizando GroupDocs.Watermark, como se muestra en el siguiente ejemplo de código.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfExtractAnnotationInformation**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    foreach (PdfPage page in pdfContent.Pages)
+    {
+        foreach (PdfAnnotation annotation in page.Annotations)
+        {
+            Console.WriteLine(annotation.AnnotationType);
+            if (annotation.Image != null)
+            {
+                Console.WriteLine(annotation.Image.Width);
+                Console.WriteLine(annotation.Image.Height);
+                Console.WriteLine(annotation.Image.GetBytes().Length);
+            }
+
+            Console.WriteLine(annotation.Text);
+            Console.WriteLine(annotation.X);
+            Console.WriteLine(annotation.Y);
+            Console.WriteLine(annotation.Width);
+            Console.WriteLine(annotation.Height);
+            Console.WriteLine(annotation.RotateAngle);
+        }
+    }
+}
+```
+
+#### Eliminar una anotación específica {#removing-a-particular-annotation}
+
+El siguiente fragmento de código puede utilizarse para eliminar una anotación <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfannotation" target="_blank" rel="nofollow noopener noreferrer">annotation</a> específica de un documento PDF.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfRemoveAnnotation**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+
+    // Remove Annotation by index
+    pdfContent.Pages[0].Annotations.RemoveAt(0);
+
+    // Remove Annotation by reference
+    pdfContent.Pages[0].Annotations.Remove(pdfContent.Pages[0].Annotations[0]);
+
+    watermarker.Save("document.pdf");
+}
+```
+
+#### Eliminación de anotaciones que contienen texto con un formato específico {#removing-annotations-containing-text-with-particular-text-formatting}
+
+También puede buscar y eliminar todas las anotaciones que contengan <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfshape/properties/formattedtextfragments" target="_blank" rel="nofollow noopener noreferrer">texto con un formato determinado</a> en un documento PDF, como se muestra en el siguiente ejemplo de código.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfRemoveAnnotationsWithParticularTextFormatting**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    foreach (PdfPage page in pdfContent.Pages)
+    {
+        for (int i = page.Annotations.Count - 1; i >= 0; i--)
+        {
+            foreach (FormattedTextFragment fragment in page.Annotations[i].FormattedTextFragments)
+            {
+                if (fragment.Font.FamilyName == "Verdana")
+                {
+                    page.Annotations.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    watermarker.Save("document.pdf");
+}
+```
+
+#### Añadir marca de agua a todas las anotaciones de imagen {#adding-watermark-to-all-image-annotations}
+
+Al igual que con los otros tipos, la marca de agua se puede añadir a las anotaciones <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfshape/properties/image" target="_blank" rel="nofollow noopener noreferrer">image</a> en documentos PDF, como se muestra en el siguiente ejemplo de código.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfAddWatermarkToAnnotationImages**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+
+    // Initialize image or text watermark
+    TextWatermark watermark = new TextWatermark("Protected image", new Font("Arial", 8));
+    watermark.HorizontalAlignment = HorizontalAlignment.Center;
+    watermark.VerticalAlignment = VerticalAlignment.Center;
+    watermark.RotateAngle = 45;
+    watermark.SizingType = SizingType.ScaleToParentDimensions;
+    watermark.ScaleFactor = 1;
+
+    foreach (PdfPage page in pdfContent.Pages)
+    {
+        foreach (PdfAnnotation annotation in page.Annotations)
+        {
+            if (annotation.Image != null)
+            {
+                // Add watermark to the image
+                annotation.Image.Add(watermark);
+            }
+        }
+    }
+
+    watermarker.Save("document.pdf");
+}
+```
+
+#### Reemplazo de texto para anotaciones específicas {#replacing-text-for-particular-annotations}
+
+GroupDocs.Watermark le permite editar y reemplazar el <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfshape/properties/text" target="_blank" rel="nofollow noopener noreferrer">text</a> de anotaciones específicas. También puede reemplazar el <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfshape/properties/formattedtextfragments" target="_blank" rel="nofollow noopener noreferrer">texto con formato</a> de la anotación, como se muestra en los ejemplos de código a continuación.
+
+##### Reemplazo del texto de la anotación {#replacing-annotation-text}
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfReplaceTextForParticularAnnotation**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    foreach (PdfAnnotation annotation in pdfContent.Pages[0].Annotations)
+    {
+        // Replace text
+        if (annotation.Text.Contains("Test"))
+        {
+            annotation.Text = "Passed";
+        }
+    }
+
+    // Save document
+    watermarker.Save("document.pdf");
+}
+```
+
+##### Reemplazar el texto de la anotación con formato {#replacing-annotation-text-with-formatting}
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfReplaceTextForParticularAnnotationWithFormatting**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    foreach (PdfAnnotation annotation in pdfContent.Pages[0].Annotations)
+    {
+        // Replace text
+        if (annotation.Text.Contains("Test"))
+        {
+            annotation.FormattedTextFragments.Clear();
+            annotation.FormattedTextFragments.Add("Passed", 
+                new Font("Calibri", 19, FontStyle.Bold), Color.Red, Color.Aqua);
+        }
+    }
+
+    // Save document
+    watermarker.Save("document.pdf");
+}
+```
+
+#### Reemplazo de imagen para anotaciones específicas {#replacing-image-for-particular-annotations}
+
+Con GroupDocs.Watermark, también puede reemplazar la imagen de una anotación específica. GroupDocs.Watermark le permite recorrer todas las anotaciones de una página determinada y reemplazar la <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfshape/properties/image" target="_blank" rel="nofollow noopener noreferrer">image</a> de anotaciones específicas mediante alguna condición, como se muestra en el siguiente ejemplo de código.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfReplaceImageForParticularAnnotation**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+
+    // Replace image
+    foreach (PdfAnnotation annotation in pdfContent.Pages[0].Annotations)
+    {
+        if (annotation.Image != null)
+        {
+            annotation.Image = new PdfWatermarkableImage(File.ReadAllBytes("test.png"));
+        }
+    }
+
+    // Save document
+    watermarker.Save("document.pdf");
+}
+```

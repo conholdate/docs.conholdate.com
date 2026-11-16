@@ -1,0 +1,285 @@
+---
+title: "Formas en documentos de hojas de cálculo"
+sidebar_label: "Formas en documentos de hojas de cálculo"
+sidebar_key: "net-watermark-adding-watermarks-add-watermarks-to-spreadsheet-documents-shapes-in-spreadsheet-document"
+sidebar_position: 1
+description: "La API de marca de agua le permite extraer información sobre todas las formas de un documento de Excel, eliminar una forma específica, eliminar formas con un formato de texto determinado, reemplazar el texto de formas específicas, reemplazar la imagen de una forma y más."
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-spreadsheet-documents/shapes-in-spreadsheet-document.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "85846e40f9e8d68e2d307f1fb373d7dfb94f44ab3a54696b3b498f9888008611"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "1260d9750ce18b166565f532abef56743c6999bcdc274ea82e18f9645c27c7f1"
+translation_updated_at: "2026-11-16T06:17:52.408Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Watermark para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+La API de marca de agua le permite extraer información sobre todas las formas de un documento de Excel, eliminar una forma específica, eliminar formas con un formato de texto determinado, reemplazar el texto de formas específicas, reemplazar la imagen de una forma y más.
+
+## Extraer información sobre todas las formas de un documento de Excel {#extracting-information-about-all-shapes-in-an-excel-document}
+
+<a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark/watermarker/methods/search" target="_blank" rel="nofollow noopener noreferrer">*Search*</a>: este método busca marcas de agua de todos los tipos mencionados, pero en algunos casos es necesario analizar únicamente una clase de objetos de Excel. El siguiente ejemplo de código muestra cómo obtener información sobre todas las <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetworksheet/properties/shapes" target="_blank" rel="nofollow noopener noreferrer">shapes</a> en un documento de Excel.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetGetShapesInformation**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    foreach (SpreadsheetWorksheet worksheet in content.Worksheets)
+    {
+        foreach (SpreadsheetShape shape in worksheet.Shapes)
+        {
+            Console.WriteLine(shape.AutoShapeType);
+            Console.WriteLine(shape.MsoDrawingType);
+            Console.WriteLine(shape.Text);
+            if (shape.Image != null)
+            {
+                Console.WriteLine(shape.Image.Width);
+                Console.WriteLine(shape.Image.Height);
+                Console.WriteLine(shape.Image.GetBytes().Length);
+            }
+
+            Console.WriteLine(shape.Id);
+            Console.WriteLine(shape.AlternativeText);
+            Console.WriteLine(shape.X);
+            Console.WriteLine(shape.Y);
+            Console.WriteLine(shape.Width);
+            Console.WriteLine(shape.Height);
+            Console.WriteLine(shape.RotateAngle);
+            Console.WriteLine(shape.IsWordArt);
+            Console.WriteLine(shape.Name);
+        }
+    }
+}
+```
+
+## Eliminar una forma específica {#removing-a-particular-shape}
+
+También puede eliminar una <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetworksheet/properties/shapes" target="_blank" rel="nofollow noopener noreferrer">shape</a> específica de la hoja de cálculo, como se muestra en el siguiente ejemplo de código.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetRemoveShape**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+
+    // Remove shape by index
+    content.Worksheets[0].Shapes.RemoveAt(0);
+
+    // Remove shape by reference
+    content.Worksheets[0].Shapes.Remove(content.Worksheets[0].Shapes[0]);
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+## Eliminación de formas con un formato de texto específico {#removing-shapes-with-particular-text-formatting}
+
+También puede buscar y eliminar las formas que contengan un <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetshape/properties/formattedtextfragments" target="_blank" rel="nofollow noopener noreferrer">formato de texto específico</a> en un documento de Excel, como se muestra en el siguiente ejemplo de código.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetRemoveTextShapesWithParticularTextFormatting**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    foreach (SpreadsheetWorksheet section in content.Worksheets)
+    {
+        for (int i = section.Shapes.Count - 1; i >= 0; i--)
+        {
+            foreach (FormattedTextFragment fragment in section.Shapes[i].FormattedTextFragments)
+            {
+                if (fragment.ForegroundColor == Color.Red && fragment.Font.FamilyName == "Arial")
+                {
+                    section.Shapes.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+## Eliminar/reemplazar el hipervínculo asociado a una forma específica {#removing-replacing-hyperlink-associated-with-a-particular-shape}
+
+Con GroupDocs.Watermark para .NET, también puede eliminar o reemplazar el hipervínculo asociado a una <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetshape/properties/hyperlink" target="_blank" rel="nofollow noopener noreferrer">shape</a> o <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetchart/properties/hyperlink" target="_blank" rel="nofollow noopener noreferrer">chart</a> específica dentro de un documento de Excel. Utilice el siguiente ejemplo de código para lograr esta funcionalidad.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetRemoveHyperlinks**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+
+    // Replace hyperlink
+    content.Worksheets[0].Charts[0].Hyperlink = "https://www.aspose.com/";
+    content.Worksheets[0].Shapes[0].Hyperlink = "https://www.groupdocs.com/";
+
+    // Remove hyperlink
+    content.Worksheets[1].Charts[0].Hyperlink = null;
+    content.Worksheets[1].Shapes[0].Hyperlink = null;
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+
+:::warning
+Esta función también es compatible con gráficos.
+:::
+
+
+## Reemplazo de texto para formas específicas {#replacing-text-for-particular-shapes}
+
+Desde la versión 17.12, GroupDocs.Watermark admite el reemplazo de <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetshape/properties/text" target="_blank" rel="nofollow noopener noreferrer">text</a> para formas específicas en una hoja de cálculo de Excel. El siguiente ejemplo de código muestra el uso de esta funcionalidad.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetReplaceTextForParticularShapes**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    foreach (SpreadsheetShape shape in content.Worksheets[0].Shapes)
+    {
+        if (shape.Text == "© Aspose 2016")
+        {
+            shape.Text = "© GroupDocs 2017";
+        }
+    }
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+## Reemplazar texto de formas específicas con texto con formato {#replacing-text-for-particular-shapes-with-formatted-text}
+
+También puede reemplazar el <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetshape/properties/text" target="_blank" rel="nofollow noopener noreferrer">text</a> de las formas por <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetshape/properties/formattedtextfragments" target="_blank" rel="nofollow noopener noreferrer">texto con formato</a>, como se muestra en el siguiente ejemplo de código.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetReplaceTextWithFormattingForParticularShapes**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    foreach (SpreadsheetShape shape in content.Worksheets[0].Shapes)
+    {
+        if (shape.Text == "© Aspose 2016")
+        {
+            shape.FormattedTextFragments.Clear();
+            shape.FormattedTextFragments.Add("© GroupDocs 2017", 
+                new Font("Calibri", 19, FontStyle.Bold), Color.Red, Color.Aqua);
+        }
+    }
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+## Reemplazar la imagen de las formas {#replacing-shape-image}
+
+GroupDocs.Watermark también le permite reemplazar la <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetshape/properties/image" target="_blank" rel="nofollow noopener noreferrer">image</a> de las formas específicas en una hoja de cálculo de Excel, como se muestra en el siguiente ejemplo de código. Esta función está disponible desde la versión 17.12.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetReplaceImageOfParticularShapes**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    foreach (SpreadsheetShape shape in content.Worksheets[0].Shapes)
+    {
+        if (shape.Image != null)
+        {
+            shape.Image = new SpreadsheetWatermarkableImage(File.ReadAllBytes("test.png"));
+        }
+    }
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+## Configuración de una imagen de fondo para formas específicas {#setting-background-image-for-particular-shapes}
+
+Desde la versión 17.12, GroupDocs.Watermark permite establecer la <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetshape/properties/imagefillformat" target="_blank" rel="nofollow noopener noreferrer">imagen de fondo</a> para formas específicas en una hoja de cálculo de Excel. El siguiente ejemplo de código muestra cómo utilizar esta funcionalidad.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetSetBackgroundImageForParticularShapes**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    foreach (SpreadsheetShape shape in content.Worksheets[0].Shapes)
+    {
+        if (shape.Text == "© Aspose 2016")
+        {
+            shape.ImageFillFormat.BackgroundImage = new SpreadsheetWatermarkableImage(
+                File.ReadAllBytes("test.png"));
+            shape.ImageFillFormat.Transparency = 0.5;
+            shape.ImageFillFormat.TileAsTexture = true;
+        }
+    }
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```
+
+## Actualización de propiedades de formas {#updating-shape-properties}
+
+Desde la versión 17.12, GroupDocs.Watermark también ofrece la funcionalidad para modificar propiedades (<a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetshape/properties/x" target="_blank" rel="nofollow noopener noreferrer">X</a>, <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetshape/properties/y" target="_blank" rel="nofollow noopener noreferrer">Y</a>, <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetshape/properties/width" target="_blank" rel="nofollow noopener noreferrer">Width</a>, <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetshape/properties/height" target="_blank" rel="nofollow noopener noreferrer">Height</a>, <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetshape/properties/rotateangle" target="_blank" rel="nofollow noopener noreferrer">RotateAngle</a> o <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.spreadsheet/spreadsheetshape/properties/alternativetext" target="_blank" rel="nofollow noopener noreferrer">AlternativeText</a>) de formas específicas en una hoja de cálculo de Excel. El siguiente ejemplo de código muestra cómo utilizar esta funcionalidad.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToSpreadsheets.SpreadsheetUpdateShapeProperties**
+
+```csharp
+SpreadsheetLoadOptions loadOptions = new SpreadsheetLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\spreadsheet.xlsx"
+using (Watermarker watermarker = new Watermarker("spreadsheet.xlsx", loadOptions))
+{
+    SpreadsheetContent content = watermarker.GetContent<SpreadsheetContent>();
+    foreach (SpreadsheetShape shape in content.Worksheets[0].Shapes)
+    {
+        if (shape.Text == "© Aspose 2019")
+        {
+            shape.AlternativeText = "watermark";
+            shape.RotateAngle = 30;
+            shape.X = 200;
+            shape.Y = 200;
+            shape.Width = 400;
+            shape.Height = 100;
+        }
+    }
+
+    watermarker.Save("spreadsheet.xlsx");
+}
+```

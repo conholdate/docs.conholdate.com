@@ -1,0 +1,80 @@
+---
+title: "Notas de migración"
+sidebar_label: "Notas de migración"
+sidebar_key: "net-merger-migration-notes"
+sidebar_position: 100
+description: "Cómo migrar desde versiones anteriores de GroupDocs.Merger para .NET"
+product: "merger"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "merger-net"
+source_path: "net/developer-guide/migration-notes.md"
+source_commit: "a94e0e4d7474596613a34f623effd20176c5227b"
+source_sha256: "9401263e71e94ff6076584b4ac51f6e5fdc826ce230d8151210d375e7af99f9e"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "b846b7cb38462340ecb92fe9ae39f39a00d3e889dc46ae2f4c9548b82e414622"
+translation_updated_at: "2026-11-16T05:27:28.217Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Merger para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+### ¿Por qué migrar? {#why-to-migrate}
+ 
+A continuación se presentan las principales razones para utilizar la nueva API actualizada proporcionada por GroupDocs.Merger para .NET desde la versión 19.9:
+*   **<a href="https://reference.groupdocs.com/merger/net/groupdocs.merger/merger" target="_blank" rel="nofollow noopener noreferrer">Merger</a>** clase introducida como **punto de entrada único** para gestionar el procesamiento de documentos de cualquier formato de archivo admitido (en lugar de la clase **DocumentHandler** de versiones anteriores).
+*   La arquitectura del producto se rediseñó desde cero con el fin de **reducir el uso de memoria** (entre un 10 % y un 400 % aproximadamente, según el tipo de documento).
+*   La API de procesamiento de documentos se **simplificó y mejoró**, lo que facilita la instanciación de la clase de opciones adecuada y el control sobre los procesos de manipulación de la estructura del documento.
+    
+
+### ¿Cómo migrar? {#how-to-migrate}
+
+A continuación se presenta una breve comparación sobre cómo unir documentos utilizando la API antigua y la nueva.  
+
+**Estilo de codificación antiguo**
+
+```csharp
+string sourceFile1 = CommonUtilities.fileOne + fileOne;
+string sourceFile2 = CommonUtilities.fileTwo + fileTwo;
+
+
+// Preparing.
+string password = "SomePasswordString";
+Stream openFile1 = new FileStream(sourceFile1, FileMode.Open);
+Stream openFile2 = new FileStream(sourceFile2, FileMode.Open);
+
+List<JoinItem> documentStreams = new List<JoinItem>();
+
+JoinItem item1 = new JoinItem(openFile1, FileFormat.Docx, password);
+documentStreams.Add(item1);
+JoinItem item2 = new JoinItem(openFile2, FileFormat.Docx, password);
+documentStreams.Add(item2);
+
+
+// Main method.
+DocumentResult result = new DocumentHandler().Join(documentStreams);
+
+Stream documentStream = result.Stream;
+var fileStream = File.Create(CommonUtilities.outputPath + "OutPut." + FileFormat.Docx);
+documentStream.CopyTo(fileStream);
+documentStream.Close();
+```
+
+**Nuevo estilo de codificación**
+
+```csharp
+using (Merger merger = new Merger(@"c:\sample1.docx"))
+{
+    merger.Join(@"c:\sample2.docx");
+    merger.Save(@"c:\output\result.docx");
+}
+```
+
+Para obtener más ejemplos de código y casos de uso específicos, consulte nuestra [Guía para desarrolladores](/net/merger/developer-guide/) documentación o <a href="https://github.com/groupdocs-merger/GroupDocs.Merger-for-.NET" target="_blank" rel="nofollow noopener noreferrer">GitHub</a> ejemplos y muestras.

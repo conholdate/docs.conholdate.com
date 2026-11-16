@@ -1,0 +1,140 @@
+---
+title: "Conceptos básicos de redacción"
+sidebar_label: "Conceptos básicos de redacción"
+sidebar_key: "net-redaction-redaction-basics"
+sidebar_position: 4
+description: "Este artículo muestra cómo los desarrolladores de C# pueden aplicar metadatos, imágenes, anotaciones y redacción de texto en sus documentos. Se admite una amplia gama de formatos de documento, como PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y otros."
+product: "redaction"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "redaction-net"
+source_path: "net/developer-guide/basic-usage/redaction-basics.md"
+source_commit: "7f9ba3f7099e7e45c9dcc8d1241caf5c3e6029ec"
+source_sha256: "37cf8179c26bb47c3c4eb30c6f2d50ab65016773ffdcf450310a1f05bd9427f8"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "f1f8e43a7e342d72d96ed572f017460cbff5c254e72d2d39339df9c083ad9063"
+translation_updated_at: "2026-11-16T05:56:33.672Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Redaction para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+GroupDocs.Redaction ofrece un conjunto eficaz de funciones para el sellado de documentos. Permite aplicar sellados a [texto](/net/redaction/developer-guide/basic-usage/text-redactions/), [metadatos](/net/redaction/developer-guide/basic-usage/metadata-redactions/), [anotaciones](/net/redaction/developer-guide/basic-usage/annotation-redactions/) y [imágenes](/net/redaction/developer-guide/basic-usage/image-redactions/).
+
+Se admite una amplia gama de formatos de documento, como: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y otros. Consulte la lista completa de formatos admitidos en el artículo sobre [formatos de documento admitidos](/net/redaction/getting-started/supported-document-formats/).
+
+## Tipos de sellado {#redaction-types}
+
+GroupDocs.Redaction incluye los siguientes tipos de sellado:
+
+| Tipo | Descripción | Clases |
+| --- | --- | --- |
+| [Texto](/net/redaction/developer-guide/basic-usage/text-redactions/) | Reemplaza u oculta con un bloque de color una porción de texto dentro del cuerpo del documento | <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/exactphraseredaction" target="_blank" rel="nofollow noopener noreferrer">ExactPhraseRedaction</a>, <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/regexredaction" target="_blank" rel="nofollow noopener noreferrer">RegexRedaction</a> |
+| [Metadatos](/net/redaction/developer-guide/basic-usage/metadata-redactions/) | Reemplaza los valores de metadatos por valores vacíos o sella los textos de metadatos | <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/erasemetadataredaction" target="_blank" rel="nofollow noopener noreferrer">EraseMetadataRedaction</a>, <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/metadatasearchredaction" target="_blank" rel="nofollow noopener noreferrer">MetadataSearchRedaction</a> |
+| [Anotaciones](/net/redaction/developer-guide/basic-usage/annotation-redactions/) | Elimina anotaciones del documento o sella sus textos | <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/deleteannotationredaction" target="_blank" rel="nofollow noopener noreferrer">DeleteAnnotationRedaction</a>, <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/annotationredaction" target="_blank" rel="nofollow noopener noreferrer">AnnotationRedaction</a> |
+| [Imágenes](/net/redaction/developer-guide/basic-usage/image-redactions/) | Reemplaza un área específica de una imagen con un cuadro de color | <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/imagearearedaction" target="_blank" rel="nofollow noopener noreferrer">ImageAreaRedaction</a> |
+| [Páginas](/net/redaction/developer-guide/basic-usage/remove-page-redactions/) | Elimina un rango específico de páginas (diapositivas, hojas de cálculo, etc.) | <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/removepageredaction" target="_blank" rel="nofollow noopener noreferrer">RemovePageRedaction</a> |
+
+## Aplicar sellado {#apply-redaction}
+
+El sellado de un documento se realiza mediante el método <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactor/apply/methods/1" target="_blank" rel="nofollow noopener noreferrer">Redactor.Apply</a>. Como resultado, se recibe una instancia de <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactorchangelog" target="_blank" rel="nofollow noopener noreferrer">RedactorChangeLog</a>, que contiene una entrada de registro para cada sellado aplicado. Cada entrada incluye una referencia a una instancia de <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redaction" target="_blank" rel="nofollow noopener noreferrer">Redacton</a>, junto con sus opciones, el estado de la operación (véase a continuación) y descripciones textuales cuando corresponda. Si al menos un sellado falla, verá <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactionstatus" target="_blank" rel="nofollow noopener noreferrer">Status == RedactionStatus.Failed</a>:
+
+**C#**
+
+```csharp
+using (Redactor redactor = new Redactor("sample.docx"))
+{
+   RedactorChangeLog result = redactor.Apply(new ExactPhraseRedaction("John Doe", new ReplacementOptions("[personal]")));
+   if (result.Status != RedactionStatus.Failed)
+   {
+      redactor.Save();
+   };
+}
+```
+
+En la siguiente tabla se enumeran todos los estados posibles de la enumeración <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactionstatus" target="_blank" rel="nofollow noopener noreferrer">RedactionStatus</a>:
+
+| Estado | Descripción | Razones posibles |
+| --- | --- | --- |
+| *Applied* (Aplicado) | La redacción se aplicó completamente y con éxito | Todas las operaciones realizadas durante el proceso de redacción se aplicaron correctamente |
+| *PartiallyApplied* (Parcialmente aplicado) | La redacción se aplicó únicamente a una parte de sus coincidencias | 1) Se superaron los límites de prueba para las sustituciones; 2) Al menos un cambio fue rechazado por el usuario |
+| *Skipped* (Omitido) | La redacción se omitió (no se aplicó) | 1) Se superaron los límites de prueba para las redacciones; 2) La redacción no se puede aplicar a este tipo de documento; 3) Todas las sustituciones fueron rechazadas por el usuario y no se realizaron cambios |
+| *Failed* (Fallido) | La redacción falló con una excepción | Se produjo una excepción durante el proceso de redacción |
+
+Para obtener información detallada, debe recorrer las entradas del registro de redacción en <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactorchangelog/properties/redactionlog" target="_blank" rel="nofollow noopener noreferrer">RedactorChangeLog.RedactionLog</a> y comprobar la propiedad <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactionresult/properties/errormessage" target="_blank" rel="nofollow noopener noreferrer">ErrorMessage</a> de cualquier elemento cuyo estado sea distinto de *Applied*:
+
+**C#**
+
+```csharp
+RedactorChangeLog summary = redactor.Apply( ... );
+if (summary.Status != RedactionStatus.Applied)
+{
+	for (int i = 0; i < summary.RedactionLog.Count; i++)
+	{
+		RedactorLogEntry logEntry = summary.RedactionLog[i];
+    	if (logEntry.Result.Status != RedactionStatus.Applied)
+        {
+			Console.WriteLine("{0} status is {1}, details: {2}", 
+				logEntry.Redaction.GetType().Name, 
+				logEntry.Result.Status, 
+				logEntry.Result.ErrorMessage);
+		}
+	}
+}
+```
+
+## Aplicar múltiples redacciones {#apply-multiple-redactions}
+
+Puede aplicar tantas redacciones como necesite en una única llamada al método <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactor/apply/methods/1" target="_blank" rel="nofollow noopener noreferrer">Redactor.Apply</a>, ya que su sobrecarga acepta un array de redacciones y una política de redacción. En este caso, las redacciones se aplicarán en el mismo orden en que aparecen en el array. Como alternativa a especificar conjuntos de redacción en su código, puede crear un archivo XML con la política de redacción, tal como se describe [aquí](/net/redaction/developer-guide/basic-usage/redaction-basics/).
+
+**C#**
+
+```csharp
+using (Redactor redactor = new Redactor("sample.docx"))
+{
+   var redactionList = new Redaction[] 
+   {
+      new ExactPhraseRedaction("John Doe", new ReplacementOptions("[Client]")),
+      new RegexRedaction("Redaction", new ReplacementOptions("[Product]")),
+      //new RegexRedaction("\\d{2}\\s*\\d{2}[^\\d]*\\d{6}", new ReplacementOptions(System.Drawing.Color.Blue)),
+      // Use GroupDocs.Redaction.Options.Drawing types instead of System.Drawing, which is scheduled for removal in future versions.
+      new RegexRedaction("\\d{2}\\s*\\d{2}[^\\d]*\\d{6}", new ReplacementOptions(GroupDocs.Redaction.Options.Drawing.Color.Blue)),
+      new DeleteAnnotationRedaction(),
+      new EraseMetadataRedaction(MetadataFilters.All)
+   }; 
+   RedactorChangeLog result = redactor.Apply(redactionList);
+   // false, if at least one redaction failed
+   if (result.Status != RedactionStatus.Failed)
+   {
+      redactor.Save();
+   };
+}
+```
+
+## Más recursos {#more-resources}
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre las funciones de redacción de documentos, consulte la [sección de uso avanzado](/net/redaction/developer-guide/advanced-usage/).
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para Java</a>
+    
+
+### Aplicación gratuita en línea para redactar documentos {#free-online-document-redaction-app}
+
+Junto con la completa biblioteca de .NET, ofrecemos aplicaciones sencillas pero potentes y gratuitas.
+
+Le damos la bienvenida a realizar redacciones en diversos formatos de documentos, como PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más, con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/redaction" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Redaction App</a>.

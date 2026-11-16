@@ -1,0 +1,99 @@
+---
+title: "Use Aspose.OCR para .NET API on-premise"
+sidebar_label: "Use Aspose.OCR para .NET API on-premise"
+sidebar_position: 4
+description: "Este artículo explica cómo utilizar la API de Aspose.OCR para .NET en entornos locales."
+product: "redaction"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "redaction-net"
+source_path: "net/developer-guide/advanced-usage/using-ocr/use-aspose-ocr-on-premise.md"
+source_commit: "7f9ba3f7099e7e45c9dcc8d1241caf5c3e6029ec"
+source_sha256: "cf87bb60104fc71bb0d8d2b088246ddd3db538bde55ad41fcbf22f572f364918"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "e3be139f90795af55d5f01e1b3c50c429253bfecc7b9f9e9e5e294f887ec1b24"
+translation_updated_at: "2026-11-16T05:41:25.474Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Redaction para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Esta implementación se basa en <a href="https://products.aspose.com/ocr/net/" target="_blank" rel="nofollow noopener noreferrer">Aspose.OCR para .NET, API local</a>. Aunque requiere un archivo de licencia válido, siempre puede solicitar una licencia temporal de un mes para evaluarla.
+
+**C#**
+```csharp
+    using GroupDocs.Redaction.Integration.Ocr;
+
+    public class AsposeOCRStandaloneConnector : IOcrConnector
+    {
+        public AsposeOCRStandaloneConnector(string licenseFile)
+        {
+            var lic = new Aspose.OCR.License();
+            lic.SetLicense(licenseFile);
+        }
+
+        public RecognizedImage Recognize(Stream imageStream)
+        {
+            try
+            {
+                using (MemoryStream memStream = new MemoryStream())
+                {
+                    imageStream.CopyTo(memStream);
+                    var api = new Aspose.OCR.AsposeOcr();
+                    var rectangles = api.GetRectangles(memStream, Aspose.OCR.AreasType.LINES, false);
+                    var result = api.RecognizeImage(memStream, new Aspose.OCR.RecognitionSettings()
+                    {
+                        Language = Aspose.OCR.Language.Eng,
+                        RecognitionAreas = rectangles
+                    });
+                    return CreateDtoFromResponse(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Aspose.OCR for Cloud Recognition failed: {0}", ex.ToString());
+            }
+            return new RecognizedImage(new List<TextLine>());
+        }
+
+        protected virtual RecognizedImage CreateDtoFromResponse(Aspose.OCR.RecognitionResult result)
+        {
+            List<TextLine> lines = new List<TextLine>();
+            for (int i = 0; i < result.RecognitionAreasText.Count; i++)
+            {
+                var fragments = RegularTextLine.SplitToFragments(result.RecognitionAreasText[i].Trim('\r', '\n'), result.RecognitionAreasRectangles[i]);
+                lines.Add(new TextLine(fragments));
+            }
+            return new RecognizedImage(lines);
+        }
+    }
+
+```
+
+En primer lugar, identificamos áreas rectangulares de texto utilizando el método `GetRectangles()` con la opción `Aspose.OCR.AreasType.LINES`. Con esta opción, obtendrá un rectángulo para cada línea de texto, pero deberá dividirla en palabras.
+
+Puede encontrar la implementación completa y un ejemplo de su uso aquí: <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para .NET</a>.
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para Java</a>
+    
+
+### Aplicación gratuita en línea para redactar documentos {#free-online-document-redaction-app}
+
+Además de la completa biblioteca de .NET, ofrecemos aplicaciones sencillas pero potentes y gratuitas.
+
+Le damos la bienvenida a realizar redacciones en diversos formatos de documentos, como PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más, con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/redaction" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Redaction App</a>.

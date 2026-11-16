@@ -1,0 +1,71 @@
+---
+title: "Vista previa del documento"
+sidebar_label: "Vista previa del documento"
+sidebar_position: 7
+description: "Este artículo muestra cómo obtener la vista previa del documento."
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/basic-usage/preview.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "e3b738d6be6ea6c4484d74f448ac67c44dd217b209d8f6aea0f3580c65d19b6d"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "4af9430666f9a1e0bd0c2805f2062428cdab2bacc57e92a2f3cb602c6f21406f"
+translation_updated_at: "2026-11-16T06:32:28.661Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Watermark para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+La biblioteca GroupDocs.Watermark está dotada de la capacidad de generar imágenes de vista previa para cada página de sus documentos, simplificando así su flujo de trabajo y mejorando la eficiencia. Con esta función, los usuarios pueden previsualizar sus documentos con una simple mirada, lo que permite una navegación rápida y garantiza un acceso fluido al contenido esencial. 
+
+## Generar vista previa del documento {#generate-document-preview}
+
+Para crear la vista previa del documento:
+1. <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark/watermarker/constructors/4" target="_blank" rel="nofollow noopener noreferrer">Create</a> instancie un objeto de la clase `Watermarker` para un archivo local o un flujo de archivos;
+
+2. Instancie el objeto <a href="https://reference.groupdocs.com/watermark/net/groupdocs.watermark.options/previewoptions/" target="_blank" rel="nofollow noopener noreferrer">PreviewOptions</a> con el delegado para la creación del flujo (consulte el controlador de eventos <a href="https://reference.groupdocs.com/watermark/net/groupdocs.watermark.options/createpagestream/" target="_blank" rel="nofollow noopener noreferrer">CreatePageStream</a>);
+Si necesita implementar la liberación personalizada del flujo de la vista previa de la imagen, debe pasar el argumento adicional <a href="https://reference.groupdocs.com/watermark/net/groupdocs.watermark.options/releasepagestream/" target="_blank" rel="nofollow noopener noreferrer">ReleasePageStream</a> para limpiar los recursos.  
+
+3. Especifique <a href="https://reference.groupdocs.com/watermark/net/groupdocs.watermark.options/previewoptions.previewformats/" target="_blank" rel="nofollow noopener noreferrer">PreviewFormat</a> (PNG / JPG / BMP, entre otros) y otras propiedades, como PageNumbers, para las que desee generar la vista previa. Además, para la mayoría de los documentos, puede utilizar sobrecargas específicas de PreviewOptions, como <a href="https://reference.groupdocs.com/watermark/net/groupdocs.watermark.options.pdf/pdfpreviewoptions/" target="_blank" rel="nofollow noopener noreferrer">PdfPreviewOptions</a> y <a href="https://reference.groupdocs.com/watermark/net/groupdocs.watermark.options.spreadsheet/spreadsheetpreviewoptions/" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetPreviewOptions</a>, que permiten configurar la resolución de las imágenes generadas en puntos por pulgada (DPI).
+
+4. Llame al método GeneratePreview del objeto Watermarker y pase los objetos PreviewOptions a este método.
+
+
+```csharp
+string outputDirectory = Constants.GetOutputDirectoryPath();
+
+using (Watermarker watermarker = new Watermarker("sample.pdf"))
+{
+    CreatePageStream createPageStreamDelegate = delegate(int number)
+    {
+        string previewImageFileName = Path.Combine(outputDirectory, 
+            string.Format("page{0}.png", number));
+        return File.OpenWrite(previewImageFileName);
+    };
+
+    ReleasePageStream releasePageStreamDelegate = delegate(int number, Stream stream)
+    {
+        stream.Close();
+    };
+
+    PreviewOptions previewOptions = new PreviewOptions(createPageStreamDelegate,
+        releasePageStreamDelegate)
+    {
+        PreviewFormat = PreviewOptions.PreviewFormats.PNG,
+        PageNumbers = new []{1, 2}
+    };
+    
+    watermarker.GeneratePreview(previewOptions);
+}
+```
+Ejecute el programa. Este creará imágenes en el `outputDirectory` correspondientes a las páginas del documento.

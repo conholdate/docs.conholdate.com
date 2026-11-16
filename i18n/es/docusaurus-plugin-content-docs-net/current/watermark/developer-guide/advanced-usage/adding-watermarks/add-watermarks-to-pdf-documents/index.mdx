@@ -1,0 +1,201 @@
+---
+title: "Añadir marcas de agua a documentos PDF"
+sidebar_label: "A documentos PDF"
+sidebar_key: "net-watermark-adding-watermarks-add-watermarks-to-pdf-documents-index"
+sidebar_position: 6
+description: "La API de marca de agua le permite agregar marcas de agua a documentos PDF. Es posible agregar marcas de agua a una página específica o agregar marcas de agua en todas las imágenes o adjuntos de una página determinada."
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-pdf-documents/_index.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "673a94dfb5071395d40c4b60135364e704f9fed9a32339ec36e3f60631c165df"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "391c43d991422820d4f6c6d9191a4521033ec3d85a19c385b84f4c3faa0a640f"
+translation_updated_at: "2026-11-16T06:12:19.016Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Watermark para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## Añadir marcas de agua a documentos PDF {#add-watermarks-to-pdf-documents}
+La API de marca de agua le permite añadir marcas de agua a documentos PDF. Es posible añadir marcas de agua a una página específica o añadir marcas de agua a todas las imágenes o adjuntos de una página determinada.
+
+### Añadir marca de agua a una página específica {#adding-watermark-to-a-particular-page}
+
+La API GroupDocs.Watermark le permite añadir una marca de agua a una página específica de un documento PDF. Añadir una marca de agua a un documento PDF mediante GroupDocs.Watermark consta de los siguientes pasos.
+
+1. Cargar el documento
+2. Crear e inicializar el objeto de marca de agua
+3. Establecer las propiedades de la marca de agua
+4. Añadir la marca de agua a la página del documento mediante la propiedad <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.pdf/pdfartifactwatermarkoptions/properties/pageindex" target="_blank" rel="nofollow noopener noreferrer">PageIndex</a> de <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.pdf/pdfartifactwatermarkoptions" target="_blank" rel="nofollow noopener noreferrer">PdfArtifactWatermarkOptions</a>
+5. Guardar el documento
+
+El siguiente código realiza esta funcionalidad.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfAddWatermarks**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    // Add text watermark to the first page
+    TextWatermark textWatermark = new TextWatermark("This is a test watermark", new Font("Arial", 8));
+    PdfArtifactWatermarkOptions textWatermarkOptions = new PdfArtifactWatermarkOptions();
+    textWatermarkOptions.PageIndex = 0;
+
+    watermarker.Add(textWatermark, textWatermarkOptions);
+
+    // Add image watermark to the second page
+    using (ImageWatermark imageWatermark = new ImageWatermark("protect.jpg"))
+    {
+        PdfArtifactWatermarkOptions imageWatermarkOptions = new PdfArtifactWatermarkOptions();
+        imageWatermarkOptions.PageIndex = 1;
+        watermarker.Add(imageWatermark, imageWatermarkOptions);
+    }
+
+    watermarker.Save("document.pdf");
+}
+```
+
+### Añadir una marca de agua a todas las imágenes de una página determinada {#adding-watermark-to-all-images-of-a-particular-page}
+
+La API también permite añadir una marca de agua a las imágenes contenidas en una página específica del documento PDF. El siguiente fragmento de código muestra cómo añadir una marca de agua a todas las imágenes de una página determinada de un documento PDF.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfAddWatermarkToImages**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    // Initialize image or text watermark
+    TextWatermark watermark = new TextWatermark("Protected image", new Font("Arial", 8));
+    watermark.HorizontalAlignment = HorizontalAlignment.Center;
+    watermark.VerticalAlignment = VerticalAlignment.Center;
+    watermark.RotateAngle = 45;
+    watermark.SizingType = SizingType.ScaleToParentDimensions;
+    watermark.ScaleFactor = 1;
+
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+
+    // Get all images from the first page
+    WatermarkableImageCollection images = pdfContent.Pages[0].FindImages();
+
+    // Add watermark to all found images
+    foreach (WatermarkableImage image in images)
+    {
+        image.Add(watermark);
+    }
+
+    watermarker.Save("document.pdf");
+}
+```
+
+### Obtención del tamaño de página {#getting-page-size}
+
+Si, por alguna razón, desea utilizar dimensiones y posicionamiento absolutos, también es posible que necesite determinar el tamaño de la página. GroupDocs.Watermark también proporciona la funcionalidad para obtener las dimensiones de una página en un documento PDF. El ejemplo siguiente muestra cómo obtener <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfpage/properties/width" target="_blank" rel="nofollow noopener noreferrer">width</a> y <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfpage/properties/height" target="_blank" rel="nofollow noopener noreferrer">height</a> de una página concreta.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfGetDimensions**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    Console.WriteLine(pdfContent.Pages[0].Width);
+    Console.WriteLine(pdfContent.Pages[0].Height);
+}
+```
+
+### Márgenes de página en documentos PDF {#page-margins-in-pdf-document}
+
+
+:::info
+**Referencia de PDF 1.7**  
+
+Una página PDF puede prepararse ya sea para un medio final, como una hoja de papel, o como parte de un proceso de preimpresión, en el que el contenido de la página se coloca en un medio intermedio, como una película o una placa de imposición. En este último caso, es importante distinguir entre la página intermedia y la página final. La página intermedia suele incluir contenido adicional relacionado con la producción, como márgenes de sangrado o marcas de impresora, que se encuentran fuera de los límites de la página final. Para manejar estos casos, una página PDF puede definir hasta cinco límites distintos para controlar diversos aspectos del proceso de impresión:
+
+* La caja de medio define los límites del medio físico en el que se imprimirá la página. Puede incluir cualquier área extendida que rodee la página final, destinada al sangrado, marcas de impresión u otros fines similares. También puede incluir áreas cercanas a los bordes del medio que no pueden marcarse debido a limitaciones físicas del dispositivo de salida. El contenido que se encuentre fuera de este límite puede descartarse sin afectar el significado del archivo PDF.
+* La caja de recorte define la región en la que se recortará (recortará) el contenido de la página al visualizarla o imprimirla. A diferencia de las demás cajas, la caja de recorte no tiene un significado definido en términos de geometría física de la página ni de uso previsto; simplemente impone un recorte sobre el contenido de la página. Sin embargo, en ausencia de información adicional (como instrucciones de imposición especificadas en un ticket de trabajo JDF o PJTF), la caja de recorte determina cómo debe posicionarse el contenido de la página en el medio de salida. El valor predeterminado es la caja de medio de la página.
+* La caja de sangrado (PDF 1.3) define la región en la que se recortará el contenido de la página cuando se genere en un entorno de producción. Puede incluir cualquier área adicional de sangrado necesaria para acomodar las limitaciones físicas de los equipos de corte, plegado y encuadernación. La página impresa efectiva puede incluir marcas de impresión que se encuentren fuera de la caja de sangrado. El valor predeterminado es la caja de recorte de la página.
+* La caja de recorte final (PDF 1.3) define las dimensiones previstas de la página final tras el recorte. Puede ser más pequeña que la caja de medio para permitir contenido relacionado con la producción, como instrucciones de impresión, marcas de corte o barras de color. El valor predeterminado es la caja de recorte de la página.
+* La caja de arte (PDF 1.3) define la extensión del contenido significativo de la página (incluido el espacio en blanco potencial), tal como lo ha concebido el creador de la página. El valor predeterminado es la caja de recorte de la página.
+:::
+
+
+Si un documento PDF contiene una definición de caja de recorte (*crop box*), Adobe Acrobat la utiliza para la visualización en pantalla y la impresión. Por esta razón, GroupDocs.Watermark utiliza, de forma predeterminada, la caja de recorte para calcular el tamaño y la posición relativa de la marca de agua. Cuando se establece la propiedad <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark/watermark/properties/considerparentmargins" target="_blank" rel="nofollow noopener noreferrer">Watermark.ConsiderParentMargins</a> en **true**, se utiliza en su lugar el rectángulo de la caja de recorte de impresión (*trim box*). Pero ¿qué sucede si desea que la marca de agua se alinee con la caja de sangrado (*bleed box*) o con la caja de arte (*art box*)? En este caso, debe establecer el valor adecuado en la propiedad <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfcontent/properties/pagemargintype" target="_blank" rel="nofollow noopener noreferrer">PdfContent.PageMarginType</a>, como se muestra en el ejemplo siguiente.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfAddWatermarkWithPageMarginType**
+
+```csharp
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    TextWatermark watermark = new TextWatermark("Test watermark", new Font("Arial", 42));
+    watermark.HorizontalAlignment = HorizontalAlignment.Right;
+    watermark.VerticalAlignment = VerticalAlignment.Top;
+    watermark.SizingType = SizingType.ScaleToParentDimensions;
+    watermark.ScaleFactor = 1;
+
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    pdfContent.PageMarginType = PdfPageMarginType.BleedBox;
+    watermark.ConsiderParentMargins = true;
+
+    watermarker.Add(watermark);
+    watermarker.Save("document.pdf");
+}
+```
+
+### Agregar marca de agua a todos los adjuntos {#add-watermark-to-all-attachments}
+
+GroupDocs.Watermark también ofrece la funcionalidad para agregar una marca de agua a los archivos compatibles en todos los <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.pdf/pdfcontent/properties/attachments" target="_blank" rel="nofollow noopener noreferrer">attachments</a> de un documento PDF. El siguiente ejemplo muestra cómo agregar una marca de agua a todos los adjuntos compatibles.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToPdf.PdfAddWatermarkToAllAttachments**
+
+```csharp
+TextWatermark watermark = new TextWatermark("This is WaterMark on Attachment", new Font("Arial", 19));
+PdfLoadOptions loadOptions = new PdfLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.pdf"
+using (Watermarker watermarker = new Watermarker("document.pdf", loadOptions))
+{
+    PdfContent pdfContent = watermarker.GetContent<PdfContent>();
+    foreach (PdfAttachment attachment in pdfContent.Attachments)
+    {
+        // Check if the attached file is supported by GroupDocs.Watermark
+        IDocumentInfo info = attachment.GetDocumentInfo();
+        if (info.FileType != FileType.Unknown && !info.IsEncrypted)
+        {
+            // Load the attached document
+            using (Watermarker attachedWatermarker = attachment.CreateWatermarker())
+            {
+                // Add wateramrk
+                attachedWatermarker.Add(watermark);
+
+                // Save changes in the attached file
+                attachedWatermarker.Save();
+            }
+        }
+    }
+
+    watermarker.Save("document.pdf");
+}
+```
+
+### Casos de uso avanzados {#advanced-use-cases}
+
+* [Adjuntos en documentos PDF](/net/watermark/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-pdf-documents/attachments-in-pdf-document/ "Attachments in PDF document")
+* [Objetos existentes en documentos PDF](/net/watermark/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-pdf-documents/existing-objects-in-pdf-document/ "Existing objects in PDF document")
+* [Rasterización de documentos o páginas](/net/watermark/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-pdf-documents/rasterize-document-or-page/ "Rasterize document or page")
+* [Marcas de agua en documentos PDF](/net/watermark/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-pdf-documents/watermarks-in-pdf-document/ "Watermarks in PDF document")

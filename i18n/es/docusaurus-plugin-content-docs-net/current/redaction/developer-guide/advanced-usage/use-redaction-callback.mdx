@@ -1,0 +1,85 @@
+---
+title: "Usar la devolución de llamada de redacción"
+sidebar_label: "Usar la devolución de llamada de redacción"
+sidebar_position: 3
+description: "Aprenda sobre los métodos de la API de redacción para rechazar o aprobar cambios específicos durante el proceso de redacción."
+product: "redaction"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "redaction-net"
+source_path: "net/developer-guide/advanced-usage/use-redaction-callback.md"
+source_commit: "7f9ba3f7099e7e45c9dcc8d1241caf5c3e6029ec"
+source_sha256: "9fafc7932988db325f4140ffee8a33d06cb99e43f7ea23dc11cd7ad1dc58a371"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "394fefe13c45c43bac11f848acaf61befec25cf6cf62261b61be93e213eb7ea3"
+translation_updated_at: "2026-11-16T05:39:45.148Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Redaction para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Para rechazar o aprobar cambios específicos durante el proceso de redacción, o para mantener un registro completo de los cambios realizados en el documento, es necesario proporcionar una instancia de <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/iredactioncallback" target="_blank" rel="nofollow noopener noreferrer">IRedactionCallback</a> al constructor de la clase <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.options/redactorsettings" target="_blank" rel="nofollow noopener noreferrer">RedactorSettings</a>. Esta interfaz contiene únicamente un método, <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/iredactioncallback/methods/acceptredaction" target="_blank" rel="nofollow noopener noreferrer">AcceptRedaction()</a>, que recibe información detallada sobre la redacción propuesta y devuelve un valor *Boolean* que indica si se acepta o no.
+
+A continuación, creamos una clase de devolución de llamada que registra los cambios en la consola del sistema:
+
+**C#**
+
+```csharp
+public class RedactionDump : IRedactionCallback
+{
+    public RedactionDump()
+    {
+    }
+
+    public bool AcceptRedaction(RedactionDescription description)
+    {
+        Console.Write("{0} redaction, {1} action, item {2}. ", description.RedactionType, description.ActionType, description.OriginalText);
+        if (description.Replacement != null)
+        {
+            Console.Write("Text {0} is replaced with {1}. ", description.Replacement.OriginalText, description.Replacement.Replacement);
+        }
+        Console.WriteLine();
+        // you can return "false" here to prevent particular change during redaction process
+        return true;
+    }
+}
+
+```
+
+La instancia de esta clase debe pasarse al constructor de la clase <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactor" target="_blank" rel="nofollow noopener noreferrer">Redactor</a>:
+
+**C#**
+
+```csharp
+using (Redactor redactor = new Redactor("\\Sample.docx", new LoadOptions(), new RedactorSettings(new RedactionDump())))
+{
+    // Assign an instance before using Redactor
+    redactor.Apply(new ExactPhraseRedaction("John Doe", new ReplacementOptions("[personal]")));
+    redactor.Save();
+}
+
+```
+
+## Más recursos {#more-resources}
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para Java</a>
+    
+
+### Aplicación gratuita en línea para redactar documentos {#free-online-document-redaction-app}
+
+Junto con la completa biblioteca de .NET, ofrecemos aplicaciones sencillas pero potentes y gratuitas.
+
+Le damos la bienvenida a realizar redacciones en diversos formatos de documentos, como PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más, con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/redaction" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Redaction App</a>.

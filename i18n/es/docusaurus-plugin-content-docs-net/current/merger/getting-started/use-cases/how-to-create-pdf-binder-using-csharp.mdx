@@ -1,0 +1,352 @@
+---
+title: "Demostración de PDF Binder: Combinar múltiples formatos en un único PDF"
+sidebar_label: "Demostración de PDF Binder: Combinar múltiples formatos en un único PDF"
+sidebar_key: "net-merger-use-cases-how-to-create-pdf-binder-using-csharp"
+sidebar_position: 500
+description: "Una revisión técnica de cuatro formas de integrar GroupDocs.Merger para .NET en un flujo de trabajo real de documentos: desde un controlador único hasta una separación completa en microservicios."
+product: "merger"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "merger-net"
+source_path: "net/getting-started/use-cases/how-to-create-pdf-binder-using-csharp.md"
+source_commit: "a94e0e4d7474596613a34f623effd20176c5227b"
+source_sha256: "1429d76af8cd0fcd88fffd2e160da81aec2fbc21ffb3f2601e6670f667c5d981"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "c4381b505a4a7673f6b8ab3e9044cf3de7bf031b846196325b43eb68a4fa75f0"
+translation_updated_at: "2026-11-16T05:57:36.739Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Merger para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+![PDF binder produced from DOCX, XLSX, and PDF sources - captured from a live run](/net/merger/images/how-to-create-pdf-binder-using-csharp/result.gif)
+
+## Por qué existe esta página {#why-this-page-exists}
+
+Esta página está dirigida al ingeniero que ya está convencido de que la fusión funciona y ahora debe decidir dónde integrarla dentro del sistema: ¿como una acción del controlador?, ¿como un trabajador en segundo plano?, ¿como un servicio independiente detrás de una cola? La biblioteca permanece idéntica en todos los casos; lo que determina si la canalización puede ejecutarse a bajo costo con tres solicitudes por hora o con trescientas por minuto es precisamente la forma en que se conecta y orquesta alrededor de ella.
+
+Recorreremos cuatro patrones de despliegue, ordenados según complejidad creciente, mostraremos el código exacto que permanece idéntico en todos ellos y señalaremos los puntos en los que cada enfoque empieza a presentar problemas.
+
+## Público objetivo y supuestos {#audience-and-assumptions}
+
+Escrito para desarrolladores y arquitectos .NET senior que necesitan integrar la fusión dentro de un flujo de trabajo más amplio. Se asume que usted está familiarizado con los patrones asíncronos, la orquestación de contenedores y la superficie básica de la API de GroupDocs.Merger. Si desea una introducción previa a la API, consulte el tutorial del blog; esta página continúa donde dicho tutorial termina.
+
+**Lo que necesitará para seguir el ejemplo:**
+- SDK de .NET 6.0 en sus agentes de compilación.
+- Paquete NuGet de GroupDocs.Merger (v23.9 o posterior).
+- Un entorno de ejecución objetivo que ya haya perfilarizado: estas decisiones dependen de las características de CPU y E/S.
+
+## Cuatro patrones en vista general {#four-shapes-at-a-glance}
+
+| Patrón | Complejidad | Rendimiento | Latencia | Escalabilidad | Perfil de recursos |
+| ------- | ------------ | ------------ | --------- | ---------------- | ------------------ |
+| **Fusión síncrona en proceso** | Baja | Media | Baja | Solo vertical | Intensivo en CPU durante la conversión |
+| **Trabajador por lotes con carpeta de entrada** | Media | Alta | Media (segundos) | Horizontal por carpeta | Estable, limitado por disco |
+| **Servicio asíncrono de extracción y particionado** | Alta | Muy alta | Baja (asíncrona) | Horizontal, impulsada por cola | Ligero, solo en memoria |
+| **Microservicio de metadatos** | Alta | Alta | Media | Horizontal, compatible con caché | Mínimo |
+
+Cada uno de estos patrones utiliza la misma API de `Merger`: las diferencias radican únicamente en cómo se le entregan los archivos y en qué se hace con la salida.
+
+## Patrón 1: Fusión síncrona en proceso {#shape-1-in-process-synchronous-merge}
+
+### Cuándo este enfoque es el adecuado {#when-this-is-the-right-call}
+
+Un controlador recibe un pequeño conjunto de archivos subidos, el usuario observa un indicador de carga y se requiere una respuesta en uno o dos segundos. El llamador proporciona la lista de archivos y su orden, por lo que no hay nada que decidir en tiempo de ejecución.
+
+**Patrón:** Fachada alrededor del SDK, invocada directamente desde el controlador.
+**Concurrencia:** Un hilo por solicitud; el grupo de subprocesos maneja la concurrencia entre solicitudes.
+**Estado:** Por solicitud; nada persiste más allá de la respuesta HTTP.
+
+### Conexión (wiring) {#wiring}
+
+```csharp
+Console.WriteLine($"Primary source: {sourcePaths[0]}");
+using var merger = new Merger(sourcePaths[0]);
+
+var joinOptions = new JoinOptions();
+for (int i = 1; i < sourcePaths.Length; i++)
+{
+    Console.WriteLine($"Joining: {sourcePaths[i]}");
+    merger.Join(sourcePaths[i], joinOptions);
+}
+
+merger.Save(outputPath);
+Console.WriteLine(
+    $"Unified PDF binder saved to: {Path.GetFullPath(outputPath)}");
+return outputPath;
+```
+
+Por qué esto sigue siendo aburrido: `Merger` posee los identificadores de archivo hasta que `Dispose()`, `Join` agrega cada fuente, y el formato de salida lo decide el archivo que abrió primero. Entregue al SDK un PDF como `sourcePaths[0]` y los DOCX/XLSX al final se convierten en tránsito: sin archivos temporales en su disco, sin segunda biblioteca.
+
+### Lo que le cuesta {#what-it-costs-you}
+
+Un DOCX de 15 páginas más un XLSX de cinco hojas más un PDF de dos páginas normalmente tarda entre 300 y 700 ms en hardware modesto. El uso de memoria alcanza su pico durante la conversión; las hojas de cálculo grandes suelen ser la causa cuando un *pod* sufre un *out-of-memory* (OOM).
+
+### Notas sobre escalado {#scaling-notes}
+
+- **Horizontal:** Escalado estándar sin estado detrás de un balanceador de carga. Nada especial aquí.
+- **Vertical:** Cada solicitud está limitada por CPU en el camino de conversión, por lo que una máquina más rápida ayuda.
+- **Lo que le causará problemas:** Un único libro de cálculo malicioso de 400 páginas puede mantener ocupado un núcleo durante segundos y bloquear un hilo de trabajo. Establezca límites razonables de tamaño de carga subyacentes.
+
+### Notas operativas {#operational-notes}
+
+- Registre la hora de inicio, la hora de finalización, la cantidad de fuentes y la cantidad final de páginas en una sola línea por solicitud: esto facilita la triaje mediante un *grep* en lugar de una sesión de depuración.
+- Incluya un reintento breve ante errores transitorios de E/S; los errores propios del SDK rara vez son transitorios, así que no reintente esos casos.
+- Exponga `merge_duration_ms` como un histograma para que el percentil 99 (p99) no sea una sorpresa.
+
+## Forma 2: Procesador por lotes con carpeta de entrada {#shape-2-drop-folder-batch-worker}
+
+### Cuándo es la opción adecuada {#when-this-is-the-right-call-1}
+
+Algo en la etapa previa —una zona de aterrizaje SFTP, un procesador de correos entrantes o una exportación financiera nocturna— deposita archivos en formatos mixtos en un directorio. Necesita convertir cada carpeta en un *binder* (archivo agrupado) según un horario programado, no por solicitud individual.
+
+**Patrón:** Productor-consumidor. La etapa previa deposita archivos; el trabajador toma una carpeta, genera un *binder* y mueve la carpeta a la carpeta “hecho”.
+**Concurrencia:** Paralela entre carpetas; secuencial dentro de una carpeta (un `Merger` por *binder*).
+**Estado:** No persiste nada entre ejecuciones; el sistema de archivos actúa como cola.
+
+### Conexión {#wiring-1}
+
+```csharp
+// Pull only the extensions the worker knows how to handle, and push
+// any PDF to the front so Merger uses it as the primary document.
+// Using ThenBy(f) keeps runs deterministic across machines.
+var extensions = new[] { ".pdf", ".docx", ".xlsx" };
+var files = Directory
+    .EnumerateFiles(folderPath)
+    .Where(f => extensions.Contains(
+        Path.GetExtension(f).ToLowerInvariant()))
+    .OrderBy(f => Path.GetExtension(f).ToLowerInvariant() == ".pdf"
+        ? 0 : 1)
+    .ThenBy(f => f)
+    .ToArray();
+
+if (files.Length == 0)
+{
+    throw new InvalidOperationException(
+        $"No supported documents found in '{folderPath}'.");
+}
+
+Console.WriteLine(
+    $"Folder binder: discovered {files.Length} files in {folderPath}");
+return MergeMultipleFormatsIntoPdf(files, outputPath);
+```
+
+El paso de ordenamiento merece una mirada atenta. GroupDocs.Merger hereda el formato de salida del primer archivo pasado a `new Merger(...)`. Una carpeta que, por orden alfabético, coloque DOCX antes que PDF produciría un documento encuadernado en formato DOCX: correcto, pero no lo que esperaba el consumidor aguas abajo. Al promover el PDF al índice 0, el formato de salida se convierte en una propiedad de la mezcla de archivos procesada, y no en una cuestión de suerte dependiente del nombre de archivo.
+
+### Lo que le cuesta {#what-it-costs-you-1}
+
+Una carpeta con 200 documentos, unos 800 páginas en total: aproximadamente 2 segundos una vez que los archivos están en un SSD local. Si los orígenes están montados en red, este tiempo se duplica aproximadamente, y la operación queda limitada por E/S, no por la CPU.
+
+### Notas sobre escalabilidad {#scaling-notes-1}
+
+- **Horizontal:** Fragmente por carpeta: un trabajador por inquilino, por región o por grupo de hashes de nombres de carpetas. Coordinar mediante una cola si el estado compartido es relevante.
+- **Vertical:** Más RAM ayuda con hojas de cálculo grandes; más CPU beneficia mezclas con muchos DOCX. Los discos son más importantes que cualquiera de los dos anteriores.
+- **Lo que podría causarle problemas:** Un socio que envíe un único XLSX de 50 MB con imágenes incrustadas. Considere una etapa previa de validación que detecte tamaños sospechosos antes de que se active el trabajador.
+
+### Notas operativas {#operational-notes-1}
+
+- Genere `files_processed` y `bytes_merged` por ejecución; son los dos valores que permiten predecir incumplimientos del SLA.
+- Aísle las carpetas con errores en una carpeta hermana `failed/` y continúe con el procesamiento: un solo archivo defectuoso no debería detener todo el lote.
+- Si se reintentó una carpeta, versione el nombre del archivo de salida (`binder-YYYYMMDD-HHmmss.pdf`) para evitar que se sobrescriba silenciosamente nada.
+
+## Forma 3: Servicio asíncrono de extracción de páginas {#shape-3-asynchronous-page-extract-service}
+
+### Cuándo es la opción adecuada {#when-this-is-the-right-call-2}
+
+Sus documentos encuadernados ya existen en almacenamiento, y el siguiente consumidor solo necesita una porción: una página de portada, un apéndice o un rango específico de páginas. Volver a fusionar los orígenes para esto es ineficiente; leer el PDF final y extraer las páginas es mucho más rápido (en segundos).
+
+**Patrón:** Separación de comandos y consultas. La fusión es el comando (realizado en otro lugar). Este servicio solo responde a la consulta: “proporcione las páginas [1, 3, 7] del documento encuadernado X.”
+**Concurrencia:** E/S asíncrona; las llamadas al SDK se ejecutan en subprocesos de un grupo detrás de `Task.Run`.
+**Estado:** Sin estado en el servicio; los objetos resultantes se almacenan en almacenamiento de objetos.
+
+### Conexión {#wiring-2}
+
+```csharp
+using var merger = new Merger(binderPath);
+merger.ExtractPages(new ExtractOptions(pages));
+merger.Save(outputPath);
+
+Console.WriteLine(
+    $"Extracted pages [{string.Join(",", pages)}] to "
+    + Path.GetFullPath(outputPath));
+return outputPath;
+```
+
+Aquí no se realiza ninguna conversión: la entrada ya es un PDF y la salida también es un PDF; por lo tanto, la latencia está dominada por la lectura del blob de origen. Esto lo convierte en una solución natural para un trabajador alimentado por una cola: una solicitud de entrada, un blob como salida, sin nada que compita por recursos.
+
+### Qué le cuesta {#what-it-costs-you-2}
+
+Bajo un segundo para los binders típicos. Los PDFs muy grandes (500 MB o más) elevan notablemente el uso de memoria durante la extracción; considere esto como el punto de escalado crítico.
+
+### Notas sobre escalado {#scaling-notes-2}
+
+- **Horizontal:** Trabajadores sin estado detrás de una cola. El rendimiento escala casi linealmente con la cantidad de trabajadores, hasta que el almacenamiento comienza a limitar el desempeño.
+- **Vertical:** Rara vez es necesario. La extracción es una operación económica.
+- **Qué le puede costar:** Solicitar páginas que no existen. Valide `pages` frente a `GetDocumentInfo().PageCount` antes de invocar `ExtractPages`; de lo contrario, el SDK lanzará una excepción y habrá consumido una lectura de blob innecesariamente.
+
+### Notas operativas {#operational-notes-2}
+
+- Rastree la latencia de extracción por separado de la latencia de fusión; ambas siguen curvas de desempeño distintas.
+- Almacene en caché las extracciones por (hash del binder, conjunto de páginas) si se solicitan repetidamente las mismas secciones. Una caché pequeña produce una mejora significativa en el rendimiento.
+- Devuelva una URL de salida determinista para que los reintentos sean idempotentes.
+
+## Forma 4: Microservicio de metadatos {#shape-4-metadata-microservice}
+
+### Cuándo es la opción adecuada {#when-this-is-the-right-call-3}
+
+Los servicios aguas abajo consultan constantemente “¿cuántas páginas tiene este binder?” decenas de veces por binder, por ejemplo, para enrutamiento, paginación o construcción de una tabla de contenidos dinámica. Cada una de estas preguntas es económica por sí sola, pero se acumulan si cada llamador reabre el PDF.
+
+**Patrón:** Servicio de solo lectura. Sin escrituras ni fusiones, solo lecturas de metadatos que se sirven tras una caché.
+**Concurrencia:** Respuesta síncrona solicitud-respuesta. Lo suficientemente rápido como para que el uso de asincronía no aporte ventaja alguna.
+**Estado:** Una caché de lectura a través (Redis) colocada delante de la llamada al SDK.
+
+### Conexión {#wiring-3}
+
+```csharp
+using var merger = new Merger(pdfPath);
+var info = merger.GetDocumentInfo();
+return info.PageCount;
+```
+
+En caso de *cold miss*, el tiempo se mide en milisegundos, ya que el SDK lee el trailer del PDF en lugar de analizar las páginas. En caso de *cache hit*, el tiempo es inferior al milisegundo.
+
+### Notas sobre escalado {#scaling-notes-3}
+
+- **Horizontal:** Pods pequeños, gran número de réplicas. Normalmente, un núcleo de CPU por pod es más que suficiente.
+- **Vertical:** No compensa la inversión.
+- **Lo que podría causarle problemas:** Obsolescencia de la caché si un *binder* llega a mutarse in situ. Prefiera nombres de salida inmutables, de modo que un nuevo *binder* fuerce una nueva clave de caché.
+
+### Notas operativas {#operational-notes-3}
+
+- Exponga `pageCount` como una métrica tipo *gauge*, etiquetada por tipo de documento: datos útiles para la planificación de capacidad.
+- Devuelva 404 (no 500) para un *binder* que no exista; los orquestadores aguas abajo deben poder distinguir entre “no está aquí” y “está roto”.
+- Si lo protege con Redis, establezca un límite superior para el TTL, de modo que un *binder* reemplazado se corrija automáticamente incluso si se omitió la invalidación.
+
+## Valores de un entorno de referencia {#numbers-from-one-reference-environment}
+
+Sus resultados pueden variar, pero estos son los valores aproximados obtenidos en el entorno que utilizamos para las pruebas de rendimiento.
+
+**Entorno:** Windows Server 2022, .NET 6 LTS, Intel Xeon de 8 núcleos, 16 GB de RAM, SSD NVMe, GroupDocs.Merger v23.9.
+
+| Forma | Rendimiento | Latencia (típica) | Memoria | Caso de uso ideal |
+| ------- | ------------ | ------------------- | -------- | ---------- |
+| **Síncrono en proceso** | Medio | ~300 ms | Mantiene todos los flujos de origen | APIs interactivas |
+| **Trabajador por lotes (drop-folder)** | Alto | ~2 s por carpeta de 200 archivos | Un archivo a la vez | Tareas programadas de back-office |
+| **Servicio de extracción asíncrona** | Muy alto | ~150 ms | Mínima | Entrega bajo demanda (por fragmentos) |
+| **Microservicio de metadatos** | Muy alto | ~20 ms | Despreciable | Consultas de recuento de páginas con alto QPS |
+
+Lea esto como una comparación de formas, no como una promesa de rendimiento. La API interactiva es más rápida por solicitud; el trabajador por lotes es más rápido por documento, ya que la inicialización del SDK se amortiza en toda la carpeta.
+
+## Patrones que merecen ser nombrados {#patterns-worth-naming}
+
+### Fachada sobre el SDK {#facade-over-the-sdk}
+
+Una interfaz de servicio ligera (`IDocumentBinder`) situada delante de `Merger` facilita el intercambio de implementaciones para pruebas y mantiene limpios sus controladores.
+
+**Cuándo:** Cualquier forma con más de un llamador.
+**Compromiso:** Un archivo más en la solución. Vale la pena.
+
+### Cola productor-consumidor {#producer-consumer-queue}
+
+Desacople la ingesta de la fusión mediante una cola. El lado de ingesta no le importa la velocidad del trabajador; el trabajador no le importa el origen de los archivos.
+
+**Cuándo:** Forma *drop-folder* a cualquier volumen significativo.
+**Compromiso:** La cola se convierte en una superficie operativa: debe considerar políticas de cola de mensajes fallidos, manejo de mensajes tóxicos, etc.
+
+### División CQRS para fusión vs. extracción {#cqrs-split-for-merge-vs-extract}
+
+Mantenga separados los servicios para “construir el *binder*” y “segmentar el *binder*”. Tienen perfiles de rendimiento y curvas de escalado muy distintos, y combinarlos en un único proceso complica innecesariamente la planificación de capacidad.
+
+**Cuándo:** Una vez que tenga una carga real de extracción de páginas.
+**Compromiso:** Dos servicios para desplegar. Vale la pena cuando la ruta de lectura tiene 10× el QPS de la ruta de escritura.
+
+## Integración en una pila existente {#embedding-into-an-existing-stack}
+
+### Microservicios {#microservices}
+
+Empaquete cada forma como su propio contenedor. Utilice gRPC si su ecosistema es interno; manténgase en REST si tiene consumidores externos. Añada un *sidecar* para registros y comprobaciones de estado: nada personalizado.
+
+### Dentro de un monolito {#inside-a-monolith}
+
+Todas las formas se compilan en el mismo ensamblado si esa es su restricción. Conéctelas mediante inyección de dependencias y mantenga las interacciones con `Merger` tras esa fachada, para que pueda extraerlas más adelante sin necesidad de reescribir el código.
+
+### Híbrido {#hybrid}
+
+Fusión en el entorno local (porque los documentos no pueden salir del edificio) y metadatos en la nube (porque es la ruta de lectura más demandada). Este es el patrón más habitual que observamos en clientes regulados.
+
+## Seguridad y cumplimiento {#security-and-compliance}
+
+### Seguridad {#security}
+
+- Coloque los archivos temporales en un directorio cuyos permisos ACL estén restringidos al identificador del trabajador. Elimínelos de inmediato; no confíe en la limpieza automática del sistema operativo.
+- Valide cada ruta de entrada frente a una raíz antes de abrirla. La inyección de rutas (*path traversal*) es un riesgo real cuando el nombre del archivo depende del usuario.
+- TLS en todos los puntos finales y mTLS entre servicios si el entorno lo permite.
+
+### Cumplimiento {#compliance}
+
+- Para archivado, solicite al SDK una salida PDF/A-1b mediante `SaveOptions`. No asuma que los PDF de entrada son compatibles solo porque se abrieron correctamente.
+- Mantenga un registro de auditoría de `(requestId, sources, output, pageCount, timestamp)` para cada fusión. Este es el registro que los reguladores desean cuando preguntan: “¿qué había en este *binder*?”.
+
+## Monitoreo y observabilidad {#monitoring-and-observability}
+
+### Métricas que justifican su existencia {#metrics-that-earn-their-keep}
+
+- `merge_duration_ms` (histograma)
+- `batch_files_processed` (contador)
+- `extract_latency_ms` (histograma)
+- `metadata_query_rate` (contador)
+
+### Registros {#logging}
+
+JSON estructurado, una línea por operación, incluyendo ID de solicitud, tipo de operación, número de archivos, total de bytes de entrada, total de bytes de salida, recuento de páginas y resultado. Esta es la estructura que permite construir paneles fiables.
+
+### Alertas {#alerts}
+
+Notifique si `merge_duration_ms` supera continuamente el umbral (no por picos puntuales, ya que estos suelen deberse a documentos grandes). Notifique si la tasa de errores supera el 1 % de forma sostenida durante cinco minutos.
+
+## Solución de problemas {#troubleshooting}
+
+### Rutas lentas habituales {#common-slow-paths}
+
+- **Imágenes incrustadas grandes en XLSX.** La ruta de conversión vuelve a rasterizar; una etapa previa de compresión antes de la fusión ayuda.
+- **Almacenamiento compartido por red.** Copie los orígenes al almacenamiento local temporal antes de fusionar; la latencia de ida y vuelta se acumula rápidamente.
+
+### Mejores mejoras rápidas {#easy-wins}
+
+- Reutilice `Merger` en operaciones por lotes siempre que sea posible: la inicialización no es gratuita.
+- Active `SaveOptions.Compress` para los PDF de salida; la reducción de tamaño suele ser significativa.
+
+## Decisiones que merecen la pena documentar {#decisions-worth-writing-down}
+
+### ADR 1: Síncrono vs. asíncrono {#adr-1-sync-vs-async}
+
+Síncrono para APIs interactivas (la latencia es crítica y el volumen es bajo). Asíncrono/colas para procesamiento por lotes y extracción (la latencia no es crítica y el volumen es alto). No combine ambos en un mismo servicio.
+
+### ADR 2: Escalar horizontalmente, no verticalmente {#adr-2-scale-out-not-up}
+
+Optamos por escalar horizontalmente detrás de un orquestador, en lugar de escalar verticalmente en máquinas grandes. Es más económico por unidad de rendimiento y evita que una única máquina deje la tubería inutilizable en caso de fallo.
+
+## Conclusión {#wrap-up}
+
+Cuatro formas, un único SDK. La forma síncrona es la opción predeterminada adecuada para una pequeña funcionalidad interactiva. El trabajador por lotes es la opción predeterminada adecuada una vez que el volumen de trabajo aumenta. El servicio de extracción es la victoria silenciosa: convierte un correo electrónico como “por favor envíenme solo la portada” en un punto final automatizado. El servicio de metadatos es casi gratuito y se paga a sí mismo la primera vez que un consumidor aguas abajo solicita recuentos de páginas a gran escala.
+
+Elija la forma adecuada, mantenga `Merger` tras una fachada, registre el recuento de páginas tras cada escritura y dispondrá de una tubería económica de mantener y claramente visible cuando falle.
+
+**Antes de producción:**
+- Lea el código fuente del proyecto de ejemplo de principio a fin.
+- Realice pruebas de rendimiento con su mezcla real de documentos, no con documentos sintéticos.
+- Active el monitoreo y las alertas descritos anteriormente antes de la primera solicitud real.
+- Intercambie la clave de evaluación por una licencia real para que la salida deje de incluir marcas de agua.
+
+**Recursos adicionales:**
+- <a href="https://reference.groupdocs.com/merger/net/" target="_blank" rel="nofollow noopener noreferrer">Referencia de la API</a> – superficie completa de la API de GroupDocs.Merger para .NET
+- <a href="https://docs.groupdocs.com/merger/net/" target="_blank" rel="nofollow noopener noreferrer">Documentación del producto</a> – guía de inicio y temas avanzados
+- <a href="https://github.com/groupdocs-merger/GroupDocs.Merger-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Repositorio de GitHub</a> – código fuente completo y más ejemplos

@@ -1,0 +1,142 @@
+---
+title: "Redacciones de metadatos"
+sidebar_label: "Redacciones de metadatos"
+sidebar_key: "net-redaction-metadata-redactions"
+sidebar_position: 6
+description: "Este artículo muestra cómo la API de redacción de C# le permite reemplazar o eliminar metadatos utilizando filtros o buscar mediante expresiones regulares."
+product: "redaction"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.7.0"
+version: "v26.7.0"
+source_repo: "redaction-net"
+source_path: "net/developer-guide/basic-usage/metadata-redactions.md"
+source_commit: "7f9ba3f7099e7e45c9dcc8d1241caf5c3e6029ec"
+source_sha256: "5beba4042ff86ce1303469288df98fa37894ac8daa020fcd7a23e90e1ac5e690"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "19cbdda34840390c28e6f5819e0a1c633a2e7541b99f73cb40652604db05fd79"
+translation_updated_at: "2026-11-16T05:55:19.240Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Redaction para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Con la API de GroupDocs.Redaction puede aplicar redacciones de metadatos a documentos de distintos formatos, como PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX y otros. Consulte la lista completa en el artículo [formatos de documento admitidos](/net/redaction/getting-started/supported-document-formats/).
+
+GroupDocs.Redactions ofrece una API flexible que permite reemplazar o eliminar metadatos mediante filtros o búsquedas mediante expresiones regulares.
+
+## Filtrado de metadatos {#filter-metadata}
+
+La funcionalidad básica de todas las redacciones, derivada de la clase base <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/metadataredaction" target="_blank" rel="nofollow noopener noreferrer">MetadataRedaction</a>, es el *filtrado de metadatos*, y es obligatorio para las redacciones de metadatos. Utiliza la enumeración con marca <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/metadatafilters" target="_blank" rel="nofollow noopener noreferrer">MetadataFilters</a>, que contiene elementos para las entradas de metadatos más frecuentes. Puede establecer el filtro en *All* (todos) o en cualquier combinación de metadatos. Por ejemplo, el siguiente código establece el filtro en *Author* (autor), *Manager* (gerente) y *NameOfApplication* (nombre de la aplicación), ya sea para redactarlos o eliminarlos:
+
+**C#**
+
+```csharp
+// redaction derived from MetadataRedaction
+redaction.Filter = MetadataFilters.Author | MetadataFilters.Manager | MetadataFilters.NameOfApplication;
+```
+
+A continuación se muestra la tabla con la lista completa de elementos <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/metadatafilters" target="_blank" rel="nofollow noopener noreferrer">MetadataFilters</a>:
+
+| Filtro | Valor numérico | Descripción |
+| --- | --- | --- |
+| *Ninguno* | 0 | Configuración de filtro vacía; no coincide con ningún elemento de metadatos |
+| *Autor* | 1 | Autor del documento |
+| *Categoría* | 2 | Categoría del documento |
+| *Comentarios* | 4 | Comentario del documento |
+| *Empresa* | 8 | Empresa del autor |
+| *EstadoDelContenido* | 16 | Estado del contenido |
+| *HoraDeCreación* | 32 | Hora de creación |
+| *BaseDeHipervínculos* | 64 | Base de hipervínculos |
+| *ÚltimaImpresión* | 128 | Fecha y hora de la última impresión |
+| *ÚltimoGuardadoPor* | 256 | Usuario que realizó el último guardado |
+| *ÚltimaHoraDeGuardado* | 1024 | Fecha y hora del último guardado |
+| *NombreDeAplicación* | 2048 | Nombre de la aplicación en la que se creó el documento |
+| *Jefe* | 4096 | Nombre del jefe del autor |
+| *NúmeroDeRevisión* | 8192 | Número de revisión |
+| *Asunto* | 16384 | Asunto del documento |
+| *Plantilla* | 32768 | Nombre de la plantilla del documento |
+| *Título* | 65536 | Título del documento |
+| *TiempoTotalDeEdición* | 131072 | Tiempo total de edición |
+| *Versión* | 262144 | Versión del documento |
+| *Descripción* | 524288 | Descripción del documento |
+| *PalabrasClave* | 1048576 | Palabras clave del documento |
+| *TipoDeContenido* | 2097152 | Tipo de contenido |
+| *Todos* | 2147483647 | Todos los tipos de elementos de metadatos |
+
+## Limpiar metadatos {#clean-metadata}
+
+Puede reemplazar todos los metadatos o solo algunos específicos del documento con valores vacíos (en blanco o mínimos) utilizando la clase <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/erasemetadataredaction" target="_blank" rel="nofollow noopener noreferrer">EraseMetadataRedaction</a>. El ejemplo siguiente borra todas las propiedades del documento:
+
+**C#**
+
+```csharp
+using (Redactor redactor = new Redactor(@"C:\sample.docx"))
+{
+   redactor.Apply(new EraseMetadataRedaction(MetadataFilters.All));
+
+   redactor.Save();
+}
+```
+
+Puede especificar <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/metadatafilters" target="_blank" rel="nofollow noopener noreferrer">MetadataFilter.All</a> o utilizar el constructor predeterminado para borrar todos los metadatos dentro del documento dado, o bien **Custom** para borrar todas las entradas de metadatos personalizados.
+
+## Redactar metadatos {#redact-metadata}
+
+Puede utilizar <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/metadatasearchredaction" target="_blank" rel="nofollow noopener noreferrer">MetadataSearchRedaction</a> para eliminar datos confidenciales de los metadatos del documento mediante expresiones regulares. Por ejemplo, podemos eliminar cualquier mención a "Company Ltd.":
+
+**C#**
+
+```csharp
+using (Redactor redactor = new Redactor(@"C:\sample.docx"))
+{
+   redactor.Apply(new MetadataSearchRedaction("Company Ltd.", "--company--"));
+
+   redactor.Save();
+}
+```
+
+El primer argumento es una expresión regular y el segundo es una cadena de reemplazo. También puede establecer el ámbito para la redacción mediante un filtro, por ejemplo, <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction.redactions/metadatafilters" target="_blank" rel="nofollow noopener noreferrer">MetadataFilter.Company</a>: esto dejará sin aplicar la redacción a las coincidencias de expresiones regulares en todos los elementos de metadatos, excepto en la propiedad “Company” (Empresa):
+
+**C#**
+
+```csharp
+using (Redactor redactor = new Redactor(@"C:\sample.docx"))
+{
+   MetadataSearchRedaction redaction = new MetadataSearchRedaction("Company Ltd.", "--company--");
+   redaction.Filter = MetadataFilters.Company;
+   redactor.Apply(redaction);
+   redactor.Save();
+}
+```
+
+## Estado de la redacción de metadatos {#metadata-redaction-status}
+
+Todas las redacciones de metadatos se aplican a cada elemento de metadatos por separado, y aunque la redacción de un elemento de metadatos falle, el resto de los elementos de metadatos se actualizarán. Puede encontrar una lista de los elementos de metadatos que fallaron, los que se omitieron (rechazados) y las razones correspondientes en la propiedad <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactionresult/properties/errormessage" target="_blank" rel="nofollow noopener noreferrer">ErrorMessage</a> del <a href="https://reference.groupdocs.com/net/redaction/groupdocs.redaction/redactorlogentry/properties/result" target="_blank" rel="nofollow noopener noreferrer">RedactorLogEntry.Result</a>.  
+ 
+
+## Más recursos {#more-resources}
+
+### Temas de uso avanzado {#advanced-usage-topics}
+
+Para obtener más información sobre las funciones de redacción de documentos, consulte la [sección de uso avanzado](/net/redaction/developer-guide/advanced-usage/).
+
+### Ejemplos en GitHub {#github-examples}
+
+Puede ejecutar fácilmente el código anterior y ver la funcionalidad en acción en nuestros ejemplos de GitHub:
+
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-.NET" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para .NET</a>
+    
+*   <a href="https://github.com/groupdocs-redaction/GroupDocs.Redaction-for-Java" target="_blank" rel="nofollow noopener noreferrer">Ejemplos de GroupDocs.Redaction para Java</a>
+    
+
+### Aplicación gratuita en línea para redactar documentos {#free-online-document-redaction-app}
+
+Junto con la completa biblioteca de .NET, ofrecemos aplicaciones sencillas pero potentes y gratuitas.
+
+Le damos la bienvenida a realizar redacciones en diversos formatos de documentos, como PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, correos electrónicos y más, con nuestra aplicación gratuita en línea <a href="https://products.groupdocs.app/redaction" target="_blank" rel="nofollow noopener noreferrer">Free Online Document Redaction App</a>.

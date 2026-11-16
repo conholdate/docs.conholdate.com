@@ -1,0 +1,274 @@
+---
+title: "Añadir marcas de agua a documentos de procesamiento de texto"
+sidebar_label: "A documentos de procesamiento de texto"
+sidebar_key: "net-watermark-adding-watermarks-add-watermarks-to-word-processing-documents-index"
+sidebar_position: 9
+description: "La API de GroupDocs.Watermark le permite agregar una marca de agua en las cabeceras y pies de página."
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-word-processing-documents/_index.md"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "3771cdc793fc8815056ff3dba66112e1e588081225c8fda9ad8f414d89350f4b"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "e39c0091fc1e317c389409118218fdc9201cb99547794bc622038198742ff311"
+translation_updated_at: "2026-11-16T06:21:12.646Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Watermark para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+Microsoft Word permite al usuario dividir y formatear el <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.wordprocessing/wordprocessingcontent" target="_blank" rel="nofollow noopener noreferrer">document</a> en varios <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.wordprocessing/wordprocessingcontent/properties/sections" target="_blank" rel="nofollow noopener noreferrer">sections</a>. Definir secciones en el documento permite al usuario establecer un diseño y formato de página específicos para distintas partes del documento. Un ejemplo de secciones son los encabezados y pies de página. Los encabezados y pies de página se utilizan para mostrar texto u cualquier objeto gráfico en todas las páginas.
+
+## Añadir una marca de agua a una sección concreta {#adding-watermark-to-a-particular-section}
+
+La API de GroupDocs.Watermark permite añadir objetos de marca de agua en los encabezados y pies de página de la página. Añadir una marca de agua a una sección de un documento de Word mediante GroupDocs.Watermark consta de los siguientes pasos:
+
+1. Cargar el documento
+2. Crear e inicializar el objeto de marca de agua
+3. Establecer las propiedades de la marca de agua
+4. Crear <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarksectionoptions" target="_blank" rel="nofollow noopener noreferrer">WordProcessingWatermarkSectionOptions</a> y establecer <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarksectionoptions/properties/sectionindex" target="_blank" rel="nofollow noopener noreferrer">SectionIndex</a>
+5. Añadir la marca de agua a la sección del documento
+6. Guardar el documento
+
+El siguiente código añade una marca de agua a los encabezados de una sección concreta.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToWordProcessing.WordProcessingAddWatermarkToSection**
+
+```csharp
+WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.docx"
+using (Watermarker watermarker = new Watermarker("document.docx", loadOptions))
+{
+    TextWatermark watermark = new TextWatermark("Test watermark", new Font("Arial", 19));
+
+    // Add watermark to all headers of the first section
+    WordProcessingWatermarkSectionOptions options = new WordProcessingWatermarkSectionOptions();
+    options.SectionIndex = 0;
+
+    watermarker.Add(watermark, options);
+    watermarker.Save("document.docx");
+}
+```
+
+El fragmento de código anterior agrega una marca de agua a la primera sección (a todas las cabeceras de esta sección). Por lo tanto, se mostrará en todas las páginas pertenecientes a dicha sección.
+
+## Obtención del tamaño de página {#getting-page-size}
+
+Si, por alguna razón, desea utilizar dimensionado y posicionamiento absolutos, también es posible que necesite obtener algunas <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.wordprocessing/wordprocessingsection/properties/pagesetup" target="_blank" rel="nofollow noopener noreferrer">propiedades de página</a> para una sección. GroupDocs.Watermark le permite extraer información sobre una sección específica.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToWordProcessing.WordProcessingGetSectionProperties**
+
+```csharp
+WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.docx"
+using (Watermarker watermarker = new Watermarker("document.docx", loadOptions))
+{
+    WordProcessingContent content = watermarker.GetContent<WordProcessingContent>();
+
+    Console.WriteLine(content.Sections[0].PageSetup.Width);
+    Console.WriteLine(content.Sections[0].PageSetup.Height);
+    Console.WriteLine(content.Sections[0].PageSetup.TopMargin);
+    Console.WriteLine(content.Sections[0].PageSetup.RightMargin);
+    Console.WriteLine(content.Sections[0].PageSetup.BottomMargin);
+    Console.WriteLine(content.Sections[0].PageSetup.LeftMargin);
+}
+```
+
+## Añadir marca de agua a las imágenes dentro de una sección específica {#adding-watermark-to-the-images-inside-a-particular-section}
+
+Con GroupDocs.Watermark, puede añadir una marca de agua a las <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents/contentpart/methods/findimages" target="_blank" rel="nofollow noopener noreferrer">images</a> que pertenecen a una sección determinada.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToWordProcessing.WordProcessingAddWatermarkToSectionImages**
+
+```csharp
+WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.docx"
+using (Watermarker watermarker = new Watermarker("document.docx", loadOptions))
+{
+    TextWatermark watermark = new TextWatermark("Protected image", new Font("Arial", 8));
+    watermark.HorizontalAlignment = HorizontalAlignment.Center;
+    watermark.VerticalAlignment = VerticalAlignment.Center;
+    watermark.RotateAngle = 45;
+    watermark.SizingType = SizingType.ScaleToParentDimensions;
+    watermark.ScaleFactor = 1;
+
+    // Get all images belonging to the first section
+    WordProcessingContent content = watermarker.GetContent<WordProcessingContent>();
+    WatermarkableImageCollection images = content.Sections[0].FindImages();
+
+    // Add watermark to all found images
+    foreach (WatermarkableImage image in images)
+    {
+        image.Add(watermark);
+    }
+
+    watermarker.Save("document.docx");
+}
+```
+
+## Añadir una marca de agua a las formas de imagen en un documento de Word {#adding-watermark-to-the-image-shapes-in-a-word-document}
+
+Un documento de Word también puede contener diferentes <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.wordprocessing/wordprocessingsection/properties/shapes" target="_blank" rel="nofollow noopener noreferrer">shapes</a>. La API le permite utilizar la colección de formas para añadir una marca de agua a las <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.wordprocessing/wordprocessingshape/properties/image" target="_blank" rel="nofollow noopener noreferrer">images</a> del documento. El ejemplo siguiente muestra cómo añadir una marca de agua a las formas de imagen.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToWordProcessing.WordProcessingAddWatermarkToShapeImages**
+
+```csharp
+WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.docx"
+using (Watermarker watermarker = new Watermarker("document.docx", loadOptions))
+{
+    TextWatermark watermark = new TextWatermark("Protected image", new Font("Arial", 8));
+    watermark.HorizontalAlignment = HorizontalAlignment.Center;
+    watermark.VerticalAlignment = VerticalAlignment.Center;
+    watermark.RotateAngle = 45;
+    watermark.SizingType = SizingType.ScaleToParentDimensions;
+    watermark.ScaleFactor = 1;
+
+    WordProcessingContent content = watermarker.GetContent<WordProcessingContent>();
+    foreach (WordProcessingSection section in content.Sections)
+    {
+        foreach (WordProcessingShape shape in section.Shapes)
+        {
+            // Headers&Footers usually contains only service information.
+            // So, we skip images in headers/footers, expecting that they are probably watermarks or backgrounds
+            if (shape.HeaderFooter == null && shape.Image != null)
+            {
+                shape.Image.Add(watermark);
+            }
+        }
+    }
+
+    watermarker.Save("document.docx");
+}
+```
+
+## Agregar una marca de agua a una página específica de un documento de Word {#adding-watermark-to-a-particular-page-of-word-document}
+
+GroupDocs.Watermark le permite agregar una marca de agua a una <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.options.wordprocessing/wordprocessingwatermarkpagesoptions" target="_blank" rel="nofollow noopener noreferrer">página específica</a> de un documento de Word. Puede utilizar el siguiente ejemplo para lograrlo.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToWordProcessing.WordProcessingAddWatermarkToParticularPage**
+
+```csharp
+WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.docx"
+using (Watermarker watermarker = new Watermarker("document.docx", loadOptions))
+{
+    TextWatermark textWatermark = new TextWatermark("DRAFT", new Font("Arial", 42));
+
+    // Add watermark to the last page
+    WordProcessingContent content = watermarker.GetContent<WordProcessingContent>();
+    WordProcessingWatermarkPagesOptions options = new WordProcessingWatermarkPagesOptions();
+    options.PageNumbers = new int[] {content.PageCount};
+
+    watermarker.Add(textWatermark, options);
+    watermarker.Save("document.docx");
+}
+```
+
+## Trabajo con encabezados y pies de página {#working-with-headers-and-footers}
+
+### Vinculación de encabezados y pies de página {#linking-headers-and-footers}
+
+Un encabezado o pie de página en un documento de Word puede vincularse al encabezado o pie de página correspondiente de la sección anterior. De esta forma, se muestra el mismo contenido en el encabezado o pie de página vinculado. La API de GroupDocs.Watermark ofrece la opción de vincular el encabezado o pie de página mediante la propiedad <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.wordprocessing/wordprocessingheaderfooter/properties/islinkedtoprevious" target="_blank" rel="nofollow noopener noreferrer">IsLinkedToPrevious</a> de la clase <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.wordprocessing/wordprocessingheaderfooter" target="_blank" rel="nofollow noopener noreferrer">WordProcessingHeaderFooter </a>. El siguiente fragmento de código cumple esta finalidad.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToWordProcessing.WordProcessingLinkHeaderFooterInSection**
+
+```csharp
+WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.docx"
+using (Watermarker watermarker = new Watermarker("document.docx", loadOptions))
+{
+    WordProcessingContent content = watermarker.GetContent<WordProcessingContent>();
+
+    // Link footer for even numbered pages to corresponding footer in previous section
+    content.Sections[1].HeadersFooters[OfficeHeaderFooterType.FooterEven].IsLinkedToPrevious = true;
+
+    watermarker.Save("document.docx");
+}
+```
+
+### Vinculación de todos los encabezados y pies de página {#linking-all-headers-and-footers}
+
+El fragmento de código siguiente vincula todos los <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.wordprocessing/wordprocessingsection/properties/headersfooters" target="_blank" rel="nofollow noopener noreferrer">encabezados y pies de página</a> de una sección determinada.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToWordProcessing.WordProcessingLinkAllHeaderFooterInSection**
+
+```csharp
+WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.docx"
+using (Watermarker watermarker = new Watermarker("document.docx", loadOptions))
+{
+    WordProcessingContent content = watermarker.GetContent<WordProcessingContent>();
+
+    // Link footer for even numbered pages to corresponding footer in previous section
+    content.Sections[1].HeadersFooters[1].IsLinkedToPrevious = true;
+
+    watermarker.Save("document.docx");
+}
+```
+
+### Agregar marca de agua a encabezados y pies de página con enlaces {#add-watermark-to-headers-and-footers-with-linking}
+
+Esta función puede resultar útil para reducir el tamaño del archivo resultante al agregar una marca de agua de imagen a todos los <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.wordprocessing/wordprocessingcontent/properties/sections" target="_blank" rel="nofollow noopener noreferrer">sections</a>.
+
+**AdvancedUsage.AddingWatermarks.AddWatermarksToWordProcessing.WordProcessingAddImageWatermark**
+
+```csharp
+WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.docx"
+using (Watermarker watermarker = new Watermarker("document.docx", loadOptions))
+{
+    using (ImageWatermark watermark = new ImageWatermark("large.png"))
+    {
+        // Add watermark to all headers of the first section
+        WordProcessingWatermarkSectionOptions options = new WordProcessingWatermarkSectionOptions();
+        options.SectionIndex = 0;
+        watermarker.Add(watermark, options);
+    }
+
+    // Link all other headers&footers to corresponding headers&footers of the first section
+    WordProcessingContent content = watermarker.GetContent<WordProcessingContent>();
+    for (int i = 1; i < content.Sections.Count; i++)
+    {
+        content.Sections[i].HeadersFooters.LinkToPrevious(true);
+    }
+
+    watermarker.Save("document.docx");
+}
+```
+
+### Configurar encabezados o pies de página diferentes {#setting-different-headers-or-footers}
+
+Usando la API de GroupDocs.Watermark, también puede configurar <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.wordprocessing/wordprocessingpagesetup/properties/differentfirstpageheaderfooter" target="_blank" rel="nofollow noopener noreferrer">different</a> encabezados o pies de página para <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.contents.wordprocessing/wordprocessingpagesetup/properties/oddandevenpagesheaderfooter" target="_blank" rel="nofollow noopener noreferrer">par e impar</a> páginas numeradas y para la primera página del documento (como se muestra en el ejemplo a continuación).
+
+**UsoAvanzado.AgregarMarcasDeAgua.AgregarMarcasDeAguaAProcesamientoDeTextos.ProcesamientoDeTextosEstablecerEncabezadoYPieDePáginaDiferentesParaLaPrimeraPágina**
+
+```csharp
+WordProcessingLoadOptions loadOptions = new WordProcessingLoadOptions();
+// Specify an absolute or relative path to your document. Ex: @"C:\Docs\document.docx"
+using (Watermarker watermarker = new Watermarker("document.docx", loadOptions))
+{
+    WordProcessingContent content = watermarker.GetContent<WordProcessingContent>();
+
+    content.Sections[0].PageSetup.DifferentFirstPageHeaderFooter = true;
+    content.Sections[0].PageSetup.OddAndEvenPagesHeaderFooter = true;
+
+    watermarker.Save("document.docx");
+}
+```
+
+## Casos de uso avanzados {#advanced-use-cases}
+
+* [Objetos existentes en documentos de procesamiento de texto](/net/watermark/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-word-processing-documents/existing-objects-in-word-processing-document/ "Existing objects in word processing document")
+* [Marcas de agua bloqueadas en documentos de procesamiento de texto](/net/watermark/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-word-processing-documents/locking-watermark-in-word-processing-document/ "Locking watermark in word processing document")
+* [Protección de documentos de procesamiento de texto](/net/watermark/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-word-processing-documents/protecting-word-processing-documents/ "Protecting word processing documents")
+* [Marcas de agua en documentos de procesamiento de texto](/net/watermark/developer-guide/advanced-usage/adding-watermarks/add-watermarks-to-word-processing-documents/watermarks-in-word-processing-document/ "Watermarks in word processing document")

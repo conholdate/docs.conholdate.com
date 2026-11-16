@@ -1,0 +1,245 @@
+---
+title: "Notas de migración"
+sidebar_label: "Notas de migración"
+sidebar_key: "net-watermark-tab"
+sidebar_position: 3
+description: ""
+product: "watermark"
+platform: "net"
+total_version: "current"
+included_product_version: "v26.9.0"
+version: "v26.9.0"
+source_repo: "watermark-net"
+source_path: "net/developer-guide/migration-notes.md/"
+source_commit: "a0e4e96832f8703735e1f226dc5a99e7b62f88cb"
+source_sha256: "2dacb75b2092de6eb75572f01b518ace433aa9514cfaa8c764dac44a2c747a04"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "d6fe806dfec97ba278d8d848a83b10bfe06f2b9d98d1a02c7229e37015436842"
+translation_updated_at: "2026-11-16T06:33:41.391Z"
+translation_status: "ai-draft"
+---
+
+:::info
+GroupDocs.Watermark para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+## Razones para migrar {#why-to-migrate}
+
+A continuación se presentan las principales razones para utilizar la nueva API actualizada proporcionada por GroupDocs.Watermark para .NET desde la versión 19.5:
+
+* Se introduce la clase <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark/watermarker" target="_blank" rel="nofollow noopener noreferrer">Watermarker</a> como punto único de entrada para gestionar las marcas de agua en el documento (en lugar de la clase <a href="https://reference.groupdocs.com/net/watermark/groupdocs.watermark.legacy/document" target="_blank" rel="nofollow noopener noreferrer">Document</a> de versiones anteriores).
+* La adición de marcas de agua se unificó para todos los formatos de documento admitidos.
+* La arquitectura del producto se rediseñó desde cero para simplificar el paso de opciones para gestionar las marcas de agua.
+* Los procedimientos para obtener información del documento y generar vistas previas se simplificaron.
+
+## Cómo migrar {#how-to-migrate}
+
+A continuación se presenta una breve comparación sobre cómo gestionar las marcas de agua mediante la API antigua y la nueva.
+
+### Cargar documentos {#load-documents}
+
+#### Cualquier formato admitido {#any-supported-format}
+
+Los siguientes ejemplos muestran cómo cargar un documento de cualquier formato admitido.
+
+**API antigua**
+
+```csharp
+using (Document doc = Document.Load(@"C:\test.doc"))
+{
+        // watermarking goes here
+        // ...
+}
+```
+
+**Nueva API**
+
+```csharp
+using (Watermarker watermarker = new Watermarker(@"C:\test.doc"))
+{
+        // watermarking goes here
+        // ...
+}
+```
+
+#### Documento de formato específico {#document-of-specific-format}
+
+Los siguientes ejemplos muestran cómo cargar un documento de diagrama.
+
+**API antigua**
+
+```csharp
+using (DiagramDocument doc = Document.Load<DiagramDocument>(@"C:\diagram.vsdx"))
+{
+        // watermarking goes here
+        // ...
+}
+```
+
+**Nueva API**
+
+```csharp
+DiagramLoadOptions loadOptions = new DiagramLoadOptions();
+using (Watermarker watermarker = new Watermarker(@"C:\diagram.vsdx", loadOptions))
+{
+        // watermarking goes here
+        // ...
+}
+```
+
+### Añadir marcas de agua {#add-watermarks}
+
+Los siguientes ejemplos muestran cómo añadir una marca de agua de texto a un documento de cualquier tipo admitido.
+
+**API antigua**
+
+```csharp
+foreach (string filePath in Directory.GetFiles(@"C:\Documents"))
+{
+    using (Document document = Document.Load(filePath))
+    {
+        TextWatermark watermark = new TextWatermark("top secret", new Font("Arial", 36))
+        watermark.ForegroundColor = Color.Red;
+        watermark.HorizontalAlignment = HorizontalAlignment.Center;
+        watermark.VerticalAlignment = VerticalAlignment.Center;
+
+        document.AddWatermark(watermark);
+        document.Save();
+    }
+}
+```
+
+**Nueva API**
+
+```csharp
+foreach (string filePath in Directory.GetFiles(@"C:\Documents"))
+{
+    using (Watermarker watermarker = new Watermarker(filePath))
+    {
+        TextWatermark watermark = new TextWatermark("top secret", new Font("Arial", 36));
+        watermark.ForegroundColor = Color.Red;
+        watermark.HorizontalAlignment = HorizontalAlignment.Center;
+        watermark.VerticalAlignment = VerticalAlignment.Center;
+
+        watermarker.Add(watermark);
+        watermarker.Save();
+    }
+}
+```
+
+#### Agregar marca de agua con opciones {#add-watermark-with-options}
+
+Los siguientes ejemplos muestran cómo agregar una marca de agua a la primera página de un documento de diagrama.
+
+**API anterior**
+
+```csharp
+using (DiagramDocument doc = Document.Load<DiagramDocument>(@"C:\diagram.vsdx"))
+{
+    TextWatermark textWatermark = new TextWatermark("Test watermark", new Font("Calibri", 19));
+
+    doc.Pages[0].AddWatermark(textWatermark);
+
+    doc.Save();
+}
+```
+
+**Nueva API**
+
+```csharp
+using (Watermarker watermarker = new Watermarker(@"C:\diagram.vsdx"))
+{
+    TextWatermark textWatermark = new TextWatermark("Test watermark", new Font("Calibri", 19));
+
+    watermarker.Add(textWatermark, new DiagramPageWatermarkOptions { PageIndex = 0 });
+
+    watermarker.Save();
+}
+```
+
+### Búsquedas de marcas de agua {#search-watermarks}
+
+Los siguientes ejemplos muestran cómo buscar marcas de agua utilizando criterios de búsqueda.
+
+**API antigua**
+
+```csharp
+using (Document doc = Document.Load(@"C:\test.some_ext"))
+{
+    SizeSearchCriteria widthRange = new SizeSearchCriteria(Dimension.Width, 50, 100);
+    RotateAngleSearchCriteria rotateAngle = new RotateAngleSearchCriteria(0, 45);
+    TextSearchCriteria textCriteria = new TextSearchCriteria(new Regex("^Test watermark$"));
+
+    PossibleWatermarkCollection watermarks = doc.FindWatermarks(textCriteria.And(widthRange.Or(rotateAngle)));
+
+    Console.WriteLine("Found {0} possible watermarks.", watermarks.Count);
+}
+```
+
+**Nueva API**
+
+```csharp
+using (Watermarker watermarker = new Watermarker(@"C:\test.some_ext"))
+{
+    SizeSearchCriteria widthRange = new SizeSearchCriteria(Dimension.Width, 50, 100);
+    RotateAngleSearchCriteria rotateAngle = new RotateAngleSearchCriteria(0, 45);
+    TextSearchCriteria textCriteria = new TextSearchCriteria(new Regex("^Test watermark$"));
+
+    PossibleWatermarkCollection watermarks = watermarker.Search(textCriteria.And(widthRange.Or(rotateAngle)));
+
+    Console.WriteLine("Found {0} possible watermarks.", watermarks.Count);
+}
+```
+
+### Eliminar marcas de agua {#remove-watermarks}
+
+Los siguientes ejemplos muestran cómo eliminar todas las marcas de agua posibles.
+
+**API anterior**
+
+```csharp
+using (Document doc = Document.Load(@"C:\document.pdf"))
+{
+    PossibleWatermarkCollection watermarks = doc.FindWatermarks();
+    watermarks.Clear();
+    doc.Save(@"C:\document_without_watermarks.pdf");
+}
+```
+
+**Nueva API**
+
+```csharp
+using (Watermarker watermarker = new Watermarker(@"C:\document.pdf"))
+{
+    PossibleWatermarkCollection watermarks = watermarker.Search();
+    watermarker.Remove(watermarks);
+    watermarker.Save(@"C:\document_without_watermarks.pdf");
+}
+```
+
+### Obtener información del documento {#get-document-info}
+
+Los siguientes ejemplos muestran cómo obtener la información del documento desde el archivo local.
+
+**API antigua**
+
+```csharp
+DocumentInfo documentInfo = Document.GetInfo(@"C:\test.ppt");
+Console.WriteLine(documentInfo.FileFormat);
+Console.WriteLine(documentInfo.IsEncrypted);
+```
+
+**Nueva API**
+
+```csharp
+using (Watermarker watermarker = new Watermarker(@"C:\test.ppt"))
+{
+    IDocumentInfo info = watermarker.GetDocumentInfo();
+    Console.WriteLine("File type: {0}", info.FileType);
+    Console.WriteLine("Number of pages: {0}", info.PageCount);
+    Console.WriteLine("Document size: {0} bytes", info.Size);
+}
+```
