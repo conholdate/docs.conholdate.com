@@ -1,0 +1,121 @@
+---
+title: "Convert a Document with Images Aspose.Words in Azure Functions"
+sidebar_label: "Convert a Document with Images Aspose.Words in Azure Functions"
+sidebar_key: "net-words-converting-a-document-with-images-using-aspose-words-in-azure-functions"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/converting-a-document-with-images-using-aspose-words-in-azure-functions.md"
+source_commit: ""
+source_sha256: "2d7816a7cc578fef3bfe1e97f9ab2b0cd5c3a489453b93041531d11953e4b1ca"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/words/net/converting-a-document-with-images-using-aspose-words-in-azure-functions/"
+source_markdown_url: "https://docs.aspose.com/words/net/converting-a-document-with-images-using-aspose-words-in-azure-functions.md"
+source_snapshot_sha256: "1c8c61b326d4cdffc3be7ca814347c7236729a85fa960a5de43c11ac18614f9d"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Purpose Summary
+
+This page describes how to convert documents containing images using Aspose.Words in Azure Functions while handling environment-specific font and rendering constraints.
+
+Conversion of documents with images to fixed page formats using Aspose.Words in Azure Functions does not work properly at deployment to Azure, having images not retained. However, such a conversion works properly on a local machine. The reason behind this problem is that SkiaSharp native assets are not properly published. The issue is reported to Azure in <a href="https://github.com/Azure/Azure-Functions/issues/622" target="_blank" rel="nofollow noopener noreferrer">Github</a>.
+
+In order to resolve the problem, you can add the following section in the .csproj file that makes native assets copied properly:
+
+```csharp
+<Target Name="CopyRequiredNativeAssets" AfterTargets="_FunctionsPostPublish">
+  <ItemGroup>
+    <NativeAssetToCopy Include="$(PublishDir)runtimes\win-x86\native\libSkiaSharp.dll" />
+  </ItemGroup>
+  <Copy SourceFiles="@(NativeAssetToCopy)" DestinationFolder="$(PublishDir)bin" />
+</Target>
+```
+
+The following example shows how to use Aspose.Words in Azure Function with the details on how to add the code above.
+
+## Prerequisites
+
+- Active Azure subscription. If you don't have one, create a free account before you begin.
+- Visual Studio 2019 or Visual Studio 2017 with the latest installed Azure Functions tools to create the project.
+
+## Creating an Azure Functions Application
+
+You need to use Visual Studio to create an Azure Functions Application. The created application already has a simple "Hello World" function code.
+
+In this example, you create a simple "Hello World" document and return it to the user's browser as a PDF file. To accomplish this:
+
+1. Start creating a function using Aspose.Words by adding a `NuGet` reference to the latest version of <a href="https://www.nuget.org/packages/Aspose.Words/" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words</a>. Then modify the code as follows:
+
+```csharp
+using System.IO;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Aspose.Words;
+namespace AsposeWordsAzureTestApp
+{
+    public static class CreateTestDocument
+    {
+        [FunctionName("CreateTestDocument")]
+        public static async Task<IActionResult> Run(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
+            ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            // Create a simple document using DocumentBuilder.
+            Document doc = new Document();
+            DocumentBuilder builder = new DocumentBuilder(doc);
+        
+            // Write some text in the document.
+            builder.Writeln("Hello Aspose.Words!");
+        
+            // Write OS we are running on.
+            builder.Writeln("You are running on " + System.Environment.OSVersion.VersionString);
+        
+            // Insert some image into the document.
+            builder.InsertImage(@"https://cms.admin.containerize.com/templates/aspose/App_Themes/V3/images/aspose-logo.png");
+            // Now save the created document to PDF and return as a FileContentResult.
+            using (MemoryStream ms = new MemoryStream())
+            {
+                doc.Save(ms, SaveFormat.Pdf);
+                return new FileContentResult(ms.ToArray(), "application/pdf")
+                {
+                    FileDownloadName = "out.pdf"
+                };
+            }
+        }
+    }
+}
+```
+
+1. Run the code in Visual Studio to test it. The result will be displayed in the console output.
+   ![converting-a-document-with-images-using-aspose-words-in-azure-functions_1](/net/words/images/e4ce8ca345cd1d7d-1.png)
+2. Copy `URL` from the console output to your favorite browser to get the output document, which should look as follows:
+   ![converting-a-document-with-images-using-aspose-words-in-azure-functions_2](/net/words/images/b9f4ba2a89a4b9e8-2.png)
+3. Now, if you <a href="https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-your-first-function-visual-studio#publish-the-project-to-azure" target="_blank" rel="nofollow noopener noreferrer">deploy the created function to Azure</a>, the image will not be rendered because of the problem stated at the beginning of this article. The output is shown below:
+   ![converting-a-document-with-images-using-aspose-words-in-azure-functions_3](/net/words/images/7b50f0f41896fbf4-3.png)
+4. Open the .csproj file in Notepad and add the following section to it:
+   `csharp<Target Name="CopyRequiredNativeAssets" AfterTargets="_FunctionsPostPublish">  <ItemGroup>  <NativeAssetToCopy Include="$(PublishDir)runtimes\win-x86\native\libSkiaSharp.dll" />  </ItemGroup>  <Copy SourceFiles="@(NativeAssetToCopy)"  DestinationFolder="$(PublishDir)bin" />  </Target> `
+5. Publish your project again and verify that the image is now present in the generated output.
+
+## See Also
+
+- Active <a href="https://docs.microsoft.com/en-us/azure/guides/developer/azure-developer-guide#understanding-accounts-subscriptions-and-billing" target="_blank" rel="nofollow noopener noreferrer">Microsoft Azure subscription</a>
+- Create a <a href="https://azure.microsoft.com/en-us/free/?ref=microsoft.com\&utm_source=microsoft.com\&utm_medium=docs\&utm_campaign=visualstudio" target="_blank" rel="nofollow noopener noreferrer">free account</a> in Microsoft Azure
+- Install <a href="https://docs.microsoft.com/en-us/azure/azure-functions/functions-develop-vs#check-your-tools-version" target="_blank" rel="nofollow noopener noreferrer">the latest Azure Functions tools</a> to create the project in Visual Studio 2017
+- Use Visual Studio to <a href="https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-your-first-function-visual-studio" target="_blank" rel="nofollow noopener noreferrer">create an Azure Functions Application</a>

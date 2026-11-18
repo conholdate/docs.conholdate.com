@@ -1,0 +1,310 @@
+---
+title: "Cómo ejecutar Aspose.Words en Docker"
+sidebar_label: "Cómo ejecutar Aspose.Words en Docker"
+sidebar_key: "net-words-how-to-run-aspose-words-in-docker"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/how-to-run-aspose-words-in-docker.html"
+source_commit: ""
+source_sha256: "8118b0c45961b7f7a73c974180befff2c2895ef725ed6e1feeb1dae2fe67134b"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/net/how-to-run-aspose-words-in-docker/"
+source_snapshot_sha256: "a1ed95e24aa194703dc2c2c788a529dfbc6342bbe82018bfab6a4e1dfc4f86fb"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "cac30ff3128685222fa4d1b73950b9005540976154bce048e5f6413ac6c312fa"
+translation_updated_at: "2026-11-18T07:03:46.030Z"
+translation_status: "ai-draft"
+---
+
+:::info
+Aspose.Words para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+:::info
+
+## Resumen del propósito {#purpose-summary}
+
+Esta página describe cómo ejecutar Aspose.Words dentro de contenedores Docker.
+:::
+
+Los microservicios, junto con la contenerización, permiten combinar fácilmente tecnologías. Docker le permite integrar fácilmente la funcionalidad de Aspose.Words en su aplicación, independientemente de la tecnología que utilice en su pila de desarrollo.
+
+En caso de que esté orientado a microservicios, o si la tecnología principal en su pila no sea .NET, C++ ni Java, pero necesite la funcionalidad de Aspose.Words, o ya utilice Docker en su pila, entonces podría interesarle utilizar Aspose.Words dentro de un contenedor Docker.
+
+## Requisitos previos {#prerequisites}
+
+- Docker debe estar instalado en su sistema. Para obtener información sobre cómo instalar Docker en Windows o Mac, consulte los enlaces en la sección «Consulte también».
+
+- Asimismo, tenga en cuenta que en el ejemplo que se proporciona a continuación se utiliza Visual Studio 2017 y el SDK de .NET Core 2.2.
+
+## Aplicación «Hola Mundo» {#hello-world-application}
+
+En este ejemplo, se crea una sencilla aplicación de consola «Hola Mundo» que genera un documento con el texto «¡Hola Mundo!» y lo guarda en todos los formatos de guardado admitidos. Posteriormente, la aplicación puede compilarse y ejecutarse en Docker.
+
+### Creación de la aplicación de consola {#creating-the-console-application}
+
+Para crear el programa «Hola Mundo», siga los pasos que se indican a continuación:
+
+1. Una vez instalado Docker, asegúrese de que utilice contenedores Linux (valor predeterminado). Si es necesario, seleccione la opción **Cambiar a contenedores Linux** desde el menú de Docker Desktop.
+
+2. En Visual Studio, cree una aplicación de consola de .NET Core.\
+   ![net-console-application](/net/words/images/cb688e7831747ea9-PArWoC8_leOnhtaF-5BMb3b4jHwI3G03WoyMK3bXZpsQKN50YzvEQBwoRniyCWKIcdR0EZGuwn3S8Z0ZK6FQ4cjMSWgH3CwSqReW4bMt-3OjZjrdt9yuWbkMdhyNjwwaaYPC5Ylr.png)
+
+3. Instale la versión más reciente de Aspose.Words desde NuGet. SkiaSharp se instalará como una dependencia de Aspose.Words.\
+   ![skiasharp-dependency](/net/words/images/5d8bf18de702a8f4-zWpvB5TLahC_OpJrHDML2131Vj_VK1vryTZBd_C3ZeOBdoUOc2vF_axEvwu9tytaL1maJv3qA2KoyP5fn7ae4_3cL23sXyoLoVysjgu8XEp6l0B2w5hgR9teh95_9mFd9X-4DGNN.png)
+
+4. Dado que la aplicación se ejecutará en Linux, deben instalarse los recursos nativos adecuados para Linux. Comience con la imagen base de Debian e instale `SkiaSharp.NativeAssets.Linux`.
+
+5. Cuando se hayan agregado todas las dependencias necesarias, escriba un programa sencillo que cree un documento «¡Hola Mundo!» y lo guarde en todos los formatos de guardado admitidos:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+using System;
+using Aspose.Words;
+
+namespace Docker
+{
+    internal class Program
+    {
+        public static void Main(string[] args)
+        {
+            // Create document and save it in all available formats.
+            Document doc = new Document();
+            DocumentBuilder builder = new DocumentBuilder(doc);
+
+            builder.Writeln("Hello from Aspose.Words!!!");
+
+            foreach (SaveFormat sf in Enum.GetValues(typeof(SaveFormat)))
+            {
+                if (sf != SaveFormat.Unknown)
+                {
+                    try
+                    {
+                        doc.Save($"out{FileFormatUtil.SaveFormatToExtension(sf)}", sf);
+                        Console.WriteLine("Saving {0}\t\t[OK]", sf);
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Saving {0}\t\t[FAILED]", sf);
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+Tenga en cuenta que la carpeta "TestOut" se especifica como una carpeta de salida para guardar los documentos generados. Al ejecutar la aplicación en Docker, una carpeta de la máquina anfitriona se montará en esta carpeta dentro del contenedor. Esto le permitirá ver fácilmente la salida generada por Aspose.Words en el contenedor Docker.
+
+### Configuración de un Dockerfile {#configuring-a-dockerfile}
+
+El siguiente paso es crear y configurar el Dockerfile.
+
+1. Cree el Dockerfile y colóquelo junto al archivo de solución de su aplicación. Mantenga este archivo sin extensión (valor predeterminado).
+2. En el Dockerfile, especifique:
+
+```plain
+FROM mcr.microsoft.com/dotnet/core/sdk:2.2
+WORKDIR /app
+RUN apt-get update && apt-get install -y libfontconfig1
+COPY . ./
+RUN dotnet publish -c Release -o out
+ENTRYPOINT ["dotnet", "Aspose.Words.Docker.Sample/out/Aspose.Words.Docker.Sample.dll"]
+```
+
+El código anterior es un Dockerfile sencillo, que contiene las siguientes instrucciones:
+
+- La imagen del SDK que se va a utilizar. En este caso, es la imagen del SDK de .NET Core 2.2. Docker la descargará cuando se ejecute la compilación. La versión del SDK se especifica mediante una etiqueta.
+- El directorio de trabajo, que se especifica en la línea siguiente.
+- El comando para instalar libfontconfig1 se ejecuta dentro del contenedor. Esto es necesario para SkiaSharp.
+- El comando para copiar todos los archivos al contenedor, publicar la aplicación y especificar el punto de entrada.
+
+### Compilación y ejecución de la aplicación en Docker {#building-and-running-the-application-in-docker}
+
+A continuación, la aplicación se puede compilar y ejecutar en Docker. Abra su terminal favorita, cambie al directorio que contiene la aplicación (la carpeta donde se encuentran el archivo de solución y el Dockerfile) y ejecute el siguiente comando:
+
+```plain
+docker build -t awtest .
+```
+
+La primera vez que se ejecute este comando, puede tardar más, ya que Docker necesita descargar las imágenes requeridas. Una vez completado el comando anterior, ejecute el siguiente comando:
+
+```plain
+docker run --mount type=bind,source=C:\Temp,target=/TestOut --rm awtest from Docker
+```
+
+:::info
+Preste atención al argumento *mount*, ya que, como se mencionó anteriormente, una carpeta en la máquina anfitriona se monta en la carpeta del contenedor, para observar fácilmente los resultados de la ejecución de la aplicación. Las rutas en Linux distinguen entre mayúsculas y minúsculas.
+:::
+
+## Imágenes compatibles con Aspose.Words {#images-supporting-asposewords}
+
+Aspose.Words está disponible tanto para .NET Framework como para .NET Core. Las imágenes de .NET Core son mucho más pequeñas en tamaño que las imágenes de .NET Framework, lo que convierte a .NET Core en la mejor opción para crear microservicios y para su uso en contenedores. Es posible implementar aplicaciones en contenedores Docker de Linux (para implementación multiplataforma), que son más ligeros que los contenedores de Windows.
+
+Las imágenes oficiales del SDK de .NET Core se proporcionan para:
+
+- Debian 9 y 10
+- Ubuntu 18.04 y 19.04
+- Alpine 3.7 y 3.9
+- Windows Nano Server
+
+Para trabajar con gráficos, Aspose.Words para .NET Standard depende de SkiaSharp. Esto limita las imágenes en las que Aspose.Words puede ejecutarse a las siguientes:
+
+- Debian 9 y 10
+- Ubuntu 18.04 y 19.04
+- Alpine 3.9
+
+SkiaSharp no funciona en Windows Nano Server debido a la falta de algunas dependencias nativas, <a href="https://github.com/mono/SkiaSharp/issues/676" target="_blank" rel="nofollow noopener noreferrer">lo cual es un problema conocido en SkiaSharp</a>. Este problema se resolverá en la versión 1.68.1.1 de SkiaSharp. Si necesita ejecutar Aspose.Words en un contenedor de Windows, utilice la imagen base de .NET Framework con la versión de .NET Framework de Aspose.Words, que no depende de SkiaSharp.
+
+SkiaSharp es un contenedor alrededor de la biblioteca nativa Skia. Los siguientes entornos de ejecución se proporcionan en el paquete NuGet de SkiaSharp:
+
+- osx
+- tizen-armel
+- tizen-x86
+- win10-arm
+- win10-x64
+- win10-x86
+- win-x64
+- win-x86
+
+Para ejecutarlo en Linux, debe utilizar paquetes NuGet adicionales con los recursos nativos correspondientes, como las compilaciones nativas de la biblioteca Skia, que se enumeran a continuación:
+
+- *SkiaSharp.NativeAssets.Linux* – proporciona una compilación nativa de Skia para distribuciones de Linux basadas en Debian x64.
+- *SkiaSharp.NativeAssets.Linux.NoDependencies* – este paquete está destinado a usarse en distribuciones de Linux que no tienen la dependencia libfontconfig. Probado en RHEL 7 (x64).
+- *Goelze.SkiaSharp.NativeAssets.AlpineLinux* – proporciona una compilación nativa de Skia para Alpine Linux 3.9 x64.
+- *Jellyfin.SkiaSharp.NativeAssets.LinuxArm* – proporciona una compilación nativa de Skia para distribuciones de Linux basadas en Debian arm32 y arm64.
+
+## Más ejemplos {#more-examples}
+
+1. En el ejemplo anterior, la aplicación se ejecutó en una imagen SDK. Las imágenes SDK son más pesadas que las imágenes de entorno de ejecución. El siguiente ejemplo muestra cómo debe modificarse el archivo Docker para utilizar la imagen SDK a fin de compilar la aplicación y la imagen de entorno de ejecución para ejecutarla:
+
+   ```plain
+   FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build
+   WORKDIR /app
+   \# copy csproj and restore as distinct layers
+   COPY Aspose.Words.Docker.Sample/*.csproj ./Aspose.Words.Docker.Sample/
+   WORKDIR /app/Aspose.Words.Docker.Sample
+   RUN dotnet restore
+   \# copy and publish app and libraries
+   WORKDIR /app/
+   COPY Aspose.Words.Docker.Sample/. ./Aspose.Words.Docker.Sample/
+   WORKDIR /app/Aspose.Words.Docker.Sample
+   RUN dotnet publish -c Release -o out
+   \# copy to runtime environment
+   FROM mcr.microsoft.com/dotnet/core/runtime:2.2 AS runtime
+   WORKDIR /app
+   \# libfontconfig1 is required to properly work with fonts in Linux.
+   RUN apt-get update && apt-get install -y libfontconfig1
+   RUN apt install libharfbuzz-icu0
+   COPY --from=build /app/Aspose.Words.Docker.Sample/out ./
+   ENTRYPOINT ["dotnet", "Aspose.Words.Docker.Sample.dll"]
+   ```
+
+2. Para ejecutar la aplicación en Ubuntu 18.04, el Dockerfile permanece prácticamente igual (solo se cambia la etiqueta):
+
+   ```plain
+   FROM mcr.microsoft.com/dotnet/core/sdk:2.2-bionic AS build
+   WORKDIR /app
+   \# copy csproj and restore as distinct layers
+   COPY Aspose.Words.Docker.Sample/*.csproj ./Aspose.Words.Docker.Sample/
+   WORKDIR /app/Aspose.Words.Docker.Sample
+   RUN dotnet restore
+   \# copy and publish app and libraries
+   WORKDIR /app/
+   COPY Aspose.Words.Docker.Sample/. ./Aspose.Words.Docker.Sample/
+   WORKDIR /app/Aspose.Words.Docker.Sample
+   RUN dotnet publish -c Release -o out
+   \# copy to runtime environment
+   FROM mcr.microsoft.com/dotnet/core/runtime:2.2-bionic AS runtime
+   WORKDIR /app
+   \# libfontconfig1 is required to properly work with fonts in Linux.
+   RUN apt-get update && apt-get install -y libfontconfig1
+   RUN apt install libharfbuzz-icu0
+   COPY --from=build /app/Aspose.Words.Docker.Sample/out ./
+   ENTRYPOINT ["dotnet", "Aspose.Words.Docker.Sample.dll"]
+   ```
+
+3. Para ejecutar la aplicación en Alpine Linux, es necesario agregar los recursos nativos de SkiaSharp y utilizar el siguiente Dockerfile:
+
+   ```plain
+   FROM mcr.microsoft.com/dotnet/core/sdk:2.2-alpine3.9 AS build
+   WORKDIR /app
+   \# copy csproj and restore as distinct layers
+   COPY Aspose.Words.Docker.Sample/*.csproj ./Aspose.Words.Docker.Sample/
+   WORKDIR /app/Aspose.Words.Docker.Sample
+   RUN dotnet restore
+   \# copy and publish app and libraries
+   WORKDIR /app/
+   COPY Aspose.Words.Docker.Sample/. ./Aspose.Words.Docker.Sample/
+   WORKDIR /app/Aspose.Words.Docker.Sample
+   RUN dotnet publish -c Release -o out
+   \# copy to runtime environment
+   FROM mcr.microsoft.com/dotnet/core/runtime:2.2-alpine3.9 AS runtime
+   WORKDIR /app
+   \# fontconfig is required to properly work with fonts in Linux.
+   RUN apk update && apk upgrade && apk add fontconfig && apk add harfbuzz
+   COPY --from=build /app/Aspose.Words.Docker.Sample/out ./
+   ENTRYPOINT ["dotnet", "Aspose.Words.Docker.Sample.dll"]
+   ```
+
+4. Para ejecutar la aplicación en RHEL 7, es necesario agregar los recursos nativos de SkiaSharp y utilizar el siguiente Dockerfile:
+
+   ```plain
+   FROM mcr.microsoft.com/dotnet/core/sdk:2.1 AS build
+   WORKDIR /app
+   \# copy csproj and restore as distinct layers
+   COPY Aspose.Words.Docker.Sample/*.csproj ./Aspose.Words.Docker.Sample/
+   WORKDIR /app/Aspose.Words.Docker.Sample
+   RUN dotnet restore
+   \# copy and publish app and libraries
+   WORKDIR /app/
+   COPY Aspose.Words.Docker.Sample/. ./Aspose.Words.Docker.Sample/
+   WORKDIR /app/Aspose.Words.Docker.Sample
+   RUN dotnet publish -c Release -o out
+   \# copy to runtime environment
+   FROM kkamberta/dotnet-21-rhel7 AS runtime
+   WORKDIR /app
+   COPY --from=build /app/Aspose.Words.Docker.Sample/out ./
+   ENTRYPOINT ["/opt/rh/rh-dotnet21/root/usr/bin/dotnet", "Aspose.Words.Docker.Sample.dll"]
+   ```
+
+## Consulte también {#see-also}
+
+- <a href="https://docs.docker.com/desktop/setup/install/windows-install/" target="_blank" rel="nofollow noopener noreferrer">Instalar Docker Desktop en Windows</a>
+- <a href="https://docs.docker.com/desktop/setup/install/mac-install/" target="_blank" rel="nofollow noopener noreferrer">Instalar Docker Desktop en Mac</a>
+- <a href="https://docs.microsoft.com/en-us/dotnet/core/install/windows?tabs=netcore22#dependencies" target="_blank" rel="nofollow noopener noreferrer">Visual Studio 2017, .NET Core 2.2 SDK</a>
+- <a href="https://docs.docker.com/desktop/setup/install/windows-install/#windows-containers" target="_blank" rel="nofollow noopener noreferrer">Cambiar a contenedores Linux</a> opción
+- Instalar <a href="https://www.nuget.org/packages/SkiaSharp.NativeAssets.Linux" target="_blank" rel="nofollow noopener noreferrer">SkiaSharp.NativeAssets.Linux</a>
+- Información adicional sobre <a href="https://hub.docker.com/r/microsoft/dotnet-sdk" target="_blank" rel="nofollow noopener noreferrer">.NET Core SDK</a>
+- Utilizar paquetes NuGet adicionales: <a href="https://www.nuget.org/packages/SkiaSharp.NativeAssets.Linux" target="_blank" rel="nofollow noopener noreferrer">SkiaSharp.NativeAssets.Linux</a>, <a href="https://www.nuget.org/packages/SkiaSharp.NativeAssets.Linux.NoDependencies" target="_blank" rel="nofollow noopener noreferrer">SkiaSharp.NativeAssets.Linux.NoDependencies</a>, <a href="https://www.nuget.org/packages/Goelze.SkiaSharp.NativeAssets.AlpineLinux" target="_blank" rel="nofollow noopener noreferrer">Goelze.SkiaSharp.NativeAssets.AlpineLinux</a>, <a href="https://www.nuget.org/packages/Jellyfin.SkiaSharp.NativeAssets.LinuxArm" target="_blank" rel="nofollow noopener noreferrer">Jellyfin.SkiaSharp.NativeAssets.LinuxArm</a>
+- <a href="https://hub.docker.com/r/kkamberta/dotnet-21-rhel7" target="_blank" rel="nofollow noopener noreferrer">RHEL 7 (x64)</a>
+
+***
+
+## Preguntas frecuentes {#faq}
+
+1. **P:** ¿Cómo aplico una licencia de Aspose.Words al ejecutarse dentro de un contenedor Docker?\
+   **R:** Copie el archivo de licencia en el contenedor (por ejemplo, colóquelo en la carpeta del proyecto) y cárguelo en tiempo de ejecución con `License license = new License(); license.SetLicense("Aspose.Words.lic");`. Asegúrese de que el Dockerfile copie el archivo `.lic` (`COPY Aspose.Words.lic ./`) para que esté disponible para la aplicación.
+
+2. **P:** ¿Puedo utilizar el método `Document.Print()` en un contenedor Docker basado en Linux?\
+   **R:** No. La impresión depende de las API de Windows GDI+ y no es compatible con contenedores Linux. Para imprimir, ejecute la aplicación en un contenedor Windows o en un host Windows fuera de Docker.
+
+3. **P:** ¿Qué formatos de salida son compatibles al guardar un documento desde Docker?\
+   **R:** Aspose.Words admite todos los formatos estándar, incluidos PDF, DOCX, DOC, RTF, HTML, MHTML, EPUB, XPS, JPEG, PNG, BMP, TIFF y SVG. Utilice `Document.Save("output.pdf", SaveFormat.Pdf);` o el valor de enumeración `SaveFormat` correspondiente.
+
+4. **P:** ¿Necesito instalar activos nativos adicionales para fuentes al utilizar SkiaSharp en Docker?\
+   **R:** Sí. Los contenedores Linux requieren `libfontconfig1` (instalado en el Dockerfile con `apt-get install -y libfontconfig1`). Para Alpine, instale `fontconfig` mediante `apk add fontconfig`. Esto proporciona las dependencias nativas necesarias para que SkiaSharp realice el procesamiento gráfico.
+
+5. **P:** ¿Es mi licencia actual de Aspose.Words retrocompatible con versiones anteriores de Aspose.Words que se ejecutan en Docker?\
+   **R:** Las licencias de Aspose.Words son compatibles hacia adelante; una licencia creada para una versión más reciente funciona con versiones anteriores, pero no al revés. Asegúrese de colocar el archivo de licencia en el contenedor y cargarlo como se describe anteriormente.

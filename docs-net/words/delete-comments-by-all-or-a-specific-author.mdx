@@ -1,0 +1,141 @@
+---
+title: "Remove Comments of All or a Specific Author"
+sidebar_label: "Remove Comments of All or a Specific Author"
+sidebar_key: "net-words-delete-comments-by-all-or-a-specific-author"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/delete-comments-by-all-or-a-specific-author.html"
+source_commit: ""
+source_sha256: "759f721473d058e32df1ac9a014258b76e542613a65b52da67c8a67e0427296b"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/net/delete-comments-by-all-or-a-specific-author/"
+source_snapshot_sha256: "af728f97cf2573b21e46f62ddb496dda3c33ad89b9a1cd3349ef3b4f358d58ed"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page describes how to delete comments from all authors or specific authors in a Word document.
+:::
+
+On this page we will look at how to remove comments of all or a specific author using Aspose.Words or Open XML SDK.
+
+<Tabs groupId="frameworks">
+
+<TabItem value="aspose-words" label="Aspose.Words" default>
+
+In Aspose.Words you can work with comments by using the <a href="https://reference.aspose.com/words/net/aspose.words/comment/" target="_blank" rel="nofollow noopener noreferrer">Comment</a> class.
+
+The following code example shows how to remove comments in a document:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Comments.docx");
+
+// Collect all comments in the document.
+NodeCollection comments = doc.GetChildNodes(NodeType.Comment, true);
+
+string authorName = string.Empty;
+if (authorName.Equals(string.Empty))
+    // Remove all comments.
+    comments.Clear();
+else
+{
+    // Remove comments by author name.
+    foreach (Comment comment in comments)
+        if (comment.Author.Equals(authorName))
+            comment.Remove();
+}
+
+doc.Save(ArtifactsDir + "Remove comments - Aspose.Words.docx");
+```
+
+</TabItem>
+
+<TabItem value="open-xml-sdk" label="Open XML SDK">
+
+You can also do the same using the Open XML SDK. At the same time, note that it looks somewhat more complicated and more cumbersome.
+
+The following code example shows how to remove comments in a document:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+string authorName = string.Empty;
+File.Copy(MyDir + "Comments.docx", ArtifactsDir + "Remove comments - OpenXML.docx", true);
+
+using WordprocessingDocument doc = WordprocessingDocument.Open(ArtifactsDir + "Remove comments - OpenXML.docx", true);
+
+// Add a main document part to the new document.
+MainDocumentPart mainPart = doc.MainDocumentPart;
+// Get the comments part
+WordprocessingCommentsPart commentsPart = mainPart.WordprocessingCommentsPart;
+if (commentsPart != null)
+{
+    // Get the comments
+    Comments comments = commentsPart.Comments;
+    // Create a list to hold comments to remove
+    List<Comment> commentsToRemove = new();
+
+    foreach (var comment in comments.Elements<Comment>())
+        if (string.IsNullOrEmpty(authorName) || comment.Author == authorName)
+            commentsToRemove.Add(comment);
+
+    IEnumerable<string> commentIds =
+    commentsToRemove.Select(r => r.Id.Value);
+
+    // Remove the comments
+    foreach (Comment comment in commentsToRemove)
+        comment.Remove();
+
+    // Save changes to the comments part
+    commentsPart.Comments.Save();
+
+    // Delete the "CommentRangeStart" for each deleted comment in the main document.
+    List<CommentRangeStart> commentRangeStartToDelete =
+        mainPart.Document.Descendants<CommentRangeStart>().Where(c => commentIds.Contains(c.Id.Value)).ToList();
+
+    foreach (CommentRangeStart rangeStart in commentRangeStartToDelete)
+        rangeStart.Remove();
+
+    // Delete the "CommentRangeEnd" for each deleted comment in the main document.
+    List<CommentRangeEnd> commentRangeEndToDelete =
+        mainPart.Document.Descendants<CommentRangeEnd>().Where(c => commentIds.Contains(c.Id.Value)).ToList();
+
+    foreach (CommentRangeEnd rangeEnd in commentRangeEndToDelete)
+        rangeEnd.Remove();
+
+    // Delete the "CommentReference" for each deleted comment in the main document.
+    List<CommentReference> commentRangeReferenceToDelete =
+        mainPart.Document.Descendants<CommentReference>().Where(c => commentIds.Contains(c.Id.Value)).ToList();
+
+    foreach (CommentReference reference in commentRangeReferenceToDelete)
+        reference.Remove();
+```
+
+</TabItem>
+
+</Tabs>
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-.NET/tree/master/Plugins/Aspose.WordsVsOpenXml" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+:::info
+For more information about Aspose.Words features please visit <a href="https://docs.aspose.com/words/net/working-with-comments/" target="_blank" rel="nofollow noopener noreferrer">Working with Comments</a>.
+:::

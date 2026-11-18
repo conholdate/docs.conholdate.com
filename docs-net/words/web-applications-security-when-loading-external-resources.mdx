@@ -1,0 +1,160 @@
+---
+title: "Web Applications Security When Loading External Resources"
+sidebar_label: "Web Applications Security When Loading External Resources"
+sidebar_key: "net-words-web-applications-security-when-loading-external-resources"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/web-applications-security-when-loading-external-resources.html"
+source_commit: ""
+source_sha256: "ef36b4b0e3c9c5acc9d47e9622454245865e0e8ad66080c5ff63a086d14ae770"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/net/web-applications-security-when-loading-external-resources/"
+source_snapshot_sha256: "37a1f11d35d26a1db43f6170033b568aef055ac816c145a48fe6ffacfedc5c76"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains security considerations for web applications that load external resources through Aspose.Words.
+:::
+
+By default, Aspose.Words for .NET can load remote resources such as images, CSS styles, or external HTML documents when importing documents or inserting images using the DocumentBuilder. This behavior allows you to process your documents in full detail but can be a reason of some security risks if the library is a part of a web application.
+
+In this article, we take a look at common security issues that can arise when loading external resources and provide recommendations on how to avoid such problems.
+
+:::info
+Aspose.Words does not function as antivirus software. Therefore, it does not provide information about the presence of malicious components in the document. To ensure the security of your data, check documents obtained from an external source yourself. In turn, Aspose.Words provides recommendations on how to deal with problems that can arise when loading external resources.
+:::
+
+## Security Issues {#security-issues}
+
+There are a number of typical security problems when loading external resources.
+
+### Credential Disclosure Via Linked Images {#credential-disclosure-via-linked-images}
+
+On Windows-based hosts, documents containing references to resources that use UNC paths such as *'\example.com\a\b*' will be processed by default. In a domain environment, this will cause the host to send its domain credentials in a hashed format to the specified server.
+
+If an attacker is able to convince a user or server to process a document with such a resource link pointing to a host they control, the attacker will receive the user or service account credentials in NTLM hash format. Such data then can be reused in a classic pass-the-hash attack, allowing the attacker to gain access to any resource as the victim user or service account.
+
+If the account in question uses a weak or guessable password, the attacker could additionally perform a password cracking attack to recover the account password for further malicious use.
+
+### Local Image Disclosure Via Linked Images {#local-image-disclosure-via-linked-images}
+
+Similar to the previous case, processing a document with a reference to a local image file will result in that file being included in the final document. This can lead to sensitive information disclosure.
+
+### Denial of Service {#denial-of-service}
+
+An attacker could upload a document that either referenced or included extremely large images - the so‑called "decompression bombs". When processing these images, the library will consume huge amounts of memory and CPU time.
+
+### Server-Side Request Forgery Via Linked Content {#server-side-request-forgery-via-linked-content}
+
+An attacker could create a series of documents containing embedded links to common combinations of internal IP address and port, then submit them to a web service using the Aspose.Words library to process the documents.
+
+Based on the length of time the service uses to process the document, the attacker could determine if a given IP/Port combination is filtered by a firewall:
+
+- longer processing time indicates that the TCP SYN packet sent by the server was dropped by a firewall
+- quick processing time indicates a successful connection has been made
+
+## Solutions of Security Issues {#solutions-of-security-issues}
+
+To solve the problems described above and to improve the security of web applications, you can control or disable loading of external resources using <a href="https://reference.aspose.com/words/net/aspose.words.loading/iresourceloadingcallback/" target="_blank" rel="nofollow noopener noreferrer">IResourceLoadingCallback</a>.
+
+The following code example shows how to disable external images loading:
+
+**.NET**
+
+```csharp
+public class DisableExternalImagesHandler : IResourceLoadingCallback
+{
+    public ResourceLoadingAction ResourceLoading(ResourceLoadingArgs args)
+    {
+        // Skip external images loading.
+        return (args.ResourceType == ResourceType.Image)
+            ? ResourceLoadingAction.Skip
+            : ResourceLoadingAction.Default;
+    }
+}
+...
+const string documentFilename = "input.docx";
+var disableExternalImagesOptions = new LoadOptions
+{
+    ResourceLoadingCallback = new DisableExternalImagesHandler()
+};
+var doc = new Document(documentFilename, disableExternalImagesOptions);
+```
+
+The following code example shows how to disable remote resources:
+
+**.NET**
+
+```csharp
+private class DisableRemoteResourcesHandler : IResourceLoadingCallback
+{
+    public ResourceLoadingAction ResourceLoading(ResourceLoadingArgs args)
+    {
+        return IsLocalResource(args.OriginalUri)
+            ? ResourceLoadingAction.Default
+            : ResourceLoadingAction.Skip;
+    }
+
+    private static bool IsLocalResource(string fileName)
+    {
+        DirectoryInfo dirInfo;
+        try
+        {
+            var dirName = Path.GetDirectoryName(fileName);
+            if (string.IsNullOrEmpty(dirName))
+                return false;
+            dirInfo = new DirectoryInfo(dirName);
+        }
+        catch
+        {
+            return false;
+        }
+    
+        foreach (DriveInfo d in DriveInfo.GetDrives())
+        {
+            if (string.Compare(dirInfo.Root.FullName, d.Name, StringComparison.OrdinalIgnoreCase) == 0)
+                return d.DriveType != DriveType.Network;
+        }
+    
+        return false;
+    }
+}
+...
+var disableRemoteResourcesOptions = new LoadOptions
+{
+    ResourceLoadingCallback = new DisableRemoteResourcesHandler()
+};
+var doc = new Document(documentFilename, disableRemoteResourcesOptions);
+```
+
+:::info
+This article is based on the consulting firm Independent Security Evaluators <a href="https://docs.aspose.com/words/net/web-applications-security-when-loading-external-resources/ise-aspose-report.pdf" target="_blank" rel="nofollow noopener noreferrer">report</a>.
+:::
+
+***
+
+## FAQ {#faq}
+
+1. **Q:** How can I stop Aspose.Words from loading external images?\
+   **A:** Implement `IResourceLoadingCallback` and return `ResourceLoadingAction.Skip` for `ResourceType.Image`. Assign the callback to `LoadOptions.ResourceLoadingCallback` when creating the `Document`. This prevents the library from fetching any remote image.
+
+2. **Q:** What if I want to block all remote resources, not just images?\
+   **A:** In the callback, examine `args.OriginalUri` and decide whether the resource is local. Return `ResourceLoadingAction.Skip` for any non‑local URI (e.g., HTTP, UNC paths). This disables loading of CSS, HTML, or other external files.
+
+3. **Q:** Will disabling external resources affect the visual layout of the document?\
+   **A:** Yes, placeholders for skipped resources remain empty, which may change the appearance (missing images or styles). However, the document remains safe to process, and you can replace skipped resources with local placeholders if needed.

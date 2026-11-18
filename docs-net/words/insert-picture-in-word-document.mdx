@@ -1,0 +1,196 @@
+---
+title: "Insert Image into a Word document"
+sidebar_label: "Insert Image into a Word document"
+sidebar_key: "net-words-insert-picture-in-word-document"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/insert-picture-in-word-document.html"
+source_commit: ""
+source_sha256: "e7862cb4b3578861bde5f003411f3c0f7165cb85d062c889493356e9c9676396"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/net/insert-picture-in-word-document/"
+source_snapshot_sha256: "56ac41119230dc1c151d2e6365c87619c8cd1d1e553ea5dc51306b41a4ccbc87"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page describes how to insert a picture into a Word document.
+:::
+
+On this page we will look at how to insert images into a Word document using Aspose.Words or Open XML SDK.
+
+<Tabs groupId="frameworks">
+
+<TabItem value="aspose-words" label="Aspose.Words" default>
+
+<a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder</a> is a powerful class that is associated with a <a href="https://reference.aspose.com/words/net/aspose.words/document/" target="_blank" rel="nofollow noopener noreferrer">Document</a> and allows to build a dynamic document from scratch or add new elements to an existing document. It provides methods to insert text, paragraphs, lists, tables, images, and other contents, as well as specification of font, paragraph, section formatting, and other things.
+
+The `DocumentBuilder` complements classes and methods available in the Aspose.Words Document Object Model (DOM) to simplify the most common document building tasks such as inserting text, tables, fields, and hyperlinks.
+
+The following code example shows how to insert an image into a document at a specified position and size:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.InsertImage(MyDir + "Aspose.Words.png",
+    RelativeHorizontalPosition.Margin,
+    100,
+    RelativeVerticalPosition.Margin,
+    100,
+    200,
+    100,
+    WrapType.Square);
+
+doc.Save(ArtifactsDir + "Insert image - Aspose.Words.docx");
+```
+
+</TabItem>
+
+<TabItem value="open-xml-sdk" label="Open XML SDK">
+
+You can also do the same using the Open XML SDK. At the same time, note that it looks somewhat more complicated and more cumbersome.
+
+The following code example shows how to insert image into a body part of a Word document.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+using WordprocessingDocument wordDocument = WordprocessingDocument.Create(ArtifactsDir + "Insert image - OpenXML.docx", WordprocessingDocumentType.Document);
+
+// Add the main document part
+MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
+mainPart.Document = new Document();
+Body body = new Body();
+
+// Add a paragraph to the document
+Paragraph paragraph = new Paragraph();
+Run run = new Run();
+
+// Add the image to the document
+ImagePart imagePart = mainPart.AddImagePart(ImagePartType.Jpeg);
+using (FileStream stream = new FileStream(MyDir + "Aspose.Words.png", FileMode.Open))
+{
+    imagePart.FeedData(stream);
+}
+
+// Generate a unique relationship ID for the image
+string imageId = mainPart.GetIdOfPart(imagePart);
+
+// Define the image's dimensions (width and height in pixels)
+const int emuPerPixel = 9525;
+int widthInPixels = 300;
+int heightInPixels = 200;
+
+// Add the image to the run
+run.AppendChild(new Drawing(
+    new DW.Inline(
+        new DW.Extent()
+        {
+            Cx = widthInPixels * emuPerPixel,
+            Cy = heightInPixels * emuPerPixel
+        },
+        new DW.DocProperties()
+        {
+            Id = 1,
+            Name = "Picture 1"
+        },
+        new DW.NonVisualGraphicFrameDrawingProperties(),
+        new Graphic(
+            new GraphicData(
+                new PIC.Picture(
+                    new PIC.NonVisualPictureProperties(
+                        new PIC.NonVisualDrawingProperties()
+                        {
+                            Id = 0,
+                            Name = "Image"
+                        },
+                        new PIC.NonVisualPictureDrawingProperties()
+                    ),
+                    new PIC.BlipFill(
+                        new Blip()
+                        {
+                            Embed = imageId,
+                            CompressionState = BlipCompressionValues.Print
+                        },
+                        new Stretch(
+                            new FillRectangle()
+                        )
+                    ),
+                    new PIC.ShapeProperties(
+                        new Transform2D(
+                            new Offset()
+                            {
+                                X = 0,
+                                Y = 0
+                            },
+                            new Extents()
+                            {
+                                Cx = widthInPixels * emuPerPixel,
+                                Cy = heightInPixels * emuPerPixel
+                            }
+                        ),
+                        new PresetGeometry(
+                            new AdjustValueList()
+                        )
+                        {
+                            Preset = ShapeTypeValues.Rectangle
+                        }
+                    )
+                )
+            )
+            {
+                Uri = "http://schemas.openxmlformats.org/drawingml/2006/picture"
+            }
+        )
+    )
+    {
+        DistanceFromTop = 0,
+        DistanceFromBottom = 0,
+        DistanceFromLeft = 0,
+        DistanceFromRight = 0,
+        EditId = "50D07946"
+    }
+));
+
+// Add the run to the paragraph
+paragraph.AppendChild(run);
+
+// Add the paragraph to the body
+body.AppendChild(paragraph);
+
+// Add the body to the document
+mainPart.Document.AppendChild(body);
+
+// Save the document
+mainPart.Document.Save();
+```
+
+</TabItem>
+
+</Tabs>
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-.NET/tree/master/Plugins/Aspose.WordsVsOpenXml" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+:::info
+For more information about Aspose.Words features please visit <a href="https://docs.aspose.com/words/net/working-with-images/" target="_blank" rel="nofollow noopener noreferrer">Working with Images</a>.
+:::
