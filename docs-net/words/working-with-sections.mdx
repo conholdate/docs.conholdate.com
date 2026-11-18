@@ -1,0 +1,445 @@
+---
+title: "Working with Sections"
+sidebar_label: "Working with Sections"
+sidebar_key: "net-words-working-with-sections"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/working-with-sections.html"
+source_commit: ""
+source_sha256: "d64bc3931bd31899450486a01c93fbf25cbbc9c7b8f40410fc1b651b7d2e36c9"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/net/working-with-sections/"
+source_snapshot_sha256: "c62a0ef10a816208bee8eab7b3de750b9b526413ffa35b661478d783fc208c8f"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains how to work with document sections.
+:::
+
+Sometimes you want a document that does not have the same formatting across all pages. For example, you may need to modify page number formats, have different page size and orientation, or have the first document page as a cover page without any numbering. You can achieve that with sections.
+
+Sections are level nodes that control headers and footers, orientation, columns, margins, page number formatting, and others.
+
+Aspose.Words allows you to manage sections, divide a document into sections, and make formatting changes that apply only to a specific section. Aspose.Words stores information about section formatting such as headers and footers, page setup, and column settings in the section break.
+
+This article explains how to work with sections and section breaks.
+
+## What Section and Section Break Is {#what-section-and-section-break-is}
+
+Document sections are represented by the <a href="https://reference.aspose.com/words/net/aspose.words/section/" target="_blank" rel="nofollow noopener noreferrer">Section</a> and <a href="https://reference.aspose.com/words/net/aspose.words/sectioncollection/" target="_blank" rel="nofollow noopener noreferrer">SectionCollection</a> classes. Section objects are immediate children of the <a href="https://reference.aspose.com/words/net/aspose.words/document/" target="_blank" rel="nofollow noopener noreferrer">Document</a> node and can be accessed via the <a href="https://reference.aspose.com/words/net/aspose.words/document/sections/" target="_blank" rel="nofollow noopener noreferrer">Sections</a> property. You can manage those nodes by using some methods such as <a href="https://reference.aspose.com/words/net/aspose.words/nodecollection/remove/" target="_blank" rel="nofollow noopener noreferrer">Remove</a>, <a href="https://reference.aspose.com/words/net/aspose.words/nodecollection/add/" target="_blank" rel="nofollow noopener noreferrer">Add</a>, <a href="https://reference.aspose.com/words/net/aspose.words/nodecollection/indexof/" target="_blank" rel="nofollow noopener noreferrer">IndexOf</a>, and others.
+
+Section break is an option that divides document pages into sections with customizable layouts.
+
+## Types of a Section Break {#types-of-a-section-break}
+
+Aspose.Words allows you to split and format documents using different section breaks of the <a href="https://reference.aspose.com/words/net/aspose.words/breaktype/" target="_blank" rel="nofollow noopener noreferrer">BreakType</a> enumeration:
+
+- SectionBreakContinuous
+- SectionBreakNewColumn
+- SectionBreakNewPage
+- SectionBreakEvenPage
+- SectionBreakOddPage
+
+You can also use the <a href="https://reference.aspose.com/words/net/aspose.words/sectionstart/" target="_blank" rel="nofollow noopener noreferrer">SectionStart</a> enumeration to choose a break type that applies only for the first section such as NewColumn, NewPage, EvenPage, and OddPage.
+
+## Manage a Section {#manage-a-section}
+
+Since a section is a normal composite node, the entire node manipulation API can be used to manipulate sections: to add, remove, and other operations on sections. You can read more about nodes in the article [Aspose.Words Document Object Model (DOM)](/net/words/aspose-words-document-object-model/).
+
+On the other hand, you can also use the `DocumentBuilder` API to work with sections. In this article, we will focus on this particular way of working with sections.
+
+## Insert or Remove a Section Break {#insert-or-remove-a-section-break}
+
+Aspose.Words allows you to insert a section break into text using the <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/insertbreak/" target="_blank" rel="nofollow noopener noreferrer">InsertBreak</a> method.
+
+The following code example shows how to insert a section break into a document:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+/// <summary>
+/// Insert section breaks before the specified paragraphs.
+/// </summary>
+private void InsertSectionBreaks(List<Paragraph> topicStartParas)
+{
+    DocumentBuilder builder = new DocumentBuilder(mDoc);
+    foreach (Paragraph para in topicStartParas)
+    {
+        Section section = para.ParentSection;
+
+        // Insert section break if the paragraph is not at the beginning of a section already.
+        if (para != section.Body.FirstParagraph)
+        {
+            builder.MoveTo(para.FirstChild);
+            builder.InsertBreak(BreakType.SectionBreakNewPage);
+
+            // This is the paragraph that was inserted at the end of the now old section.
+            // We don't really need the extra paragraph, we just needed the section.
+            section.Body.LastParagraph.Remove();
+        }
+    }
+}
+```
+
+Use the <a href="https://reference.aspose.com/words/net/aspose.words/node/remove/" target="_blank" rel="nofollow noopener noreferrer">Remove</a> method to delete a section break. If you do not need to remove a specific section break and instead delete the content of that section, you can use the <a href="https://reference.aspose.com/words/net/aspose.words/section/clearcontent/" target="_blank" rel="nofollow noopener noreferrer">ClearContent</a> method.
+
+The following code example shows how to remove sections breaks:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+private void RemoveSectionBreaks(Document doc)
+{
+    // Loop through all sections starting from the section that precedes the last one and moving to the first section.
+    for (int i = doc.Sections.Count - 2; i >= 0; i--)
+    {
+        // Copy the content of the current section to the beginning of the last section.
+        doc.LastSection.PrependContent(doc.Sections[i]);
+        // Remove the copied section.
+        doc.Sections[i].Remove();
+    }
+}
+```
+
+:::info
+Note that a section break has information about the section that goes before it, not the section that goes after it. So if you remove a section break, the text before the removed break will get the properties of the section break following it. This can cause the entire document to becoming landscape, or headers and footers to change or fully disappear.
+:::
+
+## Move a Section {#move-a-section}
+
+If you want to move a section from one position to another in your document, you need to get the index of that section. Aspose.Words allows you to get a section position from a <a href="https://reference.aspose.com/words/net/aspose.words/sectioncollection/" target="_blank" rel="nofollow noopener noreferrer">SectionCollection</a> by using the <a href="https://reference.aspose.com/words/net/aspose.words/sectioncollection/item/" target="_blank" rel="nofollow noopener noreferrer">Item</a> property. You can use the <a href="https://reference.aspose.com/words/net/aspose.words/document/sections/" target="_blank" rel="nofollow noopener noreferrer">Sections</a> property to get all sections in your document. But if you want to get only the first section, you can use the <a href="https://reference.aspose.com/words/net/aspose.words/document/firstsection/" target="_blank" rel="nofollow noopener noreferrer">FirstSection</a> property.
+
+The following code example shows how to access the first section and iterate through the children of a composite node:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.Write("Section 1");
+builder.MoveToHeaderFooter(HeaderFooterType.HeaderPrimary);
+builder.Write("Primary header");
+builder.MoveToHeaderFooter(HeaderFooterType.FooterPrimary);
+builder.Write("Primary footer");
+
+Section section = doc.FirstSection;
+
+// A Section is a composite node and can contain child nodes,
+// but only if those child nodes are of a "Body" or "HeaderFooter" node type.
+foreach (Node node in section)
+{
+    switch (node.NodeType)
+    {
+        case NodeType.Body:
+            {
+                Body body = (Body)node;
+
+                Console.WriteLine("Body:");
+                Console.WriteLine($"\t\"{body.GetText().Trim()}\"");
+                break;
+            }
+        case NodeType.HeaderFooter:
+            {
+                HeaderFooter headerFooter = (HeaderFooter)node;
+
+                Console.WriteLine($"HeaderFooter type: {headerFooter.HeaderFooterType}:");
+                Console.WriteLine($"\t\"{headerFooter.GetText().Trim()}\"");
+                break;
+            }
+        default:
+            {
+                throw new Exception("Unexpected node type in a section.");
+            }
+    }
+}
+```
+
+## Specify a Section Layout {#specify-a-section-layout}
+
+Sometimes you want your document to look better by making creative layouts for different document sections. If you want to specify the type of the current section grid, you can choose a section layout mode using the <a href="https://reference.aspose.com/words/net/aspose.words/sectionlayoutmode/" target="_blank" rel="nofollow noopener noreferrer">SectionLayoutMode</a> enumeration:
+
+- Default
+- Grid
+- LineGrid
+- SnapToChars
+
+The following code example shows how to limit the number of lines that each page may have:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// Enable pitching, and then use it to set the number of lines per page in this section.
+// A large enough font size will push some lines down onto the next page to avoid overlapping characters.
+builder.PageSetup.LayoutMode = SectionLayoutMode.LineGrid;
+builder.PageSetup.LinesPerPage = 15;
+
+builder.ParagraphFormat.SnapToGrid = true;
+
+for (int i = 0; i < 30; i++)
+    builder.Write("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ");
+
+doc.Save(ArtifactsDir + "WorkingWithDocumentOptionsAndSettings.LinesPerPage.docx");
+```
+
+## Edit a Section {#edit-a-section}
+
+When you add a new section to your document, there will be no body or paragraph that you can edit. Aspose.Words allows you to guarantee that a section contains a body with at least one paragraph using the <a href="https://reference.aspose.com/words/net/aspose.words/section/ensureminimum/" target="_blank" rel="nofollow noopener noreferrer">EnsureMinimum</a> method - it will automatically add a Body (or HeaderFooter) node to the document and then add a Paragraph to it.
+
+The following code example shows how to prepare a new section node using **EnsureMinimum**:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+
+// If we add a new section like this, it will not have a body, or any other child nodes.
+doc.Sections.Add(new Section(doc));
+// Run the "EnsureMinimum" method to add a body and a paragraph to this section to begin editing it.
+doc.LastSection.EnsureMinimum();
+            
+doc.Sections[0].Body.FirstParagraph.AppendChild(new Run(doc, "Hello world!"));
+```
+
+### Append or Prepend Content {#append-or-prepend-content}
+
+If you want to draw some shape or add text or image at the beginning/end of a section, you can use the <a href="https://reference.aspose.com/words/net/aspose.words/section/appendcontent/" target="_blank" rel="nofollow noopener noreferrer">AppendContent</a> and <a href="https://reference.aspose.com/words/net/aspose.words/section/prependcontent/" target="_blank" rel="nofollow noopener noreferrer">PrependContent</a> methods of the <a href="https://reference.aspose.com/words/net/aspose.words/section/" target="_blank" rel="nofollow noopener noreferrer">Section</a> class.
+
+The following code example shows how to append content of an existing section:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.Write("Section 1");
+builder.InsertBreak(BreakType.SectionBreakNewPage);
+builder.Write("Section 2");
+builder.InsertBreak(BreakType.SectionBreakNewPage);
+builder.Write("Section 3");
+
+Section section = doc.Sections[2];
+
+// Insert the contents of the first section to the beginning of the third section.
+Section sectionToPrepend = doc.Sections[0];
+section.PrependContent(sectionToPrepend);
+
+// Insert the contents of the second section to the end of the third section.
+Section sectionToAppend = doc.Sections[1];
+section.AppendContent(sectionToAppend);
+```
+
+### Clone a Section {#clone-a-section}
+
+Aspose.Words allows you to duplicate a section by creating a full copy of it using the <a href="https://reference.aspose.com/words/net/aspose.words/section/clone/" target="_blank" rel="nofollow noopener noreferrer">Clone</a> method.
+
+The following code example shows how to clone the first section in your document:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Document.docx");
+Section cloneSection = doc.Sections[0].Clone();
+```
+
+### Copy Sections between Documents {#copy-sections-between-documents}
+
+In some cases, you may have large documents with many sections and you want to copy the content of a section from one document to another.
+
+Aspose.Words allows you to copy sections between documents using the <a href="https://reference.aspose.com/words/net/aspose.words/nodeimporter/importnode/" target="_blank" rel="nofollow noopener noreferrer">ImportNode</a> method.
+
+The following code example shows how to copy sections between documents:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document srcDoc = new Document(MyDir + "Document.docx");
+Document dstDoc = new Document();
+
+Section sourceSection = srcDoc.Sections[0];
+Section newSection = (Section)dstDoc.ImportNode(sourceSection, true);
+dstDoc.Sections.Add(newSection);
+
+dstDoc.Save(ArtifactsDir + "WorkingWithSection.CopySection.docx");
+```
+
+### Work with Section Header and Footer {#work-with-section-header-and-footer}
+
+The basic rules for displaying a header or footer for each section are quite simple:
+
+1. If the section does not have its own headers/footers of a certain type, then it is taken from the previous section.
+2. The type of header/footer displayed on the page is controlled by the "Different First Page" and "Different Odd & Even pages" section settings - if they are disabled, then the section's own titles are ignored.
+
+The following code example shows how to create 2 sections with different headers:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.PageSetup.DifferentFirstPageHeaderFooter = true;
+
+builder.MoveToHeaderFooter(HeaderFooterType.HeaderFirst);
+builder.ParagraphFormat.Alignment = ParagraphAlignment.Center;
+builder.Font.Name = "Arial";
+builder.Font.Bold = true;
+builder.Font.Size = 14;
+builder.Write("Header for the first page.");
+
+builder.MoveToDocumentEnd();
+builder.InsertBreak(BreakType.SectionBreakNewPage);
+
+Section currentSection = builder.CurrentSection;
+PageSetup pageSetup = currentSection.PageSetup;
+pageSetup.Orientation = Orientation.Landscape;
+// This section does not need a different first-page header/footer we need only one title page in the document,
+// and the header/footer for this page has already been defined in the previous section.
+pageSetup.DifferentFirstPageHeaderFooter = false;
+
+// This section displays headers/footers from the previous section
+// by default call currentSection.HeadersFooters.LinkToPrevious(false) to cancel this page width
+// is different for the new section.
+currentSection.HeadersFooters.LinkToPrevious(false);
+currentSection.HeadersFooters.Clear();
+
+builder.MoveToHeaderFooter(HeaderFooterType.HeaderPrimary);
+builder.ParagraphFormat.Alignment = ParagraphAlignment.Center;
+builder.Font.Name = "Arial";
+builder.Font.Size = 12;
+builder.Write("New Header for the first page.");
+
+doc.Save(ArtifactsDir + "WorkingWithHeadersAndFooters.LinkToPreviousHeaderFooter.docx");
+```
+
+If you want to remove the text of headers and footers without removing <a href="https://reference.aspose.com/words/net/aspose.words/headerfooter/" target="_blank" rel="nofollow noopener noreferrer">HeaderFooter</a> objects in your document, you can use the <a href="https://reference.aspose.com/words/net/aspose.words/section/clearheadersfooters/" target="_blank" rel="nofollow noopener noreferrer">ClearHeadersFooters</a> method. In addition, you can use the <a href="https://reference.aspose.com/words/net/aspose.words/section/deleteheaderfootershapes/" target="_blank" rel="nofollow noopener noreferrer">DeleteHeaderFooterShapes</a> method to remove all shapes from headers and footers in your document.
+
+The following code example shows how to clear content of all headers and footers in a section:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Document.docx");
+
+Section section = doc.Sections[0];
+section.ClearHeadersFooters();
+```
+
+The following code example how to remove all shapes from all headers footers in a section:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Document.docx");
+
+Section section = doc.Sections[0];
+section.DeleteHeaderFooterShapes();
+```
+
+## Customize Page Properties in a Section {#customize-page-properties-in-a-section}
+
+Before printing a page or a document you may want to customize and modify the size and layout of a single page or the whole document. With page setup, you can change the settings of document pages such as margins, orientation, and size for printing different first pages or odd pages.
+
+Aspose.Words allows you to customize page and section properties using the <a href="https://reference.aspose.com/words/net/aspose.words/pagesetup/" target="_blank" rel="nofollow noopener noreferrer">PageSetup</a> class.
+
+The following code example shows how to set such properties as page size and orientation for the current section:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.PageSetup.Orientation = Orientation.Landscape;
+builder.PageSetup.LeftMargin = 50;
+builder.PageSetup.PaperSize = PaperSize.Paper10x14;
+
+doc.Save(ArtifactsDir + "WorkingWithDocumentOptionsAndSettings.PageSetupAndSectionFormatting.docx");
+```
+
+The following code example shows how to modify the page properties in all sections:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.Writeln("Section 1");
+doc.AppendChild(new Section(doc));
+builder.Writeln("Section 2");
+doc.AppendChild(new Section(doc));
+builder.Writeln("Section 3");
+doc.AppendChild(new Section(doc));
+builder.Writeln("Section 4");
+
+// It is important to understand that a document can contain many sections,
+// and each section has its page setup. In this case, we want to modify them all.
+foreach (Section section in doc)
+    section.PageSetup.PaperSize = PaperSize.Letter;
+
+doc.Save(ArtifactsDir + "WorkingWithSection.ModifyPageSetupInAllSections.doc");
+```
+
+## See Also {#see-also}
+
+- [Logical Levels of Nodes in a Document](/net/words/logical-levels-of-nodes-in-a-document/#document-and-section-logical-level)
+- [Insert and Append Documents](/net/words/insert-and-append-documents/)
+
+## Limitations and Considerations {#limitations-and-considerations}
+
+- When removing a section break, the section *before* the break adopts the formatting (including page setup, headers, and footers) of the section *after* the break. This is the opposite of what many developers expect. To avoid unintended layout changes, ensure you understand the section order before removal.
+
+- The `EnsureMinimum()` method only ensures the presence of a `Body` and at least one `Paragraph`. It does *not* create `HeaderFooter` nodes.
+
+- `Section.Clone()` copies the section together with its `HeaderFooter` nodes. To insert the copy into another document, import it with `ImportNode` or `NodeImporter`. To stop a section from using the headers and footers of the previous section, call `section.HeadersFooters.LinkToPrevious(false)`.
+
+- When copying sections between documents using `NodeImporter.ImportNode()`, specify `ImportFormatMode.KeepSourceFormatting` to preserve source formatting. Without it, the section may adopt formatting from the target document, potentially causing layout shifts.
+
+- Headers and footers are inherited from the previous section *unless* the current section has its own `HeaderFooter` nodes. To break the inheritance and enable independent editing, create or import a `HeaderFooter` for the desired type (e.g., `HeaderFooterType.HeaderPrimary`) and ensure the section's `PageSetup.DifferentFirstPageHeaderFooter` and `PageSetup.OddAndEvenPagesHeaderFooter` settings match your intent.
+
+- `PageSetup.LayoutMode` (see `SectionLayoutMode`) defines the document grid behavior of a section.
+
+:::info
+For additional details, see the official documentation:
+
+- <a href="https://reference.aspose.com/words/net/aspose.words/section/" target="_blank" rel="nofollow noopener noreferrer">Section Class</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/sectioncollection/" target="_blank" rel="nofollow noopener noreferrer">SectionCollection Class</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/pagesetup/" target="_blank" rel="nofollow noopener noreferrer">PageSetup Class</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/headerfooter/" target="_blank" rel="nofollow noopener noreferrer">HeaderFooter Class</a>
+  :::
+
+***
+
+## FAQ {#faq}
+
+1. **Q:** How can I insert a section break at a specific location in a document?\
+   **A:** Use `DocumentBuilder.InsertBreak` with the desired `BreakType`. Position the builder where you want the break, then call the method. The new section will inherit the formatting of the preceding section unless you modify its `PageSetup` afterwards.
+
+   ```csharp
+   Document doc = new Document();
+   DocumentBuilder builder = new DocumentBuilder(doc);
+   builder.Writeln("First part of the document.");
+   builder.InsertBreak(BreakType.SectionBreakNewPage); // inserts a new section
+   builder.Writeln("Content of the new section.");
+   ```
+
+2. **Q:** How can I copy a section from one document into another document?\
+   **A:** Import the section node using `NodeImporter.ImportNode` with `ImportFormatMode.KeepSourceFormatting`. Then add the imported node to the target document's `Sections` collection.
+
+   ```csharp
+   Document source = new Document("Source.docx");
+   Document target = new Document();
+
+   Section sourceSection = source.Sections[0];
+   Section importedSection = (Section)target.ImportNode(sourceSection, true, ImportFormatMode.KeepSourceFormatting);
+   target.Sections.Add(importedSection);
+
+   target.Save("Target.docx");
+   ```

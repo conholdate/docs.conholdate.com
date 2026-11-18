@@ -1,0 +1,157 @@
+---
+title: "Build a Table from a DataTable"
+sidebar_label: "Build a Table from a DataTable"
+sidebar_key: "net-words-how-to-build-a-table-from-a-datatable"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/how-to-build-a-table-from-a-datatable.html"
+source_commit: ""
+source_sha256: "44b73db42b679d0f2fd4e5aa731ae97a19495a7533c03f2225bcbf9e2e999111"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/net/how-to-build-a-table-from-a-datatable/"
+source_snapshot_sha256: "f50d04184d8347e816b855c4f841f244f7dfac765544ebfb261e1ae9f115397a"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains how to build a table from a DataTable using Aspose.Words.
+:::
+
+Often your application will pull data from a database and store it in the form of a **DataTable**. You can easily insert this data into your document as a new table and quickly apply formatting to the whole table.
+
+:::info
+Note that the preferred way of inserting data from a **DataTable** into a document table is by using [Mail Merge with Regions](/net/words/types-of-mail-merge-operations/#mail-merge-with-regions). The technique presented in this article is only suggested if you are unable to create a suitable template before hand to merge data with, in other words if you require everything to happen programmatically.
+:::
+
+Using Aspose.Words, you can easily retrieve data from a database and store it as a table:
+
+1. Create a new **DocumentBuilder** object on your **Document**.
+2. Start a new table using **DocumentBuilder**.
+3. If we want to insert the names of each of the columns from our **DataTable** as a header row then iterate through each data column and write the column names into a row in the table.
+4. Iterate through each **DataRow** in the **DataTable**:
+   1. Iterate through each object in the **DataRow**.
+   2. Insert the object into the document using **DocumentBuilder**. The method used depends on the type of the object being inserted e.g **DocumentBuilder.Writeln** for text and **DocumentBuilder.InsertImage** for a byte array which represents an image.
+   3. At the end of processing of the **DataRow** also end the row being created by the **DocumentBuilder** by using **DocumentBuilder.EndRow**.
+5. Once all rows from the **DataTable** have been processed finish the table by calling **DocumentBuilder.EndTable**.
+6. Finally we can set the desired table style using one of the appropriate table properties such as **Table.StyleIdentifier** to automatically apply formatting to the entire table.
+
+The **ImportTableFromDataTable** method accepts a **DocumentBuilder** object, the **DataTable** containing the data and a flag which specifies if the column heading from the **DataTable** are included at the top of the table. This method builds a table from these parameters using the builder's current position and formatting. Provides a method to import data from the `DataTable` and insert it into a new table using the DocumentBuilder.
+
+The following data in our **DataTable** is used in this example:
+
+![how-to-build-a-table-from-a-datatable-aspose-words-net](/net/words/images/dd85812c97b68602-how-to-build-a-table-from-a-datatable-1.png)
+
+The following code example shows how to execute the above algorithm in Aspose.Words:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+/// <summary>
+/// Imports the content from the specified DataTable into a new Aspose.Words Table object.
+/// The table is inserted at the document builder's current position and using the current builder's formatting if any is defined.
+/// </summary>
+public Table ImportTableFromDataTable(DocumentBuilder builder, DataTable dataTable,
+    bool importColumnHeadings)
+{
+    Table table = builder.StartTable();
+
+    // Check if the columns' names from the data source are to be included in a header row.
+    if (importColumnHeadings)
+    {
+        // Store the original values of these properties before changing them.
+        bool boldValue = builder.Font.Bold;
+        ParagraphAlignment paragraphAlignmentValue = builder.ParagraphFormat.Alignment;
+
+        // Format the heading row with the appropriate properties.
+        builder.Font.Bold = true;
+        builder.ParagraphFormat.Alignment = ParagraphAlignment.Center;
+
+        // Create a new row and insert the name of each column into the first row of the table.
+        foreach (DataColumn column in dataTable.Columns)
+        {
+            builder.InsertCell();
+            builder.Writeln(column.ColumnName);
+        }
+
+        builder.EndRow();
+
+        // Restore the original formatting.
+        builder.Font.Bold = boldValue;
+        builder.ParagraphFormat.Alignment = paragraphAlignmentValue;
+    }
+
+    foreach (DataRow dataRow in dataTable.Rows)
+    {
+        foreach (object item in dataRow.ItemArray)
+        {
+            // Insert a new cell for each object.
+            builder.InsertCell();
+
+            switch (item.GetType().Name)
+            {
+                case "DateTime":
+                    // Define a custom format for dates and times.
+                    DateTime dateTime = (DateTime) item;
+                    builder.Write(dateTime.ToString("MMMM d, yyyy"));
+                    break;
+                default:
+                    // By default any other item will be inserted as text.
+                    builder.Write(item.ToString());
+                    break;
+            }
+        }
+
+        // After we insert all the data from the current record, we can end the table row.
+        builder.EndRow();
+    }
+
+    // We have finished inserting all the data from the DataTable, we can end the table.
+    builder.EndTable();
+
+    return table;
+}
+```
+
+The method can then be easily called using your **DocumentBuilder** and data.
+
+The following code example shows how to import the data from a `DataTable` and insert it into a new table in the document:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+// We can position where we want the table to be inserted and specify any extra formatting to the table.
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// We want to rotate the page landscape as we expect a wide table.
+doc.FirstSection.PageSetup.Orientation = Orientation.Landscape;
+
+DataSet ds = new DataSet();
+ds.ReadXml(MyDir + "List of people.xml");
+// Retrieve the data from our data source, which is stored as a DataTable.
+DataTable dataTable = ds.Tables[0];
+
+// Build a table in the document from the data contained in the DataTable.
+Table table = ImportTableFromDataTable(builder, dataTable, true);
+
+// We can apply a table style as a very quick way to apply formatting to the entire table.
+table.StyleIdentifier = StyleIdentifier.MediumList2Accent1;
+table.StyleOptions = TableStyleOptions.FirstRow | TableStyleOptions.RowBands | TableStyleOptions.LastColumn;
+
+// For our table, we want to remove the heading for the image column.
+table.FirstRow.LastCell.RemoveAllChildren();
+
+doc.Save(ArtifactsDir + "WorkingWithTables.BuildTableFromDataTable.docx");
+```

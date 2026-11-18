@@ -1,0 +1,66 @@
+---
+title: "Restricting Access to Type Members in C#"
+sidebar_label: "Restricting Access to Type Members in C#"
+sidebar_key: "net-words-restricting-access-to-type-members"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/restricting-access-to-type-members.md"
+source_commit: ""
+source_sha256: "43a9a6d4ff3df24ca9baa3d6c7985680f1b4763d32526cacd590d0ee39924131"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/words/net/restricting-access-to-type-members/"
+source_markdown_url: "https://docs.aspose.com/words/net/restricting-access-to-type-members.md"
+source_snapshot_sha256: "577ff13b5cabbe40171d9ec14b8f794d861842725d93f47207d746293a2f9abf"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Purpose Summary
+
+This page explains how to restrict access to external type members when using the Reporting Engine.
+
+In scenarios where report templates are created by a third party, it can make sense to restrict access of a template author to members of types sensitive from a security point of view. LINQ Reporting Engine provides API to accomplish this as illustrated with the following example. Given that `SomeClass1` and `SomeClass2` are types which members should be inaccessible by the engine through template syntax, you can use the following code snippet to make the engine restrict the access.
+
+```csharp
+ReportingEngine.SetRestrictedTypes(typeof(SomeClass1), typeof(SomeClass2));
+```
+
+After the code is run, on attempt to access any member of types `SomeClass1` and `SomeClass2` through a template, there are two possible outcomes while building a report:
+
+1. By default, the engine throws an exception saying about a syntactic error the same way it does when encounters a missing type member.
+2. If missing type members are allowed, the engine treats every such a member as a null literal (see "Accessing Missing Members of Data Objects" for more information).
+
+**Note** - The engine also restricts access to members of types derived from `SomeClass1` and `SomeClass2` in the same way.
+
+Restricted types can be set only before building the very first report. Once restricted types are checked for the first time while building a report, they cannot be changed after that and an exception is thrown on attempt to do this. That is why, the recommended place to set restricted types is your application's startup.
+
+**Note** - To determine whether access to a particular type member should be restricted, some reflective calls are done by the engine under the hood, so for better performance, it is recommended to keep the set of restricted types minimal by restricting access to members of only those types that are crucial in terms of security.
+
+***
+
+## FAQ
+
+1. **Q:** How do I restrict access to specific type members in the Reporting Engine?\
+   **A:** Call `ReportingEngine.SetRestrictedTypes` and pass the `Type` objects of the classes whose members must be hidden. This method must be invoked before any report is built.
+
+2. **Q:** When is the appropriate time to call `SetRestrictedTypes`?\
+   **A:** It should be executed during application startup, before the first report generation, because the restriction list is locked after the engine processes the first template.
+
+3. **Q:** What happens if a template tries to use a restricted member?\
+   **A:** By default the engine throws a syntax‑error exception, indicating that the member is unavailable. If the engine is configured to allow missing members, the restricted member is treated as `null` instead of throwing.
+
+4. **Q:** Can I modify the list of restricted types after a report has been built?\
+   **A:** No. Once the engine has validated the restricted types during the first report build, any subsequent attempt to change the list results in an exception.
+
+5. **Q:** Does the restriction also apply to classes derived from a restricted type?\
+   **A:** Yes. All members of derived classes are automatically treated as restricted, providing consistent protection across the inheritance hierarchy.

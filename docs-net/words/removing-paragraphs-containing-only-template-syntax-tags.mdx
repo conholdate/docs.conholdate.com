@@ -1,0 +1,178 @@
+---
+title: "Removing Paragraphs with Template Syntax Tags in C#"
+sidebar_label: "Removing Paragraphs with Template Syntax Tags in C#"
+sidebar_key: "net-words-removing-paragraphs-containing-only-template-syntax-tags"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/removing-paragraphs-containing-only-template-syntax-tags.md"
+source_commit: ""
+source_sha256: "b2b204d2758911b5d1e6861d3c0a56b707aa9f8f7a788a82ac2912136b31c0b1"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/words/net/removing-paragraphs-containing-only-template-syntax-tags/"
+source_markdown_url: "https://docs.aspose.com/words/net/removing-paragraphs-containing-only-template-syntax-tags.md"
+source_snapshot_sha256: "2d4991b2d16af28ee61e1e17f9402e6d806c0f1d12f3d19f1c80a2531c51d83d"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Purpose Summary
+
+This page explains how to remove paragraphs that contain only template syntax tags during document generation.
+
+While building a report, some paragraphs containing only template syntax tags can become empty after the tags are removed or replaced with empty values. To remove such paragraphs from the report, you can apply the `ReportBuildOptions.RemoveEmptyParagraphs` option as shown in the following example.
+
+```csharp
+ReportingEngine engine = new ReportingEngine();
+engine.Options |= ReportBuildOptions.RemoveEmptyParagraphs;
+engine.BuildReport(...);
+```
+
+The difference in the engine's behavior when the option is applied and not applied is illustrated by the following examples.
+
+**Example 1**
+
+Template document
+
+```xml
+Prefix
+<<[""]>>
+Suffix
+```
+
+Result document without `ReportBuildOptions.RemoveEmptyParagraphs` applied
+
+```xml
+Prefix
+
+Suffix
+```
+
+Result document with `ReportBuildOptions.RemoveEmptyParagraphs` applied
+
+```xml
+Prefix
+Suffix
+```
+
+**Example 2**
+
+Template document
+
+```xml
+Prefix
+<<if [false]>>
+Text to be removed
+<</if>>
+Suffix
+```
+
+Result document without `ReportBuildOptions.RemoveEmptyParagraphs` applied
+
+```xml
+Prefix
+
+Suffix
+```
+
+Result document with `ReportBuildOptions.RemoveEmptyParagraphs` applied
+
+```xml
+Prefix
+Suffix
+```
+
+**Example 3**
+
+**Note** - In this example, `persons` is assumed to be a data table having a field `Name`.
+
+Template document
+
+```xml
+Prefix
+<<foreach [in persons]>>
+<<[Name]>>
+<</foreach>>
+Suffix
+```
+
+Result document without `ReportBuildOptions.RemoveEmptyParagraphs` applied
+
+```xml
+Prefix
+
+John Doe
+
+Jane Doe
+
+John Smith
+
+Suffix
+```
+
+Result document with `ReportBuildOptions.RemoveEmptyParagraphs` applied
+
+```xml
+Prefix
+John Doe
+Jane Doe
+John Smith
+Suffix
+```
+
+The same functionality can be applied to selective paragraphs only. To achieve this, you can prepend names of corresponding tags with exclamation marks as shown in the following template snippet instead of applying of the `ReportBuildOptions.RemoveEmptyParagraphs` option.
+
+```xml
+<<![...]>>
+<<!doc [...]>>
+<<!foreach [...]>>...<</foreach>>
+<<!if [...]>>...<<elseif [...]>>...<<else>>...<</if>>
+```
+
+For a tag with its name prepended with an exclamation mark, the engine treats a corresponding paragraph or paragraphs as if `ReportBuildOptions.RemoveEmptyParagraphs` was applied. For the rest of tags, the engine behaves as if `ReportBuildOptions.RemoveEmptyParagraphs` was not applied.
+
+## Limitations and Considerations
+
+- The `ReportBuildOptions.RemoveEmptyParagraphs` option works at the paragraph level and only removes paragraphs that consist solely of a template tag (or tag with an exclamation mark). If a paragraph contains invisible characters such as spaces, tabs, or line breaks besides the tag, it will not be removed. Remove any extra whitespace from the template to allow the paragraph to be deleted.
+
+- The option applies globally to all paragraphs in the document when set on `ReportingEngine.Options`. To apply the removal selectively to specific tags, prepend the tag name with an exclamation mark (`!`). For example, use `<<!foreach [in persons]>>` to remove paragraphs containing only that specific tag.
+
+- The option can be combined with other `ReportBuildOptions` using the bitwise OR operator, e.g., `engine.Options |= ReportBuildOptions.RemoveEmptyParagraphs | ReportBuildOptions.AllowMissingMembers;`.
+
+- When applied to table cells containing only a template tag, the option removes the entire paragraph (and thus the cell content), which may collapse the row if it becomes empty. The option does not delete the table structure itself.
+
+***
+
+## FAQ
+
+1. **Q:** How do I enable automatic removal of empty paragraphs that contain only template tags?\
+   **A:** Set the `ReportBuildOptions.RemoveEmptyParagraphs` flag on the `ReportingEngine.Options` property before building the report. Example:
+   ```csharp
+   ReportingEngine engine = new ReportingEngine();
+   engine.Options |= ReportBuildOptions.RemoveEmptyParagraphs;
+   engine.BuildReport(...);
+   ```
+
+2. **Q:** Can I apply the empty‑paragraph removal to only specific tags instead of the whole document?\
+   **A:** Yes. Prefix the tag name with an exclamation mark (`!`) in the template. The engine will treat paragraphs containing those tags as empty and remove them, while leaving other tags unaffected. Example: `<<!foreach [in persons]>>`.
+
+3. **Q:** Why does a paragraph remain after I enabled `RemoveEmptyParagraphs`?\
+   **A:** The paragraph may contain invisible characters such as spaces, tabs, or line‑breaks besides the tag. The option removes a paragraph only when it consists solely of the tag (or tag with an exclamation mark). Remove any extra whitespace from the template to allow the paragraph to be deleted.
+
+4. **Q:** Can `ReportBuildOptions.RemoveEmptyParagraphs` be combined with other `ReportBuildOptions`?\
+   **A:** Absolutely. Use the bitwise OR operator to combine multiple options, e.g.,
+   ```csharp
+   engine.Options |= ReportBuildOptions.RemoveEmptyParagraphs | ReportBuildOptions.AllowMissingMembers;
+   ```
+
+5. **Q:** Does the empty‑paragraph removal affect tables or other container elements?\
+   **A:** The option works at the paragraph level. If a table cell contains only a tag that becomes empty, the entire paragraph (and thus the cell content) is removed, which may collapse the row if it becomes empty. It does not delete the table structure itself.

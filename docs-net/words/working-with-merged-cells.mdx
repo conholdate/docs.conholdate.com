@@ -1,0 +1,377 @@
+---
+title: "Merge Table Cells"
+sidebar_label: "Merge Table Cells"
+sidebar_key: "net-words-working-with-merged-cells"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/working-with-merged-cells.html"
+source_commit: ""
+source_sha256: "143183897236f4159d7926896a043727b04fb92be79f37330c15678b38cbde2a"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/net/working-with-merged-cells/"
+source_snapshot_sha256: "193567100b1ca422a3ac132a0160ebcea4f4636c0503b70083cffee64b14ee80"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains how to work with merged table cells.
+:::
+
+Sometimes certain rows in a table require a heading or large blocks of text that take up the full width of the table. For proper design of the table, the user can merge several table cells into one. Aspose.Words supports merged cells when working with all input formats, including importing HTML content.
+
+## How to Merge Table Cells {#how-to-merge-table-cells}
+
+In Aspose.Words, merged cells are represented by the following properties of the <a href="https://reference.aspose.com/words/net/aspose.words.tables/cellformat/" target="_blank" rel="nofollow noopener noreferrer">CellFormat</a> class:
+
+- <a href="https://reference.aspose.com/words/net/aspose.words.tables/cellformat/horizontalmerge/" target="_blank" rel="nofollow noopener noreferrer">HorizontalMerge</a> which describes if the cell is a part of a horizontal merge of cells
+- <a href="https://reference.aspose.com/words/net/aspose.words.tables/cellformat/verticalmerge/" target="_blank" rel="nofollow noopener noreferrer">VerticalMerge</a> which describes if the cell is a part of a vertical merge of cells
+
+The values of these properties determine the merge behavior of cells:
+
+- The first cell in a sequence of merged cells will have <a href="https://reference.aspose.com/words/net/aspose.words.tables/cellmerge/" target="_blank" rel="nofollow noopener noreferrer">CellMerge.First</a>
+- Any subsequently merged cells will have <a href="https://reference.aspose.com/words/net/aspose.words.tables/cellmerge/" target="_blank" rel="nofollow noopener noreferrer">CellMerge.Previous</a>
+- A cell that is not merged will have <a href="https://reference.aspose.com/words/net/aspose.words.tables/cellmerge/" target="_blank" rel="nofollow noopener noreferrer">CellMerge.None</a>
+
+:::info
+Sometimes, when loading existing document cells in a table, they will appear merged. However, it can actually be one long cell - sometimes Microsoft Word exports merged cells this way. This can be confusing when attempting to work with individual cells, but there doesn't seem to be any particular pattern as to when this happens.
+:::
+
+## Check if Cell is Merged {#check-if-cell-is-merged}
+
+To check if a cell is part of a sequence of merged cells, we simply check the **HorizontalMerge** and **VerticalMerge** properties.
+
+The following code example shows how to print the horizontal and vertical cell merge type:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Table with merged cells.docx");
+
+Table table = (Table) doc.GetChild(NodeType.Table, 0, true);
+
+foreach (Row row in table.Rows)
+{
+    foreach (Cell cell in row.Cells)
+    {
+        Console.WriteLine(PrintCellMergeType(cell));
+    }
+}
+```
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-.NET/blob/master/Examples/Data/Table%20with%20merged%20cells.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+## Merge Table Cells When Using DocumentBuilder {#merge-table-cells-when-using-documentbuilder}
+
+To merge cells in a table created with the <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder</a>, you need to set the appropriate merge type for each cell where the merge is expected - first **CellMerge.First** and then **CellMerge.Previous**.
+
+Also, you must remember to clear the merge setting for those cells where no merge is required - this can be done by setting the first non-merge cell to **CellMerge.None**. If this is not done, all cells in the table will be merged.
+
+The following code example shows how to create a table with two rows where the cells in the first row are merged horizontally:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.InsertCell();
+builder.CellFormat.HorizontalMerge = CellMerge.First;
+builder.Write("Text in merged cells.");
+
+builder.InsertCell();
+// This cell is merged to the previous and should be empty.
+builder.CellFormat.HorizontalMerge = CellMerge.Previous;
+builder.EndRow();
+
+builder.InsertCell();
+builder.CellFormat.HorizontalMerge = CellMerge.None;
+builder.Write("Text in one cell.");
+
+builder.InsertCell();
+builder.Write("Text in another cell.");
+builder.EndRow();
+builder.EndTable();
+            
+doc.Save(ArtifactsDir + "WorkingWithTables.HorizontalMerge.docx");
+```
+
+The following code example shows how to create a two-column table where the cells in the first column are vertically merged:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.InsertCell();
+builder.CellFormat.VerticalMerge = CellMerge.First;
+builder.Write("Text in merged cells.");
+
+builder.InsertCell();
+builder.CellFormat.VerticalMerge = CellMerge.None;
+builder.Write("Text in one cell");
+builder.EndRow();
+
+builder.InsertCell();
+// This cell is vertically merged to the cell above and should be empty.
+builder.CellFormat.VerticalMerge = CellMerge.Previous;
+
+builder.InsertCell();
+builder.CellFormat.VerticalMerge = CellMerge.None;
+builder.Write("Text in another cell");
+builder.EndRow();
+builder.EndTable();
+            
+doc.Save(ArtifactsDir + "WorkingWithTables.VerticalMerge.docx");
+```
+
+## Merge Table Cells in Other Cases {#merge-table-cells-in-other-cases}
+
+In other situations where the **DocumentBuilder** is not used, such as in an existing table, merging cells in the previous way may not be as easy. Instead, we can wrap the basic operations involved in applying merge properties to cells in a method that makes the task much easier. This method is similar to the Merge automation method, which is called to merge a range of cells in a table.
+
+The code below will merge the table cells in the specified range, starting at the given cell and ending at the end cell. In this case, the range can span multiple rows or columns:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+internal void MergeCells(Cell startCell, Cell endCell)
+{
+    Table parentTable = startCell.ParentRow.ParentTable;
+
+    // Find the row and cell indices for the start and end cell.
+    Point startCellPos = new Point(startCell.ParentRow.IndexOf(startCell),
+        parentTable.IndexOf(startCell.ParentRow));
+    Point endCellPos = new Point(endCell.ParentRow.IndexOf(endCell), parentTable.IndexOf(endCell.ParentRow));
+
+    // Create a range of cells to be merged based on these indices.
+    // Inverse each index if the end cell is before the start cell.
+    Rectangle mergeRange = new Rectangle(Math.Min(startCellPos.X, endCellPos.X),
+        Math.Min(startCellPos.Y, endCellPos.Y),
+        Math.Abs(endCellPos.X - startCellPos.X) + 1, Math.Abs(endCellPos.Y - startCellPos.Y) + 1);
+
+    foreach (Row row in parentTable.Rows)
+    {
+        foreach (Cell cell in row.Cells)
+        {
+            Point currentPos = new Point(row.IndexOf(cell), parentTable.IndexOf(row));
+
+            // Check if the current cell is inside our merge range, then merge it.
+            if (mergeRange.Contains(currentPos))
+            {
+                cell.CellFormat.HorizontalMerge = currentPos.X == mergeRange.X ? CellMerge.First : CellMerge.Previous;
+
+                cell.CellFormat.VerticalMerge = currentPos.Y == mergeRange.Y ? CellMerge.First : CellMerge.Previous;
+            }
+        }
+    }
+}
+```
+
+The following code example shows how to merge a range of cells between two specified cells:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Table with merged cells.docx");
+
+Table table = doc.FirstSection.Body.Tables[0];
+
+// We want to merge the range of cells found inbetween these two cells.
+Cell cellStartRange = table.Rows[0].Cells[0];
+Cell cellEndRange = table.Rows[1].Cells[1];
+
+// Merge all the cells between the two specified cells into one.
+MergeCells(cellStartRange, cellEndRange);
+            
+doc.Save(ArtifactsDir + "WorkingWithTables.MergeCellRange.docx");
+```
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-.NET/blob/master/Examples/Data/Table%20with%20merged%20cells.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+Depending on the version of the .NET Framework you are using, you may want to refine this method by turning it into an extension method. In this case, you can call this method directly on a cell to merge a range of cells, such as `cell1.Merge(cell2)`.
+
+## Vertical and Horizontal Merged Cells in HTML Table {#vertical-and-horizontal-merged-cells-in-html-table}
+
+As we have said in previous articles, a table in Microsoft Word is a set of independent rows. Each row has a set of cells that are independent of the cells of other rows. Thus, in the Microsoft Word table there is no such object as a "column", and "1st column" is something like "the set of the 1st cells of each row in the table". This allows users to have a table in which, for example, the 1st row consists of two cells - 2cm and 1cm, and the 2nd row consists of two different cells - 1cm and 2cm wide. And Aspose.Words supports this concept of tables.
+
+A table in HTML has a essentially different structure: each row has the same number of cells and (it is important for the task) each cell has the width of the corresponding column, the same for all cells in one column. So if **HorizontalMerge** and **VerticalMerge** return an incorrect value, use the following code example:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Table with merged cells.docx");
+
+SpanVisitor visitor = new SpanVisitor(doc);
+doc.Accept(visitor);
+```
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+/// <summary>
+/// Helper class that contains collection of rowinfo for each row.
+/// </summary>
+public class TableInfo
+{
+    public List<RowInfo> Rows { get; } = new List<RowInfo>();
+}
+
+/// <summary>
+/// Helper class that contains collection of cellinfo for each cell.
+/// </summary>
+public class RowInfo
+{
+    public List<CellInfo> Cells { get; } = new List<CellInfo>();
+}
+
+/// <summary>
+/// Helper class that contains info about cell. currently here is only colspan and rowspan.
+/// </summary>
+public class CellInfo
+{
+    public CellInfo(int colSpan, int rowSpan)
+    {
+        ColSpan = colSpan;
+        RowSpan = rowSpan;
+    }
+
+    public int ColSpan { get; }
+    public int RowSpan { get; }
+}
+
+public class SpanVisitor : DocumentVisitor
+{
+    /// <summary>
+    /// Creates new SpanVisitor instance.
+    /// </summary>
+    /// <param name="doc">
+    /// Is document which we should parse.
+    /// </param>
+    public SpanVisitor(Document doc)
+    {
+        mWordTables = doc.GetChildNodes(NodeType.Table, true);
+
+        // We will parse HTML to determine the rowspan and colspan of each cell.
+        MemoryStream htmlStream = new MemoryStream();
+
+        Aspose.Words.Saving.HtmlSaveOptions options = new Aspose.Words.Saving.HtmlSaveOptions
+        {
+            ImagesFolder = Path.GetTempPath()
+        };
+
+        doc.Save(htmlStream, options);
+
+        // Load HTML into the XML document.
+        XmlDocument xmlDoc = new XmlDocument();
+        htmlStream.Position = 0;
+        xmlDoc.Load(htmlStream);
+
+        // Get collection of tables in the HTML document.
+        XmlNodeList tables = xmlDoc.DocumentElement.GetElementsByTagName("table");
+
+        foreach (XmlNode table in tables)
+        {
+            TableInfo tableInf = new TableInfo();
+            // Get collection of rows in the table.
+            XmlNodeList rows = table.SelectNodes("tr");
+
+            foreach (XmlNode row in rows)
+            {
+                RowInfo rowInf = new RowInfo();
+                // Get collection of cells.
+                XmlNodeList cells = row.SelectNodes("td");
+
+                foreach (XmlNode cell in cells)
+                {
+                    // Determine row span and colspan of the current cell.
+                    XmlAttribute colSpanAttr = cell.Attributes["colspan"];
+                    XmlAttribute rowSpanAttr = cell.Attributes["rowspan"];
+
+                    int colSpan = colSpanAttr == null ? 0 : int.Parse(colSpanAttr.Value);
+                    int rowSpan = rowSpanAttr == null ? 0 : int.Parse(rowSpanAttr.Value);
+
+                    CellInfo cellInf = new CellInfo(colSpan, rowSpan);
+                    rowInf.Cells.Add(cellInf);
+                }
+
+                tableInf.Rows.Add(rowInf);
+            }
+
+            mTables.Add(tableInf);
+        }
+    }
+
+    public override VisitorAction VisitCellStart(Cell cell)
+    {
+        int tabIdx = mWordTables.IndexOf(cell.ParentRow.ParentTable);
+        int rowIdx = cell.ParentRow.ParentTable.IndexOf(cell.ParentRow);
+        int cellIdx = cell.ParentRow.IndexOf(cell);
+
+        int colSpan = 0;
+        int rowSpan = 0;
+        if (tabIdx < mTables.Count &&
+            rowIdx < mTables[tabIdx].Rows.Count &&
+            cellIdx < mTables[tabIdx].Rows[rowIdx].Cells.Count)
+        {
+            colSpan = mTables[tabIdx].Rows[rowIdx].Cells[cellIdx].ColSpan;
+            rowSpan = mTables[tabIdx].Rows[rowIdx].Cells[cellIdx].RowSpan;
+        }
+
+        Console.WriteLine("{0}.{1}.{2} colspan={3}\t rowspan={4}", tabIdx, rowIdx, cellIdx, colSpan, rowSpan);
+
+        return VisitorAction.Continue;
+    }
+
+    private readonly List<TableInfo> mTables = new List<TableInfo>();
+    private readonly NodeCollection mWordTables;
+}
+```
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-.NET/blob/master/Examples/Data/Table%20with%20merged%20cells.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+## Convert to Horizontally Merged Cells {#convert-to-horizontally-merged-cells}
+
+Sometimes it is not possible to detect which cells are merged because some newer versions of Microsoft Word no longer use the merge flags when cells are merged horizontally. But for situations where cells are merged into a cell horizontally by their width using merge flags, Aspose.Words provides the `ConvertToHorizontallyMergedCells` method to convert cells. This method simply transforms the table and adds new cells as needed.
+
+The following code example shows the above method in operation:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Table with merged cells.docx");
+
+Table table = doc.FirstSection.Body.Tables[0];
+// Now merged cells have appropriate merge flags.
+table.ConvertToHorizontallyMergedCells();
+```
+
+***
+
+## FAQ {#faq}
+
+1. **Q:** How do I merge cells horizontally using `DocumentBuilder`?\
+   **A:** Set the first cell's `CellFormat.HorizontalMerge` to `CellMerge.First`, then set each subsequent cell in the range to `CellMerge.Previous`. After the merged range, reset the next cell's `HorizontalMerge` to `CellMerge.None` so that later cells are not unintentionally merged.
+
+2. **Q:** How can I determine whether a particular cell is part of a merged range?\
+   **A:** Inspect the cell's `CellFormat.HorizontalMerge` and `CellFormat.VerticalMerge` properties. They will return `CellMerge.First` for the leading cell, `CellMerge.Previous` for following cells, and `CellMerge.None` if the cell is not merged.
+
+3. **Q:** Why do all cells in my table become merged after I merge a single range?\
+   **A:** This usually happens because the cell immediately after the merged range still has its merge flag set to `CellMerge.Previous`. Reset that cell's `HorizontalMerge` (or `VerticalMerge`) to `CellMerge.None` to stop the propagation.
+
+4. **Q:** Can I merge a rectangular block of cells without using `DocumentBuilder`?\
+   **A:** Yes. Create a helper method that sets the appropriate `HorizontalMerge` and `VerticalMerge` flags on the start and end cells of the block. The method can be turned into an extension method, e.g., `cell1.Merge(cell2)`, to simplify future calls.
+
+5. **Q:** What should I do when cells appear merged in a loaded document but the merge flags are missing?\
+   **A:** Use the `Table.ConvertToHorizontallyMergedCells` method. It analyses cell widths and inserts the necessary merge flags, converting the visual merge into proper logical merged cells.

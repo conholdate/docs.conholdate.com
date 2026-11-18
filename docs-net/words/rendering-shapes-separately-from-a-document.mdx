@@ -1,0 +1,213 @@
+---
+title: "Rendering Shapes Separately from a Document"
+sidebar_label: "Rendering Shapes Separately from a Document"
+sidebar_key: "net-words-rendering-shapes-separately-from-a-document"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/rendering-shapes-separately-from-a-document.html"
+source_commit: ""
+source_sha256: "5d1c062af86d7d3f3259c516544bde77a0d01d8032e675489400d8b84d2200ef"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/net/rendering-shapes-separately-from-a-document/"
+source_snapshot_sha256: "ce6d2c4be1352d63cfcf257cfc2147791ba9a1179822c2b12a565e0846e09b7f"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains how to render shapes separately from the rest of the document.
+:::
+
+When processing documents, a common task is to extract all images found in the document and export them to an external location. This task becomes simple with the Aspose.Words API, which already provides the functionality for extracting and saving image data. However, sometimes you may want to similarly extract other types of graphic content that is represented by a different type of drawing object, for example, a text box containing paragraphs, arrow shapes, and a small image. There is no straightforward way of rendering this object since it is a combination of individual content elements. You may also encounter a case when the contents have been grouped together into the object that looks like a single image.
+
+Aspose.Words provides functionality for extracting this type of content in the same way you can extract a simple image from a shape as rendered content. This article describes how to utilize this functionality to render shapes independently of the document.
+
+## Shape Types in Aspose.Words {#shape-types-in-asposewords}
+
+All the content in a document drawing layer is represented by the <a href="https://reference.aspose.com/words/net/aspose.words.drawing/shape/" target="_blank" rel="nofollow noopener noreferrer">Shape</a> or <a href="https://reference.aspose.com/words/net/aspose.words.drawing/groupshape/" target="_blank" rel="nofollow noopener noreferrer">GroupShape</a> node in the Aspose.Words Document Object Module (DOM). Such contents can be text boxes, images, AutoShapes, OLE objects, etc. Some fields are also imported as shapes, for example, the `INCLUDEPICTURE` field.
+
+A simple image is represented by a **Shape** node of <a href="https://reference.aspose.com/words/net/aspose.words.drawing/shapetype/" target="_blank" rel="nofollow noopener noreferrer">ShapeType.Image</a>. This shape node has no child nodes but the image data contained within this shape node can be accessed by the <a href="https://reference.aspose.com/words/net/aspose.words.drawing/shape/imagedata/" target="_blank" rel="nofollow noopener noreferrer">Shape.ImageData</a> property. On the other hand, a shape can also be made up of many child nodes. For instance, a text box shape, which is represented by the <a href="https://reference.aspose.com/words/net/aspose.words.drawing/shapetype/" target="_blank" rel="nofollow noopener noreferrer">ShapeType.TextBox</a> property, can be made up of many nodes, such as <a href="https://reference.aspose.com/words/net/aspose.words/paragraph/" target="_blank" rel="nofollow noopener noreferrer">Paragraph</a> and <a href="https://reference.aspose.com/words/net/aspose.words.tables/table/" target="_blank" rel="nofollow noopener noreferrer">Table</a>. Most shapes can include the **Paragraph** and **Table** block-level nodes. These are the same nodes as those appearing in the main body. Shapes are always parts of some paragraph, either included directly inline or anchored to the **Paragraph,** but "floating" anywhere in the document page.
+
+![rendering-shapes-separately-from-a-document_1](/net/words/images/2ea6a9ac7dbdbc51-rendering-shapes-separately-from-a-document-1.png)
+
+A document can also contain shapes which are grouped together. Grouping can be enabled in Microsoft Word by selecting multiple objects and clicking "Group" in the right‑click menu.
+
+![rendering-shapes-separately-from-a-document_2](/net/words/images/b2e6bef302c083d9-rendering-shapes-separately-from-a-document-2.png)
+
+In Aspose.Words, these groups of shapes are represented by the <a href="https://reference.aspose.com/words/net/aspose.words.drawing/groupshape/" target="_blank" rel="nofollow noopener noreferrer">GroupShape</a> node. These can also be invoked in the same way to render the entire group to image.
+
+![rendering-shapes-separately-from-a-document_3](/net/words/images/3032a6731661a90e-rendering-shapes-separately-from-a-document-3.png)
+
+The DOCX format can contain special types of images, such as diagrams or charts. These shapes are also represented through the **Shape** node in Aspose.Words, which also provides a similar method for rendering them as images. By design, a shape cannot contain another shape as a child, unless that shape is an image (**ShapeType.Image**). For example, Microsoft Word does not allow you to insert a text box inside another text box.
+
+The shape types described above provide a special method to render the shapes through the <a href="https://reference.aspose.com/words/net/aspose.words.rendering/shaperenderer/" target="_blank" rel="nofollow noopener noreferrer">ShapeRenderer</a> class. An instance of the **ShapeRenderer** class is retrieved for a **Shape** or **GroupShape** through the **GetShapeRenderer** method or by passing the **Shape** to the constructor of the **ShapeRenderer** class. This class provides access to members, which allow rendering a shape to the following:
+
+- File on the disk using the <a href="https://reference.aspose.com/words/net/aspose.words.rendering/noderendererbase/save/" target="_blank" rel="nofollow noopener noreferrer">Save</a> method overload
+- Stream using the <a href="https://reference.aspose.com/words/net/aspose.words.rendering/noderendererbase/save/" target="_blank" rel="nofollow noopener noreferrer">Save</a> method overload
+- .NET Graphics Object by using the <a href="https://reference.aspose.com/words/net/aspose.words.rendering/noderendererbase/rendertosize/" target="_blank" rel="nofollow noopener noreferrer">RenderToSize</a> and <a href="https://reference.aspose.com/words/net/aspose.words.rendering/noderendererbase/rendertoscale/" target="_blank" rel="nofollow noopener noreferrer">RenderToScale</a> methods
+
+:::info
+When rendering a **Shape**, it must be a part of the document hierarchy. If the **Shape** is not a part of the document tree then the rendered output will be blank after invoking **ShapeRenderer** methods.
+:::
+
+## Rendering to File or Stream {#rendering-to-file-or-stream}
+
+The <a href="https://reference.aspose.com/words/net/aspose.words.rendering/noderendererbase/save/" target="_blank" rel="nofollow noopener noreferrer">Save</a> method provides overloads that render a shape directly to a file or stream. Both overloads accept an instance of the <a href="https://reference.aspose.com/words/net/aspose.words.saving/imagesaveoptions/" target="_blank" rel="nofollow noopener noreferrer">ImageSaveOptions</a> class, which allows to define options for rendering the shape. This works in the same way as the <a href="https://reference.aspose.com/words/net/aspose.words/document/save/#save" target="_blank" rel="nofollow noopener noreferrer">Document.Save</a> method. Even though this parameter is required, you can pass a null value, specifying that there are no custom options.
+
+The shape can be exported in any image format specified in the <a href="https://reference.aspose.com/words/net/aspose.words/saveformat/" target="_blank" rel="nofollow noopener noreferrer">SaveFormat</a> enumeration. For example, the image can be rendered as a raster image, such as JPEG by specifying the <a href="https://reference.aspose.com/words/net/aspose.words/saveformat/" target="_blank" rel="nofollow noopener noreferrer">SaveFormat.Jpeg</a> enumeration, or as a vector image, such as EMF by specifying the <a href="https://reference.aspose.com/words/net/aspose.words/saveformat/" target="_blank" rel="nofollow noopener noreferrer">SaveFormat.Emf</a>.
+
+The code example below illustrates rendering a shape to an EMF image separately from document, and saving to disk:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+ShapeRenderer render = shape.GetShapeRenderer();
+ImageSaveOptions imageOptions = new ImageSaveOptions(SaveFormat.Emf)
+{
+    Scale = 1.5f
+};
+
+render.Save(ArtifactsDir + "RenderShape.RenderShapeAsEmf.emf", imageOptions);
+```
+
+The code example below illustrates rendering a shape to a JPEG image separately from document, and saving to a stream:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+ShapeRenderer render = new ShapeRenderer(shape);
+ImageSaveOptions imageOptions = new ImageSaveOptions(SaveFormat.Jpeg)
+{
+    // Output the image in gray scale
+    ImageColorMode = ImageColorMode.Grayscale,
+    // Reduce the brightness a bit (default is 0.5f)
+    ImageBrightness = 0.45f
+};
+
+using (FileStream stream = new FileStream(ArtifactsDir + "RenderShape.RenderShapeAsJpeg.jpg", FileMode.Create))
+{
+    render.Save(stream, imageOptions);
+}
+```
+
+The **ImageSaveOptions** class allows you to specify a variety of options that control how the image is rendered. The functionality described above can be applied in the same manner to the **GroupShape** and **Shape** nodes.
+
+## Rendering to a .NET Graphics Object {#rendering-to-a-net-graphics-object}
+
+Rendering directly to a **Graphics** object allows you to define your own settings and the state for the **Graphics** object. A common scenario involves rendering a shape directly into a **Graphics** object retrieved from a Windows Form or a Bitmap. When the **Shape** node is rendered, the settings will affect the shape appearance. For example, you can rotate or scale the shape by using the **RotateTransform** or **ScaleTransform** methods for the **Graphics** object.
+
+The example below shows how to render a shape to a .**NET Graphics** object separately from the document and apply rotation to the rendered image:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+public void RenderShapeToGraphics()
+{
+    Document doc = new Document(MyDir + "Rendering.docx");
+    
+    Shape shape = (Shape) doc.GetChild(NodeType.Shape, 0, true);
+    ShapeRenderer render = shape.GetShapeRenderer();
+
+    // Find the size that the shape will be rendered to at the specified scale and resolution.
+    Size shapeSizeInPixels = render.GetSizeInPixels(1.0f, 96.0f);
+    // Rotating the shape may result in clipping as the image canvas is too small. Find the longest side
+    // and make sure that the graphics canvas is large enough to compensate for this.
+    int maxSide = System.Math.Max(shapeSizeInPixels.Width, shapeSizeInPixels.Height);
+
+    using (Bitmap image = new Bitmap((int) (maxSide * 1.25), (int) (maxSide * 1.25)))
+    {
+        // Rendering to a graphics object means we can specify settings and transformations to be applied to the rendered shape.
+        // In our case we will rotate the rendered shape.
+        using (Graphics graphics = Graphics.FromImage(image))
+        {
+            // Clear the shape with the background color of the document.
+            graphics.Clear(shape.Document.PageColor);
+            // Center the rotation using the translation method below.
+            graphics.TranslateTransform((float) image.Width / 8, (float) image.Height / 2);
+            // Rotate the image by 45 degrees.
+            graphics.RotateTransform(45);
+            // Undo the translation.
+            graphics.TranslateTransform(-(float) image.Width / 8, -(float) image.Height / 2);
+
+            // Render the shape onto the graphics object.
+            render.RenderToSize(graphics, 0, 0, shapeSizeInPixels.Width, shapeSizeInPixels.Height);
+        }
+
+        image.Save(ArtifactsDir + "RenderShape.RenderShapeToGraphics.png", ImageFormat.Png);
+    }
+}
+```
+
+Similarly, to the <a href="https://reference.aspose.com/words/net/aspose.words/document/rendertosize/" target="_blank" rel="nofollow noopener noreferrer">RenderToSize</a> method, the <a href="https://reference.aspose.com/words/net/aspose.words.rendering/noderendererbase/rendertosize/" target="_blank" rel="nofollow noopener noreferrer">RenderToSize</a> method inherited from the <a href="https://reference.aspose.com/words/net/aspose.words.rendering/noderendererbase/" target="_blank" rel="nofollow noopener noreferrer">NodeRendererBase</a> is useful for creating thumbnails of a document content. The shape size is specified through the constructor. The **RenderToSize** method accepts the **Graphics** object, the X and Y coordinates of the image position, and the size of the image (width and height) that will be drawn onto the **Graphics** object.
+
+The **Shape** can be rendered to a certain scale using the <a href="https://reference.aspose.com/words/net/aspose.words.rendering/noderendererbase/rendertoscale/" target="_blank" rel="nofollow noopener noreferrer">ShapeRenderer.RenderToScale</a> method inherited from the <a href="https://reference.aspose.com/words/net/aspose.words.rendering/noderendererbase/" target="_blank" rel="nofollow noopener noreferrer">NodeRendererBase</a> class. This is similar to the <a href="https://reference.aspose.com/words/net/aspose.words/document/rendertoscale/" target="_blank" rel="nofollow noopener noreferrer">Document.RenderToScale</a> method that accepts the same major parameters. The difference between these two methods is that with the **ShapeRenderer.RenderToScale** method, instead of a literal size, you choose a float value that scales the shape during its rendering. If the float value equals 1.0 causes the shape to be rendered at 100% of its original size. A float value of 0.5 will reduce the image size by half.
+
+## Rendering a Shape Image {#rendering-a-shape-image}
+
+The <a href="https://reference.aspose.com/words/net/aspose.words.drawing/shape/" target="_blank" rel="nofollow noopener noreferrer">Shape</a> class represents objects in the drawing layer, such as an AutoShape, text box, freeform, OLE object, ActiveX control, or a picture. Using the **Shape** class, you can create or modify shapes in a Microsoft Word document. An important property of a shape is its <a href="https://reference.aspose.com/words/net/aspose.words.drawing/shapebase/shapetype/" target="_blank" rel="nofollow noopener noreferrer">ShapeType</a>. Shapes of different types can have different capabilities in a Word document. For example, only image and OLE shapes can have images inside them while most of the shapes can have text only.
+
+The following example shows how to render a Shape image to a JPEG image separately from the document and save it to the disk:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+shape.GetShapeRenderer().Save(ArtifactsDir + "RenderShape.RenderShapeImage.jpg", new ImageSaveOptions(SaveFormat.Jpeg));
+```
+
+## Retrieving a Shape Size {#retrieving-a-shape-size}
+
+The <a href="https://reference.aspose.com/words/net/aspose.words.rendering/shaperenderer/" target="_blank" rel="nofollow noopener noreferrer">ShapeRenderer</a> class also provides functionality to retrieve the size of the shape in pixels through the <a href="https://reference.aspose.com/words/net/aspose.words.rendering/noderendererbase/getsizeinpixels/" target="_blank" rel="nofollow noopener noreferrer">GetSizeInPixels</a> method. This method accepts two float (Single) parameters - the scale and DPI, which are used in calculation of the shape size when the shape is rendered. The method returns the <a href="https://reference.aspose.com/words/net/aspose.words.rendering/noderendererbase/getsizeinpixels/" target="_blank" rel="nofollow noopener noreferrer">Size</a> object, which contains the width and height of the calculated size. This is useful when it is required to know the size of the rendered shape in advance, for example when creating a new Bitmap from the rendered output.
+
+The below example shows how to create a new Bitmap and Graphics object with the width and height of the shape to be rendered:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Size shapeRenderedSize = shape.GetShapeRenderer().GetSizeInPixels(1.0f, 96.0f);
+
+using (Bitmap image = new Bitmap(shapeRenderedSize.Width, shapeRenderedSize.Height))
+{
+    using (Graphics graphics = Graphics.FromImage(image))
+    {
+        // Render shape onto the graphics object using the RenderToScale
+        // or RenderToSize methods of ShapeRenderer class.
+    }
+}
+```
+
+When using the **RenderToSize** or **RenderToScale** methods, the rendered image size is also returned in the <a href="https://reference.aspose.com/words/net/aspose.words.rendering/noderendererbase/rendertoscale/" target="_blank" rel="nofollow noopener noreferrer">SizeF</a> object. This can be assigned to a variable and used if necessary.
+
+The **SizeInPoints** property returns the Shape size measured in points (see <a href="https://reference.aspose.com/words/net/aspose.words.rendering/shaperenderer/" target="_blank" rel="nofollow noopener noreferrer">ShapeRenderer</a>. The result is a `SizeF` object containing the width and height.
+
+## Related APIs {#related-apis}
+
+- **<a href="https://reference.aspose.com/words/net/aspose.words.drawing/shape/" target="_blank" rel="nofollow noopener noreferrer">Shape</a>** - Represents objects in the drawing layer such as AutoShapes, text boxes, and pictures
+- **<a href="https://reference.aspose.com/words/net/aspose.words.drawing/groupshape/" target="_blank" rel="nofollow noopener noreferrer">GroupShape</a>** - Represents a group of shapes that can be rendered together
+- **<a href="https://reference.aspose.com/words/net/aspose.words.rendering/shaperenderer/" target="_blank" rel="nofollow noopener noreferrer">ShapeRenderer</a>** - Provides methods for rendering shapes to files, streams, or Graphics objects
+- **<a href="https://reference.aspose.com/words/net/aspose.words.saving/imagesaveoptions/" target="_blank" rel="nofollow noopener noreferrer">ImageSaveOptions</a>** - Controls rendering options when saving shapes as images
+- **<a href="https://reference.aspose.com/words/net/aspose.words.rendering/noderendererbase/" target="_blank" rel="nofollow noopener noreferrer">NodeRendererBase</a>** - Base class providing common rendering functionality including `RenderToSize` and `RenderToScale` methods
+
+## FAQ {#faq}
+
+1. **Q:** Which image formats can I use when saving a shape with `ShapeRenderer.Save`?\
+   **A:** Any format supported by the `SaveFormat` enumeration can be used, such as JPEG, PNG, BMP, GIF, TIFF, EMF, and SVG. Specify the desired format through `ImageSaveOptions.SaveFormat`.
+
+2. **Q:** How do I render a shape to a memory stream instead of a file?\
+   **A:** Call `ShapeRenderer.Save(Stream, ImageSaveOptions)` and pass a `MemoryStream` instance. You may provide `null` for `ImageSaveOptions` to use default settings, then retrieve the byte array from the stream.
+
+3. **Q:** How can I determine the size of a shape before rendering it?\
+   **A:** Use `ShapeRenderer.GetSizeInPixels(float scale, float dpi)` to obtain the width and height in pixels, or read `ShapeRenderer.SizeInPoints` for size in points. This helps you create a correctly sized `Bitmap` or `Graphics` object.
+
+4. **Q:** Can a `GroupShape` be rendered the same way as a single `Shape`?\
+   **A:** Yes. Obtain a `ShapeRenderer` for the `GroupShape` via `GroupShape.GetShapeRenderer()` or the constructor, then call `Save`, `RenderToSize`, or `RenderToScale` just like with an individual shape.
+
+5. **Q:** Why does rendering a shape sometimes produce a blank image?\
+   **A:** The shape must be part of the document tree. If the shape has been removed or is detached from the document hierarchy, `ShapeRenderer` will render an empty image. Ensure the shape is inserted into a paragraph or anchored correctly before rendering.

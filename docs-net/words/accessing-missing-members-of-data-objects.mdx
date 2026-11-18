@@ -1,0 +1,77 @@
+---
+title: "Accessing Missing Members of Data Objects in C#"
+sidebar_label: "Accessing Missing Members of Data Objects in C#"
+sidebar_key: "net-words-accessing-missing-members-of-data-objects"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/accessing-missing-members-of-data-objects.md"
+source_commit: ""
+source_sha256: "bd5b2994887aea57b14b40fe530e8dea8ab5add88a92909ef74aadb2ac365707"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/words/net/accessing-missing-members-of-data-objects/"
+source_markdown_url: "https://docs.aspose.com/words/net/accessing-missing-members-of-data-objects.md"
+source_snapshot_sha256: "304d522a0fc05bb1f6b376ddb4e44c4d6c797813fdca9f6b1f599259193953cd"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Purpose Summary
+
+This page describes how the LINQ Reporting Engine handles missing object members by treating them as null or using custom fallback messages.
+
+By default, LINQ Reporting Engine forbids access to missing members of data objects used to build a report in template expressions, since such access is forbidden by <a href="https://www.microsoft.com/en-us/download/details.aspx?id=7029" target="_blank" rel="nofollow noopener noreferrer">C# Language Specification 5.0</a>. On attempt to use a missing member of a data object, the engine throws an exception then.
+
+But in some scenarios, members of data objects are not exactly known while designing a template. For example, if using a `DataSet` instance loaded from XML without its schema defined, some of expected data members can be missing.
+
+To support such scenarios, the engine provides an option to treat missing members of data objects as null literals. You can enable the option as shown in the following example.
+
+```csharp
+ReportingEngine engine = new ReportingEngine();
+engine.Options |= ReportBuildOptions.AllowMissingMembers;
+engine.BuildReport(...);
+```
+
+Consider the following example. Given that `r` is a `DataRow` instance that does not have a field `Missing`, by default, the following template expression causes the engine to throw an exception while building a report.
+
+```xml
+<<[r.Missing]>>
+```
+
+However, if `ReportBuildOptions.AllowMissingMembers` is applied, the engine treats access to such a field as a null literal, so no exception is thrown and simply no value is written to the report then.
+
+Furthermore, the engine can be instructed to print a specific message instead of no value in such a case. The following code snippet shows how to achieve this.
+
+```csharp
+ReportingEngine engine = new ReportingEngine();
+engine.Options |= ReportBuildOptions.AllowMissingMembers;
+engine.MissingMemberMessage = "None";
+engine.BuildReport(...);
+```
+
+**Note -** The message can be printed only instead of a template expression that represents a plain reference to a missing member of an object like in the provided template example; for instance, the message is not used when printing the result of a binary operator, one of which operands references a missing object member.
+
+***
+
+## FAQ
+
+1. **Q:** How can I enable the LINQ Reporting Engine to ignore missing members?\
+   **A:** Set the `ReportBuildOptions.AllowMissingMembers` flag on the engine's `Options` property before calling `BuildReport`. This tells the engine to treat missing members as null literals instead of throwing an exception.
+
+2. **Q:** What is the result of a template expression that references a missing member when `AllowMissingMembers` is enabled?\
+   **A:** The engine substitutes the missing member with a null literal, so the expression produces no output and the report generation continues without errors.
+
+3. **Q:** Can I display a custom message instead of an empty value for missing members?\
+   **A:** Yes. Assign a string to `engine.MissingMemberMessage`. The specified message will be written to the report whenever a plain reference to a missing member is encountered.
+
+4. **Q:** Does the custom missing‑member message work for expressions that use the missing member in calculations or concatenations?\
+   **A:** No. The custom message is applied only to plain member references. If the missing member participates in a binary operator (e.g., arithmetic or string concatenation), the engine still treats it as null, and the expression evaluates accordingly.

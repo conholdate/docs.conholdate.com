@@ -1,0 +1,362 @@
+---
+title: "Work with Columns and Rows"
+sidebar_label: "Work with Columns and Rows"
+sidebar_key: "net-words-working-with-columns-and-rows"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/working-with-columns-and-rows.html"
+source_commit: ""
+source_sha256: "2270e4da73b26888af5dabaa88b9d1219c42c34ab1d8a6746d4cf98b65e78133"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/net/working-with-columns-and-rows/"
+source_snapshot_sha256: "aaf5d0d35ac31992c000dae6b440d0d28abec602b544a66ffb5e78d9a0338115"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains how to work with table columns and rows programmatically.
+:::
+
+For more control over how tables work, learn how to manipulate columns and rows.
+
+## Find the Table Element Index {#find-the-index-of-table-elements}
+
+Columns, rows and cells are managed by accessing the selected document node by its index. Finding the index of any node involves gathering all child nodes of the element type from the parent node, and then using the <a href="https://reference.aspose.com/words/net/aspose.words/nodecollection/indexof/" target="_blank" rel="nofollow noopener noreferrer">IndexOf</a> method to find the index of the desired node in the collection.
+
+### Find the Index of a Table in a Document {#find-the-index-of-table-in-a-document}
+
+Sometimes you may need to make changes to a particular table in a document. To do this, you can refer to a table by its index.
+
+The following code example shows how to retrieve the index of a table in a document:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Table table = (Table) doc.GetChild(NodeType.Table, 0, true);
+
+NodeCollection allTables = doc.GetChildNodes(NodeType.Table, true);
+int tableIndex = allTables.IndexOf(table);
+```
+
+### Find the Index of a Row in a Table {#find-the-index-of-a-row-in-a-table}
+
+Similarly, you may need to make changes to a specific row in a selected table. To do this, you can also refer to a row by its index.
+
+The following code example shows how to retrieve the index of a row in a table:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+int rowIndex = table.IndexOf(table.LastRow);
+```
+
+### Find the Index of a Cell in a Row {#find-the-index-of-a-cell-in-a-row}
+
+Finally, you may need to make changes to a specific cell, and you can do this by cell index as well.
+
+The following code example shows how to retrieve the index of a cell in a row:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+int cellIndex = row.IndexOf(row.Cells[4]);
+```
+
+## Work with Columns {#work-with-columns}
+
+In the Aspose.Words Document Object Model (DOM), the <a href="https://reference.aspose.com/words/net/aspose.words.tables/table/" target="_blank" rel="nofollow noopener noreferrer">Table</a> node consists of <a href="https://reference.aspose.com/words/net/aspose.words.tables/row/" target="_blank" rel="nofollow noopener noreferrer">Row</a> nodes and then <a href="https://reference.aspose.com/words/net/aspose.words.tables/cell/" target="_blank" rel="nofollow noopener noreferrer">Cell</a> nodes. Thus, in the `Document` Object Model of Aspose.Words, as in Word documents, there is no concept of a column.
+
+By design, the table rows in Microsoft Word and Aspose.Words are completely independent, and the basic properties and operations are contained only in the rows and cells of the table. This gives tables the ability to have some interesting attributes:
+
+- Each table row can have a completely different number of cells
+- Vertically, the cells of each row can have different widths
+- It is possible to join tables with different row formats and number of cells
+
+Any operations performed on columns are actually "shortcuts" that perform the operation by collectively changing row cells in such a way that it looks like they are being applied to columns. That is, you can perform operations on columns by simply iterating over the same table row cell index.
+
+The following code example simplifies such operations by proving a facade class that collects the cells that make up a "column" of a table:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+/// <summary>
+/// Represents a facade object for a column of a table in a Microsoft Word document.
+/// </summary>
+internal class Column
+{
+    private Column(Table table, int columnIndex)
+    {
+        mTable = table ?? throw new ArgumentException("table");
+        mColumnIndex = columnIndex;
+    }
+
+    /// <summary>
+    /// Returns a new column facade from the table and supplied zero-based index.
+    /// </summary>
+    public static Column FromIndex(Table table, int columnIndex)
+    {
+        return new Column(table, columnIndex);
+    }
+
+    /// <summary>
+    /// Returns the cells which make up the column.
+    /// </summary>
+    public Cell[] Cells => GetColumnCells().ToArray();
+
+    /// <summary>
+    /// Returns the index of the given cell in the column.
+    /// </summary>
+    public int IndexOf(Cell cell)
+    {
+        return GetColumnCells().IndexOf(cell);
+    }
+
+    /// <summary>
+    /// Inserts a brand new column before this column into the table.
+    /// </summary>
+    public Column InsertColumnBefore()
+    {
+        Cell[] columnCells = Cells;
+
+        if (columnCells.Length == 0)
+            throw new ArgumentException("Column must not be empty");
+
+        // Create a clone of this column.
+        foreach (Cell cell in columnCells)
+            cell.ParentRow.InsertBefore(cell.Clone(false), cell);
+
+        // This is the new column.
+        Column column = new Column(columnCells[0].ParentRow.ParentTable, mColumnIndex);
+
+        // We want to make sure that the cells are all valid to work with (have at least one paragraph).
+        foreach (Cell cell in column.Cells)
+            cell.EnsureMinimum();
+
+        // Increase the index which this column represents since there is now one extra column in front.
+        mColumnIndex++;
+
+        return column;
+    }
+
+    /// <summary>
+    /// Removes the column from the table.
+    /// </summary>
+    public void Remove()
+    {
+        foreach (Cell cell in Cells)
+            cell.Remove();
+    }
+
+    /// <summary>
+    /// Returns the text of the column. 
+    /// </summary>
+    public string ToTxt()
+    {
+        StringBuilder builder = new StringBuilder();
+
+        foreach (Cell cell in Cells)
+            builder.Append(cell.ToString(SaveFormat.Text));
+
+        return builder.ToString();
+    }
+
+    /// <summary>
+    /// Provides an up-to-date collection of cells which make up the column represented by this facade.
+    /// </summary>
+    private List<Cell> GetColumnCells()
+    {
+        List<Cell> columnCells = new List<Cell>();
+
+        foreach (Row row in mTable.Rows)
+        {
+            Cell cell = row.Cells[mColumnIndex];
+            if (cell != null)
+                columnCells.Add(cell);
+        }
+
+        return columnCells;
+    }
+
+    private int mColumnIndex;
+    private readonly Table mTable;
+}
+```
+
+The following code example shows how to insert a blank column into a table:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Tables.docx");
+
+Table table = (Table) doc.GetChild(NodeType.Table, 0, true);
+
+Column column = Column.FromIndex(table, 0);
+// Print the plain text of the column to the screen.
+Console.WriteLine(column.ToTxt());
+            
+// Create a new column to the left of this column.
+// This is the same as using the "Insert Column Before" command in Microsoft Word.
+Column newColumn = column.InsertColumnBefore();
+
+foreach (Cell cell in newColumn.Cells)
+    cell.FirstParagraph.AppendChild(new Run(doc, "Column Text " + newColumn.IndexOf(cell)));
+```
+
+The following code example shows how to remove a column from a table in a document:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Tables.docx");
+
+Table table = (Table) doc.GetChild(NodeType.Table, 1, true);
+
+Column column = Column.FromIndex(table, 2);
+column.Remove();
+```
+
+## Specify Rows as Header Rows {#specify-rows-as-header-rows}
+
+You can choose to repeat the first row in the table as the Header Row only on the first page or on each page if the table is split into several. In Aspose.Words, you can repeat the Header Row on every page using the <a href="https://reference.aspose.com/words/net/aspose.words.tables/rowformat/headingformat/" target="_blank" rel="nofollow noopener noreferrer">HeadingFormat</a> property.
+
+You can also mark multiple header rows if such rows are located one after the other at the beginning of the table. To do this, you need to apply the **HeadingFormat** properties to these rows.
+
+:::info
+Note that Header Rows do not work in nested tables. That is, if you have a table inside another table, this setting will have no effect. It is a limitation of Microsoft Word that does not allow this, not Aspose.Words.
+:::
+
+The following code example shows how to build a table which includes Header Rows that repeat on subsequent pages:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.StartTable();
+builder.RowFormat.HeadingFormat = true;
+builder.ParagraphFormat.Alignment = ParagraphAlignment.Center;
+builder.CellFormat.Width = 100;
+builder.InsertCell();
+builder.Writeln("Heading row 1");
+builder.EndRow();
+builder.InsertCell();
+builder.Writeln("Heading row 2");
+builder.EndRow();
+
+builder.CellFormat.Width = 50;
+builder.ParagraphFormat.ClearFormatting();
+
+for (int i = 0; i < 50; i++)
+{
+    builder.InsertCell();
+    builder.RowFormat.HeadingFormat = false;
+    builder.Write("Column 1 Text");
+    builder.InsertCell();
+    builder.Write("Column 2 Text");
+    builder.EndRow();
+}
+
+doc.Save(ArtifactsDir + "WorkingWithTables.RepeatRowsOnSubsequentPages.docx");
+```
+
+## Keep Tables and Rows from Breaking Across Pages {#keep-tables-and-rows-from-breaking-across-pages}
+
+There are times where the contents of a table should not be split across pages. For instance, if a title is above a table, the title and table should always be kept together on the same page to preserve proper appearance.
+
+There are two separate techniques that are useful to achieve this functionality:
+
+- `Allow row break across pages`, which is applied to table rows
+- `Keep with next`, which is applied to paragraphs in table cells
+
+By default, the above properties are disabled.
+
+### Keep a Row from Breaking Across Pages {#keep-a-row-from-breaking-across-pages}
+
+This involves restricting content inside the cells of a row from being split across a page. In Microsoft Word, this can found under Table Properties as the option "Allow row to break across pages". In Aspose.Words this is found under the <a href="https://reference.aspose.com/words/net/aspose.words.tables/rowformat/" target="_blank" rel="nofollow noopener noreferrer">RowFormat</a> object of a <a href="https://reference.aspose.com/words/net/aspose.words.tables/row/" target="_blank" rel="nofollow noopener noreferrer">Row</a> as the property <a href="https://reference.aspose.com/words/net/aspose.words.tables/rowformat/allowbreakacrosspages/" target="_blank" rel="nofollow noopener noreferrer">RowFormat.AllowBreakAcrossPages</a>.
+
+The following code example shows how to disable breaking rows across pages for each row in a table:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Table spanning two pages.docx");
+
+Table table = (Table) doc.GetChild(NodeType.Table, 0, true);
+
+// Disable breaking across pages for all rows in the table.
+foreach (Row row in table.Rows)
+    row.RowFormat.AllowBreakAcrossPages = false;
+
+doc.Save(ArtifactsDir + "WorkingWithTables.RowFormatDisableBreakAcrossPages.docx");
+```
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-.NET/blob/master/Examples/Data/Table%20spanning%20two%20pages.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+### Keep a Table from Breaking Across Pages {#keep-a-table-from-breaking-across-pages}
+
+To stop the table from splitting across pages, we need to specify that we want the content contained within the table to stay together.
+
+To do this, Aspose.Words uses a method, which allows users to select a table and enable the <a href="https://reference.aspose.com/words/net/aspose.words/paragraphformat/keepwithnext/" target="_blank" rel="nofollow noopener noreferrer">KeepWithNext</a> parameter to true for each paragraph within the table cells. The exception is the last paragraph in the table, which should be set to false.
+
+The following code example shows how to set a table to stay together on the same page:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Table spanning two pages.docx");
+            
+Table table = (Table) doc.GetChild(NodeType.Table, 0, true);
+
+// We need to enable KeepWithNext for every paragraph in the table to keep it from breaking across a page,
+// except for the last paragraphs in the last row of the table.
+foreach (Cell cell in table.GetChildNodes(NodeType.Cell, true))
+{
+    cell.EnsureMinimum();
+
+    foreach (Paragraph para in cell.Paragraphs)
+        if (!(cell.ParentRow.IsLastRow && para.IsEndOfCell))
+            para.ParagraphFormat.KeepWithNext = true;
+}
+
+doc.Save(ArtifactsDir + "WorkingWithTables.KeepTableTogether.docx");
+```
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-.NET/blob/master/Examples/Data/Table%20spanning%20two%20pages.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+## Related APIs {#related-apis}
+
+- <a href="https://reference.aspose.com/words/net/aspose.words.tables/table/" target="_blank" rel="nofollow noopener noreferrer">Table</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words.tables/row/" target="_blank" rel="nofollow noopener noreferrer">Row</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words.tables/cell/" target="_blank" rel="nofollow noopener noreferrer">Cell</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words.tables/rowformat/headingformat/" target="_blank" rel="nofollow noopener noreferrer">RowFormat.HeadingFormat</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words.tables/rowformat/allowbreakacrosspages/" target="_blank" rel="nofollow noopener noreferrer">RowFormat.AllowBreakAcrossPages</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/paragraphformat/keepwithnext/" target="_blank" rel="nofollow noopener noreferrer">ParagraphFormat.KeepWithNext</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/nodecollection/indexof/" target="_blank" rel="nofollow noopener noreferrer">NodeCollection.IndexOf</a>
+
+## FAQ {#faq}
+
+1. **Q:** How can I obtain the index of a specific table, row, or cell in a document?\
+   **A:** Retrieve the collection of the desired node type using `Document.GetChildNodes(NodeType.Table, true)`, `NodeType.Row`, or `NodeType.Cell`. Then call `NodeCollection.IndexOf(node)` to get its zero‑based index. This works for any node that is a child of the document or a parent node.
+
+2. **Q:** What is the recommended way to insert a new blank column into an existing table?\
+   **A:** Use a helper class that gathers the cells belonging to the target column (by iterating each row and selecting the cell at the column index). For each row, insert a new `Cell` at that position with `Row.Cells.Insert(index, new Cell(document))`. The helper then updates the table layout automatically.
+
+3. **Q:** How do I delete a particular column from a table?\
+   **A:** Iterate through every `Row` in the table and call `Row.Cells.RemoveAt(columnIndex)`. After removal, you may need to call `table.AutoFit(AutoFitBehavior.AutoFitToContents)` to adjust column widths.
+
+4. **Q:** How can I make the first row (or multiple rows) repeat as a header on every page?\
+   **A:** Set `Row.RowFormat.HeadingFormat` to `true` on the first row and on each following row that should also repeat (header rows must be consecutive, starting with the first row). Example: `table.FirstRow.RowFormat.HeadingFormat = true;`.
+
+5. **Q:** What steps are required to prevent a row or an entire table from breaking across pages?\
+   **A:** For rows, set `Row.RowFormat.AllowBreakAcrossPages = false`. For tables, set `ParagraphFormat.KeepWithNext = true` on every paragraph inside the table cells except the last paragraph of the table. This keeps the whole table together on a single page.

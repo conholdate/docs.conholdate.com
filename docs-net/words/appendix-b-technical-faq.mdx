@@ -1,0 +1,106 @@
+---
+title: "Appendix B. Technical FAQ"
+sidebar_label: "Appendix B. Technical FAQ"
+sidebar_key: "net-words-appendix-b-technical-faq"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/appendix-b-technical-faq.html"
+source_commit: ""
+source_sha256: "3e559978587f8db469789e3d0f8eddbcdbb9950f38118639764c0c5dc9d0147d"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/net/appendix-b-technical-faq/"
+source_snapshot_sha256: "319c71dc51996cd295ac09232ca73db25f8baadcf325c73ef866ea4ba4a1ae17"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains technical FAQs related to Aspose.Words .NET, providing answers to common issues and questions.
+:::
+
+:::info
+This section reveals some technical aspects and implementation details related to LINQ Reporting Engine. This information can be useful for you while making design decisions for your applications. The information is provided in a question-answer form.
+:::
+
+## How is the type of an enumeration item implicitly determined by the engine in template expressions? {#how-is-the-type-of-an-enumeration-item-implicitly-determined-by-the-engine-in-template-expressions}
+
+If you do not specify the type of an enumeration item in a `foreach` statement or lambda function signature within your template explicitly, the type is implicitly determined by the engine from the type of the enumeration as follows:
+
+1. If the enumeration represents a `DataTable` instance, then the item type is `DataRow`.
+2. Otherwise, if the enumeration represents a `DataView` instance, then the item type is `DataRowView`.
+3. Otherwise, if the enumeration implements `IDataReader`, then the item type is `IDataRecord`.
+4. Otherwise, if the enumeration represents child rows of a `DataRow` instance, then the item type is `DataRow`.
+5. Otherwise, if the enumeration implements generic `IEnumerable<T>`, then the item type is a type argument corresponding to T. Note, that the engine does not support enumerations that implement `IEnumerable<T>` multiple times using different type arguments.
+6. Otherwise, the item type is `Object`.
+
+## Does the engine cooperate with LINQ providers? {#does-the-engine-cooperate-with-linq-providers}
+
+The engine does not cooperate with <a href="https://docs.microsoft.com/en-us/previous-versions/bb882640%5C%28v=vs.140%5C%29" target="_blank" rel="nofollow noopener noreferrer">LINQ providers</a>. To be aware of the consequences of this feature, consider the following example. Assume, that you have the `City` and `Person` classes defined in your application as follows.
+
+```csharp
+public class City
+{
+    public IList<Person> Persons { get { ... } }
+    ...
+}
+public class Person
+{
+    public String Name { get { ... } }
+    public int Age { get { ... } }
+    ...
+    }
+}
+```
+
+Given that `city` is an instance of the `City` class, consider the evaluation of the following template expression by the engine.
+
+```csharp
+city.Persons.Where(p => p.Age > 30).OrderBy(p => p.Name)
+```
+
+If you use an ORM to provide an interaction of your application with an SQL database in conjunction with a LINQ provider for the ORM, then you most likely expect an SQL query like the following one to be performed in the background while evaluating the template expression.
+
+```csharp
+SELECT *
+    FROM Persons
+    WHERE CityId = @CityId AND Age > 30
+    ORDER BY Name
+```
+
+However, since the engine does not cooperate with LINQ providers, the actual SQL query in this case is as follows.
+
+```csharp
+SELECT *
+    FROM Persons
+    WHERE CityId = @CityId
+```
+
+That is, the engine makes an eager call before applying its built-in extension methods. In some cases, this feature can lead to a significant performance overhead. So, if the performance of your application is your primary concern, then consider a preparing of your sequential data outside your templates. That is, pass to the engine a sequential data that is already filtered, ordered, grouped, and so forth.
+
+## Have I do something special to merge the Aspose.Words assembly with another assembly? {#have-i-do-something-special-to-merge-the-asposewords-assembly-with-another-assembly}
+
+You can normally use a tool like <a href="https://www.microsoft.com/en-us/research/people/" target="_blank" rel="nofollow noopener noreferrer">ILMerge</a> to merge the Aspose.Words assembly with another assembly. However, if you use a functionality of the LINQ Reporting Engine, add the following attribute to the target assembly.
+
+```csharp
+[assembly: InternalsVisibleTo(
+    "TargetAssemblyName" +
+    ".ReportingDynamics" +
+    ", PublicKey=TargetAssemblyPublicKey")]
+```
+
+`TargetAssemblyName` and `TargetAssemblyPublicKey` stand for the name of your target assembly and its public key (not a public key token) respectively.
+
+Despite of the `InternalsVisibleTo` attribute applied, you can normally use obfuscation routines on your target assembly, if needed. An obfuscation does not harm the functionality of LINQ Reporting Engine.

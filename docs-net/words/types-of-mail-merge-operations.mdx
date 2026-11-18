@@ -1,0 +1,258 @@
+---
+title: "Types of Mail Merge Operation"
+sidebar_label: "Types of Mail Merge Operation"
+sidebar_key: "net-words-types-of-mail-merge-operations"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/types-of-mail-merge-operations.html"
+source_commit: ""
+source_sha256: "5081e04bf4ec39f6d138d3151551c0392554bd43df56e60ee22e1ed3775b8106"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/net/types-of-mail-merge-operations/"
+source_snapshot_sha256: "b0b96b2a8db425a89e1c348a56e3497f4c838c93d95cdb4268e7ac4fdb38d91f"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains the different types of mail-merge operations supported by Aspose.Words and when to use each.
+:::
+
+The main idea of Mail Merge is to automatically create a document or multiple documents based on your template and data fetched from your data source. Aspose.Words allows you to perform two different types of Mail Merge operations: simple Mail Merge and Mail Merge with regions.
+
+The most common example of using simple Mail Merge is when you want to send a document for different clients by including their names at the beginning of the document. To do this, you need to create merge fields such as *First Name* and *Last Name* in your template, and then fill them in with data from your data source. Whereas the most common example of using Mail Merge with regions is when you want to send a document that includes specific orders with the list of all items within each order. To do this, you will need to create merge regions inside your template - own region for each order, in order to fill it with all required data for the items.
+
+The main difference between both merge operations is that simple Mail Merge (without regions) repeats the entire document per each data source record, whereas Mail Merge with regions repeats only designated regions per record. You can think of a simple Mail Merge operation as a particular case of merge with regions where the only region is the whole document.
+
+:::info
+The <a href="https://reference.aspose.com/words/net/aspose.words.mailmerging/mailmerge/" target="_blank" rel="nofollow noopener noreferrer">MailMerge</a> class represents a Mail Merge functionality. With its properties, you can customize the required behavior before executing a Mail Merge operation.
+:::
+
+## Simple Mail Merge Operation {#simple-mail-merge-operation}
+
+A simple Mail Merge is used to fill the Mail Merge fields inside your template with the required data from your data source (single table representation). So it is similar to the classic Mail Merge in Microsoft Word.
+
+You can add one or more merge fields in your template and then execute the simple Mail Merge operation. It is recommended to use it if your template does not contain any merge regions.
+
+The main limitation of using this type is the whole document content will be repeated for each record in the data source.
+
+### How to Execute a Simple Mail Merge Operation {#how-to-execute-a-simple-mail-merge-operation}
+
+Once your template is ready, you can start performing the simple Mail Merge operation. Aspose.Words allows you to execute a simple Mail Merge operation using different <a href="https://reference.aspose.com/words/net/aspose.words.mailmerging/mailmerge/execute/#execute/" target="_blank" rel="nofollow noopener noreferrer">Execute methods</a> that accept various data objects as the data source.
+
+The following code example shows how to execute a simple Mail Merge operation using one of the <a href="https://reference.aspose.com/words/net/aspose.words.mailmerging/mailmerge/execute/" target="_blank" rel="nofollow noopener noreferrer">Execute</a> method:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+// Include the code for our template.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// Create Merge Fields.
+builder.InsertField(" MERGEFIELD CustomerName ");
+builder.InsertParagraph();
+builder.InsertField(" MERGEFIELD Item ");
+builder.InsertParagraph();
+builder.InsertField(" MERGEFIELD Quantity ");
+
+// Fill the fields in the document with user data.
+doc.MailMerge.Execute(new string[] { "CustomerName", "Item", "Quantity" },
+    new object[] { "John Doe", "Hawaiian", "2" });
+
+doc.Save(ArtifactsDir + "BaseOperations.SimpleMailMerge.docx");
+```
+
+You can notice the difference between the document before executing simple mail merge:
+
+![simple_mail_merge_template](/net/words/images/33be675ea428f06d-execute-simple-mail-merge-1.png)
+
+And after executing simple mail merge:
+
+![execute_simple_mail_merge](/net/words/images/89d1f238b2aa97f7-execute-simple-mail-merge-2.png)
+
+### How to Create Multiple Merged Documents {#how-to-create-multiple-merged-documents}
+
+In Aspose.Words, the standard Mail Merge operation fills only a single document with content from your data source. So, you will need to execute the Mail Merge operation multiple times to create multiple merged documents as an output.
+
+The following code example shows how to generate multiple merged documents during a Mail Merge operation:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+string connString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + DatabaseDir + "Northwind.accdb";
+
+Document doc = new Document(MyDir + "Mail merge destination - Northwind suppliers.docx");
+
+OleDbConnection conn = new OleDbConnection(connString);
+conn.Open();
+            
+OleDbCommand cmd = new OleDbCommand("SELECT * FROM Customers", conn);
+OleDbDataAdapter da = new OleDbDataAdapter(cmd);
+            
+DataTable data = new DataTable();
+da.Fill(data);
+
+// Perform a loop through each DataRow to iterate through the DataTable. Clone the template document
+// instead of loading it from disk for better speed performance before the mail merge operation.
+// You can load the template document from a file or stream but it is faster to load the document
+// only once and then clone it in memory before each mail merge operation.
+            
+int counter = 1;
+foreach (DataRow row in data.Rows)
+{
+    Document dstDoc = (Document) doc.Clone(true);
+
+    dstDoc.MailMerge.Execute(row);
+
+    dstDoc.Save(string.Format(ArtifactsDir + "BaseOperations.ProduceMultipleDocuments_{0}.docx", counter++));
+}
+```
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-.NET/blob/master/Examples/Data/Mail%20merge%20destination%20-%20Northwind%20suppliers.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+## Mail Merge with Regions {#mail-merge-with-regions}
+
+You can create different regions in your template to have special areas that you can simply fill with your data. Use the Mail Merge with regions if you want to insert tables, rows with repeating data to make your documents dynamically grow by specifying those regions within your template.
+
+You can create nested (child) regions as well as merge regions. The main advantage of using this type is to dynamically increase parts inside a document. See more details in the next article "Nested Mail Merge with Regions".
+
+:::info
+Information about a Mail Merge region can be obtained using the <a href="https://reference.aspose.com/words/net/aspose.words.mailmerging/mailmergeregioninfo/" target="_blank" rel="nofollow noopener noreferrer">MailMergeRegionInfo</a> class.
+:::
+
+### How to Execute Mail Merge with Regions {#how-to-execute-mail-merge-with-regions}
+
+A Mail Merge region is a specific part inside a document that has a start point and an end point. Both points are represented as Mail Merge fields that have specific names *"TableStart:XXX"* and *"TableEnd:XXX"*. All content that is included in a Mail Merge region will automatically be repeated for every record in the data source.
+
+Aspose.Words allows you to execute Mail Merge with regions using different <a href="https://reference.aspose.com/words/net/aspose.words.mailmerging/mailmerge/executewithregions/#executewithregions/" target="_blank" rel="nofollow noopener noreferrer">Execute methods</a> that accept various data objects as the data source.
+
+As a first step, we need to create the `DataSet` to pass it later as an input parameter to the `ExecuteWithRegions` method:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+private DataSet CreateDataSet()
+{
+    // Create the customers table.
+    DataTable tableCustomers = new DataTable("Customers");
+    tableCustomers.Columns.Add("CustomerID");
+    tableCustomers.Columns.Add("CustomerName");
+    tableCustomers.Rows.Add(new object[] { 1, "John Doe" });
+    tableCustomers.Rows.Add(new object[] { 2, "Jane Doe" });
+
+    // Create the orders table.
+    DataTable tableOrders = new DataTable("Orders");
+    tableOrders.Columns.Add("CustomerID");
+    tableOrders.Columns.Add("ItemName");
+    tableOrders.Columns.Add("Quantity");
+    tableOrders.Rows.Add(new object[] { 1, "Hawaiian", 2 });
+    tableOrders.Rows.Add(new object[] { 2, "Pepperoni", 1 });
+    tableOrders.Rows.Add(new object[] { 2, "Chicago", 1 });
+
+    // Add both tables to a data set.
+    DataSet dataSet = new DataSet();
+    dataSet.Tables.Add(tableCustomers);
+    dataSet.Tables.Add(tableOrders);
+
+    // The "CustomerID" column, also the primary key of the customers table is the foreign key for the Orders table.
+    dataSet.Relations.Add(tableCustomers.Columns["CustomerID"], tableOrders.Columns["CustomerID"]);
+
+    return dataSet;
+}
+```
+
+The following code example shows how to execute Mail Merge with regions using the <a href="https://reference.aspose.com/words/net/aspose.words.mailmerging/mailmerge/executewithregions/" target="_blank" rel="nofollow noopener noreferrer">ExecuteWithRegions(DataSet)</a> method:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// The start point of mail merge with regions the dataset.
+builder.InsertField(" MERGEFIELD TableStart:Customers");
+            
+// Data from rows of the "CustomerName" column of the "Customers" table will go in this MERGEFIELD.
+builder.Write("Orders for ");
+builder.InsertField(" MERGEFIELD CustomerName");
+builder.Write(":");
+
+// Create column headers.
+builder.StartTable();
+builder.InsertCell();
+builder.Write("Item");
+builder.InsertCell();
+builder.Write("Quantity");
+builder.EndRow();
+
+// We have a second data table called "Orders", which has a many-to-one relationship with "Customers"
+// picking up rows with the same CustomerID value.
+builder.InsertCell();
+builder.InsertField(" MERGEFIELD TableStart:Orders");
+builder.InsertField(" MERGEFIELD ItemName");
+builder.InsertCell();
+builder.InsertField(" MERGEFIELD Quantity");
+builder.InsertField(" MERGEFIELD TableEnd:Orders");
+builder.EndTable();
+
+// The end point of mail merge with regions.
+builder.InsertField(" MERGEFIELD TableEnd:Customers");
+
+// Pass our dataset to perform mail merge with regions.
+DataSet customersAndOrders = CreateDataSet();
+doc.MailMerge.ExecuteWithRegions(customersAndOrders);
+
+doc.Save(ArtifactsDir + "BaseOperations.MailMergeWithRegions.docx");
+```
+
+You can notice the difference between the document before executing Mail Merge with regions:
+
+![mail_merge_with_regions_template](/net/words/images/0b7e5ca00b81694f-execute-mail-merge-with-regions-1.png)
+
+And after executing Mail Merge with regions:
+
+![mail_merge_with_regions_execute](/net/words/images/bd0f7afad8f89c24-execute-mail-merge-with-regions-2.png)
+
+### Limitations of Mail Merge with Regions {#limitations-of-mail-merge-with-regions}
+
+There are some important points that you need to consider when performing a Mail Merge with regions:
+
+- The start point *TableStart:Orders* and the end point *TableEnd:Orders* both need to be in the same row or cell. For example, if you start a merge region in a cell of a table, you must end the merge region in the same row as the first cell.
+- The merge field name must match the column's name in your DataTable. Unless you have specified mapped fields, the Mail Merge with regions will not be successful for any merge field that has a different name than the column's name.
+
+If one of these rules is broken, you will get unexpected results or an exception may be thrown.
+
+:::info
+If you do not use Mail Merge regions, then it will be similar to Microsoft Word mail merge, and the whole document content will be repeated for each record in the data source.
+:::
+
+***
+
+## FAQ {#faq}
+
+1. **Q:** What is the main difference between simple Mail Merge and Mail Merge with regions?\
+   **A:** Simple Mail Merge fills merge fields in the whole document and repeats the entire document for each record. Mail Merge with regions repeats only the content inside defined regions (TableStart/TableEnd) for each record, allowing parts of the document to grow dynamically while the rest stays unchanged.
+
+2. **Q:** How can I create a separate merged document for every row in my data source?\
+   **A:** Load the template, execute the simple Mail Merge for a single record, then clone the document (or reload the template) and repeat the operation for each subsequent record. Save each resulting `Document` instance with a unique file name.
+
+3. **Q:** What are the requirements for defining a Mail Merge region?\
+   **A:** A region must have a start field named `TableStart:RegionName` and an end field named `TableEnd:RegionName`. Both fields must reside in the same row or cell, and the field names must exactly match the column names in the corresponding `DataTable`.
+
+4. **Q:** Can I nest Mail Merge regions, and will they work correctly?\
+   **A:** Yes, you can nest regions by placing a child region's start and end fields inside the parent region's boundaries. The inner region will be repeated for each parent record, enabling hierarchical data structures such as orders with line items.
+
+5. **Q:** Why does an empty paragraph appear after a merge field, and how can I remove it?\
+   **A:** Aspose.Words treats a paragraph that contains only a merge field as a separate paragraph. If the field is removed during merging, the empty paragraph remains. Set `MailMerge.CleanupOptions` to `MailMergeCleanupOptions.RemoveEmptyParagraphs` to delete such paragraphs automatically during the merge.

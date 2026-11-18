@@ -1,0 +1,282 @@
+---
+title: "Insert Checkboxes, Text Input, or Images"
+sidebar_label: "Insert Checkboxes, Text Input, or Images"
+sidebar_key: "net-words-insert-checkboxes-text-input-or-images-mail-merge"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/insert-checkboxes-text-input-or-images-mail-merge.html"
+source_commit: ""
+source_sha256: "b66de162039b753f964a3384b1e8dff12d4ce9660e958627ce4df6870fd81d7f"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/net/insert-checkboxes-text-input-or-images-mail-merge/"
+source_snapshot_sha256: "ec50c59c29d5f3501cac8cec41325ed10001c9b61c1b71ada24df33ec8e5f626"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page describes how to insert checkboxes, text inputs, or images during mail merge.
+:::
+
+The merge engine takes a document as input, looks for `MERGEFIELD` fields in it, and replaces them with the data obtained from the data source. Typically, plain text and HTML are inserted, but Aspose.Words users can also generate a document that handles more unusual scenarios for Mail Merge fields.
+
+Powerful Aspose.Words functionality allows you to extend the Mail Merge process:
+
+- insert checkboxes and text input form fields into the document during a mail merge
+- insert images from any custom storage (files, BLOB fields, etc.)
+
+## Insert Checkboxes and Text Input during Mail Merge {#insert-checkboxes-and-text-input-during-mail-merge}
+
+Sometimes it is necessary to perform a Mail Merge operation so that not text is substituted in the merge field, but a checkbox or text input field. Even though this is not the most common scenario, it is very handy for some tasks.
+
+The following screenshot of a Word document shows a template with merge fields:
+
+![insert-checkboxes-or-images-mail-merge-aspose-words](/net/words/images/d1240b834021750a-insert-checkboxes-html-or-images-during-mail-merge-1.jpeg)
+
+This screenshot of the Word document below shows the already generated document:
+
+![insert-checkboxes-html-or-images-mail-merge-aspose-words](/net/words/images/baa96de1b6dfe51a-insert-checkboxes-html-or-images-during-mail-merge-2.png)
+
+:::info
+Note that some fields were replaced with plain text, some fields were replaced with checkbox form fields, and the `Subject` field was replaced with a text input field.
+:::
+
+The following code example shows how to insert checkboxes and input text fields into a document during a mail merge:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Mail merge destinations - Fax.docx");
+
+// Setup mail merge event handler to do the custom work.
+doc.MailMerge.FieldMergingCallback = new HandleMergeField();
+// Trim trailing and leading whitespaces mail merge values.
+doc.MailMerge.TrimWhitespaces = false;
+
+string[] fieldNames = {
+    "RecipientName", "SenderName", "FaxNumber", "PhoneNumber",
+    "Subject", "Body", "Urgent", "ForReview", "PleaseComment"
+};
+
+object[] fieldValues = {
+    "Josh", "Jenny", "123456789", "", "Hello",
+    "<b>HTML Body Test message 1</b>", true, false, true
+};
+
+doc.MailMerge.Execute(fieldNames, fieldValues);
+
+doc.Save(ArtifactsDir + "WorkingWithFields.MailMergeFormFields.docx");
+```
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+private class HandleMergeField : IFieldMergingCallback
+{
+    /// <summary>
+    /// This handler is called for every mail merge field found in the document,
+    /// for every record found in the data source.
+    /// </summary>
+    void IFieldMergingCallback.FieldMerging(FieldMergingArgs e)
+    {
+        if (mBuilder == null)
+            mBuilder = new DocumentBuilder(e.Document);
+
+        // We decided that we want all boolean values to be output as check box form fields.
+        if (e.FieldValue is bool)
+        {
+            // Move the "cursor" to the current merge field.
+            mBuilder.MoveToMergeField(e.FieldName);
+
+            string checkBoxName = $"{e.FieldName}{e.RecordIndex}";
+
+            mBuilder.InsertCheckBox(checkBoxName, (bool) e.FieldValue, 0);
+
+            return;
+        }
+
+        switch (e.FieldName)
+        {
+            case "Body":
+                mBuilder.MoveToMergeField(e.FieldName);
+                mBuilder.InsertHtml((string) e.FieldValue);
+                break;
+            case "Subject":
+            {
+                mBuilder.MoveToMergeField(e.FieldName);
+                string textInputName = $"{e.FieldName}{e.RecordIndex}";
+                mBuilder.InsertTextInput(textInputName, TextFormFieldType.Regular, "", (string) e.FieldValue, 0);
+                break;
+            }
+        }
+    }
+
+    void IFieldMergingCallback.ImageFieldMerging(ImageFieldMergingArgs args)
+    {
+        args.ImageFileName = "Image.png";
+        args.ImageWidth.Value = 200;
+        args.ImageHeight = new MergeFieldImageDimension(200, MergeFieldImageDimensionUnit.Percent);
+    }
+
+    private DocumentBuilder mBuilder;
+}
+```
+
+## Insert Images during Mail Merge {#insert-images-during-mail-merge}
+
+When performing a Mail Merge operation, you can insert images from the database into the document using special image Mail Merge fields. The image Mail Merge field is a merge field named Image:MyFieldName.
+
+### Insert Images from a Database {#insert-images-from-a-database}
+
+During a mail merge, when an image Mail Merge field is encountered in a document, the <a href="https://reference.aspose.com/words/net/aspose.words.mailmerging/mailmerge/fieldmergingcallback/" target="_blank" rel="nofollow noopener noreferrer">FieldMergingCallback</a> event is fired. You can respond to this event to return a filename, stream, or image object to the Mail Merge engine so it can be inserted into the document.
+
+The following code example shows how to insert images stored in a database BLOB field into a report:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Mail merge destination - Northwind employees.docx");
+
+doc.MailMerge.FieldMergingCallback = new HandleMergeImageFieldFromBlob();
+
+string connString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + DatabaseDir + "Northwind.accdb";
+OleDbConnection conn = new OleDbConnection(connString);
+conn.Open();
+
+OleDbCommand cmd = new OleDbCommand("SELECT * FROM Employees", conn);
+IDataReader dataReader = cmd.ExecuteReader();
+
+doc.MailMerge.ExecuteWithRegions(dataReader, "Employees");
+
+conn.Close();
+            
+doc.Save(ArtifactsDir + "WorkingWithFields.MailMergeImageFromBlob.docx");
+```
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+public class HandleMergeImageFieldFromBlob : IFieldMergingCallback
+{
+    void IFieldMergingCallback.FieldMerging(FieldMergingArgs args)
+    {
+        // Do nothing.
+    }
+
+    /// <summary>
+    /// This is called when mail merge engine encounters Image:XXX merge field in the document.
+    /// You have a chance to return an Image object, file name, or a stream that contains the image.
+    /// </summary>
+    void IFieldMergingCallback.ImageFieldMerging(ImageFieldMergingArgs e)
+    {
+        // The field value is a byte array, just cast it and create a stream on it.
+        MemoryStream imageStream = new MemoryStream((byte[]) e.FieldValue);
+        // Now the mail merge engine will retrieve the image from the stream.
+        e.ImageStream = imageStream;
+    }
+}
+```
+
+### Set Image Properties during Mail Merge {#set-image-properties-during-mail-merge}
+
+While merging an image merge field, you may sometimes need to control various image properties, such as <a href="https://reference.aspose.com/words/net/aspose.words.drawing/wraptype/" target="_blank" rel="nofollow noopener noreferrer">WrapType</a>.
+
+Currently, using <a href="https://reference.aspose.com/words/net/aspose.words.mailmerging/imagefieldmergingargs/" target="_blank" rel="nofollow noopener noreferrer">ImageFieldMergingArgs</a> you can only set image width or height properties, respectively. To overcome this issue, Aspose.Words provides the <a href="https://reference.aspose.com/words/net/aspose.words.mailmerging/imagefieldmergingargs/shape/" target="_blank" rel="nofollow noopener noreferrer">Shape</a> property, which facilitates to get full control over the inserted image or any other shape.
+
+The following code example shows how to set various image properties:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.Writeln("{{#foreach example}}");
+builder.Writeln("{{Image(126pt;126pt):stempel}}");
+builder.Writeln("{{/foreach example}}");
+
+doc.MailMerge.UseNonMergeFields = true;
+doc.MailMerge.TrimWhitespaces = true;
+doc.MailMerge.UseWholeParagraphAsRegion = false;
+doc.MailMerge.CleanupOptions = MailMergeCleanupOptions.RemoveEmptyTableRows
+        | MailMergeCleanupOptions.RemoveContainingFields
+        | MailMergeCleanupOptions.RemoveUnusedRegions
+        | MailMergeCleanupOptions.RemoveUnusedFields;
+
+doc.MailMerge.FieldMergingCallback = new ImageFieldMergingHandler();
+doc.MailMerge.ExecuteWithRegions(new DataSourceRoot());
+
+doc.Save(ArtifactsDir + "WorkingWithFields.MailMergeImageField.docx");
+```
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+private class ImageFieldMergingHandler : IFieldMergingCallback
+{
+    void IFieldMergingCallback.FieldMerging(FieldMergingArgs args)
+    {
+        //  Implementation is not required.
+    }
+
+    void IFieldMergingCallback.ImageFieldMerging(ImageFieldMergingArgs args)
+    {
+        Shape shape = new Shape(args.Document, ShapeType.Image)
+        {
+            Width = 126, Height = 126, WrapType = WrapType.Square
+        };
+
+        shape.ImageData.SetImage(MyDir + "Mail merge image.png");
+
+        args.Shape = shape;
+    }
+}
+```
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+public class DataSourceRoot : IMailMergeDataSourceRoot
+{
+    public IMailMergeDataSource GetDataSource(string s)
+    {
+        return new DataSource();
+    }
+
+    private class DataSource : IMailMergeDataSource
+    {
+        private bool next = true;
+
+        string IMailMergeDataSource.TableName => TableName();
+
+        private string TableName()
+        {
+            return "example";
+        }
+
+        public bool MoveNext()
+        {
+            bool result = next;
+            next = false;
+            return result;
+        }
+
+        public IMailMergeDataSource GetChildDataSource(string s)
+        {
+            return null;
+        }
+
+        public bool GetValue(string fieldName, out object fieldValue)
+        {
+            fieldValue = null;
+            return false;
+        }
+    }
+}
+```

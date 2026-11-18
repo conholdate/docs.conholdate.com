@@ -1,0 +1,545 @@
+---
+title: "Working with Table of Contents"
+sidebar_label: "Working with Table of Contents"
+sidebar_key: "net-words-working-with-table-of-contents"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/working-with-table-of-contents.html"
+source_commit: ""
+source_sha256: "fed83caa0033ff60a7d9bbf67a9cd8d60b1e16b13dec3d9dfcab135c37c10ad7"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/net/working-with-table-of-contents/"
+source_snapshot_sha256: "69f3739c2042bb9a9f5176631de3931477e6807bf282ff64abc748d3d7dcdabe"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "./_remote-markdown.css";
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains how to work with a table of contents.
+:::
+
+Often you will work with documents containing a table of contents (TOC). Using Aspose.Words you can insert your own table of contents or completely rebuild existing table of contents in the document using just a few lines of code. This article outlines how to work with the table of contents field and demonstrates:
+
+- How to insert a brand new `TOC`
+- Update new or existing TOCs in the document.
+- Specify switches to control the formatting and overall structure of the TOC.
+- How to modify the styles and appearance of the table of contents.
+- How to remove an entire `TOC` field along with all entries from the document.
+
+## Insert Table of Contents Programmatically {#insert-table-of-contents-programmatically}
+
+You can insert a `TOC` (table of contents) field into the document at the current position by calling the <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/inserttableofcontents/" target="_blank" rel="nofollow noopener noreferrer">InsertTableOfContents</a> method.
+
+A table of contents in a Word document can be built in a number of ways and formatted using a variety of options. The field switches that you pass to the method control the way the table is built and displayed in your document.
+
+The default switches that are used in a `TOC` inserted in Microsoft Word are **"\o "1-3 \h \z \u"**. Descriptions of these switches as well as a list of supported switches can be found later in the article. You can either use that guide obtain the correct switches or if you already have a document containing the similar `TOC` that you want you can show field codes (*ALT+F9*) and copy the switches directly from the field.
+
+The following code example shows how to insert a Table of Contents (TOC) into a document using heading styles as entries.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+            
+builder.InsertTableOfContents("\\o \"1-3\" \\h \\z \\u");
+            
+// Start the actual document content on the second page.
+builder.InsertBreak(BreakType.PageBreak);
+
+builder.ParagraphFormat.StyleIdentifier = StyleIdentifier.Heading1;
+
+builder.Writeln("Heading 1");
+
+builder.ParagraphFormat.StyleIdentifier = StyleIdentifier.Heading2;
+
+builder.Writeln("Heading 1.1");
+builder.Writeln("Heading 1.2");
+
+builder.ParagraphFormat.StyleIdentifier = StyleIdentifier.Heading1;
+
+builder.Writeln("Heading 2");
+builder.Writeln("Heading 3");
+
+builder.ParagraphFormat.StyleIdentifier = StyleIdentifier.Heading2;
+
+builder.Writeln("Heading 3.1");
+
+builder.ParagraphFormat.StyleIdentifier = StyleIdentifier.Heading3;
+
+builder.Writeln("Heading 3.1.1");
+builder.Writeln("Heading 3.1.2");
+builder.Writeln("Heading 3.1.3");
+
+builder.ParagraphFormat.StyleIdentifier = StyleIdentifier.Heading2;
+
+builder.Writeln("Heading 3.2");
+builder.Writeln("Heading 3.3");
+
+// The newly inserted table of contents will be initially empty.
+// It needs to be populated by updating the fields in the document.
+doc.UpdateFields();
+
+doc.Save(ArtifactsDir + "AddContentUsingDocumentBuilder.InsertTableOfContents.docx");
+```
+
+:::info
+Without the methods used in the example, when you open the output document, you would find the `TOC` field, but with no visible content. This is because the `TOC` field has been inserted but is not yet populated until it's updated in the document. Further information about this is discussed in the next section.
+:::
+
+## Update Table of Contents {#update-table-of-contents}
+
+Aspose.Words allows you to completely update a `TOC` with only a few lines of code. This can be done to populate a newly inserted `TOC` or to update an existing `TOC` after changes to the document have been made. The following two methods must be used in order to update the `TOC` fields in the document:
+
+1. <a href="https://reference.aspose.com/words/net/aspose.words/document/updatefields/" target="_blank" rel="nofollow noopener noreferrer">UpdateFields</a>
+2. <a href="https://reference.aspose.com/words/net/aspose.words/document/updatepagelayout/" target="_blank" rel="nofollow noopener noreferrer">UpdatePageLayout</a>
+
+Please note that these two update methods are required to be called in that order. If reversed the table of contents will be populated but no page numbers will be displayed. Any number of different TOCs can be updated. These methods will automatically update all TOCs found in the document.
+
+The following code example shows how to completely rebuild `TOC` fields in the document by invoking field update:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+// The newly inserted table of contents will be initially empty.
+// It needs to be populated by updating the fields in the document.
+doc.UpdateFields();
+```
+
+The first call to **UpdateFields** will build the `TOC`, all text entries are populated and the `TOC` appears almost complete. The only thing missing is the page numbers which for now are displayed with "?". The second call to **UpdatePageLayout** will build the layout of the document in memory. This needs to be done to gather the page numbers of the entries. The correct page numbers calculated from this call are then inserted into the TOC.
+
+## Use Switches to Control Table of Contents Behavior {#use-switches-to-control-table-of-contents-behavior}
+
+As with any other field, the `TOC` field can accept switches defined within the field code that control the how the table of contents is built. Certain switches are used to control which entries are included and at what level while others are used to control the appearance of the TOC. Switches can be combined together to allow complex table of contents to be produced.
+
+![working-with-table-of-contents-aspose-words-net](/net/words/images/1118966fa95748ea-working-with-table-of-contents-1.png)
+
+By default these switches above are included when inserting a default `TOC` in the document. A `TOC` with no switches will include content from the built-in heading styles (as if the \O switch is set). The available `TOC` switches that are supported by Aspose.Words are listed below and their uses are described in detail. They can be divided into separate sections based off their type. The switches in the first section define what content to include in the `TOC` and the switches in the second section control the appearance of the TOC. If a switch is not listed here then it is currently unsupported. All switches will be supported in future versions. We are adding further support with every release.
+
+### Entry Marking Switches {#entry-marking-switches}
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Switch
+
+</th>
+<th>
+
+Description
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+**Heading Styles**\
+*(\O Switch)*
+
+</td>
+<td>
+
+This switch defines that the `TOC` should be built off the built-in heading styles. In Microsoft Word these are defined by Heading 1 - Heading 9. In Aspose.Words these styles are represented by the corresponding StyleIdentifier enumeration. This enumeration represents a locale independent identifier of a style, for example `StyleIdentifier.Heading1` represents the Heading 1 style. Using this, the formatting and properties of the style can be retrieved from the Style collection of the document. The corresponding Style class can be retrieved from the `Document.Styles` collection by using the indexed property of type StyleIdentifier.
+
+![working-with-table-of-contents-styles](/net/words/images/266ccacb732fbe24-working-with-table-of-contents-2.png)
+
+Any content formatted with these styles are included in the table of contents. The level of the heading will define the corresponding hierarchical level of the entry in the TOC. For instance, a paragraph with Heading 1 style will be treated as the first level in the `TOC` whereas a paragraph with Heading 2 will be treated as the next level in the hierarchy and so forth.
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Outline Levels**\
+*(\U switch)*
+
+</td>
+<td>
+
+Each paragraph can define an outline level under Paragraph options.
+
+![working-with-table-of-contents-paragraph](/net/words/images/339d7f64a77305b0-working-with-table-of-contents-3.png)
+
+This setting dictates which level this paragraph should be treated in document hierarchy. This is commonly used practice used to easily structure the layout of a document. This hierarchy can be viewed by changing to Outline View in Microsoft Word. Similar to heading styles, there can be 1 - 9 outline levels in addition to the "Body Text" level. Outline levels 1 - 9 will appear in the `TOC` in the corresponding level of the hierarchy\
+Any content with an outline level either set in the paragraph style or directly on the paragraph itself is included in the TOC. In Aspose.Words the outline level is represented by the `ParagraphFormat.OutlineLevel` property of the Paragraph node. The outline level of a paragraph style is represented in the same way by the `Style.ParagraphFormat` property.
+
+:::info
+Note that built-in heading styles such as Heading 1 have an outline level compulsory set in style settings.
+:::
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Custom Styles**\
+*(\T switch)*
+
+</td>
+<td>
+
+This switch will allow custom styles to be used when collecting entries to be used in the TOC. This is often used in conjunction with the \O switch to include custom styles along with built-in heading styles in the TOC.\
+The parameters of the switch should be enclosed within speech marks. Many custom styles can be included, for each style the name should be specified followed by a comma followed by the level that the style should appear in the `TOC` as. Further styles are also separated by a comma as well.\
+For instance
+
+```csharp
+{ TOC \o "1-3" \t "CustomHeading1, 1,   CustomHeading2, 2"}
+```
+
+will use content styled with CustomHeading1 as level 1 content in the `TOC` and CustomHeading2 as level 2.
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Use TC Fields**\
+*(\F and \L Switches)*
+
+</td>
+<td>
+
+In older versions of Microsoft Word, the only way to build a `TOC` was the use of TC fields. These fields are inserted hidden into the document even when field codes are shown. They include the text that should be displayed in the entry and the `TOC` is built from them. This functionality is now not used very often but may still be useful in some occasions to include entries in the `TOC` which are not indented to be visible in the document.\
+When inserted these fields appear hidden even when field codes are displayed. They cannot be seen without showing hidden content. To see these fields Show paragraph formatting must be selected.
+
+![working-with-table-of-contents-paragraph-settings](/net/words/images/e764cd3e44b86023-working-with-table-of-contents-4.png)
+
+These fields can be inserted into a document at any position like any other field and are represented by the `FieldType.FieldTOCEntry` enumeration.\
+The \F switch in a `TOC` is used to specify that TC fields should be used as entries. The switch on its own without any extra identifier means that any TC field in the document will be included. Any extra parameter, often a single letter, will designate that only TC fields which have a matching \f switch will be included in the TOC. For instance \*
+
+```csharp
+{ TOC \f t }
+```
+
+will only include TC fields such as
+
+```csharp
+{ TC \f t }
+```
+
+The `TOC` field also has a related switch, the \L switch specifies that only TC field with levels within the specified range are included.
+
+![table-of-contents-field-aspose-words-net](/net/words/images/c66d90b9d58ce1a7-working-with-table-of-contents-5.png)
+
+The `TC` fields themselves also can have `{several, multiple, a few, many, numerous}` switches set. These are:
+
+\- \*\F - Explained above.\*
+
+\- \*\L - Defines which level in the `TOC` this TC field will appear in. A `TOC` which uses this same switch will only include this TC field if it's within the specified range.\*
+
+\- \_\N - The page numbering for this `TOC` entry is not displayed. Sample code of how to insert TC fields can be found in the next section.
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+### Appearance Related Switches {#appearance-related-switches}
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Switch
+
+</th>
+<th>
+
+Description
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+**Omit Page Numbers**\
+*(\N Switch)*
+
+</td>
+<td>
+
+This switch is used to hide page numbers for certain levels of the TOC. For example you can define
+
+```csharp
+{TOC \o "1-4" \n "3-4" }
+```
+
+and the page numbers on the entries of levels 3 and four will be hidden along with the leader dots (if there are any). To specify only one level a range should still be used, for example "1-1" will exclude page numbers only for the first level.\
+Supplying no level range will omit page numbers for all levels in the TOC. This is useful to set when exporting a document to HTML or similar format. This is because HTML based formats don't have any page concept and thus don't need any page numbering.
+
+![todo:image_alt_text](/net/words/images/6350b62e865be25c-working-with-table-of-contents-6.png)
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Insert As Hyperlinks**\
+*(\H Switch)*
+
+</td>
+<td>
+
+This switch specifies that `TOC` entries are inserted as hyperlinks. When viewing a document in Microsoft Word these entries will still appear as normal text inside the `TOC` but are hyperlinked and thus can be used to navigate to the position of the original entry in the document by using *Ctrl + Left Click* in Microsoft Word. When this switch is included then these links are also preserved in other formats. For instance in HTML based formats including EPUB and rendered formats such as PDF and XPS these will be exported as working links.\
+Without this switch set the `TOC` in all of these outputs will be exported as plain text and will not demonstrate this behavior. If a document is opened in MS Word the text of the entries will also not be clickable in this way but the page numbers can still be used to navigate to the original entry.
+
+![working-with-table-of-contents-titles](/net/words/images/8acf26a3352e1ee0-working-with-table-of-contents-7.png)
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Set Separator Character**\
+*(\P Switch)*
+
+</td>
+<td>
+
+This switch allows the content separating the title of the entry and page numbering to be easily changed in the TOC. The separator to use should be specified after this switch and enclosed in speech marks.\
+Contrary to what is documented in Office documentation, only one character can be used instead of up to five. This applies to both MS Word and Aspose.Words.\
+Using this switch is not recommended as it does not allow much control over what it used to separate entries and page numbers in the TOC. Instead it is recommended to edit the appropriate `TOC` style such as `StyleIdentifier.Toc1` and from there edit the leader style with access to specific font members etc. Further details of how to do this can be found later in the article.
+
+![working-with-table-of-contents-toc](/net/words/images/a9b46212b4b41a85-working-with-table-of-contents-8.png)
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Preserve Tab Entries**\
+*(\W Switch)*
+
+</td>
+<td>
+
+Using this switch will specify that any entries that have a tab character, for instance a heading which has a tab at the end of the line, will be retained as a proper tab character when populating the TOC. This means the function of the tab character will be present in the `TOC` and can be used to format the entry. For example certain entries may use tab stops and tab characters to evenly space out the text. As long as the corresponding `TOC` level defines the equivalent tab stops then the generated `TOC` entries will appear with similar spacing.
+
+In the same situation if this switch was not defined then the tab characters would be converted to white space equivalent as non functioning tabs. The output would then not appear as expected.
+
+![working-with-table-of-contents-aspose](/net/words/images/49cfc1cf11b1dd41-working-with-table-of-contents-9.png)
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Preserve New Line Entries**\
+*(\X Switch)*
+
+</td>
+<td>
+
+Similar to the switch above, this switch specifies that headings spanning over multiple lines (using new line characters not separate paragraphs) will be preserved as they are in the generated TOC. For example, a heading which is to spread across multiple lines can use the new line character (Ctrl + Enter or `ControlChar.LineBreak`) to separate content across different lines. With this switch specified, the entry in the `TOC` will preserve these new line characters as shown below.
+
+In this situation if the switch is not defined then the new line characters are converted to a single white space.
+
+![working-with-table-of-contents-aspose-words](/net/words/images/f1ab910c4582df02-working-with-table-of-contents-10.png)
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+## Insert TC Fields {#insert-tc-fields}
+
+You can insert a new TC field at the current position of the <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder</a> by calling the <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/insertfield/" target="_blank" rel="nofollow noopener noreferrer">InsertField</a> method and specifying the field name as TC along with any switches that are needed.
+
+The following code example shows how to insert a `TC` field into the document using **DocumentBuilder**:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.InsertField("TC \"Entry Text\" \\f t");
+
+doc.Save(ArtifactsDir + "AddContentUsingDocumentBuilder.InsertTcField.docx");
+```
+
+Often a specific line of text is designated for the `TOC` and is marked with a `TC` field. The easy way to do this in Microsoft Word is to highlight the text and press *ALT+SHIFT+O*. This automatically creates a `TC` field using the selected text. The same technique can be accomplished through code. The code below will find text matching the input and insert a `TC` field in the same position with the text. The code is based off the same technique used in the article.
+
+The following code example shows how to find and insert a `TC` field at text in a document:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+
+FindReplaceOptions options = new FindReplaceOptions();
+options.ApplyFont.HighlightColor = Color.DarkOrange;
+options.ReplacingCallback = new InsertTCFieldHandler("Chapter 1", "\\l 1");
+
+doc.Range.Replace(new Regex("The Beginning"), "", options);
+```
+
+## Modify Table of Contents {#modify-table-of-contents}
+
+The formatting of entries in the `TOC` do not use the original styles of the marked entries, instead each level is formatted using an equivalent `TOC` style. For example the first level in the `TOC` is formatted with the **TOC1** style, the second level formatted with the **TOC2** style and so on. This means that to change the look of the `TOC` these styles must be modified. In Aspose.Words these styles are represented by the locale independent `StyleIdentifier.Toc1` through to `StyleIdentifier.Toc9` and can be retrieved from the <a href="https://reference.aspose.com/words/net/aspose.words/documentbase/styles/" target="_blank" rel="nofollow noopener noreferrer">Styles</a> collection using these identifiers.
+
+Once the appropriate style of the document has been retrieved the formatting for this style can be modified. Any changes to these styles will be automatically reflected on the TOCs in the document.
+
+The following code example changes a formatting property used in the first level `TOC` style:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+// Retrieve the style used for the first level of the TOC and change the formatting of the style.
+doc.Styles[StyleIdentifier.Toc1].Font.Bold = true;
+```
+
+It is also useful to note that any direct formatting of a paragraph (defined on the paragraph itself and not in the style) marked to be included the `TOC` will be copied over in the entry in the TOC. For example if the Heading 1 style is used to mark content for the `TOC` and this style has Bold formatting while the paragraph also has italic formatting directly applied to it. The resulting `TOC` entry will not be bold as that is part of style formatting however it will be italic as this is directly formatted on the paragraph.
+
+You can also control the formatting of the separators used between each entry and page number. By default this is a dotted line which is spread across to the page numbering using a tab character and a right tab stop lined up close to the right margin.
+
+Using the <a href="https://reference.aspose.com/words/net/aspose.words/style/" target="_blank" rel="nofollow noopener noreferrer">Style</a> class retrieved for the particular `TOC` level you want to modify, you can also modify how these appear in the document. To change how this appears firstly <a href="https://reference.aspose.com/words/net/aspose.words/style/paragraphformat/" target="_blank" rel="nofollow noopener noreferrer">ParagraphFormat</a> must be called to retrieve the paragraph formatting for the style. From this the tab stops can be retrieved by calling <a href="https://reference.aspose.com/words/net/aspose.words/paragraphformat/tabstops/" target="_blank" rel="nofollow noopener noreferrer">TabStops</a> and the appropriate tab stop modified. Using this same technique the tab itself can be moved or removed all together.
+
+The following code example shows how to modify the position of the right tab stop in `TOC` related paragraphs:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Table of contents.docx");
+
+foreach (Paragraph para in doc.GetChildNodes(NodeType.Paragraph, true))
+{
+    // Check if this paragraph is formatted using the TOC result based styles.
+    // This is any style between TOC and TOC9.
+    if (para.ParagraphFormat.Style.StyleIdentifier >= StyleIdentifier.Toc1 &&
+        para.ParagraphFormat.Style.StyleIdentifier <= StyleIdentifier.Toc9)
+    {
+        // Get the first tab used in this paragraph, this should be the tab used to align the page numbers.
+        TabStop tab = para.ParagraphFormat.TabStops[0];
+        
+        // Remove the old tab from the collection.
+        para.ParagraphFormat.TabStops.RemoveByPosition(tab.Position);
+        
+        // Insert a new tab using the same properties but at a modified position.
+        // We could also change the separators used (dots) by passing a different Leader type.
+        para.ParagraphFormat.TabStops.Add(tab.Position - 50, tab.Alignment, tab.Leader);
+    }
+}
+
+doc.Save(ArtifactsDir + "WorkingWithTableOfContent.ChangeTocTabStops.docx");
+```
+
+## Remove Table of Contents from the Document {#remove-table-of-contents-from-the-document}
+
+A table of contents can be removed from the document by removing all nodes found between the `FieldStart` and FieldEnd node of the `TOC` field. The code below demonstrates this. The removal of the `TOC` field is simpler than a normal field as we do not keep track of nested fields. Instead we check the <a href="https://reference.aspose.com/words/net/aspose.words.fields/fieldend/" target="_blank" rel="nofollow noopener noreferrer">FieldEnd</a> node is of type <a href="https://reference.aspose.com/words/net/aspose.words.fields/fieldtype/" target="_blank" rel="nofollow noopener noreferrer">FieldType.FieldTOC</a> which means we have encountered the end of the current TOC. This technique can be used in this case without worrying about any nested fields as we can assume that any properly formed document will have no fully nested `TOC` field inside another `TOC` field.
+
+Firstly the <a href="https://reference.aspose.com/words/net/aspose.words.fields/fieldstart/" target="_blank" rel="nofollow noopener noreferrer">FieldStart</a> nodes of each `TOC` are collected and stored. The specified `TOC` is then enumerated so all nodes within the field are visited and stored. The nodes are then removed from the document.
+
+The following code example shows how to remove a specified `TOC` from a document:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+public void RemoveToc()
+{
+    Document doc = new Document(MyDir + "Table of contents.docx");
+
+    // Remove the first table of contents from the document.
+    RemoveTableOfContents(doc, 0);
+
+    doc.Save(ArtifactsDir + "RemoveContent.RemoveToc.doc");
+}
+
+/// <summary>
+/// Removes the specified table of contents field from the document.
+/// </summary>
+/// <param name="doc">The document to remove the field from.</param>
+/// <param name="index">The zero-based index of the TOC to remove.</param>
+public void RemoveTableOfContents(Document doc, int index)
+{
+    // Store the FieldStart nodes of TOC fields in the document for quick access.
+    List<FieldStart> fieldStarts = new List<FieldStart>();
+    // This is a list to store the nodes found inside the specified TOC. They will be removed at the end of this method.
+    List<Node> nodeList = new List<Node>();
+
+    foreach (FieldStart start in doc.GetChildNodes(NodeType.FieldStart, true))
+    {
+        if (start.FieldType == FieldType.FieldTOC)
+        {
+            fieldStarts.Add(start);
+        }
+    }
+
+    // Ensure the TOC specified by the passed index exists.
+    if (index > fieldStarts.Count - 1)
+        throw new ArgumentOutOfRangeException("TOC index is out of range");
+
+    bool isRemoving = true;
+    
+    Node currentNode = fieldStarts[index];
+    while (isRemoving)
+    {
+        // It is safer to store these nodes and delete them all at once later.
+        nodeList.Add(currentNode);
+        currentNode = currentNode.NextPreOrder(doc);
+
+        // Once we encounter a FieldEnd node of type FieldTOC,
+        // we know we are at the end of the current TOC and stop here.
+        if (currentNode.NodeType == NodeType.FieldEnd)
+        {
+            FieldEnd fieldEnd = (FieldEnd) currentNode;
+            if (fieldEnd.FieldType == FieldType.FieldTOC)
+                isRemoving = false;
+        }
+    }
+
+    foreach (Node node in nodeList)
+    {
+        node.Remove();
+    }
+}
+```
+
+## Extract Table of Contents {#extract-table-of-contents}
+
+If you want to extract a table of contents from any Word document, the following code sample can be used:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Table of contents.docx");
+
+foreach (Field field in doc.Range.Fields)
+{
+    if (field.Type.Equals(FieldType.FieldHyperlink))
+    {
+        FieldHyperlink hyperlink = (FieldHyperlink)field;
+        if (hyperlink.SubAddress != null && hyperlink.SubAddress.StartsWith("_Toc"))
+        {
+            Paragraph tocItem = (Paragraph)field.Start.GetAncestor(NodeType.Paragraph);
+            Console.WriteLine(tocItem.ToString(SaveFormat.Text).Trim());
+            Console.WriteLine("------------------");
+            if (tocItem != null)
+            {
+                Bookmark bm = doc.Range.Bookmarks[hyperlink.SubAddress];
+                Paragraph pointer = (Paragraph)bm.BookmarkStart.GetAncestor(NodeType.Paragraph);
+                Console.WriteLine(pointer.ToString(SaveFormat.Text));
+            }
+        }
+    }
+}
+```

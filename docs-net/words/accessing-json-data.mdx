@@ -1,0 +1,399 @@
+---
+title: "Accessing JSON Data in C#"
+sidebar_label: "Accessing JSON Data in C#"
+sidebar_key: "net-words-accessing-json-data"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/accessing-json-data.md"
+source_commit: ""
+source_sha256: "b0dca7b2d3910e716d62867ea9a218ed20c1e423da4965d5d19e3e0026d58241"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/words/net/accessing-json-data/"
+source_markdown_url: "https://docs.aspose.com/words/net/accessing-json-data.md"
+source_snapshot_sha256: "9b4b856f5e50fbece6e8feda25046f6e5c720a457a15810e50319a2974fe747c"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Purpose Summary
+
+This page explains how to supply JSON data to Aspose.Words using JsonDataSource, supporting both simple and complex JSON structures.
+
+To access JSON data while building a report, you can pass a `JsonDataSource` instance to the engine as a data source.
+
+Using of `JsonDataSource` enables you to work with typed values of JSON elements in template documents. For more convenience, the set of simple JSON types is extended as follows:
+
+- Int64?
+- Double?
+- Boolean?
+- DateTime?
+- String
+
+**Note** - Working with complex JSON types (objects and arrays) is also supported.
+
+While loading data to `JsonDataSource`, the engine performs JSON deserialization and generates corresponding internal objects. So, in template documents, a `JsonDataSource` instance should be treated according to what a root JSON element represents.
+
+If a root JSON element is an object, a `JsonDataSource` instance should be treated as an object as well as shown in the following example.
+
+JSON
+
+```json
+{
+	Name: "John Doe",
+	Age: 30,
+	Birth: "1989-04-01 4:00:00 pm",
+	Child: [ "Ann Doe", "Charles Doe" ]
+}
+```
+
+Template document
+
+```xml
+Name: <<[Name]>>, Age: <<[Age]>>, Date of Birth: <<[Birth]:"dd.MM.yyyy">>
+
+Children:
+<<foreach [in Child]>><<[Child_Text]>>
+<</foreach>>
+```
+
+Source code
+
+```csharp
+Document doc = ...              // Loading a template document.
+JsonDataSource dataSource = ... // Loading JSON.
+
+ReportingEngine engine = new ReportingEngine();
+engine.BuildReport(doc, dataSource);
+```
+
+Result document
+
+```text
+Name: John Doe, Age: 30, Date of Birth: 01.04.1989
+
+Children:
+Ann Doe
+Charles Doe
+```
+
+**Note** - To reference a `JSON` object property that is an array of simple-type values, the name of the property (for example, "Child") should be used in a template document, whereas the same name with the "\_Text" suffix (for example, "Child_Text") should be used to reference the value of an item of this array.
+
+If a root JSON element is an array, a `JsonDataSource` instance should be treated as a sequence of items of this array as shown in the following example.
+
+JSON
+
+```json
+[
+	{
+		Name: "John Doe",
+		Age: 30,
+		Birth: "1989-04-01 4:00:00 pm"
+	},
+	{
+		Name: "Jane Doe",
+		Age: 27,
+		Birth: "1992-01-31 07:00:00 am"
+	},
+	{
+		Name: "John Smith",
+		Age: 51,
+		Birth: "1968-03-08 1:00:00 pm"
+	}
+]
+```
+
+Template document
+
+```xml
+<<foreach [in persons]>>Name: <<[Name]>>, Age: <<[Age]>>, Date of Birth: <<[Birth]:"dd.MM.yyyy">>
+<</foreach>>
+
+Average age: <<[persons.Average(p => p.Age)]>>
+```
+
+Source code
+
+```csharp
+Document doc = ...              // Loading a template document.
+JsonDataSource dataSource = ... // Loading JSON.
+
+ReportingEngine engine = new ReportingEngine();
+engine.BuildReport(doc, dataSource, "persons");
+```
+
+Result document
+
+```text
+Name: John Doe, Age: 30, Date of Birth: 01.04.1989
+Name: Jane Doe, Age: 27, Date of Birth: 31.01.1992
+Name: John Smith, Age: 51, Date of Birth: 08.03.1968
+
+Average age: 36
+```
+
+By default, if a root JSON element is an object having only one property that is an object or array in turn, the engine does not generate an internal root object while loading JSON data. So, in template documents, such a `JsonDataSource` instance should be treated according to what this property represents instead. For instance, the following JSON snippets can be used to produce the same results in previous examples of this section respectively.
+
+JSON 1
+
+```json
+{
+	Person:
+	{
+		Name: "John Doe",
+		Age: 30,
+		Birth: "1989-04-01 4:00:00 pm",
+		Child: [ "Ann Doe", "Charles Doe" ]
+	}
+}
+```
+
+JSON 2
+
+```json
+{
+	Persons:
+	[
+		{
+			Name: "John Doe",
+			Age: 30,
+			Birth: "1989-04-01 4:00:00 pm"
+		},
+		{
+			Name: "Jane Doe",
+			Age: 27,
+			Birth: "1992-01-31 07:00:00 am"
+		},
+		{
+			Name: "John Smith",
+			Age: 51,
+			Birth: "1968-03-08 1:00:00 pm"
+		}
+	]
+}
+```
+
+However, if your scenario requires an internal object for a root JSON element to be always generated while loading data to `JsonDataSource`, you can force this as shown in the following code snippet.
+
+```csharp
+JsonDataLoadOptions options = new JsonDataLoadOptions();
+options.AlwaysGenerateRootObject = true;
+JsonDataSource dataSource = new JsonDataSource(..., options);
+```
+
+The following example sums up typical scenarios involving nested JSON objects and arrays.
+
+JSON
+
+```json
+[
+	{
+		Name: "John Smith",
+		Contract:
+		[
+			{
+				Client:
+				{
+					Name: "A Company"
+				},
+				Price: 1200000
+			},
+			{
+				Client:
+				{
+					Name: "B Ltd."
+				},
+				Price: 750000
+			},
+			{
+				Client:
+				{
+					Name: "C & D"
+				},
+				Price: 350000
+			}
+		]
+	},
+	{
+		Name: "Tony Anderson",
+		Contract:
+		[
+			{
+				Client:
+				{
+					Name: "E Corp."
+				},
+				Price: 650000
+			},
+			{
+				Client:
+				{
+					Name: "F & Partners"
+				},
+				Price: 550000
+			}
+		]
+	},
+	{
+		Name: "July James",
+		Contract:
+		[
+			{
+				Client:
+				{
+					Name: "G & Co."
+				},
+				Price: 350000
+			},
+			{
+				Client:
+				{
+					Name: "H Group"
+				},
+				Price: 250000
+			},
+			{
+				Client:
+				{
+					Name: "I & Sons"
+				},
+				Price: 100000
+			},
+			{
+				Client:
+				{
+					Name: "J Ent."
+				},
+				Price: 100000
+			}
+		]
+	}
+]
+```
+
+Template document
+
+```xml
+<<foreach [in managers]>>Manager: <<[Name]>>
+Contracts:
+<<foreach [in Contract]>>- <<[Client.Name]>> ($<<[Price]>>)
+<</foreach>>
+<</foreach>>
+```
+
+Source code
+
+```csharp
+Document doc = ...              // Loading a template document.
+JsonDataSource dataSource = ... // Loading JSON.
+
+ReportingEngine engine = new ReportingEngine();
+engine.BuildReport(doc, dataSource, "managers");
+```
+
+Result document
+
+```text
+Manager: John Smith
+Contracts:
+- A Company ($1200000)
+- B Ltd. ($750000)
+- C & D ($350000)
+
+Manager: Tony Anderson
+Contracts:
+- E Corp. ($650000)
+- F & Partners ($550000)
+
+Manager: July James
+Contracts:
+- G & Co. ($350000)
+- H Group ($250000)
+- I & Sons ($100000)
+- J Ent. ($100000)
+```
+
+For recognition of JSON simple values (null, boolean, number, integer, and string), the engine provides two modes: *loose* and *strict*. In the loose mode, types of JSON simple values are determined upon parsing of their string representations. In the strict mode, types of JSON simple values are determined from JSON notation itself. To see the main difference between the modes, consider the following JSON snippet.
+
+```json
+{ prop: "123" }
+```
+
+In the loose mode, the type of `prop` is determined as an integer, whereas in the strict mode, it is determined as a string.
+
+The loose mode is used by the engine by default to support more typed data representation options. However, in some scenarios, it can be more preferable to disable recognition of numbers and other JSON simple values from strings, for example, when you need to keep leading padding zeros in a string value representing a number. In this case, you can switch to the strict mode as shown in the following code snippet.
+
+```csharp
+JsonDataLoadOptions options = new JsonDataLoadOptions();
+options.SimpleValueParseMode = JsonSimpleValueParseMode.Strict;
+JsonDataSource dataSource = new JsonDataSource(..., options);
+```
+
+**Note** - Parsing of date-time values does not depend on whether the loose or strict mode is used.
+
+Recognition of date-time values is a special case, because <a href="https://www.json.org/" target="_blank" rel="nofollow noopener noreferrer">JSON specification</a> does not define a format for their representation. So, by default, while parsing date-time values from strings, the engine tries several formats in the following order:
+
+1. <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank" rel="nofollow noopener noreferrer">The ISO-8601 format</a> (for values like "2015-03-02T13:56:04Z")
+2. <a href="https://docs.microsoft.com/en-us/previous-versions/dotnet/articles/bb299886\(v=msdn.10\" target="_blank" rel="nofollow noopener noreferrer">The Microsoft® JSON date-time format</a>#from-javascript-literals-to-json) (for values like "/Date(1224043200000)/")
+3. All date-time formats supported for the current culture
+4. All date-time formats supported for the English USA culture
+5. All date-time formats supported for the English New Zealand culture
+
+Although this approach is quite flexible, in some scenarios, you may need to restrict strings to be recognized as date-time values. You can achieve this by specifying one or several exact formats in the context of the current culture to be used while parsing date-time values from strings as shown in the following example.
+
+```csharp
+List<String> formats = new List<String>();
+formats.Add("MM/dd/yyyy");
+
+JsonDataLoadOptions options = new JsonDataLoadOptions();
+options.ExactDateTimeParseFormats = formats;
+JsonDataSource dataSource = new JsonDataSource(..., options);
+```
+
+In this example, strings conforming the format "MM/dd/yyyy" are going to be recognized as date-time values while loading JSON, whereas the others are not (but see the following note).
+
+In some scenarios, you may need to disable recognition of date-time values at all, for example, when you deal with strings containing already formatted date-time values, which you do not want to re-format using the engine. You can achieve this by setting the exact date-time parse formats to an empty list (but see the following note).
+
+**Note** - Strings conforming the Microsoft® JSON date-time format (for example, "/Date(1224043200000)/") are always recognized as date-time values regardless of the exact date-time parse formats.
+
+By default, the engine trims leading and trailing whitespaces for JSON string values while loading. However, you can instruct the engine to preserve the whitespaces as follows.
+
+```csharp
+JsonDataLoadOptions options = new JsonDataLoadOptions();
+options.PreserveSpaces = true;
+JsonDataSource dataSource = new JsonDataSource(..., options);
+```
+
+## Related APIs
+
+The following APIs are related to working with JSON data in Aspose.Words for .NET:
+
+- <a href="https://reference.aspose.com/words/net/aspose.words.reporting/jsondatasource/" target="_blank" rel="nofollow noopener noreferrer">JsonDataSource</a> - Represents a data source for JSON data that can be used with the reporting engine.
+- <a href="https://reference.aspose.com/words/net/aspose.words.reporting/jsondataloadoptions/" target="_blank" rel="nofollow noopener noreferrer">JsonDataLoadOptions</a> - Provides options for loading and parsing JSON data.
+- <a href="https://reference.aspose.com/words/net/aspose.words.reporting/reportingengine/" target="_blank" rel="nofollow noopener noreferrer">ReportingEngine</a> - The main class responsible for building reports using data sources.
+
+## FAQ
+
+1. **Q:** How do I load JSON data into Aspose.Words ReportingEngine?\
+   **A:** Create a `JsonDataSource` from a JSON string, file, or stream (optionally supplying `JsonDataLoadOptions`). Then pass the `JsonDataSource` to `ReportingEngine.BuildReport`, optionally specifying the root element name.
+
+2. **Q:** My JSON root element is an array - how should I reference it in the template?\
+   **A:** Supply the array name as the third argument to `BuildReport`. For example, `engine.BuildReport(doc, dataSource, "persons")` lets you iterate with `<<foreach [in persons]>>` in the template.
+
+3. **Q:** How can I control how date strings are parsed from JSON?\
+   **A:** Use `JsonDataLoadOptions.ExactDateTimeParseFormats` to provide one or more date formats that the engine should recognize. Setting it to an empty collection does not disable recognition: no additional formats are used, but strings in the Microsoft JSON date format (for example `/Date(1224043200000)/`) are still recognized as date-time values.
+
+4. **Q:** What is the difference between loose and strict parsing modes for simple JSON values?\
+   **A:** In **loose** mode (default) the engine infers the type from the string content, so `"123"` becomes an integer. In **strict** mode the engine respects the JSON literal types, keeping `"123"` as a string unless the JSON explicitly defines a number.
+
+5. **Q:** How can I force the engine to always generate a root object for my JSON data?\
+   **A:** Set `JsonDataLoadOptions.AlwaysGenerateRootObject = true` when constructing the `JsonDataSource`. This ensures a root object is created even when the JSON itself starts with an array or a single property object.

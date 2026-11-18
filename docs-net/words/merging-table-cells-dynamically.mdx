@@ -1,0 +1,283 @@
+---
+title: "Merging Table Cells Dynamically in C#"
+sidebar_label: "Merging Table Cells Dynamically in C#"
+sidebar_key: "net-words-merging-table-cells-dynamically"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/merging-table-cells-dynamically.md"
+source_commit: ""
+source_sha256: "ae7c4061dd367bb06faa41a4ba4e91c53e03291cfe85621e8f6d9089231e6c1c"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/words/net/merging-table-cells-dynamically/"
+source_markdown_url: "https://docs.aspose.com/words/net/merging-table-cells-dynamically.md"
+source_snapshot_sha256: "b20897cf0f48cd8d2b69e719c5dd361508b5cb1db9c7aa84441b4ca53251d514"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Purpose Summary
+
+This page explains how to merge table cells dynamically during document generation using template logic.
+
+You can merge table cells with equal textual contents within your reports dynamically using `cellMerge` tags. The syntax of a `cellMerge` tag is defined as follows.
+
+```csharp
+<<cellMerge>>
+```
+
+By default, a `cellMerge` tag causes a cell merging operation only in a vertical direction during runtime. However, you can alter this behavior in the following ways:
+
+- To merge cells only in a horizontal direction, use the `horz` switch as follows.
+  `csharp<<cellMerge -horz>>`
+
+- To merge cells in both - vertical and horizontal - directions, use the `both` switch as follows.
+  `csharp<<cellMerge -both>>`
+
+For two or more successive table cells to be merged dynamically in either direction by the engine, the following requirements must be met:
+
+- Each of the cells must contain a `cellMerge` tag denoting a cell merging operation in the same direction.
+- Each of the cells must not be already merged in another direction. This requirement does not apply when a `both` switch is used.
+- The cells must have equal textual contents ignoring leading and trailing whitespaces.
+
+Consider the following template.
+
+<table className="outputting-sequential-data">
+	<tbody>
+		<tr>
+			<td>...</td>
+			<td>...</td>
+			<td>...</td>
+		</tr>
+		<tr>
+			<td>...</td>
+			<td>&lt;&lt;cellMerge&gt;&gt;&lt;&lt;[value1]&gt;&gt;</td>
+			<td>...</td>
+		</tr>
+    <tr>
+			<td>...</td>
+			<td>&lt;&lt;cellMerge&gt;&gt;&lt;&lt;[value2]&gt;&gt;</td>
+			<td>...</td>
+		</tr>
+    <tr>
+			<td>...</td>
+			<td>...</td>
+			<td>...</td>
+		</tr>
+	</tbody>
+</table>
+
+If `value1` and `value2` have the same value, say "Hello", table cells containing `cellMerge` tags are successfully merged during runtime and a result report looks as follows then.
+
+<table className="outputting-sequential-data">
+	<tbody>
+		<tr>
+			<td>...</td>
+			<td>...</td>
+			<td>...</td>
+		</tr>
+		<tr>
+			<td>...</td>
+      <td rowspan="2">**Hello**</td>
+			<td>...</td>
+		</tr>
+    <tr>
+			<td>...</td>
+			<td>...</td>
+		</tr>
+    <tr>
+			<td>...</td>
+			<td>...</td>
+			<td>...</td>
+		</tr>
+	</tbody>
+</table>
+
+If `value1` and `value2` have different values, say "Hello" and "World", table cells containing `cellMerge` tags are not merged during runtime and a result report looks as follows then.
+
+<table className="outputting-sequential-data">
+	<tbody>
+		<tr>
+			<td>...</td>
+			<td>...</td>
+			<td>...</td>
+		</tr>
+		<tr>
+			<td>...</td>
+      <td>**Hello**</td>
+			<td>...</td>
+		</tr>
+    <tr>
+			<td>...</td>
+      <td>**World**</td>
+			<td>...</td>
+		</tr>
+    <tr>
+			<td>...</td>
+			<td>...</td>
+			<td>...</td>
+		</tr>
+	</tbody>
+</table>
+
+**Note** - A `cellMerge` tag can be normally used within a table data band.
+
+You can define an additional restriction on dynamic merging of table cells by providing an expression for a `cellMerge` tag using the following syntax.
+
+```csharp
+<<cellMerge [expression]>>
+```
+
+During runtime, expressions defined for `cellMerge` tags are evaluated and dynamic cell merging is discarded for those tags, which expressions return unequal values, even if all other conditions for merging such as equal cell textual contents are met. In particular, this feature is useful when cells corresponding to different data band sequence elements should not be merged as shown in the following example.
+
+Assume that you have the `Invoice` and `InvoiceItem` classes defined in your application as follows.
+
+```csharp
+public class Invoice
+{
+	public int Number { get { ... } }
+	public IEnumerable<InvoiceItem> Items { get { ... } }
+	...
+}
+
+public class InvoiceItem
+{
+	public String Ware { get { ... } }
+	public String Pack { get { ... } }
+	public int Quantity { get { ... } }
+	...
+}
+```
+
+Given that `invoices` is an enumeration of `Invoice` instances, you could use the following template to output information on several invoices in one table.
+
+<table className="outputting-sequential-data">
+	<tbody>
+		<tr>
+      <td>**#**</td>
+			<td>**Ware**</td>
+      <td>**Pack**</td>
+      <td>**Quantity**</td>
+		</tr>
+		<tr>
+			<td>&lt;&lt;foreach [invoice in invoices]&gt;&gt;&lt;&lt;foreach [item in invoice.Items]&gt;&gt;&lt;&lt;[invoice.Number]&gt;&gt;&lt;&lt;cellMerge&gt;&gt;</td>
+      <td>&lt;&lt;[item.Ware]>>&lt;&lt;cellMerge>></td>
+      <td>&lt;&lt;[item.Pack]>></td>
+      <td>&lt;&lt;[item.Quantity]>>&lt;&lt;/foreach>>&lt;&lt;/foreach>></td>
+		</tr>
+	</tbody>
+</table>
+
+A result document would look as follows then.
+
+<table>
+	<tbody>
+		<tr>
+			<td>#</td>
+			<td>Ware</td>
+			<td>Pack</td>
+			<td>Quantity</td>
+		</tr>
+		<tr>
+			<td rowspan="2">11342</td>
+			<td rowspan="3">Natural Mineral Water</td>
+			<td>Bottle 1.0 L</td>
+			<td>30</td>
+		</tr>
+		<tr>
+			<td>Bottle 0.5 L</td>
+			<td>50</td>
+		</tr>
+		<tr>
+			<td>15385</td>
+			<td>Bottle 1.0 L</td>
+			<td>110</td>
+		</tr>
+	</tbody>
+</table>
+
+That is, cells corresponding to the same wares at different invoices would be merged, which is unwanted. To prevent this from happening, you can use the following template instead.
+
+<table className="outputting-sequential-data">
+	<tbody>
+		<tr>
+      <td>**#**</td>
+			<td>**Ware**</td>
+      <td>**Pack**</td>
+      <td>**Quantity**</td>
+		</tr>
+		<tr>
+			<td>&lt;&lt;foreach [invoice in invoices]&gt;&gt;&lt;&lt;foreach [item in invoice.Items]&gt;&gt;&lt;&lt;[invoice.Number]&gt;&gt;&lt;&lt;cellMerge&gt;&gt;</td>
+      <td>&lt;&lt;[item.Ware]>>&lt;&lt;cellMerge [invoice.IndexOf()]>></td>
+      <td>&lt;&lt;[item.Pack]>></td>
+      <td>&lt;&lt;[item.Quantity]>>&lt;&lt;/foreach>>&lt;&lt;/foreach>></td>
+		</tr>
+	</tbody>
+</table>
+
+Then, a result document looks as follows.
+
+<table>
+	<tbody>
+		<tr>
+			<td>#</td>
+			<td>Ware</td>
+			<td>Pack</td>
+			<td>Quantity</td>
+		</tr>
+		<tr>
+			<td rowspan="2">11342</td>
+			<td rowspan="2">Natural Mineral Water</td>
+			<td>Bottle 1.0 L</td>
+			<td>30</td>
+		</tr>
+		<tr>
+			<td>Bottle 0.5 L</td>
+			<td>50</td>
+		</tr>
+		<tr>
+			<td>15385</td>
+      <td>Natural Mineral Water</td>
+			<td>Bottle 1.0 L</td>
+			<td>110</td>
+		</tr>
+	</tbody>
+</table>
+
+**Note** - You could use `<<cellMerge [invoice.Number]>>` instead of `<<cellMerge [invoice.IndexOf()]>>` to get the same effect, but using of `IndexOf()` is a more generic approach.
+
+## Limitations and Considerations
+
+- All cells intended for merging must contain a `cellMerge` tag specifying the same direction (`-horz`, `-both`, or vertical by default).
+- Cells must not already be merged in a conflicting direction, except when using the `-both` switch.
+- Merging occurs only when adjacent cells contain identical text after trimming leading and trailing whitespace.
+- When an expression is provided (e.g., `<<cellMerge [expression]>>`), merging is discarded if the expressions evaluate to different values, even if textual content matches.
+- The `cellMerge` tag functions normally within table data bands.
+
+***
+
+## FAQ
+
+1. **Q:** How do I merge table cells horizontally using the `cellMerge` tag?\
+   **A:** Place the `<<cellMerge -horz>>` tag in each cell that should be merged horizontally. All involved cells must contain the tag, have the same text (ignoring surrounding whitespace), and must not be merged in another direction already.
+
+2. **Q:** Which tag should I use to merge cells both vertically and horizontally?\
+   **A:** Use the `<<cellMerge -both>>` switch. This tells the engine to consider merging in both directions, provided the usual content‑equality rules are satisfied.
+
+3. **Q:** What are the mandatory conditions for dynamic cell merging to occur?\
+   **A:** The cells must (a) contain a `cellMerge` tag with the same direction, (b) not be pre‑merged in a conflicting direction (unless the `-both` switch is used), and (c) have identical textual content after trimming leading and trailing spaces.
+
+4. **Q:** How can I prevent cells with identical text from merging when they belong to different data groups?\
+   **A:** Add an expression to the tag, e.g., `<<cellMerge [invoice.IndexOf()]>>`. The expression evaluates to a different value for each group, causing the engine to skip merging even if the visible text matches.
+
+5. **Q:** Can the `cellMerge` tag be used inside a table data band?\
+   **A:** Yes. The tag works normally within a data band; the engine evaluates it at runtime for each row generated by the band.

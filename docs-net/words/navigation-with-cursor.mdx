@@ -1,0 +1,282 @@
+---
+title: "Navigation with Cursor in C#"
+sidebar_label: "Navigation with Cursor in C#"
+sidebar_key: "net-words-navigation-with-cursor"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/navigation-with-cursor.md"
+source_commit: ""
+source_sha256: "99a444cb6c76c5925792ac30c50110cf1b04dd5ccc5871b961b6d54171d5cbc4"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/words/net/navigation-with-cursor/"
+source_markdown_url: "https://docs.aspose.com/words/net/navigation-with-cursor.md"
+source_snapshot_sha256: "4c98fc42f5bbfd435de920a139efeeaf4f40f827c8ffe6023da969b8554d1ab3"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Purpose Summary
+
+This page explains how to navigate a document using the document cursor and associated API operations.
+
+While working with a document, even if it is a short or long one, you will need to navigate through your document. Navigation with a virtual cursor represents the ability to navigate between different nodes in a document.
+
+Within a short document, moving around in a document is simple as you can move the insertion point even by using the keyboard's arrow keys or by clicking the mouse to locate the insertion point wherever you want. But once you have a large document that has many pages, these basic techniques will be insufficient.
+
+This article explains how to move around in a document and navigate with a virtual cursor to different parts of it.
+
+## Detecting Current Cursor Position
+
+Before starting the process of navigating through your document, you will need to get the node that is currently selected. You can get the exact position of the cursor at a selected node by using the <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/currentnode/" target="_blank" rel="nofollow noopener noreferrer">CurrentNode</a> property. In addition, instead of getting the current node, you can get the currently selected paragraph or the currently selected section by using the <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/currentparagraph/" target="_blank" rel="nofollow noopener noreferrer">CurrentParagraph</a> and <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/currentsection/" target="_blank" rel="nofollow noopener noreferrer">CurrentSection</a> properties.
+
+Any insert operations you perform using the <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder</a> will be inserted before the <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/currentnode/" target="_blank" rel="nofollow noopener noreferrer">CurrentNode</a>. When the current paragraph is empty or the cursor is positioned just before the end of the paragraph, the **CurrentNode** returns null.
+
+## Navigating Methods in a Document
+
+When you are editing text, it is important to know how to navigate your document and where exactly to move in it. Aspose.Words allows you to move around in a document and navigate to its different sections and parts - this is similar to the functionality of the Navigation Pane in Microsoft Word to go to a page or heading in a Word document without scrolling.
+
+The main method is to be able to move the cursor position to a specific node in your document, you can achieve this by using the <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/moveto/" target="_blank" rel="nofollow noopener noreferrer">MoveTo</a> method.
+
+The following code example shows how to move the **DocumentBuilder** to different nodes in a document:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// Start a bookmark and add content to it using a DocumentBuilder.
+builder.StartBookmark("MyBookmark");
+builder.Writeln("Bookmark contents.");
+builder.EndBookmark("MyBookmark");
+
+// The node that the DocumentBuilder is currently at is past the boundaries of the bookmark.
+Assert.AreEqual(doc.Range.Bookmarks[0].BookmarkEnd, builder.CurrentParagraph.FirstChild);
+
+// If we wish to revise the content of our bookmark with the DocumentBuilder, we can move back to it like this.
+builder.MoveToBookmark("MyBookmark");
+
+// Now we're located between the bookmark's BookmarkStart and BookmarkEnd nodes, so any text the builder adds will be within it.
+Assert.AreEqual(doc.Range.Bookmarks[0].BookmarkStart, builder.CurrentParagraph.FirstChild);
+
+// We can move the builder to an individual node,
+// which in this case will be the first node of the first paragraph, like this.
+builder.MoveTo(doc.FirstSection.Body.FirstParagraph.GetChildNodes(NodeType.Any, false)[0]);
+
+Assert.AreEqual(NodeType.BookmarkStart, builder.CurrentNode.NodeType);
+Assert.IsTrue(builder.IsAtStartOfParagraph);
+
+// A shorter way of moving the very start/end of a document is with these methods.
+builder.MoveToDocumentEnd();
+Assert.IsTrue(builder.IsAtEndOfParagraph);
+builder.MoveToDocumentStart();
+Assert.IsTrue(builder.IsAtStartOfParagraph);
+```
+
+But besides the basic **MoveTo** method, there are more specific ones.
+
+### Navigate to Beginning or End of a Document
+
+You can go to the beginning or  the end of your document using the <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetodocumentstart/" target="_blank" rel="nofollow noopener noreferrer">MoveToDocumentStart</a> and <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetodocumentend/" target="_blank" rel="nofollow noopener noreferrer">MoveToDocumentEnd</a> methods.
+
+The following code example shows how to move the cursor position to the beginning or the end of a document:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// Move the cursor position to the beginning of your document.
+builder.MoveToDocumentStart();
+Console.WriteLine("\nThis is the beginning of the document.");
+
+// Move the cursor position to the end of your document.
+builder.MoveToDocumentEnd();
+Console.WriteLine("\nThis is the end of the document.");
+```
+
+### Navigate With Bookmarks
+
+You can mark a place that you want to find and move to it again easily. You can insert as many bookmarks into your document as you want, and then navigate through them by identifying the bookmarks with unique names. You can move to a bookmark by using the <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetobookmark/#movetobookmark/" target="_blank" rel="nofollow noopener noreferrer">MoveToBookmark</a> method.
+
+The following code examples shows how to move a cursor position to a bookmark:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// Start a bookmark and add content to it using a DocumentBuilder.
+builder.StartBookmark("MyBookmark");
+builder.Writeln("Bookmark contents.");
+builder.EndBookmark("MyBookmark");
+
+// The node that the DocumentBuilder is currently at is past the boundaries of the bookmark.
+Assert.AreEqual(doc.Range.Bookmarks[0].BookmarkEnd, builder.CurrentParagraph.FirstChild);
+
+// If we wish to revise the content of our bookmark with the DocumentBuilder, we can move back to it like this.
+builder.MoveToBookmark("MyBookmark");
+
+// Now we're located between the bookmark's BookmarkStart and BookmarkEnd nodes, so any text the builder adds will be within it.
+Assert.AreEqual(doc.Range.Bookmarks[0].BookmarkStart, builder.CurrentParagraph.FirstChild);
+
+// We can move the builder to an individual node,
+// which in this case will be the first node of the first paragraph, like this.
+builder.MoveTo(doc.FirstSection.Body.FirstParagraph.GetChildNodes(NodeType.Any, false)[0]);
+```
+
+### Navigate to Table Cells
+
+You can move to a table cell by using the <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetocell/" target="_blank" rel="nofollow noopener noreferrer">MoveToCell</a> method. This method will enable you to navigate your cursor into any cell in a specific table. In addition, you can specify an index to move the cursor to any position or specified character in a cell within the **MoveToCell** method.
+
+The following code example shows how to move a cursor position to a specified table cell:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Tables.docx");
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// Move the builder to row 3, cell 4 of the first table.
+builder.MoveToCell(0, 2, 3, 0);
+builder.Write("\nCell contents added by DocumentBuilder");
+Table table = (Table)doc.GetChild(NodeType.Table, 0, true);
+
+Assert.AreEqual(table.Rows[2].Cells[3], builder.CurrentNode.ParentNode.ParentNode);
+Assert.AreEqual("Cell contents added by DocumentBuilderCell 3 contents\a", table.Rows[2].Cells[3].GetText().Trim());
+```
+
+### Navigate to a Field
+
+You can move to a specific field in your document by using the <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetofield/" target="_blank" rel="nofollow noopener noreferrer">MoveToField</a> method. In addition, you can move to a specific merge field by using the <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetomergefield/#movetomergefield/" target="_blank" rel="nofollow noopener noreferrer">MoveToMergeField</a> method.
+
+The following code example shows how to move the document builder cursor to a specific field:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// Insert a field using the DocumentBuilder and add a run of text after it.
+Field field = builder.InsertField("MERGEFIELD field");
+builder.Write(" Text after the field.");
+
+// The builder's cursor is currently at end of the document.
+Assert.Null(builder.CurrentNode);
+// We can move the builder to a field like this, placing the cursor at immediately after the field.
+builder.MoveToField(field, true);
+
+// Note that the cursor is at a place past the FieldEnd node of the field, meaning that we are not actually inside the field.
+// If we wish to move the DocumentBuilder to inside a field,
+// we will need to move it to a field's FieldStart or FieldSeparator node using the DocumentBuilder.MoveTo() method.
+Assert.AreEqual(field.End, builder.CurrentNode.PreviousSibling);
+builder.Write(" Text immediately after the field.");
+```
+
+### Navigate to a Header or Footer
+
+You can move to the beginning of a header or footer by using the <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetoheaderfooter/" target="_blank" rel="nofollow noopener noreferrer">MoveToHeaderFooter</a> method.
+
+The following code example shows how to move document builder cursor to a document header or footer:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// Specify that we want headers and footers different for first, even and odd pages.
+builder.PageSetup.DifferentFirstPageHeaderFooter = true;
+builder.PageSetup.OddAndEvenPagesHeaderFooter = true;
+
+// Create the headers.
+builder.MoveToHeaderFooter(HeaderFooterType.HeaderFirst);
+builder.Write("Header for the first page");
+builder.MoveToHeaderFooter(HeaderFooterType.HeaderEven);
+builder.Write("Header for even pages");
+builder.MoveToHeaderFooter(HeaderFooterType.HeaderPrimary);
+builder.Write("Header for all other pages");
+
+// Create two pages in the document.
+builder.MoveToSection(0);
+builder.Writeln("Page1");
+builder.InsertBreak(BreakType.PageBreak);
+builder.Writeln("Page2");
+
+doc.Save(ArtifactsDir + "AddContentUsingDocumentBuilder.MoveToHeadersFooters.docx");
+```
+
+### Navigate to a Section or Paragraph
+
+You can move to a specific section or paragraph by using the <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetoparagraph/" target="_blank" rel="nofollow noopener noreferrer">MoveToParagraph</a> or <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetosection/" target="_blank" rel="nofollow noopener noreferrer">MoveToSection</a> methods. In addition, you can specify an index to move the cursor to any position or a specified character in a paragraph within the **MoveToParagraph** method.
+
+The following code example shows how to move to a specific section and a specific paragraph in a document:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+doc.AppendChild(new Section(doc));
+
+// Move a DocumentBuilder to the second section and add text.
+DocumentBuilder builder = new DocumentBuilder(doc);
+builder.MoveToSection(1);
+builder.Writeln("Text added to the 2nd section.");
+
+// Create document with paragraphs.
+doc = new Document(MyDir + "Paragraphs.docx");
+ParagraphCollection paragraphs = doc.FirstSection.Body.Paragraphs;
+Assert.AreEqual(22, paragraphs.Count);
+
+// When we create a DocumentBuilder for a document, its cursor is at the very beginning of the document by default,
+// and any content added by the DocumentBuilder will just be prepended to the document.
+builder = new DocumentBuilder(doc);
+Assert.AreEqual(0, paragraphs.IndexOf(builder.CurrentParagraph));
+
+// You can move the cursor to any position in a paragraph.
+builder.MoveToParagraph(2, 10);
+Assert.AreEqual(2, paragraphs.IndexOf(builder.CurrentParagraph));
+builder.Writeln("This is a new third paragraph. ");
+Assert.AreEqual(3, paragraphs.IndexOf(builder.CurrentParagraph));
+```
+
+## Related APIs
+
+- <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/currentnode/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.CurrentNode</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/currentparagraph/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.CurrentParagraph</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/currentsection/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.CurrentSection</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/moveto/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.MoveTo</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetobookmark/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.MoveToBookmark</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetocell/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.MoveToCell</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetofield/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.MoveToField</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetomergefield/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.MoveToMergeField</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetoheaderfooter/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.MoveToHeaderFooter</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetoparagraph/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.MoveToParagraph</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetosection/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.MoveToSection</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetodocumentstart/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.MoveToDocumentStart</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetodocumentend/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.MoveToDocumentEnd</a>
+
+***
+
+## FAQ
+
+1. **Q:** How can I obtain the node where the cursor is currently positioned?\
+   **A:** Use the `DocumentBuilder.CurrentNode` property. It returns the node that the builder is positioned before. If the cursor is at the start of an empty paragraph, the property returns `null`. You can also retrieve the current paragraph or section via `CurrentParagraph` and `CurrentSection`.
+
+2. **Q:** How do I move the cursor to a specific bookmark?\
+   **A:** Call `DocumentBuilder.MoveToBookmark("BookmarkName")`. Ensure the bookmark exists; you can create one with `DocumentBuilder.StartBookmark("BookmarkName")` and `DocumentBuilder.EndBookmark("BookmarkName")`.
+
+3. **Q:** How can I navigate to the header or footer of a particular section?\
+   **A:** Use `DocumentBuilder.MoveToHeaderFooter(HeaderFooterType.HeaderPrimary)` or `HeaderFooterType.FooterPrimary`. To target a specific section, call `DocumentBuilder.MoveToSection(sectionIndex)` first; `MoveToHeaderFooter` then moves to the header or footer of that section.
+
+4. **Q:** How do I move the cursor to a cell inside a table?\
+   **A:** Use `DocumentBuilder.MoveToCell(tableIndex, rowIndex, columnIndex, characterIndex)`. All four arguments are indexes: the table in the current story, the row, the cell, and the character position in the cell (`0` for the start, `-1` for the end).
+
+5. **Q:** How can I move the cursor to the beginning or the end of the document?\
+   **A:** Call `DocumentBuilder.MoveToDocumentStart()` to place the cursor at the very start, or `DocumentBuilder.MoveToDocumentEnd()` to place it at the end of the document.

@@ -1,0 +1,203 @@
+---
+title: "Serialize and Work with a Document in a Database"
+sidebar_label: "Serialize and Work with a Document in a Database"
+sidebar_key: "net-words-serialize-and-work-with-a-document-in-a-database"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/serialize-and-work-with-a-document-in-a-database.html"
+source_commit: ""
+source_sha256: "5355e30f2caba0c78aa482cea506f8426e2d0e58ec92e06aee23c787139aa3c7"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/net/serialize-and-work-with-a-document-in-a-database/"
+source_snapshot_sha256: "d3deedf07462cd1357d0eda8b0e19e6db7e118666ca99c6f70aa49f6359bd9a2"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains how to serialize a document to a database and how to reload it from storage.
+:::
+
+One of the tasks you may need to get done when working with documents is storing and retrieving **Document** objects to and from a database. For example, this would be necessary if you were implementing any type of content management system. All previous versions of documents must be stored in the database system. The ability to store documents in the database is also extremely useful when your application provides a web-based service.
+
+Aspose.Words provides an ability to convert a document into a byte array for subsequent work with this document in a database.
+
+## Convert a Document to Byte Array {#convert-a-document-to-byte-array}
+
+To store a document in a database or to prepare a document for transmission across the web, it is often necessary to serialize the document to obtain a byte array.
+
+To serialize a <a href="https://reference.aspose.com/words/net/aspose.words/document/" target="_blank" rel="nofollow noopener noreferrer">Document</a> object in Aspose.Words:
+
+1. Save it to a **MemoryStream** using the <a href="https://reference.aspose.com/words/net/aspose.words/document/save/" target="_blank" rel="nofollow noopener noreferrer">Save</a> method overload of the **Document** class.
+2. Call the **ToArray** method, which returns an array of bytes representing the document in byte form.
+
+The steps above then can be reversed to load the bytes back into a **Document** object.
+
+:::info
+The selected save format is important to ensure the highest fidelity is retained when saving and reloading into the **Document** object. For this reason, it is suggested to use a series of OOXML file formats.
+:::
+
+The example below shows how to serialize a **Document** object to obtain a byte array, and then how to unserialize the byte array to obtain a **Document** object again:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Document.docx");
+
+MemoryStream outStream = new MemoryStream();
+doc.Save(outStream, SaveFormat.Docx);
+
+byte[] docBytes = outStream.ToArray();
+MemoryStream inStream = new MemoryStream(docBytes);
+
+Document docFromBytes = new Document(inStream);
+```
+
+You can download the template file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-.NET/blob/master/Examples/Data/Document.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+
+## Store, Read and Delete a Document in a Database {#store-read-and-delete-a-document-in-a-database}
+
+This section shows how to save a document in a database and then load it back into a `Document` object for working with it. For simplicity, the file name is the key used to store and fetch documents from the database. The database contains two columns. The first column "FileName" is stored as a String and is used to identify documents. The second column "FileContent" is stored as a `BLOB` object which stores the document object in the byte form.
+
+The following code example shows how to set up a connection to a database and execute commands:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+string connString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + DatabaseDir + "Northwind.accdb";
+            
+OleDbConnection connection = new OleDbConnection(connString);
+connection.Open();
+```
+
+:::info
+In this example, we use the Microsoft Access .mdb database to store an Aspose.Words document.
+:::
+
+The following code example shows how to save a document to the database, then read the same document again, and finally delete the record containing the document from the database:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+StoreToDatabase(doc, connection);
+            
+Document dbDoc = ReadFromDatabase("Document.docx", connection);
+dbDoc.Save(ArtifactsDir + "WorkingWithDocumentInDatabase.LoadAndSaveDocToDatabase.docx");
+
+DeleteFromDatabase("Document.docx", connection);
+
+connection.Close();
+```
+
+### Save a Document to a Database {#save-a-document-to-a-database}
+
+To save a document in a database convert this document to an array of bytes, as described at the beginning of this article. Then, save this byte array into a database field.
+
+The following code example shows how to save a document to the specified database:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+public void StoreToDatabase(Document doc, OleDbConnection connection)
+{
+    MemoryStream stream = new MemoryStream();
+    doc.Save(stream, SaveFormat.Docx);
+
+    string fileName = Path.GetFileName(doc.OriginalFileName);
+    string commandString = "INSERT INTO Documents (Name, Data) VALUES('" + fileName + "', @Doc)";
+    
+    OleDbCommand command = new OleDbCommand(commandString, connection);
+    command.Parameters.AddWithValue("Doc", stream.ToArray());
+    command.ExecuteNonQuery();
+}
+```
+
+Specify commandString, which is an SQL expression that does all the work:
+
+- To save a document into the database, the "INSERT INTO" command is used and a table specified along with the values of two record fields - FileName and FileContent. To avoid additional parameters, the file name is taken from the **Document** object itself. The `FileContent` field value is assigned bytes from the memory stream, which contains a binary representation of the stored document.
+- The remaining line of code executes the command which stores the Aspose.Words document in the database.
+
+### Retrieve a Document from a Database {#retrieve-a-document-from-a-database}
+
+To retrieve a document from the database, select the record that contains the document data as an array of bytes. Then load the byte array from the record into **MemoryStream** and create a **Document** object that will load the document from the **MemoryStream**.
+
+The following code example shows how to retrieve and return a document from the specified database using the filename as a key to fetch this document:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+public Document ReadFromDatabase(string fileName, OleDbConnection connection)
+{
+    string commandString = "SELECT * FROM Documents WHERE Name='" + fileName + "'";
+    
+    OleDbCommand command = new OleDbCommand(commandString, connection);
+    OleDbDataAdapter adapter = new OleDbDataAdapter(command);
+
+    DataTable dataTable = new DataTable();
+    adapter.Fill(dataTable);
+
+    if (dataTable.Rows.Count == 0)
+        throw new ArgumentException(
+            $"Could not find any record matching the document \"{fileName}\" in the database.");
+
+    // The document is stored in byte form in the FileContent column.
+    // Retrieve these bytes of the first matching record to a new buffer.
+    byte[] buffer = (byte[]) dataTable.Rows[0]["Data"];
+
+    MemoryStream newStream = new MemoryStream(buffer);
+
+    Document doc = new Document(newStream);
+
+    return doc;
+}
+```
+
+:::info
+The SQL command "SELECT \* FROM" is used to fetch the appropriate record based on the file name.
+:::
+
+### Delete a Document from a Database {#delete-a-document-from-a-database}
+
+To delete a document from the database, use the appropriate SQL command without any manipulations on the **Document** object.
+
+The following code example shows how to delete a document from the database, using the file name to fetch the record:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+public void DeleteFromDatabase(string fileName, OleDbConnection connection)
+{
+    string commandString = "DELETE * FROM Documents WHERE Name='" + fileName + "'";
+    
+    OleDbCommand command = new OleDbCommand(commandString, connection);
+    command.ExecuteNonQuery();
+}
+```
+
+## Related APIs {#related-apis}
+
+- <a href="https://reference.aspose.com/words/net/aspose.words/document/save/" target="_blank" rel="nofollow noopener noreferrer">Save</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/document/" target="_blank" rel="nofollow noopener noreferrer">Document</a>
+
+***
+
+## FAQ {#faq}
+
+1. **Q:** Which file format should I use when serializing a document for storage?\
+   **A:** Use an OOXML format such as **DOCX** or **DOTX**. These formats preserve the full fidelity of the document and are the most compact for storage.
+
+2. **Q:** My document becomes corrupted after retrieving it from the database. What could be wrong?\
+   **A:** Ensure that the byte array is stored and retrieved as a binary BLOB without any character encoding conversion. Also verify that the same save format is used for both serialization and deserialization.
+
+3. **Q:** Do I need a special Aspose.Words license to store documents in a database?\
+   **A:** No. A regular Aspose.Words license covers all API functionality, including serialization and database operations. Just make sure the license file is loaded before any document processing.
+
+4. **Q:** Can I serialize a document that contains protected sections or encryption?\
+   **A:** Yes. The protection settings are part of the document data and are preserved when you serialize to a byte array. When you deserialize, the protection remains intact. If you need to modify protection, do it before serialization.

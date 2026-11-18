@@ -1,0 +1,119 @@
+---
+title: "Restarting List Numbering Dynamically in C#"
+sidebar_label: "Restarting List Numbering Dynamically in C#"
+sidebar_key: "net-words-restarting-list-numbering-dynamically"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/restarting-list-numbering-dynamically.md"
+source_commit: ""
+source_sha256: "5fe254d599a785513dd42ab462352e9a4f598650a9d0bfb69b4ab5a005f22e7e"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/words/net/restarting-list-numbering-dynamically/"
+source_markdown_url: "https://docs.aspose.com/words/net/restarting-list-numbering-dynamically.md"
+source_snapshot_sha256: "daac2f538a2ee53270d490f0935a3dab3cfb68d8e181db9d123ca159fc8ef04b"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Purpose Summary
+
+This page explains how to restart list numbering dynamically during templated document generation.
+
+You can restart list numbering within your documents dynamically using `restartNum` tags. In particular, this feature is useful when working with a nested numbered list within a data band as shown in the following example.
+
+Assume that you have the `Order` and `Service` classes defined in your application as follows.
+
+```csharp
+  public class Order
+  {
+    public String ClientName { get { ... } }
+    public String ClientAddress { get { ... } }
+    public IEnumerable<Service> Services { get { ... } }
+    ...
+  }
+
+  public class Service
+  {
+    public String Name { get { ... } }
+    ...
+  }
+```
+
+Given that `orders` is an enumeration of `Order` instances, you could try to use the following template to output information on several orders in one document.
+
+```csharp
+<<foreach [order in orders]>><<[order.ClientName]>> (<<[order.ClientAddress]>>)
+
+1. <<foreach [service in order.Services]>><<[service.Name]>>
+
+<</foreach>><</foreach>>
+```
+
+But then, a result document would look as follows.
+
+```text
+Jane Doe (445 Mount Eden Road Mount Eden Auckland 1024)
+
+1. Regular Cleaning
+2. Oven Cleaning
+
+John Smith (43 Vogel Street Roslyn Palmerston North 4414)
+
+3. Regular Cleaning
+
+4. Oven Cleaning
+
+5. Carpet Cleaning
+```
+
+That is, there would be a single numbered list across all orders, which is not applicable for this scenario. However, you can make list numbering to restart for every order by putting a `restartNum` tag into your template before a corresponding `foreach` tag as follows.
+
+```csharp
+<<foreach [order in orders]>><<[order.ClientName]>> (<<[order.ClientAddress]>>)
+
+	1. <<restartNum>><<foreach [service in order.Services]>><<[service.Name]>>
+
+<</foreach>><</foreach>>
+```
+
+**Note** - When using with a data band, it is required to put a `restartNum` tag before a corresponding a `foreach` tag in the same numbered paragraph.
+
+Then, a result document looks as follows.
+
+```text
+Jane Doe (445 Mount Eden Road Mount Eden Auckland 1024)**
+
+1. Regular Cleaning
+2. Oven Cleaning
+
+John Smith (43 Vogel Street Roslyn Palmerston North 4414)
+
+3. Regular Cleaning
+4. Oven Cleaning
+5. Carpet Cleaning
+```
+
+**Note** - You can use a `restartNum` tag without a data band to dynamically restart list numbering for a containing paragraph, if needed; for example, the tag can be used to restart list numbering for a document inserted dynamically (see "Inserting Documents Dynamically" for more information).
+
+***
+
+## FAQ
+
+1. **Q:** How do I restart list numbering for each iteration of a `foreach` loop?\
+   **A:** Place the `<<restartNum>>` tag immediately before the `<<foreach>>` tag that generates the list items. The tag must be inside the same numbered paragraph, so the numbering restarts when the loop begins for each new parent element.
+
+2. **Q:** Can the `restartNum` tag be used when there is no data band (no `foreach`)?\
+   **A:** Yes. `<<restartNum>>` can be inserted in any numbered paragraph to reset the list numbering at that point, even if the paragraph is not part of a data band. This is useful for inserting externally generated content that should start a new list.
+
+3. **Q:** What happens if I put `<<restartNum>>` inside a nested list?\
+   **A:** The tag restarts numbering for the list that contains the paragraph where it appears. If placed inside a nested list, only that nested list's numbering is reset, while outer list numbering continues unaffected. Ensure the tag is positioned in the correct paragraph to achieve the desired reset scope.

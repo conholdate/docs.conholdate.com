@@ -1,0 +1,570 @@
+---
+title: "Extract Content Between Nodes in a Document"
+sidebar_label: "Extract Content Between Nodes in a Document"
+sidebar_key: "net-words-how-to-extract-selected-content-between-nodes-in-a-document"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/how-to-extract-selected-content-between-nodes-in-a-document.html"
+source_commit: ""
+source_sha256: "42019b302fe81577b51bb8c5a96cc2ad9ebf81da081fbd51fdf11758b16939e3"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/net/how-to-extract-selected-content-between-nodes-in-a-document/"
+source_snapshot_sha256: "0e42717a9ce2474199ad3fed959ac9c914148037b41433bd604e3e05c4ae9454"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page describes how to extract selected content between nodes in a document.
+:::
+
+When working with documents, it is important to be able to easily extract content from a specific range within a document. However, the content may consist of complex elements such as paragraphs, tables, images, etc.
+
+Regardless of what content needs to be extracted, the method to extract that content will always be determined by which nodes are selected to extract content between. These can be entire text bodies or simple text runs.
+
+There are many possible situations and therefore many different node types to consider when extracting content. For example, you might want to extract content between:
+
+- Two specific paragraphs
+- Specific runs of text
+- Fields of various types, such as merge fields
+- Start and end ranges of a bookmark or comment
+- Various bodies of text contained in separate sections
+
+In some situations, you may even need to combine different node types, such as extracting content between a paragraph and a field, or between a run and a bookmark.
+
+This article provides the code implementation for extracting text between different nodes, as well as examples of common scenarios.
+
+:::info
+These examples are just a few demonstrations of the many possibilities. We plan for the text extraction functionality to be part of the public API in the future, and no extra code will be required. In the meantime, feel free to post your requests regarding this functionality on the <a href="https://forum.conholdate.com/" target="_blank">Conholdate.Words forum</a>.
+:::
+
+## Why Extract Content {#why-extract-content}
+
+Often the goal of extracting the content is to duplicate or save it separately in a new document. For example, you can extract content and:
+
+- Copy it into a separate document
+- Convert a specific part of a document to PDF or image
+- Duplicate the content in the document many times
+- Work with extracted content separate from the rest of the document
+
+This can be easily achieved using Aspose.Words and the code implementation below.
+
+## Extracting Content Algorithm {#extracting-content-algorithm}
+
+The code in this section addresses all of the possible situations described above with one generalized and reusable method. The general outline of this technique involves:
+
+1. Gathering the nodes which dictate the area of content that will be extracted from your document. Retrieving these nodes is handled by the user in their code, based on what they want to be extracted.
+2. Passing these nodes to the **ExtractContent** method provided below. You must also pass a boolean parameter which states whether these nodes, acting as markers, should be included in the extraction or not.
+3. Retrieving a list of cloned content (copied nodes) specified to be extracted. You can use this list of nodes in any applicable way, for example, creating a new document containing only the selected content.
+
+## How to Extract Content {#how-to-extract-content}
+
+To extract the content from your document you need to call the **ExtractContent** method below and pass the appropriate parameters. The underlying basis of this method involves finding block level nodes (paragraphs and tables) and cloning them to create identical copies. If the marker nodes passed are block level then the method is able to simply copy the content on that level and add it to the array.
+
+However if the marker nodes are inline (a child of a paragraph) then the situation becomes more complex, as it is necessary to split the paragraph at the inline node, be it a run, bookmark fields etc. Content in the cloned parent nodes not present between the markers is removed. This process is used to ensure that the inline nodes will still retain the formatting of the parent paragraph. The method will also run checks on the nodes passed as parameters and throws an exception if either node is invalid. The parameters to be passed to this method are:
+
+1. **StartNode** and **EndNode**. The first two parameters are the nodes which define where the extraction of the content is to begin and to end at respectively. These nodes can be both block level (<a href="https://reference.aspose.com/words/net/aspose.words/paragraph/" target="_blank" rel="nofollow noopener noreferrer">Paragraph</a> , <a href="https://reference.aspose.com/words/net/aspose.words.tables/table/" target="_blank" rel="nofollow noopener noreferrer">Table</a>) or inline level (e.g <a href="https://reference.aspose.com/words/net/aspose.words/run/" target="_blank" rel="nofollow noopener noreferrer">Run</a> , <a href="https://reference.aspose.com/words/net/aspose.words.fields/fieldstart/" target="_blank" rel="nofollow noopener noreferrer">FieldStart</a> , <a href="https://reference.aspose.com/words/net/aspose.words/bookmark/bookmarkstart/" target="_blank" rel="nofollow noopener noreferrer">BookmarkStart</a> etc.):
+   1. To pass a field you should pass the corresponding **FieldStart** object
+   2. To pass bookmarks, the **BookmarkStart** and <a href="https://reference.aspose.com/words/net/aspose.words/bookmark/bookmarkend/" target="_blank" rel="nofollow noopener noreferrer">BookmarkEnd</a> nodes should be passed
+   3. To pass comments, the <a href="https://reference.aspose.com/words/net/aspose.words/commentrangestart/" target="_blank" rel="nofollow noopener noreferrer">CommentRangeStart</a> and <a href="https://reference.aspose.com/words/net/aspose.words/commentrangeend/" target="_blank" rel="nofollow noopener noreferrer">CommentRangeEnd</a> nodes should be used
+2. **IsInclusive**. Defines if the markers are included in the extraction or not. If this option is set to false and the same node or consecutive nodes are passed, then an empty list will be returned:
+   1. If a **FieldStart** node is passed then this option defines if the whole field is to be included or excluded.
+   2. If a **BookmarkStart** or **BookmarkEnd** node is passed, this option defines if the bookmark is included or just the content between the bookmark range.
+   3. If a **CommentRangeStart** or **CommentRangeEnd** node is passed, this option defines if the comment itself is to be included or just the content in the comment range.
+
+The implementation of the **ExtractContent** method you can find <a href="https://github.com/aspose-words/Aspose.Words-for-.NET/blob/master/Examples/DocsExamples/DocsExamples/Programming%20with%20Documents/Contents%20Management/Extract%20content%20helper.cs" target="_blank" rel="nofollow noopener noreferrer">on Aspose.Words GitHub</a>. This method will be referred to in the scenarios in this article.
+
+We will also define a custom method to easily generate a document from extracted nodes. This method is used in many of the scenarios below and simply creates a new document and imports the extracted content into it.
+
+The following code example shows how to take a list of nodes and inserts them into a new document:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+public static Document GenerateDocument(Document srcDoc, List<Node> nodes)
+{
+    Document dstDoc = new Document();
+    // Remove the first paragraph from the empty document.
+    dstDoc.FirstSection.Body.RemoveAllChildren();
+
+    // Import each node from the list into the new document. Keep the original formatting of the node.
+    NodeImporter importer = new NodeImporter(srcDoc, dstDoc, ImportFormatMode.KeepSourceFormatting);
+    foreach (Node node in nodes)
+    {
+        Node importNode = importer.ImportNode(node, true);
+        dstDoc.FirstSection.Body.AppendChild(importNode);
+    }
+
+    return dstDoc;
+}
+```
+
+## Extract Content Between Paragraphs {#extract-content-between-paragraphs}
+
+This demonstrates how to use the method above to extract content between specific paragraphs. In this case, we want to extract the body of the letter found in the first half of the document. We can tell that this is between the 7th and 11th paragraphs.
+
+The code below accomplishes this task. The appropriate paragraphs are extracted using the <a href="https://reference.aspose.com/words/net/aspose.words/compositenode/" target="_blank" rel="nofollow noopener noreferrer">GetChild</a> method on the document and passing the specified indices. We then pass these nodes to the **ExtractContent** method and state that these are to be included in the extraction. This method will return the copied content between these nodes which are then inserted into a new document.
+
+The following code example shows how to extract the content between specific paragraphs using the `ExtractContent` method above:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Extract content.docx");
+
+Paragraph startPara = (Paragraph) doc.FirstSection.Body.GetChild(NodeType.Paragraph, 6, true);
+Paragraph endPara = (Paragraph) doc.FirstSection.Body.GetChild(NodeType.Paragraph, 10, true);
+// Extract the content between these nodes in the document. Include these markers in the extraction.
+List<Node> extractedNodes = ExtractContentHelper.ExtractContent(startPara, endPara, true);
+
+Document dstDoc = ExtractContentHelper.GenerateDocument(doc, extractedNodes);
+dstDoc.Save(ArtifactsDir + "ExtractContent.ExtractContentBetweenParagraphs.docx");
+```
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-.NET/blob/master/Examples/Data/Extract%20content.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+## Extract Content Between Different Types of Nodes {#extract-content-between-different-types-of-nodes}
+
+We can extract content between any combinations of block-level or inline nodes. In this scenario below we will extract the content between first paragraph and the table in the second section inclusively. We get the markers nodes by calling <a href="https://reference.aspose.com/words/net/aspose.words/story/firstparagraph/" target="_blank" rel="nofollow noopener noreferrer">FirstParagraph</a> and <a href="https://reference.aspose.com/words/net/aspose.words/compositenode/getchild/" target="_blank" rel="nofollow noopener noreferrer">GetChild</a> methods on the second section of the document to retrieve the appropriate **Paragraph** and **Table** nodes. For a slight variation let's instead duplicate the content and insert it below the original.
+
+The following code example shows how to extract the content between a paragraph and table using the **ExtractContent** method:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Extract content.docx");
+
+Paragraph startPara = (Paragraph) doc.LastSection.GetChild(NodeType.Paragraph, 2, true);
+Table endTable = (Table) doc.LastSection.GetChild(NodeType.Table, 0, true);
+// Extract the content between these nodes in the document. Include these markers in the extraction.
+List<Node> extractedNodes = ExtractContentHelper.ExtractContent(startPara, endTable, true);
+
+// Let's reverse the array to make inserting the content back into the document easier.
+extractedNodes.Reverse();
+foreach (Node extractedNode in extractedNodes)                
+    endTable.ParentNode.InsertAfter(extractedNode, endTable);            
+
+doc.Save(ArtifactsDir + "ExtractContent.ExtractContentBetweenBlockLevelNodes.docx");
+```
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-.NET/blob/master/Examples/Data/Extract%20content.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+## Extract Content Between Paragraphs Based on Style {#extract-content-between-paragraphs-based-on-style}
+
+You may need to extract the content between paragraphs of the same or different style, such as between paragraphs marked with heading styles. The code below shows how to achieve this. It is a simple example which will extract the content between the first instance of the "Heading 1" and "Header 3" styles without extracting the headings as well. To do this we set the last parameter to false, which specifies that the marker nodes should not be included.
+
+In a proper implementation this should be run in a loop to extract content between all paragraphs of these styles from the document. The extracted content is copied into a new document.
+
+The following code example shows how to extract content between paragraphs with specific styles using the **ExtractContent** method:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Extract content.docx");
+
+// Gather a list of the paragraphs using the respective heading styles.
+List<Paragraph> parasStyleHeading1 = ParagraphsByStyleName(doc, "Heading 1");
+List<Paragraph> parasStyleHeading3 = ParagraphsByStyleName(doc, "Heading 3");
+
+// Use the first instance of the paragraphs with those styles.
+Node startPara = parasStyleHeading1[0];
+Node endPara = parasStyleHeading3[0];
+
+// Extract the content between these nodes in the document. Don't include these markers in the extraction.
+List<Node> extractedNodes = ExtractContentHelper.ExtractContent(startPara, endPara, false);
+
+Document dstDoc = ExtractContentHelper.GenerateDocument(doc, extractedNodes);
+dstDoc.Save(ArtifactsDir + "ExtractContent.ExtractContentBetweenParagraphStyles.docx");
+```
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+public List<Paragraph> ParagraphsByStyleName(Document doc, string styleName)
+{
+    // Create an array to collect paragraphs of the specified style.
+    List<Paragraph> paragraphsWithStyle = new List<Paragraph>();
+    NodeCollection paragraphs = doc.GetChildNodes(NodeType.Paragraph, true);
+
+    // Look through all paragraphs to find those with the specified style.
+    foreach (Paragraph paragraph in paragraphs)
+    {
+        if (paragraph.ParagraphFormat.Style.Name == styleName)
+            paragraphsWithStyle.Add(paragraph);
+    }
+
+    return paragraphsWithStyle;
+}
+```
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-.NET/blob/master/Examples/Data/Extract%20content.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+## Extract Content Between Specific Runs {#extract-content-between-specific-runs}
+
+You can extract content between inline nodes such as a <a href="https://reference.aspose.com/words/net/aspose.words/run/" target="_blank" rel="nofollow noopener noreferrer">Run</a> as well. **Runs** from different paragraphs can be passed as markers. The code below shows how to extract specific text in-between the same **Paragraph** node.
+
+The following code example shows how to extract content between specific runs of the same paragraph using the **ExtractContent** method:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Extract content.docx");
+
+Paragraph para = (Paragraph) doc.GetChild(NodeType.Paragraph, 7, true);
+Run startRun = para.Runs[1];
+Run endRun = para.Runs[4];
+
+// Extract the content between these nodes in the document. Include these markers in the extraction.
+List<Node> extractedNodes = ExtractContentHelper.ExtractContent(startRun, endRun, true);
+foreach (Node extractedNode in extractedNodes)
+    Console.WriteLine(extractedNode.ToString(SaveFormat.Text));
+```
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-.NET/blob/master/Examples/Data/Extract%20content.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+## Extract Content using a Field {#extract-content-using-a-field}
+
+To use a field as marker, the `FieldStart` node should be passed. The last parameter to the `ExtractContent` method will define if the entire field is to be included or not. Let's extract the content between the "FullName" merge field and a paragraph in the document. We use the <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/movetomergefield/" target="_blank" rel="nofollow noopener noreferrer">MoveToMergeField</a> method of <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder</a> class. This will return the **FieldStart** node from the name of merge field passed to it.
+
+In our case let's set the last parameter passed to the **ExtractContent** method to false to exclude the field from the extraction. We will render the extracted content to PDF.
+
+The following code example shows how to extract content between a specific field and paragraph in the document using the **ExtractContent** method:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Extract content.docx");
+DocumentBuilder builder = new DocumentBuilder(doc);
+// Pass the first boolean parameter to get the DocumentBuilder to move to the FieldStart of the field.
+// We could also get FieldStarts of a field using GetChildNode method as in the other examples.
+builder.MoveToMergeField("Fullname", false, false);
+
+// The builder cursor should be positioned at the start of the field.
+FieldStart startField = (FieldStart) builder.CurrentNode;
+Paragraph endPara = (Paragraph) doc.FirstSection.GetChild(NodeType.Paragraph, 5, true);
+// Extract the content between these nodes in the document. Don't include these markers in the extraction.
+List<Node> extractedNodes = ExtractContentHelper.ExtractContent(startField, endPara, false);
+
+Document dstDoc = ExtractContentHelper.GenerateDocument(doc, extractedNodes);
+dstDoc.Save(ArtifactsDir + "ExtractContent.ExtractContentUsingField.docx");
+```
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-.NET/blob/master/Examples/Data/Extract%20content.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+## Extract Content from a Bookmark {#extract-content-from-a-bookmark}
+
+In a document the content that is defined within a bookmark is encapsulated by the `BookmarkStart` and BookmarkEnd nodes. Content found between these two nodes make up the bookmark. You can pass either of these nodes as any marker, even ones from different bookmarks, as long as the starting marker appears before the ending marker in the document. We will extract this content into a new document using the code below. The **IsInclusive** parameter option shows how to retain or discard the bookmark.
+
+The following code example shows how to extract the content referenced a bookmark using the **ExtractContent** method:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Extract content.docx");            
+
+Bookmark bookmark = doc.Range.Bookmarks["Bookmark1"];            
+BookmarkStart bookmarkStart = bookmark.BookmarkStart;
+BookmarkEnd bookmarkEnd = bookmark.BookmarkEnd;
+
+// Firstly, extract the content between these nodes, including the bookmark.
+List<Node> extractedNodesInclusive = ExtractContentHelper.ExtractContent(bookmarkStart, bookmarkEnd, true);
+            
+Document dstDoc = ExtractContentHelper.GenerateDocument(doc, extractedNodesInclusive);
+dstDoc.Save(ArtifactsDir + "ExtractContent.ExtractContentBetweenBookmark.IncludingBookmark.docx");
+
+// Secondly, extract the content between these nodes this time without including the bookmark.
+List<Node> extractedNodesExclusive = ExtractContentHelper.ExtractContent(bookmarkStart, bookmarkEnd, false);
+            
+dstDoc = ExtractContentHelper.GenerateDocument(doc, extractedNodesExclusive);
+dstDoc.Save(ArtifactsDir + "ExtractContent.ExtractContentBetweenBookmark.WithoutBookmark.docx");
+```
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-.NET/blob/master/Examples/Data/Extract%20content.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+## Extract Content from a Comment {#extract-content-from-a-comment}
+
+A comment is made up of the CommentRangeStart, CommentRangeEnd and Comment nodes. All of these nodes are inline. The first two nodes encapsulate the content in the document which is referenced by the comment, as seen in the screenshot below.
+
+The **Comment** node itself is an <a href="https://reference.aspose.com/words/net/aspose.words/inlinestory/" target="_blank" rel="nofollow noopener noreferrer">InlineStory</a> that can contain paragraphs and runs. It represents the message of the comment as seen as a comment bubble in the review pane. As this node is inline and a descendant of a body you can also extract the content from inside this message as well.
+
+The comment encapsulates the heading, first paragraph and the table in the second section. Let's extract this comment into a new document. The **IsInclusive** option dictates if the comment itself is kept or discarded.
+
+The following code example shows how to do this:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Extract content.docx");
+
+CommentRangeStart commentStart = (CommentRangeStart) doc.GetChild(NodeType.CommentRangeStart, 0, true);
+CommentRangeEnd commentEnd = (CommentRangeEnd) doc.GetChild(NodeType.CommentRangeEnd, 0, true);
+
+// Firstly, extract the content between these nodes including the comment as well.
+List<Node> extractedNodesInclusive = ExtractContentHelper.ExtractContent(commentStart, commentEnd, true);
+            
+Document dstDoc = ExtractContentHelper.GenerateDocument(doc, extractedNodesInclusive);
+dstDoc.Save(ArtifactsDir + "ExtractContent.ExtractContentBetweenCommentRange.IncludingComment.docx");
+
+// Secondly, extract the content between these nodes without the comment.
+List<Node> extractedNodesExclusive = ExtractContentHelper.ExtractContent(commentStart, commentEnd, false);
+            
+dstDoc = ExtractContentHelper.GenerateDocument(doc, extractedNodesExclusive);
+dstDoc.Save(ArtifactsDir + "ExtractContent.ExtractContentBetweenCommentRange.WithoutComment.docx");
+```
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-.NET/blob/master/Examples/Data/Extract%20content.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+## How to Extract Content using DocumentVisitor {#how-to-extract-content-using-documentvisitor}
+
+Use the <a href="https://reference.aspose.com/words/net/aspose.words/documentvisitor/" target="_blank" rel="nofollow noopener noreferrer">DocumentVisitor</a> class to implement this usage scenario. This class corresponds to the well-known Visitor design pattern. With **DocumentVisitor** **,** you can define and execute custom operations that require enumeration over the document tree.
+
+**DocumentVisitor** provides a set of **VisitXXX** methods that are invoked when a particular document element (node) is encountered. For example, <a href="https://reference.aspose.com/words/net/aspose.words/documentvisitor/visitparagraphstart/" target="_blank" rel="nofollow noopener noreferrer">VisitParagraphStart</a> is called when the beginning of a text paragraph is found and <a href="https://reference.aspose.com/words/net/aspose.words/documentvisitor/visitparagraphend/" target="_blank" rel="nofollow noopener noreferrer">VisitParagraphEnd</a> is called when the end of a text paragraph is found. Each **DocumentVisitor.VisitXXX** method accepts the corresponding object that it encounters so you can use it as needed (say retrieve the formatting), e.g. both **DocumentVisitor.VisitParagraphStart** and **DocumentVisitor.VisitParagraphEnd** accept a <a href="https://reference.aspose.com/words/net/aspose.words/paragraph/" target="_blank" rel="nofollow noopener noreferrer">Paragraph</a> object.
+
+Each **DocumentVisitor.VisitXXX** method returns a <a href="https://reference.aspose.com/words/net/aspose.words/visitoraction/" target="_blank" rel="nofollow noopener noreferrer">VisitorAction</a> value that controls the enumeration of nodes. You can request either to continue the enumeration, skip the current node (but continue the enumeration), or stop the enumeration of nodes.
+
+These are the steps you should follow to programmatically determine and extract various parts of a document:
+
+- Create a class derived from **DocumentVisitor**
+- Override and provide implementations for some or all of the **DocumentVisitor.VisitXXX** methods to perform some custom operations
+- Call <a href="https://reference.aspose.com/words/net/aspose.words/node/accept/" target="_blank" rel="nofollow noopener noreferrer">Node.Accept</a> on the node from where you want to start the enumeration, for example, if you want to enumerate the whole document, use <a href="https://reference.aspose.com/words/net/aspose.words/document/accept/" target="_blank" rel="nofollow noopener noreferrer">Document.Accept</a>
+
+**DocumentVisitor** provides default implementations for all of the **DocumentVisitor.VisitXXX** methods. This makes it easier to create new document visitors as only the methods required for the particular visitor need to be overridden. It is not necessary to override all of the visitor methods.
+
+The following example shows how to use the Visitor pattern to add new operations to the Aspose.Words object model. In this case, we create a simple document converter into a text format:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Extract content.docx");
+
+ConvertDocToTxt convertToPlainText = new ConvertDocToTxt();
+// Note that every node in the object model has the accept method so the visiting
+// can be executed not only for the whole document, but for any node in the document.
+doc.Accept(convertToPlainText);
+
+// Once the visiting is complete, we can retrieve the result of the operation,
+// That in this example, has accumulated in the visitor.
+Console.WriteLine(convertToPlainText.GetText());
+```
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+/// <summary>
+/// Simple implementation of saving a document in the plain text format. Implemented as a Visitor.
+/// </summary>
+internal class ConvertDocToTxt : DocumentVisitor
+{
+    public ConvertDocToTxt()
+    {
+        mIsSkipText = false;
+        mBuilder = new StringBuilder();
+    }
+
+    /// <summary>
+    /// Gets the plain text of the document that was accumulated by the visitor.
+    /// </summary>
+    public string GetText()
+    {
+        return mBuilder.ToString();
+    }
+
+    /// <summary>
+    /// Called when a Run node is encountered in the document.
+    /// </summary>
+    public override VisitorAction VisitRun(Run run)
+    {
+        AppendText(run.Text);
+        // Let the visitor continue visiting other nodes.
+        return VisitorAction.Continue;
+    }
+
+    /// <summary>
+    /// Called when a FieldStart node is encountered in the document.
+    /// </summary>
+    public override VisitorAction VisitFieldStart(FieldStart fieldStart)
+    {
+        // In Microsoft Word, a field code (such as "MERGEFIELD FieldName") follows
+        // after a field start character. We want to skip field codes and output field.
+        // Result only, therefore we use a flag to suspend the output while inside a field code.
+        // Note this is a very simplistic implementation and will not work very well.
+        // If you have nested fields in a document.
+        mIsSkipText = true;
+        return VisitorAction.Continue;
+    }
+
+    /// <summary>
+    /// Called when a FieldSeparator node is encountered in the document.
+    /// </summary>
+    public override VisitorAction VisitFieldSeparator(FieldSeparator fieldSeparator)
+    {
+        // Once reached a field separator node, we enable the output because we are
+        // now entering the field result nodes.
+        mIsSkipText = false;
+        return VisitorAction.Continue;
+    }
+
+    /// <summary>
+    /// Called when a FieldEnd node is encountered in the document.
+    /// </summary>
+    public override VisitorAction VisitFieldEnd(FieldEnd fieldEnd)
+    {
+        // Make sure we enable the output when reached a field end because some fields
+        // do not have field separator and do not have field result.
+        mIsSkipText = false;
+        return VisitorAction.Continue;
+    }
+
+    /// <summary>
+    /// Called when visiting of a Paragraph node is ended in the document.
+    /// </summary>
+    public override VisitorAction VisitParagraphEnd(Paragraph paragraph)
+    {
+        // When outputting to plain text we output Cr+Lf characters.
+        AppendText(ControlChar.CrLf);
+        return VisitorAction.Continue;
+    }
+
+    public override VisitorAction VisitBodyStart(Body body)
+    {
+        // We can detect beginning and end of all composite nodes such as Section, Body, 
+        // Table, Paragraph etc and provide custom handling for them.
+        mBuilder.Append("*** Body Started ***\r\n");
+        return VisitorAction.Continue;
+    }
+
+    public override VisitorAction VisitBodyEnd(Body body)
+    {
+        mBuilder.Append("*** Body Ended ***\r\n");
+        return VisitorAction.Continue;
+    }
+
+    /// <summary>
+    /// Called when a HeaderFooter node is encountered in the document.
+    /// </summary>
+    public override VisitorAction VisitHeaderFooterStart(HeaderFooter headerFooter)
+    {
+        // Returning this value from a visitor method causes visiting of this
+        // Node to stop and move on to visiting the next sibling node
+        // The net effect in this example is that the text of headers and footers
+        // Is not included in the resulting output
+        return VisitorAction.SkipThisNode;
+    }
+
+    /// <summary>
+    /// Adds text to the current output. Honors the enabled/disabled output flag.
+    /// </summary>
+    private void AppendText(string text)
+    {
+        if (!mIsSkipText)
+            mBuilder.Append(text);
+    }
+
+    private readonly StringBuilder mBuilder;
+    private bool mIsSkipText;
+}
+```
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-.NET/blob/master/Examples/Data/Extract%20content.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+## How to Extract Text Only {#how-to-extract-text-only}
+
+The ways to retrieve text from the document are:
+
+- Use <a href="https://reference.aspose.com/words/net/aspose.words/document/save/" target="_blank" rel="nofollow noopener noreferrer">Document.Save</a> with <a href="https://reference.aspose.com/words/net/aspose.words/saveformat/" target="_blank" rel="nofollow noopener noreferrer">SaveFormat.Text</a> to save as plain text into a file or stream
+- Use <a href="https://reference.aspose.com/words/net/aspose.words/node/tostring/" target="_blank" rel="nofollow noopener noreferrer">Node.ToString</a> and pass the **SaveFormat.Text** parameter. Internally, this invokes save as text into a memory stream and returns the resulting string
+- Use <a href="https://reference.aspose.com/words/net/aspose.words/node/gettext/" target="_blank" rel="nofollow noopener noreferrer">Node.GetText</a> to retrieve text with all Microsoft Word control characters including field codes
+- Implement a custom <a href="https://reference.aspose.com/words/net/aspose.words/documentvisitor/" target="_blank" rel="nofollow noopener noreferrer">DocumentVisitor</a> to perform customized extraction
+
+### Using `Node.GetText` and `Node.ToString` {#using-nodegettext-and-nodetostring}
+
+A Word document can contains control characters that designate special elements such as field, end of cell, end of section etc. The full list of possible Word control characters is defined in the **ControlChar** class. The **Node.GetText** method returns text with all of the control character characters present in the node.
+
+Calling **ToString** returns the plain text representation of the document only without control characters. For further information on exporting as plain text see following section **"Using SaveFormat.Text"**.
+
+The following code example shows the difference between calling the **GetText** and **ToString** methods on a node:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);            
+            
+builder.InsertField("MERGEFIELD Field");
+
+// When converted to text it will not retrieve fields code or special characters,
+// but will still contain some natural formatting characters such as paragraph markers etc. 
+// This is the same as "viewing" the document as if it was opened in a text editor.
+Console.WriteLine("Convert to text result: " + doc.ToString(SaveFormat.Text));
+```
+
+## Extract Images from Shapes {#extract-images-from-shapes}
+
+You may need to extract document images to perform some tasks. Aspose.Words allows you to do this as well.
+
+The following code example shows how to extract images from a document:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Images.docx");
+
+NodeCollection shapes = doc.GetChildNodes(NodeType.Shape, true);
+int imageIndex = 0;
+            
+foreach (Shape shape in shapes)
+{
+    if (shape.HasImage)
+    {
+        string imageFileName =
+            $"Image.ExportImages.{imageIndex}_{FileFormatUtil.ImageTypeToExtension(shape.ImageData.ImageType)}";
+
+        // Note, if you have only an image (not a shape with a text and the image),
+        // you can use shape.GetShapeRenderer().Save(...) method to save the image.
+        shape.ImageData.Save(ArtifactsDir + imageFileName);
+        imageIndex++;
+    }
+}
+```
+
+## Related APIs {#related-apis}
+
+- <a href="https://reference.aspose.com/words/net/aspose.words/paragraph/" target="_blank" rel="nofollow noopener noreferrer">Paragraph</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words.tables/table/" target="_blank" rel="nofollow noopener noreferrer">Table</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/run/" target="_blank" rel="nofollow noopener noreferrer">Run</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words.fields/fieldstart/" target="_blank" rel="nofollow noopener noreferrer">FieldStart</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words.fields/fieldend/" target="_blank" rel="nofollow noopener noreferrer">FieldEnd</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/bookmark/bookmarkstart/" target="_blank" rel="nofollow noopener noreferrer">BookmarkStart</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/bookmark/bookmarkend/" target="_blank" rel="nofollow noopener noreferrer">BookmarkEnd</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/commentrangestart/" target="_blank" rel="nofollow noopener noreferrer">CommentRangeStart</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/commentrangeend/" target="_blank" rel="nofollow noopener noreferrer">CommentRangeEnd</a>
+
+## FAQ {#faq}
+
+1. **Q:** How do I control whether the start and end marker nodes are included in the extracted content?\
+   **A:** Pass a Boolean value to the `IsInclusive` parameter of the `ExtractContent` method. Set it to `true` to include the marker nodes (e.g., the whole field or bookmark), or `false` to exclude them and extract only the content between the markers.
+
+2. **Q:** Can I extract content between nodes that belong to different sections of the document?\
+   **A:** Yes. Retrieve the desired nodes from their respective sections (e.g., using `Document.GetChild` or `Section.Body.FirstParagraph`) and pass those nodes to `ExtractContent`. The method works across sections as long as both nodes belong to the same `Document` instance.
+
+3. **Q:** After extracting nodes, how can I obtain plain text without any formatting or control characters?\
+   **A:** Create a new `Document`, import the extracted nodes, then either call `newDocument.GetText()` for raw text with control characters or `newDocument.Save(stream, SaveFormat.Text)` to get clean plain‑text output. Using `SaveFormat.Text` removes formatting and Word control characters.
+
+4. **Q:** Why does `ExtractContent` throw an exception about invalid nodes?\
+   **A:** This usually occurs when the start or end node is `null`, belongs to a different `Document`, or the start node appears after the end node in the document order. Verify that both nodes are non‑null, belong to the same document, and that the start node precedes the end node before calling the method.

@@ -1,0 +1,117 @@
+---
+title: "Working with Content Controls in C#"
+sidebar_label: "Working with Content Controls in C#"
+sidebar_key: "net-words-working-with-content-controls"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/working-with-content-controls.md"
+source_commit: ""
+source_sha256: "a313d4ce590c2d0ccd868482b9339a9beaee07674fb17ed986800c623a99e183"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/words/net/working-with-content-controls/"
+source_markdown_url: "https://docs.aspose.com/words/net/working-with-content-controls.md"
+source_snapshot_sha256: "313cf44c08db3834f050144721ee1862acd8e8772c481b36575da57e591aabdb"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Purpose Summary
+
+This page explains how to work with content controls conceptually and programmatically.
+
+LINQ Reporting Engine enables you to perform certain operations on content controls dynamically while building a report.
+
+**Note** - To work with content controls in template documents using Microsoft Word®, you may need to <a href="https://docs.microsoft.com/en-us/visualstudio/vsto/how-to-show-the-developer-tab-on-the-ribbon?view=vs-2022" target="_blank" rel="nofollow noopener noreferrer">show the Developer tab on its ribbon</a>.
+
+## Setting Checkbox Values Dynamically
+
+You can set checkbox values to either checked or unchecked in your reports dynamically by taking the following steps:
+
+1. Add a checkbox content control to your template at a place where you want it to appear in a result document.
+2. By editing content control properties, add a `check` tag to the title of the checkbox content control using the following syntax.
+
+```csharp
+<<check [conditional_expression]>>
+```
+
+Here, `conditional_expression` defines a condition upon which the value of the checkbox content control is to be set to checked (or unchecked, if the condition is not met). The conditional expression must return a `Boolean` value.
+
+While building a report, a conditional expression declared within a `check` tag is evaluated and the value of its containing checkbox content control is set accordingly. The `check` tag itself is removed then.
+
+## Adding Combobox and Dropdown List Items Dynamically
+
+You can dynamically add items to comboboxes and dropdown lists defined in your template by taking the following steps:
+
+1. Add a combobox or dropdown list content control to your template at a place where you want it to appear in a result document.
+2. By editing content control properties, add an item tag to the title of this content control using the following syntax.
+
+```csharp
+<<item [value_expression] [display_name_expression]>>
+```
+
+Here, `value_expression` defines a value of a combobox or dropdown list item to be added dynamically. This expression is mandatory and must return a non‑empty value.
+
+In turn, `display_name_expression` defines a display name of the combobox or dropdown list item to be added. This expression is optional. If it is omitted, then during runtime, a value of `value_expression` is used as a display name as well.
+
+**Note** - Values of both `value_expression` and `display_name_expression` can be of any types. During runtime, `Object.ToString()` is invoked to get textual representations of these expressions' values.
+
+While building a report, `value_expression` and `display_name_expression` are evaluated and a corresponding combobox or dropdown list item is added. A declaring item tag is removed then.
+
+A single `item` tag causes addition of a single combobox or dropdown list item during runtime. You can add multiple combobox or dropdown list items using multiple `item` tags as shown in the following snippet.
+
+```csharp
+<<item ...>><<item ...>>
+```
+
+Also, you can normally use `item` tags within data bands to add a combobox or dropdown list item per item of a data collection. For example, given that `clients` is a `DataTable` instance having a field named "Name", you can use the following template to cover such a scenario.
+
+```csharp
+<<foreach [client in clients]>><<item [client.Name]>><</foreach>>
+```
+
+An `item` tag can also be combined with an `if` tag to add a combobox or dropdown list item depending on a condition as shown in the following snippet.
+
+```csharp
+<<if ...>><<item ...>><</if>>
+```
+
+Existing combobox and dropdown list items are not affected by `item` tags. Thus, you can combine both ways of adding combobox and dropdown list items using a template: static and dynamic.
+
+**Note** - While inserting a combobox or dropdown list, Microsoft Word adds a default item that has to be removed manually, if the item is unwanted.
+
+## Setting Content Control Titles Dynamically
+
+You can normally use common expression tags in content control titles, thus forming their contents dynamically. For example, given that `s` is a string value, you can set a content control title from this value dynamically by putting the following expression tag into the title.
+
+```csharp
+<<[s]>>
+```
+
+***
+
+## FAQ
+
+1. **Q:** How do I make a checkbox content control checked or unchecked based on data?\
+   **A:** Add a `check` tag to the checkbox title using the syntax `<<check [conditional_expression]>>`. The expression must return a Boolean value; if true, the checkbox is checked, otherwise it remains unchecked. The `check` tag is removed automatically after evaluation.
+
+2. **Q:** What is the correct way to add items to a combobox or dropdown list at runtime?\
+   **A:** Use the `item` tag inside the content control title: `<<item [value_expression] [display_name_expression]>>`. The first argument supplies the item value (required), and the optional second argument supplies the display text. Multiple `item` tags can be placed sequentially or generated inside a `foreach` loop.
+
+3. **Q:** Can I conditionally add a combobox item only when a certain condition is met?\
+   **A:** Yes. Wrap the `item` tag inside an `if` tag, e.g., `<<if [condition]>> <<item [value]>> <</if>>`. The `item` will be added only if the condition evaluates to true.
+
+4. **Q:** Why does a default item appear in a newly inserted dropdown list, and how can I remove it?\
+   **A:** Microsoft Word automatically inserts a placeholder item when a dropdown list is created. This item is not removed by Aspose.Words, so you must delete it manually in the template or programmatically after the document is generated.
+
+5. **Q:** How can I set the title of a content control dynamically using a variable?\
+   **A:** Place an expression tag inside the title, such as `<<[myVariable]>>`. During report generation the variable's `ToString()` value replaces the tag, producing a dynamic title. This works for any content control type.

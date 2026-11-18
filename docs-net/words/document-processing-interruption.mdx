@@ -1,0 +1,171 @@
+---
+title: "Document Processing Interruption in C#"
+sidebar_label: "Document Processing Interruption in C#"
+sidebar_key: "net-words-document-processing-interruption"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/document-processing-interruption.md"
+source_commit: ""
+source_sha256: "04adabe36602c07a277d66f6452688a810d1b48c216cf8324b549efdde5f2bee"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/words/net/document-processing-interruption/"
+source_markdown_url: "https://docs.aspose.com/words/net/document-processing-interruption.md"
+source_snapshot_sha256: "512f8521b1d1e7d204cf83ef5a6eac3698ee621efcfba12476dd0193135c1e4f"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Purpose Summary
+
+This page explains how to detect and handle processing interruptions for long-running document tasks.
+
+Document processing in .NET applications can involve complex and time-consuming operations, such as loading and saving large files, building the document layout, updating fields, or retrieving external resources.
+
+Sometimes it is necessary to gracefully interrupt document processing without forcibly terminating the application or leaving resources in an inconsistent state. To ensure greater control over these long-running tasks, the processing flow can be managed using appropriate callbacks.
+
+## CancellationToken for Interrupting Document Processing
+
+.NET has a widely used `CancellationToken` structure. It is a built-in mechanism for safely and controlled closure of asynchronous operations.
+
+The `CancellationToken` structure in .NET provides a standardized mechanism that allows developers to monitor and respond to cancellation requests during asynchronous or long-running operations.
+
+It is useful to know that Aspose.Words also allows to interrupt document processing using callbacks, where a `CancellationToken` can be used as a process interruption trigger.
+
+## How to Use a CancellationToken
+
+By integrating a `CancellationToken` into your document processing logic, you can safely and efficiently stop the operation when needed.
+
+The following code example shows how to use a `CancellationToken` to interrupt a document processing task:
+
+```csharp
+// Arrange
+using (CancellationTokenSource cts = new CancellationTokenSource())
+{
+    // Simulate user cancel after short delay
+    _ = Task.Run(async () =>
+    {
+        await Task.Delay(20);
+        cts.Cancel();
+    });
+
+    try
+    {
+        ProcessDocument(cts.Token);
+    }
+    catch (OperationCanceledException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+```
+
+```csharp
+public static void ProcessDocument(CancellationToken token)
+{
+    CancelationCallback cancelationCallback = new CancelationCallback(token);
+
+    LoadOptions loadOptions = new LoadOptions();
+    loadOptions.ProgressCallback = cancelationCallback;
+    loadOptions.ResourceLoadingCallback = cancelationCallback;
+
+    SaveOptions saveOptions = new PdfSaveOptions();
+    saveOptions.ProgressCallback = cancelationCallback;
+
+    Document doc = new Document(@"C:\Temp\in.docx", loadOptions);
+    doc.LayoutOptions.Callback = cancelationCallback;
+    doc.FieldOptions.FieldUpdatingProgressCallback = cancelationCallback;
+
+    doc.Save(@"C:\Temp\out.pdf", saveOptions);
+}
+```
+
+```csharp
+private class CancelationCallback : 
+    IDocumentLoadingCallback,
+    IDocumentSavingCallback,
+    IPageLayoutCallback,
+    IFieldUpdatingProgressCallback,
+    IResourceLoadingCallback
+{
+    public CancelationCallback(CancellationToken token)
+    {
+        mToken = token;
+    }
+
+    void IDocumentLoadingCallback.Notify(DocumentLoadingArgs args)
+    {
+        ThrowIfCancellationRequested("Document processing is canceled at the document loading stage.");
+    }
+
+    void IDocumentSavingCallback.Notify(DocumentSavingArgs args)
+    {
+        ThrowIfCancellationRequested("Document processing is canceled at the document saving stage.");
+    }
+
+    void IPageLayoutCallback.Notify(PageLayoutCallbackArgs args)
+    {
+        ThrowIfCancellationRequested("Document processing is canceled at the building document layout stage.");
+    }
+
+    void IFieldUpdatingProgressCallback.Notify(FieldUpdatingProgressArgs args)
+    {
+        ThrowIfCancellationRequested("Document processing is canceled at the field updating stage.");
+    }
+
+    ResourceLoadingAction IResourceLoadingCallback.ResourceLoading(ResourceLoadingArgs args)
+    {
+        try
+        {
+            return mToken.IsCancellationRequested ? ResourceLoadingAction.Skip : ResourceLoadingAction.Default;
+        }
+        finally
+        {
+            ThrowIfCancellationRequested("Document processing is canceled at the loading external resources stage.");
+        }
+    }
+
+    private void ThrowIfCancellationRequested(string message)
+    {
+        if (mToken.IsCancellationRequested)
+            throw new OperationCanceledException(message, mToken);
+    }
+
+    private CancellationToken mToken;
+}
+```
+
+## Document Processing Interruption Using Low Code
+
+If complex document processing is not required, a similar approach using Low Code can be used. In this case, you will need an overload of the <a href="https://reference.aspose.com/words/net/aspose.words.lowcode/processor/execute/#execute_1" target="_blank" rel="nofollow noopener noreferrer">Execute</a> method that accepts a `CancellationToken` as a parameter.
+
+The following code example shows how to interrupt a document processing task with Low Code:
+
+```csharp
+using (CancellationTokenSource cts = new CancellationTokenSource())
+{
+    // Simulate user cancel after short delay
+    Task.Run(() => {
+        Thread.Sleep(20);
+        cts.Cancel();
+    });
+
+    try
+    {
+        Converter.Create().From(MyDir + "Simple.docx").To(ArtifactsDir + "Processor.ExecuteAsync.pdf").Execute(cts.Token);
+    }
+    catch (OperationCanceledException ex)
+    {
+        Console.WriteLine($"Cancellation reason: '{ex.Message}'");
+    }
+}
+```

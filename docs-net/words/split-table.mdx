@@ -1,0 +1,102 @@
+---
+title: "Split Table in C#"
+sidebar_label: "Split Table in C#"
+sidebar_key: "net-words-split-table"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/net"
+source_path: "words/net/split-table.md"
+source_commit: ""
+source_sha256: "e2f347dda9ad819a95f6e61a4010cb76b9919ea8022a5831b68d69fcf905557e"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/words/net/split-table/"
+source_markdown_url: "https://docs.aspose.com/words/net/split-table.md"
+source_snapshot_sha256: "6647f3e39f7fa757b02253daaa81908795aa3f689e63647bfd97b94240f63cd2"
+---
+
+:::info
+Aspose.Words for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Purpose Summary
+
+This page explains how to split a table into multiple tables.
+
+A table, represented in the Aspose.Words Document Object Model, is made up of independent rows and cells, making it easy to split a table.
+
+To manipulate a table to split it into two tables, we just need to move some of the rows from the original table to the new one. To do this, we need to pick the row by which we want to split the table.
+
+We can create two tables from the original table by following these simple steps:
+
+1. Create a clone of the table without cloning the children to keep the moved rows and insert them after the original table
+2. Starting at the specified row, move all subsequent rows to this second table
+
+The following code example shows how to split a table into two tables on a specific row:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-.NET.git.
+Document doc = new Document(MyDir + "Tables.docx");
+
+Table firstTable = (Table) doc.GetChild(NodeType.Table, 0, true);
+
+// We will split the table at the third row (inclusive).
+Row row = firstTable.Rows[2];
+
+// Create a new container for the split table.
+Table table = (Table) firstTable.Clone(false);
+
+// Insert the container after the original.
+firstTable.ParentNode.InsertAfter(table, firstTable);
+
+// Add a buffer paragraph to ensure the tables stay apart.
+firstTable.ParentNode.InsertAfter(new Paragraph(doc), firstTable);
+
+Row currentRow;
+do
+{
+    currentRow = firstTable.LastRow;
+    table.PrependChild(currentRow);
+} while (currentRow != row);
+
+doc.Save(ArtifactsDir + "WorkingWithTables.SplitTable.docx");
+```
+
+## Limitations and Considerations
+
+- **Merged cells**: Aspose.Words does not change merge flags when rows are moved. If a vertically merged cell spans the split row, the first moved cell keeps `CellMerge.Previous`; set its `CellFormat.VerticalMerge` to `CellMerge.First` so that the merged block starts correctly in the new table.
+
+- **Formatting preservation**: The formatting applied to rows, cells, and the table itself is retained because the rows are moved, not recreated. Any style or direct formatting on the moved rows remains unchanged in the new table.
+
+- **Pagination effects**: Aspose.Words recalculates pagination automatically after the table structure changes. To avoid unexpected pagination shifts, perform the split operation before any layout-dependent processing (e.g., before saving or printing).
+
+## Related APIs
+
+- <a href="https://reference.aspose.com/words/net/aspose.words.tables/table/" target="_blank" rel="nofollow noopener noreferrer">Table</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words.tables/row/" target="_blank" rel="nofollow noopener noreferrer">Row</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words.tables/cell/" target="_blank" rel="nofollow noopener noreferrer">Cell</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/documentbuilder/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder</a>
+- <a href="https://reference.aspose.com/words/net/aspose.words/nodecollection/" target="_blank" rel="nofollow noopener noreferrer">NodeCollection</a>
+
+## FAQ
+
+1. **Q:** How do I split a table at a particular row using Aspose.Words for .NET?\
+   **A:** Create a clone of the original `Table` without its child nodes, insert the clone after the original table, then move all rows starting from the chosen split row to the cloned table. This separates the original table into two independent tables.
+
+2. **Q:** What happens to merged cells that cross the split row?\
+   **A:** Aspose.Words does not change merge flags when rows are moved. If a vertically merged cell spans the split row, the first moved cell keeps `CellMerge.Previous`; set its `CellFormat.VerticalMerge` to `CellMerge.First` so that the merged block starts correctly in the new table.
+
+3. **Q:** Can I split a table into more than two tables?\
+   **A:** Yes. After the first split, repeat the same process on the resulting tables: clone the table you want to split, insert the clone, and move the desired rows. By iterating, you can create any number of separate tables.
+
+4. **Q:** Will the formatting (borders, shading, etc.) be preserved after splitting?\
+   **A:** The formatting applied to rows, cells, and the table itself is retained because the rows are moved, not recreated. Any style or direct formatting on the moved rows remains unchanged in the new table.
+
+5. **Q:** How can I split a table without affecting the document's pagination?\
+   **A:** Perform the split operation before any layout‑dependent processing (e.g., before saving or printing). Aspose.Words recalculates pagination automatically after the table structure changes, ensuring the document flow remains correct.
