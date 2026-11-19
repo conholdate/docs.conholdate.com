@@ -1,0 +1,289 @@
+---
+title: "Insert Checkboxes, Text Input, or Images"
+sidebar_label: "Insert Checkboxes, Text Input, or Images"
+sidebar_key: "java-words-insert-checkboxes-text-input-or-images-mail-merge"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/java"
+source_path: "words/java/insert-checkboxes-text-input-or-images-mail-merge.html"
+source_commit: ""
+source_sha256: "07ae02118a84e019ca6cce137e63a41907c3d537e87ac7a3a5859cab1a57536b"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/java/insert-checkboxes-text-input-or-images-mail-merge/"
+source_snapshot_sha256: "ecc793ebd9a921c99f7712b689fbeb9109241895a0ae2efaf70c8fc8f34f8387"
+---
+
+:::info
+Aspose.Words for Java is included in Conholdate.Total for Java.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page describes how to insert checkboxes, text inputs, or images during mail merge.
+:::
+
+The merge engine takes a document as input, looks for `MERGEFIELD` fields in it, and replaces them with the data obtained from the data source. Typically, plain text and HTML are inserted, but Aspose.Words users can also generate a document that handles more unusual scenarios for Mail Merge fields.
+
+Powerful Aspose.Words functionality allows you to extend the Mail Merge process:
+
+- insert checkboxes and text input form fields into the document during a mail merge
+- insert images from any custom storage (files, BLOB fields, etc.)
+
+## Insert Checkboxes and Text Input during Mail Merge {#insert-checkboxes-and-text-input-during-mail-merge}
+
+Sometimes it is necessary to perform a Mail Merge operation so that not text is substituted in the merge field, but a checkbox or text input field. Even though this is not the most common scenario, it is very handy for some tasks.
+
+The following screenshot of a Word document shows a template with merge fields:
+
+![insert-checkboxes-or-images-mail-merge-aspose-words-java](/java/words/images/d1240b834021750a-insert-checkboxes-html-or-images-during-mail-merge-1.jpeg)
+
+This screenshot of the Word document below shows the already generated document:
+
+![insert-checkboxes-html-or-images-mail-merge-aspose-words-java](/java/words/images/2331173bca114388-insert-checkboxes-html-or-images-during-mail-merge-2.png)
+
+:::info
+Note that some fields were replaced with plain text, some fields were replaced with checkbox form fields, and the `Subject` field was replaced with a text input field.
+:::
+
+The following code example shows how to insert checkboxes and input text fields into a document during a mail merge:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Mail merge destinations - Fax.docx");
+
+// Setup mail merge event handler to do the custom work.
+doc.getMailMerge().setFieldMergingCallback(new HandleMergeField());
+// Trim trailing and leading whitespaces mail merge values.
+doc.getMailMerge().setTrimWhitespaces(false);
+
+String[] fieldNames = {
+        "RecipientName", "SenderName", "FaxNumber", "PhoneNumber",
+        "Subject", "Body", "Urgent", "ForReview", "PleaseComment"
+};
+
+Object[] fieldValues = {
+        "Josh", "Jenny", "123456789", "", "Hello",
+        "<b>HTML Body Test message 1</b>", true, false, true
+};
+
+doc.getMailMerge().execute(fieldNames, fieldValues);
+
+doc.save(getArtifactsDir() + "WorkingWithFields.MailMergeFormFields.docx");
+```
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+private static class HandleMergeField implements IFieldMergingCallback {
+    /// <summary>
+    /// This handler is called for every mail merge field found in the document,
+    /// for every record found in the data source.
+    /// </summary>
+    public void fieldMerging(FieldMergingArgs e) throws Exception {
+        if (mBuilder == null)
+            mBuilder = new DocumentBuilder(e.getDocument());
+
+        // We decided that we want all boolean values to be output as check box form fields.
+        if (e.getFieldValue() instanceof /*boolean*/ Boolean) {
+            // Move the "cursor" to the current merge field.
+            mBuilder.moveToMergeField(e.getFieldName());
+
+            String checkBoxName = MessageFormat.format("{0}{1}", e.getFieldName(), e.getRecordIndex());
+
+            mBuilder.insertCheckBox(checkBoxName, (Boolean) e.getFieldValue(), 0);
+
+            return;
+        }
+
+        switch (e.getFieldName()) {
+            case "Body":
+                mBuilder.moveToMergeField(e.getFieldName());
+                mBuilder.insertHtml((String) e.getFieldValue());
+                break;
+            case "Subject": {
+                mBuilder.moveToMergeField(e.getFieldName());
+                String textInputName = MessageFormat.format("{0}{1}", e.getFieldName(), e.getRecordIndex());
+                mBuilder.insertTextInput(textInputName, TextFormFieldType.REGULAR, "", (String) e.getFieldValue(), 0);
+                break;
+            }
+        }
+    }
+
+    public void imageFieldMerging(ImageFieldMergingArgs args) {
+        args.setImageFileName("Image.png");
+        args.getImageWidth().setValue(200.0);
+        args.setImageHeight(new MergeFieldImageDimension(200.0, MergeFieldImageDimensionUnit.PERCENT));
+    }
+
+    private DocumentBuilder mBuilder;
+}
+```
+
+## Insert Images during Mail Merge {#insert-images-during-mail-merge}
+
+When performing a Mail Merge operation, you can insert images from the database into the document using special image Mail Merge fields. The image Mail Merge field is a merge field named Image:MyFieldName.
+
+### Insert Images from a Database {#insert-images-from-a-database}
+
+During a mail merge, when an image Mail Merge field is encountered in a document, the <a href="https://reference.aspose.com/words/java/com.aspose.words/mailmerge/#getFieldMergingCallback" target="_blank" rel="nofollow noopener noreferrer">getFieldMergingCallback()</a> event is fired. You can respond to this event to return a filename, stream, or image object to the Mail Merge engine so it can be inserted into the document.
+
+The following code example shows how to insert images stored in a database BLOB field into a report:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Mail merge destination - Northwind employees.docx");
+
+doc.getMailMerge().setFieldMergingCallback(new HandleMergeImageFieldFromBlob());
+
+Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+String connString = "jdbc:ucanaccess://" + getDatabaseDir() + "Northwind.accdb";
+
+Connection connection = DriverManager.getConnection(connString, "Admin", "");
+
+Statement statement = connection.createStatement();
+ResultSet resultSet = statement.executeQuery("SELECT * FROM Employees");
+
+DataTable dataTable = new DataTable(resultSet, "Employees");
+IDataReader dataReader = new DataTableReader(dataTable);
+
+doc.getMailMerge().executeWithRegions(dataReader, "Employees");
+
+connection.close();
+
+doc.save(getArtifactsDir() + "WorkingWithFields.MailMergeImageFromBlob.docx");
+```
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+public static class HandleMergeImageFieldFromBlob implements IFieldMergingCallback {
+    public void fieldMerging(FieldMergingArgs args) {
+        // Do nothing.
+    }
+
+    /// <summary>
+    /// This is called when mail merge engine encounters Image:XXX merge field in the document.
+    /// You have a chance to return an Image object, file name, or a stream that contains the image.
+    /// </summary>
+    public void imageFieldMerging(ImageFieldMergingArgs e) throws Exception {
+        // The field value is a byte array, just cast it and create a stream on it.
+        ByteArrayInputStream imageStream = new ByteArrayInputStream((byte[]) e.getFieldValue());
+        // Now the mail merge engine will retrieve the image from the stream.
+        e.setImageStream(imageStream);
+    }
+}
+```
+
+### Set Image Properties during Mail Merge {#set-image-properties-during-mail-merge}
+
+While merging an image merge field, you may sometimes need to control various image properties, such as <a href="https://reference.aspose.com/words/java/com.aspose.words/wraptype/" target="_blank" rel="nofollow noopener noreferrer">WrapType</a>.
+
+Currently, using <a href="https://reference.aspose.com/words/java/com.aspose.words/imagefieldmergingargs/" target="_blank" rel="nofollow noopener noreferrer">ImageFieldMergingArgs</a> you can only set image width or height properties, respectively. To overcome this issue, Aspose.Words provides the <a href="https://reference.aspose.com/words/java/com.aspose.words/imagefieldmergingargs/#getShape" target="_blank" rel="nofollow noopener noreferrer">getShape()</a> property, which facilitates to get full control over the inserted image or any other shape.
+
+The following code example shows how to set various image properties:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.writeln("{{#foreach example}}");
+builder.writeln("{{Image(126pt;126pt):stempel}}");
+builder.writeln("{{/foreach example}}");
+
+doc.getMailMerge().setUseNonMergeFields(true);
+doc.getMailMerge().setTrimWhitespaces(true);
+doc.getMailMerge().setUseWholeParagraphAsRegion(false);
+doc.getMailMerge().setCleanupOptions(MailMergeCleanupOptions.REMOVE_EMPTY_TABLE_ROWS
+        | MailMergeCleanupOptions.REMOVE_CONTAINING_FIELDS
+        | MailMergeCleanupOptions.REMOVE_UNUSED_REGIONS
+        | MailMergeCleanupOptions.REMOVE_UNUSED_FIELDS);
+
+doc.getMailMerge().setFieldMergingCallback(new ImageFieldMergingHandler());
+doc.getMailMerge().executeWithRegions(new DataSourceRoot());
+
+doc.save(getArtifactsDir() + "WorkingWithFields.MailMergeImageField.docx");
+```
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+private static class ImageFieldMergingHandler implements IFieldMergingCallback {
+    public void fieldMerging(FieldMergingArgs args) {
+        //  Implementation is not required.
+    }
+
+    public void imageFieldMerging(ImageFieldMergingArgs args) throws Exception {
+        Shape shape = new Shape(args.getDocument(), ShapeType.IMAGE);
+        shape.setWidth(126.0);
+        shape.setHeight(126.0);
+        shape.setWrapType(WrapType.SQUARE);
+
+        shape.getImageData().setImage(getMyDir() + "Mail merge image.png");
+
+        args.setShape(shape);
+    }
+}
+```
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+public static class DataSourceRoot implements IMailMergeDataSourceRoot {
+    public IMailMergeDataSource getDataSource(String s) {
+        return new DataSource();
+    }
+
+    private static class DataSource implements IMailMergeDataSource {
+        private boolean next = true;
+
+        private String tableName() {
+            return "example";
+        }
+
+        @Override
+        public String getTableName() {
+            return tableName();
+        }
+
+        public boolean moveNext() {
+            boolean result = next;
+            next = false;
+            return result;
+        }
+
+        public IMailMergeDataSource getChildDataSource(String s) {
+            return null;
+        }
+
+        public boolean getValue(String fieldName, Ref<Object> fieldValue) {
+            fieldValue.set(null);
+            return false;
+        }
+    }
+}
+```
+
+***
+
+## FAQ {#faq}
+
+1. **Q:** How can I insert a checkbox form field during a mail merge?\
+   **A:** Implement `IFieldMergingCallback` and, in the `fieldMerging` method, detect the target merge field name. Move a `DocumentBuilder` to the field with `builder.moveToMergeField(args.getFieldName())` and insert the check box with `builder.insertCheckBox(...)`. The check box replaces the merge field.
+
+2. **Q:** How do I add a text input form field using mail merge?\
+   **A:** In the same `fieldMerging` callback, move the `DocumentBuilder` to the merge field with `builder.moveToMergeField(args.getFieldName())` and call `builder.insertTextInput(...)` with the form field name, a `TextFormFieldType` value, the default text, and the maximum length. The text input form field replaces the merge field.
+
+3. **Q:** How can I insert images that are stored in a database BLOB during mail merge?\
+   **A:** Use an image merge field (`Image:MyField`) in the template. In the `imageFieldMerging` callback, retrieve the BLOB as a `byte[]` or `InputStream` and pass it to `ImageFieldMergingArgs.setImageStream` (wrap a `byte[]` in a `ByteArrayInputStream`) to supply the image data to the engine.
+
+4. **Q:** How can I control the size, rotation, or wrap type of an inserted image?\
+   **A:** Inside the `imageFieldMerging` callback, create a `Shape` with the image, set properties such as `setWidth`, `setHeight`, `setWrapType`, and `setRotation`, and pass it to `ImageFieldMergingArgs.setShape`. The engine then inserts this shape instead of the image data. To set only the size, use `setImageWidth` and `setImageHeight`.
+
+5. **Q:** Do I need a licensed version of Aspose.Words to use form fields or image insertion in mail merge?\
+   **A:** Not to use the feature. Without a license, Aspose.Words for Java works in evaluation mode with full functionality, but it adds an evaluation watermark and limits the document size to a few hundred paragraphs. To remove these limitations, apply a license: `License license = new License(); license.setLicense("Aspose.Words.Java.lic");`.

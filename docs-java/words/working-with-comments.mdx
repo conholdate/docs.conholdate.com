@@ -1,0 +1,309 @@
+---
+title: "Working with Comments"
+sidebar_label: "Working with Comments"
+sidebar_key: "java-words-working-with-comments"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/java"
+source_path: "words/java/working-with-comments.html"
+source_commit: ""
+source_sha256: "8737cc8492d4dbf11168452eb0d15f13aebede3334018aee2a916d93a860b60e"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/java/working-with-comments/"
+source_snapshot_sha256: "b93a1ec80e4f94c65808fb08bfb6cac827e26d15c5c30ed84ffae8aa8206c92b"
+---
+
+:::info
+Aspose.Words for Java is included in Conholdate.Total for Java.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains how to work with comments in a Word document.
+:::
+
+:::info
+**Try online**
+
+You can try this functionality with our <a href="https://products.conholdate.app/annotation/word" target="_blank">Free online remove annotations</a>.
+:::
+
+Aspose.Words allows users to work with comments - comments in a document in Aspose.Words are represented by the <a href="https://reference.aspose.com/words/java/com.aspose.words/comment/" target="_blank" rel="nofollow noopener noreferrer">Comment</a> class. Also use the <a href="https://reference.aspose.com/words/java/com.aspose.words/commentrangestart/" target="_blank" rel="nofollow noopener noreferrer">CommentRangeStart</a> and <a href="https://reference.aspose.com/words/java/com.aspose.words/commentrangeend/" target="_blank" rel="nofollow noopener noreferrer">CommentRangeEnd</a> classes to specify the region of text that should be associated with a comment.
+
+## Add a Comment {#add-a-comment}
+
+Aspose.Words allows you to add comments in several ways:
+
+1. Using the <a href="https://reference.aspose.com/words/java/com.aspose.words/comment/" target="_blank" rel="nofollow noopener noreferrer">Comment</a> class
+2. Using the <a href="https://reference.aspose.com/words/java/com.aspose.words/commentrangestart/" target="_blank" rel="nofollow noopener noreferrer">CommentRangeStart</a> and <a href="https://reference.aspose.com/words/java/com.aspose.words/commentrangeend/" target="_blank" rel="nofollow noopener noreferrer">CommentRangeEnd</a> classes
+
+The following code example shows how to add a comment to a paragraph using the **Comment** class:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.write("Some text is added.");
+
+Comment comment = new Comment(doc, "Awais Hafeez", "AH", new Date());
+comment.setText("Comment text.");
+
+builder.getCurrentParagraph().appendChild(comment);
+
+doc.save(getArtifactsDir() + "WorkingWithComments.AddComments.docx");
+```
+
+The following code example shows how to add a comment to a paragraph using a region of text and the **CommentRangeStart** and **CommentRangeEnd** classes:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+
+Paragraph para1 = new Paragraph(doc);
+Run run1 = new Run(doc, "Some ");
+Run run2 = new Run(doc, "text ");
+para1.appendChild(run1);
+para1.appendChild(run2);
+doc.getFirstSection().getBody().appendChild(para1);
+
+Paragraph para2 = new Paragraph(doc);
+Run run3 = new Run(doc, "is ");
+Run run4 = new Run(doc, "added ");
+para2.appendChild(run3);
+para2.appendChild(run4);
+doc.getFirstSection().getBody().appendChild(para2);
+
+Comment comment = new Comment(doc, "Awais Hafeez", "AH", new Date());
+comment.getParagraphs().add(new Paragraph(doc));
+comment.getFirstParagraph().getRuns().add(new Run(doc, "Comment text."));
+
+CommentRangeStart commentRangeStart = new CommentRangeStart(doc, comment.getId());
+CommentRangeEnd commentRangeEnd = new CommentRangeEnd(doc, comment.getId());
+
+run1.getParentNode().insertAfter(commentRangeStart, run1);
+run3.getParentNode().insertAfter(commentRangeEnd, run3);
+commentRangeEnd.getParentNode().insertAfter(comment, commentRangeEnd);
+
+doc.save(getArtifactsDir() + "WorkingWithComments.AnchorComment.doc");
+```
+
+## Extract or Remove Comments {#extract-or-remove-comments}
+
+Using Comments in a Word document (in addition to Track Changes) is a common practice when reviewing documents, particularly when there are multiple reviewers. There can be situations where the only thing you need from a document is the comments. Say you want to generate a list of review findings, or perhaps you have collected all the useful information from the document and you simply want to remove unnecessary comments. You may want to view or remove the comments of a particular reviewer.
+
+In this sample we are going to look at some simple methods for both gathering information from the comments within a document and for removing comments from a document. Specifically we'll cover how to:
+
+- Extract all the comments from a document or only the ones made by a particular author
+- Remove all the comments from a document or only from a particular author
+
+### How to Extract or Remove Comments {#how-to-extract-or-remove-comments}
+
+The code in this sample is actually quite simple and all methods are based on the same approach. A comment in a Word document is represented by a com.aspose.words.Comment object in the Aspose.Words document object model. To collect all the comments in a document use the getChildNodes method with the first parameter set to NodeType.COMMENT. Make sure that the second parameter of the getChildNodes method is set to true: this forces getChildNodes to select from all child nodes recursively, rather than only collecting the immediate children.
+
+To illustrate how to extract and remove comments from a document, we will go through the following steps:
+
+1. Open a Word document using the <a href="https://reference.aspose.com/words/java/com.aspose.words/document/" target="_blank" rel="nofollow noopener noreferrer">Document</a> class
+2. Get all comments from the document into a collection
+3. To extract comments:
+   1. Go through the collection using the foreach operator
+   2. Extract and list the author name, date & time and text of all comments
+   3. Extract and list the author name, date & time and text of comments written by a specific author, in this case the author `ks`
+4. To remove comments:
+   1. Go backwards through the collection using the for operator
+   2. Remove comments
+5. Save the changes
+
+### How to Extract All Comments {#how-to-extract-all-comments}
+
+The **GetChildNodes** method is very useful and you can use it every time you need to get a list of document nodes of any type. The resulting collection does not create an immediate overhead because the nodes are selected into this collection only when you enumerate or access items in it.
+
+The following code example shows how to extract the author name, date\&time and text of all comments in the document:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+private ArrayList<String> extractComments(Document doc) throws Exception {
+    ArrayList<String> collectedComments = new ArrayList<String>();
+    NodeCollection comments = doc.getChildNodes(NodeType.COMMENT, true);
+
+    for (Comment comment : (Iterable<Comment>) comments) {
+        collectedComments.add(comment.getAuthor() + " " + comment.getDateTime() + " " +
+                comment.toString(SaveFormat.TEXT));
+    }
+
+    return collectedComments;
+}
+```
+
+### How to Extract Comments of a Specified Author {#how-to-extract-comments-of-a-specified-author}
+
+After you have selected **Comment** nodes into a collection, all you have to do is extract the information you need. In this sample, author initials, date, time and the plain text of the comment is combined into one string; you could choose to store it in some other ways instead.
+
+The overloaded method that extracts the Comments from a particular author is almost the same, it just checks the author's name before adding the info into the array.
+
+The following code example shows how to extract the author name, date\&time and text of the comments by the specified author:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+private ArrayList<String> extractComments(Document doc, String authorName) throws Exception {
+    ArrayList<String> collectedComments = new ArrayList<String>();
+    NodeCollection comments = doc.getChildNodes(NodeType.COMMENT, true);
+
+    for (Comment comment : (Iterable<Comment>) comments) {
+        if (comment.getAuthor().equals(authorName))
+            collectedComments.add(comment.getAuthor() + " " + comment.getDateTime() + " " +
+                    comment.toString(SaveFormat.TEXT));
+    }
+
+    return collectedComments;
+}
+```
+
+### How to Remove Comments {#how-to-remove-comments}
+
+If you are removing all comments, there is no need to move through the collection deleting comments one by one. You can remove them by calling the <a href="https://reference.aspose.com/words/java/com.aspose.words/nodecollection/#clear" target="_blank" rel="nofollow noopener noreferrer">clear</a> method on the comments collection.
+
+The following code example shows how to remove all comments in the document:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+private void removeComments(Document doc) {
+    NodeCollection comments = doc.getChildNodes(NodeType.COMMENT, true);
+    comments.clear();
+}
+```
+
+When you need to selectively remove comments, the process becomes more similar to the code we used for comment extraction.
+
+The following code example shows how to remove comments by the specified author:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+private void removeComments(Document doc, String authorName) {
+    NodeCollection comments = doc.getChildNodes(NodeType.COMMENT, true);
+
+    // Look through all comments and remove those written by the authorName.
+    for (int i = comments.getCount() - 1; i >= 0; i--) {
+        Comment comment = (Comment) comments.get(i);
+        if (comment.getAuthor().equals(authorName))
+            comment.remove();
+    }
+}
+```
+
+The main point to highlight here is the use of the for operator. Unlike the simple extraction, here you want to delete a comment. A suitable trick is to iterate the collection backwards from the last Comment to the first one. The reason for this if you start from the end and move backwards, the index of the preceding items remains unchanged, and you can work your way back to the first item in the collection.
+
+The following code example shows the methods for the comments extraction and removal:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Comments.docx");
+
+// Extract the information about the comments of all the authors.
+for (String comment : extractComments(doc))
+    System.out.println(comment);
+
+// Remove comments by the "pm" author.
+removeComments(doc, "pm");
+System.out.println("Comments from \"pm\" are removed!");
+
+// Extract the information about the comments of the "ks" author.
+for (String comment : extractComments(doc, "ks"))
+    System.out.println(comment);
+
+// Read the comment's reply and resolve them.
+commentResolvedAndReplies(doc);
+
+// Remove all comments.
+removeComments(doc);
+System.out.println("All comments are removed!");
+
+doc.save(getArtifactsDir() + "WorkingWithComments.ProcessComments.docx");
+```
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-Java/blob/master/Examples/Data/Comments.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+### How to Remove a Comment between CommentRangeStart and CommentRangeEnd {#how-to-remove-a-comment-between-commentrangestart-and-commentrangeend}
+
+Using Aspose.Words you can also remove comments between the **CommentRangeStart** and **CommentRangeEnd** nodes.
+
+The following code example shows how to remove text between **CommentRangeStart** and **CommentRangeEnd**:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Comments.docx");
+
+CommentRangeStart commentStart = (CommentRangeStart) doc.getChild(NodeType.COMMENT_RANGE_START, 0, true);
+Node currentNode = commentStart;
+
+boolean isRemoving = true;
+while (currentNode != null && isRemoving) {
+    if (currentNode.getNodeType() == NodeType.COMMENT_RANGE_END)
+        isRemoving = false;
+
+    Node nextNode = currentNode.nextPreOrder(doc);
+    currentNode.remove();
+    currentNode = nextNode;
+}
+
+doc.save(getArtifactsDir() + "WorkingWithComments.RemoveRangeText.docx");
+```
+
+## Add or Remove Comment's Reply {#add-or-remove-comments-reply}
+
+The <a href="https://reference.aspose.com/words/java/com.aspose.words/comment/#addReply-java.lang.String-java.lang.String-java.util.Date-java.lang.String" target="_blank" rel="nofollow noopener noreferrer">addReply</a> method adds a reply to this comment. Please note that due to the existing Microsoft Office limitations only 1 level of replies is allowed in the document. An exception of type *IllegalStateException* will be raised if this method is called on the existing Reply comment.
+
+You can use the <a href="https://reference.aspose.com/words/java/com.aspose.words/comment/#removeReply-com.aspose.words.Comment" target="_blank" rel="nofollow noopener noreferrer">removeReply</a> method to remove the specified reply to this comment.
+
+The following code example shows how to add a reply to comment and remove comment's reply:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Comments.docx");
+
+Comment comment = (Comment) doc.getChild(NodeType.COMMENT, 0, true);
+comment.removeReply(comment.getReplies().get(0));
+
+Calendar calendar = new GregorianCalendar(2017, Calendar.SEPTEMBER, 25);
+calendar.set(Calendar.HOUR, 12);
+calendar.set(Calendar.MINUTE, 15);
+calendar.set(Calendar.SECOND, 0);
+
+comment.addReply("John Doe", "JD", calendar.getTime(), "New reply");
+
+doc.save(getArtifactsDir() + "WorkingWithComments.AddRemoveCommentReply.docx");
+```
+
+## Read Comment's Reply {#read-comments-reply}
+
+The <a href="https://reference.aspose.com/words/java/com.aspose.words/comment/#getReplies" target="_blank" rel="nofollow noopener noreferrer">getReplies()</a> property returns a collection of the <a href="https://reference.aspose.com/words/java/com.aspose.words/comment/" target="_blank" rel="nofollow noopener noreferrer">Comment</a> objects that are immediate children of the specified comment.
+
+The following code example shows how to iterate through a comment's replies and resolved them:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+private void commentResolvedAndReplies(Document doc) {
+    NodeCollection comments = doc.getChildNodes(NodeType.COMMENT, true);
+
+    Comment parentComment = (Comment) comments.get(0);
+    for (Comment childComment : parentComment.getReplies()) {
+        // Get comment parent and status.
+        System.out.println(childComment.getAncestor().getId());
+        System.out.println(childComment.getDone());
+
+        // And update comment Done mark.
+        childComment.setDone(true);
+    }
+}
+```

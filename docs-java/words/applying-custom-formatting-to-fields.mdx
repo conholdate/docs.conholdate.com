@@ -1,0 +1,296 @@
+---
+title: "Apply Custom Formatting to Fields"
+sidebar_label: "Apply Custom Formatting to Fields"
+sidebar_key: "java-words-applying-custom-formatting-to-fields"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/java"
+source_path: "words/java/applying-custom-formatting-to-fields.md"
+source_commit: ""
+source_sha256: "e1c0ee870801ab8e3c79acd37550a8c4b95c3745725f8e7764f178a42ece6c07"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/words/java/applying-custom-formatting-to-fields/"
+source_markdown_url: "https://docs.aspose.com/words/java/applying-custom-formatting-to-fields.md"
+source_snapshot_sha256: "2694e73b1985ccfab5a5d2007d220fb00b500b02bb399dd8e339528f73f6603e"
+---
+
+:::info
+Aspose.Words for Java is included in Conholdate.Total for Java.
+:::
+
+
+## Purpose Summary
+
+This page outlines how to apply custom formatting to fields (like merge fields or document variables) in Aspose.Words.
+
+Sometimes users need to apply custom formatting to fields. In this article, we will look at a couple of examples of how this can be done.
+
+To learn more options, see the full list of properties for each field type in the corresponding class in the <a href="https://reference.aspose.com/words/java/com.aspose.words/" target="_blank" rel="nofollow noopener noreferrer">com.aspose.words</a> package.
+
+## How to Apply Custom Formatting to Field Result
+
+Aspose.Words provides API for custom formatting of field's result. You can implement <a href="https://reference.aspose.com/words/java/com.aspose.words/ifieldresultformatter/" target="_blank" rel="nofollow noopener noreferrer">IFieldResultFormatter</a> interface to control how the field result is formatted. You can apply numeric format switch, i.e. # "#.##", date/time format switch, i.e. @ "dd.MM.yyyy", and number format switch, i.e. \* Ordinal.
+
+The following code example shows how to apply custom formatting for the field result:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+FieldResultFormatter formatter = new FieldResultFormatter("$%d", "Date: %s", "Item # %s:");
+doc.getFieldOptions().setResultFormatter(formatter);
+
+// Our field result formatter applies a custom format to newly created fields of three types of formats.
+// Field result formatters apply new formatting to fields as they are updated,
+// which happens as soon as we create them using this InsertField method overload.
+// 1 -  Numeric:
+builder.insertField(" = 2 + 3 \\# $###");
+
+Assert.assertEquals("$5", doc.getRange().getFields().get(0).getResult());
+Assert.assertEquals(1, formatter.countFormatInvocations(FieldResultFormatter.FormatInvocationType.NUMERIC));
+
+// 2 -  Date/time:
+builder.insertField("DATE \\@ \"d MMMM yyyy\"");
+
+Assert.assertTrue(doc.getRange().getFields().get(1).getResult().startsWith("Date: "));
+Assert.assertEquals(1, formatter.countFormatInvocations(FieldResultFormatter.FormatInvocationType.DATE_TIME));
+
+// 3 -  General:
+builder.insertField("QUOTE \"2\" \\* Ordinal");
+
+Assert.assertEquals("Item # 2:", doc.getRange().getFields().get(2).getResult());
+Assert.assertEquals(1, formatter.countFormatInvocations(FieldResultFormatter.FormatInvocationType.GENERAL));
+
+formatter.printFormatInvocations();
+```
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+/// <summary>
+/// When fields with formatting are updated, this formatter will override their formatting
+/// with a custom format, while tracking every invocation.
+/// </summary>
+public static class FieldResultFormatter implements IFieldResultFormatter {
+
+    private final String mNumberFormat;
+    private final String mDateFormat;
+    private final String mGeneralFormat;
+    private final ArrayList<FormatInvocation> formatInvocations = new ArrayList<>();
+
+    public FieldResultFormatter(String numberFormat, String dateFormat, String generalFormat) {
+        this.mNumberFormat = numberFormat;
+        this.mDateFormat = dateFormat;
+        this.mGeneralFormat = generalFormat;
+    }
+
+    @Override
+    public String formatNumeric(double value, String format) {
+        if (mNumberFormat == null || mNumberFormat.isEmpty()) {
+            return null;
+        }
+
+        String newValue = String.format(mNumberFormat, (int) value);
+        formatInvocations.add(new FormatInvocation(FormatInvocationType.NUMERIC, value, format, newValue));
+        return newValue;
+    }
+
+    @Override
+    public String formatDateTime(Date value, String format, int calendarType) {
+        if (mDateFormat == null || mDateFormat.isEmpty()) {
+            return null;
+        }
+
+        String newValue = String.format(mDateFormat, value);
+        formatInvocations.add(new FormatInvocation(FormatInvocationType.DATE_TIME, value + " (" + calendarType + ")", format, newValue));
+        return newValue;
+    }
+
+    @Override
+    public String format(String value, int format) {
+        return format((Object) value, format);
+    }
+
+    @Override
+    public String format(double value, int format) {
+        return format((Object) value, format);
+    }
+
+    private String format(Object value, int format) {
+        if (mGeneralFormat == null || mGeneralFormat.isEmpty()) {
+            return null;
+        }
+
+        double doubleValue = Double.parseDouble(value.toString());
+        String newValue = String.format(mGeneralFormat, (int) doubleValue);
+        formatInvocations.add(new FormatInvocation(FormatInvocationType.GENERAL, value, String.valueOf(format), newValue));
+        return newValue;
+    }
+
+    public int countFormatInvocations(FormatInvocationType formatInvocationType) {
+        if (formatInvocationType == FormatInvocationType.ALL) {
+            return formatInvocations.size();
+        }
+        return (int) formatInvocations.stream()
+                .filter(f -> f.getFormatInvocationType() == formatInvocationType)
+                .count();
+    }
+
+    public void printFormatInvocations() {
+        for (FormatInvocation f : formatInvocations) {
+            System.out.println("Invocation type:\t" + f.getFormatInvocationType() + "\n" +
+                    "\tOriginal value:\t\t" + f.getValue() + "\n" +
+                    "\tOriginal format:\t" + f.getOriginalFormat() + "\n" +
+                    "\tNew value:\t\t\t" + f.getNewValue() + "\n");
+        }
+    }
+
+    public static class FormatInvocation {
+        private final FormatInvocationType formatInvocationType;
+        private final Object value;
+        private final String originalFormat;
+        private final String newValue;
+
+        public FormatInvocation(FormatInvocationType formatInvocationType, Object value, String originalFormat, String newValue) {
+            this.formatInvocationType = formatInvocationType;
+            this.value = value;
+            this.originalFormat = originalFormat;
+            this.newValue = newValue;
+        }
+
+        public FormatInvocationType getFormatInvocationType() {
+            return formatInvocationType;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public String getOriginalFormat() {
+            return originalFormat;
+        }
+
+        public String getNewValue() {
+            return newValue;
+        }
+    }
+
+    public enum FormatInvocationType {
+        NUMERIC, DATE_TIME, GENERAL, ALL
+    }
+}
+```
+
+## How to evaluate `IF` condition
+
+If you want to evaluate `IF` condition after mail merge, you can use the <a href="https://reference.aspose.com/words/java/com.aspose.words/fieldif/#evaluateCondition" target="_blank" rel="nofollow noopener noreferrer">evaluateCondition()</a> method that immediately returns the result of the expression evaluation.
+
+The following code example shows how to use this method:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+DocumentBuilder builder = new DocumentBuilder();
+
+FieldIf field = (FieldIf) builder.insertField("IF 1 = 1", null);
+int actualResult = field.evaluateCondition();
+
+System.out.println(actualResult);
+```
+
+## How to Apply Custom Formatting to Time Field
+
+By default Aspose.Words updates `TIME` field with current culture short time format. If you want to format the `TIME` field according to your requirement, you can achieve this by implementing <a href="https://reference.aspose.com/words/java/com.aspose.words/ifieldupdatecultureprovider/" target="_blank" rel="nofollow noopener noreferrer">IFieldUpdateCultureProvider</a> interface.
+
+The following code examples shows how to apply custom formatting to the `TIME` field:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.insertField(FieldType.FIELD_TIME, true);
+
+doc.getFieldOptions().setFieldUpdateCultureSource(FieldUpdateCultureSource.FIELD_CODE);
+doc.getFieldOptions().setFieldUpdateCultureProvider(new FieldUpdateCultureProvider());
+
+doc.save(getArtifactsDir() + "WorkingWithFields.FieldUpdateCulture.pdf");
+```
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+private static class FieldUpdateCultureProvider implements IFieldUpdateCultureProvider {
+    public CultureInfo getCulture(String name, Field field) {
+        switch (name) {
+            case "ru-RU":
+                CultureInfo culture = new CultureInfo(new Locale(name));
+                DateTimeFormatInfo format = culture.getDateTimeFormat();
+
+                format.setMonthNames(new String[]
+                        {
+                                "месяц 1", "месяц 2", "месяц 3", "месяц 4", "месяц 5", "месяц 6", "месяц 7", "месяц 8",
+                                "месяц 9", "месяц 10", "месяц 11", "месяц 12", ""
+                        });
+                format.setMonthGenitiveNames(format.getMonthNames());
+                format.setAbbreviatedMonthNames(new String[]
+                        {
+                                "мес 1", "мес 2", "мес 3", "мес 4", "мес 5", "мес 6", "мес 7", "мес 8", "мес 9", "мес 10",
+                                "мес 11", "мес 12", ""
+                        });
+                format.setAbbreviatedMonthGenitiveNames(format.getAbbreviatedMonthNames());
+
+                format.setDayNames(new String[]
+                        {
+                                "день недели 7", "день недели 1", "день недели 2", "день недели 3", "день недели 4",
+                                "день недели 5", "день недели 6"
+                        });
+                format.setAbbreviatedDayNames(new String[]
+                        {"день 7", "день 1", "день 2", "день 3", "день 4", "день 5", "день 6"});
+                format.setShortestDayNames(new String[]{"д7", "д1", "д2", "д3", "д4", "д5", "д6"});
+
+                format.setAMDesignator("До полудня");
+                format.setPMDesignator("После полудня");
+
+                final String PATTERN = "yyyy MM (MMMM) dd (dddd) hh:mm:ss tt";
+                format.setLongDatePattern(PATTERN);
+                format.setLongTimePattern(PATTERN);
+                format.setShortDatePattern(PATTERN);
+                format.setShortTimePattern(PATTERN);
+
+                return culture;
+            case "en-US":
+                return new CultureInfo(new Locale(name));
+            default:
+                return null;
+        }
+    }
+}
+```
+
+## Related APIs
+
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/ifieldresultformatter/" target="_blank" rel="nofollow noopener noreferrer">IFieldResultFormatter</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/fieldif/#evaluateCondition" target="_blank" rel="nofollow noopener noreferrer">FieldIf.evaluateCondition</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/ifieldupdatecultureprovider/" target="_blank" rel="nofollow noopener noreferrer">IFieldUpdateCultureProvider</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/field/" target="_blank" rel="nofollow noopener noreferrer">Field</a>
+
+## FAQ
+
+1. **Q:** How can I format a date field with a custom pattern?\
+   **A:** Implement `IFieldResultFormatter` and, in its `formatDateTime(Date value, String format, int calendarType)` method, return the string formatted with `SimpleDateFormat` and the desired pattern, such as `"dd.MM.yyyy"`. Assign the formatter with `doc.getFieldOptions().setResultFormatter(...)`.
+
+2. **Q:** What switch should I use to apply a numeric format to a field result?\
+   **A:** Use the numeric format switch `\# "#.##"` (or any valid .NET/Java numeric format string) inside the field code. The custom formatter can also apply this switch programmatically.
+
+3. **Q:** How do I evaluate an `IF` field after performing a mail merge?\
+   **A:** Call `FieldIf.evaluateCondition()` on the `FieldIf` object. This method returns a `FieldIfComparisonResult` value (`TRUE`, `FALSE`, or `ERROR`) indicating the result of the expression without needing to update the whole document.
+
+4. **Q:** How can I change the culture used by the `TIME` field?\
+   **A:** Implement `IFieldUpdateCultureProvider` and return a `CultureInfo` that matches your required time format. Register it with `doc.getFieldOptions().setFieldUpdateCultureProvider(provider)` and set `doc.getFieldOptions().setFieldUpdateCultureSource(FieldUpdateCultureSource.FIELD_CODE)`; the provider is used when the fields are updated.
+
+5. **Q:** Is it possible to apply an ordinal number format (e.g., 1st, 2nd) to a field?\
+   **A:** Yes. Use the number format switch `\* Ordinal` in the field code, or return the ordinal string from your `IFieldResultFormatter` implementation for the field's result.

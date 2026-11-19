@@ -1,0 +1,153 @@
+---
+title: "Removing Paragraphs Containing Only Template Syntax Tags in Java"
+sidebar_label: "Removing Paragraphs Containing Only Template Syntax Tags in Java"
+sidebar_key: "java-words-removing-paragraphs-containing-only-template-syntax-tags"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/java"
+source_path: "words/java/removing-paragraphs-containing-only-template-syntax-tags.md"
+source_commit: ""
+source_sha256: "aff96f5e380b67928bcaad7fa438528c8d92212f354d7874e56a1f5b4d5b3294"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/words/java/removing-paragraphs-containing-only-template-syntax-tags/"
+source_markdown_url: "https://docs.aspose.com/words/java/removing-paragraphs-containing-only-template-syntax-tags.md"
+source_snapshot_sha256: "c8720d3aff9d3dcdbda98b5acca77709029b4c65de5af134bc32066a29b21e9e"
+---
+
+:::info
+Aspose.Words for Java is included in Conholdate.Total for Java.
+:::
+
+
+While building a report, some paragraphs containing only template syntax tags can become empty after the tags are removed or replaced with empty values. To remove such paragraphs from the report, you can apply the `ReportBuildOptions.REMOVE_EMPTY_PARAGRAPHS` option as shown in the following example.
+
+```java
+ReportingEngine engine = new ReportingEngine();
+engine.setOptions(ReportBuildOptions.REMOVE_EMPTY_PARAGRAPHS);
+engine.buildReport(...);
+```
+
+The difference in the engine's behavior when the option is applied and not applied is illustrated by the following examples.
+
+**Example 1**
+
+Template document
+
+```xml
+Prefix
+<<[""]>>
+Suffix
+```
+
+Result document without `ReportBuildOptions.REMOVE_EMPTY_PARAGRAPHS` applied
+
+```xml
+Prefix
+
+Suffix
+```
+
+Result document with `ReportBuildOptions.REMOVE_EMPTY_PARAGRAPHS` applied
+
+```xml
+Prefix
+Suffix
+```
+
+**Example 2**
+
+Template document
+
+```xml
+Prefix
+<<if [false]>>
+Text to be removed
+<</if>>
+Suffix
+```
+
+Result document without `ReportBuildOptions.REMOVE_EMPTY_PARAGRAPHS` applied
+
+```xml
+Prefix
+
+Suffix
+```
+
+Result document with `ReportBuildOptions.REMOVE_EMPTY_PARAGRAPHS` applied
+
+```xml
+Prefix
+Suffix
+```
+
+**Example 3**
+
+**Note** - In this example, `persons` is assumed to be a data table having a field Name.
+
+Template document
+
+```xml
+Prefix
+<<foreach [in persons]>>
+<<[Name]>>
+<</foreach>>
+Suffix
+```
+
+Result document without `ReportBuildOptions.REMOVE_EMPTY_PARAGRAPHS` applied
+
+```xml
+Prefix
+
+John Doe
+
+Jane Doe
+
+John Smith
+
+Suffix
+```
+
+Result document with `ReportBuildOptions.REMOVE_EMPTY_PARAGRAPHS` applied
+
+```xml
+Prefix
+John Doe
+Jane Doe
+John Smith
+Suffix
+```
+
+The same functionality can be applied to selective paragraphs only. To achieve this, you can prepend names of corresponding tags with exclamation marks as shown in the following template snippet instead of applying of the `ReportBuildOptions.REMOVE_EMPTY_PARAGRAPHS` option.
+
+```xml
+<<![...]>>
+<<!doc [...]>>
+<<!foreach [...]>>...<</foreach>>
+<<!if [...]>>...<<elseif [...]>>...<<else>>...<</if>>
+```
+
+For a tag with its name prepended with an exclamation mark, the engine treats a corresponding paragraph or paragraphs as if `ReportBuildOptions.REMOVE_EMPTY_PARAGRAPHS` was applied. For the rest of tags, the engine behaves as if `ReportBuildOptions.REMOVE_EMPTY_PARAGRAPHS` was not applied.
+
+***
+
+## FAQ
+
+1. **Q:** How do I enable the removal of empty paragraphs for the whole report?\
+   **A:** Set the `ReportBuildOptions.REMOVE_EMPTY_PARAGRAPHS` flag on the `ReportingEngine` before calling `buildReport`. This tells the engine to delete any paragraph that contains only template tags that resolve to empty values.
+
+2. **Q:** Can I apply the removal behavior only to specific tags instead of the entire document?\
+   **A:** Yes. Prefix the tag name with an exclamation mark in the template (e.g., `<<![...]>>`, `<<!foreach [...]>>`). The engine will treat paragraphs containing those tags as empty, while other tags will follow the default behavior.
+
+3. **Q:** Will a paragraph that contains whitespace or line‑break characters be removed when the option is enabled?\
+   **A:** The engine treats a paragraph as empty if, after tag processing, it contains no visible characters. Whitespace and line‑breaks are ignored, so such a paragraph will still be removed.
+
+4. **Q:** What happens if a paragraph contains both regular text and a tag that resolves to an empty string?\
+   **A:** The paragraph is retained because it still contains visible text. The removal option only affects paragraphs that consist solely of tags (or tags that become empty).

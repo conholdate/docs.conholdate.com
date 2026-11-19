@@ -1,0 +1,439 @@
+---
+title: "Working with Sections"
+sidebar_label: "Working with Sections"
+sidebar_key: "java-words-working-with-sections"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/java"
+source_path: "words/java/working-with-sections.html"
+source_commit: ""
+source_sha256: "31894da6301e2acb322d622ff2e1dcb8a6c5597f18757f495fc9cc1ff88abfdc"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/java/working-with-sections/"
+source_snapshot_sha256: "76eac5e18e330264fdc52e9af6c2942aa537f38e1475cd3acce097778ef687a0"
+---
+
+:::info
+Aspose.Words for Java is included in Conholdate.Total for Java.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains how to work with document sections.
+:::
+
+Sometimes you want a document that does not have the same formatting across all pages. For example, you may need to modify page number formats, have different page size and orientation, or have the first document page as a cover page without any numbering. You can achieve that with sections.
+
+Sections are level nodes that control headers and footers, orientation, columns, margins, page number formatting, and others.
+
+Aspose.Words allows you to manage sections, divide a document into sections, and make formatting changes that apply only to a specific section. Aspose.Words stores information about section formatting such as headers and footers, page setup, and column settings in the section break.
+
+This article explains how to work with sections and section breaks.
+
+## What Section and Section Break Is {#what-section-and-section-break-is}
+
+Document sections are represented by the <a href="https://reference.aspose.com/words/java/com.aspose.words/section/" target="_blank" rel="nofollow noopener noreferrer">Section</a> and <a href="https://reference.aspose.com/words/java/com.aspose.words/sectioncollection/" target="_blank" rel="nofollow noopener noreferrer">SectionCollection</a> classes. Section objects are immediate children of the <a href="https://reference.aspose.com/words/java/com.aspose.words/document/" target="_blank" rel="nofollow noopener noreferrer">Document</a> node and can be accessed via the <a href="https://reference.aspose.com/words/java/com.aspose.words/document/#getSections" target="_blank" rel="nofollow noopener noreferrer">getSections()</a> property. You can manage those nodes by using some methods such as <a href="https://reference.aspose.com/words/java/com.aspose.words/nodecollection/#remove-com.aspose.words.Node" target="_blank" rel="nofollow noopener noreferrer">remove()</a>, <a href="https://reference.aspose.com/words/java/com.aspose.words/nodecollection/#add-com.aspose.words.Node" target="_blank" rel="nofollow noopener noreferrer">add()</a>, <a href="https://reference.aspose.com/words/java/com.aspose.words/nodecollection/#indexOf-com.aspose.words.Node" target="_blank" rel="nofollow noopener noreferrer">indexOf()</a>, and others.
+
+Section break is an option that divides document pages into sections with customizable layouts.
+
+## Types of a Section Break {#types-of-a-section-break}
+
+Aspose.Words allows you to split and format documents using different section breaks of the <a href="https://reference.aspose.com/words/java/com.aspose.words/breaktype/" target="_blank" rel="nofollow noopener noreferrer">BreakType</a> enumeration:
+
+- SectionBreakContinuous
+- SectionBreakNewColumn
+- SectionBreakNewPage
+- SectionBreakEvenPage
+- SectionBreakOddPage
+
+You can also use the <a href="https://reference.aspose.com/words/java/com.aspose.words/sectionstart/" target="_blank" rel="nofollow noopener noreferrer">SectionStart</a> enumeration to choose a break type that applies only for the first section such as NewColumn, NewPage, EvenPage, and OddPage.
+
+## Manage a Section {#manage-a-section}
+
+Since a section is a normal composite node, the entire node manipulation API can be used to manipulate sections: to add, remove, and other operations on sections. You can read more about nodes in the article [Aspose.Words Document Object Model (DOM)](/java/words/aspose-words-document-object-model/).
+
+On the other hand, you can also use the `DocumentBuilder` API to work with sections. In this article, we will focus on this particular way of working with sections.
+
+## Insert or Remove a Section Break {#insert-or-remove-a-section-break}
+
+Aspose.Words allows you to insert a section break into text using the <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#insertBreak-int" target="_blank" rel="nofollow noopener noreferrer">insertBreak()</a> method.
+
+The following code example shows how to insert a section break into a document:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+/// <summary>
+/// Insert section breaks before the specified paragraphs.
+/// </summary>
+private void insertSectionBreaks(ArrayList<Paragraph> topicStartParas) {
+    DocumentBuilder builder = new DocumentBuilder(mDoc);
+    for (Paragraph para : topicStartParas) {
+        Section section = para.getParentSection();
+
+        // Insert section break if the paragraph is not at the beginning of a section already.
+        if (para != section.getBody().getFirstParagraph()) {
+            builder.moveTo(para.getFirstChild());
+            builder.insertBreak(BreakType.SECTION_BREAK_NEW_PAGE);
+
+            // This is the paragraph that was inserted at the end of the now old section.
+            // We don't really need the extra paragraph, we just needed the section.
+            section.getBody().getLastParagraph().remove();
+        }
+    }
+}
+```
+
+Use the <a href="https://reference.aspose.com/words/java/com.aspose.words/node/#remove" target="_blank" rel="nofollow noopener noreferrer">remove()</a> method to delete a section break. If you do not need to remove a specific section break and instead delete the content of that section, you can use the <a href="https://reference.aspose.com/words/java/com.aspose.words/section/#clearContent" target="_blank" rel="nofollow noopener noreferrer">clearContent()</a> method.
+
+The following code example shows how to remove sections breaks:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+private void removeSectionBreaks(Document doc) {
+    // Loop through all sections starting from the section that precedes the last one and moving to the first section.
+    for (int i = doc.getSections().getCount() - 2; i >= 0; i--) {
+        // Copy the content of the current section to the beginning of the last section.
+        doc.getLastSection().prependContent(doc.getSections().get(i));
+        // Remove the copied section.
+        doc.getSections().get(i).remove();
+    }
+}
+```
+
+:::info
+Note that a section break has information about the section that goes before it, not the section that goes after it. So if you remove a section break, the text before the removed break will get the properties of the section break following it. This can cause the entire document to becoming landscape, or headers and footers to change or fully disappear.
+:::
+
+## Move a Section {#move-a-section}
+
+If you want to move a section from one position to another in your document, you need to get the index of that section. Aspose.Words allows you to get a section position from a <a href="https://reference.aspose.com/words/java/com.aspose.words/sectioncollection/" target="_blank" rel="nofollow noopener noreferrer">SectionCollection</a> by using the <a href="https://reference.aspose.com/words/java/com.aspose.words/document/#getSections" target="_blank" rel="nofollow noopener noreferrer">getSections()</a> property. You can use the <a href="https://reference.aspose.com/words/java/com.aspose.words/document/#getFirstSection" target="_blank" rel="nofollow noopener noreferrer">getFirstSection()</a> property to get all sections in your document. But if you want to get only the first section, you can use the <a href="https://reference.aspose.com/words/java/com.aspose.words/document/#getFirstSection" target="_blank" rel="nofollow noopener noreferrer">getFirstSection()</a> property.
+
+The following code example shows how to access the first section and iterate through the children of a composite node:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.write("Section 1");
+builder.moveToHeaderFooter(HeaderFooterType.HEADER_PRIMARY);
+builder.write("Primary header");
+builder.moveToHeaderFooter(HeaderFooterType.FOOTER_PRIMARY);
+builder.write("Primary footer");
+
+Section section = doc.getFirstSection();
+
+// A Section is a composite node and can contain child nodes,
+// but only if those child nodes are of a "Body" or "HeaderFooter" node type.
+for (Node node : section) {
+    switch (node.getNodeType()) {
+        case NodeType.BODY: {
+            Body body = (Body) node;
+
+            System.out.println("Body:");
+            System.out.println(MessageFormat.format("\t\"{0}\"", body.getText().trim()));
+            break;
+        }
+        case NodeType.HEADER_FOOTER: {
+            HeaderFooter headerFooter = (HeaderFooter) node;
+
+            System.out.println(MessageFormat.format("HeaderFooter type: {0}:", headerFooter.getHeaderFooterType()));
+            System.out.println(MessageFormat.format("\t\"{0}\"", headerFooter.getText().trim()));
+            break;
+        }
+        default: {
+            throw new Exception("Unexpected node type in a section.");
+        }
+    }
+}
+```
+
+## Specify a Section Layout {#specify-a-section-layout}
+
+Sometimes you want your document to look better by making creative layouts for different document sections. If you want to specify the type of the current section grid, you can choose a section layout mode using the <a href="https://reference.aspose.com/words/java/com.aspose.words/sectionlayoutmode/" target="_blank" rel="nofollow noopener noreferrer">SectionLayoutMode</a> enumeration:
+
+- Default
+- Grid
+- LineGrid
+- SnapToChars
+
+The following code example shows how to limit the number of lines that each page may have:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// Enable pitching, and then use it to set the number of lines per page in this section.
+// A large enough font size will push some lines down onto the next page to avoid overlapping characters.
+builder.getPageSetup().setLayoutMode(SectionLayoutMode.LINE_GRID);
+builder.getPageSetup().setLinesPerPage(15);
+
+builder.getParagraphFormat().setSnapToGrid(true);
+
+for (int i = 0; i < 30; i++)
+    builder.write("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ");
+
+doc.save(getArtifactsDir() + "WorkingWithDocumentOptionsAndSettings.LinesPerPage.docx");
+```
+
+## Edit a Section {#edit-a-section}
+
+When you add a new section to your document, there will be no body or paragraph that you can edit. Aspose.Words allows you to guarantee that a section contains a body with at least one paragraph using the <a href="https://reference.aspose.com/words/java/com.aspose.words/section/#ensureMinimum" target="_blank" rel="nofollow noopener noreferrer">ensureMinimum()</a> method - it will automatically add a Body (or HeaderFooter) node to the document and then add a Paragraph to it.
+
+The following code example shows how to prepare a new section node using **ensureMinimum()**:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+
+// If we add a new section like this, it will not have a body, or any other child nodes.
+doc.getSections().add(new Section(doc));
+// Run the "EnsureMinimum" method to add a body and a paragraph to this section to begin editing it.
+doc.getLastSection().ensureMinimum();
+
+doc.getSections().get(0).getBody().getFirstParagraph().appendChild(new Run(doc, "Hello world!"));
+```
+
+### Append or Prepend Content {#append-or-prepend-content}
+
+If you want to draw some shape or add text or image at the beginning/end of a section, you can use the <a href="https://reference.aspose.com/words/java/com.aspose.words/section/#appendContent-com.aspose.words.Section" target="_blank" rel="nofollow noopener noreferrer">appendContent()</a> and <a href="https://reference.aspose.com/words/java/com.aspose.words/section/#prependContent-com.aspose.words.Section" target="_blank" rel="nofollow noopener noreferrer">prependContent()</a> methods of the <a href="https://reference.aspose.com/words/java/com.aspose.words/section/" target="_blank" rel="nofollow noopener noreferrer">Section</a> class.
+
+The following code example shows how to append content of an existing section:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.write("Section 1");
+builder.insertBreak(BreakType.SECTION_BREAK_NEW_PAGE);
+builder.write("Section 2");
+builder.insertBreak(BreakType.SECTION_BREAK_NEW_PAGE);
+builder.write("Section 3");
+
+// This is the section that we will append and prepend to.
+Section section = doc.getSections().get(2);
+
+// Insert the contents of the first section to the beginning of the third section.
+Section sectionToPrepend = doc.getSections().get(0);
+section.prependContent(sectionToPrepend);
+
+// Insert the contents of the second section to the end of the third section.
+Section sectionToAppend = doc.getSections().get(1);
+section.appendContent(sectionToAppend);
+```
+
+### Clone a Section {#clone-a-section}
+
+Aspose.Words allows you to duplicate a section by creating a full copy of it using the <a href="https://reference.aspose.com/words/java/com.aspose.words/section/#deepClone" target="_blank" rel="nofollow noopener noreferrer">deepClone</a> method.
+
+The following code example shows how to clone the first section in your document:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Document.docx");
+Section cloneSection = doc.getSections().get(0).deepClone();
+```
+
+### Copy Sections between Documents {#copy-sections-between-documents}
+
+In some cases, you may have large documents with many sections and you want to copy the content of a section from one document to another.
+
+Aspose.Words allows you to copy sections between documents using the <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbase/#importNode-com.aspose.words.Node-boolean" target="_blank" rel="nofollow noopener noreferrer">importNode()</a> method.
+
+The following code example shows how to copy sections between documents:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document srcDoc = new Document(getMyDir() + "Document.docx");
+Document dstDoc = new Document();
+
+Section sourceSection = srcDoc.getSections().get(0);
+Section newSection = (Section) dstDoc.importNode(sourceSection, true);
+dstDoc.getSections().add(newSection);
+
+dstDoc.save(getArtifactsDir() + "WorkingWithSection.CopySection.docx");
+```
+
+### Work with Section Header and Footer {#work-with-section-header-and-footer}
+
+The basic rules for displaying a header or footer for each section are quite simple:
+
+1. If the section does not have its own headers/footers of a certain type, then it is taken from the previous section.
+2. The type of header/footer displayed on the page is controlled by the "Different First Page" and "Different Odd & Even pages" section settings - if they are disabled, then the section's own titles are ignored.
+
+The following code example shows how to create 2 sections with different headers:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.getPageSetup().setDifferentFirstPageHeaderFooter(true);
+
+builder.moveToHeaderFooter(HeaderFooterType.HEADER_FIRST);
+builder.getParagraphFormat().setAlignment(ParagraphAlignment.CENTER);
+builder.getFont().setName("Arial");
+builder.getFont().setBold(true);
+builder.getFont().setSize(14);
+builder.write("Header for the first page.");
+
+builder.moveToDocumentEnd();
+builder.insertBreak(BreakType.SECTION_BREAK_NEW_PAGE);
+
+Section currentSection = builder.getCurrentSection();
+PageSetup pageSetup = currentSection.getPageSetup();
+pageSetup.setOrientation(Orientation.LANDSCAPE);
+// This section does not need a different first-page header/footer we need only one title page in the document,
+// and the header/footer for this page has already been defined in the previous section.
+pageSetup.setDifferentFirstPageHeaderFooter(false);
+
+// This section displays headers/footers from the previous section
+// by default call currentSection.HeadersFooters.LinkToPrevious(false) to cancel this page width
+// is different for the new section.
+currentSection.getHeadersFooters().linkToPrevious(false);
+currentSection.getHeadersFooters().clear();
+
+builder.moveToHeaderFooter(HeaderFooterType.HEADER_PRIMARY);
+builder.getParagraphFormat().setAlignment(ParagraphAlignment.CENTER);
+builder.getFont().setName("Arial");
+builder.getFont().setSize(12);
+builder.write("New Header for the first page.");
+
+doc.save(getArtifactsDir() + "WorkingWithHeadersAndFooters.LinkToPreviousHeaderFooter.docx");
+```
+
+If you want to remove the text of headers and footers without removing <a href="https://reference.aspose.com/words/java/com.aspose.words/headerfooter/" target="_blank" rel="nofollow noopener noreferrer">HeaderFooter</a> objects in your document, you can use the <a href="https://reference.aspose.com/words/java/com.aspose.words/section/#clearHeadersFooters" target="_blank" rel="nofollow noopener noreferrer">clearHeadersFooters()</a> method. In addition, you can use the <a href="https://reference.aspose.com/words/java/com.aspose.words/section/#deleteHeaderFooterShapes" target="_blank" rel="nofollow noopener noreferrer">deleteHeaderFooterShapes()</a> method to remove all shapes from headers and footers in your document.
+
+The following code example shows how to clear content of all headers and footers in a section:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Document.docx");
+
+Section section = doc.getSections().get(0);
+section.clearHeadersFooters();
+```
+
+The following code example how to remove all shapes from all headers footers in a section:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Document.docx");
+
+Section section = doc.getSections().get(0);
+section.deleteHeaderFooterShapes();
+```
+
+## Customize Page Properties in a Section {#customize-page-properties-in-a-section}
+
+Before printing a page or a document you may want to customize and modify the size and layout of a single page or the whole document. With page setup, you can change the settings of document pages such as margins, orientation, and size for printing different first pages or odd pages.
+
+Aspose.Words allows you to customize page and section properties using the <a href="https://reference.aspose.com/words/java/com.aspose.words/pagesetup/" target="_blank" rel="nofollow noopener noreferrer">PageSetup</a> class.
+
+The following code example shows how to set such properties as page size and orientation for the current section:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.getPageSetup().setOrientation(Orientation.LANDSCAPE);
+builder.getPageSetup().setLeftMargin(50.0);
+builder.getPageSetup().setPaperSize(PaperSize.PAPER_10_X_14);
+
+doc.save(getArtifactsDir() + "WorkingWithDocumentOptionsAndSettings.PageSetupAndSectionFormatting.docx");
+```
+
+The following code example shows how to modify the page properties in all sections:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.writeln("Section 1");
+doc.appendChild(new Section(doc));
+builder.writeln("Section 2");
+doc.appendChild(new Section(doc));
+builder.writeln("Section 3");
+doc.appendChild(new Section(doc));
+builder.writeln("Section 4");
+
+// It is important to understand that a document can contain many sections,
+// and each section has its page setup. In this case, we want to modify them all.
+for (Section section : doc.getSections())
+    section.getPageSetup().setPaperSize(PaperSize.LETTER);
+
+doc.save(getArtifactsDir() + "WorkingWithSection.ModifyPageSetupInAllSections.doc");
+```
+
+## See Also {#see-also}
+
+- [Logical Levels of Nodes in a Document](/java/words/logical-levels-of-nodes-in-a-document/#document-and-section-logical-level)
+- [Insert and Append Documents](/java/words/insert-and-append-documents/)
+
+## Limitations and Considerations {#limitations-and-considerations}
+
+- When removing a section break, the section *before* the break adopts the formatting (including page setup, headers, and footers) of the section *after* the break. This is the opposite of what many developers expect. To avoid unintended layout changes, ensure you understand the section order before removal.
+
+- The `ensureMinimum()` method only ensures the presence of a `Body` and at least one `Paragraph`. It does *not* create `HeaderFooter` nodes. To add a header or footer, create it and add it to the section, e.g., `section.getHeadersFooters().add(new HeaderFooter(doc, HeaderFooterType.HEADER_PRIMARY))`.
+
+`Section.deepClone()` copies the section together with its `HeaderFooter` nodes. To insert the copy into another document, import it with `importNode` or `NodeImporter`. To stop a section from using the headers and footers of the previous section, call `section.getHeadersFooters().linkToPrevious(false)`.
+
+When copying sections between documents using `NodeImporter.importNode()`, specify `ImportFormatMode.KEEP_SOURCE_FORMATTING` to preserve source formatting. Without it, the section may adopt formatting from the target document, potentially causing layout shifts.
+
+Headers and footers are inherited from the previous section unless the current section has its own HeaderFooter nodes. To break the inheritance and enable independent editing, create or import a HeaderFooter for the desired type (e.g., HeaderFooterType.HEADER_PRIMARY) and ensure the section's PageSetup settings match your intent, e.g.:
+
+```java
+Section section = ...;
+section.getPageSetup().setDifferentFirstPageHeaderFooter(true);
+section.getPageSetup().setOddAndEvenPagesHeaderFooter(true);
+```
+
+- `PageSetup.getLayoutMode()` (see `SectionLayoutMode`) defines the document grid behavior of a section.
+
+:::info
+For additional details, see the official documentation:
+
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/section/" target="_blank" rel="nofollow noopener noreferrer">Section Class</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/sectioncollection/" target="_blank" rel="nofollow noopener noreferrer">SectionCollection Class</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/pagesetup/" target="_blank" rel="nofollow noopener noreferrer">PageSetup Class</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/headerfooter/" target="_blank" rel="nofollow noopener noreferrer">HeaderFooter Class</a>
+  :::
+
+## FAQ {#faq}
+
+1. **Q:** How can I insert a section break at a specific location in a Java document?\
+   **A:** Use `DocumentBuilder.insertBreak(BreakType.SECTION_BREAK_NEW_PAGE)` (or another `BreakType`) at the desired cursor position. Create a `DocumentBuilder` for the document, move the cursor to the target node, then call `insertBreak`.
+
+2. **Q:** What is the safest way to remove a section break without losing the formatting of surrounding sections?\
+   **A:** Copy the content of the section before the break to the beginning of the next section with `nextSection.prependContent(section)`, then remove the copied section with `section.remove()`, as in the code example above. Removing the section alone deletes its content. After the break is removed, the content before it takes the page setup of the following section, so copy the required `PageSetup` settings first if you need them.
+
+3. **Q:** How do I clone a section and insert the clone into the same document or another document?\
+   **A:** Call `Section clonedSection = (Section) originalSection.deepClone();` and then add it to the target document's `Sections` collection with `targetDoc.getSections().add(clonedSection);`. If the target document is different, import the cloned node first using `targetDoc.importNode(clonedSection, true)`.
+
+4. **Q:** How can I set different headers or footers for the first page and for odd/even pages within a section?\
+   **A:** Access the `Section` object and set `section.getPageSetup().setDifferentFirstPageHeaderFooter(true);` and `section.getPageSetup().setOddAndEvenPagesHeaderFooter(true);`. Then create or modify the `HeaderFooter` objects for `HeaderFooterType.HEADER_FIRST`, `HEADER_EVEN`, and `HEADER_PRIMARY` as needed.
+
+5. **Q:** How can I change the page size and orientation for only one section?\
+   **A:** Retrieve the `Section` you want to modify and use its `PageSetup` property:
+
+   ```java
+   Section section = doc.getSections().get(2); // example index
+   PageSetup setup = section.getPageSetup();
+   setup.setPaperSize(PaperSize.A4);
+   setup.setOrientation(Orientation.LANDSCAPE);
+   ```
+
+   This affects only the selected section, leaving other sections unchanged.

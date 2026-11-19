@@ -1,0 +1,175 @@
+---
+title: "Build a Table from a DataTable"
+sidebar_label: "Build a Table from a DataTable"
+sidebar_key: "java-words-how-to-build-a-table-from-a-datatable"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/java"
+source_path: "words/java/how-to-build-a-table-from-a-datatable.html"
+source_commit: ""
+source_sha256: "e3a84a048d14b9b4931db31d899f71b07730f28f91093a85e163490637e205b1"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/java/how-to-build-a-table-from-a-datatable/"
+source_snapshot_sha256: "4bbf78946ccb68374baead3c7129aad9383e5409d4d2f55ecf5b62ba6b9a5f86"
+---
+
+:::info
+Aspose.Words for Java is included in Conholdate.Total for Java.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains how to build a table from a DataTable using Aspose.Words.
+:::
+
+Often your application will pull data from a database and store it in the form of a **DataTable**. You can easily insert this data into your document as a new table and quickly apply formatting to the whole table.
+
+:::info
+Note that the preferred way of inserting data from a **DataTable** into a document table is by using [Mail Merge with Regions](/java/words/types-of-mail-merge-operations/#mail-merge-with-regions). The technique presented in this article is only suggested if you are unable to create a suitable template before hand to merge data with, in other words if you require everything to happen programmatically.
+:::
+
+Using Aspose.Words, you can easily retrieve data from a database and store it as a table:
+
+1. Create a new **DocumentBuilder** object on your **Document**.
+2. Start a new table using **DocumentBuilder**.
+3. If we want to insert the names of each of the columns from our **DataTable** as a header row then iterate through each data column and write the column names into a row in the table.
+4. Iterate through each **DataRow** in the **DataTable**:
+   1. Iterate through each object in the **DataRow**.
+   2. Insert the object into the document using **DocumentBuilder**. The method used depends on the type of the object being inserted e.g **DocumentBuilder.writeln** for text and **DocumentBuilder.insertImage** for a byte array which represents an image.
+   3. At the end of processing of the **DataRow** also end the row being created by the **DocumentBuilder** by using **DocumentBuilder.endRow**.
+5. Once all rows from the **DataTable** have been processed finish the table by calling **DocumentBuilder.endTable**.
+6. Finally we can set the desired table style using one of the appropriate table properties such as **Table.getStyleIdentifier()** to automatically apply formatting to the entire table.
+
+The **ImportTableFromDataTable** method accepts a **DocumentBuilder** object, the **DataTable** containing the data and a flag which specifies if the column heading from the **DataTable** are included at the top of the table. This method builds a table from these parameters using the builder's current position and formatting. Provides a method to import data from the `DataTable` and insert it into a new table using the DocumentBuilder.
+
+The following data in our **DataTable** is used in this example:
+
+![how-to-build-a-table-from-a-datatable-aspose-words-net](/java/words/images/dd85812c97b68602-how-to-build-a-table-from-a-datatable-1.png)
+
+The following code example shows how to execute the above algorithm in Aspose.Words:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+/// <summary>
+/// Imports the content from the specified DataTable into a new Aspose.Words Table object.
+/// The table is inserted at the document builder's current position and using the current builder's formatting if any is defined.
+/// </summary>
+public Table importTableFromDataTable(DocumentBuilder builder, DataTable dataTable,
+    boolean importColumnHeadings)
+{
+    Table table = builder.startTable();
+
+    // Check if the columns' names from the data source are to be included in a header row.
+    if (importColumnHeadings)
+    {
+        // Store the original values of these properties before changing them.
+        boolean boldValue = builder.getFont().getBold();
+        int paragraphAlignmentValue = builder.getParagraphFormat().getAlignment();
+
+        // Format the heading row with the appropriate properties.
+        builder.getFont().setBold(true);
+        builder.getParagraphFormat().setAlignment(ParagraphAlignment.CENTER);
+
+        // Create a new row and insert the name of each column into the first row of the table.
+        for (DataColumn column : dataTable.getColumns())
+        {
+            builder.insertCell();
+            builder.writeln(column.getColumnName());
+        }
+
+        builder.endRow();
+
+        // Restore the original formatting.
+        builder.getFont().setBold(boldValue);
+        builder.getParagraphFormat().setAlignment(paragraphAlignmentValue);
+    }
+
+    for (DataRow dataRow : (Iterable<DataRow>) dataTable.getRows())
+    {
+        for (Object item : dataRow.getItemArray())
+        {
+            // Insert a new cell for each object.
+            builder.insertCell();
+
+            switch (item.getClass().getName())
+            {
+                case "DateTime":
+                    // Define a custom format for dates and times.
+                    Date dateTime = (Date) item;
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMMM d, yyyy");
+                    builder.write(simpleDateFormat.format(dateTime));
+                    break;
+                default:
+                    // By default any other item will be inserted as text.
+                    builder.write(item.toString());
+                    break;
+            }
+        }
+
+        // After we insert all the data from the current record, we can end the table row.
+        builder.endRow();
+    }
+
+    // We have finished inserting all the data from the DataTable, we can end the table.
+    builder.endTable();
+
+    return table;
+}
+```
+
+The method can then be easily called using your **DocumentBuilder** and data.
+
+The following code example shows how to import the data from a `DataTable` and insert it into a new table in the document:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+// We can position where we want the table to be inserted and specify any extra formatting to the table.
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// We want to rotate the page landscape as we expect a wide table.
+doc.getFirstSection().getPageSetup().setOrientation(Orientation.LANDSCAPE);
+
+DataSet ds = new DataSet();
+ds.readXml(getMyDir() + "List of people.xml");
+// Retrieve the data from our data source, which is stored as a DataTable.
+DataTable dataTable = ds.getTables().get(0);
+
+// Build a table in the document from the data contained in the DataTable.
+Table table = importTableFromDataTable(builder, dataTable, true);
+
+// We can apply a table style as a very quick way to apply formatting to the entire table.
+table.setStyleIdentifier(StyleIdentifier.MEDIUM_LIST_2_ACCENT_1);
+table.setStyleOptions(TableStyleOptions.FIRST_ROW | TableStyleOptions.ROW_BANDS | TableStyleOptions.LAST_COLUMN);
+
+// For our table, we want to remove the heading for the image column.
+table.getFirstRow().getLastCell().removeAllChildren();
+
+doc.save(getArtifactsDir() + "WorkingWithTables.BuildTableFromDataTable.docx");
+```
+
+## FAQ {#faq}
+
+1. **Q:** How can I insert an image stored as a byte array into a table cell?\
+   **A:** Use `DocumentBuilder.insertImage(byte[] imageBytes)` while the builder's cursor is positioned inside the desired cell. After inserting the image, call `DocumentBuilder.insertCell()` to continue with the next cell (or `endRow()` to finish the row).
+
+2. **Q:** What is the easiest way to apply a predefined table style after the table is built?\
+   **A:** Retrieve the `Table` node (the first child of the builder's current paragraph) and call `table.setStyleIdentifier(StyleIdentifier.LIGHT_LIST)` (or any other `StyleIdentifier`). The style is applied to the whole table instantly.
+
+3. **Q:** Is there a more automatic approach than writing code for each column when populating a table from a `DataTable`?\
+   **A:** Yes. Aspose.Words' **Mail Merge with Regions** can map a `DataTable` directly to a table in a template. Create a region in the template with the merge fields `TableStart:Data` and `TableEnd:Data` (`{ MERGEFIELD TableStart:Data }` … `{ MERGEFIELD TableEnd:Data }`) and call `document.getMailMerge().executeWithRegions(dataTable)`. This eliminates manual iteration.
+
+4. **Q:** How should I handle `null` values in the `DataTable` while building the table?\
+   **A:** Check each cell value before writing. If the value is `null`, write an empty string or a placeholder, e.g. `builder.writeln("")`. This prevents `NullPointerException` and keeps the table layout consistent.
+
+5. **Q:** Can I merge cells or set column widths after the table has been created?\
+   **A:** Yes. After `endTable()`, locate the `Table` node, then merge cells with `cell.getCellFormat().setHorizontalMerge(...)` or `setVerticalMerge(...)` and `CellMerge` values. Column widths can be set via `Table.getFirstRow().getCells().get(i).getCellFormat().setWidth(width)`. Adjust widths before saving the document.

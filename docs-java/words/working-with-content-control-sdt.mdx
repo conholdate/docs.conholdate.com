@@ -1,0 +1,336 @@
+---
+title: "Working with Content Control SDT"
+sidebar_label: "Working with Content Control SDT"
+sidebar_key: "java-words-working-with-content-control-sdt"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/java"
+source_path: "words/java/working-with-content-control-sdt.html"
+source_commit: ""
+source_sha256: "918eea11d2908ec846287223f2c4b2b958da1d6694b88fd5672714d2df95d731"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/java/working-with-content-control-sdt/"
+source_snapshot_sha256: "ae85be2b843f98f23a84c640b6aeac9cfe9a6968fb7448950abe03a24c561667"
+---
+
+:::info
+Aspose.Words for Java is included in Conholdate.Total for Java.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains how to work with content controls (SDTs) through the Aspose.Words API.
+:::
+
+In Microsoft Word, you can create a form by starting with a template and adding content controls, including checkboxes, text boxes, date pickers, and drop-down lists. In Aspose.Words, a Structured Document Tag or content control from any document loaded into Aspose.Words is imported as a StructuredDocumentTag node. Structured document tags (SDT or content control) allow embedding customer-defined semantics as well as its behaviour and appearance into a document.
+
+StructuredDocumentTag can occur in a document in the following places:
+
+- Block-level - Among paragraphs and tables, as a child of a Body, HeaderFooter, Comment, Footnote or a Shape node
+- Row-level - Among rows in a table, as a child of a Table node
+- Cell-level - Among cells in a table row, as a child of a Row node
+- Inline-level - Among inline content inside, as a child of a Paragraph
+- Nested inside another StructuredDocumentTag
+
+## Inserting Content Controls into a Document {#inserting-content-controls-into-a-document}
+
+In this version of Aspose.Words, the following types of SDT or content control can be created:
+
+- Checkbox
+- DropDownList
+- ComboBox
+- Date
+- BuildingBlockGallery
+- Group
+- `Picture`
+- RichText
+- PlainText
+
+The following code example shows how to create content control of type checkbox:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+StructuredDocumentTag sdtCheckBox = new StructuredDocumentTag(doc, SdtType.CHECKBOX, MarkupLevel.INLINE);
+builder.insertNode(sdtCheckBox);
+
+doc.save(getArtifactsDir() + "WorkingWithSdt.SdtCheckBox.docx");
+```
+
+The following code example shows how to create content control of type rich text box:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+
+StructuredDocumentTag sdtRichText = new StructuredDocumentTag(doc, SdtType.RICH_TEXT, MarkupLevel.BLOCK);
+
+Paragraph para = new Paragraph(doc);
+Run run = new Run(doc);
+run.setText("Hello World");
+run.getFont().setColor(Color.GREEN);
+para.getRuns().add(run);
+sdtRichText.getChildNodes(NodeType.ANY, false).add(para);
+doc.getFirstSection().getBody().appendChild(sdtRichText);
+
+doc.save(getArtifactsDir() + "WorkingWithSdt.SdtRichTextBox.docx");
+```
+
+The following code example shows how to create content control of the type combo box:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+
+StructuredDocumentTag sdt = new StructuredDocumentTag(doc, SdtType.COMBO_BOX, MarkupLevel.BLOCK);
+sdt.getListItems().add(new SdtListItem("Choose an item", "-1"));
+sdt.getListItems().add(new SdtListItem("Item 1", "1"));
+sdt.getListItems().add(new SdtListItem("Item 2", "2"));
+doc.getFirstSection().getBody().appendChild(sdt);
+
+doc.save(getArtifactsDir() + "WorkingWithSdt.SdtComboBox.docx");
+```
+
+## How to Update Content Controls {#how-to-update-content-controls}
+
+This section explains how to update the values of SDT or content control programmatically.
+
+The following code example shows how to set the current state of the checkbox:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Structured document tags.docx");
+
+// Get the first content control from the document.
+StructuredDocumentTag sdtCheckBox =
+        (StructuredDocumentTag) doc.getChild(NodeType.STRUCTURED_DOCUMENT_TAG, 0, true);
+
+if (sdtCheckBox.getSdtType() == SdtType.CHECKBOX)
+    sdtCheckBox.setChecked(true);
+
+doc.save(getArtifactsDir() + "WorkingWithSdt.CurrentStateOfCheckBox.docx");
+```
+
+The following code example shows how to modify content controls of type plain text box, drop-down list and picture:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Structured document tags.docx");
+
+for (StructuredDocumentTag sdt : (Iterable<StructuredDocumentTag>) doc.getChildNodes(NodeType.STRUCTURED_DOCUMENT_TAG, true)) {
+    switch (sdt.getSdtType()) {
+        case SdtType.PLAIN_TEXT: {
+            sdt.removeAllChildren();
+            Paragraph para = sdt.appendChild(new Paragraph(doc));
+            Run run = new Run(doc, "new text goes here");
+            para.appendChild(run);
+            break;
+        }
+        case SdtType.DROP_DOWN_LIST: {
+            SdtListItem secondItem = sdt.getListItems().get(2);
+            sdt.getListItems().setSelectedValue(secondItem);
+            break;
+        }
+        case SdtType.PICTURE: {
+            Shape shape = (Shape) sdt.getChild(NodeType.SHAPE, 0, true);
+            if (shape.hasImage()) {
+                shape.getImageData().setImage(getImagesDir() + "Watermark.png");
+            }
+
+            break;
+        }
+    }
+}
+
+doc.save(getArtifactsDir() + "WorkingWithSdt.ModifySdt.docx");
+```
+
+## Binding Content Control to Custom XML Parts {#binding-content-control-to-custom-xml-parts}
+
+You can bind content controls with XML data (*custom XML part*) in Word documents.
+
+The following code example shows how to bind content control to custom XML parts:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+CustomXmlPart xmlPart =
+        doc.getCustomXmlParts().add(UUID.randomUUID().toString(), "<root><text>Hello, World!</text></root>");
+
+StructuredDocumentTag sdt = new StructuredDocumentTag(doc, SdtType.PLAIN_TEXT, MarkupLevel.BLOCK);
+doc.getFirstSection().getBody().appendChild(sdt);
+
+sdt.getXmlMapping().setMapping(xmlPart, "/root[1]/text[1]", "");
+
+doc.save(getArtifactsDir() + "WorkingWithSdt.BindSdtToCustomXmlPart.doc");
+```
+
+## XMLMapping of Structured Document Tag Range {#xmlmapping-of-structured-document-tag-range}
+
+You can get the mapping of this structured document tag range to XML data in a custom XML part of the current document using the **StructuredDocumentTagRangeStart.getXmlMapping()** property. However, the <a href="https://reference.aspose.com/words/java/com.aspose.words/xmlmapping/#setMapping-com.aspose.words.CustomXmlPart-java.lang.String-java.lang.String" target="_blank" rel="nofollow noopener noreferrer">setMapping()</a> method can be used to map a structured document tag range to XML data.
+
+The following code example shows how to set XML mapping:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Multi-section structured document tags.docx");
+
+// Construct an XML part that contains data and add it to the document's CustomXmlPart collection.
+String xmlPartId = UUID.randomUUID().toString();
+String xmlPartContent = "<root><text>Text element #1</text><text>Text element #2</text></root>";
+CustomXmlPart xmlPart = doc.getCustomXmlParts().add(xmlPartId, xmlPartContent);
+System.out.println(new String(xmlPart.getData(), StandardCharsets.US_ASCII));
+
+// Create a StructuredDocumentTag that will display the contents of our CustomXmlPart in the document.
+StructuredDocumentTagRangeStart sdtRangeStart = (StructuredDocumentTagRangeStart) doc.getChild(NodeType.STRUCTURED_DOCUMENT_TAG_RANGE_START, 0, true);
+
+// If we set a mapping for our StructuredDocumentTag,
+// it will only display a part of the CustomXmlPart that the XPath points to.
+// This XPath will point to the contents second "<text>" element of the first "<root>" element of our CustomXmlPart.
+sdtRangeStart.getXmlMapping().setMapping(xmlPart, "/root[1]/text[2]", null);
+
+doc.save(getArtifactsDir() + "WorkingWithSdt.SdtRangeStartXmlMapping.docx");
+```
+
+## Clear Contents of a Content Control {#clear-contents-of-a-content-control}
+
+You can clear the contents of a content control with displaying a placeholder. The **StructuredDocumentTag.clear** method clears contents of this structured document tag and displays a placeholder if it is defined. However, It is not possible to clear the contents of a content control if it has revisions. If a content control has no placeholder, five spaces are inserted like in Microsoft Word (except repeating sections, repeating section items, groups, check-boxes, citations). If a content control is mapped to custom XML, the referenced XML node is cleared.
+
+The following code example shows how to clear the content of content control:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Structured document tags.docx");
+
+StructuredDocumentTag sdt = (StructuredDocumentTag) doc.getChild(NodeType.STRUCTURED_DOCUMENT_TAG, 0, true);
+sdt.clear();
+
+doc.save(getArtifactsDir() + "WorkingWithSdt.ClearSdt.doc");
+```
+
+## Change Content Control Background and Border Colors {#change-content-control-background-and-border-colors}
+
+In Java, use the getColor() and setColor() methods of StructuredDocumentTag: "The StructuredDocumentTag.getColor() / setColor() methods allow you to get or set the color of a content control. The color affects the content control in two situations:"
+
+1. MS Word highlights the background of the content control when the mouse moves over the content control. This helps to identify the content control. The color of highlighting is a bit "softer" than the *Color*. For example, MS Word highlights the background with the pink color, when *Color* is Red.
+2. When you interact (editing, picking etc) with the content control, the border of content control is colored with the *Color*.
+
+The following code example shows how to change the color of content control:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Structured document tags.docx");
+
+StructuredDocumentTag sdt = (StructuredDocumentTag) doc.getChild(NodeType.STRUCTURED_DOCUMENT_TAG, 0, true);
+sdt.setColor(Color.RED);
+
+doc.save(getArtifactsDir() + "WorkingWithSdt.SdtColor.docx");
+```
+
+## How to Set Style to Format Text Typed into the Content Control {#how-to-set-style-to-format-text-typed-into-the-content-control}
+
+If you want to set the style of a content control, use the `StructuredDocumentTag.setStyle(Style)` or `StructuredDocumentTag.setStyleName(String)` methods. When you type text into the content control in the output document, the typed text will have the style "Quote".
+
+:::info
+Note that only Linked and Character styles can be applied to content control. An IllegalStateException ("Cannot apply this style to the SDT") is thrown when a style that exists but is not Linked or Character style is being applied.
+:::
+
+The following code example shows how to set the style of content control:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Structured document tags.docx");
+
+StructuredDocumentTag sdt = (StructuredDocumentTag) doc.getChild(NodeType.STRUCTURED_DOCUMENT_TAG, 0, true);
+Style style = doc.getStyles().getByStyleIdentifier(StyleIdentifier.QUOTE);
+sdt.setStyle(style);
+
+doc.save(getArtifactsDir() + "WorkingWithSdt.SdtStyle.docx");
+```
+
+## Working with Repeating Section Content Control {#working-with-repeating-section-content-control}
+
+The repeating section content control allows repeating the content contained within it. Using Aspose.Words, the structured document tag nodes of the repeating section and repeating section item types can be created and for this purpose, <a href="https://reference.aspose.com/words/java/com.aspose.words/sdttype/" target="_blank" rel="nofollow noopener noreferrer">SdtType enumeration type</a> provides **REPEATING_SECTION_ITEM** property.
+
+The following code example shows how to bind a repeating section content control to a table:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+CustomXmlPart xmlPart = doc.getCustomXmlParts().add("Books",
+        "<books><book><title>Everyday Italian</title><author>Giada De Laurentiis</author></book>" +
+                "<book><title>Harry Potter</title><author>J K. Rowling</author></book>" +
+                "<book><title>Learning XML</title><author>Erik T. Ray</author></book></books>");
+
+Table table = builder.startTable();
+
+builder.insertCell();
+builder.write("Title");
+
+builder.insertCell();
+builder.write("Author");
+
+builder.endRow();
+builder.endTable();
+
+StructuredDocumentTag repeatingSectionSdt =
+        new StructuredDocumentTag(doc, SdtType.REPEATING_SECTION, MarkupLevel.ROW);
+repeatingSectionSdt.getXmlMapping().setMapping(xmlPart, "/books[1]/book", "");
+table.appendChild(repeatingSectionSdt);
+
+StructuredDocumentTag repeatingSectionItemSdt =
+        new StructuredDocumentTag(doc, SdtType.REPEATING_SECTION_ITEM, MarkupLevel.ROW);
+repeatingSectionSdt.appendChild(repeatingSectionItemSdt);
+
+Row row = new Row(doc);
+repeatingSectionItemSdt.appendChild(row);
+
+StructuredDocumentTag titleSdt =
+        new StructuredDocumentTag(doc, SdtType.PLAIN_TEXT, MarkupLevel.CELL);
+titleSdt.getXmlMapping().setMapping(xmlPart, "/books[1]/book[1]/title[1]", "");
+row.appendChild(titleSdt);
+
+StructuredDocumentTag authorSdt =
+        new StructuredDocumentTag(doc, SdtType.PLAIN_TEXT, MarkupLevel.CELL);
+authorSdt.getXmlMapping().setMapping(xmlPart, "/books[1]/book[1]/author[1]", "");
+row.appendChild(authorSdt);
+
+doc.save(getArtifactsDir() + "WorkingWithSdt.RepeatingSectionMappedToCustomXmlPart.docx");
+```
+
+***
+
+## FAQ {#faq}
+
+1. **Q:** How can I create a checkbox content control in Java?\
+   **A:** Instantiate a `StructuredDocumentTag` with `SdtType.CHECKBOX`, set its properties (e.g., title, placeholder), and insert it into the desired node (e.g., `Document.getFirstSection().getBody().appendChild(structuredDocumentTag);`).
+
+2. **Q:** How do I set or read the checked state of a checkbox content control?\
+   **A:** Use the `StructuredDocumentTag.setChecked(boolean)` method to set the state and `StructuredDocumentTag.getChecked()` to read the current state.
+
+3. **Q:** How can I bind a content control to a custom XML part?\
+   **A:** Create a `CustomXmlPart`, add it to the document (`document.getCustomXmlParts().add(customXmlPart);`), then call `structuredDocumentTag.getXmlMapping().setMapping(customXmlPart, "/Root/Element", "");` to map the control to the XML node.
+
+4. **Q:** How can I change the background or border color of a content control?\
+   **A:** Set the `StructuredDocumentTag.getColor()` / `StructuredDocumentTag.setColor(java.awt.Color)` properties. The color affects hover background and active border highlighting.
+
+5. **Q:** How can I specify the display format for a date content control?\
+   **A:** Use `structuredDocumentTag.setDateDisplayFormat("MM/dd/yyyy");` to define the format string that Word will use to display the date value. This does not affect the underlying date value stored in the XML.
+
+6. **Q:** How can I clear the contents of a content control while preserving its placeholder? **A:** Call `structuredDocumentTag.clear()`. If a placeholder is defined, it will be displayed; otherwise, five spaces are inserted (unless it's a repeating section, group, checkbox, or citation).
+
+7. **Q:** Can I apply any style to a content control?\
+   **A:** Only Linked or Character styles can be applied using `StructuredDocumentTag.setStyle(Style)` or `setStyleName(String)`. Attempting to apply non-linked/character styles throws an `IllegalStateException`.

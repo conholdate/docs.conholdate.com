@@ -1,0 +1,265 @@
+---
+title: "Navigation with Cursor"
+sidebar_label: "Navigation with Cursor"
+sidebar_key: "java-words-navigation-with-cursor"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/java"
+source_path: "words/java/navigation-with-cursor.html"
+source_commit: ""
+source_sha256: "4ca6eeedafc5d1d06841d5cf87014930a7ddb67017854ab2e8b5264232862840"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/java/navigation-with-cursor/"
+source_snapshot_sha256: "645e0ed3723347808d98e556a2aedb6c773fe17e85d8854e647b18a40f51bd24"
+---
+
+:::info
+Aspose.Words for Java is included in Conholdate.Total for Java.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains how to navigate a document using the document cursor and associated API operations.
+:::
+
+While working with a document, even if it is a short or long one, you will need to navigate through your document. Navigation with a virtual cursor represents the ability to navigate between different nodes in a document.
+
+Within a short document, moving around in a document is simple as you can move the insertion point even by using the keyboard's arrow keys or by clicking the mouse to locate the insertion point wherever you want. But once you have a large document that has many pages, these basic techniques will be insufficient.
+
+This article explains how to move around in a document and navigate with a virtual cursor to different parts of it.
+
+## Detecting Current Cursor Position {#detecting-current-cursor-position}
+
+Before starting the process of navigating through your document, you will need to get the node that is currently selected. You can get the exact position of the cursor at a selected node by using the <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#getCurrentNode" target="_blank" rel="nofollow noopener noreferrer">getCurrentNode()</a> property. In addition, instead of getting the current node, you can get the currently selected paragraph or the currently selected section by using the <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#getCurrentParagraph" target="_blank" rel="nofollow noopener noreferrer">getCurrentParagraph()</a> and <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#getCurrentSection" target="_blank" rel="nofollow noopener noreferrer">getCurrentSection()</a> properties.
+
+Any insert operations you perform using the <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder</a> will be inserted before the <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#getCurrentNode" target="_blank" rel="nofollow noopener noreferrer">getCurrentNode()</a>. When the current paragraph is empty or the cursor is positioned just before the end of the paragraph, the **getCurrentNode()** returns null.
+
+## Navigating Methods in a Document {#navigating-methods-in-a-document}
+
+When you are editing text, it is important to know how to navigate your document and where exactly to move in it. Aspose.Words allows you to move around in a document and navigate to its different sections and parts - this is similar to the functionality of the Navigation Pane in Microsoft Word to go to a page or heading in a Word document without scrolling.
+
+The main method is to be able to move the cursor position to a specific node in your document, you can achieve this by using the <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveTo-com.aspose.words.Node" target="_blank" rel="nofollow noopener noreferrer">moveTo()</a> method.
+
+The following code example shows how to move the **DocumentBuilder** to different nodes in a document:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// Start a bookmark and add content to it using a DocumentBuilder.
+builder.startBookmark("MyBookmark");
+builder.writeln("Bookmark contents.");
+builder.endBookmark("MyBookmark");
+
+// The node that the DocumentBuilder is currently at is past the boundaries of the bookmark.
+Assert.assertEquals(doc.getRange().getBookmarks().get(0).getBookmarkEnd(), builder.getCurrentParagraph().getFirstChild());
+
+// If we wish to revise the content of our bookmark with the DocumentBuilder, we can move back to it like this.
+builder.moveToBookmark("MyBookmark");
+
+// Now we're located between the bookmark's BookmarkStart and BookmarkEnd nodes, so any text the builder adds will be within it.
+Assert.assertEquals(doc.getRange().getBookmarks().get(0).getBookmarkStart(), builder.getCurrentParagraph().getFirstChild());
+
+// We can move the builder to an individual node,
+// which in this case will be the first node of the first paragraph, like this.
+builder.moveTo(doc.getFirstSection().getBody().getFirstParagraph().getChildNodes(NodeType.ANY, false).get(0));
+
+Assert.assertEquals(NodeType.BOOKMARK_START, builder.getCurrentNode().getNodeType());
+Assert.assertTrue(builder.isAtStartOfParagraph());
+
+// A shorter way of moving the very start/end of a document is with these methods.
+builder.moveToDocumentEnd();
+Assert.assertTrue(builder.isAtEndOfParagraph());
+builder.moveToDocumentStart();
+Assert.assertTrue(builder.isAtStartOfParagraph());
+```
+
+But besides the basic **moveTo()** method, there are more specific ones.
+
+### Navigate to Beginning or End of a Document {#navigate-to-beginning-or-end-of-a-document}
+
+You can go to the beginning or the end of your document using the <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveToDocumentStart" target="_blank" rel="nofollow noopener noreferrer">moveToDocumentStart()</a> and <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveToDocumentEnd" target="_blank" rel="nofollow noopener noreferrer">moveToDocumentEnd()</a> methods.
+
+The following code example shows how to move the cursor position to the beginning or the end of a document:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// Move the cursor position to the beginning of your document.
+builder.moveToDocumentStart();
+System.out.println("\nThis is the beginning of the document.");
+
+// Move the cursor position to the end of your document.
+builder.moveToDocumentEnd();
+System.out.println("\nThis is the end of the document.");
+```
+
+### Navigate With Bookmarks {#navigate-with-bookmarks}
+
+You can mark a place that you want to find and move to it again easily. You can insert as many bookmarks into your document as you want, and then navigate through them by identifying the bookmarks with unique names. You can move to a bookmark by using the <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveToBookmark-java.lang.String-boolean-boolean" target="_blank" rel="nofollow noopener noreferrer">moveToBookmark()</a> method.
+
+The following code examples shows how to move a cursor position to a bookmark:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// Start a bookmark and add content to it using a DocumentBuilder.
+builder.startBookmark("MyBookmark");
+builder.writeln("Bookmark contents.");
+builder.endBookmark("MyBookmark");
+
+// The node that the DocumentBuilder is currently at is past the boundaries of the bookmark.
+Assert.assertEquals(doc.getRange().getBookmarks().get(0).getBookmarkEnd(), builder.getCurrentParagraph().getFirstChild());
+
+// If we wish to revise the content of our bookmark with the DocumentBuilder, we can move back to it like this.
+builder.moveToBookmark("MyBookmark");
+
+// Now we're located between the bookmark's BookmarkStart and BookmarkEnd nodes, so any text the builder adds will be within it.
+Assert.assertEquals(doc.getRange().getBookmarks().get(0).getBookmarkStart(), builder.getCurrentParagraph().getFirstChild());
+
+// We can move the builder to an individual node,
+// which in this case will be the first node of the first paragraph, like this.
+builder.moveTo(doc.getFirstSection().getBody().getFirstParagraph().getChildNodes(NodeType.ANY, false).get(0));
+```
+
+### Navigate to Table Cells {#navigate-to-table-cells}
+
+You can move to a table cell by using the <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveToCell-int-int-int-int" target="_blank" rel="nofollow noopener noreferrer">moveToCell()</a> method. This method will enable you to navigate your cursor into any cell in a specific table. In addition, you can specify an index to move the cursor to any position or specified character in a cell within the **moveToCell()** method.
+
+The following code example shows how to move a cursor position to a specified table cell:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Tables.docx");
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// Move the builder to row 3, cell 4 of the first table.
+builder.moveToCell(0, 2, 3, 0);
+builder.write("\nCell contents added by DocumentBuilder");
+Table table = (Table) doc.getChild(NodeType.TABLE, 0, true);
+
+Assert.assertEquals(table.getRows().get(2).getCells().get(3), builder.getCurrentNode().getParentNode().getParentNode());
+Assert.assertEquals("Cell contents added by DocumentBuilderCell 3 contents", table.getRows().get(2).getCells().get(3).getText().trim());
+```
+
+### Navigate to a Field {#navigate-to-a-field}
+
+You can move to a specific field in your document by using the <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveToField-com.aspose.words.Field-boolean" target="_blank" rel="nofollow noopener noreferrer">moveToField()</a> method. In addition, you can move to a specific merge field by using the <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveToMergeField-java.lang.String" target="_blank" rel="nofollow noopener noreferrer">moveToMergeField()</a> method.
+
+The following code example shows how to move the document builder cursor to a specific field:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// Insert a field using the DocumentBuilder and add a run of text after it.
+Field field = builder.insertField("MERGEFIELD field");
+builder.write(" Text after the field.");
+
+// The builder's cursor is currently at end of the document.
+Assert.assertNull(builder.getCurrentNode());
+// We can move the builder to a field like this, placing the cursor at immediately after the field.
+builder.moveToField(field, true);
+
+// Note that the cursor is at a place past the FieldEnd node of the field, meaning that we are not actually inside the field.
+// If we wish to move the DocumentBuilder to inside a field,
+// we will need to move it to a field's FieldStart or FieldSeparator node using the DocumentBuilder.MoveTo() method.
+Assert.assertEquals(field.getEnd(), builder.getCurrentNode().getPreviousSibling());
+builder.write(" Text immediately after the field.");
+```
+
+### Navigate to a Header or Footer {#navigate-to-a-header-or-footer}
+
+You can move to the beginning of a header or footer by using the <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveToHeaderFooter-int" target="_blank" rel="nofollow noopener noreferrer">moveToHeaderFooter()</a> method.
+
+The following code example shows how to move document builder cursor to a document header or footer:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// Specify that we want headers and footers different for first, even and odd pages.
+builder.getPageSetup().setDifferentFirstPageHeaderFooter(true);
+builder.getPageSetup().setOddAndEvenPagesHeaderFooter(true);
+
+// Create the headers.
+builder.moveToHeaderFooter(HeaderFooterType.HEADER_FIRST);
+builder.write("Header for the first page");
+builder.moveToHeaderFooter(HeaderFooterType.HEADER_EVEN);
+builder.write("Header for even pages");
+builder.moveToHeaderFooter(HeaderFooterType.HEADER_PRIMARY);
+builder.write("Header for all other pages");
+
+// Create two pages in the document.
+builder.moveToSection(0);
+builder.writeln("Page1");
+builder.insertBreak(BreakType.PAGE_BREAK);
+builder.writeln("Page2");
+
+doc.save(getArtifactsDir() + "AddContentUsingDocumentBuilder.MoveToHeadersFooters.docx");
+```
+
+### Navigate to a Section or Paragraph {#navigate-to-a-section-or-paragraph}
+
+You can move to a specific section or paragraph by using the <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveToParagraph-int-int" target="_blank" rel="nofollow noopener noreferrer">moveToParagraph()</a> or <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveToSection-int" target="_blank" rel="nofollow noopener noreferrer">moveToSection()</a> methods. In addition, you can specify an index to move the cursor to any position or a specified character in a paragraph within the **moveToParagraph()** method.
+
+The following code example shows how to move to a specific section and a specific paragraph in a document:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+doc.appendChild(new Section(doc));
+
+// Move a DocumentBuilder to the second section and add text.
+DocumentBuilder builder = new DocumentBuilder(doc);
+builder.moveToSection(1);
+builder.writeln("Text added to the 2nd section.");
+
+// Create document with paragraphs.
+doc = new Document(getMyDir() + "Paragraphs.docx");
+ParagraphCollection paragraphs = doc.getFirstSection().getBody().getParagraphs();
+Assert.assertEquals(22, paragraphs.getCount());
+
+// When we create a DocumentBuilder for a document, its cursor is at the very beginning of the document by default,
+// and any content added by the DocumentBuilder will just be prepended to the document.
+builder = new DocumentBuilder(doc);
+Assert.assertEquals(0, paragraphs.indexOf(builder.getCurrentParagraph()));
+
+// You can move the cursor to any position in a paragraph.
+builder.moveToParagraph(2, 10);
+Assert.assertEquals(2, paragraphs.indexOf(builder.getCurrentParagraph()));
+builder.writeln("This is a new third paragraph. ");
+Assert.assertEquals(3, paragraphs.indexOf(builder.getCurrentParagraph()));
+```
+
+## Related APIs {#related-apis}
+
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#getCurrentNode" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.getCurrentNode()</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#getCurrentParagraph" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.getCurrentParagraph()</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#getCurrentSection" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.getCurrentSection()</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveTo-com.aspose.words.Node" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.moveTo</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveToBookmark-java.lang.String" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.moveToBookmark</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveToCell-int-int-int-int" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.moveToCell</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveToField-com.aspose.words.Field-boolean" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.moveToField</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveToMergeField-java.lang.String" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.moveToMergeField</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveToHeaderFooter-int" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.moveToHeaderFooter</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveToParagraph-int-int" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.moveToParagraph</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveToSection-int" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.moveToSection</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveToDocumentStart" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.moveToDocumentStart</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/#moveToDocumentEnd" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder.moveToDocumentEnd</a>

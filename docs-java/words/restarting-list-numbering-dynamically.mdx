@@ -1,0 +1,115 @@
+---
+title: "Restarting List Numbering Dynamically in Java"
+sidebar_label: "Restarting List Numbering Dynamically in Java"
+sidebar_key: "java-words-restarting-list-numbering-dynamically"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/java"
+source_path: "words/java/restarting-list-numbering-dynamically.md"
+source_commit: ""
+source_sha256: "7f4f42137b475fd227861b54ca2a0843b3299976b44da30ddfb9cb5e28d60667"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/words/java/restarting-list-numbering-dynamically/"
+source_markdown_url: "https://docs.aspose.com/words/java/restarting-list-numbering-dynamically.md"
+source_snapshot_sha256: "81220166ca4fc8d4789b2639d48067cea14e7fc158d1804654cf64a506e45f9a"
+---
+
+:::info
+Aspose.Words for Java is included in Conholdate.Total for Java.
+:::
+
+
+You can restart list numbering within your documents dynamically using `restartNum` tags. In particular, this feature is useful when working with a nested numbered list within a data band as shown in the following example.
+
+Assume that you have the `Order` and `Service` classes defined in your application as follows.
+
+```java
+public class Order
+{
+	public String getClientName() { ... }
+	public String getClientAddress() { ... }
+	public Iterable&lt;Service&gt; getServices() { ... }
+	...
+}
+
+public class Service
+{
+	public String getName() { ... }
+	...
+}
+```
+
+Given that `orders` is an enumeration of `Order` instances, you could try to use the following template to output information on several orders in one document.
+
+```text
+<<foreach [order in orders]>><<[order.getClientName()]>> (<<[order.getClientAddress()]>>)
+	1. <<foreach [service in order.getServices()]>><<[service.getName()]>>
+<</foreach>><</foreach>>
+```
+
+But then, a result document would look as follows.
+
+```text
+Jane Doe (445 Mount Eden Road Mount Eden Auckland 1024)
+
+1. Regular Cleaning
+2. Oven Cleaning
+
+John Smith (43 Vogel Street Roslyn Palmerston North 4414)
+
+3. Regular Cleaning
+4. Oven Cleaning
+5. Carpet Cleaning
+```
+
+That is, there would be a single numbered list across all orders, which is not applicable for this scenario. However, you can make list numbering to restart for every order by putting a `restartNum` tag into your template before a corresponding `foreach` tag as follows.
+
+```text
+<<foreach [order in orders]>><<[order.getClientName()]>> (<<[order.getClientAddress()]>>)
+	1. <<restartNum>><<foreach [service in order.getServices()]>><<[service.getName()]>>
+<</foreach>><</foreach>>
+```
+
+**Note** - When using with a data band, it is required to put a `restartNum` tag before a corresponding `foreach` tag in the same numbered paragraph.
+
+Then, a result document looks as follows.
+
+```text
+Jane Doe (445 Mount Eden Road Mount Eden Auckland 1024)
+
+1. Regular Cleaning
+2. Oven Cleaning
+
+John Smith (43 Vogel Street Roslyn Palmerston North 4414)
+
+3. Regular Cleaning
+4. Oven Cleaning
+5. Carpet Cleaning
+```
+
+**Note** - You can use a `restartNum` tag without a data band to dynamically restart list numbering for a containing paragraph, if needed; for example, the tag can be used to restart list numbering for a document inserted dynamically (see "Inserting Documents Dynamically" for more information).
+
+***
+
+## FAQ
+
+1. **Q:** How do I restart list numbering for each iteration of a `foreach` loop?\
+   **A:** Place the `<<restartNum>>` tag immediately before the `<<foreach>>` tag that generates the list items. The tag must be inside the same numbered paragraph where the list starts, ensuring the numbering restarts for each new iteration.
+
+2. **Q:** Can the `restartNum` tag be used when there is no data band (no `foreach`)?\
+   **A:** Yes. `restartNum` works independently of data bands; you can insert it before any numbered paragraph to reset the numbering at that point, such as when inserting a document fragment that contains its own list.
+
+3. **Q:** Does `restartNum` affect nested lists or only the top‑level list?\
+   **A:** `restartNum` resets the numbering of the list that contains the tag. If you have nested lists, only the outer list numbering is restarted. Nested lists will continue their own numbering unless you also place a `restartNum` tag within the nested list's paragraph.
+
+4. **Q:** Where should the `restartNum` tag be placed relative to the `foreach` tag?\
+   **A:** The tag must appear **before** the `<<foreach>>` tag inside the same paragraph that contains the list number (e.g., `1.`). This ensures the list numbering is reset before the loop generates its items.
+
+5. **Q:** Is the `restartNum` tag supported in Aspose.Words for Java?\
+   **A:** Yes. The `restartNum` tag is part of the Aspose.Words templating engine and works the same way in Java as in other .NET languages. Use it in your Java templates exactly as shown in the examples.

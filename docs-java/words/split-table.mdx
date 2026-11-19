@@ -1,0 +1,102 @@
+---
+title: "Split Table"
+sidebar_label: "Split Table"
+sidebar_key: "java-words-split-table"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/java"
+source_path: "words/java/split-table.html"
+source_commit: ""
+source_sha256: "78e1d3bef032c67099a06ba0bf273dd115304540a63fa280e9b8f6257dd76520"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/java/split-table/"
+source_snapshot_sha256: "2b07707028aa8ea615482dfc622fe16a3b5c91251e3b237cfe6c440529d03cfb"
+---
+
+:::info
+Aspose.Words for Java is included in Conholdate.Total for Java.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains how to split a table into multiple tables.
+:::
+
+A table, represented in the Aspose.Words Document Object Model, is made up of independent rows and cells, making it easy to split a table.
+
+To manipulate a table to split it into two tables, we just need to move some of the rows from the original table to the new one. To do this, we need to pick the row by which we want to split the table.
+
+We can create two tables from the original table by following these simple steps:
+
+1. Create a clone of the table without cloning the children to keep the moved rows and insert them after the original table
+2. Starting at the specified row, move all subsequent rows to this second table
+
+The following code example shows how to split a table into two tables on a specific row:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Tables.docx");
+
+Table firstTable = (Table) doc.getChild(NodeType.TABLE, 0, true);
+
+// We will split the table at the third row (inclusive).
+Row row = firstTable.getRows().get(2);
+
+// Create a new container for the split table.
+Table table = (Table) firstTable.deepClone(false);
+
+// Insert the container after the original.
+firstTable.getParentNode().insertAfter(table, firstTable);
+
+// Add a buffer paragraph to ensure the tables stay apart.
+firstTable.getParentNode().insertAfter(new Paragraph(doc), firstTable);
+
+Row currentRow;
+
+do
+{
+    currentRow = firstTable.getLastRow();
+    table.prependChild(currentRow);
+} while (currentRow != row);
+
+doc.save(getArtifactsDir() + "WorkingWithTables.SplitTable.docx");
+```
+
+## Limitations and Considerations {#limitations-and-considerations}
+
+- **Merged cells**: Aspose.Words does not change merge flags when rows are moved. If a vertically merged cell spans the split row, the first moved cell keeps `CellMerge.PREVIOUS`; set its `getCellFormat().setVerticalMerge(CellMerge.FIRST)` so that the merged block starts correctly in the new table.
+
+- **Formatting preservation**: The formatting applied to rows, cells, and the table itself is retained because the rows are moved, not recreated. Any style or direct formatting on the moved rows remains unchanged in the new table.
+
+- **Pagination effects**: Aspose.Words recalculates pagination automatically after the table structure changes. To avoid unexpected pagination shifts, perform the split operation before any layout-dependent processing (e.g., before saving or printing).
+
+## Related APIs {#related-apis}
+
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/table/" target="_blank" rel="nofollow noopener noreferrer">Table</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/row/" target="_blank" rel="nofollow noopener noreferrer">Row</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/cell/" target="_blank" rel="nofollow noopener noreferrer">Cell</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/documentbuilder/" target="_blank" rel="nofollow noopener noreferrer">DocumentBuilder</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/nodecollection/" target="_blank" rel="nofollow noopener noreferrer">NodeCollection</a>
+
+## FAQ {#faq}
+
+1. **Q:** How can I split a table at a specific row using Aspose.Words for Java?\
+   **A:** Load the document, locate the target `Table` node, clone the table without its child nodes (`Table clonedTable = (Table) originalTable.deepClone(false);`), insert the cloned table after the original, then move each `Row` starting from the split row to the cloned table using `clonedTable.appendChild(row);`. This creates two independent tables.
+
+2. **Q:** Does cloning a table also clone its rows and cells?\
+   **A:** By default `deepClone(true)` copies the table together with all its rows and cells. To split a table you should use `deepClone(false)` so only the table structure is cloned; the rows are then moved manually to the new table.
+
+3. **Q:** After splitting, how do I preserve the original table's formatting in the new table?\
+   **A:** The cloned table inherits the original table's formatting (borders, shading, width, etc.) because the clone copies the table's properties. Since you move existing `Row` objects, their individual formatting is retained as well. If you need to adjust spacing, modify `Table.setAllowAutoFit(false)` or call `getRowFormat().setHeight(...)` on the rows of the new table.
+
+4. **Q:** Can I split a table without affecting the surrounding document layout (e.g., page breaks or spacing)?\
+   **A:** Yes. Insert the cloned table immediately after the original with `originalTable.getParentNode().insertAfter(clonedTable, originalTable);`. This keeps the flow of paragraphs unchanged. If a page break is required, insert a `Paragraph` between the two tables, move a `DocumentBuilder` to it, and call `builder.insertBreak(BreakType.PAGE_BREAK)`.

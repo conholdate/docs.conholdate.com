@@ -1,0 +1,779 @@
+---
+title: "Translate Markdown to Document Object Model (DOM)"
+sidebar_label: "Translate Markdown to Document Object Model (DOM)"
+sidebar_key: "java-words-translate-markdown-to-document-object-model"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/java"
+source_path: "words/java/translate-markdown-to-document-object-model.html"
+source_commit: ""
+source_sha256: "bcd4851544225619bf52b82f1972c7fb5cee62bef9142c2501446f4f8dbe713e"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/java/translate-markdown-to-document-object-model/"
+source_snapshot_sha256: "ea49b5cc5c0f82e6b2a753eb5039fdf55d6da3b231aa9a0a9d5bb61468dc5ca2"
+---
+
+:::info
+Aspose.Words for Java is included in Conholdate.Total for Java.
+:::
+
+
+import "./_remote-markdown.css";
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains how to translate Markdown into the Document Object Model and how Aspose.Words interprets Markdown structures.
+:::
+
+To programmatically read, manipulate, and modify the content and formatting of a document, you need to translate it to the Aspose.Words Document Object Model (DOM).
+
+In contrast to Word documents, Markdown does not conform to the DOM described in the [Aspose.Words Document Object Model (DOM)](/java/words/aspose-words-document-object-model/) article. However, Aspose.Words provides its own mechanism for translating Markdown documents to DOM and back, so that we can successfully work with their elements such as text formatting, tables, headers, and others.
+
+This article explains how the various markdown features can be translated into Aspose.Words DOM and back to Markdown format.
+
+## Complexity of Translation Markdown - DOM - Markdown {#complexity-of-translation-markdown--dom--markdown}
+
+The main difficulty of this mechanism is not only to translate Markdown to DOM, but also to do the reverse transformation - to save the document back to Markdown format with minimal loss. There are elements, such as multilevel quotes, for which the reverse transformation is not trivial.
+
+Our translation engine allows users not only to work with complex elements in an existing Markdown document, but also to create their own document in Markdown format with the original structure from scratch. To create various elements, you need to use styles with specific names according to certain rules described later in this article. Such styles can be created programmatically.
+
+## Common Translation Principles {#common-translation-principles}
+
+We use <a href="https://reference.aspose.com/words/java/com.aspose.words/font/" target="_blank" rel="nofollow noopener noreferrer">Font</a> formatting for inline blocks. When there is no direct correspondence for a Markdown feature in Aspose.Words DOM, we use a character style with a name that starts from some special words.
+
+For container blocks, we use style inheritance to denote nested Markdown features. In this case, even when there are no nested features, we also use paragraph styles with a name that starts from some special words.
+
+Bulleted and ordered lists are container blocks in Markdown as well. Their nesting is represented in DOM the same way as for all other container blocks using style inheritance. However, additionally, lists in DOM have corresponded number formatting in either list style or paragraph formatting.
+
+## Inline Blocks {#inline-blocks}
+
+We use <a href="https://reference.aspose.com/words/java/com.aspose.words/font/" target="_blank" rel="nofollow noopener noreferrer">Font</a> formatting when translating **Bold**, *Italic* or ~~Strikethrough~~ inline markdown features.
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Markdown feature
+
+</th>
+<th>
+
+Aspose.Words
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+**Bold**\
+`**bold text**`
+
+</td>
+<td>
+
+`Font.setBold(true)`
+
+</td>
+</tr>
+<tr>
+<td>
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+// Use a document builder to add content to the document.
+DocumentBuilder builder = new DocumentBuilder();
+
+// Make the text Bold.
+builder.getFont().setBold(true);
+builder.writeln("This text will be Bold");
+```
+
+</td>
+<td></td>
+</tr>
+<tr>
+<td>
+
+**Italic**\
+`*italic text*`
+
+</td>
+<td>
+
+`Font.setItalic(true)`
+
+</td>
+</tr>
+<tr>
+<td>
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+// Use a document builder to add content to the document.
+DocumentBuilder builder = new DocumentBuilder();
+
+// Make the text Italic.
+builder.getFont().setItalic(true);
+builder.writeln("This text will be Italic");
+```
+
+</td>
+<td></td>
+</tr>
+<tr>
+<td>
+
+**Strikethrough**\
+`~Strikethrough text~`
+
+</td>
+<td>
+
+`Font.setStrikeThrough(true)`
+
+</td>
+</tr>
+<tr>
+<td>
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+// Use a document builder to add content to the document.
+DocumentBuilder builder = new DocumentBuilder();
+
+// Make the text Strikethrough.
+builder.getFont().setStrikeThrough(true);
+builder.writeln("This text will be StrikeThrough");
+```
+
+</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+We use a character style with a name that starts from the word `InlineCode`, followed by an optional dot `(.)` and a number of backticks ``(`)`` for the `InlineCode` feature. If a number of backticks is missed, then one backtick will be used by default.
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Markdown feature
+
+</th>
+<th>
+
+Aspose.Words
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+**InlineCode**\
+`**inline code**`
+
+</td>
+<td>
+
+`Font.setStyleName(“InlineCode[.][N]”)`
+
+</td>
+</tr>
+<tr>
+<td>
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+// Use a document builder to add content to the document.
+DocumentBuilder builder = new DocumentBuilder();
+
+// Number of backticks is missed, one backtick will be used by default.
+Style inlineCode1BackTicks = builder.getDocument().getStyles().add(StyleType.CHARACTER, "InlineCode");
+builder.getFont().setStyle(inlineCode1BackTicks);
+builder.writeln("Text with InlineCode style with 1 backtick");
+
+// There will be 3 backticks.
+Style inlineCode3BackTicks = builder.getDocument().getStyles().add(StyleType.CHARACTER, "InlineCode.3");
+builder.getFont().setStyle(inlineCode3BackTicks);
+builder.writeln("Text with InlineCode style with 3 backtick");
+```
+
+</td>
+<td></td>
+</tr>
+<tr>
+<td>
+
+**Autolink**\
+`<scheme://domain.com>`\
+`<email@domain.com>`
+
+</td>
+<td>
+
+The <a href="https://reference.aspose.com/words/java/com.aspose.words/fieldhyperlink/" target="_blank" rel="nofollow noopener noreferrer">FieldHyperlink</a> class.
+
+</td>
+</tr>
+<tr>
+<td>
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+// Use a document builder to add content to the document.
+DocumentBuilder builder = new DocumentBuilder();
+
+// Insert hyperlink.
+builder.insertHyperlink("https://www.aspose.com", "https://www.aspose.com", false);
+builder.insertHyperlink("email@aspose.com", "mailto:email@aspose.com", false);
+```
+
+</td>
+<td></td>
+</tr>
+<tr>
+<td>
+
+**Link**\
+`[link text](url)`\
+`[link text](<url> "title")`\
+`[link text](url 'title')`\
+`[link text](url (title))`
+
+</td>
+<td>
+
+The <a href="https://reference.aspose.com/words/java/com.aspose.words/fieldhyperlink/" target="_blank" rel="nofollow noopener noreferrer">FieldHyperlink</a> class.
+
+</td>
+</tr>
+<tr>
+<td>
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+// Use a document builder to add content to the document.
+DocumentBuilder builder = new DocumentBuilder();
+
+// Insert hyperlink.
+builder.insertHyperlink("Aspose", "https://www.aspose.com", false);
+```
+
+</td>
+<td></td>
+</tr>
+<tr>
+<td>
+
+**Image**\
+`![](url)`\
+`![alt text](<url> “title”)`\
+`![alt text](url ‘title')`\
+`![alt text](url (title))`
+
+</td>
+<td>
+
+The <a href="https://reference.aspose.com/words/java/com.aspose.words/shape/" target="_blank" rel="nofollow noopener noreferrer">Shape</a> class.
+
+</td>
+</tr>
+<tr>
+<td>
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+// Use a document builder to add content to the document.
+DocumentBuilder builder = new DocumentBuilder();
+
+// Insert image.
+Shape shape = builder.insertImage(getImagesDir() + "Logo.jpg");
+shape.getImageData().setTitle("title");
+```
+
+</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+## Container Blocks {#container-blocks}
+
+A document is a sequence of container blocks such as headings, paragraphs, lists, quotes, and others. Container blocks can be divided into 2 classes: Leaf blocks and Complex Containers. Leaf blocks can only contain inline content. Complex containers, in turn, can contain other container blocks, including Leaf blocks.
+
+### Leaf Blocks {#leaf-blocks}
+
+The table below shows examples of using Markdown Leaf blocks in Aspose.Words:
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Markdown feature
+
+</th>
+<th>
+
+Aspose.Words
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+**HorizontalRule**\
+`-----`
+
+</td>
+<td>
+
+This is a simple paragraph with a corresponding HorizontalRule shape:\
+`documentBuilder.insertHorizontalRule();`
+
+</td>
+</tr>
+<tr>
+<td>
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+// Use a document builder to add content to the document.
+DocumentBuilder builder = new DocumentBuilder();
+
+// Insert horizontal rule.
+builder.insertHorizontalRule();
+```
+
+</td>
+<td></td>
+</tr>
+<tr>
+<td>
+
+**ATX Heading**\
+`# H1, ## H2, ### H3…`
+
+</td>
+<td>
+
+`paragraph.getParagraphFormat().setStyleName("Heading N");` where (1 ≤ N ≤ 9). This is translated into a built‑in style and must match the exact pattern (no suffixes or prefixes). Otherwise it will be a regular paragraph with the specified style.
+
+</td>
+</tr>
+<tr>
+<td>
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+// Use a document builder to add content to the document.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// By default Heading styles in Word may have Bold and Italic formatting.
+//If we do not want to be emphasized, set these properties explicitly to false.
+builder.getFont().setBold(false);
+builder.getFont().setItalic(false);
+
+builder.writeln("The following produces headings:");
+builder.getParagraphFormat().setStyle(doc.getStyles().get("Heading 1"));
+builder.writeln("Heading1");
+builder.getParagraphFormat().setStyle(doc.getStyles().get("Heading 2"));
+builder.writeln("Heading2");
+builder.getParagraphFormat().setStyle(doc.getStyles().get("Heading 3"));
+builder.writeln("Heading3");
+builder.getParagraphFormat().setStyle(doc.getStyles().get("Heading 4"));
+builder.writeln("Heading4");
+builder.getParagraphFormat().setStyle(doc.getStyles().get("Heading 5"));
+builder.writeln("Heading5");
+builder.getParagraphFormat().setStyle(doc.getStyles().get("Heading 6"));
+builder.writeln("Heading6");
+
+// Note, emphases are also allowed inside Headings:
+builder.getFont().setBold(true);
+builder.getParagraphFormat().setStyle(doc.getStyles().get("Heading 1"));
+builder.writeln("Bold Heading1");
+
+doc.save(getArtifactsDir() + "WorkingWithMarkdown.Heading.md");
+```
+
+</td>
+<td></td>
+</tr>
+<tr>
+<td>
+
+**Setext Heading**\
+`===` (if Heading level 1),\
+`---` (if Heading level 2)
+
+</td>
+<td>
+
+`paragraph.getParagraphFormat().setStyleName("SetextHeading" + suffix);` based on the "Heading N" style. If N ≥ 2, "Heading 2" is used, otherwise "Heading 1". Any suffix is allowed; the importer uses numbers "1" and "2" respectively.
+
+</td>
+</tr>
+<tr>
+<td>
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+// Use a document builder to add content to the document.
+DocumentBuilder builder = new DocumentBuilder();
+
+builder.getParagraphFormat().setStyleName("Heading 1");
+builder.writeln("This is an H1 tag");
+
+// Reset styles from the previous paragraph to not combine styles between paragraphs.
+builder.getFont().setBold(false);
+builder.getFont().setItalic(false);
+
+Style setexHeading1 = builder.getDocument().getStyles().add(StyleType.PARAGRAPH, "SetextHeading1");
+builder.getParagraphFormat().setStyle(setexHeading1);
+builder.getDocument().getStyles().get("SetextHeading1").setBaseStyleName("Heading 1");
+builder.writeln("Setext Heading level 1");
+
+builder.getParagraphFormat().setStyle(builder.getDocument().getStyles().get("Heading 3"));
+builder.writeln("This is an H3 tag");
+
+// Reset styles from the previous paragraph to not combine styles between paragraphs.
+builder.getFont().setBold(false);
+builder.getFont().setItalic(false);
+
+Style setexHeading2 = builder.getDocument().getStyles().add(StyleType.PARAGRAPH, "SetextHeading2");
+builder.getParagraphFormat().setStyle(setexHeading2);
+builder.getDocument().getStyles().get("SetextHeading2").setBaseStyleName("Heading 3");
+
+// Setex heading level will be reset to 2 if the base paragraph has a Heading level greater than 2.
+builder.writeln("Setext Heading level 2");
+```
+
+</td>
+<td></td>
+</tr>
+<tr>
+<td>
+
+**Indented Code**
+
+</td>
+<td>
+
+`paragraph.getParagraphFormat().setStyleName("IndentedCode" + suffix);`
+
+</td>
+</tr>
+<tr>
+<td>
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+// Use a document builder to add content to the document.
+DocumentBuilder builder = new DocumentBuilder();
+
+Style indentedCode = builder.getDocument().getStyles().add(StyleType.PARAGRAPH, "IndentedCode");
+builder.getParagraphFormat().setStyle(indentedCode);
+builder.writeln("This is an indented code");
+```
+
+</td>
+<td></td>
+</tr>
+<tr>
+<td>
+
+**Fenced Code**
+
+```java
+if (condition) {
+    // then
+} else {
+    // else
+}
+```
+
+</td>
+<td>
+
+`paragraph.getParagraphFormat().setStyleName("FencedCode" + optionalDot + optionalInfoString);` The optional dot and info string are optional.
+
+</td>
+</tr>
+<tr>
+<td>
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+// Use a document builder to add content to the document.
+DocumentBuilder builder = new DocumentBuilder();
+
+Style fencedCode = builder.getDocument().getStyles().add(StyleType.PARAGRAPH, "FencedCode");
+builder.getParagraphFormat().setStyle(fencedCode);
+builder.writeln("This is an fenced code");
+
+Style fencedCodeWithInfo = builder.getDocument().getStyles().add(StyleType.PARAGRAPH, "FencedCode.C#");
+builder.getParagraphFormat().setStyle(fencedCodeWithInfo);
+builder.writeln("This is a fenced code with info string");
+```
+
+</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+### Complex Containers {#complex-containers}
+
+The table below shows examples of using Markdown Complex Containers in Aspose.Words:
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Markdown feature
+
+</th>
+<th>
+
+Aspose.Words
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+**Quote**\
+`> quote,`\
+`>> nested quote`
+
+</td>
+<td>
+
+`paragraph.getParagraphFormat().setStyleName(“Quote[some suffix]”);`\
+The suffix in style name is optional, but Aspose.Words importer uses the ordered numbers 1, 2, 3, …. in case of nested quotes.\
+The nesting is defined via the inherited styles.
+
+</td>
+</tr>
+<tr>
+<td>
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+// Use a document builder to add content to the document.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+// By default a document stores blockquote style for the first level.
+builder.getParagraphFormat().setStyleName("Quote");
+builder.writeln("Blockquote");
+
+// Create styles for nested levels through style inheritance.
+Style quoteLevel2 = builder.getDocument().getStyles().add(StyleType.PARAGRAPH, "Quote1");
+builder.getParagraphFormat().setStyle(quoteLevel2);
+builder.getDocument().getStyles().get("Quote1").setBaseStyleName("Quote");
+builder.writeln("1. Nested blockquote");
+
+doc.save(getArtifactsDir() + "WorkingWithMarkdown.Quote.md");
+```
+
+</td>
+<td></td>
+</tr>
+<tr>
+<td>
+
+**BulletedList**\
+`- Item 1`\
+`- Item 2`\
+`- Item 2a`\
+`- Item 2b`
+
+</td>
+<td>
+
+Bulleted lists are represented using paragraph numbering:\
+`ListFormat.applyBulletDefault()`\
+There can be 3 types of bulleted lists. They are only diff in a numbering format of the very first level. These are: `‘-'`, `‘+'` or `‘*'` respectively.
+
+</td>
+</tr>
+<tr>
+<td>
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+// Use a document builder to add content to the document.
+DocumentBuilder builder = new DocumentBuilder();
+
+builder.getListFormat().applyBulletDefault();
+builder.getListFormat().getList().getListLevels().get(0).setNumberFormat("-");
+
+builder.writeln("Item 1");
+builder.writeln("Item 2");
+
+builder.getListFormat().listIndent();
+
+builder.writeln("Item 2a");
+builder.writeln("Item 2b");
+```
+
+</td>
+<td></td>
+</tr>
+<tr>
+<td>
+
+**OrderedList**\
+`1. Item 1`\
+`2. Item 2`\
+`1) Item 2a`\
+`2) Item 2b`
+
+</td>
+<td>
+
+Ordered lists are represented using paragraph numbering:\
+`ListFormat.applyNumberDefault()`\
+There can be 2 number format markers: '.' and ')'. The default marker is '.'.
+
+</td>
+</tr>
+<tr>
+<td>
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.getListFormat().applyNumberDefault();
+
+builder.writeln("Item 1");
+builder.writeln("Item 2");
+
+builder.getListFormat().listIndent();
+
+builder.writeln("Item 2a");
+builder.writeln("Item 2b");
+```
+
+</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+### Tables {#tables}
+
+Aspose.Words also allows to translate tables into DOM, as shown below:
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Markdown feature
+
+</th>
+<th>
+
+Aspose.Words
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`Table`\
+\`a
+
+</td>
+<td>
+
+b`<br />`-
+
+</td>
+</tr>
+<tr>
+<td>
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+// Use a document builder to add content to the document.
+DocumentBuilder builder = new DocumentBuilder();
+
+// Add the first row.
+builder.insertCell();
+builder.writeln("a");
+builder.insertCell();
+builder.writeln("b");
+
+builder.endRow();
+
+// Add the second row.
+builder.insertCell();
+builder.writeln("c");
+builder.insertCell();
+builder.writeln("d");
+```
+
+</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+## See Also {#see-also}
+
+- [Working with Markdown Features](/java/words/working-with-markdown-features/)
+
+## FAQ {#faq}
+
+1. **Q:** How can I convert a Markdown file to a Word document using Aspose.Words for Java?\
+   **A:** Load the Markdown file with `Document doc = new Document("input.md");` and then save it in a Word format, e.g., `doc.save("output.docx");`. The library automatically parses the Markdown and builds the corresponding DOM.
+
+2. **Q:** Is it possible to convert a Word document back to Markdown?\
+   **A:** Yes. After loading a Word document (`Document doc = new Document("input.docx");`), call `doc.save("output.md");`. Aspose.Words will translate the DOM back to Markdown, preserving supported elements.
+
+3. **Q:** Which style names are used for Markdown headings when they are imported?\
+   **A:** Headings are mapped to built‑in styles named `Heading 1` … `Heading 9`. The importer expects the exact pattern without extra prefixes or suffixes; otherwise the text is treated as a normal paragraph.
+
+4. **Q:** How are bulleted and ordered lists represented in the DOM?\
+   **A:** Bulleted lists use `ListFormat.applyBulletDefault();` while ordered lists use `ListFormat.applyNumberDefault();`. The first‑level marker can be `-`, `+`, `*` for bullets and `.` or `)` for numbers.
+
+5. **Q:** What classes are used for images and hyperlinks during conversion?\
+   **A:** Images become `Shape` objects (`Shape shape = new Shape(doc, ShapeType.IMAGE);`). Hyperlinks and autolinks are represented by `FieldHyperlink` fields, which you can get from `doc.getRange().getFields()` by casting each `Field` whose `getType()` is `FieldType.FIELD_HYPERLINK` to `FieldHyperlink`.

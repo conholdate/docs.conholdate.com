@@ -1,0 +1,175 @@
+---
+title: "Replace Fields with Static Text"
+sidebar_label: "Replace Fields with Static Text"
+sidebar_key: "java-words-replace-fields"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/java"
+source_path: "words/java/replace-fields.html"
+source_commit: ""
+source_sha256: "1aafbbc3323da5393062d7c9b044d7717f819ad99647f503cba676b9a228572e"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/java/replace-fields/"
+source_snapshot_sha256: "8066251b2d3467d1cee843297e5f0a78d558435205629ec4e66a7a25e1ad96ee"
+---
+
+:::info
+Aspose.Words for Java is included in Conholdate.Total for Java.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains how to replace fields in a document programmatically.
+:::
+
+Replacing fields is often required when you wish to save your document as a static copy. For example, when sending as an attachment in an e-mail. Converting fields such as `DATE` or `TIME` to static text will allow the document to display the same date as when it was sent. Also, in some situations, you may need to remove the conditional `IF` fields from your document and replace them with the most recent text result instead. For example, converting the result of the `IF` field to static text so it will no longer dynamically change its value when fields in the document are updated.
+
+The diagram below shows how the `IF` field is stored in a document:
+
+- the text is surrounded by the special field nodes - <a href="https://reference.aspose.com/words/java/com.aspose.words/fieldstart/" target="_blank" rel="nofollow noopener noreferrer">FieldStart</a> and <a href="https://reference.aspose.com/words/java/com.aspose.words/fieldend/" target="_blank" rel="nofollow noopener noreferrer">FieldEnd</a>
+- the <a href="https://reference.aspose.com/words/java/com.aspose.words/fieldseparator/" target="_blank" rel="nofollow noopener noreferrer">FieldSeparator</a> node separates the text within the field into the field code and field result
+- the field code defines the general behavior of the field, while the field result retains the most recent result when this field is updated using Microsoft Word or Aspose.Words
+- the field result is what is stored in the field and displayed in the document when viewed
+
+![update-remove-a-field-aspose-words](/java/words/images/4643fd397b1cba6f-updating-and-removing-a-field-1.png)
+
+The structure can also be seen below in hierarchical form using the <a href="https://github.com/aspose-words/Aspose.Words-for-Java/tree/master/Examples/DocsExamples/Java/src/main/java/DocsExamples/Document_explorer" target="_blank" rel="nofollow noopener noreferrer">demo project *"DocumentExplorer"*</a>*.*
+
+![update-remove-a-field-aspose-words-2](/java/words/images/d17a8d83ffb6d1f5-updating-and-removing-a-field-2.png)
+
+## Fields That Cannot be Replaced by Text {#fields-that-cannot-be-replaced-by-text}
+
+Replacing a field with static text does not work properly for some fields in a header or footer.
+
+For example, trying to convert the `PAGE` field in a header or footer to static text will result in the same value being displayed on all pages. This is because headers and footers are repeated across multiple pages, and when they remain as fields, they are handled especially so they display the correct result for each page.
+
+However, in the header, the `PAGE` field translates well to static run of text. This run of text will be evaluated as if it were the last page in the section, which will cause any `PAGE` field in the header to display the last page over all pages.
+
+The following code example shows how to replace the field with its most recent result:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Various fields.docx");
+doc.unlinkFields();
+```
+
+## Convert Certain Field Types in Specific Document Parts {#convert-certain-field-types-in-specific-document-parts}
+
+Since the **ConvertFieldsToStaticText** method accepts two parameters - the <a href="https://reference.aspose.com/words/java/com.aspose.words/compositenode/" target="_blank" rel="nofollow noopener noreferrer">CompositeNode</a> properties and the <a href="https://reference.aspose.com/words/java/com.aspose.words/fieldtype/" target="_blank" rel="nofollow noopener noreferrer">FieldType</a> enumeration, it is possible to pass any composite node to this method. This allows fields to be converted to static text only in specific parts of the document.
+
+For example, you can pass a <a href="https://reference.aspose.com/words/java/com.aspose.words/document/" target="_blank" rel="nofollow noopener noreferrer">Document</a> object and convert fields of the specified type from the entire document to static text, or you can pass a <a href="https://reference.aspose.com/words/java/com.aspose.words/body/" target="_blank" rel="nofollow noopener noreferrer">Body</a> object of a section and only convert the fields found in that body.
+
+:::info
+When passing a block-level node such as a <a href="https://reference.aspose.com/words/java/com.aspose.words/paragraph/" target="_blank" rel="nofollow noopener noreferrer">Paragraph</a>, be aware that in some cases, fields can span across multiple paragraphs. If this happens it is recommended to pass the parent of the composite instead to avoid this.
+:::
+
+The <a href="https://reference.aspose.com/words/java/com.aspose.words/fieldtype/" target="_blank" rel="nofollow noopener noreferrer">FieldType</a> enumeration passed to the **ConvertFieldsToStaticText** method specifies what type of fields should be convert to static text. Any other field type found in the document will remain unchanged.
+
+The following code example shows how to select fields of a specific type - *targetFieldType* in a specific node - *compositeNode* and then convert them to static text:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+/// <summary>
+/// Converts any fields of the specified type found in the descendants of the node into static text.
+/// </summary>
+/// <param name="compositeNode">The node in which all descendants of the specified FieldType will be converted to static text.</param>
+/// <param name="targetFieldType">The FieldType of the field to convert to static text.</param>
+private static void convertFieldsToStaticText(CompositeNode compositeNode, int targetFieldType) throws Exception {
+    // Get all fields in the composite node's range.
+    FieldCollection fields = compositeNode.getRange().getFields();
+
+    // Iterate through the fields and unlink those that match the target field type.
+    for (Field field : fields) {
+        if (field.getType() == targetFieldType) {
+            field.unlink();
+        }
+    }
+}
+```
+
+The following code example shows how to convert all `IF` fields in a document to static text:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Linked fields.docx");
+
+// Pass the appropriate parameters to convert all IF fields encountered in the document (including headers and footers) to text.
+for (Field field : doc.getRange().getFields()) {
+    if (field.getType() == FieldType.FIELD_IF) {
+        field.unlink();
+    }
+}
+
+// Save the document with fields transformed to disk
+doc.save(getArtifactsDir() + "WorkingWithFields.UnlinkFieldsInDocument.docx");
+```
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-Java/blob/master/Examples/Data/Linked%20fields.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+The following code example shows how to convert all `PAGE` fields in a Body of a document to static text:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Linked fields.docx");
+
+// Pass the appropriate parameters to convert PAGE fields encountered to text only in the body of the first section.
+for (Field field : doc.getRange().getFields()) {
+    if (field.getType() == FieldType.FIELD_PAGE) {
+        field.unlink();
+    }
+}
+
+doc.save(getArtifactsDir() + "WorkingWithFields.UnlinkFieldsInBody.docx");
+```
+
+The following code example shows how to convert all `IF` fields in the last paragraph to static text:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Linked fields.docx");
+
+// Pass the appropriate parameters to convert all IF fields to text that are encountered only in the last 
+// paragraph of the document.
+for (Field field : doc.getFirstSection().getBody().getLastParagraph().getRange().getFields()) {
+    if (field.getType() == FieldType.FIELD_IF) {
+        field.unlink();
+    }
+}
+
+doc.save(getArtifactsDir() + "WorkingWithFields.UnlinkFieldsInParagraph.docx");
+```
+
+## Related APIs {#related-apis}
+
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/fieldstart/" target="_blank" rel="nofollow noopener noreferrer">FieldStart</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/fieldend/" target="_blank" rel="nofollow noopener noreferrer">FieldEnd</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/fieldseparator/" target="_blank" rel="nofollow noopener noreferrer">FieldSeparator</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/fieldtype/" target="_blank" rel="nofollow noopener noreferrer">FieldType</a>
+
+## FAQ {#faq}
+
+1. **Q:** How can I replace a field with its current result as static text?\
+   **A:** Call `doc.unlinkFields()` to replace every field with its last result. To convert only fields of a certain type, use the `convertFieldsToStaticText` method shown above, passing the node that contains the fields (e.g., `Document`, `Body`, or `Paragraph`) and the `FieldType`. It replaces each matching field with its last evaluated result, leaving plain text in the document.
+
+2. **Q:** Which field types should not be replaced with static text in headers or footers?\
+   **A:** Fields that depend on page context, such as `PAGE`, `NUMPAGES`, and other pagination‑related fields, should be avoided in headers/footers because converting them to static text will cause the same value to appear on every page.
+
+3. **Q:** How do I replace fields only in a particular part of the document, like a single section body?\
+   **A:** Retrieve the desired `CompositeNode` (for example, `Section.getBody()`) and pass it to `convertFieldsToStaticText`. This limits the conversion to that node and its descendants, leaving the rest of the document untouched.
+
+4. **Q:** What if a field spans multiple paragraphs-will the conversion still work?\
+   **A:** When a field crosses paragraph boundaries, pass the parent node that contains the whole field (e.g., the `Section` or `Document`) instead of an individual `Paragraph`. This ensures the method can locate the complete field structure and replace it correctly.
+
+5. **Q:** How can I safely replace `PAGE` fields in a header without breaking page numbering?\
+   **A:** Instead of converting the `PAGE` field to static text, copy its current result into a plain `Run` node and then remove the original field. This preserves the displayed page number for the current state while preventing further automatic updates.

@@ -1,0 +1,365 @@
+---
+title: "Work with Columns and Rows"
+sidebar_label: "Work with Columns and Rows"
+sidebar_key: "java-words-working-with-columns-and-rows"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/java"
+source_path: "words/java/working-with-columns-and-rows.html"
+source_commit: ""
+source_sha256: "f0ad93c63b6f309e312260f0779e249b9cc2787989ef0b1a7ef1db6c6ee5b604"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/java/working-with-columns-and-rows/"
+source_snapshot_sha256: "b0fae79c91c9d14d259f1d122575060c1ba784142f4032136e2b94d7a5bcb1db"
+---
+
+:::info
+Aspose.Words for Java is included in Conholdate.Total for Java.
+:::
+
+
+:::info
+
+## Purpose Summary {#purpose-summary}
+
+This page explains how to work with table columns and rows programmatically.
+:::
+
+For more control over how tables work, learn how to manipulate columns and rows.
+
+## Find the Table Element Index {#find-the-index-of-table-elements}
+
+Columns, rows and cells are managed by accessing the selected document node by its index. Finding the index of any node involves gathering all child nodes of the element type from the parent node, and then using the <a href="https://reference.aspose.com/words/java/com.aspose.words/nodecollection/#indexOf-com.aspose.words.Node" target="_blank" rel="nofollow noopener noreferrer">indexOf()</a> method to find the index of the desired node in the collection.
+
+### Find the Index of a Table in a Document {#find-the-index-of-table-in-a-document}
+
+Sometimes you may need to make changes to a particular table in a document. To do this, you can refer to a table by its index.
+
+The following code example shows how to retrieve the index of a table in a document:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Table table = (Table) doc.getChild(NodeType.TABLE, 0, true);
+
+NodeCollection allTables = doc.getChildNodes(NodeType.TABLE, true);
+int tableIndex = allTables.indexOf(table);
+```
+
+### Find the Index of a Row in a Table {#find-the-index-of-a-row-in-a-table}
+
+Similarly, you may need to make changes to a specific row in a selected table. To do this, you can also refer to a row by its index.
+
+The following code example shows how to retrieve the index of a row in a table:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+int rowIndex = table.indexOf(table.getLastRow());
+```
+
+### Find the Index of a Cell in a Row {#find-the-index-of-a-cell-in-a-row}
+
+Finally, you may need to make changes to a specific cell, and you can do this by cell index as well.
+
+The following code example shows how to retrieve the index of a cell in a row:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+int cellIndex = row.indexOf(row.getCells().get(4));
+```
+
+## Work with Columns {#work-with-columns}
+
+In the Aspose.Words Document Object Model (DOM), the <a href="https://reference.aspose.com/words/java/com.aspose.words/table/" target="_blank" rel="nofollow noopener noreferrer">Table</a> node consists of <a href="https://reference.aspose.com/words/java/com.aspose.words/row/" target="_blank" rel="nofollow noopener noreferrer">Row</a> nodes and then <a href="https://reference.aspose.com/words/java/com.aspose.words/cell/" target="_blank" rel="nofollow noopener noreferrer">Cell</a> nodes. Thus, in the `Document` Object Model of Aspose.Words, as in Word documents, there is no concept of a column.
+
+By design, the table rows in Microsoft Word and Aspose.Words are completely independent, and the basic properties and operations are contained only in the rows and cells of the table. This gives tables the ability to have some interesting attributes:
+
+- Each table row can have a completely different number of cells
+- Vertically, the cells of each row can have different widths
+- It is possible to join tables with different row formats and number of cells
+
+Any operations performed on columns are actually "shortcuts" that perform the operation by collectively changing row cells in such a way that it looks like they are being applied to columns. That is, you can perform operations on columns by simply iterating over the same table row cell index.
+
+The following code example simplifies such operations by proving a facade class that collects the cells that make up a "column" of a table:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+/// <summary>
+/// Represents a facade object for a column of a table in a Microsoft Word document.
+/// </summary>
+static class Column
+{
+    private Column(Table table, int columnIndex) {
+        if (table != null) {
+            mTable = table;
+        } else {
+            throw new IllegalArgumentException("table");
+        }
+
+        mColumnIndex = columnIndex;
+    }
+
+    /// <summary>
+    /// Returns a new column facade from the table and supplied zero-based index.
+    /// </summary>
+    public static Column fromIndex(Table table, int columnIndex)
+    {
+        return new Column(table, columnIndex);
+    }
+
+    private ArrayList<Cell> getCells() {
+        return getColumnCells();
+    }
+
+    /// <summary>
+    /// Returns the index of the given cell in the column.
+    /// </summary>
+    public int indexOf(Cell cell)
+    {
+        return getColumnCells().indexOf(cell);
+    }
+
+    /// <summary>
+    /// Inserts a brand new column before this column into the table.
+    /// </summary>
+    public Column insertColumnBefore()
+    {
+        ArrayList<Cell> columnCells = getCells();
+
+        if (columnCells.size() == 0)
+            throw new IllegalArgumentException("Column must not be empty");
+
+        // Create a clone of this column.
+        for (Cell cell : columnCells)
+            cell.getParentRow().insertBefore(cell.deepClone(false), cell);
+
+        // This is the new column.
+        Column column = new Column(columnCells.get(0).getParentRow().getParentTable(), mColumnIndex);
+
+        // We want to make sure that the cells are all valid to work with (have at least one paragraph).
+        for (Cell cell : column.getCells())
+            cell.ensureMinimum();
+
+        // Increase the index which this column represents since there is now one extra column in front.
+        mColumnIndex++;
+
+        return column;
+    }
+
+    /// <summary>
+    /// Removes the column from the table.
+    /// </summary>
+    public void remove()
+    {
+        for (Cell cell : getCells())
+            cell.remove();
+    }
+
+    /// <summary>
+    /// Returns the text of the column. 
+    /// </summary>
+    public String toTxt() throws Exception
+    {
+        StringBuilder builder = new StringBuilder();
+
+        for (Cell cell : getCells())
+            builder.append(cell.toString(SaveFormat.TEXT));
+
+        return builder.toString();
+    }
+
+    /// <summary>
+    /// Provides an up-to-date collection of cells which make up the column represented by this facade.
+    /// </summary>
+    private ArrayList<Cell> getColumnCells()
+    {
+        ArrayList<Cell> columnCells = new ArrayList<Cell>();
+
+        for (Row row : mTable.getRows())
+        {
+            Cell cell = row.getCells().get(mColumnIndex);
+            if (cell != null)
+                columnCells.add(cell);
+        }
+
+        return columnCells;
+    }
+
+    private int mColumnIndex;
+    private Table mTable;
+}
+```
+
+The following code example shows how to insert a blank column into a table:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Tables.docx");
+
+Table table = (Table) doc.getChild(NodeType.TABLE, 0, true);
+
+Column column = Column.fromIndex(table, 0);
+// Print the plain text of the column to the screen.
+System.out.println(column.toTxt());
+        
+// Create a new column to the left of this column.
+// This is the same as using the "Insert Column Before" command in Microsoft Word.
+Column newColumn = column.insertColumnBefore();
+
+for (Cell cell : newColumn.getColumnCells())
+    cell.getFirstParagraph().appendChild(new Run(doc, "Column Text " + newColumn.indexOf(cell)));
+```
+
+The following code example shows how to remove a column from a table in a document:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Tables.docx");
+
+Table table = (Table) doc.getChild(NodeType.TABLE, 1, true);
+
+Column column = Column.fromIndex(table, 2);
+column.remove();
+```
+
+## Specify Rows as Header Rows {#specify-rows-as-header-rows}
+
+You can choose to repeat the first row in the table as the Header Row only on the first page or on each page if the table is split into several. In Aspose.Words, you can repeat the Header Row on every page using the <a href="https://reference.aspose.com/words/java/com.aspose.words/rowformat/#getHeadingFormat" target="_blank" rel="nofollow noopener noreferrer">getHeadingFormat()</a> property.
+
+You can also mark multiple header rows if such rows are located one after the other at the beginning of the table. To do this, you need to apply the **getHeadingFormat()** properties to these rows.
+
+:::info
+Note that Header Rows do not work in nested tables. That is, if you have a table inside another table, this setting will have no effect. It is a limitation of Microsoft Word that does not allow this, not Aspose.Words.
+:::
+
+The following code example shows how to build a table which includes Header Rows that repeat on subsequent pages:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document();
+DocumentBuilder builder = new DocumentBuilder(doc);
+
+builder.startTable();
+builder.getRowFormat().setHeadingFormat(true);
+builder.getParagraphFormat().setAlignment(ParagraphAlignment.CENTER);
+builder.getCellFormat().setWidth(100.0);
+builder.insertCell();
+builder.writeln("Heading row 1");
+builder.endRow();
+builder.insertCell();
+builder.writeln("Heading row 2");
+builder.endRow();
+
+builder.getCellFormat().setWidth(50.0);
+builder.getParagraphFormat().clearFormatting();
+
+for (int i = 0; i < 50; i++)
+{
+    builder.insertCell();
+    builder.getRowFormat().setHeadingFormat(false);
+    builder.write("Column 1 Text");
+    builder.insertCell();
+    builder.write("Column 2 Text");
+    builder.endRow();
+}
+
+doc.save(getArtifactsDir() + "WorkingWithTables.RepeatRowsOnSubsequentPages.docx");
+```
+
+## Keep Tables and Rows from Breaking Across Pages {#keep-tables-and-rows-from-breaking-across-pages}
+
+There are times where the contents of a table should not be split across pages. For instance, if a title is above a table, the title and table should always be kept together on the same page to preserve proper appearance.
+
+There are two separate techniques that are useful to achieve this functionality:
+
+- `Allow row break across pages`, which is applied to table rows
+- `Keep with next`, which is applied to paragraphs in table cells
+
+By default, the above properties are disabled.
+
+### Keep a Row from Breaking Across Pages {#keep-a-row-from-breaking-across-pages}
+
+This involves restricting content inside the cells of a row from being split across a page. In Microsoft Word, this can found under Table Properties as the option "Allow row to break across pages". In Aspose.Words this is found under the <a href="https://reference.aspose.com/words/java/com.aspose.words/rowformat/" target="_blank" rel="nofollow noopener noreferrer">RowFormat</a> object of a <a href="https://reference.aspose.com/words/java/com.aspose.words/row/" target="_blank" rel="nofollow noopener noreferrer">Row</a> as the property <a href="https://reference.aspose.com/words/java/com.aspose.words/rowformat/#getAllowBreakAcrossPages" target="_blank" rel="nofollow noopener noreferrer">RowFormat.getAllowBreakAcrossPages()</a>.
+
+The following code example shows how to disable breaking rows across pages for each row in a table:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Table spanning two pages.docx");
+
+Table table = (Table) doc.getChild(NodeType.TABLE, 0, true);
+
+// Disable breaking across pages for all rows in the table.
+for (Row row : (Iterable<Row>) table.getRows())
+    row.getRowFormat().setAllowBreakAcrossPages(false);
+
+doc.save(getArtifactsDir() + "WorkingWithTables.RowFormatDisableBreakAcrossPages.docx");
+```
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-Java/blob/master/Examples/Data/Table%20spanning%20two%20pages.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+### Keep a Table from Breaking Across Pages {#keep-a-table-from-breaking-across-pages}
+
+To stop the table from splitting across pages, we need to specify that we want the content contained within the table to stay together.
+
+To do this, Aspose.Words uses a method, which allows users to select a table and enable the <a href="https://reference.aspose.com/words/java/com.aspose.words/paragraphformat/#getKeepWithNext" target="_blank" rel="nofollow noopener noreferrer">getKeepWithNext()</a> parameter to true for each paragraph within the table cells. The exception is the last paragraph in the table, which should be set to false.
+
+The following code example shows how to set a table to stay together on the same page:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Table spanning two pages.docx");
+        
+Table table = (Table) doc.getChild(NodeType.TABLE, 0, true);
+
+// We need to enable KeepWithNext for every paragraph in the table to keep it from breaking across a page,
+// except for the last paragraphs in the last row of the table.
+for (Cell cell : (Iterable<Cell>) table.getChildNodes(NodeType.CELL, true))
+{
+    cell.ensureMinimum();
+
+    for (Paragraph para : (Iterable<Paragraph>) cell.getParagraphs())
+        if (!(cell.getParentRow().isLastRow() && para.isEndOfCell()))
+            para.getParagraphFormat().setKeepWithNext(true);
+}
+
+doc.save(getArtifactsDir() + "WorkingWithTables.KeepTableTogether.docx");
+```
+
+:::info
+You can download the sample file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-Java/blob/master/Examples/Data/Table%20spanning%20two%20pages.docx" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+## Related APIs {#related-apis}
+
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/table/" target="_blank" rel="nofollow noopener noreferrer">Table</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/row/" target="_blank" rel="nofollow noopener noreferrer">Row</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/cell/" target="_blank" rel="nofollow noopener noreferrer">Cell</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/rowformat/#getHeadingFormat" target="_blank" rel="nofollow noopener noreferrer">RowFormat.getHeadingFormat()</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/rowformat/#getAllowBreakAcrossPages" target="_blank" rel="nofollow noopener noreferrer">RowFormat.getAllowBreakAcrossPages()</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/paragraphformat/#getKeepWithNext" target="_blank" rel="nofollow noopener noreferrer">ParagraphFormat.getKeepWithNext()</a>
+- <a href="https://reference.aspose.com/words/java/com.aspose.words/nodecollection/#indexOf-com.aspose.words.Node" target="_blank" rel="nofollow noopener noreferrer">NodeCollection.indexOf</a>
+
+## FAQ {#faq}
+
+1. **Q:** How can I insert a new blank column into an existing table?\
+   **A:** Use a helper class that gathers cells by column index, then iterate through each row and insert a new `Cell` at the desired position. After insertion, you may need to adjust column widths to maintain layout.
+
+2. **Q:** What is the recommended way to remove a column from a table?\
+   **A:** Iterate over all rows of the table and call `Row.getCells().removeAt(columnIndex)` for the column you want to delete. Ensure that any merged cells spanning the removed column are handled appropriately.
+
+3. **Q:** How do I make the first row of a table repeat as a header on every page?\
+   **A:** Set `Row.getRowFormat().setHeadingFormat(true)` on the first row (or on multiple consecutive rows) before saving the document. This marks the rows as header rows that Word repeats on each page.
+
+4. **Q:** How can I prevent a table row from breaking across pages?\
+   **A:** Set `Row.getRowFormat().setAllowBreakAcrossPages(false)` for the rows you want to keep together. This disables the "Allow row to break across pages" option.
+
+5. **Q:** How do I keep an entire table on the same page without splitting?\
+   **A:** For each paragraph inside the table cells, set `Paragraph.getParagraphFormat().setKeepWithNext(true)`, except for the last paragraph in the table where it should be `false`. This forces Word to keep the table together when possible.

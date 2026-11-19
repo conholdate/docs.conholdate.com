@@ -1,0 +1,170 @@
+---
+title: "Serialize and Work with a Document in a Database"
+sidebar_label: "Serialize and Work with a Document in a Database"
+sidebar_key: "java-words-serialize-and-work-with-a-document-in-a-database"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/java"
+source_path: "words/java/serialize-and-work-with-a-document-in-a-database.html"
+source_commit: ""
+source_sha256: "b2eff9073811cb7ebf9b1c3f40fdd33db7d0cead4994d783255b5ca7a7c6b52f"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/java/serialize-and-work-with-a-document-in-a-database/"
+source_snapshot_sha256: "dea8453904ff68673bfac6d08a6e1d052b2da3ddd06ec2a072a0fa48447f514b"
+---
+
+:::info
+Aspose.Words for Java is included in Conholdate.Total for Java.
+:::
+
+
+One of the tasks you may need to get done when working with documents is storing and retrieving **Document** objects to and from a database. For example, this would be necessary if you were implementing any type of content management system. All previous versions of documents must be stored in the database system. The ability to store documents in the database is also extremely useful when your application provides a web-based service.
+
+Aspose.Words provides an ability to convert a document into a byte array for subsequent work with this document in a database.
+
+## Convert a Document to Byte Array {#convert-a-document-to-byte-array}
+
+To store a document in a database or to prepare a document for transmission across the web, it is often necessary to serialize the document to obtain a byte array.
+
+To serialize a <a href="https://reference.aspose.com/words/java/com.aspose.words/document/" target="_blank" rel="nofollow noopener noreferrer">Document</a> object in Aspose.Words:
+
+1. Save it to a **MemoryStream** using the <a href="https://reference.aspose.com/words/java/com.aspose.words/document/#save-java.io.OutputStream-int" target="_blank" rel="nofollow noopener noreferrer">save()</a> method overload of the **Document** class.
+2. Call the **toArray()** method, which returns an array of bytes representing the document in byte form.
+
+The steps above then can be reversed to load the bytes back into a **Document** object.
+
+:::info
+The selected save format is important to ensure the highest fidelity is retained when saving and reloading into the **Document** object. For this reason, it is suggested to use a series of OOXML file formats.
+:::
+
+The example below shows how to serialize a **Document** object to obtain a byte array, and then how to unserialize the byte array to obtain a **Document** object again:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Document doc = new Document(getMyDir() + "Document.docx");
+
+ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+doc.save(outStream, SaveFormat.DOCX);
+
+ByteArrayInputStream inStream = new ByteArrayInputStream(outStream.toByteArray());
+
+Document docFromBytes = new Document(inStream);
+```
+
+:::info
+You can download the template file of this example from <a href="https://github.com/aspose-words/Aspose.Words-for-Java/blob/master/Examples/Data/Document.doc" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words GitHub</a>.
+:::
+
+## Store, Read and Delete a Document in a Database {#store-read-and-delete-a-document-in-a-database}
+
+This section shows how to save a document in a database and then load it back into a `Document` object for working with it. For simplicity, the file name is the key used to store and fetch documents from the database. The database contains two columns. The first column "FileName" is stored as a String and is used to identify documents. The second column "FileContent" is stored as a `BLOB` object which stores the document object in the byte form.
+
+The following code example shows how to set up a connection to a database and execute commands:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+String connString = "jdbc:ucanaccess://" + getDatabaseDir() + "Northwind.accdb";
+
+Connection connection = DriverManager.getConnection(connString, "Admin", "");
+```
+
+:::info
+In this example, we use the MySQL database to store an Aspose.Words document.
+:::
+
+The following code example shows how to save a document to the database, then read the same document again, and finally delete the record containing the document from the database:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+storeToDatabase(doc, connection);
+
+Document dbDoc = readFromDatabase("Document.docx", connection);
+dbDoc.save(getArtifactsDir() + "WorkingWithDocumentInDatabase.LoadAndSaveDocToDatabase.docx");
+
+deleteFromDatabase("Document.docx", connection);
+
+connection.close();
+```
+
+### Save a Document to a Database {#save-a-document-to-a-database}
+
+To save a document in a database convert this document to an array of bytes, as described at the beginning of this article. Then, save this byte array into a database field.
+
+The following code example shows how to save a document to the specified database:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+private void storeToDatabase(Document doc, Connection connection) throws Exception {
+    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    doc.save(stream, SaveFormat.DOCX);
+
+    String fileName = Paths.get(doc.getOriginalFileName()).getFileName().toString();
+
+    String sql = "INSERT INTO Documents (Name, Data) VALUES(?, ?)";
+
+    PreparedStatement pStatement = connection.prepareStatement(sql);
+    pStatement.setString(1, fileName);
+    pStatement.setBytes(2, stream.toByteArray());
+    pStatement.execute();
+}
+```
+
+Specify commandString, which is an SQL expression that does all the work:
+
+- To save a document into the database, the "INSERT INTO" command is used and a table specified along with the values of two record fields - FileName and FileContent. To avoid additional parameters, the file name is taken from the **Document** object itself. The `FileContent` field value is assigned bytes from the memory stream, which contains a binary representation of the stored document.
+- The remaining line of code executes the command which stores the Aspose.Words document in the database.
+
+### Retrieve a Document from a Database {#retrieve-a-document-from-a-database}
+
+To retrieve a document from the database, select the record that contains the document data as an array of bytes. Then load the byte array from the record into **MemoryStream** and create a **Document** object that will load the document from the **MemoryStream**.
+
+The following code example shows how to retrieve and return a document from the specified database using the filename as a key to fetch this document:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+private Document readFromDatabase(String fileName, Connection connection) throws Exception {
+    Statement statement = connection.createStatement();
+    ResultSet resultSet = statement.executeQuery("SELECT * FROM Documents WHERE Name='" + fileName + "'");
+
+    DataTable dataTable = new DataTable(resultSet, "Documents");
+
+    if (dataTable.getRows().getCount() == 0)
+        throw new IllegalArgumentException(
+                MessageFormat.format("Could not find any record matching the document \"{0}\" in the database.", fileName));
+
+    // The document is stored in byte form in the FileContent column.
+    // Retrieve these bytes of the first matching record to a new buffer.
+    byte[] buffer = (byte[]) dataTable.getRows().get(0).get("Data");
+
+    ByteArrayInputStream newStream = new ByteArrayInputStream(buffer);
+
+    Document doc = new Document(newStream);
+
+    return doc;
+}
+```
+
+:::info
+The SQL command "SELECT \* FROM" is used to fetch the appropriate record based on the file name.
+:::
+
+### Delete a Document from a Database {#delete-a-document-from-a-database}
+
+To delete a document from the database, use the appropriate SQL command without any manipulations on the **Document** object.
+
+The following code example shows how to delete a document from the database, using the file name to fetch the record:
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-words/Aspose.Words-for-Java.git.
+private void deleteFromDatabase(String fileName, Connection connection) throws SQLException {
+    Statement statement = connection.createStatement();
+    statement.execute("DELETE * FROM Documents WHERE Name='" + fileName + "'");
+}
+```
