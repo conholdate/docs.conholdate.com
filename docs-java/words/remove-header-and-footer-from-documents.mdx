@@ -1,0 +1,131 @@
+---
+title: "Remove Header and Footer from Documents"
+sidebar_label: "Remove Header and Footer from Documents"
+sidebar_key: "java-words-remove-header-and-footer-from-documents"
+sidebar_position: 100
+description: ""
+product: "words"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/words/java"
+source_path: "words/java/remove-header-and-footer-from-documents.html"
+source_commit: ""
+source_sha256: "d6ab057656cbe3af769906d47a7e3f61007466ba6da956df40dc01ec40763318"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/words/java/remove-header-and-footer-from-documents/"
+source_snapshot_sha256: "740b4aa9d9ad4e788c099dc3dc765edbfc1fbe62d2caf912d88a0aae1f91cd6b"
+---
+
+:::info
+Aspose.Words for Java is included in Conholdate.Total for Java.
+:::
+
+
+## Aspose.Words - Remove Header Footer from Documents {#asposewords---remove-header-footer-from-documents}
+
+Each section in a document can have up to three headers and up to three footers (for first, even and odd pages). If you want to delete all headers footers in a document you need to loop through all sections and remove every header and footer node.
+
+**Java**
+
+```java
+Document doc = new Document(dataDir + "AsposeHeaderFooter.docx");
+for (Section section : doc.getSections())
+{
+	// Up to three different header footers are possible in a section (for first, even and odd pages).
+	// We check and delete all of them.
+	HeaderFooter header;
+	HeaderFooter footer;
+	header = section.getHeadersFooters().getByHeaderFooterType(HeaderFooterType.HEADER_FIRST);
+	footer = section.getHeadersFooters().getByHeaderFooterType(HeaderFooterType.FOOTER_FIRST);
+	if (header != null)
+		header.remove();
+	if (footer != null)
+		footer.remove();
+
+	// Primary header and footer is used for odd pages.
+	header = section.getHeadersFooters().getByHeaderFooterType(HeaderFooterType.HEADER_PRIMARY);
+	footer = section.getHeadersFooters().getByHeaderFooterType(HeaderFooterType.FOOTER_PRIMARY);
+	if (header != null)
+		header.remove();
+	if (footer != null)
+		footer.remove();
+	header = section.getHeadersFooters().getByHeaderFooterType(HeaderFooterType.HEADER_EVEN);
+	footer = section.getHeadersFooters().getByHeaderFooterType(HeaderFooterType.FOOTER_EVEN);
+	if (header != null)
+		header.remove();
+	if (footer != null)
+		footer.remove();
+}
+```
+
+## Docx4j - Remove Header Footer from Documents {#docx4j---remove-header-footer-from-documents}
+
+Examples shows how header and footer can be removed using docx4j library.
+
+**Java**
+
+```java
+public static void main(String[] args) throws Exception
+{
+	 // The path to the documents directory.
+        String dataDir = Utils.getDataDir(Docx4jHeaderFooterRemove.class);
+
+	// A docx or a dir containing docx files
+	String inputpath = dataDir + "Docx4jHeaderFooter.docx";
+	StringBuilder sb = new StringBuilder();
+	File dir = new File(inputpath);
+	if (dir.isDirectory()) {
+		String[] files = dir.list();
+		for (int i = 0; i<files.length; i++  ) {
+			if (files[i].endsWith("docx")) {
+				sb.append("\n\n" + files[i] + "\n");
+				removeHFFromFile(new java.io.File(inputpath + "/" + files[i]));
+			}
+		}
+	} else if (inputpath.endsWith("docx")) {
+		sb.append("\n\n" + inputpath + "\n");
+		removeHFFromFile(new java.io.File(inputpath ));
+	}
+	System.out.println(sb.toString());
+}
+public static void removeHFFromFile(File f) throws Exception {
+	WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage
+			.load(f);
+	MainDocumentPart mdp = wordMLPackage.getMainDocumentPart();
+
+	// Remove from sectPr
+	SectPrFinder finder = new SectPrFinder(mdp);
+	new TraversalUtil(mdp.getContent(), finder);
+	for (SectPr sectPr : finder.getSectPrList()) {
+		sectPr.getEGHdrFtrReferences().clear();
+	}
+	
+	// Remove rels
+	List<Relationship> hfRels = new ArrayList<Relationship>();
+	for (Relationship rel : mdp.getRelationshipsPart().getRelationships().getRelationship() ) {
+		if (rel.getType().equals(Namespaces.HEADER)
+				|  | rel.getType().equals(Namespaces.FOOTER)) {
+			hfRels.add(rel);
+		}
+	}
+	for (Relationship rel : hfRels ) {
+		mdp.getRelationshipsPart().removeRelationship(rel);
+	}
+	wordMLPackage.save(f);
+}
+```
+
+## Download Running Code {#download-running-code}
+
+- <a href="https://github.com/aspose-words/Aspose.Words-for-Java/releases/tag/Aspose.Words_Java_for_Docx4j-v1.0.0" target="_blank" rel="nofollow noopener noreferrer">GitHub</a>
+
+## Download Sample Code {#download-sample-code}
+
+- <a href="https://github.com/aspose-words/Aspose.Words-for-Java/tree/master/Plugins/Aspose_Words_Java_for_Docx4j/src/main/java/com/aspose/words/examples/featurescomparison/headerfooter/removeheaderfooter" target="_blank" rel="nofollow noopener noreferrer">GitHub</a>
+
+:::info
+For more details, visit <a href="https://docs.aspose.com/words/java/working-with-headers-and-footers/#how-to-remove-only-headers-or-only-footers" target="_blank" rel="nofollow noopener noreferrer">How to Remove Footers but Leave Headers Intact</a>.
+:::
