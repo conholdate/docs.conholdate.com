@@ -1,0 +1,206 @@
+---
+title: "Working with XFA Forms"
+sidebar_label: "Working with XFA Forms"
+sidebar_key: "net-pdf-xfa-forms"
+sidebar_position: 100
+description: ""
+product: "pdf"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/pdf/net"
+source_path: "pdf/net/xfa-forms.html"
+source_commit: ""
+source_sha256: "381067b5fec08223fe0eb5c3ba9399602056e46837cb8851fbc30ce5a4d30d8f"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/pdf/net/xfa-forms/"
+source_snapshot_sha256: "56fb6b5af30de4ffce0cbfecd38673fbfdb6f1ab3ae5deeec62e5e1028ef8446"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+Aspose.PDF for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+Dynamic forms are based on an XML specification known as XFA, the "XML Forms Architecture". It can also convert dynamic XFA form to standard Acroform. The information about the form (as far as PDF is concerned) is very vague - it specifies that fields exist, with properties, and JavaScript events, but does not specify any rendering. The objects of XFA form are drawn at the time loading the document.
+:::
+
+Form class provides the capability to deal with static AcroForm and you can get a particular field instance using the Form class' GetFieldFacade(..) method. However, XFA fields cannot be accessed via the Form.GetFieldFacade(..) method. Instead, use <a href="https://reference.aspose.com/pdf/net/aspose.pdf.forms/form/properties/xfa" target="_blank" rel="nofollow noopener noreferrer">Document.Form.XFA</a> to get/set field values and manipulate XFA field template (set field properties).
+
+The following code snippet also work with [Aspose.PDF.Drawing](/net/pdf/drawing/) library.
+
+## Fill XFA fields {#fill-xfa-fields}
+
+The following code snippet shows you how to fill fields in XFA form.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void FillXFAFields()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Forms();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "FillXFAFields.pdf"))
+    {
+        // Get names of XFA form fields
+        var names = document.Form.XFA.FieldNames;
+
+        // Set field values
+        if (names.Length > 0)
+        {
+            document.Form.XFA[names[0]] = "Field 0";
+        }
+        if (names.Length > 1)
+        {
+            document.Form.XFA[names[1]] = "Field 1";
+        }
+
+        // Save PDF document
+        document.Save(dataDir + "FilledXfa_out.pdf");
+    }
+}
+```
+
+## Convert XFA-to-Acroform {#convert-xfa-to-acroform}
+
+:::info
+Try online You can check the quality of Aspose.PDF conversion and view the results online at this link: <a href="https://products.aspose.app/pdf/xfa/acroform" target="_blank" rel="nofollow noopener noreferrer">products.aspose.app/pdf/xfa/acroform</a>
+:::
+
+Dynamic forms are based on an XML specification known as XFA, the "XML Forms Architecture". The information about the form (as far as a PDF is concerned) is very vague - it specifies that fields exist, with properties, and JavaScript events, but does not specify any rendering.
+
+Currently, PDF supports two different methods for integrating data and PDF forms:
+
+- AcroForms (also known as Acrobat forms), introduced and included in the PDF 1.2 format specification.
+- Adobe XML Forms Architecture (XFA) forms, introduced in the PDF 1.5 format specification as an optional feature (The XFA specification is not included in the PDF specification, it is only referenced.)
+
+We cannot extract or manipulate pages of XFA Forms, because the form content is generated at runtime (during XFA form viewing) within the application trying to display or render the XFA form. Aspose.PDF has a feature that allows developers to convert XFA forms to standard AcroForms.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void ConvertDynamicXFAToAcroForm()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Forms();
+
+    // Load dynamic XFA form
+    using (var document = new Aspose.Pdf.Document(dataDir + "DynamicXFAToAcroForm.pdf"))
+    {
+        // Set the form fields type as standard AcroForm
+        document.Form.Type = Aspose.Pdf.Forms.FormType.Standard;
+
+        // Save PDF document
+        document.Save(dataDir + "StandardAcroForm_out.pdf");
+    }
+}
+```
+
+## Get XFA field properties {#get-xfa-field-properties}
+
+To access field properties, first use Document.Form.XFA.Template to access the field template. The following code snippet shows the steps of getting X and Y coordinates of XFA a form field.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void GetXFAProperties()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Forms();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "GetXFAProperties.pdf"))
+    {
+        // Get names of XFA form fields
+        var names = document.Form.XFA.FieldNames;
+
+        // Set field values
+        if (names.Length > 0)
+        {
+            document.Form.XFA[names[0]] = "Field 0";
+        }
+        if (names.Length > 1)
+        {
+            document.Form.XFA[names[1]] = "Field 1";
+        }
+
+        // Get field position
+        if (names.Length > 0)
+        {
+            Console.WriteLine(document.Form.XFA.GetFieldTemplate(names[0]).Attributes["x"].Value);
+            Console.WriteLine(document.Form.XFA.GetFieldTemplate(names[0]).Attributes["y"].Value);
+        }
+
+        // Save PDF document
+        document.Save(dataDir + "FilledXfa_out.pdf");
+    }
+}
+```
+
+## Use of IgnoreNeedsRendering {#use-of-ignoreneedsrendering}
+
+In some cases (e.g, in the case of a static XFA form), conversion to AcroForm may suffer from the disabled `NeedsRendering` flag that signals that the form isn't dynamically rendered. To convert such forms and remove the XFA form, it's recommended to use the `IgnoreNeedsRendering` property to count the document as dynamically rendered and to calculate element conversion properly.
+
+<Tabs groupId="frameworks">
+
+<TabItem value="net-core-3-1" label=".NET Core 3.1" default>
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void ConvertXFAFormWithIgnoreNeedsRendering()
+{
+    // The path to the documents directory.
+    string dataDir = RunExamples.GetDataDir_AsposePdf_Forms();
+
+    // Load dynamic XFA form
+    using (var document = new Aspose.Pdf.Document(dataDir + "DynamicXFAToAcroForm.pdf")) 
+    {
+        //check if XFA is present & if rendering should be overwritten
+        if (!doc.Form.NeedsRendering && doc.Form.HasXfa)
+        {
+            doc.Form.IgnoreNeedsRendering = true;
+        }
+
+        // Set the form fields type as standard AcroForm
+        document.Form.Type = Aspose.Pdf.Forms.FormType.Standard;
+
+        // Save the resultant PDF
+        document.Save(dataDir + "Standard_AcroForm_out.pdf");
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="net-8" label=".NET 8">
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void ConvertXFAFormWithIgnoreNeedsRendering()
+{
+    // The path to the documents directory.
+    string dataDir = RunExamples.GetDataDir_AsposePdf_Forms();
+
+    // Load dynamic XFA form
+    using (var document = new Aspose.Pdf.Document(dataDir + "DynamicXFAToAcroForm.pdf")) 
+    {
+        //check if XFA is present & if rendering should be overwritten
+        doc.Form.IgnoreNeedsRendering = !doc.Form.NeedsRendering && doc.Form.HasXfa;
+        
+        // Set the form fields type as standard AcroForm
+        document.Form.Type = Aspose.Pdf.Forms.FormType.Standard;
+
+        // Save the resultant PDF
+        document.Save(dataDir + "Standard_AcroForm_out.pdf");
+    }
+}
+```
+
+</TabItem>
+
+</Tabs>

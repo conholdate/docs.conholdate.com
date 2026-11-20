@@ -1,0 +1,588 @@
+---
+title: "Extract Image and Signature Information"
+sidebar_label: "Extract Image and Signature Information"
+sidebar_key: "net-pdf-extract-image-and-signature-information"
+sidebar_position: 100
+description: ""
+product: "pdf"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/pdf/net"
+source_path: "pdf/net/extract-image-and-signature-information.html"
+source_commit: ""
+source_sha256: "5e7f358ab004b6b148d78e8b7924a24101f043d79d5c5508ed34f0a012378578"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/pdf/net/extract-image-and-signature-information/"
+source_snapshot_sha256: "d9f01e346de5f9596c4d70c2e0f5786c5a110bea0f599e42f6830dc561929ab6"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+Aspose.PDF for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "./_remote-markdown.css";
+
+The following code snippet also works with [Aspose.PDF.Drawing](/net/pdf/drawing/) library.
+
+## Extracting Image from Signature Field {#extracting-image-from-signature-field}
+
+Aspose.PDF for .NET supports the feature to digitally sign the PDF files using the <a href="https://reference.aspose.com/pdf/net/aspose.pdf.forms/signaturefield" target="_blank" rel="nofollow noopener noreferrer">SignatureField</a> class and while signing the document, you can also set an image for `SignatureAppearance`. Now, this API also provides the capability to extract signature information as well as the image associated with the signature field.
+
+In order to extract signature information, we have introduced the <a href="https://reference.aspose.com/pdf/net/aspose.pdf.forms/signaturefield/methods/extractimage" target="_blank" rel="nofollow noopener noreferrer">ExtractImage</a> method to the SignatureField class. Please take a look at the following code snippet which demonstrates the steps to extract an image from the `SignatureField` object:
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void ExtractImagesFromSignatureField()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_SecuritySignatures();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "ExtractingImage.pdf"))
+    {
+        // Searching for signature fields
+        foreach (var field in document.Form)
+        {
+            var sf = field as Aspose.Pdf.Forms.SignatureField;
+            if (sf == null)
+            {
+                continue;
+            }
+
+            using (Stream imageStream = sf.ExtractImage())
+            {
+                if (imageStream != null)
+                {
+                    continue;
+                }
+
+                using (System.Drawing.Image image = System.Drawing.Bitmap.FromStream(imageStream))
+                {
+                    // Save the image
+                    image.Save(dataDir + "output_out.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
+            }
+        }
+    }
+}
+```
+
+## Extract Signature Information {#extract-signature-information}
+
+Aspose.PDF for .NET supports the feature to digitally sign the PDF files using the SignatureField class. Currently, we can also determine the validity of the certificate but we cannot extract the whole certificate. The information which can be extracted is a public key, thumbprint, issuer, etc.
+
+To extract signature information, we have introduced the <a href="https://reference.aspose.com/pdf/net/aspose.pdf.forms/signaturefield/methods/extractcertificate" target="_blank" rel="nofollow noopener noreferrer">ExtractCertificate</a> method to the <a href="https://reference.aspose.com/pdf/net/aspose.pdf.forms/signaturefield" target="_blank" rel="nofollow noopener noreferrer">SignatureField</a> class. Please take a look at the following code snippet which demonstrates the steps to extract the certificate from SignatureField object:
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void ExtractCertificate()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_SecuritySignatures();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "ExtractSignatureInfo.pdf"))
+    {
+        // Searching for signature fields
+        foreach (var field in document.Form)
+        {
+            var sf = field as Aspose.Pdf.Forms.SignatureField;
+            if (sf == null)
+            {
+                continue;
+            }
+            // Extract certificate
+            Stream cerStream = sf.ExtractCertificate();
+            if (cerStream == null)
+            {
+                continue;
+            }
+            // Save certificate
+            using (cerStream)
+            {
+                byte[] bytes = new byte[cerStream.Length];
+                using (FileStream fs = new FileStream(dataDir + "input.cer", FileMode.CreateNew))
+                {
+                    cerStream.Read(bytes, 0, bytes.Length);
+                    fs.Write(bytes, 0, bytes.Length);
+                }
+            }
+        }
+    }
+}
+```
+
+You can use the `PdfFileSignature.TryExtractCertificate` method to extract a certificate stream or a `X509Certificate2` object.
+
+<Tabs groupId="frameworks">
+
+<TabItem value="net-core-3-1" label=".NET Core 3.1" default>
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void ExtractCertificate()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_SecuritySignatures();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "ExtractSignatureInfo.pdf"))
+    {
+        using (var signature = new Aspose.Pdf.Facades.PdfFileSignature(document))
+        {
+            // Get signature names
+            var signatureNames = signature.GetSignatureNames();
+            foreach (var signatureName in signatureNames)
+            {
+                // Extract certificate
+                X509Certificate2 certificate;
+                if (signature.TryExtractCertificate(signatureName, out certificate))
+                {
+                    Console.WriteLine(certificate.SerialNumber);
+                }
+            }
+        }
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="net-8" label=".NET 8">
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void ExtractCertificate()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_SecuritySignatures();
+
+    // Open PDF document
+    using var document = new Aspose.Pdf.Document(dataDir + "ExtractSignatureInfo.pdf");
+    using var signature = new Aspose.Pdf.Facades.PdfFileSignature(document);
+    
+    // Get signature names
+    var signatureNames = signature.GetSignatureNames();
+    foreach (var signatureName in signatureNames)
+    {
+        // Extract certificate
+        if (signature.TryExtractCertificate(signatureName, out X509Certificate2 certificate))
+        {
+            Console.WriteLine(certificate.SerialNumber);
+        }
+    }
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+You can get information about document signature algorithms.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private void GetSignaturesInfo()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_SecuritySignatures();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "signed_rsa.pdf"))
+    {
+        using (var signature = new Aspose.Pdf.Facades.PdfFileSignature(document))
+        {
+            var sigNames = signature.GetSignatureNames();
+            var signaturesInfoList =  signature.GetSignaturesInfo();
+            foreach (var sigInfo in signaturesInfoList)
+            {
+                Console.WriteLine(sigInfo.DigestHashAlgorithm);
+                Console.WriteLine(sigInfo.AlgorithmType);
+                Console.WriteLine(sigInfo.CryptographicStandard);
+                Console.WriteLine(sigInfo.SignatureName);
+            }
+        }
+    }
+}
+```
+
+Sample output for the example above:
+
+```text
+Sha256
+Rsa
+Pkcs7
+Signature1
+```
+
+## Checking signatures for compromise {#checking-signatures-for-compromise}
+
+You can use the **SignaturesCompromiseDetector** class to verify digital signatures for compromise. Call the **Check()** method to check the document's signatures. If no signature compromise is detected, the method will return true. If the method returns false, you can check whether compromised signatures use the **HasCompromisedSignatures** property and retrieve the list of compromised signatures through the **CompromisedSignatures** property.
+
+To verify whether the existing signatures cover the entire document, use the **SignaturesCoverage** property. This property can have the following values:
+
+- **Undefined** - if one of the signatures is explicitly compromised or the coverage check failed.
+- **EntirelySigned** - if the signatures cover the entire document.
+- **PartiallySigned** - if the signatures do not cover the entire document and there is unsigned content.
+
+<Tabs groupId="frameworks">
+
+<TabItem value="net-core-3-1" label=".NET Core 3.1" default>
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void Check(string pdfFile)
+{
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(pdfFile))
+    {   
+        // Create the compromise detector instance
+        var detector = new Aspose.Pdf.SignaturesCompromiseDetector(document);
+        CompromiseCheckResult result;
+    
+        // Check for compromise
+        if (detector.Check(out result))
+        {
+            Console.WriteLine("No signature compromise detected");
+            return;
+        }
+         
+        // Get information about compromised signatures
+        if (result.HasCompromisedSignatures)
+        {
+            Console.WriteLine($"Count of compromised signatures: {result.CompromisedSignatures.Count}");
+            foreach (var signatureName in result.CompromisedSignatures)
+            {
+                Console.WriteLine($"Signature name: {signatureName.FullName}");
+            }
+        }
+         
+        // Get info about signatures coverage
+        Console.WriteLine(result.SignaturesCoverage);   
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="net-8" label=".NET 8">
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void Check(string pdfFile)
+{
+    // Open PDF document
+    using var document = new Aspose.Pdf.Document(pdfFile);
+    // Create the compromise detector instance
+    var detector = new Aspose.Pdf.SignaturesCompromiseDetector(document);
+
+    // Check for compromise
+    if (detector.Check(out var result))
+    {
+        Console.WriteLine("No signature compromise detected");
+        return;
+    }
+         
+    // Get information about compromised signatures
+    if (result.HasCompromisedSignatures)
+    {
+        Console.WriteLine($"Count of compromised signatures: {result.CompromisedSignatures.Count}");
+        foreach (var signatureName in result.CompromisedSignatures)
+        {
+            Console.WriteLine($"Signature name: {signatureName.FullName}");
+        }
+    }
+         
+    // Get info about signatures coverage
+    Console.WriteLine(result.SignaturesCoverage);
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+Вот перевод с сохранением markdown:
+
+***
+
+## Extracting Unsigned Content {#extracting-unsigned-content}
+
+You can extract unsigned content from a document using the `UnsignedContentAbsorber` class. If a signed document was modified *non-incrementally*, the objects in the PDF structure may be rearranged, making it impossible to determine which parts were originally signed and which were not. In such cases, the absorber will indicate that the document was modified non‑incrementally.
+
+If the document was modified incrementally, then we can detect what has changed. Unfortunately, since page content streams are compressed, it's impossible to determine which exact portion of a page's text was changed, so the absorber will mark the entire page as modified.
+
+Other changes that are tracked:
+
+- changes to form fields
+- changes to annotations
+- changes to images
+- changes to XForms displayed on pages
+
+If annotations, fields, or XForms are modified in a way that impacts their appearance, the absorber will also report those changes. The processing result is represented by the `UnsignedContentAbsorber.Result` class.
+
+### 1. `UnsignedContentAbsorber.Result` {#1-unsignedcontentabsorberresult}
+
+Represents the result of attempting to obtain unsigned content from a PDF document.
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Property
+
+</th>
+<th>
+
+Type
+
+</th>
+<th>
+
+Description
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+**Success**
+
+</td>
+<td>
+
+`bool`
+
+</td>
+<td>
+
+`true` if the operation completed successfully and unsigned content was identified (or if the document has no signatures).
+
+</td>
+</tr>
+<tr>
+<td>
+
+**UnsignedContent**
+
+</td>
+<td>
+
+`UnsignedContentAbsorber.UnsignedContent`
+
+</td>
+<td>
+
+An object containing collections of detected pages, form fields, XForms, and annotations that are not covered by the signature.
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Message**
+
+</td>
+<td>
+
+`string`
+
+</td>
+<td>
+
+A textual message describing the result.
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Coverage**
+
+</td>
+<td>
+
+`SignaturesCoverage`
+
+</td>
+<td>
+
+The coverage level of the signature: `Undefined`, `EntirelySigned`, `PartiallySigned`.
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+### 2. `UnsignedContentAbsorber.UnsignedContent` {#2-unsignedcontentabsorberunsignedcontent}
+
+A container that holds all PDF document elements **not covered** by the digital signature. This class is used inside `Result` and provides convenient access to the detected objects.
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Property
+
+</th>
+<th>
+
+Type
+
+</th>
+<th>
+
+Description
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+**Pages**
+
+</td>
+<td>
+
+`List<Page>`
+
+</td>
+<td>
+
+A list of pages whose content is not covered by the signature (or was modified after signing). If a page is considered modified, its XForms are not checked and do not appear in the XForms list.
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Forms**
+
+</td>
+<td>
+
+`List<WidgetAnnotation>`
+
+</td>
+<td>
+
+A list of form fields (text fields, checkboxes, etc.) that were added or modified without a signature.
+
+</td>
+</tr>
+<tr>
+<td>
+
+**XForms**
+
+</td>
+<td>
+
+`Dictionary<int, XForm>`
+
+</td>
+<td>
+
+A dictionary where the key is the page number and the value is an `XForm` object that was modified after signing.
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Annotations**
+
+</td>
+<td>
+
+`Dictionary<int, Annotation>`
+
+</td>
+<td>
+
+A dictionary of annotations, where the key is the page number and the value is an annotation modified without a signature.
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<Tabs groupId="frameworks">
+
+<TabItem value="net-core-3-1" label=".NET Core 3.1" default>
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void ExtractUnsignedContent(string inputPdfFile)
+{
+    // Open PDF document
+    using (Document document = new Document(inputPdfFile))
+    {
+           // Create an instance of PdfFileSignature for working with signatures in the document
+        using (PdfFileSignature signature = new PdfFileSignature(document))
+        {
+            // Create an instance of UnsignedContentAbsorber
+            UnsignedContentAbsorber unsignedContent = new UnsignedContentAbsorber(signature);
+            // Try to get unsigned content
+            UnsignedContentAbsorber.Result result = unsignedContent.TryGetContent();
+            
+            // Print information about unsigned content
+            Console.WriteLine(result.Message);
+            Console.WriteLine(result.Coverage);
+            Console.WriteLine(result.UnsignedContent.Pages.Count);
+            Console.WriteLine(result.UnsignedContent.XForms.Count);
+            Console.WriteLine(result.UnsignedContent.Annotation.Count);
+            Console.WriteLine(result.UnsignedContent.Forms.Count);
+        }
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="net-8" label=".NET 8">
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void ExtractUnsignedContent(string inputPdfFile)
+{
+    // Open PDF document
+    using Document document = new Document(inputPdfFile);  
+    // Create an instance of PdfFileSignature for working with signatures in the document
+    using PdfFileSignature signature = new PdfFileSignature(document);
+    
+    // Create an instance of UnsignedContentAbsorber    
+    UnsignedContentAbsorber unsignedContent = new UnsignedContentAbsorber(signature);
+    // Try to get unsigned content   
+    UnsignedContentAbsorber.Result result = unsignedContent.TryGetContent();
+    
+    // Print information about unsigned content
+    Console.WriteLine(result.Message);
+    Console.WriteLine(result.Coverage);
+    Console.WriteLine(result.UnsignedContent.Pages.Count);
+    Console.WriteLine(result.UnsignedContent.XForms.Count);
+    Console.WriteLine(result.UnsignedContent.Annotation.Count);
+    Console.WriteLine(result.UnsignedContent.Forms.Count); 
+}
+```
+
+</TabItem>
+
+</Tabs>

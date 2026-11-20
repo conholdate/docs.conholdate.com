@@ -1,0 +1,199 @@
+---
+title: "How to Create PDF using C#"
+sidebar_label: "How to Create PDF using C#"
+sidebar_key: "net-pdf-create-pdf-document"
+sidebar_position: 100
+description: ""
+product: "pdf"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/pdf/net"
+source_path: "pdf/net/create-pdf-document.html"
+source_commit: ""
+source_sha256: "5b78d348500652588a3ac1c15ba7b2c4ffc00d0dd5ff455edc1edfc8d11204ea"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/pdf/net/create-pdf-document/"
+source_snapshot_sha256: "13f628b5d0527dd081ebcbfb91df9b92a7aa674e59fd335c91fa3d4b4445363b"
+---
+
+:::info
+Aspose.PDF for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+We are always looking for a way to generate PDF documents and work with them in C# projects more exactly, accurately, and effectively. Having easy-to-use functions from a library allows us to track more of the work, and less on the time-heavy details of trying to generate PDFs, whether in .NET.
+
+The following code snippet also work with [Aspose.PDF.Drawing](/net/pdf/drawing/) library.
+
+## Create (or Generate) PDF document using C# language {#create-or-generate-pdf-document-using-c-language}
+
+Aspose.PDF for .NET API lets you create and read PDF files using C# and VB.NET. The API can be used in a variety of .NET applications including WinForms, ASP.NET, and several others. In this article, we are going to show how to use Aspose.PDF for .NET API to easily generate and read PDF files in .NET applications.
+
+### How to Create Simple PDF File {#how-to-create-simple-pdf-file}
+
+To create a PDF file using C#, the following steps can be used.
+
+1. Create an object of <a href="https://reference.aspose.com/pdf/net/aspose.pdf/document" target="_blank" rel="nofollow noopener noreferrer">Document</a> class.
+2. Add a <a href="https://reference.aspose.com/pdf/net/aspose.pdf/page" target="_blank" rel="nofollow noopener noreferrer">Page</a> object to the <a href="https://reference.aspose.com/pdf/net/aspose.pdf/document/properties/pages" target="_blank" rel="nofollow noopener noreferrer">Pages</a> collection of the Document object.
+3. Add <a href="https://reference.aspose.com/pdf/net/aspose.pdf.text/textfragment" target="_blank" rel="nofollow noopener noreferrer">TextFragment</a> to <a href="https://reference.aspose.com/pdf/net/aspose.pdf/page/properties/paragraphs" target="_blank" rel="nofollow noopener noreferrer">Paragraphs</a> collection of the page.
+4. Save the resultant PDF document.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void CreateHelloWorldDocument()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_QuickStart();
+
+    // Create PDF document
+    using (var document = new Aspose.Pdf.Document())
+    {
+        // Add page
+        var page = document.Pages.Add();
+        // Add text to new page
+        page.Paragraphs.Add(new Aspose.Pdf.Text.TextFragment("Hello World!"));
+        // Save PDF document
+        document.Save(dataDir + "HelloWorld_out.pdf");
+    }
+}
+```
+
+### How to Create a Searchable PDF document {#how-to-create-a-searchable-pdf-document}
+
+Aspose.PDF for .NET provides the feature to create as well as manipulate existing PDF documents. When adding Text elements inside PDF file, the resultant PDF is searchable. However if we are converting an Image containing text to PDF file, the contents inside PDF are not searchable. However as a workaround, we can use OCR over the resultant file, so that it becomes searchable.
+
+This logic specified below recognizes text for PDF images. For recognition you may use outer OCR supports HOCR standard. For testing purposes, we have used a free Google tesseract OCR. Therefore first you need to install Tesseract-OCR on your system, and you will have tesseract console application.
+
+Following is complete code to accomplish this requirement:
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void CreateSearchableDocument()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_QuickStart();
+    
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "SearchableDocument.pdf"))
+    {
+        document.Convert(CallBackGetHocr);
+
+        // Save PDF document
+        document.Save(dataDir + "SearchableDocument_out.pdf");
+    }
+}
+
+private static string CallBackGetHocr(System.Drawing.Image img)
+{
+    var tmpFile = Path.GetTempFileName();
+    try
+    {
+        using (var bmp = new System.Drawing.Bitmap(img))
+        {
+            bmp.Save(tmpFile, System.Drawing.Imaging.ImageFormat.Bmp);
+        }
+
+        var inputFile = string.Concat('"', tmpFile, '"');
+        var outputFile = string.Concat('"', tmpFile, '"');
+        var arguments = string.Concat(inputFile, " ", outputFile, " -l eng hocr");
+        var tesseractProcessName = RunExamples.GetTesseractExePath();
+
+        var psi = new System.Diagnostics.ProcessStartInfo(tesseractProcessName, arguments)
+        {
+            UseShellExecute = true,
+            CreateNoWindow = true,
+            WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden,
+            WorkingDirectory = Path.GetDirectoryName(tesseractProcessName)
+        };
+
+        var p = new System.Diagnostics.Process
+        {
+            StartInfo = psi
+        };
+        p.Start();
+        p.WaitForExit();
+
+        using (var streamReader = new StreamReader(tmpFile + ".hocr"))
+        {
+            string text = streamReader.ReadToEnd();
+            return text;
+        }
+    }
+    finally
+    {
+        if (File.Exists(tmpFile))
+        {
+            File.Delete(tmpFile);
+        }
+        if (File.Exists(tmpFile + ".hocr"))
+        {
+            File.Delete(tmpFile + ".hocr");
+        }
+    }
+}
+```
+
+### How to Create an accessible PDF using low-level functions {#how-to-create-an-accessible-pdf-using-low-level-functions}
+
+This code snippet works with a PDF document and its tagged content, utilizing an Aspose.PDF library to process it.
+
+The example creates a new span element in the tagged content of the first page of a PDF, finds all BDC elements, and associates them with the span. The modified document is then saved.
+
+You can create a bdc statement specifying mcid, lang, and expansion text using the BDCProperties object:
+
+```cs
+var bdc = new Aspose.Pdf.Operators.BDC("P", new Aspose.Pdf.Facades.BDCProperties(1, "de", "Hallo, welt!"));
+```
+
+After creating the structure tree, it is possible to bind the BDC operator to the specified element of the structure with method Tag on the element object:
+
+```cs
+Aspose.Pdf.LogicalStructure.SpanElement span = content.CreateSpanElement();
+span.Tag(bdc);
+```
+
+Steps to creating an accessible PDF:
+
+1. Load the PDF Document.
+2. Access Tagged Content.
+3. Create a Span Element.
+4. Append Span to Root Element.
+5. Iterate Over Page Contents.
+6. Check for BDC Elements and Tag Them.
+7. Save the Modified Document.
+
+```cs
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void CreateAnAccessibleDocument()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_QuickStart();
+    
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "tourguidev2_gb_tags.pdf"))
+    {
+        // Access tagged content
+        Aspose.Pdf.Tagged.ITaggedContent content = document.TaggedContent;
+        // Create a span element
+        Aspose.Pdf.LogicalStructure.SpanElement span = content.CreateSpanElement();
+        // Append span to root element
+        content.RootElement.AppendChild(span);
+        // Iterate over page contents
+        foreach (var op in document.Pages[1].Contents)
+        {
+            var bdc = op as Aspose.Pdf.Operators.BDC;
+            if (bdc != null)
+            {
+                span.Tag(bdc);
+            }
+        }
+        // Save PDF document
+        document.Save(dataDir + "AccessibleDocument_out.pdf");
+    }
+}
+```
+
+This code modifies a PDF by creating a span element within the document's tagged content and tagging specific content (BDC operations) from the first page with this span. The modified PDF is then saved to a new file.

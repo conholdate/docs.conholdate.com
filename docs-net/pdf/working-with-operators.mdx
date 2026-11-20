@@ -1,0 +1,218 @@
+---
+title: "Working with Operators"
+sidebar_label: "Working with Operators"
+sidebar_key: "net-pdf-working-with-operators"
+sidebar_position: 100
+description: ""
+product: "pdf"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/pdf/net"
+source_path: "pdf/net/working-with-operators.html"
+source_commit: ""
+source_sha256: "19247489ab61e4fe0a6b7f8cd5f1046220614179794820314e63625078797534"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/pdf/net/working-with-operators/"
+source_snapshot_sha256: "2ef5ba2c7a91486684f56031006a2b1f47be81a6052ae9930c3f5e14890abd15"
+---
+
+:::info
+Aspose.PDF for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Introduction to the PDF Operators and Their Usage {#introduction-to-the-pdf-operators-and-their-usage}
+
+An operator is a PDF keyword specifying some action that shall be performed, such as painting a graphical shape on the page. An operator keyword is distinguished from a named object by the absence of an initial solidus character (2Fh). Operators are meaningful only inside the content stream.
+
+A content stream is a PDF stream object whose data consists of instructions describing the graphical elements to be painted on a page. More details about PDF operators can be found in the <a href="https://opensource.adobe.com/dc-acrobat-sdk-docs/" target="_blank" rel="nofollow noopener noreferrer">PDF specification</a>.
+
+### Implementation details {#implementation-details}
+
+This topic explains how to use operators with Aspose.PDF. The selected example adds an image into a PDF file to illustrate the concept. To add an image in a PDF file, different operators are needed. This example uses <a href="https://reference.aspose.com/pdf/net/aspose.pdf.ioperatorselector/visit/methods/28" target="_blank" rel="nofollow noopener noreferrer">GSave</a>, <a href="https://reference.aspose.com/pdf/net/aspose.pdf.ioperatorselector/visit/methods/10" target="_blank" rel="nofollow noopener noreferrer">ConcatenateMatrix</a>, <a href="https://reference.aspose.com/pdf/net/aspose.pdf.ioperatorselector/visit/methods/14" target="_blank" rel="nofollow noopener noreferrer">Do</a>, and <a href="https://reference.aspose.com/pdf/net/aspose.pdf.ioperatorselector/visit/methods/26" target="_blank" rel="nofollow noopener noreferrer">GRestore</a>.
+
+- The **GSave** operator saves the PDF's current graphical state.
+- The **ConcatenateMatrix** (concatenate matrix) operator is used to define how an image should be placed on the PDF page.
+- The **Do** operator draws the image on the page.
+- The **GRestore** operator restores the graphical state.
+
+To add an image into a PDF file:
+
+1. Create a <a href="https://reference.aspose.com/pdf/net/aspose.pdf/document" target="_blank" rel="nofollow noopener noreferrer">Document</a> object and open the input PDF document.
+2. Get the particular page the image is going to be added to.
+3. Add the image into the page's Resources collection.
+4. Use the operators to place the image on the page:
+   - First, use the GSave operator to save the current graphical state.
+   - Then use the ConcatenateMatrix operator to specify where the image is to be placed.
+   - Use the Do operator to draw the image on the page.
+5. Finally, use GRestore operator to save the updated graphical state.
+
+The following code snippet also work with [Aspose.PDF.Drawing](/net/pdf/drawing/) library.
+
+The following code snippet shows how to use PDF operators.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void AddImageUsingPDFOperators()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "PDFOperators.pdf"))
+    {
+        // Set coordinates for the image placement
+        int lowerLeftX = 100;
+        int lowerLeftY = 100;
+        int upperRightX = 200;
+        int upperRightY = 200;
+
+        // Get the page where the image needs to be added
+        var page = document.Pages[1];
+
+        // Load the image into a file stream
+        using (var imageStream = new FileStream(dataDir + "PDFOperators.jpg", FileMode.Open))
+        {
+            // Add the image to the page's Resources collection
+            page.Resources.Images.Add(imageStream);
+        }
+
+        // Save the current graphics state using the GSave operator
+        page.Contents.Add(new Aspose.Pdf.Operators.GSave());
+
+        // Create a rectangle and matrix for positioning the image
+        var rectangle = new Aspose.Pdf.Rectangle(lowerLeftX, lowerLeftY, upperRightX, upperRightY);
+        var matrix = new Aspose.Pdf.Matrix(new double[]
+        {
+            rectangle.URX - rectangle.LLX, 0,
+            0, rectangle.URY - rectangle.LLY,
+            rectangle.LLX, rectangle.LLY
+        });
+
+        // Define how the image must be placed using the ConcatenateMatrix operator
+        page.Contents.Add(new Aspose.Pdf.Operators.ConcatenateMatrix(matrix));
+
+        // Get the image from the Resources collection
+        var ximage = page.Resources.Images[page.Resources.Images.Count];
+
+        // Draw the image using the Do operator
+        page.Contents.Add(new Aspose.Pdf.Operators.Do(ximage.Name));
+
+        // Restore the graphics state using the GRestore operator
+        page.Contents.Add(new Aspose.Pdf.Operators.GRestore());
+
+        // Save PDF document
+        document.Save(dataDir + "PDFOperators_out.pdf");
+    }
+}
+```
+
+## Draw XForm on Page using Operators {#draw-xform-on-page-using-operators}
+
+This topic demonstrates how to use the GSave/GRestore operators, the ContatenateMatrix operator to position an xForm and the Do operator to draw an xForm on a page.
+
+The code below wraps a PDF file's existing contents with the GSave/GRestore operator pair. This approach helps get the initial graphics state at the and of the existing contents. Without this approach, undesirable transformations might remain at the end of the existing operator chain.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void DrawXFormOnPage()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "DrawXFormOnPage.pdf"))
+    {
+        var pageContents = document.Pages[1].Contents;
+
+        // Wrap existing contents with GSave/GRestore operators to preserve graphics state
+        pageContents.Insert(1, new Aspose.Pdf.Operators.GSave());
+        pageContents.Add(new Aspose.Pdf.Operators.GRestore());
+
+        // Add GSave operator to start new graphics state
+        pageContents.Add(new Aspose.Pdf.Operators.GSave());
+
+        // Create an XForm
+        var form = Aspose.Pdf.XForm.CreateNewForm(document.Pages[1], document);
+        document.Pages[1].Resources.Forms.Add(form);
+
+        form.Contents.Add(new Aspose.Pdf.Operators.GSave());
+        // Define image width and height
+        form.Contents.Add(new Aspose.Pdf.Operators.ConcatenateMatrix(200, 0, 0, 200, 0, 0));
+
+        // Load image into stream
+        using (var imageStream = new FileStream(dataDir + "aspose-logo.jpg", FileMode.Open))
+        {
+            // Add the image to the XForm's resources
+            form.Resources.Images.Add(imageStream);
+        }
+
+        var ximage = form.Resources.Images[form.Resources.Images.Count];
+        // Draw the image on the XForm
+        form.Contents.Add(new Aspose.Pdf.Operators.Do(ximage.Name));
+        form.Contents.Add(new Aspose.Pdf.Operators.GRestore());
+
+        // Place and draw the XForm at two different coordinates
+
+        // Draw the XForm at (100, 500)
+        pageContents.Add(new Aspose.Pdf.Operators.GSave());
+        pageContents.Add(new Aspose.Pdf.Operators.ConcatenateMatrix(1, 0, 0, 1, 100, 500));
+        pageContents.Add(new Aspose.Pdf.Operators.Do(form.Name));
+        pageContents.Add(new Aspose.Pdf.Operators.GRestore());
+
+        // Draw the XForm at (100, 300)
+        pageContents.Add(new Aspose.Pdf.Operators.GSave());
+        pageContents.Add(new Aspose.Pdf.Operators.ConcatenateMatrix(1, 0, 0, 1, 100, 300));
+        pageContents.Add(new Aspose.Pdf.Operators.Do(form.Name));
+        pageContents.Add(new Aspose.Pdf.Operators.GRestore());
+
+        // Restore graphics state
+        pageContents.Add(new Aspose.Pdf.Operators.GRestore());
+
+        // Save PDF document
+        document.Save(dataDir + "DrawXFormOnPage_out.pdf");
+    }
+}
+```
+
+## Remove Graphics Objects using Operator Classes {#remove-graphics-objects-using-operator-classes}
+
+The operator classes provide great features for PDF manipulation. When a PDF file contains graphics that cannot be removed using the <a href="https://reference.aspose.com/pdf/net/aspose.pdf.facades/pdfcontenteditor" target="_blank" rel="nofollow noopener noreferrer">PdfContentEditor</a> class' <a href="https://reference.aspose.com/pdf/net/aspose.pdf.facades/pdfcontenteditor/methods/deleteimage" target="_blank" rel="nofollow noopener noreferrer">DeleteImage</a> method, the operator classes can be used to remove them instead.
+
+The following code snippet shows how to remove graphics. Please note that if the PDF file contains text labels for the graphics, they might persist in the PDF file, using this approach. Therefore search the graphic operators for an alternate method to delete such images.
+
+```csharp
+  // For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+  private static void RemoveGraphicsObjects()
+  {
+      // The path to the documents directory
+      var dataDir = RunExamples.GetDataDir_AsposePdf();
+
+      // Open PDF document
+      using (var document = new Aspose.Pdf.Document(dataDir + "RemoveGraphicsObjects.pdf"))
+      {
+          // Get the specific page (page 2 in this case)
+          var page = document.Pages[2];
+
+          // Get the operator collection from the page contents
+          var oc = page.Contents;
+
+          // Define the path-painting operators to be removed
+          var operators = new Aspose.Pdf.Operator[]
+          {
+              new Aspose.Pdf.Operators.Stroke(),
+              new Aspose.Pdf.Operators.ClosePathStroke(),
+              new Aspose.Pdf.Operators.Fill()
+          };
+
+          // Delete the specified operators from the page contents
+          oc.Delete(operators);
+
+          // Save PDF document
+          document.Save(dataDir + "NoGraphics_out.pdf");
+      }
+  }
+```

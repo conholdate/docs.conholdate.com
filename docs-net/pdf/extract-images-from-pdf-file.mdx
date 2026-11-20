@@ -1,0 +1,192 @@
+---
+title: "Extract Images from PDF File"
+sidebar_label: "Extract Images from PDF File"
+sidebar_key: "net-pdf-extract-images-from-pdf-file"
+sidebar_position: 100
+description: ""
+product: "pdf"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/pdf/net"
+source_path: "pdf/net/extract-images-from-pdf-file.html"
+source_commit: ""
+source_sha256: "362e9eb9c4856cc47ad8c0ce5018b11f5bf5e0dde2794a828f4dd60baecfb6fb"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/pdf/net/extract-images-from-pdf-file/"
+source_snapshot_sha256: "4351e95eafa2e55bfdfdce31089e25b4e4c501bbe994557a5da91e0c59c199b9"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+Aspose.PDF for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Using page resources {#using-page-resources}
+
+The following code snippet also works with [Aspose.PDF.Drawing](/net/pdf/drawing/) library.
+
+Images are held in each page's <a href="https://reference.aspose.com/pdf/net/aspose.pdf/resources" target="_blank" rel="nofollow noopener noreferrer">Resources</a> collection's <a href="https://reference.aspose.com/pdf/net/aspose.pdf/resources/properties/images" target="_blank" rel="nofollow noopener noreferrer">Images</a> collection. To extract a particular page, then get the image from the Images collection using the particular index of the image.
+
+The image's index returns an <a href="https://reference.aspose.com/pdf/net/aspose.pdf/ximage" target="_blank" rel="nofollow noopener noreferrer">XImage</a> object. This object provides a Save method for saving the extracted image. The following code snippet shows how to extract images from a PDF file.
+
+<Tabs groupId="frameworks">
+
+<TabItem value="net-core-3-1" label=".NET Core 3.1" default>
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void ExtractImageFromPDF()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_WorkingDocuments();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "ExtractImages.pdf"))
+    {
+        // Extract a particular image
+        var xImage = document.Pages[1].Resources.Images[1];
+        using (var outputImage = new FileStream(dataDir + "ExtractedImage.jpg", FileMode.Create))
+        {
+            // Save PDF document image
+            xImage.Save(outputImage, System.Drawing.Imaging.ImageFormat.Jpeg);
+        }
+
+        // Save PDF document
+        document.Save(dataDir + "ExtractImages_out.pdf");
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="net-8" label=".NET 8">
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void ExtractImageFromPDF()
+{
+    // The path to the documents directory
+    string dataDir = RunExamples.GetDataDir_AsposePdf_WorkingDocuments();
+
+    // Open PDF document
+    using var document = new Aspose.Pdf.Document(dataDir + "ExtractImages.pdf");
+
+    // Get the first image from the first page
+    var xImage = document.Pages[1].Resources.Images[1];
+
+    using var outputImage = File.Create(dataDir + "ExtractedImage.jpg");
+
+    // Save PDF document image
+    xImage.Save(outputImage, System.Drawing.Imaging.ImageFormat.Jpeg);
+
+    // Save PDF document
+    document.Save(dataDir + "ExtractImages_out.pdf");
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+## Using ImagePlacementAbsorber {#using-imageplacementabsorber}
+
+With the release of Aspose.PDF for .NET 7.0.0, we introduced classes called <a href="https://reference.aspose.com/pdf/net/aspose.pdf/imageplacement" target="_blank" rel="nofollow noopener noreferrer">ImagePlacement</a>, <a href="https://reference.aspose.com/pdf/net/aspose.pdf/imageplacementabsorber" target="_blank" rel="nofollow noopener noreferrer">ImagePlacementAbsorber</a> and <a href="https://reference.aspose.com/pdf/net/aspose.pdf/imageplacementcollection" target="_blank" rel="nofollow noopener noreferrer">ImagePlacementCollection</a> which provide similar capability as the classes described above to get an image's resolution and position in a PDF document.
+
+- ImagePlacementAbsorber performs image usage search as the ImagePlacement objects collection.
+- ImagePlacement provides the members Resolution and Rectangle that return actual image placement values.
+
+The next code snippet also works with [Aspose.Drawing](/net/pdf/drawing/) library.
+
+<Tabs groupId="frameworks">
+
+<TabItem value="net-core-3-1" label=".NET Core 3.1" default>
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void ExtractAndScaleImagesFromPDF()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Images();
+
+    int imageCount = 0;
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "ImagePlacement.pdf"))
+    {
+        var abs = new Aspose.Pdf.ImagePlacementAbsorber();
+
+        // Load the contents of the first page
+        document.Pages[1].Accept(abs);
+
+        // Iterate through each image placement on the first page
+        foreach (var imagePlacement in abs.ImagePlacements)
+        {
+            // Get image properties
+            Console.Out.WriteLine("image width: " + imagePlacement.Rectangle.Width);
+            Console.Out.WriteLine("image height: " + imagePlacement.Rectangle.Height);
+            Console.Out.WriteLine("image LLX: " + imagePlacement.Rectangle.LLX);
+            Console.Out.WriteLine("image LLY: " + imagePlacement.Rectangle.LLY);
+            Console.Out.WriteLine("image horizontal resolution: " + imagePlacement.Resolution.X);
+            Console.Out.WriteLine("image vertical resolution: " + imagePlacement.Resolution.Y);
+
+            // Extract a particular image
+            using (var outputImage = new FileStream(dataDir + "ExtractedImage_" + imageCount.ToString() + ".jpg", FileMode.Create))
+            {
+                // Save PDF document image
+                imagePlacement.Save(outputImage, System.Drawing.Imaging.ImageFormat.Jpeg);
+            }
+
+            ++imageCount;
+        }
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="net-8" label=".NET 8">
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void ExtractAndScaleImagesFromPDF()
+{
+    // The path to the documents directory
+    string dataDir = RunExamples.GetDataDir_AsposePdf_Images();
+    int imageCount = 0;
+
+    // Open PDF document
+    using var document = new Aspose.Pdf.Document(dataDir + "ImagePlacement.pdf");
+    var absorber = new Aspose.Pdf.ImagePlacementAbsorber();
+
+    // Load contents of the first page
+    document.Pages[1].Accept(absorber);
+
+    // Iterate through each image placement on the first page
+    foreach (var imagePlacement in absorber.ImagePlacements)
+    {
+        Console.WriteLine($"Image {imageCount}:");
+        Console.WriteLine($"  Width: {imagePlacement.Rectangle.Width}");
+        Console.WriteLine($"  Height: {imagePlacement.Rectangle.Height}");
+        Console.WriteLine($"  LLX: {imagePlacement.Rectangle.LLX}");
+        Console.WriteLine($"  LLY: {imagePlacement.Rectangle.LLY}");
+        Console.WriteLine($"  Horizontal Resolution: {imagePlacement.Resolution.X}");
+        Console.WriteLine($"  Vertical Resolution: {imagePlacement.Resolution.Y}");
+
+        using var outputImage = File.Create(dataDir + $"ExtractedImage_{imageCount}.jpg");
+        // Save PDF document image
+        imagePlacement.Save(outputImage, System.Drawing.Imaging.ImageFormat.Jpeg);
+
+        ++imageCount;
+    }
+}
+```
+
+</TabItem>
+
+</Tabs>

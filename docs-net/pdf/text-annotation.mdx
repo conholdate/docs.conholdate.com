@@ -1,0 +1,703 @@
+---
+title: "Using Text Annotation for PDF"
+sidebar_label: "Using Text Annotation for PDF"
+sidebar_key: "net-pdf-text-annotation"
+sidebar_position: 100
+description: ""
+product: "pdf"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/pdf/net"
+source_path: "pdf/net/text-annotation.html"
+source_commit: ""
+source_sha256: "2438280610598201c6c80586864d232611e35d4d225c0a5da52e2380b99feca5"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/pdf/net/text-annotation/"
+source_snapshot_sha256: "adfb7941d98a3252ba2439e8f1459195f6bd295a5e8de1ed84052a566bd9f905"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+Aspose.PDF for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## How to add Text Annotation into existing PDF file {#how-to-add-text-annotation-into-existing-pdf-file}
+
+The following code snippet also works with [Aspose.PDF.Drawing](/net/pdf/drawing/) library.
+
+A Text Annotation is an annotation attached to a specific location in a PDF document. When closed, the annotation is displayed as an icon; when opened, it should display a pop-up window containing the note text in the font and size chosen by the reader.
+
+Annotations are contained by the <a href="https://reference.aspose.com/pdf/net/aspose.pdf.annotations" target="_blank" rel="nofollow noopener noreferrer">Annotations</a> collection of a particular Page. This collection contains the annotations for that individual page only; every page has its own Annotations collection.
+
+To add an annotation to a particular page, add it to that page's Annotations collection with the <a href="https://reference.aspose.com/pdf/net/aspose.pdf.annotations/annotationcollection/methods/add" target="_blank" rel="nofollow noopener noreferrer">Add</a> method.
+
+1. First, create an annotation that you want to add to the PDF.
+2. Then open the input PDF.
+3. Add the annotation to the <a href="https://reference.aspose.com/pdf/net/aspose.pdf/page" target="_blank" rel="nofollow noopener noreferrer">Page</a> object's Annotations collection.
+
+The following code snippet shows you how to add an annotation in a PDF page.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void AddTextAnnotationToPdf()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Annotations();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "AddAnnotation.pdf"))
+    {
+        // Create text annotation
+        var textAnnotation = new Aspose.Pdf.Annotations.TextAnnotation(document.Pages[1], new Aspose.Pdf.Rectangle(200, 400, 400, 600));
+        textAnnotation.Title = "Sample Annotation Title";
+        textAnnotation.Subject = "Sample Subject";
+        textAnnotation.SetReviewState(Aspose.Pdf.Annotations.AnnotationState.Accepted);
+        textAnnotation.Contents = "Sample contents for the annotation";
+        textAnnotation.Open = true;
+        textAnnotation.Icon = Aspose.Pdf.Annotations.TextIcon.Key;
+
+        // Set border for the annotation
+        var border = new Aspose.Pdf.Annotations.Border(textAnnotation);
+        border.Width = 5;
+        border.Dash = new Aspose.Pdf.Annotations.Dash(1, 1);
+        textAnnotation.Border = border;
+        textAnnotation.Rect = new Aspose.Pdf.Rectangle(200, 400, 400, 600);
+
+        // Add annotation to the annotations collection of the page
+        document.Pages[1].Annotations.Add(textAnnotation);
+
+        // Save PDF document
+        document.Save(dataDir + "AddAnnotation_out.pdf");
+    }
+}
+```
+
+## How to add Popup Annotation {#how-to-add-popup-annotation}
+
+A Pop-up Annotation displays text in a pop-up window for entry and editing. It shall not appear alone but is associated with a markup annotation, its parent annotation, and shall be used for editing the parent's text.
+
+It shall have no appearance stream or associated actions of its own and shall be identified by the Popup entry in the parent's annotation dictionary.
+
+The following code snippet shows you how to add <a href="https://reference.aspose.com/pdf/net/aspose.pdf.annotations/popupannotation" target="_blank" rel="nofollow noopener noreferrer">Popup Annotation</a> in a PDF page using an example of adding a parent's [Line annotation](/net/pdf/figures-annotation/#adding-lines-or-arrows).
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void AddLineAnnotation()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Annotations();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "Appartments.pdf"))
+    {
+        // Create Line Annotation
+        var lineAnnotation = new Aspose.Pdf.Annotations.LineAnnotation(
+            document.Pages[1],
+            new Aspose.Pdf.Rectangle(550, 93, 562, 439),
+            new Aspose.Pdf.Point(556, 99), new Aspose.Pdf.Point(556, 443))
+        {
+            Title = "John Smith",
+            Color = Aspose.Pdf.Color.Red,
+            Width = 3,
+            StartingStyle = Aspose.Pdf.Annotations.LineEnding.OpenArrow,
+            EndingStyle = Aspose.Pdf.Annotations.LineEnding.OpenArrow,
+            Popup = new Aspose.Pdf.Annotations.PopupAnnotation(document.Pages[1], new Aspose.Pdf.Rectangle(842, 124, 1021, 266))
+        };
+
+        // Add annotation to the page
+        document.Pages[1].Annotations.Add(lineAnnotation);
+
+        // Save PDF document
+        document.Save(dataDir + "AddLineAnnotation_out.pdf");
+    }
+}
+```
+
+## How to add (or Create) new Free Text Annotation {#how-to-add-or-create-new-free-text-annotation}
+
+A free text annotation displays text directly on the page. The <a href="https://reference.aspose.com/pdf/net/aspose.pdf.facades/pdfcontenteditor/methods/createfreetext" target="_blank" rel="nofollow noopener noreferrer">PdfContentEditor.CreateFreeText</a> method allows creating this type of annotation. In the following snippet, we add free text annotation above the first occurrence of the string.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void AddFreeTextAnnotationDemo()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Annotations();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "pdf-sample.pdf"))
+    {
+        var pdfContentEditor = new Aspose.Pdf.Facades.PdfContentEditor(document);
+
+        // Assuming tfa is an instance of TextFragmentAbsorber or similar
+        var tfa = new Aspose.Pdf.Text.TextFragmentAbsorber();
+        tfa.Visit(document.Pages[1]);
+
+        if (tfa.TextFragments.Count <= 0)
+        {
+            return;
+        }
+
+        // Define the rectangle for the free text annotation
+        var rect = new System.Drawing.Rectangle
+        {
+            X = (int)tfa.TextFragments[1].Rectangle.LLX,
+            Y = (int)tfa.TextFragments[1].Rectangle.URY + 5,
+            Height = 18,
+            Width = 100
+        };
+
+        // Create free text annotation
+        pdfContentEditor.CreateFreeText(rect, "Free Text Demo", 1); // Last param is the page number
+
+        // Save PDF document
+        pdfContentEditor.Save(dataDir + "pdf-sample-0.pdf");
+    }
+}
+```
+
+### Set Callout Property for FreeTextAnnotation {#set-callout-property-for-freetextannotation}
+
+For a more flexible configuration of annotation in the PDF document, Aspose.PDF for .NET provides <a href="https://reference.aspose.com/pdf/net/aspose.pdf.annotations/freetextannotation/properties/callout" target="_blank" rel="nofollow noopener noreferrer">Callout</a> property of <a href="https://reference.aspose.com/pdf/net/aspose.pdf.annotations/freetextannotation" target="_blank" rel="nofollow noopener noreferrer">FreeTextAnnotation</a> class which allows specifying Array of point of callout line. The following code snippet shows how to use this functionality:
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void AddFreeTextCalloutAnnotation()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Annotations();
+
+    // Create PDF document
+    using (var document = new Aspose.Pdf.Document())
+    {
+        // Add page
+        var page = document.Pages.Add();
+
+        // Create default appearance for the annotation
+        var da = new Aspose.Pdf.Annotations.DefaultAppearance();
+        da.TextColor = System.Drawing.Color.Red;
+        da.FontSize = 10;
+
+        // Create free text annotation with callout
+        var fta = new Aspose.Pdf.Annotations.FreeTextAnnotation(page, new Aspose.Pdf.Rectangle(422.25, 645.75, 583.5, 702.75), da);
+        fta.Intent = Aspose.Pdf.Annotations.FreeTextIntent.FreeTextCallout;
+        fta.EndingStyle = Aspose.Pdf.Annotations.LineEnding.OpenArrow;
+        fta.Callout = new Aspose.Pdf.Point[]
+        {
+            new Aspose.Pdf.Point(428.25, 651.75),
+            new Aspose.Pdf.Point(462.75, 681.375),
+            new Aspose.Pdf.Point(474, 681.375)
+        };
+
+        // Add the annotation to the page
+        page.Annotations.Add(fta);
+
+        // Set rich text for the annotation
+        fta.RichText = "<body xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:xfa=\"http://www.xfa.org/schema/xfa-data/1.0/\" xfa:APIVersion=\"Acrobat:11.0.23\" xfa:spec=\"2.0.2\"  style=\"color:#FF0000;font-weight:normal;font-style:normal;font-stretch:normal\"><p dir=\"ltr\"><span style=\"font-size:9.0pt;font-family:Helvetica\">This is a sample</span></p></body>";
+
+        // Save PDF document
+        document.Save(dataDir + "SetCalloutProperty_out.pdf");
+    }
+}
+```
+
+### Set Callout Property for XFDF File {#set-callout-property-for-xfdf-file}
+
+If you use import from XFDF file please use callout-line name instead of just Callout. The following code snippet shows how to use this functionality:
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void ImportAnnotationsFromXfdf()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Annotations();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "AddAnnotation.pdf"))
+    {
+        // Create an XFDF string builder
+        var xfdf = new StringBuilder();
+        xfdf.AppendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?><xfdf xmlns=\"http://ns.adobe.com/xfdf/\" xml:space=\"preserve\"><annots>");
+
+        // Call the method to create XFDF content
+        CreateXfdf(ref xfdf);
+
+        xfdf.AppendLine("</annots></xfdf>");
+
+        // Import annotations from the XFDF string
+        document.ImportAnnotationsFromXfdf(new MemoryStream(Encoding.UTF8.GetBytes(xfdf.ToString())));
+
+        // Save PDF document
+        document.Save(dataDir + "SetCalloutPropertyXfdf_out.pdf");
+    }
+}
+```
+
+The following method is being used to CreateXfdf:
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void CreateXfdf(ref StringBuilder pXfdf)
+{
+    pXfdf.Append("<freetext");
+    pXfdf.Append(" page=\"0\"");
+    pXfdf.Append(" rect=\"422.25,645.75,583.5,702.75\"");
+    pXfdf.Append(" intent=\"FreeTextCallout\"");
+    pXfdf.Append(" callout-line=\"428.25,651.75,462.75,681.375,474,681.375\"");
+    pXfdf.Append(" tail=\"OpenArrow\"");
+    pXfdf.AppendLine(">");
+    pXfdf.Append("<contents-richtext><body ");
+    pXfdf.Append(" style=\"font-size:10.0pt;text-align:left;color:#FF0000;font-weight:normal;font-style:normal;font-family:Helvetica;font-stretch:normal\">");
+    pXfdf.Append("<p dir=\"ltr\">This is a sample</p>");
+    pXfdf.Append("</body></contents-richtext>");
+    pXfdf.AppendLine("<defaultappearance>/Helv 12 Tf 1 0 0 rg</defaultappearance>");
+    pXfdf.AppendLine("</freetext>");
+}
+```
+
+### Make Free Text Annotation Invisible {#make-free-text-annotation-invisible}
+
+Sometimes, it is necessary to create a watermark that isn't visible in the document when viewing it but should be visible when the document is printed. Use annotation flags for this purpose. The following code snippet shows how.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void AddInvisibleAnnotation()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Annotations();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "input.pdf"))
+    {
+        // Create a free text annotation
+        var annotation = new Aspose.Pdf.Annotations.FreeTextAnnotation(
+            document.Pages[1],
+            new Aspose.Pdf.Rectangle(50, 600, 250, 650),
+            new Aspose.Pdf.Annotations.DefaultAppearance("Helvetica", 16, System.Drawing.Color.Red)
+        );
+
+        annotation.Contents = "ABCDEFG";
+        annotation.Characteristics.Border = System.Drawing.Color.Red;
+        annotation.Flags = Aspose.Pdf.Annotations.AnnotationFlags.Print | Aspose.Pdf.Annotations.AnnotationFlags.NoView;
+
+        // Add the annotation to the page
+        document.Pages[1].Annotations.Add(annotation);
+
+        // Save PDF document
+        document.Save(dataDir + "InvisibleAnnotation_out.pdf");
+    }
+}
+```
+
+### Set Formatting of FreeTextAnnotation {#set-formatting-of-freetextannotation}
+
+This part looks at how to format the text in a free text annotation.
+
+Annotations are contained in a <a href="https://reference.aspose.com/pdf/net/aspose.pdf/page" target="_blank" rel="nofollow noopener noreferrer">Page</a> object's <a href="https://reference.aspose.com/pdf/net/aspose.pdf.annotations/annotationcollection" target="_blank" rel="nofollow noopener noreferrer">AnnotationCollection</a> collection. When adding a <a href="https://reference.aspose.com/pdf/net/aspose.pdf.annotations/freetextannotation" target="_blank" rel="nofollow noopener noreferrer">FreeTextAnnotation</a> to a PDF document, you can specify the formatting information such as font, size, color and so on using the <a href="https://reference.aspose.com/pdf/net/aspose.pdf.annotations/defaultappearance/methods/index" target="_blank" rel="nofollow noopener noreferrer">DefaultAppearance</a> class. It is also possible to specify the formatting information using the TextStyle property. Furthermore, you can update the formatting of any FreeTextAnnotation already in the PDF document.
+
+The <a href="https://reference.aspose.com/pdf/net/aspose.pdf.annotations/textstyle" target="_blank" rel="nofollow noopener noreferrer">TextStyle</a> class supports working with the default style entry. This class allows you to set color, font size and font name:
+
+- The FontName property gets or sets the font name (string).
+- The FontSize property gets and sets the default text size (double).
+- The System.Drawing.Color property gets and sets the text color (color).
+- The TextAlignment property gets and sets the annotation's text alignment (alignment).
+
+The following code snippet shows how to add a FreeTextAnnotation with specific text formatting.
+
+<Tabs groupId="frameworks">
+
+<TabItem value="net-core-3-1" label=".NET Core 3.1" default>
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void AddFreeAnnotation()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Annotations();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "SetFreeTextAnnotationFormatting.pdf"))
+    {
+        // Instantiate DefaultAppearance object
+        var defaultAppearance = new Aspose.Pdf.Annotations.DefaultAppearance("Arial", 28, System.Drawing.Color.Red);
+
+        // Create annotation
+        var freetext = new Aspose.Pdf.Annotations.FreeTextAnnotation(document.Pages[1], new Aspose.Pdf.Rectangle(200, 400, 400, 600), defaultAppearance);
+
+        // Specify the contents of annotation
+        freetext.Contents = "Free Text";
+
+        // Add annotation to annotations collection of page
+        document.Pages[1].Annotations.Add(freetext);
+
+        // Save PDF document
+        document.Save(dataDir + "SetFreeTextAnnotationFormatting_out.pdf");
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="net-8" label=".NET 8">
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void AddFreeAnnotation(string fontName = "Arial", float fontSize = 28)
+{
+     // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Annotations();
+	
+    using (var document = new Aspose.Pdf.Document(dataDir + "SetFreeTextAnnotationFormatting.pdf"))
+    {
+        // Set default values
+        var textColor = System.Drawing.Color.Red;
+        var position = new Aspose.Pdf.Rectangle(200, 400, 400, 600);
+
+        // Instantiate DefaultAppearance object
+        Aspose.Pdf.Annotations.DefaultAppearance defaultAppearance = new(fontName, fontSize, textColor);
+        // Create annotation
+        var freetext = new Aspose.Pdf.Annotations.FreeTextAnnotation(document.Pages[1], position, defaultAppearance)
+        {
+            // Specify the contents of annotation
+            Contents = "Free Text"
+        };
+        // Add annotation to annotations collection of page
+        document.Pages[1].Annotations.Add(freetext);
+
+        // Save PDF document
+        document.Save(dataDir + "SetFreeTextAnnotationFormatting_out.pdf");
+    }
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+:::info
+When you change the contents or text style of a free text annotation, the annotation's appearance is regenerated to reflect changes.
+:::
+
+You can also use the SetTextStyle method to format the styles of text fragments (or the full text) in an annotation, as shown in the following example.
+
+<Tabs groupId="frameworks">
+
+<TabItem value="net-core-3-1" label=".NET Core 3.1" default>
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void AddFreeAnnotationAndSetStyles()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Annotations();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "SetFreeTextAnnotationFormatting.pdf"))
+    {
+        // Add new page
+        Page page = document.Pages.Add();
+
+        // Instantiate DefaultAppearance object
+        var defaultAppearance = new Aspose.Pdf.Annotations.DefaultAppearance("Arial", 16, System.Drawing.Color.Blue);
+
+        // Create annotation
+        var freetext = new Aspose.Pdf.Annotations.FreeTextAnnotation(page, new Aspose.Pdf.Rectangle(20, 600, 400, 650), defaultAppearance);
+
+        // Specify the contents of annotation
+        freetext.Contents = "Text of FreeTextAnnotation with different styles";
+
+        // Add annotation to annotations collection of page
+        page.Annotations.Add(freetext);
+
+        // Set styles for annotation text
+        freetext.SetTextStyle(0, 4, RichTextFontStyles.Italic);
+        freetext.SetTextStyle(8, 26, RichTextFontStyles.Underline | RichTextFontStyles.Bold);
+        freetext.SetTextStyle(27, 86, RichTextFontStyles.Bold);
+        freetext.SetTextStyle(42, 45, RichTextFontStyles.ClearExisting | RichTextFontStyles.Underline);
+
+        // Save PDF document
+        document.Save(dataDir + "SetFreeTextAnnotationFormatting_out.pdf");
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="net-8" label=".NET 8">
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void AddFreeAnnotationAndSetStyles()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Annotations();
+
+    // Open PDF document
+    using var document = new Aspose.Pdf.Document(dataDir + "SetFreeTextAnnotationFormatting.pdf");
+
+    // Add new page
+    Page page = document.Pages.Add();
+
+    // Instantiate DefaultAppearance object
+    var defaultAppearance = new Aspose.Pdf.Annotations.DefaultAppearance("Arial", 16, System.Drawing.Color.Blue);
+
+    // Create annotation
+    var freetext = new Aspose.Pdf.Annotations.FreeTextAnnotation(page, new Aspose.Pdf.Rectangle(20, 600, 400, 650), defaultAppearance);
+
+    // Specify the contents of annotation
+    freetext.Contents = "Text of FreeTextAnnotation with different styles";
+
+    // Add annotation to annotations collection of page
+    page.Annotations.Add(freetext);
+
+    // Set styles for annotation text
+    freetext.SetTextStyle(0, 4, RichTextFontStyles.Italic);
+    freetext.SetTextStyle(8, 26, RichTextFontStyles.Underline | RichTextFontStyles.Bold);
+    freetext.SetTextStyle(27, 86, RichTextFontStyles.Bold);
+    freetext.SetTextStyle(42, 45, RichTextFontStyles.ClearExisting | RichTextFontStyles.Underline);
+
+    // Save PDF document
+    document.Save(dataDir + "SetFreeTextAnnotationFormatting_out.pdf");
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+### Strike Out Words using StrikeOutAnnotation {#strike-out-words-using-strikeoutannotation}
+
+Aspose.PDF for .NET allows you to add, delete and update annotations in PDF documents. One of the classes allows you to strike out annotations too. This is useful when you want to strike out one or more text fragments in a document. Annotations are held in a <a href="https://reference.aspose.com/pdf/net/aspose.pdf/page" target="_blank" rel="nofollow noopener noreferrer">Page</a> object's <a href="https://reference.aspose.com/pdf/net/aspose.pdf.annotations/annotationcollection" target="_blank" rel="nofollow noopener noreferrer">AnnotationCollection</a> collection. A class named <a href="https://reference.aspose.com/pdf/net/aspose.pdf.annotations/strikeoutannotation" target="_blank" rel="nofollow noopener noreferrer">StrikeOutAnnotation</a> can be used to add strike out annotations to a PDF document.
+
+To strike out a certain TextFragment:
+
+1. Search for a TextFragment in the PDF file.
+2. Get the TextFragment object's coordinates.
+3. Use the coordinates to instantiate a StrikeOutAnnotation object.
+
+The following code snippet shows how to search for a particular TextFragment and add a StrikeOutAnnotation to that object.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private void StrikeOutTextInDocument()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Annotations();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "pdf-sample.pdf"))
+    {
+        // Create TextFragment Absorber instance to search for a particular text fragment
+        var textFragmentAbsorber = new Aspose.Pdf.Text.TextFragmentAbsorber("Estoque");
+
+        // Iterate through pages of PDF document
+        foreach (var page in document.Pages)
+        {
+            // Accept the absorber for the current page
+            page.Accept(textFragmentAbsorber);
+        }
+
+        // Get the collection of absorbed text fragments
+        var textFragmentCollection = textFragmentAbsorber.TextFragments;
+
+        // Iterate through the collection of text fragments
+        foreach (Aspose.Pdf.Text.TextFragment textFragment in textFragmentCollection)
+        {
+            // Get rectangular dimensions of the TextFragment object
+            var rect = new Aspose.Pdf.Rectangle(
+                (float)textFragment.Position.XIndent,
+                (float)textFragment.Position.YIndent,
+                (float)textFragment.Position.XIndent + (float)textFragment.Rectangle.Width,
+                (float)textFragment.Position.YIndent + (float)textFragment.Rectangle.Height);
+
+            // Instantiate StrikeOut Annotation instance
+            var strikeOut = new Aspose.Pdf.Annotations.StrikeOutAnnotation(textFragment.Page, rect)
+            {
+                // Set opacity for annotation
+                Opacity = 0.80f,
+
+                // Set the color of annotation
+                Color = Aspose.Pdf.Color.Red
+            };
+
+            // Set the border for annotation instance
+            strikeOut.Border = new Aspose.Pdf.Annotations.Border(strikeOut);
+
+            // Add annotation to the annotations collection of the TextFragment's page
+            textFragment.Page.Annotations.Add(strikeOut);
+        }
+
+        // Save PDF document
+        document.Save(dataDir + "StrikeOutWords_out.pdf");
+    }
+}
+```
+
+## Delete All Annotations from Page of PDF File {#delete-all-annotations-from-page-of-pdf-file}
+
+A <a href="https://reference.aspose.com/pdf/net/aspose.pdf/page" target="_blank" rel="nofollow noopener noreferrer">Page</a> object's <a href="https://reference.aspose.com/pdf/net/aspose.pdf.annotations/annotationcollection" target="_blank" rel="nofollow noopener noreferrer">AnnotationCollection</a> collection contains all the annotations for that particular page. To delete all the annotations from a page, call the *Delete* method of the AnnotationCollection collection.
+
+The following code snippet shows you how to delete all the annotations from a particular page.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void DeleteAllAnnotationsFromPage()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Annotations();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "DeleteAllAnnotationsFromPage.pdf"))
+    {
+        // Delete all annotations from the first page
+        document.Pages[1].Annotations.Delete();
+
+        // Save PDF document
+        document.Save(dataDir + "DeleteAllAnnotationsFromPage_out.pdf");
+    }
+}
+```
+
+## Delete Particular Annotation from PDF File {#delete-particular-annotation-from-pdf-file}
+
+:::info
+You can check the quality of Aspose.PDF and get the results online at this link: <a href="https://products.aspose.app/pdf/annotation" target="_blank" rel="nofollow noopener noreferrer">products.aspose.app/pdf/annotation</a>
+:::
+
+Aspose.PDF allows you to remove a particular Annotation from a PDF file. This topic explains how.
+
+To delete a particular annotation from a PDF, call the <a href="https://reference.aspose.com/pdf/net/aspose.pdf.annotations.annotationcollection/delete/methods/1" target="_blank" rel="nofollow noopener noreferrer">AnnotationCollection collection's Delete method</a>. This collection belongs to the <a href="https://reference.aspose.com/pdf/net/aspose.pdf/page" target="_blank" rel="nofollow noopener noreferrer">Page</a> object. The Delete method requires the index of the annotation you want to delete. Then, save the updated PDF file. The following code snippet shows how to delete a particular annotation.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void DeleteParticularAnnotation()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Annotations();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "DeleteParticularAnnotation.pdf"))
+    {
+        // Delete a particular annotation by index (e.g., the first annotation on the first page)
+        document.Pages[1].Annotations.Delete(1);
+
+        // Save PDF document
+        document.Save(dataDir + "DeleteParticularAnnotation_out.pdf");
+    }
+}
+```
+
+## Get All Annotations from Page of PDF Document {#get-all-annotations-from-page-of-pdf-document}
+
+Aspose.PDF allows you to get annotations from an entire document, or from a given page. To get all annotations from the page in a PDF document, loop through the <a href="https://reference.aspose.com/pdf/net/aspose.pdf.annotations/annotationcollection" target="_blank" rel="nofollow noopener noreferrer">AnnotationCollection</a> collection of desired page resources. The following code snippet shows you how to get all the annotations of a page.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void GetAllAnnotationsFromPage()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Annotations();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "GetAllAnnotationsFromPage.pdf"))
+    {
+        // Loop through all the annotations on the first page
+        foreach (Aspose.Pdf.Annotations.MarkupAnnotation annotation in document.Pages[1].Annotations)
+        {
+            // Get annotation properties
+            Console.WriteLine("Title : {0} ", annotation.Title);
+            Console.WriteLine("Subject : {0} ", annotation.Subject);
+            Console.WriteLine("Contents : {0} ", annotation.Contents);
+        }
+    }
+}
+```
+
+Please note that to get all annotations from the whole PDF, you have to loop through the document's PageCollection Class collection before navigating through the AnnotationCollection class collection. You can get each annotation of the collection in a base annotation type called MarkupAnnotation Class and then show its properties.
+
+## Get Particular Annotation from PDF File {#get-particular-annotation-from-pdf-file}
+
+Annotations are associated with individual pages and stored in a <a href="https://reference.aspose.com/pdf/net/aspose.pdf/page" target="_blank" rel="nofollow noopener noreferrer">Page</a> object's <a href="https://reference.aspose.com/pdf/net/aspose.pdf.annotations/annotationcollection" target="_blank" rel="nofollow noopener noreferrer">AnnotationCollection</a> collection. To get a particular annotation, specify its index. This returns an <a href="https://reference.aspose.com/pdf/net/aspose.pdf.annotations/annotation" target="_blank" rel="nofollow noopener noreferrer">Annotation</a> object which needs to be cast to a particular annotation type, for example <a href="https://reference.aspose.com/pdf/net/aspose.pdf.annotations/textannotation" target="_blank" rel="nofollow noopener noreferrer">TextAnnotation</a>. The following code snippet shows how to get a particular annotation and its properties.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void GetParticularAnnotation()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Annotations();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "GetParticularAnnotation.pdf"))
+    {
+        // Get a particular annotation by index (e.g., the first annotation on the first page)
+        var textAnnotation = (Aspose.Pdf.Annotations.TextAnnotation)document.Pages[1].Annotations[1];
+
+        // Get annotation properties
+        Console.WriteLine("Title : {0} ", textAnnotation.Title);
+        Console.WriteLine("Subject : {0} ", textAnnotation.Subject);
+        Console.WriteLine("Contents : {0} ", textAnnotation.Contents);
+    }
+}
+```
+
+## Get Resource of Annotation {#get-resource-of-annotation}
+
+Aspose.PDF allows you to get a resource of annotation from an entire document, or from a given page. The following code snippet shows you how to get the resource of annotation as <a href="https://reference.aspose.com/pdf/net/aspose.pdf/filespecification" target="_blank" rel="nofollow noopener noreferrer">FileSpecification</a> object of input PDF file.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void AddAndGetResourceOfAnnotation()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Annotations();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "AddAnnotation.pdf"))
+    {
+        // Create a screen annotation with a SWF file
+        var sa = new Aspose.Pdf.Annotations.ScreenAnnotation(document.Pages[1], new Aspose.Pdf.Rectangle(100, 400, 300, 600), dataDir + "AddSwfFileAsAnnotation.swf");
+        document.Pages[1].Annotations.Add(sa);
+
+        // Save PDF document with the new annotation
+        document.Save(dataDir + "GetResourceOfAnnotation_out.pdf");
+
+        // Open the updated document
+        var document1 = new Aspose.Pdf.Document(dataDir + "GetResourceOfAnnotation_Out.pdf");
+
+        // Get the action of the annotation
+        var action = (document1.Pages[1].Annotations[1] as Aspose.Pdf.Annotations.ScreenAnnotation).Action as Aspose.Pdf.Annotations.RenditionAction;
+
+        // Get the rendition of the rendition action
+        var rendition = action.Rendition;
+
+        // Get the media clip
+        var clip = (rendition as Aspose.Pdf.Annotations.MediaRendition).MediaClip;
+        var data = (clip as Aspose.Pdf.Annotations.MediaClipData).Data;
+
+        // Read the media data
+        using (var ms = new MemoryStream())
+        {
+            byte[] buffer = new byte[1024];
+            int read = 0;
+
+            // Data of media are accessible in FileSpecification.Contents
+            using (var source = data.Contents)
+            {
+                while ((read = source.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    ms.Write(buffer, 0, read);
+                }
+            }
+
+            Console.WriteLine(rendition.Name);
+            Console.WriteLine(action.RenditionOperation);
+        }
+    }
+}
+```

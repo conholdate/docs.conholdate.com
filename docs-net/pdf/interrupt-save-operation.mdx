@@ -1,0 +1,240 @@
+---
+title: "Interrupt save operation hanging"
+sidebar_label: "Interrupt save operation hanging"
+sidebar_key: "net-pdf-interrupt-save-operation"
+sidebar_position: 100
+description: ""
+product: "pdf"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/pdf/net"
+source_path: "pdf/net/interrupt-save-operation.html"
+source_commit: ""
+source_sha256: "3beb9e3c56d24b7b64dbd2a2de8f4b63d8fb6ad9e5a89af4cf50edab108f1422"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/pdf/net/interrupt-save-operation/"
+source_snapshot_sha256: "525165db0c7509c33adfcad79d8dc1c5f5888675b04a3912530388e519599e50"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+Aspose.PDF for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+Unfortunately, there are situations where the application hangs during document saving and ceases to respond. This feature allows you to gracefully cancel long-running operations, such as saving large or complex PDF documents, preventing application freezes, and improving responsiveness. You'll find the relevant information to integrate this functionality into your applications. Note that this approach ensures that your application remains responsive even during resource-intensive operations.
+:::
+
+The 'InterruptMonitor' class provides the capability to interrupt the document saving process if it takes too long. (<a href="https://reference.aspose.com/pdf/net/aspose.pdf.multithreading/interruptmonitor/\" target="_blank" rel="nofollow noopener noreferrer">https://reference.aspose.com/pdf/net/aspose.pdf.multithreading/interruptmonitor/)</a>).
+
+The following code snippet also works with [Aspose.PDF.Drawing](/net/pdf/drawing/) library.
+
+## Using InterruptMonitor {#using-interruptmonitor}
+
+Let us highlight that the implementation involves several key steps:
+
+1. **`InterruptMonitor` Creation:** Instantiate an `InterruptMonitor` object. This object acts as a signal for thread interruption.
+
+2. **`ThreadLocalInstance` Assignment:** Before initiating the long-running Aspose.PDF operation, assign the `InterruptMonitor` instance to `InterruptMonitor.ThreadLocalInstance` for the current thread. This links the monitor to the thread.
+
+3. **Thread Execution:** Execute the code containing the Aspose.PDF operation (e.g., `Document.Save()`) within a separate thread.
+
+4. **Interruption Signal:** At a suitable point (e.g., after a timeout or user action), call `monitor.Interrupt()`. This signals the thread to terminate.
+
+5. **Exception Handling:** The `Document.Save()` method throws an `OperationCanceledException` if interrupted. Handle this exception using a `try-catch` block. Remember that proper exception handling is crucial for application stability.
+
+The following code snippet shows you how to use InterruptMonitor in PDF processing.
+
+<Tabs groupId="frameworks">
+
+<TabItem value="net-core-3-1" label=".NET Core 3.1" default>
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void InterruptMonitorExample()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+    // Path to a large text file 
+    var longTextFile = dataDir + "LongTextFile.txt";
+    var outputFile = dataDir + "interrupt_output.pdf";
+    var longText = File.ReadAllText(longTextFile);
+
+    // Create an InterruptMonitor instance
+    using (var monitor = new InterruptMonitor())
+    {
+        // Create a RowSpanWorker instance, passing the monitor
+        var worker = new RowSpanWorker(outputFile, monitor, longText);
+
+        // Start the worker thread
+        var thread = new Thread(worker.Work);
+        thread.Start();
+
+        // Simulate a timeout (adjust as needed)
+        Thread.Sleep(500);
+
+        // Interrupt the thread
+        monitor.Interrupt();
+
+        // Wait for the thread to finish
+        thread.Join();
+    }
+}
+
+// Helper class to demonstrate how to handle PDF generation with interruption support
+private class RowSpanWorker
+{
+    private readonly string outputPath;
+    private readonly string longText;
+    private readonly Aspose.Pdf.Multithreading.InterruptMonitor monitor;
+
+    public RowSpanWorker(string outputPath, Aspose.Pdf.Multithreading.InterruptMonitor monitor, string longText)
+    {
+        this.outputPath = outputPath;
+        this.monitor = monitor;
+        this.longText = longText;
+    }
+
+    public void Work()
+    {
+        // Create PDF document
+        using (var document  = new Aspose.Pdf.Document())
+        {
+            // Assign the InterruptMonitor to the current thread
+            Aspose.Pdf.Multithreading.InterruptMonitor.ThreadLocalInstance = this.monitor;
+            var page = document.Pages.Add();
+
+            var table = new Aspose.Pdf.Table
+            {
+                DefaultCellBorder = new Aspose.Pdf.BorderInfo(Aspose.Pdf.BorderSide.All, 0.1F)
+            };
+
+            var row0 = table.Rows.Add();
+
+            // Add a cell spanning multiple rows with long text
+            var cell00 = row0.Cells.Add(this.longText);
+            cell00.RowSpan = 2;
+            cell00.IsWordWrapped = true;
+            row0.Cells.Add("Ipsum Ipsum Ipsum");
+            row0.Cells.Add("Dolor Dolor Dolor");
+
+            var row1 = table.Rows.Add();
+            row1.Cells.Add("Ipsum Dolor");
+            row1.Cells.Add("Dolor Dolor");
+
+            page.Paragraphs.Add(table);
+
+            try
+            {
+                // Save the document (this operation can be interrupted)
+                document.Save(this.outputPath);
+            }
+            catch (OperationCanceledException ex)
+            {
+                Console.WriteLine($"Operation cancelled: {ex.Message}");
+            }
+        }
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="net-8" label=".NET 8">
+
+```csharp
+private static void InterruptMonitorExample()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+
+    // Construct a long text string to simulate a long process
+    var longTextFile = Path.Combine(dataDir, "LongTextFile.txt");
+    var outputFile = Path.Combine(dataDir, "interrupt_output.pdf");
+    var longText = File.ReadAllText(longTextFile);
+
+    // Create an InterruptMonitor instance
+    using Aspose.Pdf.Multithreading.InterruptMonitor monitor = new();
+
+    // Create a RowSpanWorker instance, passing the monitor
+    var worker = new RowSpanWorker(outputFile, monitor, longText);
+
+    // Start the worker thread
+    var thread = new Thread(worker.Work);
+    thread.Start();
+
+    // Simulate a timeout (adjust as needed)
+    Thread.Sleep(500);
+
+    // Interrupt the thread
+    monitor.Interrupt();
+
+    // Wait for the thread to finish
+    thread.Join();    
+}
+
+// Helper class to demonstrate how to handle PDF generation with interruption support
+public class RowSpanWorker
+{
+    private readonly string _outputFile;
+    private readonly InterruptMonitor _monitor;
+    private readonly string _longText;
+
+    public RowSpanWorker(string outputFile, Aspose.Pdf.Multithreading.InterruptMonitor monitor, string longText)
+    {
+        _outputFile = outputFile;
+        _monitor = monitor;
+        _longText = longText;
+    }
+
+    public void Work()
+    {
+        // Create PDF document
+        using Aspose.Pdf.Document document = new();
+
+        // Assign the InterruptMonitor to the current thread
+        Aspose.Pdf.Multithreading.InterruptMonitor.ThreadLocalInstance = this._monitor;
+        var page = document.Pages.Add();
+
+        var table = new Aspose.Pdf.Table
+        {
+            DefaultCellBorder = new Aspose.Pdf.BorderInfo(Aspose.Pdf.BorderSide.All, 0.1F)
+        };
+
+        var row0 = table.Rows.Add();
+
+        // Add a cell spanning multiple rows with long text
+        var cell00 = row0.Cells.Add(this._longText);
+        cell00.RowSpan = 2;
+        cell00.IsWordWrapped = true;
+        row0.Cells.Add("Ipsum Ipsum Ipsum Ipsum Ipsum Ipsum ");
+        row0.Cells.Add("Dolor Dolor Dolor Dolor Dolor Dolor ");
+
+        var row1 = table.Rows.Add();
+        row1.Cells.Add("IpsumDolor Dolor Dolor Dolor Dolor ");
+        row1.Cells.Add("DolorDolor Dolor Dolor Dolor Dolor ");
+
+        page.Paragraphs.Add(table);
+        try
+        {
+            // Save() operation supports interruption 
+            document.Save(this._outputFile);
+        }
+        catch (OperationCanceledException ex)
+        {
+            // Print operation cancel exception's message to console 
+            Console.WriteLine(ex.Message);
+        }
+    }
+}
+```
+
+</TabItem>
+
+</Tabs>

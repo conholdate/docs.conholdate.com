@@ -1,0 +1,264 @@
+---
+title: "How to add Smart Card signature to PDF"
+sidebar_label: "How to add Smart Card signature to PDF"
+sidebar_key: "net-pdf-sign-pdf-document-from-smart-card"
+sidebar_position: 100
+description: ""
+product: "pdf"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/pdf/net"
+source_path: "pdf/net/sign-pdf-document-from-smart-card.html"
+source_commit: ""
+source_sha256: "b7c14af702e732d0e9805604538ae3cafdfdd10bc4879e213a735bb7b878e8d1"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/pdf/net/sign-pdf-document-from-smart-card/"
+source_snapshot_sha256: "aa44358c92e373e58b9ce80fb40eafcc8f411629b4ba4356017c18f855ba8a98"
+---
+
+:::info
+Aspose.PDF for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+Aspose.PDF for .NET offers the functionality to add digital signatures from a key store location. You can apply the signature by accepting the certificate provided by the certificate store, smart card or <a href="https://whatis.techtarget.com/definition/personal-identity-verification-PIV-card" target="_blank" rel="nofollow noopener noreferrer">PIV card</a> connected to the system at run-time.
+
+The following code snippet also work with [Aspose.PDF.Drawing](/net/pdf/drawing/) library.
+
+Following are the code snippets to sign a PDF document from a smart card:
+
+## Sign With Smart Card Using Signature Field {#sign-with-smart-card-using-signature-field}
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void GetSignatureInfo()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_SecuritySignatures();
+
+    // Open a document stream
+    using (var fs = new FileStream(dataDir + "blank.pdf", FileMode.Open, FileAccess.ReadWrite))
+    {
+        // Open PDF document from stream
+        using (var document = new Aspose.Pdf.Document(fs))
+        {
+            // Create a signature field
+            var field1 = new Aspose.Pdf.Forms.SignatureField(document.Pages[1], new Aspose.Pdf.Rectangle(100, 400, 10, 10));
+
+            // Sign with certificate selection in the windows certificate store
+            var store = new X509Store(StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly);
+            
+            // Manually chose the certificate in the store
+            var sel = X509Certificate2UI.SelectFromCollection(store.Certificates, null, null, X509SelectionFlag.SingleSelection);
+
+            // Set an external signature settings
+            var externalSignature = new Aspose.Pdf.Forms.ExternalSignature(sel[0])
+            {
+                Authority = "Me",
+                Reason = "Reason",
+                ContactInfo = "Contact"
+            };
+            // Set a name of signature field
+            field1.PartialName = "sig1";
+            // Add the signature field to the document
+            document.Form.Add(field1, 1);
+            // Sign the document
+            field1.Sign(externalSignature);
+            // Save PDF document
+            document.Save(dataDir + "externalSignature1_out.pdf");
+        }
+    }
+}
+
+private static void VerifyExternalSignature()
+{    
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_SecuritySignatures();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "externalSignature1.pdf"))
+    {
+        using (var pdfSign = new Aspose.Pdf.Facades.PdfFileSignature(document))
+        {
+            var sigNames = pdfSign.GetSignatureNames();
+            for (int index = 0; index <= sigNames.Count - 1; index++)
+            {
+                if (!pdfSign.VerifySignature(sigNames[index]))
+                {
+                    throw new Exception("Not verified");
+                }
+            }
+        }
+    }
+}
+```
+
+## Sign With Smart Card Using PDF File Signature {#sign-with-smart-card-using-pdf-file-signature}
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private void SignWithSmartCard()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_SecuritySignatures();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "blank.pdf"))
+    {
+        using (var pdfSign = new Aspose.Pdf.Facades.PdfFileSignature())
+        {   
+            // Bind PDF document
+            pdfSign.BindPdf(document);
+
+            // Sign with certificate selection in the windows certificate store
+            var store = new X509Store(StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly);
+            // Manually chose the certificate in the store
+            var sel = X509Certificate2UI.SelectFromCollection(store.Certificates, null, null, X509SelectionFlag.SingleSelection);
+            
+            // Set an external signature settings
+            var externalSignature = new Aspose.Pdf.Forms.ExternalSignature(sel[0]);
+            pdfSign.SignatureAppearance = dataDir + "demo.png";
+            // Sign the document
+            pdfSign.Sign(1, "Reason", "Contact", "Location", true, new System.Drawing.Rectangle(100, 100, 200, 200), externalSignature);
+            // Save PDF document
+            pdfSign.Save(dataDir + "externalSignature2_out.pdf");
+        }
+    }
+}
+
+private static void VerifyExternalSignature()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_SecuritySignatures();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "externalSignature1.pdf"))
+    {
+        using (var pdfSign = new Aspose.Pdf.Facades.PdfFileSignature(document))
+        {
+            var sigNames = pdfSign.GetSignatureNames();
+            for (int index = 0; index <= sigNames.Count - 1; index++)
+            {
+                if (!pdfSign.VerifySignature(sigNames[index]))
+                {
+                    throw new Exception("Not verified");
+                }
+            }
+        }
+    }
+}
+```
+
+You can use the ExternalSignature class for an external signing service. ExternalSignature creates PKCS7 and PKCS7 detached signatures. You can pass the desired hashing algorithm to the ExternalSignature constructor. Note that non-detached signatures can only use SHA1. It will be chosen automatically if you do not explicitly specify the hashing algorithm. For non-detached signatures, it will be SHA1; for detached, it will be SHA-256 for an RSA key. For an ECDSA key, the hash size depends on the key size.
+
+The ExternalSignature constructor also accepts a key certificate (it can be in Base64 format). You can pass a certificate containing a private key and a certificate containing only a public key. In either case, the signature will be performed externally in the CustomSignHash delegate code, but the external algorithm must create a signature corresponding to the key of the passed certificate. The certificate is needed to generate the signed document correctly. ECDSA signature does not support SHA-1.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void SignWithExternalService()
+{    
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_SecuritySignatures();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "blank.pdf"))
+    {
+        using (var sign = new Aspose.Pdf.Facades.PdfFileSignature())
+        {
+            // Bind PDF document
+            sign.BindPdf(document);
+
+            // Get public certificate
+            X509Certificate2 signerCert = GetPublicCertificate();
+
+            // Set a certificate and a digest algorithm
+            var signature = new Aspose.Pdf.Forms.ExternalSignature(signerCert, Aspose.Pdf.DigestHashAlgorithm.Sha256);
+
+            // Define a delegate to external sign
+            Aspose.Pdf.Forms.SignHash customSignHash = delegate(byte[] signableHash, Aspose.Pdf.DigestHashAlgorithm digestHashAlgorithm)
+            {
+                return CallExternalSignatureService(signableHash, digestHashAlgorithm);
+            };
+            // Set a sign hash
+            signature.CustomSignHash = customSignHash;
+            sign.Sign(1, "reason", "cont", "loc", false, new System.Drawing.Rectangle(0, 0, 500, 500), signature);
+            // Save PDF document
+            sign.Save(dataDir + "ExternalSignature_out.pdf");
+        }
+    }
+}
+
+private static X509Certificate2 GetPublicCertificate()
+{
+    // Your code to get a public certificate. The certificate can be supplied by a third-party service or a smart card
+}
+
+private static byte[] CallExternalSignatureService(byte[] hash, Aspose.Pdf.DigestHashAlgorithm digestHashAlgorithm)
+{
+    // Call a third-party service that provides a digital signature service
+    // The method must return signed data
+    // The digestHashAlgorithm argument points to the digest algorithm that was applied to the data to produce the value of the hash argument
+}
+```
+
+To create a signature, a preliminary estimate of the length of the future digital signature is required. If you use SignHash to create a digital signature, you may find that the delegate is called twice during the document saving process. If for some reason you cannot afford two calls, for example, if a PIN code request occurs during the call, you can use the **AvoidEstimatingSignatureLength** option for the PKCS1, PKCS7, PKCS7Detached, and ExternalSignature classes. Setting this option avoids the signature length estimation step by setting a fixed value as the expected length - **DefaultSignatureLength**. The default value for the DefaultSignatureLength property is 3000 bytes. The AvoidEstimatingSignatureLength option only works if the SignHash delegate is set in the CustomSignHash property. If the resulting signature length exceeds the expected length specified by the DefaultSignatureLength property, you will receive a **SignatureLengthMismatchException** indicating the actual length. You can adjust the value of the DefaultSignatureLength parameter at your discretion.
+
+For **ExternalSignature**, the AvoidEstimatingSignatureLength option can be used even if CustomSignHash is not used.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void SignWithExternalService()
+{    
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_SecuritySignatures();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "blank.pdf"))
+    {
+        using (var sign = new Aspose.Pdf.Facades.PdfFileSignature())
+        {
+            // Bind PDF document
+            sign.BindPdf(document);
+
+            // Get public certificate
+            X509Certificate2 signerCert = GetPublicCertificate();
+
+            // Set a certificate and a digest algorithm
+            var signature = new Aspose.Pdf.Forms.ExternalSignature(signerCert, Aspose.Pdf.DigestHashAlgorithm.Sha256);
+
+            // Define a delegate to external sign
+            Aspose.Pdf.Forms.SignHash customSignHash = delegate(byte[] signableHash, Aspose.Pdf.DigestHashAlgorithm digestHashAlgorithm)
+            {
+                return CallExternalSignatureService(signableHash, digestHashAlgorithm);
+            };
+            // Set a sign hash
+            signature.CustomSignHash = customSignHash;
+
+            // Set an option to avoiding twice SignHash calling.
+            signature.AvoidEstimatingSignatureLength = true;
+            signature.DefaultSignatureLength = 3500;
+
+            sign.Sign(1, "reason", "cont", "loc", false, new System.Drawing.Rectangle(0, 0, 500, 500), signature);
+            // Save PDF document
+            sign.Save(dataDir + "ExternalSignature_out.pdf");
+        }
+    }
+}
+
+private static X509Certificate2 GetPublicCertificate()
+{
+    // Your code to get a public certificate. The certificate can be supplied by a third-party service or a smart card
+}
+
+private static byte[] CallExternalSignatureService(byte[] hash, Aspose.Pdf.DigestHashAlgorithm digestHashAlgorithm)
+{
+    // Call a third-party service that provides a digital signature service
+    // The method must return signed data
+    // The digestHashAlgorithm argument points to the digest algorithm that was applied to the data to produce the value of the hash argument
+}
+```

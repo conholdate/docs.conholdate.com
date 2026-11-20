@@ -1,0 +1,145 @@
+---
+title: "Extract Paragraph from PDF C#"
+sidebar_label: "Extract Paragraph from PDF C#"
+sidebar_key: "net-pdf-extract-paragraph-from-pdf"
+sidebar_position: 100
+description: ""
+product: "pdf"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/pdf/net"
+source_path: "pdf/net/extract-paragraph-from-pdf.html"
+source_commit: ""
+source_sha256: "66405f4023f9ced6db0bdd9df05cc6c4e3ee87764f342dd3a9c4d1e351b7fefe"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/pdf/net/extract-paragraph-from-pdf/"
+source_snapshot_sha256: "130ab84499a00bc6f64238470e379c83d26ee3a9f8c75a2d0ea3b1d448a9d0fa"
+---
+
+:::info
+Aspose.PDF for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Extract Text from PDF document in Paragraphs form {#extract-text-from-pdf-document-in-paragraphs-form}
+
+We can get text from a PDF document by searching a particular text (using "plain text" or "regular expressions") from a single page or whole document, or we can get the complete text of a single page, range of pages or complete document. However, in some cases, you require to extract paragraphs from a PDF document or text in the form of Paragraphs. We have implemented functionality for searching sections and paragraphs in the text of PDF document pages. We have introduced ParagraphAbsorber Class (like TextFragmentAbsorber and TextAbsorber), which can be used to extract paragraphs from PDF documents. There are two following ways in which you can use ParagraphAbsorber:
+
+**By drawing the border of sections and paragraphs of text on PDF page:**
+
+The following code snippet also work with [Aspose.PDF.Drawing](/net/pdf/drawing/) library.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void ExtractParagraphWithDrawingTheBorder()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "DocumentForExtract.pdf"))
+    {
+        var page = document.Pages[2];
+
+        var absorber = new Aspose.Pdf.Text.ParagraphAbsorber();
+        absorber.Visit(page);
+
+        Aspose.Pdf.Text.PageMarkup markup = absorber.PageMarkups[0];
+
+        foreach (Aspose.Pdf.Text.MarkupSection section in markup.Sections)
+        {
+            DrawRectangleOnPage(section.Rectangle, page);
+            foreach (Aspose.Pdf.Text.MarkupParagraph paragraph in section.Paragraphs)
+            {
+                DrawPolygonOnPage(paragraph.Points, page);
+            }
+        }
+
+        // Save PDF document
+        document.Save(dataDir + "DocumentWithBorder_out.pdf");
+    }
+}
+
+private static void DrawRectangleOnPage(Aspose.Pdf.Rectangle rectangle, Aspose.Pdf.Page page)
+{
+    page.Contents.Add(new Aspose.Pdf.Operators.GSave());
+    page.Contents.Add(new Aspose.Pdf.Operators.ConcatenateMatrix(1, 0, 0, 1, 0, 0));
+    page.Contents.Add(new Aspose.Pdf.Operators.SetRGBColorStroke(0, 1, 0));
+    page.Contents.Add(new Aspose.Pdf.Operators.SetLineWidth(2));
+    page.Contents.Add(
+        new Aspose.Pdf.Operators.Re(rectangle.LLX,
+            rectangle.LLY,
+            rectangle.Width,
+            rectangle.Height));
+    page.Contents.Add(new Aspose.Pdf.Operators.ClosePathStroke());
+    page.Contents.Add(new Aspose.Pdf.Operators.GRestore());
+}
+
+private static void DrawPolygonOnPage(Aspose.Pdf.Point[] polygon, Aspose.Pdf.Page page)
+{
+    page.Contents.Add(new Aspose.Pdf.Operators.GSave());
+    page.Contents.Add(new Aspose.Pdf.Operators.ConcatenateMatrix(1, 0, 0, 1, 0, 0));
+    page.Contents.Add(new Aspose.Pdf.Operators.SetRGBColorStroke(0, 0, 1));
+    page.Contents.Add(new Aspose.Pdf.Operators.SetLineWidth(1));
+    page.Contents.Add(new Aspose.Pdf.Operators.MoveTo(polygon[0].X, polygon[0].Y));
+    for (int i = 1; i < polygon.Length; i++)
+    {
+        page.Contents.Add(new Aspose.Pdf.Operators.LineTo(polygon[i].X, polygon[i].Y));
+    }
+    page.Contents.Add(new Aspose.Pdf.Operators.LineTo(polygon[0].X, polygon[0].Y));
+    page.Contents.Add(new Aspose.Pdf.Operators.ClosePathStroke());
+    page.Contents.Add(new Aspose.Pdf.Operators.GRestore());
+}
+```
+
+**By iterating through paragraphs collection and get the text of them:**
+
+The following code snippet also work with [Aspose.PDF.Drawing](/net/pdf/drawing/) library.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void ExtractParagraphByIteratingThroughParagraphsCollection()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "DocumentForExtract.pdf"))
+    {
+        // Instantiate ParagraphAbsorber
+        var absorber = new Aspose.Pdf.Text.ParagraphAbsorber();
+        absorber.Visit(document);
+
+        foreach (Aspose.Pdf.Text.PageMarkup markup in absorber.PageMarkups)
+        {
+            int i = 1;
+            foreach (Aspose.Pdf.Text.MarkupSection section in markup.Sections)
+            {
+                int j = 1;
+                foreach (Aspose.Pdf.Text.MarkupParagraph paragraph in section.Paragraphs)
+                {
+                    StringBuilder paragraphText = new StringBuilder();
+                    foreach (List<Aspose.Pdf.Text.TextFragment> line in paragraph.Lines)
+                    {
+                        foreach (Aspose.Pdf.Text.TextFragment fragment in line)
+                        {
+                            paragraphText.Append(fragment.Text);
+                        }
+                        paragraphText.Append("\r\n");
+                    }
+                    paragraphText.Append("\r\n");
+
+                    Console.WriteLine("Paragraph {0} of section {1} on page {2}:", j, i, markup.Number);
+                    Console.WriteLine(paragraphText.ToString());
+
+                    j++;
+                }
+                i++;
+            }
+        }
+    }
+}
+```

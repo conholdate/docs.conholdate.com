@@ -1,0 +1,176 @@
+---
+title: "PDF Tooltip using C#"
+sidebar_label: "PDF Tooltip using C#"
+sidebar_key: "net-pdf-pdf-tooltip"
+sidebar_position: 100
+description: ""
+product: "pdf"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/pdf/net"
+source_path: "pdf/net/pdf-tooltip.html"
+source_commit: ""
+source_sha256: "99dacf70b80f32ad8826635ce1d9e6b5d83225a5e2496f00f9001d3efa7e8a7c"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/pdf/net/pdf-tooltip/"
+source_snapshot_sha256: "b1e1b73059eeff874584edf2f299dbee30649dbf91384f94f42595309e8f85e3"
+---
+
+:::info
+Aspose.PDF for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+The following code snippet also work with [Aspose.PDF.Drawing](/net/pdf/drawing/) library.
+
+## Add Tooltip to Searched Text by adding Invisible Button {#add-tooltip-to-searched-text-by-adding-invisible-button}
+
+It is often required to add some details for a phrase or specific word as a tooltip in the PDF document so that it can popup when the user hovers the mouse cursor over the text. Aspose.PDF for .NET provides this feature to create tooltips by adding an invisible button over the searched text. The following code snippet will show you the way to achieve this functionality:
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void AddTooltipToSearchedText()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+
+    // Create PDF document
+    using (var document = new Aspose.Pdf.Document())
+    {
+        document.Pages.Add().Paragraphs.Add(new Aspose.Pdf.Text.TextFragment("Move the mouse cursor here to display a tooltip"));
+        document.Pages[1].Paragraphs.Add(new Aspose.Pdf.Text.TextFragment("Move the mouse cursor here to display a very long tooltip"));
+        // Save PDF document
+        document.Save(dataDir + "Tooltip_out.pdf");
+    }
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "Tooltip_out.pdf"))
+    {
+        // Create TextAbsorber object to find all the phrases matching the regular expression
+        var absorber = new Aspose.Pdf.Text.TextFragmentAbsorber("Move the mouse cursor here to display a tooltip");
+        // Accept the absorber for the document pages
+        document.Pages.Accept(absorber);
+        // Get the extracted text fragments
+        var textFragments = absorber.TextFragments;
+
+        // Loop through the fragments
+        foreach (var fragment in textFragments)
+        {
+            // Create invisible button on text fragment position
+            var field = new Aspose.Pdf.Forms.ButtonField(fragment.Page, fragment.Rectangle);
+            // AlternateName value will be displayed as tooltip by a viewer application
+            field.AlternateName = "Tooltip for text.";
+            // Add button field to the document
+            document.Form.Add(field);
+        }
+
+        absorber = new Aspose.Pdf.Text.TextFragmentAbsorber("Move the mouse cursor here to display a very long tooltip");
+        document.Pages.Accept(absorber);
+        textFragments = absorber.TextFragments;
+
+        foreach (var fragment in textFragments)
+        {
+            var field = new Aspose.Pdf.Forms.ButtonField(fragment.Page, fragment.Rectangle);
+            // Set very long text
+            field.AlternateName = "Lorem ipsum dolor sit amet, consectetur adipiscing elit," +
+                                    " sed do eiusmod tempor incididunt ut labore et dolore magna" +
+                                    " aliqua. Ut enim ad minim veniam, quis nostrud exercitation" +
+                                    " ullamco laboris nisi ut aliquip ex ea commodo consequat." +
+                                    " Duis aute irure dolor in reprehenderit in voluptate velit" +
+                                    " esse cillum dolore eu fugiat nulla pariatur. Excepteur sint" +
+                                    " occaecat cupidatat non proident, sunt in culpa qui officia" +
+                                    " deserunt mollit anim id est laborum.";
+            document.Form.Add(field);
+        }
+
+        // Save PDF document
+        document.Save(dataDir + "Tooltip_out.pdf");
+    }
+}
+```
+
+:::info
+Concerning to the length of the tooltip, the tooltip text is contained in the PDF document as PDF string type, outside of the content stream. There is no effective restriction on such strings in PDF files (See PDF Reference Appendix C.). However, a conforming reader (e.g. Adobe Acrobat) running on a particular processor and in a particular operating environment does have such a limit. Please refer to your PDF reader application documentation.
+:::
+
+## Create a Hidden Text Block and Show it on Mouse Over {#create-a-hidden-text-block-and-show-it-on-mouse-over}
+
+In Aspose.PDF, a feature to hide actions is implemented by which it is possible to show/hide text box field (or any other type of annotation) on mouse enter/exit over some invisible button. For this purpose, Aspose.Pdf.Annotations.HideAction Class is used to assign the action of hide/show to the text block. Please use the following code snippet to Show/Hide a Text Block on Mouse Enter/Exit.
+
+Please also take into account that PDF actions in the documents work fine in the conforming readers (e.g. Adobe Reader) but no warranties for other PDF readers (e.g. web browser plugins). We have provided a brief investigation and found:
+
+- All implementations of the hide action in PDF documents work fine in Internet Explorer v.11.0.
+- All implementations of the hide action also work in Opera v.12.14, but we spot some response delay at the first opening of the document.
+- Only implementation using HideAction constructor accepting field name works if Google Chrome v.61.0 browses the document; Please use corresponding constructors if browsing in the Google Chrome is significant:
+
+> buttonField.Actions.OnEnter = new HideAction(floatingField.FullName, false); buttonField.Actions.OnExit = new HideAction(floatingField.FullName);
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void CreateHiddenTextBlock()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+
+    // Create PDF document
+    using (var document = new Aspose.Pdf.Document())
+    {
+        // Add paragraph with text
+        document.Pages.Add().Paragraphs.Add(new Aspose.Pdf.Text.TextFragment("Move the mouse cursor here to display floating text"));
+        // Save PDF document
+        document.Save(dataDir + "TextBlock_HideShow_MouseOverOut_out.pdf");
+    }
+
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document(dataDir + "TextBlock_HideShow_MouseOverOut_out.pdf"))
+    {
+        // Create TextAbsorber object to find all the phrases matching the regular expression
+        var absorber = new Aspose.Pdf.Text.TextFragmentAbsorber("Move the mouse cursor here to display floating text");
+        // Accept the absorber for the document pages
+        document.Pages.Accept(absorber);
+        // Get the first extracted text fragment
+        var textFragments = absorber.TextFragments;
+        var fragment = textFragments[1];
+
+        // Create hidden text field for floating text in the specified rectangle of the page
+        var floatingField = new Aspose.Pdf.Forms.TextBoxField(fragment.Page, new Aspose.Pdf.Rectangle(100, 700, 220, 740));
+        // Set text to be displayed as field value
+        floatingField.Value = "This is the \"floating text field\".";
+        // We recommend to make field 'readonly' for this scenario
+        floatingField.ReadOnly = true;
+        // Set 'hidden' flag to make field invisible on document opening
+        floatingField.Flags |= Aspose.Pdf.Annotations.AnnotationFlags.Hidden;
+
+        // Setting a unique field name isn't necessary but allowed
+        floatingField.PartialName = "FloatingField_1";
+
+        // Setting characteristics of field appearance isn't necessary but makes it better
+        floatingField.DefaultAppearance = new Aspose.Pdf.Annotations.DefaultAppearance("Helv", 10, System.Drawing.Color.Blue);
+        floatingField.Characteristics.Background = System.Drawing.Color.LightBlue;
+        floatingField.Characteristics.Border = System.Drawing.Color.DarkBlue;
+        floatingField.Border = new Aspose.Pdf.Annotations.Border(floatingField);
+        floatingField.Border.Width = 1;
+        floatingField.Multiline = true;
+
+        // Add text field to the document
+        document.Form.Add(floatingField);
+
+        // Create invisible button on text fragment position
+        var buttonField = new Aspose.Pdf.Forms.ButtonField(fragment.Page, fragment.Rectangle);
+        // Create new hide action for specified field (annotation) and invisibility flag
+        // (You also may reffer floating field by the name if you specified it above)
+        // Add actions on mouse enter/exit at the invisible button field
+        buttonField.Actions.OnEnter = new Aspose.Pdf.Annotations.HideAction(floatingField, false);
+        buttonField.Actions.OnExit = new Aspose.Pdf.Annotations.HideAction(floatingField);
+
+        // Add button field to the document
+        document.Form.Add(buttonField);
+
+        // Save PDF document
+        document.Save(dataDir + "CreateHiddenTextBlock_out.pdf");
+    }
+}
+```

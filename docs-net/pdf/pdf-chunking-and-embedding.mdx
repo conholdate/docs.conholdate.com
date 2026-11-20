@@ -1,0 +1,501 @@
+---
+title: "PDF Chunking and Embedding"
+sidebar_label: "PDF Chunking and Embedding"
+sidebar_key: "net-pdf-pdf-chunking-and-embedding"
+sidebar_position: 100
+description: ""
+product: "pdf"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/pdf/net"
+source_path: "pdf/net/pdf-chunking-and-embedding.html"
+source_commit: ""
+source_sha256: "03164ddb0e6eaac4ea8a1ad2e9c5aeefd6e7bb989b6271833e4ddd6fc18466cb"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/pdf/net/pdf-chunking-and-embedding/"
+source_snapshot_sha256: "af8b87b18a0b90a14045f75841178410bc137138b9644513910d7f5da146c04f"
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+:::info
+Aspose.PDF for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "./_remote-markdown.css";
+
+## Overview {#overview}
+
+**Aspose.PDF PDF Chunking and Embedding** enables splitting PDF documents into semantic text chunks and generating vector embeddings for use in Retrieval-Augmented Generation (RAG) pipelines, semantic search, and other AI-driven scenarios.
+
+The API provides two entry points as extension methods on `Document`:
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Method
+
+</th>
+<th>
+
+Description
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`GetChunksAsync`
+
+</td>
+<td>
+
+Converts a PDF to Markdown and splits it into `DocumentChunk` objects.
+
+</td>
+</tr>
+<tr>
+<td>
+
+`IngestAsync`
+
+</td>
+<td>
+
+Full pipeline: chunks the document, generates embeddings, and upserts records into a vector store.
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+## Prerequisites {#prerequisites}
+
+- Aspose.PDF for .NET
+- `Microsoft.Extensions.AI` - for `IEmbeddingGenerator<string, Embedding<float>>`
+- `Microsoft.Extensions.VectorData` - for `VectorStoreCollection<string, DocumentChunk>`
+- An embedding provider (e.g. OpenAI, Azure OpenAI, or any `IEmbeddingGenerator` implementation)
+- A vector store (e.g. Azure AI Search, Qdrant, in-memory, or any `VectorStoreCollection` implementation)
+
+## Chunking Options {#chunking-options}
+
+Configure chunking behavior via `ChunkingOptions`:
+
+```csharp
+var options = new Aspose.Pdf.AI.ChunkingOptions();
+
+var customOptions = new Aspose.Pdf.AI.ChunkingOptions
+{
+    MaxChunkSize = 512,
+    OverlapSize  = 50
+};
+```
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Property
+
+</th>
+<th>
+
+Default
+
+</th>
+<th>
+
+Range
+
+</th>
+<th>
+
+Description
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`MaxChunkSize`
+
+</td>
+<td>
+
+`1000`
+
+</td>
+<td>
+
+50-10 000
+
+</td>
+<td>
+
+Maximum number of tokens per chunk.
+
+</td>
+</tr>
+<tr>
+<td>
+
+`OverlapSize`
+
+</td>
+<td>
+
+`100`
+
+</td>
+<td>
+
+0-(MaxChunkSize−1)
+
+</td>
+<td>
+
+Number of overlapping tokens between consecutive chunks, preserving context at boundaries.
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+## Getting Chunks {#getting-chunks}
+
+Use `GetChunksAsync` when you only need the text chunks - for example, to inspect them, post-process them, or feed them into a custom embedding pipeline.
+
+<Tabs groupId="frameworks">
+
+<TabItem value="net-core-3-1" label=".NET Core 3.1" default>
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static async Task GetDocumentChunks()
+{
+    var dataDir = RunExamples.GetDataDir_AsposePdf_AI();
+
+    using (var document = new Aspose.Pdf.Document(dataDir + "RagGuide.pdf"))
+    {
+        var options = new Aspose.Pdf.AI.ChunkingOptions { MaxChunkSize = 512, OverlapSize = 50 };
+
+        var chunks = await document.GetChunksAsync(options, sourceId: "my-document");
+
+        foreach (var chunk in chunks)
+        {
+            Console.WriteLine(string.Format("Chunk {0}: {1}", chunk.Index, chunk.Id));
+            Console.WriteLine(chunk.Content);
+        }
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="net-8" label=".NET 8">
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static async Task GetDocumentChunks()
+{
+    var dataDir = RunExamples.GetDataDir_AsposePdf_AI();
+
+    using var document = new Aspose.Pdf.Document(dataDir + "RagGuide.pdf");
+
+    var options = new Aspose.Pdf.AI.ChunkingOptions { MaxChunkSize = 512, OverlapSize = 50 };
+
+    var chunks = await document.GetChunksAsync(options, sourceId: "my-document");
+
+    foreach (var chunk in chunks)
+    {
+        Console.WriteLine(string.Format("Chunk {0}: {1}", chunk.Index, chunk.Id));
+        Console.WriteLine(chunk.Content);
+    }
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+## Chunking, Embedding, and Vector Store Ingestion {#chunking-embedding-and-vector-store-ingestion}
+
+Use `IngestAsync` to run the complete pipeline in a single call: the document is chunked, embeddings are generated for each chunk, and all records are upserted into the vector store.
+
+Because the API is built on `Microsoft.Extensions.AI` abstractions, any embedding provider and any vector store can be used interchangeably.
+
+### OpenAI {#openai}
+
+<Tabs groupId="frameworks">
+
+<TabItem value="net-core-3-1" label=".NET Core 3.1" default>
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static async Task IngestDocument()
+{
+    var dataDir = RunExamples.GetDataDir_AsposePdf_AI();
+
+    var embeddingGenerator = new OpenAIClient(ApiKey)
+        .AsEmbeddingGenerator("text-embedding-ada-002");
+
+    var collection = new InMemoryVectorStore()
+        .GetCollection<string, Aspose.Pdf.AI.DocumentChunk>("pdf-chunks");
+
+    await collection.EnsureCollectionExistsAsync();
+
+    using (var document = new Aspose.Pdf.Document(dataDir + "RagGuide.pdf"))
+    {
+        var options = new Aspose.Pdf.AI.ChunkingOptions { MaxChunkSize = 512, OverlapSize = 50 };
+
+        await document.IngestAsync(options, "my-document", embeddingGenerator, collection);
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="net-8" label=".NET 8">
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static async Task IngestDocument()
+{
+    var dataDir = RunExamples.GetDataDir_AsposePdf_AI();
+
+    var embeddingGenerator = new OpenAIClient(ApiKey)
+        .AsEmbeddingGenerator("text-embedding-ada-002");
+
+    var collection = new InMemoryVectorStore()
+        .GetCollection<string, Aspose.Pdf.AI.DocumentChunk>("pdf-chunks");
+
+    await collection.EnsureCollectionExistsAsync();
+
+    using var document = new Aspose.Pdf.Document(dataDir + "RagGuide.pdf");
+
+    var options = new Aspose.Pdf.AI.ChunkingOptions { MaxChunkSize = 512, OverlapSize = 50 };
+
+    await document.IngestAsync(options, "my-document", embeddingGenerator, collection);
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+### Azure OpenAI and Azure AI Search {#azure-openai-and-azure-ai-search}
+
+<Tabs groupId="frameworks">
+
+<TabItem value="net-core-3-1" label=".NET Core 3.1" default>
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static async Task IngestDocument()
+{
+    var dataDir = RunExamples.GetDataDir_AsposePdf_AI();
+
+    var embeddingGenerator = new AzureOpenAIClient(new Uri(AzureOpenAIEndpoint), new AzureKeyCredential(AzureOpenAIKey))
+        .AsEmbeddingGenerator("text-embedding-ada-002");
+
+    var searchClient = new SearchIndexClient(new Uri(AzureSearchEndpoint), new AzureKeyCredential(AzureSearchKey));
+    var collection = new AzureAISearchVectorStore(searchClient)
+        .GetCollection<string, Aspose.Pdf.AI.DocumentChunk>("pdf-chunks");
+
+    await collection.EnsureCollectionExistsAsync();
+
+    using (var document = new Aspose.Pdf.Document(dataDir + "RagGuide.pdf"))
+    {
+        var options = new Aspose.Pdf.AI.ChunkingOptions { MaxChunkSize = 512, OverlapSize = 50 };
+
+        await document.IngestAsync(options, "my-document", embeddingGenerator, collection);
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="net-8" label=".NET 8">
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static async Task IngestDocument()
+{
+    var dataDir = RunExamples.GetDataDir_AsposePdf_AI();
+
+    var embeddingGenerator = new AzureOpenAIClient(new Uri(AzureOpenAIEndpoint), new AzureKeyCredential(AzureOpenAIKey))
+        .AsEmbeddingGenerator("text-embedding-ada-002");
+
+    var searchClient = new SearchIndexClient(new Uri(AzureSearchEndpoint), new AzureKeyCredential(AzureSearchKey));
+    var collection = new AzureAISearchVectorStore(searchClient)
+        .GetCollection<string, Aspose.Pdf.AI.DocumentChunk>("pdf-chunks");
+
+    await collection.EnsureCollectionExistsAsync();
+
+    using var document = new Aspose.Pdf.Document(dataDir + "RagGuide.pdf");
+
+    var options = new Aspose.Pdf.AI.ChunkingOptions { MaxChunkSize = 512, OverlapSize = 50 };
+
+    await document.IngestAsync(options, "my-document", embeddingGenerator, collection);
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+## DocumentChunk Reference {#documentchunk-reference}
+
+Each `DocumentChunk` returned by `GetChunksAsync` or stored by `IngestAsync` has the following properties:
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Property
+
+</th>
+<th>
+
+Type
+
+</th>
+<th>
+
+Description
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`Id`
+
+</td>
+<td>
+
+`string`
+
+</td>
+<td>
+
+Unique identifier in the format `{sourceId}_chunk_{index}`.
+
+</td>
+</tr>
+<tr>
+<td>
+
+`Index`
+
+</td>
+<td>
+
+`int`
+
+</td>
+<td>
+
+Zero-based position of this chunk in the document.
+
+</td>
+</tr>
+<tr>
+<td>
+
+`Content`
+
+</td>
+<td>
+
+`string`
+
+</td>
+<td>
+
+The text content of the chunk. Stored as full-text-search data in the vector store.
+
+</td>
+</tr>
+<tr>
+<td>
+
+`Context`
+
+</td>
+<td>
+
+`string`
+
+</td>
+<td>
+
+Structural context extracted from the document (e.g., heading path). Helps RAG pipelines understand where in the document the chunk came from.
+
+</td>
+</tr>
+<tr>
+<td>
+
+`Embedding`
+
+</td>
+<td>
+
+`ReadOnlyMemory<float>?`
+
+</td>
+<td>
+
+Vector embedding, populated by `IngestAsync`. `null` when using `GetChunksAsync` alone.
+
+</td>
+</tr>
+<tr>
+<td>
+
+`Metadata`
+
+</td>
+<td>
+
+`IDictionary<string, string>`
+
+</td>
+<td>
+
+Extensible key-value store for custom metadata.
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+### Vector Store Schema {#vector-store-schema}
+
+Use `DocumentChunk.GetVectorDefinition(dimensions)` to get the collection schema matching the embedding model's output size:
+
+```csharp
+var definition = Aspose.Pdf.AI.DocumentChunk.GetVectorDefinition(dimensions: 1536);
+```

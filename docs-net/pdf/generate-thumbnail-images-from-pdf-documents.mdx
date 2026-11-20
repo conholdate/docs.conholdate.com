@@ -1,0 +1,190 @@
+---
+title: "Generate Thumbnail Images from PDF"
+sidebar_label: "Generate Thumbnail Images from PDF"
+sidebar_key: "net-pdf-generate-thumbnail-images-from-pdf-documents"
+sidebar_position: 100
+description: ""
+product: "pdf"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/pdf/net"
+source_path: "pdf/net/generate-thumbnail-images-from-pdf-documents.html"
+source_commit: ""
+source_sha256: "495b3a7615a55a0ccd2c25df3f1485fbe0c264c99fb9a0de65a42415976bc076"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/pdf/net/generate-thumbnail-images-from-pdf-documents/"
+source_snapshot_sha256: "23fd9066b38266bbe2526d6cab77b6085c70bd96e583a69a80f6598cf32ce1c4"
+---
+
+:::info
+Aspose.PDF for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+The Adobe Acrobat SDK is a set of tools that help you develop software that interacts with Acrobat technology. The SDK contains header files, type libraries, simple utilities, sample code, and documentation.
+
+Using the Acrobat SDK, you can develop software that integrates with Acrobat and Adobe Reader in several ways:
+
+- **JavaScript** - Write scripts, either in an individual PDF document or externally, to extend the functionality of Acrobat or Adobe Reader.
+- **Plug-ins** - Create plug-ins that are dynamically linked to and extend the functionality of Acrobat or Adobe Reader.
+- **Interapplication communication** - Write a separate application process that uses interapplication communication (IAC) to control Acrobat functionality. DDE and OLE are supported on Microsoft® Windows®, and Apple events/AppleScript on Mac OS®. IAC is not available on UNIX®.
+
+Aspose.PDF for .NET provides a lot of the same functionality, freeing you from dependence on Adobe Acrobat Automation. This article shows how to generate thumbnail images from PDF documents using first the Acrobat SDK and then Aspose.PDF.
+:::
+
+## Developing Application using Acrobat Interapplication communication API {#developing-application-using-acrobat-interapplication-communication-api}
+
+Think of the Acrobat API as having two distinct layers that use Acrobat Interapplication Communication (IAC) objects:
+
+- The Acrobat application (AV) layer. The AV layer lets you control how the document is viewed. For example, the view of a document object resides in the layer associated with Acrobat.
+- The portable document (PD) layer. The PD layer provides access to the information within a document, such as a page. From the PD layer you can perform basic manipulations of PDF documents, such as deleting, moving, or replacing pages, as well as changing annotation attributes. You can also print PDF pages, select text, access manipulated text, and create or delete thumbnails.
+
+As our intent is to convert PDF pages into thumbnail images, so we are focusing more over IAC. The IAC API contains objects such as PDDoc, PDPage, PDAnnot, and others, which enable the user to deal with the portable document (PD) layer. The following code sample scans a folder and converts PDF pages into thumbnail images. With using the Acrobat SDK, we could also read the PDF metadata and retrieve the number of pages in the document.
+
+### Acrobat Approach {#acrobat-approach}
+
+In order to generate the thumbnail images for each document, we have used the Adobe Acrobat 7.0 SDK and the Microsoft .NET 2.0 Framework.
+
+The <a href="https://opensource.adobe.com/dc-acrobat-sdk-docs/acrobatsdk/" target="_blank" rel="nofollow noopener noreferrer">Acrobat SDK</a> combined with the full version of Adobe Acrobat exposes a COM library of objects (sadly the free Adobe Reader does not expose the COM interfaces) that can be used to manipulate and access PDF information. Using these COM objects via COM Interop, load the PDF document, get the first page and render that page to the clipboard. Then, with the .NET Framework, copy this to a bitmap, scale and combine the image and save the result as a GIF or PNG file.
+
+Once Adobe Acrobat is installed, use regedit.exe and look under HKEY_CLASSES_ROOT for entry entry called AcroExch.PDDoc.
+
+**The registry showing the AcroExch.PDDDoc entry**
+
+![todo:image_alt_text](/net/pdf/images/edbf8dcefca63fef-generate-thumbnail-images-from-pdf-documents_1.png)
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void GenerateThumbnailImagesFromPDF()
+{
+    // Acrobat objects
+    Acrobat.CAcroPDDoc pdfDoc;
+    Acrobat.CAcroPDPage pdfPage;
+    Acrobat.CAcroRect pdfRect;
+    Acrobat.CAcroPoint pdfPoint;
+
+    AppSettingsReader appSettings = new AppSettingsReader();
+    string pdfInputPath = appSettings.GetValue("pdfInputPath", typeof(string)).ToString();
+    string pngOutputPath = appSettings.GetValue("pngOutputPath", typeof(string)).ToString();
+    string templatePortraitFile = Application.StartupPath + @"\pdftemplate_portrait.gif";
+    string templateLandscapeFile = Application.StartupPath + @"\pdftemplate_landscape.gif";
+
+    // Get list of files to process from the input path
+    string[] files = Directory.GetFiles(pdfInputPath, "*.pdf");
+
+    for (int n = 0; n < files.Length; n++)
+    {
+        string inputFile = files[n];
+        string outputFile = Path.Combine(pngOutputPath, Path.GetFileNameWithoutExtension(inputFile) + ".png");
+
+        // Create PDF document
+        pdfDoc = (Acrobat.CAcroPDDoc)Microsoft.VisualBasic.Interaction.CreateObject("AcroExch.PDDoc", "");
+
+        if (pdfDoc.Open(inputFile) == 0)
+        {
+            throw new FileNotFoundException($"Unable to open PDF file: {inputFile}");
+        }
+
+        int pageCount = pdfDoc.GetNumPages();
+        pdfPage = (Acrobat.CAcroPDPage)pdfDoc.AcquirePage(0);
+        pdfPoint = (Acrobat.CAcroPoint)pdfPage.GetSize();
+
+        pdfRect = (Acrobat.CAcroRect)Microsoft.VisualBasic.Interaction.CreateObject("AcroExch.Rect", "");
+        pdfRect.Left = 0;
+        pdfRect.right = pdfPoint.x;
+        pdfRect.Top = 0;
+        pdfRect.bottom = pdfPoint.y;
+
+        pdfPage.CopyToClipboard(pdfRect, 0, 0, 100);
+        IDataObject clipboardData = Clipboard.GetDataObject();
+
+        if (clipboardData.GetDataPresent(DataFormats.Bitmap))
+        {
+            Bitmap pdfBitmap = (Bitmap)clipboardData.GetData(DataFormats.Bitmap);
+
+            int thumbnailWidth = 45;
+            int thumbnailHeight = 59;
+            string templateFile = pdfPoint.x < pdfPoint.y ? templatePortraitFile : templateLandscapeFile;
+
+            if (pdfPoint.x > pdfPoint.y)
+            {
+                // Swap width and height for landscape orientation
+                (thumbnailWidth, thumbnailHeight) = (thumbnailHeight, thumbnailWidth);
+            }
+
+            Bitmap templateBitmap = new Bitmap(templateFile);
+            Image pdfImage = pdfBitmap.GetThumbnailImage(thumbnailWidth, thumbnailHeight, null, IntPtr.Zero);
+
+            Bitmap thumbnailBitmap = new Bitmap(thumbnailWidth + 7, thumbnailHeight + 7, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            templateBitmap.MakeTransparent();
+
+            using (Graphics thumbnailGraphics = Graphics.FromImage(thumbnailBitmap))
+            {
+                thumbnailGraphics.DrawImage(pdfImage, 2, 2, thumbnailWidth, thumbnailHeight);
+                thumbnailGraphics.DrawImage(templateBitmap, 0, 0);
+                thumbnailBitmap.Save(outputFile, System.Drawing.Imaging.ImageFormat.Png);
+            }
+
+            Console.WriteLine("Generated thumbnail: {0}", outputFile);
+
+            pdfDoc.Close();
+            Marshal.ReleaseComObject(pdfPage);
+            Marshal.ReleaseComObject(pdfRect);
+            Marshal.ReleaseComObject(pdfDoc);
+        }
+    }
+}
+```
+
+## Aspose.PDF for .NET Approach {#asposepdf-for-net-approach}
+
+Aspose.PDF for .NET provides extensive support for dealing with PDF documents. It also supports the capability to convert the pages of PDF documents to a variety of image formats. The functionality described above can easily be achieved using Aspose.PDF for .NET.
+
+Aspose.PDF has distinct benefits:
+
+- You don't need to have Adobe Acrobat installed on your system to work with PDF files.
+- Using Aspose.PDF for .NET is simple and easy to understand as compared to Acrobat Automation.
+
+If we need to convert PDF pages into JPEGs, the <a href="https://reference.aspose.com/pdf/net/aspose.pdf.devices" target="_blank" rel="nofollow noopener noreferrer">Aspose.PDF.Devices</a> namespace provides a class named <a href="https://reference.aspose.com/pdf/net/aspose.pdf.devices/jpegdevice" target="_blank" rel="nofollow noopener noreferrer">JpegDevice</a> for rendering PDF pages into JPEG images. Please take a look over the following code snippet.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void GenerateThumbnailImagesFromPDF()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Images();
+
+    // Retrieve names of all the PDF files in a particular directory
+    string[] fileEntries = Directory.GetFiles(dataDir, "*.pdf");
+
+    // Iterate through all the files entries in array
+    for (int counter = 0; counter < fileEntries.Length; counter++)
+    {
+        // Open PDF document
+        using (var document = new Aspose.Pdf.Document(fileEntries[counter]))
+        {
+            for (int pageCount = 1; pageCount <= document.Pages.Count; pageCount++)
+            {
+                using (FileStream imageStream = new FileStream(dataDir + @"\Thumbanils" + counter.ToString() + "_" + pageCount + ".jpg", FileMode.Create))
+                {
+                    var resolution = new Aspose.Pdf.Devices.Resolution(300);
+                    var jpegDevice = new Aspose.Pdf.Devices.JpegDevice(45, 59, resolution, 100);
+                    // Convert a particular page and save the image to stream
+                    jpegDevice.Process(document.Pages[pageCount], imageStream);
+                }
+            }
+        }
+    }
+}
+```
+
+:::info
+
+- Thank you to CodeProject for <a href="https://www.codeproject.com/Articles/5887/Generate-Thumbnail-Images-from-PDF-Documents" target="_blank" rel="nofollow noopener noreferrer">Generate Thumbnail Image from PDF document</a>.
+- Thank you to Acrobat for the <a href="https://opensource.adobe.com/dc-acrobat-sdk-docs/acrobatsdk/documentation.html" target="_blank" rel="nofollow noopener noreferrer">Acrobat SDK reference</a>.
+  :::

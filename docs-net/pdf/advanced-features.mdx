@@ -1,0 +1,176 @@
+---
+title: "Advanced Features"
+sidebar_label: "Advanced Features"
+sidebar_key: "net-pdf-advanced-features"
+sidebar_position: 100
+description: ""
+product: "pdf"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/pdf/net"
+source_path: "pdf/net/advanced-features.html"
+source_commit: ""
+source_sha256: "8c7b1b850eb0f77c6c3b6cd1c0996fc0d023a5f90969374d4d7292885f0ccf6b"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/pdf/net/advanced-features/"
+source_snapshot_sha256: "a077b61c0acbf9b8d9bb577d91c98ba8903ebd49f0470def9f6080eefd566a46"
+---
+
+:::info
+Aspose.PDF for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Sending Pdf to Browser for Download {#sending-pdf-to-browser-for-download}
+
+Sometimes when you are developing an ASP.NET application, you need to send PDF file(s) to web browser(s) for download without saving them physically. In order to achieve that you can save PDF document into MemoryStream object after generating it and pass bytes from that MemoryStream to Response object. Doing this will make the browser to download the generated PDF document.
+
+Following code snippet demonstrate the above functionality:
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private void Page_Load(object sender, EventArgs e)
+{
+    // Clear the response before writing to it
+    Response.Clear();
+    // Set content type for PDF
+    Response.ContentType = "application/pdf";
+    // Set the response header for file download
+    Response.AddHeader("content-disposition", "attachment; filename=TestDocument.pdf");
+
+    // Create PDF document
+    using (var document = new Aspose.Pdf.Document())
+    {
+        // Add Page in Pages Collection
+        var page = document.Pages.Add();
+        var textFragment = new Aspose.Pdf.Text.TextFragment("Hello World");
+        page.Paragraphs.Add(textFragment);
+        
+        // Save PDF document to a MemoryStream
+        using (var ms = new MemoryStream())
+        {
+            document.Save(ms);
+             // Reset the stream position to the beginning
+            ms.Position = 0;
+
+            // Write the MemoryStream to the response
+            ms.CopyTo(Response.OutputStream);
+            Response.AddHeader("content-length", ms.Length.ToString());
+            Response.Flush();
+            // Suppress the remaining content
+            Response.SuppressContent = true; 
+        }
+    }
+    // End the response to prevent further processing
+    Response.End(); 
+}
+```
+
+## Use of Latex Script to Add Mathematical Expressions {#use-of-latex-script-to-add-mathematical-expressions}
+
+With Aspose.PDF, you can add mathematical expressions/formulas inside PDF document using latex script. Following examples show how this feature can be used in two different ways, in order to add a mathematical formula inside a table cell:
+
+### Without preamble and document environment {#without-preamble-and-document-environment}
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET      
+private static void LatexWithoutPreambleAndDocEnvironment()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+    // Create PDF document
+    using (var document = new Aspose.Pdf.Document())
+    {
+        // Add page
+        var page = doc.Pages.Add();
+        // Create a Table
+        var table = new Aspose.Pdf.Table();
+        // Add a row into Table
+        var row = table.Rows.Add();
+        // Add Cell with Latex Script to add methematical expressions/formulae
+        var latexText1 = "$123456789+\\sqrt{1}+\\int_a^b f(x)dx$";
+        var cell = row.Cells.Add();
+        cell.Margin = new MarginInfo { Left = 20, Right = 20, Top = 20, Bottom = 20 };
+        // Second TeXFragment constructor bool parameter provides LaTeX paragraph indents elimination
+        var ltext1 = new Aspose.Pdf.TeXFragment(latexText1, true);
+        cell.Paragraphs.Add(ltext1);
+        // Add table inside page
+        page.Paragraphs.Add(table);
+        // Save PDF document
+        document.Save(dataDir + "LatextScriptInPdf_out.pdf");
+    }
+}
+```
+
+### With preamble and document environment {#with-preamble-and-document-environment}
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void LatexWithPreambleAndDocEnvironment()
+{
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+    // Open PDF document
+    using (var document = new Aspose.Pdf.Document())
+    {
+        // Add page
+        var page = doc.Pages.Add();
+        // Create a Table
+        var table = new Aspose.Pdf.Table();
+        // Add a row into Table
+        var row = table.Rows.Add();
+       // Add Cell with Latex Script to add methematical expressions/formulae
+        var latexText2 = @"\documentclass{article}
+                            \begin{document}
+                            Latex and the document class will normally take care of page layout issues for you. For submission to an academic publication, this entire topic will be out
+                            \end{document}";
+        var cell = row.Cells.Add();
+        cell.Margin = new Aspose.Pdf.MarginInfo { Left = 20, Right = 20, Top = 20, Bottom = 20 };
+        var text2 = new Aspose.Pdf.HtmlFragment(latexText2);
+        cell.Paragraphs.Add(text2);
+        // Add table inside page
+        page.Paragraphs.Add(table);
+        // Save PDF document
+        document.Save(dataDir + "LatextScriptInPdf2_out.pdf");
+    }
+}
+```
+
+### Support for Latex Tags {#support-for-latex-tags}
+
+The align environment is defined in amsmath package, and proof environment is defined in amsthm package. Thus, you have to specify these packages using \usepackage command in the document preamble. And this means that you have to enclose the LaTeX text into document environment either as shown in the following code sample.
+
+```csharp
+// For complete examples and data files, visit https://github.com/aspose-pdf/Aspose.PDF-for-.NET
+private static void LatexTagsSupport()
+{
+    var s = @"
+    \usepackage{amsmath,amsthm}
+    \begin{document}
+    \begin{proof} The proof is a follows: 
+    \begin{align}
+    (x+y)^3&=(x+y)(x+y)^2
+    (x+y)(x^2+2xy+y^2)\\
+    &=x^3+3x^2y+3xy^3+x^3.\qedhere
+    \end{align}
+    \end{proof}
+    \end{document}";
+
+    // The path to the documents directory
+    var dataDir = RunExamples.GetDataDir_AsposePdf_Text();
+    
+    // Create PDF document
+    using (var document = new Aspose.Pdf.Document())
+    {
+        // Add page
+        var page = document.Pages.Add();
+        var latex = new Aspose.Pdf.TeXFragment(s);
+        page.Paragraphs.Add(latex);
+        // Save PDF document
+        document.Save(dataDir + "Script_out.pdf");
+    }
+}
+```
