@@ -1,0 +1,180 @@
+---
+title: "Track Progress and Cancel Processing"
+sidebar_label: "Track Progress and Cancel Processing"
+sidebar_key: "net-slides-examples-optimization-batch-progress-cancellation"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/net"
+source_path: "slides/net/examples/optimization-batch/progress-cancellation.md"
+source_commit: ""
+source_sha256: "d1cfc4dd29915aea9cc5c2d2c35d12ce3075c4e117dc114e1b5c989fb821ee08"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/net/examples/optimization-batch/progress-cancellation/"
+source_markdown_url: "https://docs.aspose.com/slides/net/examples/optimization-batch/progress-cancellation.md"
+source_snapshot_sha256: "bccd84fd851a46a99e2478d5547b041e970bb9c9792104097f27cea2d57d20cf"
+---
+
+:::info
+Aspose.Slides for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+g
+
+> Observe PDF export progress, request an SDK interruption during another export, and confirm that the operation stops before completion.
+> 3
+
+Observe PDF export progress, request an SDK interruption during another export, and confirm that the operation stops before completion.
+
+<span id="run-the-example"></span>
+
+## **Example**
+
+Copy a C# block into `Program.cs` in a .NET project with `Aspose.Slides.NET6.CrossPlatform` installed. Each block is a complete program. Run one block at a time. The ZIP contains the IDE-ready project and its verification checks.
+The copied program writes its files under `example-output` by default.
+
+The program generates four text slides and writes `complete.pdf` under `example-output`. No input file is needed. The second export uses the SDK interruption token; its partial PDF is always removed.
+
+```csharp
+using System;
+using System.IO;
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+internal static class Program
+{
+    private static int Main()
+    {
+        var licensePath = Environment.GetEnvironmentVariable("ASPOSE_LICENSE_PATH");
+        if (!string.IsNullOrWhiteSpace(licensePath))
+            new License().SetLicense(licensePath);
+        var output = Directory.CreateDirectory("example-output").FullName;
+        var inputPath = Path.Combine(output, "input.pptx");
+        var completePath = Path.Combine(output, "complete.pdf");
+        var partialPath = Path.Combine(output, "partial.pdf");
+        CreateInput(inputPath);
+        // First export: observe progress through completion.
+        var completeProgress = new ExportProgress();
+        using (var presentation = new Presentation(inputPath))
+        {
+            var options = new PdfOptions
+            {
+                ProgressCallback = completeProgress
+            };
+            presentation.Save(completePath, SaveFormat.Pdf, options);
+        }
+
+        Console.WriteLine($"Completed export: {completeProgress.MaximumPercent}% - {completePath}");
+        if (completeProgress.MaximumPercent != 100)
+        {
+            Console.Error.WriteLine("The control export did not report completion.");
+            return 1;
+        }
+
+        // Second export: interrupt once, as soon as positive progress is reported.
+        var interruption = new InterruptionTokenSource();
+        var cancelledProgress = new ExportProgress(interruption);
+        var cancellationException = false;
+        try
+        {
+            var loadOptions = new LoadOptions
+            {
+                InterruptionToken = interruption.Token
+            };
+            using var presentation = new Presentation(inputPath, loadOptions);
+            var saveOptions = new PdfOptions
+            {
+                ProgressCallback = cancelledProgress
+            };
+            presentation.Save(partialPath, SaveFormat.Pdf, saveOptions);
+        }
+        catch (OperationCanceledException)
+        {
+            cancellationException = true;
+        }
+        finally
+        {
+            // The presentation has been disposed before partial output is deleted.
+            if (File.Exists(partialPath))
+                File.Delete(partialPath);
+        }
+
+        // Some export paths return normally after interruption.
+        var stopped = cancellationException || (cancelledProgress.InterruptionRequested && cancelledProgress.MaximumPercent < 100);
+        if (!cancelledProgress.InterruptionRequested || !stopped)
+        {
+            Console.Error.WriteLine("The cancellation request did not stop the export.");
+            return 1;
+        }
+
+        Console.WriteLine($"Interrupted at {cancelledProgress.MaximumPercent}%; partial PDF removed.");
+        return 0;
+    }
+
+    private static void CreateInput(string path)
+    {
+        using var presentation = new Presentation();
+        for (var index = 0; index < 4; index++)
+        {
+            var slide = index == 0 ? presentation.Slides[0] : presentation.Slides.AddEmptySlide(presentation.LayoutSlides[0]);
+            var title = slide.Shapes.AddAutoShape(ShapeType.Rectangle, 40, 40, 600, 100);
+            title.TextFrame.Text = $"Progress example - slide {index + 1}";
+        }
+
+        presentation.Save(path, SaveFormat.Pptx);
+    }
+
+    private sealed class ExportProgress(InterruptionTokenSource? interruption = null) : IProgressCallback
+    {
+        public double MaximumPercent { get; private set; }
+        public bool InterruptionRequested { get; private set; }
+
+        public void Reporting(double percent)
+        {
+            MaximumPercent = Math.Max(MaximumPercent, percent);
+            if (interruption != null && !InterruptionRequested && percent > 0)
+            {
+                InterruptionRequested = true;
+                interruption.Interrupt();
+            }
+        }
+    }
+}
+```
+
+## **Expected result and checks**
+
+The console reports 100 percent for `example-output/complete.pdf`, then reports an interrupted export. The second operation must throw <a href="https://learn.microsoft.com/en-us/dotnet/api/system.operationcanceledexception" target="_blank" rel="nofollow noopener noreferrer">OperationCanceledException</a> or stop below 100 percent after requesting interruption. Callback frequency varies by export path. The downloaded project additionally records callback arrays and checks that the input unlocks after disposal.
+
+## **Learn more**
+
+- [Support For Interruptable Library](/net/slides/support-for-interruptable-library/)
+- [Convert PPT and PPTX to PDF in .NET \[Advanced Features Included\]](/net/slides/convert-powerpoint-to-pdf/)
+- [Convert PowerPoint Presentations to Animated GIFs in .NET](/net/slides/convert-powerpoint-to-animated-gif/)
+
+## **Open and run the complete project**
+
+<a href="https://docs.aspose.com/slides/net/examples/optimization-batch/progress-cancellation/example.zip" target="_blank" rel="nofollow noopener noreferrer">Download the complete project</a>, extract it and open `Example.sln`, or run:
+
+```text
+dotnet restore Example.sln
+dotnet run --project Example.csproj --configuration Release -- --mode evaluation
+```
+
+Use the current supported .NET 10 SDK/runtime. The project keeps a stable `net8.0`
+target and accepts compatible stable SDKs; no exact SDK patch is required.
+Evaluation runs without a license and explicitly ignores license environment settings.
+It uses bounded fixtures and checks valid output while allowing the evaluation watermark
+and documented read-back text truncation. For unrestricted checks, use `--mode licensed`
+with your authorized `ASPOSE_LICENSE_PATH`. No license is included.
+
+Inputs are copied from `Fixtures` into a separate output workspace. The program prints
+the absolute output path; `execution.json` records the actual runtime and verified action.
+See [setup and prerequisites](/net/slides/examples/getting-started/) for native libraries,
+fonts, IDE settings and the .NET 8/9 runtime support boundary of 2026-11-10.
