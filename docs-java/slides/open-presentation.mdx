@@ -1,0 +1,199 @@
+---
+title: "Open Presentations in Java"
+sidebar_label: "Open Presentations in Java"
+sidebar_key: "java-slides-open-presentation"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/open-presentation.md"
+source_commit: ""
+source_sha256: "9d1af30c419f75ca04ec816643efa699807d1f6c17b4ed05693040f514981742"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/open-presentation/"
+source_markdown_url: "https://docs.aspose.com/slides/java/open-presentation.md"
+source_snapshot_sha256: "dc867d3282a2d8b04cd8abe9095586982e5438a8bb1b127529f2499801709ec1"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+a
+
+> Learn how to open PowerPoint and OpenDocument presentations in Java, supply opening passwords, control resource loading, and reduce memory use with Aspose.Slides for Java.
+> 7
+
+## **Introduction**
+
+<a href="https://products.aspose.com/slides/java/" target="_blank" rel="nofollow noopener noreferrer">Aspose.Slides for Java</a> can load PowerPoint and OpenDocument presentations from files and streams. After a presentation is loaded, you can inspect its structure, edit slides, manage resources, and save it in the original or another supported format.
+
+Loading behavior can be customized through the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">LoadOptions</a> class. For example, you can supply an opening password, keep large binary objects outside Java heap memory, control external resources, or omit embedded binary data.
+
+## **Open Presentations**
+
+After loading a file or stream, you can [determine its original presentation format](/java/slides/detect-presentation-source-format/) to choose how your application processes it.
+
+To open an existing presentation, pass its file path to the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> constructor. Dispose the presentation after use so that file handles, temporary data, and other resources are released promptly.
+
+The following Java example shows how to open a presentation and get its slide count:
+
+```java
+import com.aspose.slides.Presentation;
+
+Presentation presentation = new Presentation("sample.pptx");
+try {
+    System.out.println("Slide count: " + presentation.getSlides().size());
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Open Password-Protected Presentations**
+
+An opening password encrypts presentation content. To load the complete presentation, pass the correct password to <a href="https://reference.aspose.com/slides/java/com.aspose.slides/loadoptions/#setPassword-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">LoadOptions.setPassword</a> and provide the options to the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> constructor. Loading fails when the password is missing or incorrect.
+
+```java
+import com.aspose.slides.LoadOptions;
+import com.aspose.slides.Presentation;
+
+LoadOptions loadOptions = new LoadOptions();
+loadOptions.setPassword("open_password");
+
+Presentation presentation = new Presentation("encrypted-presentation.pptx", loadOptions);
+try {
+    System.out.println("Slide count: " + presentation.getSlides().size());
+} finally {
+    presentation.dispose();
+}
+```
+
+For password detection, validation, and encryption workflows, see [Password-Protect Presentations](/java/slides/password-protected-presentation/). If an encrypted presentation was deliberately saved with public document properties, those properties can be read without a password; see [Manage Presentation Properties](/java/slides/presentation-properties/).
+
+## **Open Large Presentations**
+
+<a href="https://reference.aspose.com/slides/java/com.aspose.slides/loadoptions/#getBlobManagementOptions--" target="_blank" rel="nofollow noopener noreferrer">LoadOptions.getBlobManagementOptions</a> returns options that control how Aspose.Slides handles binary large objects such as images, audio, and video. You can keep the source file locked, allow temporary files, and limit the amount of BLOB data retained in memory.
+
+The following Java code demonstrates loading a large presentation (for example, 2 GB):
+
+```java
+import com.aspose.slides.LoadOptions;
+import com.aspose.slides.Presentation;
+import com.aspose.slides.PresentationLockingBehavior;
+import com.aspose.slides.SaveFormat;
+
+final String filePath = "large-presentation.pptx";
+
+LoadOptions loadOptions = new LoadOptions();
+loadOptions.getBlobManagementOptions().setPresentationLockingBehavior(PresentationLockingBehavior.KeepLocked);
+loadOptions.getBlobManagementOptions().setTemporaryFilesAllowed(true);
+loadOptions.getBlobManagementOptions().setMaxBlobsBytesInMemory(10 * 1024 * 1024);
+
+Presentation presentation = new Presentation(filePath, loadOptions);
+try {
+    presentation.getSlides().get_Item(0).setName("Large presentation");
+    presentation.save("large-presentation-copy.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+With <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentationlockingbehavior/#KeepLocked" target="_blank" rel="nofollow noopener noreferrer">PresentationLockingBehavior.KeepLocked</a>, the source file remains locked until the presentation instance is disposed. Do not move, overwrite, or delete the source file while that instance is alive.
+
+Aspose.Slides may copy the contents of an input stream while loading it. For large presentations, a file path is therefore generally more efficient than a stream. See [Manage BLOBs](/java/slides/manage-blob/) for additional storage and memory-management options.
+
+## **Control External Resources**
+
+<a href="https://reference.aspose.com/slides/java/com.aspose.slides/loadoptions/#setResourceLoadingCallback-com.aspose.slides.IResourceLoadingCallback-" target="_blank" rel="nofollow noopener noreferrer">LoadOptions.setResourceLoadingCallback</a> accepts an <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iresourceloadingcallback/" target="_blank" rel="nofollow noopener noreferrer">IResourceLoadingCallback</a> implementation. The callback can supply replacement data, redirect a resource, use the default loader, or skip the resource. This is useful when presentations contain external images that must be resolved according to application-specific security or storage rules.
+
+```java
+import com.aspose.slides.IResourceLoadingArgs;
+import com.aspose.slides.IResourceLoadingCallback;
+import com.aspose.slides.LoadOptions;
+import com.aspose.slides.Presentation;
+import com.aspose.slides.ResourceLoadingAction;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Locale;
+
+class ImageLoadingHandler implements IResourceLoadingCallback {
+    public int resourceLoading(IResourceLoadingArgs args) {
+        boolean isJpeg = args.getOriginalUri().toLowerCase(Locale.ROOT).endsWith(".jpg");
+        Path approvedImagePath = Paths.get("approved-image.jpg");
+        if (!isJpeg || !Files.exists(approvedImagePath)) {
+            return ResourceLoadingAction.Skip;
+        }
+
+        try {
+            byte[] imageData = Files.readAllBytes(approvedImagePath);
+            args.setData(imageData);
+            return ResourceLoadingAction.UserProvided;
+        } catch (IOException exception) {
+            System.err.println("The approved replacement image could not be read.");
+            return ResourceLoadingAction.Skip;
+        }
+    }
+}
+
+LoadOptions loadOptions = new LoadOptions();
+loadOptions.setResourceLoadingCallback(new ImageLoadingHandler());
+
+Presentation presentation = new Presentation("presentation-with-external-images.pptx", loadOptions);
+try {
+    System.out.println("Slide count: " + presentation.getSlides().size());
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Load Presentations without Embedded Binary Objects**
+
+A presentation may contain embedded binary data that an application does not need or does not want to retain. Examples include:
+
+- VBA projects, available through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ipresentation/#getVbaProject--" target="_blank" rel="nofollow noopener noreferrer">IPresentation.getVbaProject</a>;
+- embedded OLE data, available through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ioleembeddeddatainfo/#getEmbeddedFileData--" target="_blank" rel="nofollow noopener noreferrer">IOleEmbeddedDataInfo.getEmbeddedFileData</a>;
+- ActiveX control data, available through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icontrol/#getActiveXControlBinary--" target="_blank" rel="nofollow noopener noreferrer">IControl.getActiveXControlBinary</a>.
+
+Set <a href="https://reference.aspose.com/slides/java/com.aspose.slides/loadoptions/#setDeleteEmbeddedBinaryObjects-boolean-" target="_blank" rel="nofollow noopener noreferrer">LoadOptions.setDeleteEmbeddedBinaryObjects</a> to `true` to remove this binary data while loading. Save the loaded presentation to persist the sanitized result.
+
+This option reduces exposure to unwanted embedded payloads, but it is not a complete malware-detection or content-sanitization system.
+
+```java
+import com.aspose.slides.LoadOptions;
+import com.aspose.slides.Presentation;
+import com.aspose.slides.SaveFormat;
+
+LoadOptions loadOptions = new LoadOptions();
+loadOptions.setDeleteEmbeddedBinaryObjects(true);
+
+Presentation presentation = new Presentation("presentation-with-embedded-data.pptx", loadOptions);
+try {
+    presentation.save("presentation-without-embedded-data.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **FAQ**
+
+**How can I tell that a file is corrupted and cannot be opened?**
+
+Aspose.Slides throws a parsing or format exception during loading. Handle that failure separately from an incorrect-password error so that the application can report the cause accurately.
+
+**What happens if required fonts are missing?**
+
+The presentation can still load, but rendering and export may substitute fonts. You can [configure font substitution](/java/slides/font-substitution/) or [provide custom fonts](/java/slides/custom-font/) to make output more predictable.
+
+**Does loading a presentation also load its embedded media?**
+
+Embedded audio and video become available through the presentation object model. External resources are resolved according to the configured resource-loading behavior and may be unavailable if their locations cannot be accessed.
+
+Related feature: <a href="https://docs.aspose.com/slides/features/powerpoint-files/" target="_blank" rel="nofollow noopener noreferrer">Read PPTX presentations</a>.

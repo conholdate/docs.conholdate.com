@@ -1,0 +1,377 @@
+---
+title: "Manage Rows and Columns in PowerPoint Tables Using Java"
+sidebar_label: "Manage Rows and Columns in PowerPoint Tables Using Java"
+sidebar_key: "java-slides-manage-rows-and-columns"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/manage-rows-and-columns.md"
+source_commit: ""
+source_sha256: "078ce934fde9640719bec909238b9ce7d89d4a649f719911ef76c91d54408b54"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/manage-rows-and-columns/"
+source_markdown_url: "https://docs.aspose.com/slides/java/manage-rows-and-columns.md"
+source_snapshot_sha256: "b69238fe32eaf24e6d2bb0d528ff90f98f04b9f1e83db6d4a733d0fb4b0afc1a"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+import "./_remote-markdown.css";
+
+a
+
+> Manage table rows and columns in PowerPoint with Aspose.Slides for Java and speed up presentation editing and data updates.
+> 6
+
+## **Introduction**
+
+Aspose.Slides for Java lets you manage table structure and formatting in PowerPoint presentations through the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/table/" target="_blank" rel="nofollow noopener noreferrer">Table</a> class and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/itable/" target="_blank" rel="nofollow noopener noreferrer">ITable</a> interface. You can designate a header row, clone or remove rows and columns, and apply text formatting to an entire row or column.
+
+This article explains these operations with Java examples. It also shows how to retrieve a table's style preset so you can reuse it. Table row and column indices are zero-based.
+
+## **Control Row Height**
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/irow/#setMinimalHeight-double-" target="_blank" rel="nofollow noopener noreferrer">IRow.setMinimalHeight</a> to set a row's minimum height in points. It is a lower bound, not a fixed height. <a href="https://reference.aspose.com/slides/java/com.aspose.slides/irow/#getHeight--" target="_blank" rel="nofollow noopener noreferrer">IRow.getHeight</a> returns the actual height. Access the row through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/itable/#getRows--" target="_blank" rel="nofollow noopener noreferrer">ITable.getRows</a>.
+
+The example loads <a href="https://docs.aspose.com/slides/java/manage-rows-and-columns/row-height-input.pptx" target="_blank" rel="nofollow noopener noreferrer">row-height-input.pptx</a>, which has a table as the first shape on the first slide. Its first row starts at 70 points. The cells use 18-point Arial text, wrapping, and 6-point top and bottom margins; the longer text in the second column wraps onto multiple lines. The example increases the minimum to 100 points, then decreases it to 20 points, prints the actual height after each change, and saves both results.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("row-height-input.pptx");
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    ITable table = (ITable)slide.getShapes().get_Item(0);
+    IRow row = table.getRows().get_Item(0);
+
+    row.setMinimalHeight(100);
+    System.out.printf("Increased: minimum = %.1f, actual = %.1f pt%n", row.getMinimalHeight(), row.getHeight());
+    presentation.save("row-height-increased.pptx", SaveFormat.Pptx);
+
+    row.setMinimalHeight(20);
+    System.out.printf("Decreased: minimum = %.1f, actual = %.1f pt%n", row.getMinimalHeight(), row.getHeight());
+    presentation.save("row-height-decreased.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+With the supplied presentation, increasing the minimum adds space to the row. Decreasing it removes that extra space, but the actual height remains greater than 20 points because the text and cell margins need more room. Reducing the minimum alone cannot force the row below the space required by its content.
+
+Several factors affect the actual height:
+
+- **Text and font size:** longer text, explicit line breaks, or a larger font can require more vertical space.
+- **Wrapping and column width:** with wrapping enabled, reducing the column width with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icolumn/#setWidth-double-" target="_blank" rel="nofollow noopener noreferrer">IColumn.setWidth</a> can produce more lines. A wider column can reduce the space required vertically.
+- **Cell margins:** <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#setMarginTop-double-" target="_blank" rel="nofollow noopener noreferrer">ICell.setMarginTop</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#setMarginBottom-double-" target="_blank" rel="nofollow noopener noreferrer">ICell.setMarginBottom</a> add vertical space. <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#setMarginLeft-double-" target="_blank" rel="nofollow noopener noreferrer">ICell.setMarginLeft</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#setMarginRight-double-" target="_blank" rel="nofollow noopener noreferrer">ICell.setMarginRight</a> reduce the width available for text and can cause additional wrapping.
+
+For this table without merged cells, the cell that needs the most vertical space determines the content-driven lower limit for the entire row. To make the row shorter, you may also need to shorten the text, reduce the font size or margins, or widen a column.
+
+The images below show the same table at the same scale. In the illustrated results, the actual heights were 70, 100, and 55.2 points: the final row remained taller than its 20-point minimum. Exact text measurements can vary with the fonts available in your environment. Download the saved results: <a href="https://docs.aspose.com/slides/java/manage-rows-and-columns/row-height-increased.pptx" target="_blank" rel="nofollow noopener noreferrer">increased minimum</a> and <a href="https://docs.aspose.com/slides/java/manage-rows-and-columns/row-height-decreased.pptx" target="_blank" rel="nofollow noopener noreferrer">decreased minimum</a>.
+
+<div className="docs-owner-markdown-table">
+
+| Original: minimum 70 pt, actual 70 pt | Increased: minimum 100 pt, actual 100 pt | Decreased: minimum 20 pt, actual 55.2 pt |
+| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Original table with a 70-point first row.](/java/slides/images/555408ee7960befb-row-height-before.png) | ![Table after increasing the first row minimum to 100 points.](/java/slides/images/f468746e818a043d-row-height-increased.png) | ![Table after decreasing the first row minimum to 20 points; wrapped text keeps the row taller than the minimum.](/java/slides/images/a3f6b36c100322f9-row-height-decreased.png) |
+
+</div>
+
+## **Set the First Row as a Header**
+
+Use the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/itable/#setFirstRow-boolean-" target="_blank" rel="nofollow noopener noreferrer">setFirstRow</a> method to mark the first row for header formatting. Its appearance depends on the table style applied to the table.
+
+1. Load the presentation with the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> class.
+2. Access the first slide.
+3. Access the table stored as the first shape on the slide.
+4. Enable header formatting for its first row.
+5. Save the modified presentation.
+
+The example requires `table.pptx` with a table as the first shape on the first slide. It enables header formatting for the first row and saves `First_row_header.pptx`.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("table.pptx");
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    ITable table = (ITable)slide.getShapes().get_Item(0);
+    table.setFirstRow(true);
+
+    presentation.save("First_row_header.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Clone a Table Row or Column**
+
+Clone rows or columns to reuse their content and formatting. You can append a copy to the end of the table or insert it at a specific position.
+
+1. Load the presentation with the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> class.
+2. Access the first slide.
+3. Define the column widths and row heights.
+4. Add a table with the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ishapecollection/#addTable-float-float-double---double---" target="_blank" rel="nofollow noopener noreferrer">addTable</a> method.
+5. Clone the required rows.
+6. Clone the required columns.
+7. Save the modified presentation.
+
+The example requires `Test.pptx` with at least one slide. It creates a table with three columns and five rows, with dimensions specified in points. It appends copies of the first row and column, then inserts copies of the second row and column at index 3 (the fourth position). The resulting table has seven rows and five columns. The `false` argument disables cloning into adjacent merged rows or columns; this table has no merged cells.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("Test.pptx");
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    double[] columnWidths = new double[] { 50, 50, 50 };
+    double[] rowHeights = new double[] { 50, 30, 30, 30, 30 };
+    ITable table = slide.getShapes().addTable(100, 50, columnWidths, rowHeights);
+
+    table.get_Item(0, 0).getTextFrame().setText("Row 1 Cell 1");
+    table.get_Item(1, 0).getTextFrame().setText("Row 1 Cell 2");
+    table.getRows().addClone(table.getRows().get_Item(0), false);
+
+    table.get_Item(0, 1).getTextFrame().setText("Row 2 Cell 1");
+    table.get_Item(1, 1).getTextFrame().setText("Row 2 Cell 2");
+    table.getRows().insertClone(3, table.getRows().get_Item(1), false);
+
+    table.getColumns().addClone(table.getColumns().get_Item(0), false);
+    table.getColumns().insertClone(3, table.getColumns().get_Item(1), false);
+
+    presentation.save("table_out.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Remove a Row or Column from a Table**
+
+Remove rows or columns that are no longer needed in a table. Removing an item shifts the indices of the rows or columns that follow it.
+
+1. Create a presentation with the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> class.
+2. Access the first slide.
+3. Define the column widths and row heights.
+4. Add a table with the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ishapecollection/#addTable-float-float-double---double---" target="_blank" rel="nofollow noopener noreferrer">addTable</a> method.
+5. Remove the second row and second column.
+6. Save the modified presentation.
+
+This example creates a three-by-three table and removes the row and column at index 1, leaving a two-by-two table in `TestTable_out.pptx`. The dimensions are in points. The `false` argument disables removal of adjacent merged rows or columns; this table has no merged cells.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    double[] columnWidths = new double[] { 100, 50, 30 };
+    double[] rowHeights = new double[] { 30, 50, 30 };
+    ITable table = slide.getShapes().addTable(100, 100, columnWidths, rowHeights);
+
+    table.getRows().removeAt(1, false);
+    table.getColumns().removeAt(1, false);
+
+    presentation.save("TestTable_out.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Set Text Formatting on the Table Row Level**
+
+Apply text formatting to an entire row to keep its cells consistent. You can set font properties, paragraph formatting, and text direction without formatting each cell individually.
+
+1. Load the presentation with the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> class.
+2. Access the table on the first slide.
+3. Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/baseportionformat/#setFontHeight-float-" target="_blank" rel="nofollow noopener noreferrer">setFontHeight</a> for the first row.
+4. Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iparagraphformat/#setAlignment-int-" target="_blank" rel="nofollow noopener noreferrer">setAlignment</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iparagraphformat/#setMarginRight-float-" target="_blank" rel="nofollow noopener noreferrer">setMarginRight</a> for the first row.
+5. Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/textframeformat/#setTextVerticalType-byte-" target="_blank" rel="nofollow noopener noreferrer">setTextVerticalType</a> for the second row.
+6. Save the modified presentation.
+
+The example requires `table.pptx` with a table as the first shape on the first slide and at least two rows. It applies 25-point text, right alignment, and a 20-point right paragraph margin to the first row, then sets vertical text in the second row.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("table.pptx");
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    ITable table = (ITable)slide.getShapes().get_Item(0);
+
+    PortionFormat portionFormat = new PortionFormat();
+    portionFormat.setFontHeight(25);
+    table.getRows().get_Item(0).setTextFormat(portionFormat);
+
+    ParagraphFormat paragraphFormat = new ParagraphFormat();
+    paragraphFormat.setAlignment(TextAlignment.Right);
+    paragraphFormat.setMarginRight(20);
+    table.getRows().get_Item(0).setTextFormat(paragraphFormat);
+
+    TextFrameFormat textFrameFormat = new TextFrameFormat();
+    textFrameFormat.setTextVerticalType(TextVerticalType.Vertical);
+    table.getRows().get_Item(1).setTextFormat(textFrameFormat);
+
+    presentation.save("row_formatting.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Set Text Formatting on the Table Column Level**
+
+Apply text formatting to an entire column to keep its cells consistent. You can set font properties, paragraph formatting, and text direction without formatting each cell individually.
+
+1. Load the presentation with the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> class.
+2. Access the table on the first slide.
+3. Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/baseportionformat/#setFontHeight-float-" target="_blank" rel="nofollow noopener noreferrer">setFontHeight</a> for the first column.
+4. Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iparagraphformat/#setAlignment-int-" target="_blank" rel="nofollow noopener noreferrer">setAlignment</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iparagraphformat/#setMarginRight-float-" target="_blank" rel="nofollow noopener noreferrer">setMarginRight</a> for the first column.
+5. Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/textframeformat/#setTextVerticalType-byte-" target="_blank" rel="nofollow noopener noreferrer">setTextVerticalType</a> for the second column.
+6. Save the modified presentation.
+
+The example requires `table.pptx` with a table as the first shape on the first slide and at least two columns. It applies 25-point text, right alignment, and a 20-point right paragraph margin to the first column, then sets vertical text in the second column.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("table.pptx");
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    ITable table = (ITable)slide.getShapes().get_Item(0);
+
+    PortionFormat portionFormat = new PortionFormat();
+    portionFormat.setFontHeight(25);
+    table.getColumns().get_Item(0).setTextFormat(portionFormat);
+
+    ParagraphFormat paragraphFormat = new ParagraphFormat();
+    paragraphFormat.setAlignment(TextAlignment.Right);
+    paragraphFormat.setMarginRight(20);
+    table.getColumns().get_Item(0).setTextFormat(paragraphFormat);
+
+    TextFrameFormat textFrameFormat = new TextFrameFormat();
+    textFrameFormat.setTextVerticalType(TextVerticalType.Vertical);
+    table.getColumns().get_Item(1).setTextFormat(textFrameFormat);
+
+    presentation.save("column_formatting.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Get Table Style Properties**
+
+Use the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/itable/#getStylePreset--" target="_blank" rel="nofollow noopener noreferrer">getStylePreset</a> method to retrieve the preset applied to a table and reuse it on another table. This identifies the preset rather than individual cell formatting overrides.
+
+The example creates a table, applies <a href="https://reference.aspose.com/slides/java/com.aspose.slides/tablestylepreset/#DarkStyle1" target="_blank" rel="nofollow noopener noreferrer">TableStylePreset.DarkStyle1</a>, and reads the preset back. It prints the integer value corresponding to `DarkStyle1` and saves the table in `table.pptx`.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    double[] columnWidths = new double[] { 100, 150 };
+    double[] rowHeights = new double[] { 5, 5, 5 };
+    ITable table = slide.getShapes().addTable(10, 10, columnWidths, rowHeights);
+    table.setStylePreset(TableStylePreset.DarkStyle1);
+
+    int stylePreset = table.getStylePreset();
+    System.out.println(stylePreset);
+
+    presentation.save("table.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Apply Row or Column Banding**
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/itable/#setHorizontalBanding-boolean-" target="_blank" rel="nofollow noopener noreferrer">setHorizontalBanding</a> to alternate row fills or <a href="https://reference.aspose.com/slides/java/com.aspose.slides/itable/#setVerticalBanding-boolean-" target="_blank" rel="nofollow noopener noreferrer">setVerticalBanding</a> to alternate column fills. The table style supplies the band colors. To keep a particular cell the same color in every configuration, use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icellformat/#getFillFormat--" target="_blank" rel="nofollow noopener noreferrer">getFillFormat</a> to apply a solid fill.
+
+The example saves three versions of the same table. Only the two banding flags change between saves.
+
+```java
+import com.aspose.slides.*;
+import java.awt.Color;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    double[] columnWidths = { 100, 100, 100, 100 };
+    double[] rowHeights = { 50, 50, 50, 50 };
+    
+    ITable table = slide.getShapes().addTable(40, 40, columnWidths, rowHeights);
+    table.setStylePreset(TableStylePreset.MediumStyle2Accent1);
+    table.setFirstRow(false);
+    table.setFirstCol(false);
+    table.setLastRow(false);
+    table.setLastCol(false);
+
+    for (int row = 0; row < rowHeights.length; row++) {
+        for (int column = 0; column < columnWidths.length; column++) {
+            table.get_Item(column, row).getTextFrame().setText((row + 1) + "," + (column + 1));
+        }
+    }
+
+    IFillFormat fill = table.get_Item(1, 1).getCellFormat().getFillFormat();
+    fill.setFillType(FillType.Solid);
+    fill.getSolidFillColor().setColor(new Color(255, 165, 0));
+
+    table.setHorizontalBanding(true);
+    table.setVerticalBanding(false);
+    presentation.save("rows.pptx", SaveFormat.Pptx);
+
+    table.setHorizontalBanding(false);
+    table.setVerticalBanding(true);
+    presentation.save("columns.pptx", SaveFormat.Pptx);
+
+    table.setVerticalBanding(false);
+    presentation.save("off.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+In PowerPoint, cell `2,2` stays orange in all three versions. Its neighbors alternate in color by row or by column and share a single fill when both flags are off.
+
+<div className="docs-owner-markdown-table">
+
+| Row banding | Column banding | Both off |
+| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| ![Alternating row fills with cell 2,2 in orange.](/java/slides/images/d33ca7f455f72def-row-banding.png) | ![Alternating column fills with cell 2,2 in orange.](/java/slides/images/19087db58201debf-column-banding.png) | ![Uniform fill except for the orange cell.](/java/slides/images/f53c90576289a9e3-banding-off.png) |
+
+</div>
+
+## **FAQ**
+
+**Can I apply PowerPoint themes/styles to a table that's already created?**
+
+Yes. The table inherits the slide/layout/master theme, and you can still override fills, borders, and text colors on top of that theme.
+
+**Can I sort table rows like in Excel?**
+
+No, Aspose.Slides tables don't have built-in sorting or filters. Sort your data in memory first, then repopulate the table rows in that order.
+
+**Can I have banded (striped) columns while keeping custom colors on specific cells?**
+
+Yes. Enable banded columns and apply a local fill to the cells you want to highlight. See [Apply Row or Column Banding](/java/slides/manage-rows-and-columns/#apply-row-or-column-banding).
+
+## Related articles
+
+- [Manage Presentation Tables in Java](/java/slides/manage-table/)
+- [Create and Customize PowerPoint Tables in Java](/java/slides/powerpoint-table/)

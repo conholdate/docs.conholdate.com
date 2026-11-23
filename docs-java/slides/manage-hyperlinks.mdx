@@ -1,0 +1,605 @@
+---
+title: "Manage Presentation Hyperlinks in Java"
+sidebar_label: "Manage Presentation Hyperlinks in Java"
+sidebar_key: "java-slides-manage-hyperlinks"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/manage-hyperlinks.md"
+source_commit: ""
+source_sha256: "b5b2362b7bca77ff92a353560f7d72c392396c9b25b83c4d9b7a2f9455b1fb2e"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/manage-hyperlinks/"
+source_markdown_url: "https://docs.aspose.com/slides/java/manage-hyperlinks.md"
+source_snapshot_sha256: "980c261f54da29c4a54b4f803f16dd228881e7e2131214c2bbfb3eb186f2428e"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+import "./_remote-markdown.css";
+
+a
+
+> Add, format, update, and remove hyperlinks in PowerPoint and OpenDocument presentations with Aspose.Slides for Java, using Java examples.
+> 9
+
+## **Introduction**
+
+A hyperlink connects presentation content to a website or a location within the presentation. In PowerPoint, hyperlinks commonly serve two purposes:
+
+- Open a website from text, a shape, or a media frame.
+- Navigate to another slide, for example, from a table of contents.
+
+Aspose.Slides for Java lets you add these links, control their appearance and sound, update their properties, and remove them. The examples below show how to work with hyperlinks on individual elements and how to access hyperlinks at the presentation, slide, or text-frame level.
+
+You can also edit presentations with the <a href="https://products.aspose.app/slides/editor" target="_blank" rel="nofollow noopener noreferrer">free online Aspose PowerPoint editor</a>.
+
+## **Add URL Hyperlinks**
+
+You can assign a website URL to text, a shape, or a media frame. The element to which you assign the hyperlink determines the clickable area: a text portion links the selected text, while a shape or frame links the slide object.
+
+For presentations containing relative hyperlinks, see [Manage the Hyperlink Base](/java/slides/presentation-properties/#manage-the-hyperlink-base) to read, change, or clear the document-level base.
+
+### **Add URL Hyperlinks to Text**
+
+To link text to a website, pass a <a href="https://reference.aspose.com/slides/java/com.aspose.slides/hyperlink/" target="_blank" rel="nofollow noopener noreferrer">Hyperlink</a> to the text portion's <a href="https://reference.aspose.com/slides/java/com.aspose.slides/portionformat/#setHyperlinkClick-com.aspose.slides.IHyperlink-" target="_blank" rel="nofollow noopener noreferrer">setHyperlinkClick</a> method, as shown below. Only that portion of text becomes clickable.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    IAutoShape textShape = presentation.getSlides().get_Item(0).getShapes().addAutoShape(ShapeType.Rectangle, 100, 100, 600, 50, false);
+    textShape.addTextFrame("Aspose: File Format APIs");
+    IPortionFormat portionFormat = textShape.getTextFrame().getParagraphs().get_Item(0).getPortions().get_Item(0).getPortionFormat();
+    portionFormat.setHyperlinkClick(new Hyperlink("https://www.aspose.com/"));
+    portionFormat.getHyperlinkClick().setTooltip("Explore Aspose file format APIs");
+    portionFormat.setFontHeight(32);
+
+    presentation.save("presentation-out.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+### **Add URL Hyperlinks to Shapes and Media Frames**
+
+Call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/shape/#setHyperlinkClick-com.aspose.slides.IHyperlink-" target="_blank" rel="nofollow noopener noreferrer">setHyperlinkClick</a> on the rectangle to make its entire area clickable. Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/#setTooltip-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">setTooltip</a> to show readers a hint about the destination when they hover over the rectangle. Both methods also apply to picture, audio, and video frames.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    IAutoShape shape = presentation.getSlides().get_Item(0).getShapes().addAutoShape(ShapeType.Rectangle, 100, 100, 600, 50);
+
+    shape.setHyperlinkClick(new Hyperlink("https://www.aspose.com/"));
+    shape.getHyperlinkClick().setTooltip("Explore Aspose file format APIs");
+
+    presentation.save("presentation-out.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Use Hyperlinks to Create a Table of Contents**
+
+Internal hyperlinks let readers jump from a table of contents to a specific slide. The following example uses <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkmanager/#setInternalHyperlinkClick-com.aspose.slides.ISlide-" target="_blank" rel="nofollow noopener noreferrer">setInternalHyperlinkClick</a> to link the "Page 2" text on the first slide to the second slide.
+
+```java
+import com.aspose.slides.*;
+import java.awt.Color;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide firstSlide = presentation.getSlides().get_Item(0);
+    ISlide secondSlide = presentation.getSlides().addEmptySlide(firstSlide.getLayoutSlide());
+
+    IAutoShape tableOfContents = firstSlide.getShapes().addAutoShape(ShapeType.Rectangle, 40, 40, 300, 100);
+    tableOfContents.getFillFormat().setFillType(FillType.NoFill);
+    tableOfContents.getLineFormat().getFillFormat().setFillType(FillType.NoFill);
+    tableOfContents.getTextFrame().getParagraphs().clear();
+
+    Paragraph paragraph = new Paragraph();
+    paragraph.getParagraphFormat().getDefaultPortionFormat().getFillFormat().setFillType(FillType.Solid);
+    paragraph.getParagraphFormat().getDefaultPortionFormat().getFillFormat().getSolidFillColor().setColor(Color.BLACK);
+    paragraph.setText("Title of slide 2 .......... ");
+
+    Portion linkPortion = new Portion();
+    linkPortion.setText("Page 2");
+    linkPortion.getPortionFormat().getHyperlinkManager().setInternalHyperlinkClick(secondSlide);
+
+    paragraph.getPortions().add(linkPortion);
+    tableOfContents.getTextFrame().getParagraphs().add(paragraph);
+
+    presentation.save("link_to_slide.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Format Hyperlinks**
+
+You can change the color of linked text, play or stop a sound when a reader activates a link, and set the tooltip that appears on hover.
+
+### **Color**
+
+The <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/#setColorSource-int-" target="_blank" rel="nofollow noopener noreferrer">setColorSource</a> method of <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/" target="_blank" rel="nofollow noopener noreferrer">IHyperlink</a> determines whether a hyperlink uses the presentation's hyperlink color or the text portion's formatting. To apply a custom text color, select <a href="https://reference.aspose.com/slides/java/com.aspose.slides/hyperlinkcolorsource/" target="_blank" rel="nofollow noopener noreferrer">HyperlinkColorSource.PortionFormat</a> and set the portion's fill color. This feature was introduced in PowerPoint 2019; older versions do not apply this setting.
+
+In this example, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/#setColorSource-int-" target="_blank" rel="nofollow noopener noreferrer">setColorSource</a> makes the first link use the text portion's red fill. The second link keeps the presentation's hyperlink color.
+
+```java
+import com.aspose.slides.*;
+import java.awt.Color;
+
+Presentation presentation = new Presentation();
+try {
+    IAutoShape coloredShape = presentation.getSlides().get_Item(0).getShapes().addAutoShape(ShapeType.Rectangle, 100, 100, 450, 50, false);
+    coloredShape.addTextFrame("This hyperlink uses a custom color.");
+    IPortionFormat coloredPortionFormat = coloredShape.getTextFrame().getParagraphs().get_Item(0).getPortions().get_Item(0).getPortionFormat();
+    coloredPortionFormat.setHyperlinkClick(new Hyperlink("https://www.aspose.com/"));
+    coloredPortionFormat.getHyperlinkClick().setColorSource(HyperlinkColorSource.PortionFormat);
+    coloredPortionFormat.getFillFormat().setFillType(FillType.Solid);
+    coloredPortionFormat.getFillFormat().getSolidFillColor().setColor(Color.RED);
+
+    IAutoShape defaultShape = presentation.getSlides().get_Item(0).getShapes().addAutoShape(ShapeType.Rectangle, 100, 200, 450, 50, false);
+    defaultShape.addTextFrame("This hyperlink uses the default color.");
+    defaultShape.getTextFrame().getParagraphs().get_Item(0).getPortions().get_Item(0).getPortionFormat().setHyperlinkClick(new Hyperlink("https://www.aspose.com/"));
+
+    presentation.save("presentation-out-hyperlink.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+### **Sound**
+
+A hyperlink can play a sound when activated or stop a sound that is already playing. Use the following methods to configure these behaviors:
+
+- <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/#setSound-com.aspose.slides.IAudio-" target="_blank" rel="nofollow noopener noreferrer">IHyperlink.setSound</a> specifies the audio associated with the hyperlink.
+- <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/#setStopSoundOnClick-boolean-" target="_blank" rel="nofollow noopener noreferrer">IHyperlink.setStopSoundOnClick</a> controls whether activating the hyperlink stops the previous sound.
+
+#### **Add a Hyperlink Sound**
+
+The button on the first slide uses <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/#setSound-com.aspose.slides.IAudio-" target="_blank" rel="nofollow noopener noreferrer">IHyperlink.setSound</a> to play audio from `sampleaudio.wav` when the reader clicks to advance. On the second slide, a separate button uses <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/#setStopSoundOnClick-boolean-" target="_blank" rel="nofollow noopener noreferrer">IHyperlink.setStopSoundOnClick</a> to stop playback and keep the reader on that slide.
+
+```java
+import com.aspose.slides.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+Presentation presentation = new Presentation();
+try {
+    byte[] audioData = Files.readAllBytes(Paths.get("sampleaudio.wav"));
+    IAudio hyperlinkSound = presentation.getAudios().addAudio(audioData);
+
+    ISlide firstSlide = presentation.getSlides().get_Item(0);
+
+    IAutoShape playButton = firstSlide.getShapes().addAutoShape(ShapeType.SoundButton, 100, 100, 100, 50);
+    playButton.setHyperlinkClick(Hyperlink.getNextSlide());
+
+    if (!playButton.getHyperlinkClick().getStopSoundOnClick() && playButton.getHyperlinkClick().getSound() == null)
+    {
+        playButton.getHyperlinkClick().setSound(hyperlinkSound);
+    }
+
+    ISlide secondSlide = presentation.getSlides().addEmptySlide(firstSlide.getLayoutSlide());
+
+    IAutoShape stopButton = secondSlide.getShapes().addAutoShape(ShapeType.Rectangle, 100, 100, 100, 50);
+    stopButton.setHyperlinkClick(Hyperlink.getNoAction());
+
+    stopButton.getHyperlinkClick().setStopSoundOnClick(true);
+
+    presentation.save("hyperlink-sound.pptx", SaveFormat.Pptx);
+} catch (IOException exception) {
+    System.out.println("Unable to read the audio file: " + exception.getMessage());
+} finally {
+    presentation.dispose();
+}
+```
+
+#### **Extract a Hyperlink Sound**
+
+The following example opens the presentation created above and reads the first shape's hyperlink audio into memory through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/#getSound--" target="_blank" rel="nofollow noopener noreferrer">getSound</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iaudio/#getBinaryData--" target="_blank" rel="nofollow noopener noreferrer">getBinaryData</a>.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("hyperlink-sound.pptx");
+try {
+    if (presentation.getSlides().size() > 0 && presentation.getSlides().get_Item(0).getShapes().size() > 0) {
+        IHyperlink hyperlink = presentation.getSlides().get_Item(0).getShapes().get_Item(0).getHyperlinkClick();
+        IAudio sound = hyperlink == null ? null : hyperlink.getSound();
+        if (sound != null) {
+            byte[] audioData = sound.getBinaryData();
+            System.out.println("Extracted " + audioData.length + " bytes of hyperlink audio.");
+        } else {
+            System.out.println("The first shape has no hyperlink sound.");
+        }
+    } else {
+        System.out.println("The presentation has no first slide or shape to inspect.");
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+### **Tooltip and Interaction Settings**
+
+You can call the following <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/" target="_blank" rel="nofollow noopener noreferrer">IHyperlink</a> methods after assigning a hyperlink to text or a shape:
+
+- <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/#setTooltip-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">setTooltip</a> sets the text that a viewer can display as a hint for the link.
+- <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/#setTargetFrame-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">setTargetFrame</a> specifies the target frame within a parent HTML frameset, when applicable.
+- <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/#setHistory-boolean-" target="_blank" rel="nofollow noopener noreferrer">setHistory</a> controls whether activating the link adds its destination to the list of viewed hyperlinks.
+- <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/#setHighlightClick-boolean-" target="_blank" rel="nofollow noopener noreferrer">setHighlightClick</a> controls whether the hyperlink is highlighted when clicked.
+
+## **Remove Hyperlinks from Presentations**
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkqueries/#getAnyHyperlinks--" target="_blank" rel="nofollow noopener noreferrer">getAnyHyperlinks</a> to collect hyperlink containers, including text-portion links, before changing them. The following example removes both activation types from the first slide. To remove only one type, call only <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkmanager/#removeHyperlinkClick--" target="_blank" rel="nofollow noopener noreferrer">removeHyperlinkClick</a> or <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkmanager/#removeHyperlinkMouseOver--" target="_blank" rel="nofollow noopener noreferrer">removeHyperlinkMouseOver</a>; removing a click action does not remove its mouse-over counterpart.
+
+```java
+import com.aspose.slides.*;
+import java.util.ArrayList;
+import java.util.List;
+
+Presentation presentation = new Presentation("pres.pptx");
+try {
+    if (presentation.getSlides().size() > 0) {
+        List<IHyperlinkContainer> containers = new ArrayList<>();
+        for (IHyperlinkContainer container : presentation.getSlides().get_Item(0).getHyperlinkQueries().getAnyHyperlinks()) {
+            containers.add(container);
+        }
+        for (IHyperlinkContainer container : containers) {
+            container.getHyperlinkManager().removeHyperlinkClick();
+            container.getHyperlinkManager().removeHyperlinkMouseOver();
+        }
+        presentation.save("pres-removed-hyperlinks.pptx", SaveFormat.Pptx);
+    } else {
+        System.out.println("The presentation has no slides to process.");
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+For unconditional removal, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkqueries/#removeAllHyperlinks--" target="_blank" rel="nofollow noopener noreferrer">removeAllHyperlinks</a> removes both activation types in the selected scope in one call. For selective cleanup and coverage of masters, layouts, and notes, see [Report, Sanitize, and Verify Hyperlinks](/java/slides/manage-hyperlinks/#report-sanitize-and-verify-hyperlinks).
+
+### **Clear Hyperlinks Before Replacing SmartArt Text**
+
+When you replace a paragraph in an existing SmartArt node, clearing its text portions can leave an old hyperlink in effect. Retrieve the paragraph through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ismartartnode/#getTextFrame--" target="_blank" rel="nofollow noopener noreferrer">ISmartArtNode.getTextFrame</a>. Before clearing its portions, call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/itextframe/#getHyperlinkQueries--" target="_blank" rel="nofollow noopener noreferrer">getHyperlinkQueries</a> on the text frame of the node shape that displays the paragraph, then call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkqueries/#removeAllHyperlinks--" target="_blank" rel="nofollow noopener noreferrer">removeAllHyperlinks</a> on the returned object. This removes every hyperlink in that frame, including links in its other paragraphs.
+
+The example assumes that the third shape on the first slide of `SmartArtHyperlink.pptx` is a SmartArt graphic. It replaces the first paragraph of the fourth node. In this presentation, the node's first shape displays that paragraph.
+
+After adding both portions, the example reads their effective formatting with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iportionformat/#getEffective--" target="_blank" rel="nofollow noopener noreferrer">getEffective</a>. On that formatting, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iportionformateffectivedata/#getHyperlinkClick--" target="_blank" rel="nofollow noopener noreferrer">getHyperlinkClick</a> returns the new hyperlink for the first portion and `null` for the second.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("SmartArtHyperlink.pptx");
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    ISmartArt smartArt = (ISmartArt) slide.getShapes().get_Item(2);
+    ISmartArtNode node = smartArt.getAllNodes().get_Item(3);
+    IParagraph paragraph = node.getTextFrame().getParagraphs().get_Item(0);
+
+    node.getShapes().get_Item(0).getTextFrame().getHyperlinkQueries().removeAllHyperlinks();
+    paragraph.getPortions().clear();
+
+    IPortion link = new Portion("New reference");
+    link.getPortionFormat().setHyperlinkClick(new Hyperlink("https://example.com/new"));
+    paragraph.getPortions().add(link);
+    IPortion text = new Portion(" (updated)");
+    paragraph.getPortions().add(text);
+
+    System.out.println(link.getPortionFormat().getEffective().getHyperlinkClick().getExternalUrl()); // https://example.com/new
+    System.out.println(text.getPortionFormat().getEffective().getHyperlinkClick()); // null
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Build a Complete Hyperlink Inventory**
+
+Before distributing a presentation, inventory its interactive actions as well as its web links. <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkqueries/#getAnyHyperlinks--" target="_blank" rel="nofollow noopener noreferrer">getAnyHyperlinks</a> returns <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkcontainer/" target="_blank" rel="nofollow noopener noreferrer">IHyperlinkContainer</a> objects, not a flat list of URL strings. Inspect both <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkcontainer/#getHyperlinkClick--" target="_blank" rel="nofollow noopener noreferrer">getHyperlinkClick</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkcontainer/#getHyperlinkMouseOver--" target="_blank" rel="nofollow noopener noreferrer">getHyperlinkMouseOver</a> on each container. They are independent: the same container can expose both actions, so a complete report needs up to two rows per container.
+
+Scanning only shape-level hyperlinks can miss links attached to text portions. Query the appropriate scope instead, and retain the returned containers so that you can later update or remove their actions.
+
+### **Query Presentation, Slide, and Text-Frame Scopes**
+
+The <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkqueries/" target="_blank" rel="nofollow noopener noreferrer">IHyperlinkQueries</a> interface is available through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ipresentation/#getHyperlinkQueries--" target="_blank" rel="nofollow noopener noreferrer">IPresentation.getHyperlinkQueries</a>, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ibaseslide/#getHyperlinkQueries--" target="_blank" rel="nofollow noopener noreferrer">IBaseSlide.getHyperlinkQueries</a>, and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/itextframe/#getHyperlinkQueries--" target="_blank" rel="nofollow noopener noreferrer">ITextFrame.getHyperlinkQueries</a>. Each scope supports the same queries:
+
+- <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkqueries/#getHyperlinkClicks--" target="_blank" rel="nofollow noopener noreferrer">getHyperlinkClicks</a> returns containers with a click action.
+- <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkqueries/#getHyperlinkMouseOvers--" target="_blank" rel="nofollow noopener noreferrer">getHyperlinkMouseOvers</a> returns containers with a mouse-over action.
+- <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkqueries/#getAnyHyperlinks--" target="_blank" rel="nofollow noopener noreferrer">getAnyHyperlinks</a> returns containers with either or both actions.
+
+This example assigns click and mouse-over actions to a shape and its text, and a macro action to a separate button. It compares the number of containers returned by <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkqueries/#getAnyHyperlinks--" target="_blank" rel="nofollow noopener noreferrer">getAnyHyperlinks</a> with the counts for each activation type. A text-frame query counts only links in the text. The enclosing shape's own actions appear in the slide and presentation queries.
+
+```java
+import com.aspose.slides.*;
+
+class QueryCounts {
+    void print(String scope, IHyperlinkQueries queries) {
+        int clickCount = queries.getHyperlinkClicks().size();
+        int mouseOverCount = queries.getHyperlinkMouseOvers().size();
+        int anyCount = queries.getAnyHyperlinks().size();
+        System.out.println(scope + ": click=" + clickCount + ", mouse-over=" + mouseOverCount + ", any=" + anyCount);
+    }
+}
+
+QueryCounts counts = new QueryCounts();
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+    ISlide destination = presentation.getSlides().addEmptySlide(slide.getLayoutSlide());
+    IAutoShape shape = slide.getShapes().addAutoShape(ShapeType.Rectangle, 20, 20, 400, 60);
+    shape.getTextFrame().setText("Click the text to go to slide 2");
+    shape.getHyperlinkManager().setExternalHyperlinkClick("https://example.com/");
+    shape.getHyperlinkClick().setTooltip("Public website");
+    shape.getHyperlinkManager().setExternalHyperlinkMouseOver("file:///C:/private/report.xlsx");
+
+    IPortionFormat portionFormat = shape.getTextFrame().getParagraphs().get_Item(0).getPortions().get_Item(0).getPortionFormat();
+    portionFormat.getHyperlinkManager().setInternalHyperlinkClick(destination);
+    portionFormat.getHyperlinkManager().setExternalHyperlinkMouseOver("https://example.com/help");
+    IAutoShape macroButton = slide.getShapes().addAutoShape(ShapeType.Rectangle, 20, 120, 200, 60);
+    macroButton.getHyperlinkManager().setMacroHyperlinkClick("ReviewPresentation");
+
+    counts.print("Presentation", presentation.getHyperlinkQueries());
+    counts.print("Slide 1", slide.getHyperlinkQueries());
+    counts.print("Text frame", shape.getTextFrame().getHyperlinkQueries());
+    presentation.save("hyperlink-audit-input.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+For this example, presentation and slide queries each report three click containers, two mouse-over containers, and three containers with either action. The text-frame query reports one container in each category.
+
+### **Classify Actions and Destinations**
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/#getActionType--" target="_blank" rel="nofollow noopener noreferrer">IHyperlink.getActionType</a> to interpret an action before interpreting its destination. The <a href="https://reference.aspose.com/slides/java/com.aspose.slides/hyperlinkactiontype/" target="_blank" rel="nofollow noopener noreferrer">HyperlinkActionType</a> values cover more than web navigation:
+
+<div className="docs-owner-markdown-table">
+
+| Values | Meaning for an audit |
+| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `Hyperlink` | External hyperlink; inspect the URL and its scheme. |
+| `JumpSpecificSlide` | Internal navigation to a particular slide. |
+| `JumpFirstSlide`, `JumpPreviousSlide`, `JumpNextSlide`, `JumpLastSlide`, `JumpLastViewedSlide` | Built-in slideshow navigation, resolved in slideshow context. |
+| `JumpEndShow`, `StartCustomSlideShow` | End the current show or start a custom show. |
+| `StartMacro` | Execute a macro. |
+| `StartProgram` | Launch a program. |
+| `OpenFile`, `OpenPresentation` | Open a file or another presentation; review separately from web URLs. |
+| `StartStopMedia` | Start or stop media playback. |
+| `NoAction`, `Unknown` | No navigation action, or an unrecognized action requiring review. |
+
+</div>
+
+Read external destinations from <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/#getExternalUrl--" target="_blank" rel="nofollow noopener noreferrer">getExternalUrl</a> and specific internal destinations from <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/#getTargetSlide--" target="_blank" rel="nofollow noopener noreferrer">getTargetSlide</a>. Internal actions and built-in commands may have no external URL; an empty URL does not mean that the container has no action. Preserve the value returned by <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/#getExternalUrlOriginal--" target="_blank" rel="nofollow noopener noreferrer">getExternalUrlOriginal</a> when it differs from the normalized URL, and include the tooltip returned by <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/#getTooltip--" target="_blank" rel="nofollow noopener noreferrer">getTooltip</a> when available.
+
+### **Report, Sanitize, and Verify Hyperlinks**
+
+This example opens the presentation from the preceding example and writes one JSON record per action. It uses <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkqueries/#getAnyHyperlinks--" target="_blank" rel="nofollow noopener noreferrer">getAnyHyperlinks</a> to collect containers on ordinary slides, masters, layouts, and notes, including the notes and handout masters when present. It uses reference equality to count each container once, applies the policy described below, and reopens the saved presentation to check both click and mouse-over actions.
+
+The report records a one-based slide index and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ibaseslide/#getSlideId--" target="_blank" rel="nofollow noopener noreferrer">getSlideId</a> where available. <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islidecomponent/#getSlide--" target="_blank" rel="nofollow noopener noreferrer">ISlideComponent.getSlide</a> supplies the owning slide for supported containers. Masters, layouts, and notes have no ordinary slide index and are identified by their scope. Shape containers and text-portion formatting containers are labeled separately; other container types retain their runtime type name. Each container gets a report-local ID so its two actions can be correlated. The report stores action types as the integer constants defined by the Java enumeration.
+
+This deliberately restrictive application policy allows only absolute HTTPS URLs and valid internal slide targets. It rejects macros, programs, file actions, other slideshow actions, unknown actions, and other URL schemes. These rejections are policy decisions, not an Aspose.Slides safety verdict. HTTPS alone does not establish trust: add host allowlists and other checks for your application. Both original and normalized external URLs are checked. The example audits metadata without following links or running actions.
+
+For remediation, the container's <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkcontainer/#getHyperlinkManager--" target="_blank" rel="nofollow noopener noreferrer">getHyperlinkManager</a> supports <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkmanager/#setExternalHyperlinkClick-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">setExternalHyperlinkClick</a>, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkmanager/#removeHyperlinkClick--" target="_blank" rel="nofollow noopener noreferrer">removeHyperlinkClick</a>, and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkmanager/#removeHyperlinkMouseOver--" target="_blank" rel="nofollow noopener noreferrer">removeHyperlinkMouseOver</a>. Here, prohibited external click links are replaced with a fixed HTTPS landing page; other prohibited clicks and prohibited mouse-over actions are removed independently. Set `replaceExternalClicks` to `false` to remove all policy violations instead. Choose an application-owned replacement page before deployment.
+
+The report's export flag uses a conservative PDF review policy: flag mouse-over actions and anything other than an external link or specific slide jump as potentially unsupported. It is a review hint, not a capability test or a guarantee that unflagged links will survive export. Supported [PDF](/java/slides/convert-powerpoint-to-pdf/) and [HTML](/java/slides/convert-powerpoint-to-html/) exports may preserve hyperlinks, depending on the action, export options, and viewer. Raster [images](/java/slides/convert-powerpoint-to-png/) and [video](/java/slides/convert-powerpoint-to-video/) cannot preserve interactive hyperlinks; flag every action when auditing for those outputs.
+
+```java
+import com.aspose.slides.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+class HyperlinkAudit {
+    Integer slideIndex(IPresentation presentation, IBaseSlide slide) {
+        for (int index = 0; index < presentation.getSlides().size(); index++) {
+            if (presentation.getSlides().get_Item(index) == slide) return index + 1;
+        }
+        return null;
+    }
+
+    boolean isHttps(String value) {
+        if (value == null || value.isEmpty()) return false;
+        try {
+            URI uri = new URI(value);
+            return uri.isAbsolute() && "https".equalsIgnoreCase(uri.getScheme()) && uri.getHost() != null;
+        } catch (URISyntaxException exception) {
+            return false;
+        }
+    }
+
+    String policyViolation(IHyperlink link) {
+        if (link == null) return null;
+        if (link.getActionType() == HyperlinkActionType.JumpSpecificSlide) {
+            return link.getTargetSlide() == null ? "Missing target slide" : null;
+        }
+        if (link.getActionType() != HyperlinkActionType.Hyperlink) return "Action is not allowed";
+        if (!isHttps(link.getExternalUrl())) return "Normalized URL is not absolute HTTPS";
+        String original = link.getExternalUrlOriginal();
+        if (original != null && !original.isEmpty() && !isHttps(original)) return "Original URL is not absolute HTTPS";
+        return null;
+    }
+
+    void addScope(List<IHyperlinkContainer> found, IBaseSlide slide) {
+        if (slide != null) {
+            for (IHyperlinkContainer container : slide.getHyperlinkQueries().getAnyHyperlinks()) {
+                found.add(container);
+            }
+        }
+    }
+
+    List<IHyperlinkContainer> collectContainers(IPresentation presentation) {
+        List<IHyperlinkContainer> found = new ArrayList<>();
+        for (IHyperlinkContainer container : presentation.getHyperlinkQueries().getAnyHyperlinks()) {
+            found.add(container);
+        }
+        for (IMasterSlide master : presentation.getMasters()) addScope(found, master);
+        for (ILayoutSlide layout : presentation.getLayoutSlides()) addScope(found, layout);
+        for (ISlide slide : presentation.getSlides()) addScope(found, slide.getNotesSlideManager().getNotesSlide());
+        addScope(found, presentation.getMasterNotesSlideManager().getMasterNotesSlide());
+        addScope(found, presentation.getMasterHandoutSlideManager().getMasterHandoutSlide());
+        Set<IHyperlinkContainer> seen = Collections.newSetFromMap(new IdentityHashMap<IHyperlinkContainer, Boolean>());
+        List<IHyperlinkContainer> unique = new ArrayList<>();
+        for (IHyperlinkContainer container : found) {
+            if (seen.add(container)) unique.add(container);
+        }
+        return unique;
+    }
+
+    void addRow(List<Map<String, Object>> rows, IPresentation presentation, IHyperlink link, String activation, IHyperlinkContainer container, int containerId) {
+        if (link == null) return;
+        IBaseSlide ownerSlide = container instanceof ISlideComponent ? ((ISlideComponent) container).getSlide() : null;
+        ISlide targetSlide = link.getTargetSlide();
+        String violation = policyViolation(link);
+        String ownerType = container instanceof IShape ? "Shape" : container instanceof IPortionFormat ? "Text portion" : container.getClass().getSimpleName();
+        boolean ordinaryAction = link.getActionType() == HyperlinkActionType.Hyperlink || link.getActionType() == HyperlinkActionType.JumpSpecificSlide;
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("ContainerId", containerId);
+        row.put("SlideIndex", slideIndex(presentation, ownerSlide));
+        row.put("SlideId", ownerSlide == null ? null : ownerSlide.getSlideId());
+        row.put("Scope", ownerSlide == null ? null : ownerSlide.getClass().getSimpleName());
+        row.put("OwnerType", ownerType);
+        row.put("Activation", activation);
+        row.put("ActionType", link.getActionType());
+        row.put("ExternalUrl", link.getExternalUrl());
+        row.put("TargetSlideIndex", slideIndex(presentation, targetSlide));
+        row.put("TargetSlideId", targetSlide == null ? null : targetSlide.getSlideId());
+        row.put("Tooltip", link.getTooltip());
+        row.put("OriginalExternalUrl", Objects.equals(link.getExternalUrlOriginal(), link.getExternalUrl()) ? null : link.getExternalUrlOriginal());
+        row.put("PotentiallyUnsafe", violation != null);
+        row.put("PolicyViolation", violation);
+        row.put("TargetExport", "PDF");
+        row.put("PotentiallyUnsupportedByExport", "mouse-over".equals(activation) || !ordinaryAction);
+        rows.add(row);
+    }
+
+    // Serialize this report's flat rows without an additional JSON dependency.
+    String jsonValue(Object value) {
+        if (value == null) return "null";
+        if (value instanceof Number || value instanceof Boolean) return value.toString();
+        StringBuilder escaped = new StringBuilder("\"");
+        for (char character : value.toString().toCharArray()) {
+            if (character == '"' || character == '\\') {
+                escaped.append('\\').append(character);
+            } else if (character < 0x20 || Character.isSurrogate(character)) {
+                escaped.append(String.format("\\u%04x", (int) character));
+            } else {
+                escaped.append(character);
+            }
+        }
+        return escaped.append('"').toString();
+    }
+
+    String toJson(List<Map<String, Object>> rows) {
+        List<String> objects = new ArrayList<>();
+        for (Map<String, Object> row : rows) {
+            List<String> fields = new ArrayList<>();
+            for (Map.Entry<String, Object> field : row.entrySet()) {
+                fields.add("    " + jsonValue(field.getKey()) + ": " + jsonValue(field.getValue()));
+            }
+            objects.add("  {\n" + String.join(",\n", fields) + "\n  }");
+        }
+        return "[\n" + String.join(",\n", objects) + "\n]\n";
+    }
+}
+
+boolean replaceExternalClicks = true;
+String replacementUrl = "https://example.com/blocked-link";
+HyperlinkAudit audit = new HyperlinkAudit();
+Presentation presentation = new Presentation("hyperlink-audit-input.pptx");
+try {
+    List<IHyperlinkContainer> containers = audit.collectContainers(presentation);
+    List<Map<String, Object>> rows = new ArrayList<>();
+    for (int index = 0; index < containers.size(); index++) {
+        IHyperlinkContainer container = containers.get(index);
+        audit.addRow(rows, presentation, container.getHyperlinkClick(), "click", container, index + 1);
+        audit.addRow(rows, presentation, container.getHyperlinkMouseOver(), "mouse-over", container, index + 1);
+    }
+    String json = audit.toJson(rows);
+    byte[] jsonData = json.getBytes(StandardCharsets.UTF_8);
+    Files.write(Paths.get("hyperlink-audit.json"), jsonData);
+
+    for (IHyperlinkContainer container : containers) {
+        IHyperlink click = container.getHyperlinkClick();
+        if (audit.policyViolation(click) != null) {
+            if (replaceExternalClicks && click.getActionType() == HyperlinkActionType.Hyperlink) {
+                container.getHyperlinkManager().setExternalHyperlinkClick(replacementUrl);
+            } else {
+                container.getHyperlinkManager().removeHyperlinkClick();
+            }
+        }
+        if (audit.policyViolation(container.getHyperlinkMouseOver()) != null) {
+            container.getHyperlinkManager().removeHyperlinkMouseOver();
+        }
+    }
+    presentation.save("hyperlink-sanitized.pptx", SaveFormat.Pptx);
+
+    Presentation reopened = new Presentation("hyperlink-sanitized.pptx");
+    try {
+        List<IHyperlinkContainer> remainingContainers = audit.collectContainers(reopened);
+        int violations = 0;
+        for (IHyperlinkContainer container : remainingContainers) {
+            if (audit.policyViolation(container.getHyperlinkClick()) != null) violations++;
+            if (audit.policyViolation(container.getHyperlinkMouseOver()) != null) violations++;
+        }
+        System.out.println("Audit rows: " + rows.size() + "; prohibited actions after reopening: " + violations);
+        if (violations != 0) {
+            System.out.println("Verification failed: do not distribute the saved presentation.");
+        }
+    } finally {
+        reopened.dispose();
+    }
+} catch (IOException exception) {
+    System.out.println("Unable to write the audit report: " + exception.getMessage());
+} finally {
+    presentation.dispose();
+}
+```
+
+With the input created above, the report contains five action rows. The file mouse-over link and macro click are removed, while the HTTPS links and internal slide navigation remain. The verification prints zero prohibited actions. An input containing a prohibited external click URL also exercises the replacement branch. A container with an allowed click and a prohibited mouse-over keeps its click action.
+
+This selective cleanup differs from <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlinkqueries/#removeAllHyperlinks--" target="_blank" rel="nofollow noopener noreferrer">removeAllHyperlinks</a>, which removes both activation types throughout the selected scope regardless of policy. Verification here checks hyperlink actions only; it does not remove embedded VBA projects, OLE objects, or other active content, and it does not validate an exported PDF or HTML file.
+
+## **FAQ**
+
+**How can I link to a section or its first slide?**
+
+Sections in PowerPoint group slides, but an internal hyperlink targets an individual slide. To create navigation to a section, link to the first slide in that section.
+
+**Can I attach a hyperlink to master slide elements so it works on all slides?**
+
+Yes. Master slide and layout elements support hyperlinks. Links on these elements are available during the slide show on slides that use the corresponding master or layout.
+
+**Will hyperlinks be preserved when exporting to PDF, HTML, images, or video?**
+
+Supported PDF and HTML exports may preserve hyperlinks; raster images and video cannot. See the export considerations in [Report, Sanitize, and Verify Hyperlinks](/java/slides/manage-hyperlinks/#report-sanitize-and-verify-hyperlinks).
+
+## Related articles
+
+- <a href="https://docs.aspose.com/slides/java/examples/elements/hyperlink/" target="_blank" rel="nofollow noopener noreferrer">Hyperlink</a>

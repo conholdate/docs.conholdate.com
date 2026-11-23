@@ -1,0 +1,585 @@
+---
+title: "Customize Chart Axes in Presentations Using Java"
+sidebar_label: "Customize Chart Axes in Presentations Using Java"
+sidebar_key: "java-slides-chart-axis"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/chart-axis.md"
+source_commit: ""
+source_sha256: "810ae73758ea1e6fc5c37d79054077da413dc31beee0e0a32b31606fd0310f18"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/chart-axis/"
+source_markdown_url: "https://docs.aspose.com/slides/java/chart-axis.md"
+source_snapshot_sha256: "6523701d1f8ade4acd0a0fcac285bd20d8313e48626df4142b36f012087b53cd"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+import "./_remote-markdown.css";
+
+a
+
+> Discover how to use Aspose.Slides for Java to customize chart axes in PowerPoint presentations for reports and visualizations.
+> 0
+
+## **Overview**
+
+This article explains how to customize chart axes with Aspose.Slides for Java. It covers calculated axis values, switching chart rows and columns, axis visibility, category label and tick-mark intervals, date categories and formatting, title rotation, axis positioning, display units, and logarithmic scaling.
+
+## **Get the Max Values on the Vertical Axis on Charts**
+
+Create a <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> and add an area chart with default data. Call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/chart/#validateChartLayout--" target="_blank" rel="nofollow noopener noreferrer">validateChartLayout</a> before reading calculated axis values so that the chart layout is up to date.
+
+Read <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#getActualMaxValue--" target="_blank" rel="nofollow noopener noreferrer">getActualMaxValue</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#getActualMinValue--" target="_blank" rel="nofollow noopener noreferrer">getActualMinValue</a> for the axis limits, and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#getActualMajorUnit--" target="_blank" rel="nofollow noopener noreferrer">getActualMajorUnit</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#getActualMinorUnit--" target="_blank" rel="nofollow noopener noreferrer">getActualMinorUnit</a> for the tick intervals. <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#getActualMajorUnitScale--" target="_blank" rel="nofollow noopener noreferrer">getActualMajorUnitScale</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#getActualMinorUnitScale--" target="_blank" rel="nofollow noopener noreferrer">getActualMinorUnitScale</a> provide time-unit scales, which are relevant to date axes. The example stores these values in local variables and saves the chart.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IChart chart = slide.getShapes().addChart(ChartType.Area, 100, 100, 500, 350);
+    chart.validateChartLayout();
+
+    double maxValue = chart.getAxes().getVerticalAxis().getActualMaxValue();
+    double minValue = chart.getAxes().getVerticalAxis().getActualMinValue();
+
+    double majorUnit = chart.getAxes().getVerticalAxis().getActualMajorUnit();
+    double minorUnit = chart.getAxes().getVerticalAxis().getActualMinorUnit();
+
+    int majorUnitScale = chart.getAxes().getVerticalAxis().getActualMajorUnitScale();
+    int minorUnitScale = chart.getAxes().getVerticalAxis().getActualMinorUnitScale();
+
+    presentation.save("AxisValues_out.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Swap the Data between Axes**
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/chartdata/#switchRowColumn--" target="_blank" rel="nofollow noopener noreferrer">switchRowColumn</a> to exchange the roles of series and categories in chart data. Each former category becomes a series, and each former series becomes a category. This changes how the data is grouped; it does not exchange the horizontal and vertical axes. The example uses <a href="https://reference.aspose.com/slides/java/com.aspose.slides/chartdata/#setRange-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">setRange</a> to bind the default data to `Sheet1!A1:D5`, including the header row and category column, before switching rows and columns. It saves a chart with four series and three categories.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IChart chart = slide.getShapes().addChart(ChartType.ClusteredColumn, 100, 100, 400, 300);
+    chart.getChartData().setRange("Sheet1!A1:D5");
+    chart.getChartData().switchRowColumn();
+
+    presentation.save("SwitchChartRowColumns_out.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Reverse the Plotting Order of an Axis**
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setPlotOrderReversed-boolean-" target="_blank" rel="nofollow noopener noreferrer">setPlotOrderReversed</a> to reverse a category or value axis. For example, a horizontal bar chart can show project stages from top to bottom in the same order as the worksheet: Planning, Development, Testing. Reversing an axis changes the plotting direction; it does not sort or rearrange the workbook data. By comparison, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/chartdata/#switchRowColumn--" target="_blank" rel="nofollow noopener noreferrer">switchRowColumn</a> exchanges the roles of series and categories.
+
+The following example creates a horizontal bar chart with three stages and one series. It saves a presentation with three slides: normal order, reversed categories, and reversed values. Each copy uses the same dataset, and only one axis is reversed on each copy.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IChart chart = slide.getShapes().addChart(ChartType.ClusteredBar, 50, 40, 620, 320);
+    chart.setLegend(false);
+
+    chart.getChartData().getCategories().clear();
+    chart.getChartData().getSeries().clear();
+
+    IChartDataWorkbook workbook = chart.getChartData().getChartDataWorkbook();
+    workbook.clear(0);
+
+    IChartSeries series = chart.getChartData().getSeries().add(ChartType.ClusteredBar);
+    String[] stages = { "Planning", "Development", "Testing" };
+    int[] values = { 10, 30, 20 };
+    for (int i = 0; i < stages.length; i++) {
+        IChartDataCell categoryCell = workbook.getCell(0, i + 1, 0, stages[i]);
+        chart.getChartData().getCategories().add(categoryCell);
+        IChartDataCell valueCell = workbook.getCell(0, i + 1, 1, values[i]);
+        series.getDataPoints().addDataPointForBarSeries(valueCell);
+    }
+
+    // Slide 2: display the first category at the top.
+    ISlide categorySlide = presentation.getSlides().addClone(slide);
+    IChart categoryChart = (IChart)categorySlide.getShapes().get_Item(0);
+    categoryChart.getAxes().getVerticalAxis().setPlotOrderReversed(true);
+    // Keep the horizontal value axis at the bottom.
+    categoryChart.getAxes().getVerticalAxis().setCrossType(CrossesType.Maximum);
+
+    // Slide 3: reverse only the horizontal numeric scale.
+    ISlide valueSlide = presentation.getSlides().addClone(slide);
+    IChart valueChart = (IChart)valueSlide.getShapes().get_Item(0);
+    valueChart.getAxes().getHorizontalAxis().setPlotOrderReversed(true);
+
+    presentation.save("ReversedAxes.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+Reversing an axis can also move the perpendicular axis to the opposite side of the plot. <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setCrossType-int-" target="_blank" rel="nofollow noopener noreferrer">setCrossType</a> controls where the other axis crosses the axis being configured. In slide 2, calling it with `CrossesType.Maximum` on the reversed category axis keeps the horizontal value axis at the bottom. For a specific crossing point, use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setCrossAt-float-" target="_blank" rel="nofollow noopener noreferrer">setCrossAt</a>. Check the crossing settings when changing direction, especially if the chart already has a custom crossing point. Call `setPlotOrderReversed` with `false` to restore the normal plotting direction; crossing settings are separate.
+
+<div className="docs-owner-markdown-table">
+
+| Normal order (slide 1) | Reversed categories (slide 2) | Reversed values (slide 3) |
+| ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Horizontal bar chart with normal category and value axis order](/java/slides/images/1e1441713c19d4c9-axis-order-normal.png) | ![Horizontal bar chart with categories displayed from top to bottom](/java/slides/images/0ac736a9ddd831f0-axis-order-categories-reversed.png) | ![Horizontal bar chart with a reversed value axis and zero on the right](/java/slides/images/00ec739de69adbf7-axis-order-values-reversed.png) |
+| Categories run from bottom to top; values increase from left to right. | Planning, Development, and Testing run from top to bottom. Values and workbook row order are unchanged. | Categories retain their normal order; values increase from right to left. The category axis crosses at zero on the right. |
+
+</div>
+
+## **Disable the Vertical Axis for Line Charts**
+
+Call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setVisible-boolean-" target="_blank" rel="nofollow noopener noreferrer">setVisible</a> with `false` on the vertical axis to hide it. The example creates a line chart with default data and saves it with the vertical axis hidden.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IChart chart = slide.getShapes().addChart(ChartType.Line, 100, 100, 400, 300);
+    chart.getAxes().getVerticalAxis().setVisible(false);
+
+    presentation.save("HiddenVerticalAxis.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Disable the Horizontal Axis for Line Charts**
+
+Call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setVisible-boolean-" target="_blank" rel="nofollow noopener noreferrer">setVisible</a> with `false` on the horizontal axis to hide it. The example creates a line chart with default data and saves it with the horizontal axis hidden.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IChart chart = slide.getShapes().addChart(ChartType.Line, 100, 100, 400, 300);
+    chart.getAxes().getHorizontalAxis().setVisible(false);
+
+    presentation.save("HiddenHorizontalAxis.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Show or Hide Chart Gridlines**
+
+Call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iaxis/#getShowMajorGridLines--" target="_blank" rel="nofollow noopener noreferrer">getShowMajorGridLines</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iaxis/#getShowMinorGridLines--" target="_blank" rel="nofollow noopener noreferrer">getShowMinorGridLines</a> to check which gridlines an axis displays. These methods report the current visibility. To show minor gridlines, use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iaxis/#getMinorGridLinesFormat--" target="_blank" rel="nofollow noopener noreferrer">getMinorGridLinesFormat</a> and set its line fill to a solid, visible color. To hide them, set the fill to <a href="https://reference.aspose.com/slides/java/com.aspose.slides/filltype/#NoFill" target="_blank" rel="nofollow noopener noreferrer">FillType.NoFill</a>. Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iaxis/#getMajorGridLinesFormat--" target="_blank" rel="nofollow noopener noreferrer">getMajorGridLinesFormat</a> to change the line fill for major gridlines in the same way. Changing the fill preserves axis visibility and tick marks.
+
+The vertical axis of this clustered column chart initially shows only major gridlines. The example displays the minor gridlines in dark orange, then hides them again before saving the presentation. It prints the gridline visibility at each step.
+
+```java
+import com.aspose.slides.*;
+import java.awt.Color;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IChart chart = slide.getShapes().addChart(ChartType.ClusteredColumn, 30, 30, 660, 230);
+    IAxis axis = chart.getAxes().getVerticalAxis();
+    System.out.printf("Initial: major=%b, minor=%b%n", axis.getShowMajorGridLines(), axis.getShowMinorGridLines());
+
+    ILineFillFormat minorFill = axis.getMinorGridLinesFormat().getLine().getFillFormat();
+    minorFill.setFillType(FillType.Solid);
+    minorFill.getSolidFillColor().setColor(new Color(255, 140, 0));
+    System.out.printf("Enabled: minor=%b%n", axis.getShowMinorGridLines());
+
+    minorFill.setFillType(FillType.NoFill);
+    System.out.printf("Hidden: major=%b, minor=%b%n", axis.getShowMajorGridLines(), axis.getShowMinorGridLines());
+
+    presentation.save("ChartGridlines.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+<div className="docs-owner-markdown-table">
+
+| Minor gridlines enabled | Minor gridlines hidden |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| ![Orange minor gridlines between the major gridlines on the vertical axis](/java/slides/images/cd9e31f1de64089b-minor-gridlines-enabled.png) | ![The same column chart with only major gridlines visible](/java/slides/images/7e5e923abd01ce91-minor-gridlines-hidden.png) |
+
+</div>
+
+## **Change a Category Axis**
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setCategoryAxisType-int-" target="_blank" rel="nofollow noopener noreferrer">setCategoryAxisType</a> to choose a date or text category axis. This example requires `ExistingChart.pptx`, with a chart as the first shape on the first slide and category cells containing numeric Excel date values. It changes the horizontal axis to a date axis. Calling <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setAutomaticMajorUnit-boolean-" target="_blank" rel="nofollow noopener noreferrer">setAutomaticMajorUnit</a> with `false`, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setMajorUnit-double-" target="_blank" rel="nofollow noopener noreferrer">setMajorUnit</a> with `1`, and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setMajorUnitScale-int-" target="_blank" rel="nofollow noopener noreferrer">setMajorUnitScale</a> with `TimeUnitType.Months` places major ticks at one-month intervals.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("ExistingChart.pptx");
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IChart chart = (IChart) slide.getShapes().get_Item(0);
+    chart.getAxes().getHorizontalAxis().setCategoryAxisType(CategoryAxisType.Date);
+    chart.getAxes().getHorizontalAxis().setAutomaticMajorUnit(false);
+    chart.getAxes().getHorizontalAxis().setMajorUnit(1);
+    chart.getAxes().getHorizontalAxis().setMajorUnitScale(TimeUnitType.Months);
+
+    presentation.save("ChangeChartCategoryAxis_out.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+### **Determine the Category Axis Type from Data**
+
+Call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iaxis/#setCategoryAxisTypeAutomatically--" target="_blank" rel="nofollow noopener noreferrer">setCategoryAxisTypeAutomatically</a> after populating the categories, then read <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iaxis/#getCategoryAxisType--" target="_blank" rel="nofollow noopener noreferrer">getCategoryAxisType</a> to inspect the selection. This is useful when the same chart receives either text labels or numeric date values. The method determines the type when called; it does not enable a persistent mode that reevaluates later data changes. Call it again after replacing the categories.
+
+The following example creates a chart with text categories and prints `true` when the selected type is `CategoryAxisType.Text`. It then replaces the category cell values with dates and calls the method again, printing `true` when the selected type is `CategoryAxisType.Date`. Dates are stored as numeric OLE Automation values, calculated for these dates as the number of days since December 30, 1899, rather than date strings. <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ichartdatacell/#setCustomNumberFormat-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">setCustomNumberFormat</a> controls how those values are displayed; it does not convert text into numeric dates. For more on category cells, see [Chart Workbook](/java/slides/chart-workbook/).
+
+Use automatic determination when the input is known to contain text categories or numeric dates, as in this example. For ordinary numeric labels, mixed categories, or empty data, explicitly call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iaxis/#setCategoryAxisType-int-" target="_blank" rel="nofollow noopener noreferrer">setCategoryAxisType</a> to match the intended meaning. Numeric values alone do not establish that the categories represent dates.
+
+```java
+import com.aspose.slides.*;
+import java.time.LocalDate;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IChart chart = slide.getShapes().addChart(ChartType.ClusteredColumn, 30, 40, 660, 320);
+
+    chart.getChartData().getCategories().clear();
+    chart.getChartData().getSeries().clear();
+
+    IChartDataWorkbook workbook = chart.getChartData().getChartDataWorkbook();
+    workbook.clear(0);
+
+    IChartDataCell seriesName = workbook.getCell(0, 0, 1, "Sales");
+    IChartSeries series = chart.getChartData().getSeries().add(seriesName, chart.getType());
+    String[] labels = { "First", "Second", "Third" };
+
+    for (int i = 0; i < labels.length; i++) {
+        IChartDataCell categoryCell = workbook.getCell(0, i + 1, 0, labels[i]);
+        chart.getChartData().getCategories().add(categoryCell);
+
+        IChartDataCell valueCell = workbook.getCell(0, i + 1, 1, (i + 1) * 10);
+        series.getDataPoints().addDataPointForBarSeries(valueCell);
+    }
+
+    IAxis axis = chart.getAxes().getHorizontalAxis();
+    axis.setCategoryAxisTypeAutomatically();
+    System.out.println(axis.getCategoryAxisType() == CategoryAxisType.Text); // true
+
+    LocalDate baseDate = LocalDate.of(1899, 12, 30);
+    LocalDate[] dates = { LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 2), LocalDate.of(2026, 2, 1) };
+
+    for (int i = 0; i < dates.length; i++) {
+        IChartDataCell categoryCell = workbook.getCell(0, i + 1, 0);
+        categoryCell.setValue((double)(dates[i].toEpochDay() - baseDate.toEpochDay()));
+        categoryCell.setCustomNumberFormat("yyyy-mm-dd");
+    }
+
+    axis.setCategoryAxisTypeAutomatically();
+    System.out.println(axis.getCategoryAxisType() == CategoryAxisType.Date); // true
+
+    presentation.save("AutomaticCategoryAxis.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Control Category Axis Label Intervals**
+
+When a chart has many categories, reduce the number of visible axis labels without removing categories or data points. Call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iaxis/#setAutomaticTickLabelSpacing-boolean-" target="_blank" rel="nofollow noopener noreferrer">setAutomaticTickLabelSpacing</a> with `false`, then pass the desired category interval to <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iaxis/#setTickLabelSpacing-long-" target="_blank" rel="nofollow noopener noreferrer">setTickLabelSpacing</a>. For text categories in their normal order, counting starts at the first category:
+
+<div className="docs-owner-markdown-table">
+
+| Interval | Labels displayed in the example |
+| -------- | --------------------------------------------------- |
+| `1` | Category 1, Category 2, Category 3, ... Category 24 |
+| `2` | Category 1, Category 3, Category 5, ... Category 23 |
+| `3` | Category 1, Category 4, Category 7, ... Category 22 |
+
+</div>
+
+An interval of `3` displays every third label, leaving two labels hidden between displayed labels. It does not remove the corresponding columns. Automatic spacing chooses an interval based on the available space; it does not necessarily display every label.
+
+Tick marks have separate controls. Call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iaxis/#setAutomaticTickMarksSpacing-boolean-" target="_blank" rel="nofollow noopener noreferrer">setAutomaticTickMarksSpacing</a> with `false` and use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iaxis/#setTickMarksSpacing-long-" target="_blank" rel="nofollow noopener noreferrer">setTickMarksSpacing</a> to set their interval. For example, `1` keeps a tick mark at every category interval while labels appear only every third category. Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iaxis/#setMajorTickMark-int-" target="_blank" rel="nofollow noopener noreferrer">setMajorTickMark</a> with a visible style so you can see the result. Calling either automatic-spacing setter with `true` again lets the chart choose that interval again.
+
+The following self-contained example creates 24 categories and one series, then saves three slides in `CategoryAxisIntervals.pptx`: automatic spacing, manual label spacing with independent tick marks, and restored automatic spacing. The two copies retain the original chart data. No input presentation is required. Horizontal label text makes the difference in density easy to see.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IChart chart = slide.getShapes().addChart(ChartType.ClusteredColumn, 30, 40, 660, 320);
+
+    chart.setLegend(false);
+    chart.getChartData().getCategories().clear();
+    chart.getChartData().getSeries().clear();
+
+    IChartDataWorkbook workbook = chart.getChartData().getChartDataWorkbook();
+    workbook.clear(0);
+
+    IChartSeries series = chart.getChartData().getSeries().add(ChartType.ClusteredColumn);
+    for (int i = 0; i < 24; i++) {
+        IChartDataCell categoryCell = workbook.getCell(0, i + 1, 0, "Category " + (i + 1));
+        chart.getChartData().getCategories().add(categoryCell);
+        IChartDataCell valueCell = workbook.getCell(0, i + 1, 1, 10 + i % 6 * 5);
+        series.getDataPoints().addDataPointForBarSeries(valueCell);
+    }
+
+    IAxis axis = chart.getAxes().getHorizontalAxis();
+    axis.setCategoryAxisType(CategoryAxisType.Text);
+    axis.getTextFormat().getTextBlockFormat().setRotationAngle(0);
+    axis.getTextFormat().getPortionFormat().setFontHeight(12);
+    axis.setMajorTickMark(TickMarkType.Outside);
+    axis.setAutomaticTickLabelSpacing(true);
+    axis.setAutomaticTickMarksSpacing(true);
+
+    // Slide 2: show every third label, but keep a tick mark for every category.
+    ISlide manualSlide = presentation.getSlides().addClone(slide);
+    IChart manualChart = (IChart)manualSlide.getShapes().get_Item(0);
+    IAxis manualAxis = manualChart.getAxes().getHorizontalAxis();
+    manualAxis.setAutomaticTickLabelSpacing(false);
+    manualAxis.setTickLabelSpacing(3);
+    manualAxis.setAutomaticTickMarksSpacing(false);
+    manualAxis.setTickMarksSpacing(1);
+
+    // Slide 3: let the chart choose both intervals again.
+    ISlide restoredSlide = presentation.getSlides().addClone(manualSlide);
+    IChart restoredChart = (IChart)restoredSlide.getShapes().get_Item(0);
+    restoredChart.getAxes().getHorizontalAxis().setAutomaticTickLabelSpacing(true);
+    restoredChart.getAxes().getHorizontalAxis().setAutomaticTickMarksSpacing(true);
+
+    presentation.save("CategoryAxisIntervals.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+**Automatic spacing (slide 1):** In this rendering, every second category label is displayed and wraps onto two lines. The automatic result can vary with chart size, fonts, and the renderer.
+
+![Automatic category label spacing with all 24 columns visible](/java/slides/images/120853ab61db9bc2-category-axis-automatic.png)
+
+**Manual spacing (slide 2):** Every third label is displayed on one line, while tick marks remain at every category interval. All 24 columns, including those without labels, remain visible with the same values. Slide 3 restores the automatic appearance shown above.
+
+![Manual category label interval of three with all 24 columns visible](/java/slides/images/d97feffb5134cd3e-category-axis-manual.png)
+
+### **Choose the Correct Axis and Interval**
+
+Use this category-count interval for a text category axis, such as the category axis of a column, line, area, or bar chart. In a column chart, it is the horizontal axis. In a horizontal bar chart, the category axis is vertical, so apply these settings to the axis returned by <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iaxesmanager/#getVerticalAxis--" target="_blank" rel="nofollow noopener noreferrer">getVerticalAxis</a>. Tick-mark spacing also applies to a series axis in charts that have one.
+
+Do not use category label spacing to set the numeric scale of a value axis. On a value axis, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iaxis/#setMajorUnit-double-" target="_blank" rel="nofollow noopener noreferrer">setMajorUnit</a> specifies a difference in values: for example, a major unit of `10` produces ticks at 0, 10, 20, and so on when the axis starts at zero. A category label interval of `3` instead counts category positions, regardless of their data values. Scatter and bubble charts use value axes rather than a text category axis. For a date axis, use time-based major units and scales as described in [Change a Category Axis](/java/slides/chart-axis/#change-a-category-axis).
+
+## **Set the Date Format for Category Axis Values**
+
+The example replaces the default chart data with four annual values. Dates are stored as OLE Automation serial numbers in the first worksheet (index `0`), calculated as the number of days since December 30, 1899, for these dates. Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setCategoryAxisType-int-" target="_blank" rel="nofollow noopener noreferrer">setCategoryAxisType</a> with `CategoryAxisType.Date`, call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setNumberFormatLinkedToSource-boolean-" target="_blank" rel="nofollow noopener noreferrer">setNumberFormatLinkedToSource</a> with `false`, and pass `yyyy` to <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setNumberFormat-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">setNumberFormat</a> so the category labels display four-digit years independently of the cell formatting.
+
+```java
+import com.aspose.slides.*;
+import java.time.LocalDate;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IChart chart = slide.getShapes().addChart(ChartType.Line, 50, 50, 450, 300);
+
+    chart.getChartData().getCategories().clear();
+    chart.getChartData().getSeries().clear();
+
+    IChartDataWorkbook workbook = chart.getChartData().getChartDataWorkbook();
+    workbook.clear(0);
+
+    LocalDate baseDate = LocalDate.of(1899, 12, 30);
+
+    IChartSeries series = chart.getChartData().getSeries().add(ChartType.Line);
+    for (int i = 0; i < 4; i++) {
+        LocalDate date = LocalDate.of(2015 + i, 1, 1);
+        IChartDataCell categoryCell = workbook.getCell(0, i + 1, 0, date.toEpochDay() - baseDate.toEpochDay());
+        chart.getChartData().getCategories().add(categoryCell);
+
+        IChartDataCell valueCell = workbook.getCell(0, i + 1, 1, i + 1);
+        series.getDataPoints().addDataPointForLineSeries(valueCell);
+    }
+
+    chart.getAxes().getHorizontalAxis().setCategoryAxisType(CategoryAxisType.Date);
+    chart.getAxes().getHorizontalAxis().setNumberFormatLinkedToSource(false);
+    chart.getAxes().getHorizontalAxis().setNumberFormat("yyyy");
+
+    presentation.save("DateAxisFormat.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Set a Rotation Angle for a Chart Axis Title**
+
+Call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setTitle-boolean-" target="_blank" rel="nofollow noopener noreferrer">setTitle</a> with `true` on the vertical axis, provide title text, and use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icharttextblockformat/#setRotationAngle-float-" target="_blank" rel="nofollow noopener noreferrer">setRotationAngle</a> to rotate the title. The angle is measured in degrees; this example saves a column chart with its value-axis title rotated by 90 degrees.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IChart chart = slide.getShapes().addChart(ChartType.ClusteredColumn, 50, 50, 450, 300);
+    chart.getAxes().getVerticalAxis().setTitle(true);
+    chart.getAxes().getVerticalAxis().getTitle().addTextFrameForOverriding("Value");
+    chart.getAxes().getVerticalAxis().getTitle().getTextFormat().getTextBlockFormat().setRotationAngle(90);
+
+    presentation.save("RotatedAxisTitle.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Set the Axis Position on a Category or Value Axis**
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setAxisBetweenCategories-boolean-" target="_blank" rel="nofollow noopener noreferrer">setAxisBetweenCategories</a> to control whether the value axis crosses the category axis between categories or at category tick marks. This setting applies to category axes. The example sets it to `true` on the horizontal category axis of a column chart and saves the result.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IChart chart = slide.getShapes().addChart(ChartType.ClusteredColumn, 50, 50, 450, 300);
+    chart.getAxes().getHorizontalAxis().setAxisBetweenCategories(true);
+
+    presentation.save("AxisBetweenCategories.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Set the Display Unit on a Chart Value Axis**
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setDisplayUnit-int-" target="_blank" rel="nofollow noopener noreferrer">setDisplayUnit</a> to scale the labels on a value axis without changing the underlying data. With <a href="https://reference.aspose.com/slides/java/com.aspose.slides/displayunittype/" target="_blank" rel="nofollow noopener noreferrer">DisplayUnitType</a> set to `Millions`, a value of 60,000,000 is displayed as 60. The example creates a column chart and applies the millions display unit to its vertical axis.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IChart chart = slide.getShapes().addChart(ChartType.ClusteredColumn, 50, 50, 450, 300);
+    chart.getAxes().getVerticalAxis().setDisplayUnit(DisplayUnitType.Millions);
+
+    presentation.save("Result.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Configure a Logarithmic Value Axis**
+
+A logarithmic value axis is useful when positive values span several orders of magnitude. For example, a service might receive 10, 100, 1,000, 10,000, and 100,000 requests over five periods. On a linear scale, the smaller values appear close together near zero. A logarithmic scale makes their relative growth easier to compare: equal distances represent equal ratios rather than equal differences.
+
+Call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setLogarithmic-boolean-" target="_blank" rel="nofollow noopener noreferrer">setLogarithmic</a> with `true` on the value axis and use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setLogBase-double-" target="_blank" rel="nofollow noopener noreferrer">setLogBase</a> to choose the base. This changes how the existing values are displayed; it does not change the data or add a logarithmic trend line. A trend line represents a fitted relationship in the data and is a separate feature.
+
+### **Choose the Value Axis and Base**
+
+For a line or column chart, the value axis is returned by <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iaxesmanager/#getVerticalAxis--" target="_blank" rel="nofollow noopener noreferrer">getVerticalAxis</a>. For a horizontal bar chart, it is returned by <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iaxesmanager/#getHorizontalAxis--" target="_blank" rel="nofollow noopener noreferrer">getHorizontalAxis</a>. Scatter and bubble charts have two value axes, so choose the horizontal axis for X values, the vertical axis for Y values, or both. Do not apply logarithmic scaling to a category axis.
+
+The default logarithmic base is `10`. For PPTX charts, use a base from `2` through `1000`, inclusive; fractional bases such as `2.5` are also supported. With base `10`, successive powers such as 10, 100, 1,000, and 10,000 are equally spaced.
+
+### **Compare Linear and Logarithmic Scaling**
+
+The following self-contained example creates a line chart with the five request counts on the first slide, then clones that slide and enables a base-10 logarithmic value axis on the second. Both slides retain the same data.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IChart chart = slide.getShapes().addChart(ChartType.Line, 30, 40, 660, 200);
+
+    chart.setLegend(false);
+
+    chart.getChartData().getCategories().clear();
+    chart.getChartData().getSeries().clear();
+
+    IChartDataWorkbook workbook = chart.getChartData().getChartDataWorkbook();
+    workbook.clear(0);
+
+    IChartSeries series = chart.getChartData().getSeries().add(ChartType.Line);
+    double[] values = { 10, 100, 1000, 10000, 100000 };
+
+    for (int i = 0; i < values.length; i++) {
+        IChartDataCell categoryCell = workbook.getCell(0, i + 1, 0, "Period " + (i + 1));
+        chart.getChartData().getCategories().add(categoryCell);
+
+        IChartDataCell valueCell = workbook.getCell(0, i + 1, 1, values[i]);
+        series.getDataPoints().addDataPointForLineSeries(valueCell);
+    }
+
+    // Keep the first slide linear and change only the copy's value-axis scale.
+    ISlide logarithmicSlide = presentation.getSlides().addClone(slide);
+    IChart logarithmicChart = (IChart)logarithmicSlide.getShapes().get_Item(0);
+    IAxis valueAxis = logarithmicChart.getAxes().getVerticalAxis();
+    valueAxis.setLogarithmic(true);
+    valueAxis.setLogBase(10);
+
+    presentation.save("LogarithmicAxis.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+**Linear scale (slide 1):** Equal vertical distances represent equal differences in request counts. The largest value dominates the chart, making the smaller values difficult to distinguish.
+
+![Line chart in PowerPoint showing five request counts on a linear value axis](/java/slides/images/00d943a65a682b27-value-axis-linear.png)
+
+**Logarithmic scale (slide 2):** Equal vertical distances represent equal ratios. Each period has ten times as many requests as the previous one, so the points form a straight rising line on the base-10 scale. The axis labels still show the original request counts.
+
+![The same five request counts in PowerPoint on a base-10 logarithmic value axis](/java/slides/images/bdac94e59d4b8099-value-axis-logarithmic.png)
+
+### **Handle Zero and Negative Values**
+
+A logarithmic scale can display only strictly positive values. Check the data before enabling it. If zero or negative values are meaningful, keep a linear scale or show them separately. If excluding those values is appropriate for the analysis, explain the omission. Do not silently replace them with small positive numbers, as this changes the meaning of the data. Any manually configured minimum or maximum for a logarithmic axis must also be positive.
+
+## **FAQ**
+
+**How do I set the value at which one axis crosses the other (axis crossing)?**
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setCrossType-int-" target="_blank" rel="nofollow noopener noreferrer">setCrossType</a> to select the crossing behavior. To specify a numeric crossing value, use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setCrossAt-float-" target="_blank" rel="nofollow noopener noreferrer">setCrossAt</a>. These settings let you move the axis crossing to a suitable baseline.
+
+**How can I position tick labels relative to the axis?**
+
+Call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setTickLabelPosition-int-" target="_blank" rel="nofollow noopener noreferrer">setTickLabelPosition</a> using <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ticklabelpositiontype/" target="_blank" rel="nofollow noopener noreferrer">TickLabelPositionType</a>: `Low`, `High`, `NextTo`, or `None`. To control the tick marks themselves, use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setMajorTickMark-int-" target="_blank" rel="nofollow noopener noreferrer">setMajorTickMark</a> or <a href="https://reference.aspose.com/slides/java/com.aspose.slides/axis/#setMinorTickMark-int-" target="_blank" rel="nofollow noopener noreferrer">setMinorTickMark</a>; these are separate from label positioning.
+
+## Related articles
+
+- [Format Presentation Charts in Java](/java/slides/chart-formatting/)

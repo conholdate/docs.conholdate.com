@@ -1,0 +1,99 @@
+---
+title: "Support For Interruptable Library"
+sidebar_label: "Support For Interruptable Library"
+sidebar_key: "java-slides-support-for-interruptable-library"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/support-for-interruptable-library.md"
+source_commit: ""
+source_sha256: "1b911c44c0901940204a6fa2ef7bd2df0fee7547f4e794cde6214b19dfe35ac2"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/support-for-interruptable-library/"
+source_markdown_url: "https://docs.aspose.com/slides/java/support-for-interruptable-library.md"
+source_snapshot_sha256: "eb8a59027000040f5c44da39321d449042e8b806e7de5fe927f924fb8d00f99d"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+y
+
+> Make long-running tasks cancelable with Aspose.Slides for Java. Interrupt rendering and conversions for PowerPoint and OpenDocument safely, with examples.
+> 5
+
+## **Overview**
+
+Aspose.Slides provides an interruptible processing mechanism for long-running presentation tasks, such as deserialization, serialization, and rendering. This mechanism is based on the `InterruptionToken` and `InterruptionTokenSource` classes.
+
+An `InterruptionToken` can be assigned to `LoadOptions` and passed to the `Presentation` constructor. When `InterruptionTokenSource.interrupt()` is called, the associated long-running task is interrupted.
+
+## **Interruptable Library**
+
+In <a href="https://releases.aspose.com/slides/java/release-notes/2018/aspose-slides-for-java-18-4-release-notes/" target="_blank" rel="nofollow noopener noreferrer">Aspose.Slides 18.4</a>, we introduced the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/interruptiontoken/" target="_blank" rel="nofollow noopener noreferrer">InterruptionToken</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/interruptiontokensource/" target="_blank" rel="nofollow noopener noreferrer">InterruptionTokenSource</a> classes. They allow you to interrupt long-running tasks such as deserialization, serialization, and rendering.
+
+- <a href="https://reference.aspose.com/slides/java/com.aspose.slides/interruptiontokensource/" target="_blank" rel="nofollow noopener noreferrer">InterruptionTokenSource</a> is the source of the token(s) passed to <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iloadoptions/#setInterruptionToken-com.aspose.slides.IInterruptionToken-" target="_blank" rel="nofollow noopener noreferrer">ILoadOptions.setInterruptionToken</a>.
+- When <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iloadoptions/#setInterruptionToken-com.aspose.slides.IInterruptionToken-" target="_blank" rel="nofollow noopener noreferrer">ILoadOptions.setInterruptionToken</a> is set and the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">LoadOptions</a> instance is passed to the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> constructor, invoking <a href="https://reference.aspose.com/slides/java/com.aspose.slides/interruptiontokensource/#interrupt--" target="_blank" rel="nofollow noopener noreferrer">InterruptionTokenSource.Interrupt()</a> interrupts any long-running task associated with that <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a>.
+
+The following code snippet demonstrates interrupting a running task:
+
+```java
+import com.aspose.slides.*;
+
+final InterruptionTokenSource tokenSource = new InterruptionTokenSource();
+
+Runnable interruption = new Runnable() {
+    public void run() {
+        LoadOptions loadOptions = new LoadOptions();
+        loadOptions.setInterruptionToken(tokenSource.getToken());
+
+        Presentation presentation = new Presentation("sample.pptx", loadOptions);
+        try{
+            presentation.save("sample.ppt", SaveFormat.Ppt);
+        }
+        finally {
+            presentation.dispose();
+        }
+    }
+};
+
+Thread thread = new Thread(interruption);
+thread.start();          // run the action in a separate thread
+Thread.sleep(10000);     // timeout
+tokenSource.interrupt(); // stop the conversion
+```
+
+## **FAQ**
+
+### What is the purpose of the Aspose.Slides interrupt library?
+
+It provides a mechanism to interrupt long-running operations-such as loading, saving, or rendering presentations-before they complete. This is useful when processing time must be limited or the task is no longer needed.
+
+### What is the difference between <a href="https://reference.aspose.com/slides/java/com.aspose.slides/interruptiontoken/" target="_blank" rel="nofollow noopener noreferrer">InterruptionToken</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/interruptiontokensource/" target="_blank" rel="nofollow noopener noreferrer">InterruptionTokenSource</a>?
+
+- `InterruptionToken` is passed to the Aspose.Slides API and checked during long-running operations.
+- `InterruptionTokenSource` is used in your code to create tokens and trigger interruptions by calling `Interrupt()`.
+
+### What tasks can be interrupted?
+
+Any Aspose.Slides task that accepts an <a href="https://reference.aspose.com/slides/java/com.aspose.slides/interruptiontoken/" target="_blank" rel="nofollow noopener noreferrer">InterruptionToken</a>-such as loading a presentation with `Presentation(path, loadOptions)` or saving with `Presentation.save(...)`-can be interrupted.
+
+### Does interruption happen immediately?
+
+No. Interruption is cooperative: the operation periodically checks the token and stops as soon as it detects that <a href="https://reference.aspose.com/slides/java/com.aspose.slides/interruptiontokensource/#interrupt--" target="_blank" rel="nofollow noopener noreferrer">Interrupt()</a> has been called.
+
+### What happens if I call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/interruptiontokensource/#interrupt--" target="_blank" rel="nofollow noopener noreferrer">Interrupt()</a> after a task has already completed?
+
+Nothing-the call has no effect if the corresponding task has already completed.
+
+### Can I reuse the same <a href="https://reference.aspose.com/slides/java/com.aspose.slides/interruptiontokensource/" target="_blank" rel="nofollow noopener noreferrer">InterruptionTokenSource</a> for multiple tasks?
+
+Yes-but after you call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/interruptiontokensource/#interrupt--" target="_blank" rel="nofollow noopener noreferrer">Interrupt()</a> on that source, all tasks using its tokens will be interrupted. Use separate token sources to manage tasks independently.

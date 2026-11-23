@@ -1,0 +1,171 @@
+---
+title: "Public API and Backwards Incompatible Changes in Aspose.Slides for Java 14.9.0"
+sidebar_label: "Public API and Backwards Incompatible Changes in Aspose.Slides for Java 14.9.0"
+sidebar_key: "java-slides-public-api-and-backwards-incompatible-changes-in-aspose-slides-for-java-14-9-0"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/public-api-and-backwards-incompatible-changes-in-aspose-slides-for-java-14-9-0.md"
+source_commit: ""
+source_sha256: "9013f6da90b72f5b7910b6af169d0f83a08de4b01940ed19403206dfc3275740"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/public-api-and-backwards-incompatible-changes-in-aspose-slides-for-java-14-9-0/"
+source_markdown_url: "https://docs.aspose.com/slides/java/public-api-and-backwards-incompatible-changes-in-aspose-slides-for-java-14-9-0.md"
+source_snapshot_sha256: "b2fa0d40685618df8bfd18e55b2dba5a00cbc96fa132a5ceb29839ff0b4340c5"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+0
+
+> Review public API updates and breaking changes in Aspose.Slides for Java to smoothly migrate your PowerPoint PPT, PPTX and ODP presentation solutions.
+> 3
+
+This page lists all [added](/java/slides/public-api-and-backwards-incompatible-changes-in-aspose-slides-for-java-14-9-0/) classes, methods, properties and so on, any new restrictions and other [changes](/java/slides/public-api-and-backwards-incompatible-changes-in-aspose-slides-for-java-14-9-0/) introduced with the Aspose.Slides for Java 14.9.0 API.
+
+## **Public API Changes**
+
+### **Added Methods for Replacing Image to PPImage, IPPImage**
+
+New methods added:
+
+- IPPImage.replaceImage(byte\[] newImageData)
+- IPPImage.replaceImage(IPPImage newImage)
+
+```java
+import com.aspose.slides.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+Presentation presentation = new Presentation("presentation.pptx");
+try {
+    // The first way
+    byte[] imageData = Files.readAllBytes(Paths.get("image.png"));
+    presentation.getImages().get_Item(0).replaceImage(imageData);
+
+    // The second way
+    presentation.getImages().get_Item(1).replaceImage(presentation.getImages().get_Item(0));
+
+    presentation.save("presentation_out.pptx", SaveFormat.Pptx);
+} finally {
+    if (presentation != null) presentation.dispose();
+}
+```
+
+### **Added Methods for Saving Slides Keeping Page Numbers**
+
+The following methods have been added:
+
+- void IPresentation.save(string fname, int\[] slides, SaveFormat format);
+- void IPresentation.save(string fname, int\[] slides, SaveFormat format, ISaveOption options);
+- void IPresentation.save(Stream stream, int\[] slides, SaveFormat format);
+- void IPresentation.save(Stream stream, int\[] slides, SaveFormat format, ISaveOption options);
+
+These methods allow to save specified presentation slides to PDF, XPS, TIFF, HTML formats. The 'slides' array allows to specify page numbers, starting from 1.
+
+```java
+// Overloads added to IPresentation (SaveFormat values are int constants in Java):
+//
+// void save(String fname, int[] slides, int format);
+// void save(String fname, int[] slides, int format, ISaveOptions options);
+// void save(OutputStream stream, int[] slides, int format);
+// void save(OutputStream stream, int[] slides, int format, ISaveOptions options);
+```
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("presentation.pptx");
+try {
+    int[] slides = new int[] { 2, 3, 5 }; // Array of slide positions
+
+    presentation.save("presentation_out.pdf", slides, SaveFormat.Pdf);
+} finally {
+    if (presentation != null) presentation.dispose();
+}
+```
+
+### **Added the SmartArtLayoutType.Custom Enum Value**
+
+This type of SmartArt layout represents diagram with custom template. Custom diagrams only can be loaded from presentation file and can't be created via method ShapeCollection.addSmartArt(x, y, width, height, SmartArtLayoutType.Custom)
+
+### **Added the SmartArtShape Class and ISmartArtShape Interface**
+
+The Aspose.Slides.SmartArt.SmartArtShape class (and its interface Aspose.Slides.SmartArt.ISmartArtShape) add access to individual shapes inside SmartArt diagram. SmartArtShape can be used to change FillFormat, LineFormat, adding Hyperlinks etc.
+
+SmartArtShape does not supported IShape properties RawFrame, Frame, Rotation, X, Y, Width, Height and thrown System.NotSupportedException when attempting to access them.
+
+Example of usage:
+
+```java
+import com.aspose.slides.*;
+import java.awt.Color;
+
+
+ Presentation pres = new Presentation();
+
+ISmartArt smart = pres.getSlides().get_Item(0).getShapes().addSmartArt(10, 10, 400, 300, SmartArtLayoutType.BasicBlockList);
+
+ISmartArtNode node = smart.getAllNodes().get_Item(0);
+
+for (ISmartArtShape shape : node.getShapes())
+
+{
+
+    shape.getFillFormat().setFillType(FillType.Solid);
+
+    shape.getFillFormat().getSolidFillColor().setColor(Color.RED);
+
+}
+
+pres.save("out.pptx", SaveFormat.Pptx);
+
+```
+
+### **SmartArtShapeCollection class, ISmartArtShapeCollection interface and ISmartArtNode.getShapes() method have been added**
+
+The Aspose.Slides.SmartArt.SmartArtShapeCollection class (and its interface Aspose.Slides.SmartArt.ISmartArtShapeCollection) add access to individual shapes inside SmartArt diagram. Collection contains shapes associated with SmartArtNode. Property SmartArtNode.Shapes returns collections of all shapes associated with the node.
+
+Depending of SmartArtLayoutType one SmartArtShape can be shared between several nodes.
+
+﻿
+
+```java
+import com.aspose.slides.*;
+import java.awt.Color;
+
+
+ Presentation pres = new Presentation();
+
+ISmartArt smart = pres.getSlides().get_Item(0).getShapes().addSmartArt(10, 10, 400, 300, SmartArtLayoutType.BasicBlockList);
+
+ISmartArtNode node = smart.getAllNodes().get_Item(0);
+
+for (ISmartArtShape shape : node.getShapes())
+
+{
+
+    shape.getFillFormat().setFillType(FillType.Solid);
+
+    shape.getFillFormat().getSolidFillColor().setColor(Color.RED);
+
+}
+
+pres.save("out.pptx", SaveFormat.Pptx);
+
+```
+
+## Related articles
+
+- [Public API and Backwards Incompatible Changes in Aspose.Slides for Java 16.1.0](/java/slides/public-api-and-backwards-incompatible-changes-in-aspose-slides-for-java-16-1-0/)
+- [Public API and Backwards Incompatible Changes in Aspose.Slides for Java 15.8.0](/java/slides/public-api-and-backwards-incompatible-changes-in-aspose-slides-for-java-15-8-0/)
+- [Public API and Backwards Incompatible Changes in Aspose.Slides for Java 15.9.0](/java/slides/public-api-and-backwards-incompatible-changes-in-aspose-slides-for-java-15-9-0/)

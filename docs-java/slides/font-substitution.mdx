@@ -1,0 +1,212 @@
+---
+title: "Configure Font Substitution in Presentations Using Java"
+sidebar_label: "Configure Font Substitution in Presentations Using Java"
+sidebar_key: "java-slides-font-substitution"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/font-substitution.md"
+source_commit: ""
+source_sha256: "27c414bc3aeb251b42cf8a0e462fa6e5304f11366860ebc631f3656f41d00b10"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/font-substitution/"
+source_markdown_url: "https://docs.aspose.com/slides/java/font-substitution.md"
+source_snapshot_sha256: "a04307aeaa8fac9ea2e72901e4e94ee1ccb5fe5ea3c2b596fb2f165621f4ed65"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+import "./_remote-markdown.css";
+
+a
+
+> Configure font substitution rules and inspect substituted fonts in Aspose.Slides for Java when rendering or converting PowerPoint and OpenDocument presentations.
+> 8
+
+## **Overview**
+
+Font substitution allows Aspose.Slides to use an available font in place of a font that cannot be accessed when a presentation is rendered or converted. The substitution affects the rendered output; it does not change the font assigned to the presentation content.
+
+You can define the font to use when a particular font is unavailable, and you can inspect the substitutions that Aspose.Slides will make during rendering. This helps keep output consistent across environments with different installed fonts.
+
+If a font is available but has no dedicated bold typeface, see [Handle Fonts Without a Dedicated Bold Typeface](/java/slides/convert-powerpoint-to-pdf/#handle-fonts-without-a-dedicated-bold-typeface). That section explains how to rasterize the affected text during PDF export and the consequences for text selection, searching, and scaling.
+
+## **Get Font Substitutions**
+
+Use the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifontsmanager/#getSubstitutions--" target="_blank" rel="nofollow noopener noreferrer">IFontsManager.getSubstitutions</a> method to determine which fonts will be substituted when the presentation is rendered. The method returns <a href="https://reference.aspose.com/slides/java/com.aspose.slides/fontsubstitutioninfo/" target="_blank" rel="nofollow noopener noreferrer">FontSubstitutionInfo</a> objects that identify the original and substituted font names.
+
+The following Java example lists all font substitutions for a presentation:
+
+```java
+import com.aspose.slides.FontSubstitutionInfo;
+import com.aspose.slides.Presentation;
+
+Presentation presentation = new Presentation("Presentation.pptx");
+try {
+    for (FontSubstitutionInfo substitution : presentation.getFontsManager().getSubstitutions()) {
+        System.out.println(substitution.getOriginalFontName() + " -> " + substitution.getSubstitutedFontName());
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Get Font Substitutions for Selected Slides**
+
+Use the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifontsmanager/#getSubstitutions-int---" target="_blank" rel="nofollow noopener noreferrer">IFontsManager.getSubstitutions</a> overload with an `int[] slides` argument to inspect only the substitutions required to render specific slides. This is useful when you are rendering or exporting part of a presentation, checking a large presentation incrementally, locating slides that depend on unavailable fonts, preparing a minimal font package for a server or container, or diagnosing rendering differences without processing unrelated slides.
+
+The `slides` array contains one-based slide indexes: `1` identifies the first slide. By contrast, the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/#getSlides--" target="_blank" rel="nofollow noopener noreferrer">Presentation.getSlides</a> collection accessor uses zero-based indexing, so that same slide is accessed as `presentation.getSlides().get_Item(0)`. Keep this difference in mind when building the array to avoid off-by-one errors.
+
+Call the overload through the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/#getFontsManager--" target="_blank" rel="nofollow noopener noreferrer">Presentation.getFontsManager</a> method. It returns only the substitutions determined while rendering the selected slides. Each result is a <a href="https://reference.aspose.com/slides/java/com.aspose.slides/fontsubstitutioninfo/" target="_blank" rel="nofollow noopener noreferrer">FontSubstitutionInfo</a> object containing the original and substituted font names. The result reflects the current font environment, configured fallback rules, and [externally loaded fonts](/java/slides/custom-font/). Substitution rules stored in an <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifontsubstrulecollection/" target="_blank" rel="nofollow noopener noreferrer">IFontSubstRuleCollection</a> are applied when the presentation is rendered, but the result does not list them; check the fonts in the output file instead.
+
+The same substitution can be required by more than one selected slide. Deduplicate the results when you create a font inventory or preflight report. The following example reports every returned substitution and then creates a sorted list of unique font mappings:
+
+```java
+import com.aspose.slides.FontSubstitutionInfo;
+import com.aspose.slides.Presentation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+Presentation presentation = new Presentation("Presentation.pptx");
+try {
+    int[] selectedSlides = { 1, 3, 5 };
+    List<FontSubstitutionInfo> substitutions = new ArrayList<>();
+    for (FontSubstitutionInfo substitution : presentation.getFontsManager().getSubstitutions(selectedSlides)) {
+        substitutions.add(substitution);
+    }
+
+    System.out.println("Substitutions for the selected slides:");
+    for (FontSubstitutionInfo substitution : substitutions) {
+        System.out.println(substitution.getOriginalFontName() + " -> " + substitution.getSubstitutedFontName());
+    }
+
+    Set<String> sortedPreflightEntries = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+    for (FontSubstitutionInfo substitution : substitutions) {
+        String entry = substitution.getOriginalFontName() + " -> " + substitution.getSubstitutedFontName();
+        sortedPreflightEntries.add(entry);
+    }
+
+    System.out.println("Deduplicated font preflight report:");
+    for (String entry : sortedPreflightEntries) {
+        System.out.println(entry);
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+The <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifontsmanager/" target="_blank" rel="nofollow noopener noreferrer">IFontsManager</a> interface provides both overloads. Choose one according to the scope of the rendering operation:
+
+<div className="docs-owner-markdown-table">
+
+| Overload | Use it when |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifontsmanager/#getSubstitutions--" target="_blank" rel="nofollow noopener noreferrer">getSubstitutions</a> with no arguments | You need substitutions for the entire presentation. |
+| <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifontsmanager/#getSubstitutions-int---" target="_blank" rel="nofollow noopener noreferrer">getSubstitutions</a> with `int[] slides` | You need substitutions for a selected range, incremental check, or partial export. |
+
+</div>
+
+## **Set Font Substitution Rules**
+
+To specify the font that Aspose.Slides should use when a source font is unavailable:
+
+1. Load the presentation.
+2. Create font definitions for the source and substitute fonts.
+3. Create a <a href="https://reference.aspose.com/slides/java/com.aspose.slides/fontsubstrule/" target="_blank" rel="nofollow noopener noreferrer">FontSubstRule</a> with the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/fontsubstcondition/" target="_blank" rel="nofollow noopener noreferrer">WhenInaccessible</a> condition.
+4. Add the rule to a <a href="https://reference.aspose.com/slides/java/com.aspose.slides/fontsubstrulecollection/" target="_blank" rel="nofollow noopener noreferrer">FontSubstRuleCollection</a>.
+5. Assign the collection by using the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/fontsmanager/#setFontSubstRuleList-com.aspose.slides.IFontSubstRuleCollection-" target="_blank" rel="nofollow noopener noreferrer">FontsManager.setFontSubstRuleList</a> method.
+6. Render or convert the presentation.
+
+The following Java example substitutes `Arial` for `SomeRareFont` when `SomeRareFont` is unavailable, and then renders the first slide to verify the result. The substitute font must be available to Aspose.Slides.
+
+```java
+import com.aspose.slides.FontData;
+import com.aspose.slides.FontSubstCondition;
+import com.aspose.slides.FontSubstRule;
+import com.aspose.slides.FontSubstRuleCollection;
+import com.aspose.slides.IFontData;
+import com.aspose.slides.IFontSubstRule;
+import com.aspose.slides.IFontSubstRuleCollection;
+import com.aspose.slides.IImage;
+import com.aspose.slides.ImageFormat;
+import com.aspose.slides.Presentation;
+
+Presentation presentation = new Presentation("Fonts.pptx");
+try {
+    IFontData sourceFont = new FontData("SomeRareFont");
+    IFontData substituteFont = new FontData("Arial");
+    IFontSubstRule substitutionRule = new FontSubstRule(sourceFont, substituteFont, FontSubstCondition.WhenInaccessible);
+
+    IFontSubstRuleCollection substitutionRules = new FontSubstRuleCollection();
+    substitutionRules.add(substitutionRule);
+    presentation.getFontsManager().setFontSubstRuleList(substitutionRules);
+
+    IImage image = presentation.getSlides().get_Item(0).getImage(1f, 1f);
+    try {
+        image.save("slide.jpg", ImageFormat.Jpeg);
+    } finally {
+        image.dispose();
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+For an unconditional change to the fonts used throughout a presentation, see [Font Replacement](/java/slides/font-replacement/).
+
+## **Limitations for Math Equation Fonts**
+
+Font substitution rules are part of the standard font selection process used during rendering and conversion. They work for regular text when Aspose.Slides can replace an inaccessible font with the available font specified by a rule.
+
+Office Math equations have an additional requirement. If an equation uses **Cambria Math**, Aspose.Slides may need that exact font to calculate and render the equation layout. A rule that substitutes another math font, such as **STIX Two Math**, cannot replace **Cambria Math** for this purpose, and rendering may still report that **Cambria Math** is required.
+
+To render or convert such a presentation, make **Cambria Math** available to Aspose.Slides. Install it in the operating system or load it as an [external font](/java/slides/custom-font/).
+
+This limitation applies to equation layout. The substitution rules described above still apply to regular presentation text.
+
+## **FAQ**
+
+**What is the difference between font replacement and font substitution?**
+
+[Font replacement](/java/slides/font-replacement/) intentionally changes one font to another throughout the presentation. Font substitution selects a font for rendered output when the configured condition is met, such as when the original font is unavailable.
+
+**When are substitution rules applied?**
+
+The rules participate in the [font selection sequence](/java/slides/font-selection-sequence/) during rendering and conversion. With `WhenInaccessible`, a rule is used only when Aspose.Slides cannot access the source font.
+
+**What happens when a font is missing and no substitution rule is configured?**
+
+Aspose.Slides selects the closest available font according to its font selection process. The result depends on the fonts available in the runtime environment.
+
+**Can I load external fonts to avoid substitution?**
+
+Yes. You can [load external fonts](/java/slides/custom-font/) so Aspose.Slides can use them during rendering and conversion.
+
+**Does Aspose distribute fonts with the library?**
+
+No. You are responsible for providing fonts and complying with their licenses.
+
+**Can substitution results differ between Windows, Linux, and macOS?**
+
+Yes. Installed fonts and font search locations differ by operating system, so a font available on one machine may require substitution on another.
+
+**How can I make font selection consistent in batch conversions?**
+
+Use the same font files and versions on every machine or container, [load required external fonts](/java/slides/custom-font/), and [embed fonts](/java/slides/embedded-font/) when licensing permits. You can also call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifontsmanager/#getSubstitutions--" target="_blank" rel="nofollow noopener noreferrer">IFontsManager.getSubstitutions</a> before export to identify unexpected substitutions.
+
+## Related articles
+
+- [Font Selection Sequence in Aspose.Slides for Java](/java/slides/font-selection-sequence/)
+- [Streamline Font Replacement in Presentations Using Java](/java/slides/font-replacement/)
+- [Manage Fallback Fonts for Presentations in Java](/java/slides/fallback-font/)

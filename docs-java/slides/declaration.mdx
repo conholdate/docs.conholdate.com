@@ -1,0 +1,58 @@
+---
+title: "Security Manager Requirements"
+sidebar_label: "Security Manager Requirements"
+sidebar_key: "java-slides-declaration"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/declaration.md"
+source_commit: ""
+source_sha256: "74f19d165fda31644532348838c3a9865e1ce93c94fbe749ce0e6fd1b4590abe"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/declaration/"
+source_markdown_url: "https://docs.aspose.com/slides/java/declaration.md"
+source_snapshot_sha256: "9fad2bff0cd7a65e0df5c2216103cdf78f31dcd72349cb7e08301dbdaca4ca02"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+s
+
+> Which Security Manager permissions Aspose.Slides for Java and the code that calls it need on Java 23 and earlier, and why there is nothing to configure on Java 24 and later.
+> 9
+
+## **Overview**
+
+The Java Security Manager limits what code can do according to a security policy. Java 17 deprecated it for removal (<a href="https://openjdk.org/jeps/411" target="_blank" rel="nofollow noopener noreferrer">JEP 411</a>), and Java 24 disabled it permanently (<a href="https://openjdk.org/jeps/486" target="_blank" rel="nofollow noopener noreferrer">JEP 486</a>). This article explains what Aspose.Slides for Java needs when an application still runs with a Security Manager. If your application does not enable one, which is the default, there is nothing to configure.
+
+## **Java 23 and Earlier**
+
+When a Security Manager is enabled, the security policy must grant these permissions to the Aspose.Slides JAR file and to the application code that calls it:
+
+- `java.util.PropertyPermission "*", "read"`: Aspose.Slides reads system properties.
+- `java.io.FilePermission "<<ALL FILES>>", "read"`: Aspose.Slides reads font files and other files.
+- `java.io.FilePermission "<<ALL FILES>>", "execute"`: Aspose.Slides starts operating-system programs, for example `reg` on Windows and `fc-match` on Linux.
+- `java.io.FilePermission` with the `write` action for the folders where your application saves files.
+
+Granting the permissions to the JAR file alone is not enough: the code that calls Aspose.Slides needs them too. Granting `java.security.AllPermission` to both also works.
+
+Without the permission to read system properties or to start programs, Aspose.Slides fails on first use: creating a <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> object throws an `ExceptionInInitializerError`. Without read access to the font files, saving a presentation as PDF fails with the error "Cannot find any fonts installed on the system".
+
+## **Java 24 and Later**
+
+The Security Manager cannot be enabled on Java 24 and later, so there are no permissions to grant. Aspose.Slides runs with the permissions of the account that runs your application. To restrict what an application can access, the OpenJDK project recommends technologies outside the JDK, such as containers, hypervisors, and operating-system sandboxing features. See <a href="https://openjdk.org/jeps/486" target="_blank" rel="nofollow noopener noreferrer">JEP 486</a>.
+
+## **FAQ**
+
+**Can I use Aspose.Slides in an environment that runs applications under a restrictive Security Manager policy?**
+
+Only if the policy grants the permissions listed above both to Aspose.Slides and to the code that calls it. They include reading all files and starting any program.

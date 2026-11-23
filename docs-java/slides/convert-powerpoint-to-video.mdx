@@ -1,0 +1,421 @@
+---
+title: "Convert PowerPoint Presentations to Video in Java"
+sidebar_label: "Convert PowerPoint Presentations to Video in Java"
+sidebar_key: "java-slides-convert-powerpoint-to-video"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/convert-powerpoint-to-video.md"
+source_commit: ""
+source_sha256: "17585ba38f4ed77f5681858637e2bd483ff7eb3156f4289da620b8e2e03ad39f"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/convert-powerpoint-to-video/"
+source_markdown_url: "https://docs.aspose.com/slides/java/convert-powerpoint-to-video.md"
+source_snapshot_sha256: "fadc5d88e706bde06ec555f8bf1023ea3ea8dad8ac4f2dc0a34d5613ecab23af"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+import "./_remote-markdown.css";
+
+a
+
+> Learn how to convert PowerPoint presentations to video in Java. Discover sample code and automation techniques to streamline your workflow.
+> 8
+
+## **Introduction**
+
+By converting your PowerPoint or OpenDocument presentation to video, you gain:
+
+**Increased accessibility:** All devices, regardless of platform, are equipped with video players by default, making it easier for users to open or play videos compared to traditional presentation applications.
+
+**Wider reach:** Videos enable you to reach a larger audience and present information in a more engaging format. Surveys and statistics indicate that people prefer to watch and consume video content over other forms, making your message more impactful.
+
+You may want to check our <a href="https://products.aspose.app/slides/video" target="_blank" rel="nofollow noopener noreferrer">**PowerPoint to Video Online Converter**</a> because it is a live and effective implementation of the process described here.
+
+## **PowerPoint to Video Conversion in Aspose.Slides**
+
+In <a href="https://docs.aspose.com/slides/java/aspose-slides-for-java-22-11-release-notes/" target="_blank" rel="nofollow noopener noreferrer">Aspose.Slides 22.11</a>, we implemented support for presentation to video conversion.
+
+- Use **Aspose.Slides** to generate a set of frames (from the presentation slides) that correspond to a certain FPS (frames per second)
+- Use a third-party utility like **ffmpeg** (<a href="https://github.com/bramp/ffmpeg-cli-wrapper" target="_blank" rel="nofollow noopener noreferrer">for java</a>) to create a video based on the frames.
+
+### **Convert PowerPoint to Video**
+
+1. Add this to your POM file:
+
+```xml
+   <dependency>
+     <groupId>net.bramp.ffmpeg</groupId>
+     <artifactId>ffmpeg</artifactId>
+     <version>0.7.0</version>
+   </dependency>
+```
+
+2. Download ffmpeg <a href="https://ffmpeg.org/download.html" target="_blank" rel="nofollow noopener noreferrer">here</a>.
+
+3. Run the PowerPoint to video Java code.
+
+This Java code shows you how to convert a presentation (containing a figure and two animation effects) to a video:
+
+```java
+import com.aspose.slides.*;
+import java.io.IOException;
+import java.util.ArrayList;
+
+Presentation presentation = new Presentation();
+try {
+    // Adds a smile shape and then animates it
+    IAutoShape smile = presentation.getSlides().get_Item(0).getShapes().addAutoShape(ShapeType.SmileyFace, 110, 20, 500, 500);
+    ISequence mainSequence = presentation.getSlides().get_Item(0).getTimeline().getMainSequence();
+    IEffect effectIn = mainSequence.addEffect(smile, EffectType.Fly, EffectSubtype.TopLeft, EffectTriggerType.AfterPrevious);
+    IEffect effectOut = mainSequence.addEffect(smile, EffectType.Fly, EffectSubtype.BottomRight, EffectTriggerType.AfterPrevious);
+    effectIn.getTiming().setDuration(2f);
+    effectOut.setPresetClassType(EffectPresetClassType.Exit);
+
+    final int fps = 33;
+    ArrayList<String> frames = new ArrayList<String>();
+
+    PresentationAnimationsGenerator animationsGenerator = new PresentationAnimationsGenerator(presentation);
+    try
+    {
+        PresentationPlayer player = new PresentationPlayer(animationsGenerator, fps);
+        try {
+            player.setFrameTick((sender, arguments) ->
+            {
+                try {
+                    String frame = String.format("frame_%04d.png", sender.getFrameIndex());
+                    arguments.getFrame().save(frame, ImageFormat.Png);
+                    frames.add(frame);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            animationsGenerator.run(presentation.getSlides());
+        } finally {
+            if (player != null) player.dispose();
+        }
+    } finally {
+        if (animationsGenerator != null) animationsGenerator.dispose();
+    }
+
+    // Configure ffmpeg binaries folder. See this page: https://github.com/rosenbjerg/FFMpegCore#installation
+    FFmpeg ffmpeg = new FFmpeg("path/to/ffmpeg");
+    FFprobe ffprobe = new FFprobe("path/to/ffprobe");
+
+    FFmpegBuilder builder = new FFmpegBuilder()
+            .addExtraArgs("-start_number", "1")
+            .setInput("frame_%04d.png")
+            .addOutput("output.avi")
+            .setVideoFrameRate(FFmpeg.FPS_24)
+            .setFormat("avi")
+            .done();
+
+    FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
+    executor.createJob(builder).run();
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
+## **Video Effects**
+
+You can apply animations to objects on slides and use transitions between slides.
+
+You may want to see these articles: [PowerPoint Animation](/java/slides/powerpoint-animation/), [Shape Animation](/java/slides/shape-animation/), and [Shape Effect](/java/slides/shape-effect/).
+
+Animations and transitions make slideshows more engaging and interesting-and they do the same thing for videos. Let's add another slide and transition to the code for the previous presentation:
+
+```java
+import com.aspose.slides.*;
+import java.awt.Color;
+
+Presentation presentation = new Presentation();
+try {
+    // Adds a smile shape and animates it
+
+    // ...
+
+    // Adds a new slide and animated transition
+
+    ISlide newSlide = presentation.getSlides().addEmptySlide(presentation.getSlides().get_Item(0).getLayoutSlide());
+
+    newSlide.getBackground().setType(BackgroundType.OwnBackground);
+
+    newSlide.getBackground().getFillFormat().setFillType(FillType.Solid);
+
+    newSlide.getBackground().getFillFormat().getSolidFillColor().setColor(Color.MAGENTA);
+
+    newSlide.getSlideShowTransition().setType(TransitionType.Push);
+} finally {
+    if (presentation != null) presentation.dispose();
+}
+```
+
+Aspose.Slides also supports animation for texts. So we animate paragraphs on objects, which will appear one after the other (with the delay set to a second):
+
+```java
+import com.aspose.slides.*;
+import java.io.IOException;
+import java.util.ArrayList;
+
+Presentation presentation = new Presentation();
+try {
+    // Adds text and animations
+    IAutoShape autoShape = presentation.getSlides().get_Item(0).getShapes().addAutoShape(ShapeType.Rectangle, 210, 120, 300, 300);
+    Paragraph para1 = new Paragraph();
+    para1.getPortions().add(new Portion("Aspose Slides for Java"));
+    Paragraph para2 = new Paragraph();
+    para2.getPortions().add(new Portion("convert PowerPoint Presentation with text to video"));
+
+    Paragraph para3 = new Paragraph();
+    para3.getPortions().add(new Portion("paragraph by paragraph"));
+    IParagraphCollection paragraphCollection = autoShape.getTextFrame().getParagraphs();
+    paragraphCollection.add(para1);
+    paragraphCollection.add(para2);
+    paragraphCollection.add(para3);
+    paragraphCollection.add(new Paragraph());
+
+    ISequence mainSequence = presentation.getSlides().get_Item(0).getTimeline().getMainSequence();
+    IEffect effect1 = mainSequence.addEffect(para1, EffectType.Appear, EffectSubtype.None, EffectTriggerType.AfterPrevious);
+    IEffect effect2 = mainSequence.addEffect(para2, EffectType.Appear, EffectSubtype.None, EffectTriggerType.AfterPrevious);
+    IEffect effect3 = mainSequence.addEffect(para3, EffectType.Appear, EffectSubtype.None, EffectTriggerType.AfterPrevious);
+
+    effect1.getTiming().setTriggerDelayTime(1f);
+    effect2.getTiming().setTriggerDelayTime(1f);
+    effect3.getTiming().setTriggerDelayTime(1f);
+
+    final int fps = 33;
+    ArrayList<String> frames = new ArrayList<String>();
+
+    PresentationAnimationsGenerator animationsGenerator = new PresentationAnimationsGenerator(presentation);
+    try
+    {
+        PresentationPlayer player = new PresentationPlayer(animationsGenerator, fps);
+        try {
+            player.setFrameTick((sender, arguments) ->
+            {
+                try {
+                    String frame = String.format("frame_%04d.png", sender.getFrameIndex());
+                    arguments.getFrame().save(frame, ImageFormat.Png);
+                    frames.add(frame);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            animationsGenerator.run(presentation.getSlides());
+        } finally {
+            if (player != null) player.dispose();
+        }
+    } finally {
+        if (animationsGenerator != null) animationsGenerator.dispose();
+    }
+
+    // Configure ffmpeg binaries folder. See this page: https://github.com/rosenbjerg/FFMpegCore#installation
+    FFmpeg ffmpeg = new FFmpeg("path/to/ffmpeg");
+    FFprobe ffprobe = new FFprobe("path/to/ffprobe");
+
+    FFmpegBuilder builder = new FFmpegBuilder()
+            .addExtraArgs("-start_number", "1")
+            .setInput("frame_%04d.png")
+            .addOutput("output.avi")
+            .setVideoFrameRate(FFmpeg.FPS_24)
+            .setFormat("avi")
+            .done();
+
+    FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
+    executor.createJob(builder).run();
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
+## **Video Conversion Classes**
+
+To allow you to perform PowerPoint to video conversion tasks, Aspose.Slides provides the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentationanimationsgenerator/" target="_blank" rel="nofollow noopener noreferrer">PresentationAnimationsGenerator</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentationplayer/" target="_blank" rel="nofollow noopener noreferrer">PresentationPlayer</a> classes.
+
+<a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentationanimationsgenerator/" target="_blank" rel="nofollow noopener noreferrer">PresentationAnimationsGenerator</a> allows you to set the frame size for the video (that will be created later) through its constructor. If you pass an instance of the presentation, `Presentation.SlideSize` will be used and it generates animations that <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentationplayer/" target="_blank" rel="nofollow noopener noreferrer">PresentationPlayer</a> uses.
+
+When animations are generated, a `NewAnimation` event is generated for each subsequent animation, which has the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ipresentationanimationplayer/" target="_blank" rel="nofollow noopener noreferrer">IPresentationAnimationPlayer</a> parameter. The latter is a class that represents a player for a separate animation.
+
+<!-- visual-explanation:convert-powerpoint-to-video:start -->
+
+[![Presentation animation data is rendered to numbered PNGs, then a separate encoder writes the selected video format with coordinated frame rates.](/java/slides/images/f34cee01f86707e8-visual-convert-powerpoint-to-video-f34cee01f867.svg)](https://docs.aspose.com/slides/java/convert-powerpoint-to-video/visual-convert-powerpoint-to-video-f34cee01f867.svg)
+
+*Conceptual pipeline with matched rates for intended pacing. The article's samples configure rendering at 33 FPS but request AVI output at 24 FPS. Coordinate the encoder's image-sequence input and output rates with the rendered frames; this diagram does not measure those samples' resulting playback.*
+
+<!-- visual-explanation:convert-powerpoint-to-video:end -->
+
+To work with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ipresentationanimationplayer/" target="_blank" rel="nofollow noopener noreferrer">IPresentationAnimationPlayer</a>, the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ipresentationanimationplayer/#getDuration--" target="_blank" rel="nofollow noopener noreferrer">Duration</a> (the full duration of the animation) property and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ipresentationanimationplayer/#setTimePosition-double-" target="_blank" rel="nofollow noopener noreferrer">SetTimePosition</a> method are used. Each animation position is set within the *0 to duration* range, and then the `getFrame` method will return an <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iimage/" target="_blank" rel="nofollow noopener noreferrer">IImage</a> that corresponds to the animation state at that moment:
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    // Adds a smile shape and animates it
+    IAutoShape smile = presentation.getSlides().get_Item(0).getShapes().addAutoShape(ShapeType.SmileyFace, 110, 20, 500, 500);
+    ISequence mainSequence = presentation.getSlides().get_Item(0).getTimeline().getMainSequence();
+    IEffect effectIn = mainSequence.addEffect(smile, EffectType.Fly, EffectSubtype.TopLeft, EffectTriggerType.AfterPrevious);
+    IEffect effectOut = mainSequence.addEffect(smile, EffectType.Fly, EffectSubtype.BottomRight, EffectTriggerType.AfterPrevious);
+    effectIn.getTiming().setDuration(2f);
+    effectOut.setPresetClassType(EffectPresetClassType.Exit);
+
+    PresentationAnimationsGenerator animationsGenerator = new PresentationAnimationsGenerator(presentation);
+    try {
+        animationsGenerator.setNewAnimation(animationPlayer ->
+        {
+            System.out.println(String.format("Animation total duration: %f", animationPlayer.getDuration()));
+
+            animationPlayer.setTimePosition(0); // initial animation state
+            // initial animation state bitmap
+            animationPlayer.getFrame().save("firstFrame.png", ImageFormat.Png);
+
+            animationPlayer.setTimePosition(animationPlayer.getDuration()); // final state of the animation
+            // last frame of the animation
+            animationPlayer.getFrame().save("lastFrame.png", ImageFormat.Png);
+        });
+
+        // generate the animations - this is what raises the events handled above
+        animationsGenerator.run(presentation.getSlides());
+    } finally {
+        if (animationsGenerator != null) animationsGenerator.dispose();
+    }
+} finally {
+    if (presentation != null) presentation.dispose();
+}
+```
+
+To make all animations in a presentation play at once, the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentationplayer/" target="_blank" rel="nofollow noopener noreferrer">PresentationPlayer</a> class is used. This class  takes a <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentationanimationsgenerator/" target="_blank" rel="nofollow noopener noreferrer">PresentationAnimationsGenerator</a> instance and FPS for effects in its constructor and then calls the `FrameTick` event for all the animations to get them played:
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("animated.pptx");
+try {
+    PresentationAnimationsGenerator animationsGenerator = new PresentationAnimationsGenerator(presentation);
+    try {
+        PresentationPlayer player = new PresentationPlayer(animationsGenerator, 33);
+        try {
+            player.setFrameTick((sender, arguments) ->
+            {
+                arguments.getFrame().save("frame_" + sender.getFrameIndex() + ".png", ImageFormat.Png);
+            });
+            animationsGenerator.run(presentation.getSlides());
+        } finally {
+            if (player != null) player.dispose();
+        }
+    } finally {
+        if (animationsGenerator != null) animationsGenerator.dispose();
+    }
+} finally {
+    if (presentation != null) presentation.dispose();
+}
+```
+
+Then the generated frames can be compiled to produce a video. See the [Convert PowerPoint to Video](/java/slides/convert-powerpoint-to-video/#convert-powerpoint-to-video) section.
+
+## **Supported Animations and Effects**
+
+**Entrance**:
+
+<div className="docs-owner-markdown-table">
+
+| Animation Type | Aspose.Slides | PowerPoint |
+| --------------- | ------------------------------------------------------------ | -------------------------------------------------------- |
+| **Appear** | ![not supported](/java/slides/images/d9323f5d1496e9d4-x.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Fade** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Fly In** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Float In** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Split** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Wipe** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Shape** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Wheel** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Random Bars** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Grow & Turn** | ![not supported](/java/slides/images/d9323f5d1496e9d4-x.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Zoom** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Swivel** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Bounce** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+
+</div>
+
+**Emphasis**:
+
+<div className="docs-owner-markdown-table">
+
+| Animation Type | Aspose.Slides | PowerPoint |
+| ----------------------- | ------------------------------------------------------------ | -------------------------------------------------------- |
+| **Pulse** | ![not supported](/java/slides/images/d9323f5d1496e9d4-x.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Color Pulse** | ![not supported](/java/slides/images/d9323f5d1496e9d4-x.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Teeter** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Spin** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Grow/Shrink** | ![not supported](/java/slides/images/d9323f5d1496e9d4-x.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Desaturate** | ![not supported](/java/slides/images/d9323f5d1496e9d4-x.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Darken** | ![not supported](/java/slides/images/d9323f5d1496e9d4-x.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Lighten** | ![not supported](/java/slides/images/d9323f5d1496e9d4-x.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Transparency** | ![not supported](/java/slides/images/d9323f5d1496e9d4-x.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Object Color** | ![not supported](/java/slides/images/d9323f5d1496e9d4-x.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Complementary Color** | ![not supported](/java/slides/images/d9323f5d1496e9d4-x.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Line Color** | ![not supported](/java/slides/images/d9323f5d1496e9d4-x.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Fill Color** | ![not supported](/java/slides/images/d9323f5d1496e9d4-x.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+
+</div>
+
+**Exit**:
+
+<div className="docs-owner-markdown-table">
+
+| Animation Type | Aspose.Slides | PowerPoint |
+| ----------------- | ------------------------------------------------------------ | -------------------------------------------------------- |
+| **Disappear** | ![not supported](/java/slides/images/d9323f5d1496e9d4-x.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Fade** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Fly Out** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Float Out** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Split** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Wipe** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Shape** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Random Bars** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Shrink & Turn** | ![not supported](/java/slides/images/d9323f5d1496e9d4-x.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Zoom** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Swivel** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Bounce** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+
+</div>
+
+**Motion Paths:**
+
+<div className="docs-owner-markdown-table">
+
+| Animation Type | Aspose.Slides | PowerPoint |
+| --------------- | -------------------------------------------------------- | -------------------------------------------------------- |
+| **Lines** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Arcs** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Turns** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Shapes** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Loops** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+| **Custom Path** | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) | ![supported](/java/slides/images/0dd3e3ebf32ea99a-v.png) |
+
+</div>
+
+## **FAQ**
+
+### Is it possible to convert presentations that are password protected?
+
+Yes, Aspose.Slides allows working with [password-protected presentations](/java/slides/password-protected-presentation/). When processing such files, you need to provide the correct password so that the library can access the content of the presentation.
+
+### Does Aspose.Slides support usage in cloud solutions?
+
+Yes, Aspose.Slides can be integrated into cloud applications and services. The library is designed to work in server environments, ensuring high performance and scalability for batch processing of files.
+
+### Are there any size limitations for presentations during conversion?
+
+Aspose.Slides is capable of handling presentations of virtually any size. However, when working with very large files, additional system resources may be required, and it is sometimes recommended to optimize the presentation to improve performance.

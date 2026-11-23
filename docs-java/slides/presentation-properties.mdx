@@ -1,0 +1,315 @@
+---
+title: "Manage Presentation Properties in Java"
+sidebar_label: "Manage Presentation Properties in Java"
+sidebar_key: "java-slides-presentation-properties"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/presentation-properties.md"
+source_commit: ""
+source_sha256: "13c59ccf804bda03ab27f106f6be80977deadb05ceed8f108985d50a4dc0b09d"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/presentation-properties/"
+source_markdown_url: "https://docs.aspose.com/slides/java/presentation-properties.md"
+source_snapshot_sha256: "0550c94d3bd6c4593aa8d5fcdb36082beed56dcced40934f128116122658f97e"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+a
+
+> Master presentation properties in Aspose.Slides for Java and streamline search, branding and workflow in your PowerPoint and OpenDocument files.
+> 2
+
+## **Introduction**
+
+Aspose.Slides for Java supports **built-in** and **custom** document properties. Use these properties to read and update presentation metadata, such as the author, title, and user-defined values.
+
+Aspose.Slides allows you to work with presentation document properties through the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idocumentproperties/" target="_blank" rel="nofollow noopener noreferrer">IDocumentProperties</a> interface. An instance of this interface is returned by <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ipresentation/#getDocumentProperties--" target="_blank" rel="nofollow noopener noreferrer">IPresentation.getDocumentProperties</a>. The following examples show how to read, modify, and manage these properties.
+
+Aspose.Slides manages the application and producer metadata when saving presentations; these fields identify the software that created the output.
+
+## **Manage Presentation Properties**
+
+Document properties store descriptive information alongside presentation content. They fall into two categories:
+
+- **Built-in properties** contain standard metadata, such as the title, author, and document statistics.
+- **Custom properties** store user-defined name/value pairs.
+
+Aspose.Slides for Java provides access to both categories. In PowerPoint, select **File → Info → Properties → Advanced Properties** to inspect document metadata. The dialog groups information into tabs such as **Summary**, **Statistics**, **Contents**, and **Custom**. Use the **Custom** tab to manage user-defined properties.
+
+## **Read Public Properties from an Encrypted Presentation**
+
+An opening password normally protects both presentation content and document properties. When a presentation is encrypted after calling <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iprotectionmanager/#setEncryptDocumentProperties-boolean-" target="_blank" rel="nofollow noopener noreferrer">IProtectionManager.setEncryptDocumentProperties</a> with `false`, its document properties remain public. An application can then call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/loadoptions/#setOnlyLoadDocumentProperties-boolean-" target="_blank" rel="nofollow noopener noreferrer">LoadOptions.setOnlyLoadDocumentProperties</a> with `true` and read the public metadata without supplying the opening password.
+
+<a href="https://reference.aspose.com/slides/java/com.aspose.slides/loadoptions/#setOnlyLoadDocumentProperties-boolean-" target="_blank" rel="nofollow noopener noreferrer">LoadOptions.setOnlyLoadDocumentProperties</a> controls what Aspose.Slides loads; it does not decrypt anything. If the properties were included in encryption, loading them without the password fails. If the presentation is not encrypted, the option is ignored and the complete presentation is loaded.
+
+The example requires an encrypted presentation whose document properties were left public. It verifies the loading mode through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iprotectionmanager/#isOnlyDocumentPropertiesLoaded--" target="_blank" rel="nofollow noopener noreferrer">IProtectionManager.isOnlyDocumentPropertiesLoaded</a> and then reads built-in properties through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ipresentation/#getDocumentProperties--" target="_blank" rel="nofollow noopener noreferrer">IPresentation.getDocumentProperties</a>:
+
+```java
+import com.aspose.slides.IDocumentProperties;
+import com.aspose.slides.LoadOptions;
+import com.aspose.slides.Presentation;
+
+LoadOptions loadOptions = new LoadOptions();
+loadOptions.setOnlyLoadDocumentProperties(true);
+
+Presentation presentation = new Presentation("public-properties-encrypted.pptx", loadOptions);
+try {
+    if (presentation.getProtectionManager().isOnlyDocumentPropertiesLoaded()) {
+        IDocumentProperties documentProperties = presentation.getDocumentProperties();
+
+        System.out.println("Author: " + documentProperties.getAuthor());
+        System.out.println("Title: " + documentProperties.getTitle());
+        System.out.println("Keywords: " + documentProperties.getKeywords());
+    } else {
+        System.out.println("The presentation was not loaded in document-properties-only mode.");
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+In this mode, slide content is not loaded. Slides, masters, layouts, shapes, media, and other presentation objects are unavailable. Applications should always check <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iprotectionmanager/#isOnlyDocumentPropertiesLoaded--" target="_blank" rel="nofollow noopener noreferrer">IProtectionManager.isOnlyDocumentPropertiesLoaded</a> before performing an operation that requires the complete presentation object model.
+
+Public metadata may expose author names, titles, subjects, keywords, company information, comments, and custom values. Encrypt sensitive properties together with the presentation. Leave them public only when indexing, classification, search, or document-management systems have a specific requirement to access them without a password.
+
+## **Update Properties of an Encrypted Presentation**
+
+For an encrypted PPTX file, a presentation loaded after calling <a href="https://reference.aspose.com/slides/java/com.aspose.slides/loadoptions/#setOnlyLoadDocumentProperties-boolean-" target="_blank" rel="nofollow noopener noreferrer">LoadOptions.setOnlyLoadDocumentProperties</a> with `true` is intended for reading public metadata. Aspose.Slides cannot save changed properties from that metadata-only object because the public properties must remain consistent with the corresponding data inside the encrypted presentation. Updating them therefore requires the correct opening password and a complete load.
+
+The example requires an encrypted PPTX presentation with public document properties and a known opening password. It opens the complete presentation with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/loadoptions/#setPassword-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">LoadOptions.setPassword</a>, updates public built-in properties, and saves the result. It then uses <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ipresentationinfo/#isEncrypted--" target="_blank" rel="nofollow noopener noreferrer">IPresentationInfo.isEncrypted</a> to verify that encryption is preserved and reopens the public metadata without a password to verify the new values:
+
+```java
+import com.aspose.slides.IDocumentProperties;
+import com.aspose.slides.IPresentationInfo;
+import com.aspose.slides.LoadOptions;
+import com.aspose.slides.Presentation;
+import com.aspose.slides.PresentationFactory;
+import com.aspose.slides.SaveFormat;
+
+final String inputPath = "public-properties-encrypted.pptx";
+final String outputPath = "updated-public-properties-encrypted.pptx";
+
+LoadOptions loadOptions = new LoadOptions();
+loadOptions.setPassword("open_password");
+
+Presentation presentation = new Presentation(inputPath, loadOptions);
+try {
+    IDocumentProperties documentProperties = presentation.getDocumentProperties();
+    documentProperties.setTitle("Updated Product Roadmap");
+    documentProperties.setKeywords("roadmap, planning, indexed");
+
+    presentation.save(outputPath, SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+
+IPresentationInfo presentationInfo = PresentationFactory.getInstance().getPresentationInfo(outputPath);
+System.out.println("The presentation is encrypted: " + presentationInfo.isEncrypted());
+
+LoadOptions metadataLoadOptions = new LoadOptions();
+metadataLoadOptions.setOnlyLoadDocumentProperties(true);
+
+Presentation metadataPresentation = new Presentation(outputPath, metadataLoadOptions);
+try {
+    if (metadataPresentation.getProtectionManager().isOnlyDocumentPropertiesLoaded()) {
+        System.out.println("Title: " + metadataPresentation.getDocumentProperties().getTitle());
+        System.out.println("Keywords: " + metadataPresentation.getDocumentProperties().getKeywords());
+    } else {
+        System.out.println("The presentation was not loaded in document-properties-only mode.");
+    }
+} finally {
+    metadataPresentation.dispose();
+}
+```
+
+If an application is not allowed to decrypt or load the presentation content, it must treat public properties of an encrypted PPTX file as read-only.
+
+## **Access Built-in Properties**
+
+The <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idocumentproperties/" target="_blank" rel="nofollow noopener noreferrer">IDocumentProperties</a> interface exposes built-in metadata through getter methods, including <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idocumentproperties/#getAuthor--" target="_blank" rel="nofollow noopener noreferrer">getAuthor</a>, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idocumentproperties/#getTitle--" target="_blank" rel="nofollow noopener noreferrer">getTitle</a>, and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idocumentproperties/#getCreatedTime--" target="_blank" rel="nofollow noopener noreferrer">getCreatedTime</a>. This example opens an existing presentation and prints its stored metadata to the console. Values depend on the input presentation; some fields may be empty.
+
+```java
+import com.aspose.slides.IDocumentProperties;
+import com.aspose.slides.Presentation;
+
+Presentation presentation = new Presentation("AccessBuiltInProperties.pptx");
+try {
+    IDocumentProperties documentProperties = presentation.getDocumentProperties();
+
+    System.out.println("Category: " + documentProperties.getCategory());
+    System.out.println("Content status: " + documentProperties.getContentStatus());
+    System.out.println("Creation date: " + documentProperties.getCreatedTime());
+    System.out.println("Author: " + documentProperties.getAuthor());
+    System.out.println("Comments: " + documentProperties.getComments());
+    System.out.println("Keywords: " + documentProperties.getKeywords());
+    System.out.println("Last modified by: " + documentProperties.getLastSavedBy());
+    System.out.println("Manager: " + documentProperties.getManager());
+    System.out.println("Modified date: " + documentProperties.getLastSavedTime());
+    System.out.println("Presentation format: " + documentProperties.getPresentationFormat());
+    System.out.println("Last print date: " + documentProperties.getLastPrinted());
+    System.out.println("Is shared between producers: " + documentProperties.getSharedDoc());
+    System.out.println("Subject: " + documentProperties.getSubject());
+    System.out.println("Title: " + documentProperties.getTitle());
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Modify Built-in Properties**
+
+To update built-in metadata, use the setter methods on the object returned by <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ipresentation/#getDocumentProperties--" target="_blank" rel="nofollow noopener noreferrer">IPresentation.getDocumentProperties</a>. This example opens an existing presentation, calls <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idocumentproperties/#setAuthor-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">setAuthor</a>, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idocumentproperties/#setTitle-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">setTitle</a>, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idocumentproperties/#setSubject-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">setSubject</a>, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idocumentproperties/#setComments-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">setComments</a>, and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idocumentproperties/#setManager-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">setManager</a>, then saves the updated presentation with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/#save-java.lang.String-int-" target="_blank" rel="nofollow noopener noreferrer">Presentation.save</a>. The saved PPTX contains the new metadata.
+
+```java
+import com.aspose.slides.IDocumentProperties;
+import com.aspose.slides.Presentation;
+import com.aspose.slides.SaveFormat;
+
+Presentation presentation = new Presentation("ModifyBuiltInProperties.pptx");
+try {
+    IDocumentProperties documentProperties = presentation.getDocumentProperties();
+
+    documentProperties.setAuthor("Aspose.Slides for Java");
+    documentProperties.setTitle("Manage PowerPoint Presentation Properties");
+    documentProperties.setSubject("Modify Built-in Properties");
+    documentProperties.setComments("Aspose description");
+    documentProperties.setManager("Aspose manager");
+
+    presentation.save("DocumentProperties_output.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Manage the Hyperlink Base**
+
+<a href="https://reference.aspose.com/slides/java/com.aspose.slides/idocumentproperties/#getHyperlinkBase--" target="_blank" rel="nofollow noopener noreferrer">IDocumentProperties.getHyperlinkBase</a> returns the document-level base for relative hyperlinks. Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idocumentproperties/#setHyperlinkBase-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">IDocumentProperties.setHyperlinkBase</a> to change or clear it. This is useful when moving a presentation and its linked files to another location. It is separate from an individual hyperlink's <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ihyperlink/#getExternalUrl--" target="_blank" rel="nofollow noopener noreferrer">IHyperlink.getExternalUrl</a>: changing the base does not rewrite the stored link addresses or change absolute destinations.
+
+The example requires a presentation containing both a relative link, such as `target.html`, and an absolute link, such as `https://example.org/absolute.html`. It reads the existing base, assigns a new base address, and saves and reopens the presentation to check the value. It then clears the base with an empty string and verifies the empty value in a separate saved file. Replace the example base address with the location of your linked files.
+
+```java
+import com.aspose.slides.Presentation;
+import com.aspose.slides.SaveFormat;
+
+Presentation presentation = new Presentation("hyperlinks.pptx");
+try {
+    System.out.println("Original base: " + presentation.getDocumentProperties().getHyperlinkBase());
+
+    final String newBase = "https://example.com/new/";
+    presentation.getDocumentProperties().setHyperlinkBase(newBase);
+    presentation.save("hyperlinks-updated.pptx", SaveFormat.Pptx);
+
+    Presentation updatedPresentation = new Presentation("hyperlinks-updated.pptx");
+    try {
+        System.out.println("Base preserved: " + newBase.equals(updatedPresentation.getDocumentProperties().getHyperlinkBase()));
+
+        updatedPresentation.getDocumentProperties().setHyperlinkBase("");
+        updatedPresentation.save("hyperlinks-cleared.pptx", SaveFormat.Pptx);
+
+        Presentation clearedPresentation = new Presentation("hyperlinks-cleared.pptx");
+        try {
+            System.out.println("Base cleared: " + "".equals(clearedPresentation.getDocumentProperties().getHyperlinkBase()));
+        } finally {
+            clearedPresentation.dispose();
+        }
+    } finally {
+        updatedPresentation.dispose();
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+The two verification messages should print `true`. Clearing the base leaves the individual hyperlink addresses intact.
+
+A relative link to `target.pptx` opened `old/target.pptx` when the base pointed to the `old` folder. After changing the base to the `new` folder, saving, and reopening the presentation, the same link opened `new/target.pptx`. An absolute link continued to open the same file. Test your relative links in PowerPoint before and after moving the presentation or changing its base.
+
+## **Add Custom Presentation Properties**
+
+Custom properties store metadata that has no corresponding built-in field. The <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idocumentproperties/#set-Item-java.lang.String-java.lang.Object-" target="_blank" rel="nofollow noopener noreferrer">IDocumentProperties.set_Item</a> method lets you assign a value by property name. This example creates a presentation, adds two text values and an integer version value, and saves the presentation with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/#save-java.lang.String-int-" target="_blank" rel="nofollow noopener noreferrer">Presentation.save</a>. Assigning a value to an existing name replaces that property's value.
+
+```java
+import com.aspose.slides.IDocumentProperties;
+import com.aspose.slides.Presentation;
+import com.aspose.slides.SaveFormat;
+
+Presentation presentation = new Presentation();
+try {
+    IDocumentProperties documentProperties = presentation.getDocumentProperties();
+
+    documentProperties.set_Item("Reviewed by", "John Smith");
+    documentProperties.set_Item("Confidentiality level", "Internal");
+    documentProperties.set_Item("Document version", 2);
+
+    presentation.save("CustomDocumentProperties_output.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Access and Modify Custom Properties**
+
+This example opens a presentation containing custom properties and uses <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idocumentproperties/#getCountOfCustomProperties--" target="_blank" rel="nofollow noopener noreferrer">getCountOfCustomProperties</a> to iterate over them. <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idocumentproperties/#getCustomPropertyName-int-" target="_blank" rel="nofollow noopener noreferrer">getCustomPropertyName</a> accepts a zero-based index and returns the name used by <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idocumentproperties/#set-Item-java.lang.String-java.lang.Object-" target="_blank" rel="nofollow noopener noreferrer">IDocumentProperties.set_Item</a>. The example prints each original name and value, replaces every value with a numbered string regardless of its original type, and saves the changes. If there are no custom properties, the loop makes no changes.
+
+```java
+import com.aspose.slides.IDocumentProperties;
+import com.aspose.slides.Presentation;
+import com.aspose.slides.SaveFormat;
+
+Presentation presentation = new Presentation("AccessAndModifyProperties.pptx");
+try {
+    IDocumentProperties documentProperties = presentation.getDocumentProperties();
+
+    for (int i = 0; i < documentProperties.getCountOfCustomProperties(); i++) {
+        String propertyName = documentProperties.getCustomPropertyName(i);
+        Object propertyValue = documentProperties.get_Item(propertyName);
+
+        System.out.println("Custom property name: " + propertyName);
+        System.out.println("Custom property value: " + propertyValue);
+
+        documentProperties.set_Item(propertyName, "New Value " + (i + 1));
+    }
+
+    presentation.save("CustomProperties_output.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Live Example**
+
+Try the <a href="https://products.aspose.app/slides/metadata" target="_blank" rel="nofollow noopener noreferrer">**View &amp; Edit PowerPoint Metadata**</a> online app to see how to work with document properties using the Aspose.Slides API:
+
+[![View & Edit PowerPoint Metadata](/java/slides/images/a2477624f2e54e79-slides-metadata.png)](https://products.aspose.app/slides/metadata)
+
+## **FAQ**
+
+**How can I remove a built-in property from a presentation?**
+
+Built-in properties are an integral part of the presentation and cannot be removed entirely. However, you can either change their values or set them to empty if allowed by the specific property.
+
+**What happens if I add a custom property that already exists?**
+
+If you add a custom property that already exists, its existing value will be overwritten with the new one. You do not need to remove or check the property beforehand, as Aspose.Slides automatically updates the property's value.
+
+**Can I access presentation properties without fully loading the presentation?**
+
+Yes. Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentationfactory/#getPresentationInfo-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">PresentationFactory.getPresentationInfo</a> and then <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ipresentationinfo/#readDocumentProperties--" target="_blank" rel="nofollow noopener noreferrer">IPresentationInfo.readDocumentProperties</a> to read stored document metadata without creating a <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> instance. See [Build a Lightweight Presentation Inventory](/java/slides/examine-presentation/) for a complete reporting example and format-specific limitations.
+
+**Can I read public properties of an encrypted presentation without its opening password?**
+
+Yes. The presentation must have been encrypted after calling <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iprotectionmanager/#setEncryptDocumentProperties-boolean-" target="_blank" rel="nofollow noopener noreferrer">IProtectionManager.setEncryptDocumentProperties</a> with `false`, and it must be loaded after calling <a href="https://reference.aspose.com/slides/java/com.aspose.slides/loadoptions/#setOnlyLoadDocumentProperties-boolean-" target="_blank" rel="nofollow noopener noreferrer">LoadOptions.setOnlyLoadDocumentProperties</a> with `true`.
+
+**Can I update an encrypted PPTX file in document-properties-only mode?**
+
+No. Public and encrypted property data must remain consistent, so updating an encrypted PPTX file requires loading the complete presentation with the correct opening password.

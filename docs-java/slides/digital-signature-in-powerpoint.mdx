@@ -1,0 +1,194 @@
+---
+title: "Add Digital Signatures to Presentations in Java"
+sidebar_label: "Add Digital Signatures to Presentations in Java"
+sidebar_key: "java-slides-digital-signature-in-powerpoint"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/digital-signature-in-powerpoint.md"
+source_commit: ""
+source_sha256: "587d3cb62440f7b8d03d65fa525c7f27b30b6fa3ed197caec2f1b56cf4950a90"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/digital-signature-in-powerpoint/"
+source_markdown_url: "https://docs.aspose.com/slides/java/digital-signature-in-powerpoint.md"
+source_snapshot_sha256: "e1ff3ecd4d39768e3fb63f48ded289206585aa0f98f69684f353659fafa272cc"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+a
+
+> Learn how to sign existing PPTX presentations with PFX certificates and use Aspose.Slides for Java to validate or remove digital signatures.
+> 5
+
+## **Overview**
+
+A digital signature helps a recipient determine who signed a presentation and whether the signed content has changed. Three related security concepts are important here:
+
+- A **digital certificate** is an electronic credential that associates an identity with a public key. A trusted certificate authority (CA) can issue a certificate, or an organization can use a self-signed certificate for internal workflows.
+- A **digital signature** is created from the presentation content and the certificate holder's private key. The certificate's public key can then be used to verify the signature. A signature provides evidence of origin and integrity; it does not encrypt the presentation.
+- **Password protection** controls whether a user can open or modify a presentation. It is separate from digital signing and is described in [Password-Protected Presentations](/java/slides/password-protected-presentation/).
+
+PowerPoint provides the **Add a Digital Signature** command under **File &gt; Info &gt; Protect Presentation**.
+
+![PowerPoint Protect Presentation menu with Add a Digital Signature highlighted](/java/slides/images/7ef4c262c542e7f1-add-digital-signature-in-powerpoint.png)
+
+After a signed presentation is opened, PowerPoint can display a signature-status notification.
+
+![PowerPoint notification stating that the presentation contains valid signatures](/java/slides/images/af363afdc42e3892-digital-signature-status-in-powerpoint.png)
+
+Aspose.Slides exposes signatures through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ipresentation/#getDigitalSignatures--" target="_blank" rel="nofollow noopener noreferrer">IPresentation.getDigitalSignatures</a>, which returns an <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idigitalsignaturecollection/" target="_blank" rel="nofollow noopener noreferrer">IDigitalSignatureCollection</a> whose items implement <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idigitalsignature/" target="_blank" rel="nofollow noopener noreferrer">IDigitalSignature</a>. A presentation can contain multiple signatures.
+
+## **Understand PFX Certificates and Passwords**
+
+A PFX file, also known as a PKCS#12 file and commonly given a `.pfx` or `.p12` extension, can contain an X.509 certificate, its private key, and the certificate chain. The private key is what allows the holder to create a signature. A certificate without an accessible private key cannot be used to sign a presentation.
+
+The PFX password protects the certificate package and private key. It is **not** a password for opening or editing the presentation. Do not commit PFX files or their passwords to source control. In production, limit access to the certificate file and obtain its password from a secret store or another protected configuration source. The examples below use an environment variable only to avoid embedding the password in code.
+
+## **Add a Digital Signature to a Presentation**
+
+To sign a real presentation workflow, load an existing PPTX file, create a <a href="https://reference.aspose.com/slides/java/com.aspose.slides/digitalsignature/" target="_blank" rel="nofollow noopener noreferrer">DigitalSignature</a> from a PFX certificate and its password, add the signature to the presentation's collection, and save to a PPTX file.
+
+```java
+String certificatePassword = System.getenv("PFX_PASSWORD");
+if (certificatePassword == null || certificatePassword.isEmpty()) {
+    throw new IllegalStateException("Set the PFX_PASSWORD environment variable.");
+}
+
+Presentation presentation = new Presentation("InputPresentation.pptx");
+try {
+    DigitalSignature signature = new DigitalSignature("signing-certificate.pfx", certificatePassword);
+    signature.setComments("Approved for release.");
+
+    presentation.getDigitalSignatures().add(signature);
+    presentation.save("InputPresentation-signed.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+Saving the result under a new name preserves the unsigned source file. The value set by <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idigitalsignature/#setComments-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">IDigitalSignature.setComments</a> describes the purpose of the signature; it is not a security control.
+
+## **Validate Digital Signatures**
+
+When you load a signed PPTX file, inspect every item returned by <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ipresentation/#getDigitalSignatures--" target="_blank" rel="nofollow noopener noreferrer">IPresentation.getDigitalSignatures</a>. The <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idigitalsignature/#isValid--" target="_blank" rel="nofollow noopener noreferrer">IDigitalSignature.isValid</a> method indicates whether the embedded signature is valid for the current presentation content.
+
+```java
+Presentation presentation = new Presentation("InputPresentation-signed.pptx");
+try {
+    IDigitalSignatureCollection signatures = presentation.getDigitalSignatures();
+    int signatureCount = signatures.size();
+
+    if (signatureCount == 0) {
+        System.out.println("The presentation does not contain digital signatures.");
+    } else {
+        boolean allSignaturesAreValid = true;
+        java.text.SimpleDateFormat signTimeFormat = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        java.security.cert.CertificateFactory certificateFactory = java.security.cert.CertificateFactory.getInstance("X.509");
+
+        for (IDigitalSignature signature : signatures) {
+            boolean signatureIsValid = signature.isValid();
+            String signatureStatus = signatureIsValid ? "VALID" : "INVALID";
+            java.util.Date signTime = signature.getSignTime();
+            String formattedSignTime = signTimeFormat.format(signTime);
+
+            byte[] certificateData = signature.getCertificate();
+            java.io.ByteArrayInputStream certificateStream = new java.io.ByteArrayInputStream(certificateData);
+            java.security.cert.X509Certificate certificate = (java.security.cert.X509Certificate) certificateFactory.generateCertificate(certificateStream);
+            javax.security.auth.x500.X500Principal signerPrincipal = certificate.getSubjectX500Principal();
+            String signerName = signerPrincipal.getName();
+
+            System.out.println(signerName + ", " + formattedSignTime + " -- " + signatureStatus);
+
+            allSignaturesAreValid &= signatureIsValid;
+        }
+
+        if (allSignaturesAreValid) {
+            System.out.println("All embedded signatures are valid for the current presentation.");
+        } else {
+            System.out.println("At least one embedded signature is invalid.");
+        }
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+An invalid result commonly means that the signed presentation content or signature data changed after signing, or that the file is damaged. Removing every signature produces an unsigned presentation, so checking only the validity of items is not enough: a security-sensitive workflow must also verify that the expected number of signatures and expected signer identities are present.
+
+This validity result should not be treated as a complete certificate-trust decision. Depending on your security policy, your application may also need to build and validate the X.509 certificate chain, check certificate validity dates and revocation status, confirm the expected subject or thumbprint, verify key usage, and evaluate a trusted timestamp. The <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idigitalsignature/#getSignTime--" target="_blank" rel="nofollow noopener noreferrer">IDigitalSignature.getSignTime</a> value by itself is not proof from a trusted timestamp authority.
+
+## **Remove Digital Signatures**
+
+Removing signatures changes the presentation's security state. The following example loads a signed PPTX file, removes all signatures with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idigitalsignaturecollection/#clear--" target="_blank" rel="nofollow noopener noreferrer">IDigitalSignatureCollection.clear</a>, and saves an unsigned copy.
+
+```java
+Presentation presentation = new Presentation("InputPresentation-signed.pptx");
+try {
+    presentation.getDigitalSignatures().clear();
+    presentation.save("InputPresentation-unsigned.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+To remove only one signature, call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/idigitalsignaturecollection/#removeAt-int-" target="_blank" rel="nofollow noopener noreferrer">IDigitalSignatureCollection.removeAt</a> with its zero-based index. Save to a new file unless overwriting the signed original is an explicit part of your workflow.
+
+## **Editing and Format Considerations**
+
+- A signature does not make a presentation read-only. Users and applications can still edit the file, but changes to signed content normally invalidate the existing signature.
+- Complete all intended edits before signing. If a presentation must be changed, save the revised presentation and sign that revision again.
+- Keep the final output in PPTX format. Converting a signed presentation to another format does not transfer the original PPTX signature as a valid signature for the converted file.
+- Treat the certificate's private key as sensitive. Anyone who obtains the private key and its password may be able to create signatures that appear to come from that certificate holder.
+- Retain the unsigned source or another controlled copy when your document-retention policy requires it.
+
+## **FAQ**
+
+**Does a digital signature encrypt the presentation?**
+
+No. A digital signature provides evidence about origin and integrity, but presentation content remains readable unless separate encryption is applied. Use [password protection](/java/slides/password-protected-presentation/) when access to the content must be restricted.
+
+**Is the PFX password the same as a presentation password?**
+
+No. The PFX password unlocks the private key stored in the certificate package. It does not control who can open or edit the PPTX file.
+
+**Can I use a self-signed certificate?**
+
+Technically, a self-signed certificate can be used when it includes an accessible private key. Recipients will not automatically trust it, however, unless that certificate has been explicitly added to their trusted environment. Public or cross-organization workflows generally use a certificate issued by a trusted CA.
+
+**What makes a signature invalid?**
+
+Changing signed presentation content or the signature data after signing can invalidate the signature. File corruption can also cause validation to fail. If all signatures are removed, the presentation is unsigned rather than a file containing an invalid signature.
+
+**Does a valid signature mean that I should trust the signer?**
+
+Not by itself. Signature integrity and signer trust are separate decisions. A production validation policy should also check the certificate chain, validity period, revocation status, expected identity, key usage, and any trusted timestamp requirements.
+
+**What happens when the certificate expires?**
+
+Certificate expiration does not alter the presentation bytes, but it affects certificate-trust evaluation. Whether a signature remains acceptable depends on your policy and on whether a valid trusted timestamp proves that signing occurred while the certificate was valid. Do not rely on the displayed signing time alone as a trusted timestamp.
+
+**Can a signed presentation still be edited?**
+
+Yes. Signing does not lock the file. Editing signed content generally makes the existing signature invalid, so finish the presentation first and sign the final revision.
+
+**Can a presentation contain more than one signature?**
+
+Yes. Add each signature to the collection returned by <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ipresentation/#getDigitalSignatures--" target="_blank" rel="nofollow noopener noreferrer">IPresentation.getDigitalSignatures</a> before saving. During validation, inspect every signature and confirm that all required signers are present.
+
+**Which presentation formats support these operations?**
+
+Aspose.Slides supports the digital-signature operations described here only for PPTX. PPT and OpenDocument presentation formats are not supported by this API workflow.
+
+**Can I remove a signature without affecting the slides?**
+
+Yes. You can remove one signature or clear the entire collection and then save the presentation. The slide content remains available, but the saved file no longer carries the removed signature evidence.

@@ -1,0 +1,256 @@
+---
+title: "Customize 3D Charts in Presentations Using Java"
+sidebar_label: "Customize 3D Charts in Presentations Using Java"
+sidebar_key: "java-slides-3d-chart"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/3d-chart.md"
+source_commit: ""
+source_sha256: "db189af340a5a9a91e559591da4e476bf7b59fcb5be0babf6594010d0ecdfd2e"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/3d-chart/"
+source_markdown_url: "https://docs.aspose.com/slides/java/3d-chart.md"
+source_snapshot_sha256: "44cee4a84cae3cf3a56fabe71d53a6b0cd3b9bf9dccf92db4507f538ecd3252c"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+import "./_remote-markdown.css";
+
+a
+
+> Create 3D charts in PowerPoint presentations with Aspose.Slides for Java. Adjust rotation, height proportions, chart depth, and spacing between series with Java examples.
+> 9
+
+## **Overview**
+
+Aspose.Slides for Java lets you customize the view of a 3D chart through the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ichart/#getRotation3D--" target="_blank" rel="nofollow noopener noreferrer">IChart.getRotation3D</a> method. This article demonstrates how to adjust rotation, height proportions, depth, right-angle axes, and spacing between series, then save the presentation in PPTX format.
+
+## **Set the Rotation and Depth of a 3D Chart**
+
+The example below creates a <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> and uses <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ishapecollection/#addChart-int-float-float-float-float-" target="_blank" rel="nofollow noopener noreferrer">IShapeCollection.addChart</a> to add a stacked 3D column chart to its first slide. It replaces the default series and categories with two series containing three values each. Worksheet index `0` identifies the chart's first data worksheet; row `0` holds series names, and column `0` holds category labels.
+
+The <a href="https://reference.aspose.com/slides/java/com.aspose.slides/irotation3d/#setRotationX-byte-" target="_blank" rel="nofollow noopener noreferrer">setRotationX</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/irotation3d/#setRotationY-int-" target="_blank" rel="nofollow noopener noreferrer">setRotationY</a> methods set the chart's rotation to 40 and 270 degrees, respectively. <a href="https://reference.aspose.com/slides/java/com.aspose.slides/irotation3d/#setDepthPercents-int-" target="_blank" rel="nofollow noopener noreferrer">setDepthPercents</a> sets its depth to 150% of its width, while <a href="https://reference.aspose.com/slides/java/com.aspose.slides/irotation3d/#setRightAngleAxes-boolean-" target="_blank" rel="nofollow noopener noreferrer">setRightAngleAxes</a> enables right-angle axes instead of perspective. The resulting presentation contains the populated chart with these 3D view settings.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IChart chart = slide.getShapes().addChart(ChartType.StackedColumn3D, 0, 0, 500, 500);
+
+    chart.getChartData().getSeries().clear();
+    chart.getChartData().getCategories().clear();
+
+    IChartDataWorkbook workbook = chart.getChartData().getChartDataWorkbook();
+    int worksheetIndex = 0;
+
+    double[][] values = { { 20, 50, 30 }, { 30, 10, 60 } };
+
+    for (int categoryIndex = 0; categoryIndex < 3; categoryIndex++) {
+        IChartDataCell categoryCell = workbook.getCell(worksheetIndex, categoryIndex + 1, 0, "Category " + (categoryIndex + 1));
+        chart.getChartData().getCategories().add(categoryCell);
+    }
+
+    for (int seriesIndex = 0; seriesIndex < 2; seriesIndex++) {
+        IChartDataCell seriesCell = workbook.getCell(worksheetIndex, 0, seriesIndex + 1, "Series " + (seriesIndex + 1));
+        IChartSeries series = chart.getChartData().getSeries().add(seriesCell, chart.getType());
+
+        for (int categoryIndex = 0; categoryIndex < 3; categoryIndex++) {
+            IChartDataCell valueCell = workbook.getCell(worksheetIndex, categoryIndex + 1, seriesIndex + 1, values[seriesIndex][categoryIndex]);
+            series.getDataPoints().addDataPointForBarSeries(valueCell);
+        }
+    }
+
+    chart.getRotation3D().setRightAngleAxes(true);
+    chart.getRotation3D().setRotationX((byte) 40);
+    chart.getRotation3D().setRotationY(270);
+    chart.getRotation3D().setDepthPercents(150);
+
+    presentation.save("Rotation3D_out.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Adjust the Height Proportions of a 3D Chart**
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/irotation3d/#setHeightPercents-int-" target="_blank" rel="nofollow noopener noreferrer">IRotation3D.setHeightPercents</a> to set the height of a 3D chart as a percentage of its width. This changes the proportions of the 3D scene without resizing the chart object on the slide.
+
+The following example creates a <a href="https://reference.aspose.com/slides/java/com.aspose.slides/charttype/" target="_blank" rel="nofollow noopener noreferrer">Column3D</a> chart with the default data: three series and four categories. It saves three presentations with height proportions of 50%, 100%, and 200%. The chart's position, width, and height remain fixed. The data, rotation, depth, series spacing, and formatting are identical in all three files; only the height percentage changes.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IChart chart = slide.getShapes().addChart(ChartType.Column3D, 40, 30, 620, 460);
+    chart.getRotation3D().setRotationX((byte) 20);
+    chart.getRotation3D().setRotationY(30);
+    chart.getRotation3D().setRightAngleAxes(true);
+    chart.getRotation3D().setDepthPercents(100);
+    chart.getChartData().getSeries().get_Item(0).getParentSeriesGroup().setGapDepth(150);
+
+    for (int heightPercent : new int[] { 50, 100, 200 }) {
+        chart.getRotation3D().setHeightPercents(heightPercent);
+        presentation.save("chart_height_" + heightPercent + ".pptx", SaveFormat.Pptx);
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+The following images illustrate the same height settings in the equivalent .NET example and were exported using Microsoft PowerPoint. A smaller percentage produces a flatter scene, while a larger percentage produces a taller scene within the same chart object. PowerPoint may also adjust axis tick intervals and label placement to fit the scene.
+
+<div className="docs-owner-markdown-table">
+
+| Height: 50% | Height: 100% | Height: 200% |
+| ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| ![3D column chart with height set to 50 percent of its width](/java/slides/images/dfbffc68f5d029b5-height_percent_50.png) | ![3D column chart with height set to 100 percent of its width](/java/slides/images/2293d6a73b7b54aa-height_percent_100.png) | ![3D column chart with height set to 200 percent of its width](/java/slides/images/bbb62a08da9a1cb5-height_percent_200.png) |
+
+</div>
+
+These methods control different aspects of the chart:
+
+<div className="docs-owner-markdown-table">
+
+| Method | Effect |
+| ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| <a href="https://reference.aspose.com/slides/java/com.aspose.slides/irotation3d/#setHeightPercents-int-" target="_blank" rel="nofollow noopener noreferrer">IRotation3D.setHeightPercents</a> | Height of the 3D scene as a percentage of its width. |
+| <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ishape/#setHeight-float-" target="_blank" rel="nofollow noopener noreferrer">IChart.setHeight</a> | Height of the chart object on the slide, in points. |
+| <a href="https://reference.aspose.com/slides/java/com.aspose.slides/irotation3d/#setDepthPercents-int-" target="_blank" rel="nofollow noopener noreferrer">IRotation3D.setDepthPercents</a> | Depth of the 3D scene as a percentage of its width. |
+| <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ichartseriesgroup/#setGapDepth-int-" target="_blank" rel="nofollow noopener noreferrer">IChartSeriesGroup.setGapDepth</a> | Spacing between series along the depth axis, as a percentage of the marker width. |
+
+</div>
+
+The height setting affects 3D column and bar charts, including cylinder, cone, and pyramid variants, as well as 3D line, area, pie, and surface charts. The comparison above uses the verified `Column3D` type. The setting does not change the appearance of a 2D `ClusteredColumn` chart or a `BubbleWith3D` chart; these names are members of the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/charttype/" target="_blank" rel="nofollow noopener noreferrer">ChartType</a> class. For other chart appearance settings, see [Chart Formatting](/java/slides/chart-formatting/).
+
+## **Adjust the Gap Between Series**
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ichartseriesgroup/#setGapDepth-int-" target="_blank" rel="nofollow noopener noreferrer">IChartSeriesGroup.setGapDepth</a> to control the distance between data series along the depth axis of a 3D chart, expressed as a percentage of the marker width. Use values from **0 to 500**, inclusive: `0` removes the gap, while larger values increase the spacing. With a fixed chart depth, increasing the gap makes the markers thinner along the depth axis.
+
+Access the group through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ichartseries/#getParentSeriesGroup--" target="_blank" rel="nofollow noopener noreferrer">IChartSeries.getParentSeriesGroup</a>. The setting applies to every series in that group, not just the series used to access it. <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ichartseries/#getGapDepth--" target="_blank" rel="nofollow noopener noreferrer">IChartSeries.getGapDepth</a> returns the depth gap and reflects the parent group's setting.
+
+This setting affects 3D column and bar charts, including their cylinder, cone, and pyramid variants, as well as 3D line and area charts. The appearance depends on whether the series are arranged in depth, clustered, or stacked. For a clear comparison of gaps between separate series, use `ChartType.Column3D` from the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/charttype/" target="_blank" rel="nofollow noopener noreferrer">ChartType</a> class.
+
+These methods control different aspects of the chart:
+
+<div className="docs-owner-markdown-table">
+
+| Method | Effect |
+| ------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ichartseriesgroup/#setGapDepth-int-" target="_blank" rel="nofollow noopener noreferrer">IChartSeriesGroup.setGapDepth</a> | Spacing between series along the depth axis, as a percentage of the marker width. |
+| <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ichartseriesgroup/#setGapWidth-int-" target="_blank" rel="nofollow noopener noreferrer">IChartSeriesGroup.setGapWidth</a> | Spacing between adjacent bar or column clusters, as a percentage of the bar or column width. |
+| <a href="https://reference.aspose.com/slides/java/com.aspose.slides/irotation3d/#setDepthPercents-int-" target="_blank" rel="nofollow noopener noreferrer">setDepthPercents</a> | Overall chart depth, as a percentage of the chart width. |
+
+</div>
+
+The following self-contained example uses the default chart data, which contains three series and four categories. It saves two presentations with identical data, rotation, gap width, and chart depth; only the gap depth changes.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+    
+    IChart chart = slide.getShapes().addChart(ChartType.Column3D, 40, 30, 620, 230);
+
+    chart.getRotation3D().setRotationX((byte) 20);
+    chart.getRotation3D().setRotationY(30);
+    chart.getRotation3D().setDepthPercents(100);
+
+    IChartSeries series = chart.getChartData().getSeries().get_Item(0);
+    IChartSeriesGroup group = series.getParentSeriesGroup();
+    group.setGapWidth(150);
+
+    for (int gapDepth : new int[] { 0, 500 }) {
+        group.setGapDepth(gapDepth);
+
+        String fileName = "series_gap_depth_" + gapDepth + ".pptx";
+        presentation.save(fileName, SaveFormat.Pptx);
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+The following images illustrate the same gap depth settings in the equivalent .NET example and were exported using Microsoft PowerPoint.
+
+<div className="docs-owner-markdown-table">
+
+| Gap depth: 0% | Gap depth: 500% |
+| ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| ![3D column chart with no gap between series along the depth axis](/java/slides/images/29576b8659573bba-gap_depth_0.png) | ![3D column chart with a 500 percent gap between series along the depth axis](/java/slides/images/f0fdbe49f9fb4d2e-gap_depth_500.png) |
+
+</div>
+
+## **Change the 3D Series Type and Bar Shape**
+
+In a clustered cylinder chart, the first series starts with a cylindrical bar shape. The example prints the integer values returned by <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ichartseries/#getType--" target="_blank" rel="nofollow noopener noreferrer">IChartSeries.getType</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ichartseries/#getBar3DShape--" target="_blank" rel="nofollow noopener noreferrer">IChartSeries.getBar3DShape</a> before and after each change. The table gives the corresponding constant names.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+    
+    IChart chart = slide.getShapes().addChart(ChartType.ClusteredCylinder, 20, 20, 500, 300);
+    IChartSeries series = chart.getChartData().getSeries().get_Item(0);
+
+    System.out.println(series.getType() + " | " + series.getBar3DShape());
+
+    series.setType(ChartType.ClusteredCone);
+    System.out.println(series.getType() + " | " + series.getBar3DShape());
+
+    series.setBar3DShape(ChartShapeType.Box);
+    System.out.println(series.getType() + " | " + series.getBar3DShape());
+
+    presentation.save("series_shape.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+<div className="docs-owner-markdown-table">
+
+| Change to the first series | Series type | Bar shape |
+| -------------------------------------- | ------------------- | ---------- |
+| Create the chart | `ClusteredCylinder` | `Cylinder` |
+| Set the series type to `ClusteredCone` | `ClusteredCone` | `Cone` |
+| Set the bar shape to `Box` | `ClusteredColumn3D` | `Box` |
+
+</div>
+
+Setting the shape to `Box` also changes the series type to `ClusteredColumn3D`. If your code branches on the series type, call `series.getType()` after changing the shape. A value cached before the assignment would still select the `ClusteredCone` branch.
+
+![PowerPoint comparison showing the first series as cylinders, cones, and rectangular columns from left to right](/java/slides/images/50a1793870318d80-series-shapes.png)
+
+## **FAQ**
+
+**Which chart types support 3D mode in Aspose.Slides?**
+
+Aspose.Slides supports 3D variants of column charts, including Column 3D, Clustered Column 3D, Stacked Column 3D, and 100% Stacked Column 3D, along with related 3D types exposed through the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/charttype/" target="_blank" rel="nofollow noopener noreferrer">ChartType</a> class. For an exact, up-to-date list, check the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/charttype/" target="_blank" rel="nofollow noopener noreferrer">ChartType</a> members in the API reference of your installed version.
+
+**Can I get a raster image of a 3D chart for a report or the web?**
+
+Yes. You can export a chart to an image with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/shape/#getImage--" target="_blank" rel="nofollow noopener noreferrer">Shape.getImage</a> or [render the entire slide](/java/slides/convert-powerpoint-to-png/) to formats like PNG or JPEG. This is useful when you need a raster preview or want to embed the chart into documents, dashboards, or web pages without requiring PowerPoint.
+
+**How performant is building and rendering large 3D charts?**
+
+Performance depends on data volume and visual complexity. For best results, keep 3D effects minimal, avoid heavy textures on walls and plot areas, limit the number of data points per series when possible, and render to an appropriately sized output (resolution and dimensions) to match the target display or print needs.

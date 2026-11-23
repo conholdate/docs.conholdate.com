@@ -1,0 +1,406 @@
+---
+title: "Manage Slide Transitions in Presentations Using Java"
+sidebar_label: "Manage Slide Transitions in Presentations Using Java"
+sidebar_key: "java-slides-slide-transition"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/slide-transition.md"
+source_commit: ""
+source_sha256: "441973b4ca98b22e3c02f3f64dc3e6784cf78cab30b9aad930e9a813f7ce8f9b"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/slide-transition/"
+source_markdown_url: "https://docs.aspose.com/slides/java/slide-transition.md"
+source_snapshot_sha256: "a260e63a94cf7b45984a12a44e5e3982c800af21813a25ddfffbefe32fc3b9c2"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+import "./_remote-markdown.css";
+
+a
+
+> Apply slide transitions, configure automatic slide advancement, and customize Morph and other transition effects with Aspose.Slides for Java.
+> 7
+
+## **Overview**
+
+Slide transitions control how slides appear during a slide show. With Aspose.Slides for Java, you can choose a transition effect for each slide, configure advancement by mouse click or timer, and adjust options specific to an effect. This article uses Java examples to apply transitions, set exact transition durations, manage slide timing, and create a Morph transition between two slides. The examples also show how to save the settings to a PPTX file.
+
+## **Add Slide Transition**
+
+To apply a transition, load a presentation with the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> class and access the slide's transition settings through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ibaseslide/#getSlideShowTransition--" target="_blank" rel="nofollow noopener noreferrer">getSlideShowTransition</a>. Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setType-int-" target="_blank" rel="nofollow noopener noreferrer">setType</a> with a value from the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/transitiontype/" target="_blank" rel="nofollow noopener noreferrer">TransitionType</a> enumeration, then save the presentation.
+
+The following example applies a Circle transition to the first slide and a Comb transition to the second. Use an `input.pptx` file with at least two slides.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("input.pptx");
+try {
+    if (presentation.getSlides().size() >= 2) {
+        presentation.getSlides().get_Item(0).getSlideShowTransition().setType(TransitionType.Circle);
+        presentation.getSlides().get_Item(1).getSlideShowTransition().setType(TransitionType.Comb);
+
+        presentation.save("slide-transitions.pptx", SaveFormat.Pptx);
+    } else {
+        System.out.println("The input presentation must contain at least two slides.");
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Wheel Transition**
+
+The <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iwheeltransition/#setSpokes-long-" target="_blank" rel="nofollow noopener noreferrer">setSpokes</a> method of <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iwheeltransition/" target="_blank" rel="nofollow noopener noreferrer">IWheelTransition</a> controls the number of radial sectors that reveal the destination slide. Set the slide's transition type to Wheel from <a href="https://reference.aspose.com/slides/java/com.aspose.slides/transitiontype/" target="_blank" rel="nofollow noopener noreferrer">TransitionType</a> using <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setType-int-" target="_blank" rel="nofollow noopener noreferrer">setType</a> before accessing <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#getValue--" target="_blank" rel="nofollow noopener noreferrer">getValue</a> as <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iwheeltransition/" target="_blank" rel="nofollow noopener noreferrer">IWheelTransition</a>.
+
+This example creates two identical pairs of slides: a black slide followed by a slide with a gold rectangle. The destination slides use spoke counts of 1 and 8, with the same speed set through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setSpeed-int-" target="_blank" rel="nofollow noopener noreferrer">setSpeed</a> and an explicit duration of 8,000 milliseconds set through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setDuration-int-" target="_blank" rel="nofollow noopener noreferrer">setDuration</a> to make the difference easy to observe.
+
+```java
+import java.awt.Color;
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    float slideWidth = (float) presentation.getSlideSize().getSize().getWidth();
+    float slideHeight = (float) presentation.getSlideSize().getSize().getHeight();
+
+    ISlide blackSlide = presentation.getSlides().get_Item(0);
+    blackSlide.getShapes().clear();
+    blackSlide.getBackground().setType(BackgroundType.OwnBackground);
+    blackSlide.getBackground().getFillFormat().setFillType(FillType.Solid);
+    blackSlide.getBackground().getFillFormat().getSolidFillColor().setColor(Color.BLACK);
+
+    ISlide destinationSlide = presentation.getSlides().addClone(blackSlide);
+    IAutoShape rectangle = destinationSlide.getShapes().addAutoShape(ShapeType.Rectangle, 0, 0, slideWidth, slideHeight);
+    rectangle.getFillFormat().setFillType(FillType.Solid);
+    Color gold = new Color(255, 215, 0);
+    rectangle.getFillFormat().getSolidFillColor().setColor(gold);
+    rectangle.getTextFrame().setText("Wheel transition");
+
+    presentation.getSlides().addClone(blackSlide);
+    presentation.getSlides().addClone(destinationSlide);
+
+    long[] spokeCounts = { 1, 8 };
+    for (int i = 0; i < spokeCounts.length; i++) {
+        ISlideShowTransition transition = presentation.getSlides().get_Item(i * 2 + 1).getSlideShowTransition();
+        transition.setType(TransitionType.Wheel);
+        IWheelTransition wheelTransition = (IWheelTransition) transition.getValue();
+        wheelTransition.setSpokes(spokeCounts[i]);
+        transition.setSpeed(TransitionSpeed.Slow);
+        transition.setDuration(8000);
+    }
+
+    presentation.save("wheel-transitions.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+Open the output presentation in PowerPoint and run the slide show. Advance from slide 1 to slide 2, then from slide 3 to slide 4. In PowerPoint playback, the verified spoke count of 1 reveals the slide with one clockwise sweep; the verified count of 8 reveals it through eight radial sectors simultaneously. The destination content and transition timing are identical, so the difference is the number of reveal sectors.
+
+## **Add Advanced Slide Transition**
+
+You can configure how long a slide remains on screen and whether a mouse click advances the slide show. The following methods control this behavior:
+
+- <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setAdvanceOnClick-boolean-" target="_blank" rel="nofollow noopener noreferrer">setAdvanceOnClick</a> allows the viewer to advance by clicking the mouse.
+- <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setAdvanceAfter-boolean-" target="_blank" rel="nofollow noopener noreferrer">setAdvanceAfter</a> enables automatic advancement.
+- <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setAdvanceAfterTime-long-" target="_blank" rel="nofollow noopener noreferrer">setAdvanceAfterTime</a> specifies the delay before automatic advancement, in milliseconds.
+
+Enable both click and timed advancement to let the viewer move on with a click or wait for the timer. To use only the timer, pass `false` to <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setAdvanceOnClick-boolean-" target="_blank" rel="nofollow noopener noreferrer">setAdvanceOnClick</a>. The delay controls when the slide show advances; it does not set the duration of the visual transition effect.
+
+This example assigns different effects to the first three slides and enables automatic advancement after 3, 5, and 7 seconds, respectively. Mouse clicks can also advance these slides. Use an `input.pptx` file with at least three slides.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("input.pptx");
+try {
+    if (presentation.getSlides().size() >= 3) {
+        ISlideShowTransition firstTransition = presentation.getSlides().get_Item(0).getSlideShowTransition();
+        firstTransition.setType(TransitionType.Circle);
+        firstTransition.setAdvanceOnClick(true);
+        firstTransition.setAdvanceAfter(true);
+        firstTransition.setAdvanceAfterTime(3000);
+
+        ISlideShowTransition secondTransition = presentation.getSlides().get_Item(1).getSlideShowTransition();
+        secondTransition.setType(TransitionType.Comb);
+        secondTransition.setAdvanceOnClick(true);
+        secondTransition.setAdvanceAfter(true);
+        secondTransition.setAdvanceAfterTime(5000);
+
+        ISlideShowTransition thirdTransition = presentation.getSlides().get_Item(2).getSlideShowTransition();
+        thirdTransition.setType(TransitionType.Zoom);
+        thirdTransition.setAdvanceOnClick(true);
+        thirdTransition.setAdvanceAfter(true);
+        thirdTransition.setAdvanceAfterTime(7000);
+
+        presentation.save("advanced-transitions.pptx", SaveFormat.Pptx);
+    } else {
+        System.out.println("The input presentation must contain at least three slides.");
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+To check whether timed advancement is enabled, call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#getAdvanceAfter--" target="_blank" rel="nofollow noopener noreferrer">getAdvanceAfter</a>. A stored delay alone does not indicate that the timer is active.
+
+The next example opens the file saved above, reports each enabled timer, and disables automatic advancement for slides with a delay greater than two seconds. It enables mouse clicks for those slides and saves the updated settings.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("advanced-transitions.pptx");
+try {
+    for (ISlide slide : presentation.getSlides()) {
+        ISlideShowTransition transition = slide.getSlideShowTransition();
+
+        if (transition.getAdvanceAfter()) {
+            System.out.println("Slide " + slide.getSlideNumber() + ": advance after " + transition.getAdvanceAfterTime() + " ms.");
+
+            if (transition.getAdvanceAfterTime() > 2000) {
+                transition.setAdvanceAfter(false);
+                transition.setAdvanceOnClick(true);
+            }
+        }
+    }
+
+    presentation.save("adjusted-transitions.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Control Transition Timing Precisely**
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setDuration-int-" target="_blank" rel="nofollow noopener noreferrer">setDuration</a> to specify the exact length of a transition effect in milliseconds. The slide's <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ibaseslide/#getSlideShowTransition--" target="_blank" rel="nofollow noopener noreferrer">getSlideShowTransition</a> method exposes these settings through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/" target="_blank" rel="nofollow noopener noreferrer">ISlideShowTransition</a>:
+
+<div className="docs-owner-markdown-table">
+
+| Method | Purpose |
+| --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setDuration-int-" target="_blank" rel="nofollow noopener noreferrer">setDuration</a> | Sets the duration of the transition effect itself, in milliseconds. |
+| <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setAdvanceAfterTime-long-" target="_blank" rel="nofollow noopener noreferrer">setAdvanceAfterTime</a> | Sets the delay before the slide advances automatically, in milliseconds. Pass `true` to <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setAdvanceAfter-boolean-" target="_blank" rel="nofollow noopener noreferrer">setAdvanceAfter</a> to activate this timer. |
+| <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setSpeed-int-" target="_blank" rel="nofollow noopener noreferrer">setSpeed</a> | Selects a predefined speed category from <a href="https://reference.aspose.com/slides/java/com.aspose.slides/transitionspeed/" target="_blank" rel="nofollow noopener noreferrer">TransitionSpeed</a>: Slow, Medium, or Fast. It is used when an exact duration is not specified. |
+
+</div>
+
+<a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setDuration-int-" target="_blank" rel="nofollow noopener noreferrer">setDuration</a> controls only the transition effect; it does not determine how long the slide remains visible. Configure the automatic advancement delay separately. When no explicit duration is set, Aspose.Slides determines the effect duration from the transition type and the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#getSpeed--" target="_blank" rel="nofollow noopener noreferrer">getSpeed</a> value.
+
+<!-- visual-explanation:slide-transition:start -->
+
+[![Separate bars identify the 750-ms transition duration and 5,000-ms automatic advancement setting.](/java/slides/images/1f705a740cf69b98-visual-slide-transition-1f705a740cf6.svg)](https://docs.aspose.com/slides/java/slide-transition/visual-slide-transition-1f705a740cf6.svg)
+
+*The shared example gives each slide a 750-ms Fade transition and separately enables automatic advancement at 5,000 ms. Transition duration controls the effect; advancement controls when to leave the slide. These bars are schematic settings, not a measured combined timeline.*
+
+<!-- visual-explanation:slide-transition:end -->
+
+### **Apply the Same Duration to Every Slide**
+
+For consistent pacing, apply the same effect and exact duration to every slide. This example loads `input.pptx`, selects Fade from <a href="https://reference.aspose.com/slides/java/com.aspose.slides/transitiontype/" target="_blank" rel="nofollow noopener noreferrer">TransitionType</a>, and gives each transition a duration of 750 milliseconds. It separately enables automatic advancement after 5,000 milliseconds and disables advancement by mouse click, then saves the result as PPTX.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("input.pptx");
+try {
+    for (ISlide slide : presentation.getSlides()) {
+        ISlideShowTransition transition = slide.getSlideShowTransition();
+        transition.setType(TransitionType.Fade);
+        transition.setDuration(750);
+
+        // Configure automatic advancement independently of the effect duration.
+        transition.setAdvanceAfter(true);
+        transition.setAdvanceAfterTime(5000);
+        transition.setAdvanceOnClick(false);
+    }
+
+    presentation.save("precise-transitions.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+### **Set Different Durations for Individual Slides**
+
+Different slides can use different effect durations. For example, use a brief transition for a title slide and a longer transition for a section introduction. This example sets 500 milliseconds for the first slide and 1,200 milliseconds for the second. Use an `input.pptx` file with at least two slides.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("input.pptx");
+try {
+    if (presentation.getSlides().size() >= 2) {
+        ISlideShowTransition firstTransition = presentation.getSlides().get_Item(0).getSlideShowTransition();
+        firstTransition.setType(TransitionType.Fade);
+        firstTransition.setDuration(500);
+
+        ISlideShowTransition secondTransition = presentation.getSlides().get_Item(1).getSlideShowTransition();
+        secondTransition.setType(TransitionType.Push);
+        secondTransition.setDuration(1200);
+
+        presentation.save("individual-transition-durations.pptx", SaveFormat.Pptx);
+    } else {
+        System.out.println("The input presentation must contain at least two slides.");
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+### **Coordinate Transitions with Animated Output**
+
+When preparing an [animated GIF](/java/slides/convert-powerpoint-to-animated-gif/), [HTML5 presentation](/java/slides/export-to-html5/), or [video](/java/slides/convert-powerpoint-to-video/), set exact transition durations before export to match the intended pacing. For example, use a 600-millisecond fade between scenes, and adjust each slide's advancement delay separately to allow time for its narration or content.
+
+For GIF and video, coordinate the output frame rate with the effect duration: 600 milliseconds corresponds to 18 frames at 30 frames per second. In HTML5, enable animated transitions in the export settings. Check the chosen export format's supported effects and timing options, and preview the output to confirm synchronization.
+
+### **Read an Existing Transition Duration**
+
+Call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#getDuration--" target="_blank" rel="nofollow noopener noreferrer">getDuration</a> before modifying the transition to determine whether an explicit value is stored. A value of `-1` means no explicit duration is set; a nonnegative value specifies the stored duration in milliseconds. The unset value is not the calculated playback duration: Aspose.Slides uses the transition type and the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#getSpeed--" target="_blank" rel="nofollow noopener noreferrer">getSpeed</a> value to determine that duration. Setting a transition type can initialize a duration, so inspect the original settings first.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("input.pptx");
+try {
+    for (ISlide slide : presentation.getSlides()) {
+        ISlideShowTransition transition = slide.getSlideShowTransition();
+        int duration = transition.getDuration();
+
+        if (duration >= 0) {
+            System.out.println("Slide " + slide.getSlideNumber() + ": stored transition duration is " + duration + " ms.");
+        } else {
+            System.out.println("Slide " + slide.getSlideNumber() + ": no explicit duration; timing depends on transition type " + transition.getType() + " and speed " + transition.getSpeed() + ".");
+        }
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Morph Transition**
+
+The Morph transition animates changes between objects on consecutive slides. To create a simple Morph effect, clone a slide, move or resize an object on the clone, and apply the Morph transition to the second slide. This gives the transition corresponding objects to animate between their original and modified states.
+
+The following example creates a slide with a text rectangle, clones the slide, and changes the rectangle's position and size on the clone. It then selects Morph from the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/transitiontype/" target="_blank" rel="nofollow noopener noreferrer">TransitionType</a> enumeration for the second slide. Open the saved file in a presentation viewer that supports Morph to see the effect during a slide show.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide firstSlide = presentation.getSlides().get_Item(0);
+    IAutoShape rectangle = firstSlide.getShapes().addAutoShape(ShapeType.Rectangle, 100, 100, 400, 100);
+    rectangle.getTextFrame().setText("Morph transition");
+
+    ISlide secondSlide = presentation.getSlides().addClone(firstSlide);
+    IShape movedRectangle = secondSlide.getShapes().get_Item(0);
+    movedRectangle.setX(movedRectangle.getX() + 100);
+    movedRectangle.setY(movedRectangle.getY() + 50);
+    movedRectangle.setWidth(movedRectangle.getWidth() - 200);
+    movedRectangle.setHeight(movedRectangle.getHeight() - 10);
+
+    secondSlide.getSlideShowTransition().setType(TransitionType.Morph);
+
+    presentation.save("morph-transition.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Morph Transition Types**
+
+The <a href="https://reference.aspose.com/slides/java/com.aspose.slides/transitionmorphtype/" target="_blank" rel="nofollow noopener noreferrer">TransitionMorphType</a> enumeration controls how Morph matches and animates content:
+
+- <a href="https://reference.aspose.com/slides/java/com.aspose.slides/transitionmorphtype/#ByObject" target="_blank" rel="nofollow noopener noreferrer">ByObject</a> treats each shape as a whole object.
+- <a href="https://reference.aspose.com/slides/java/com.aspose.slides/transitionmorphtype/#ByWord" target="_blank" rel="nofollow noopener noreferrer">ByWord</a> animates text by matching words where possible.
+- <a href="https://reference.aspose.com/slides/java/com.aspose.slides/transitionmorphtype/#ByChar" target="_blank" rel="nofollow noopener noreferrer">ByChar</a> animates text by matching characters where possible.
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setType-int-" target="_blank" rel="nofollow noopener noreferrer">setType</a> to select Morph before accessing <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#getValue--" target="_blank" rel="nofollow noopener noreferrer">getValue</a>. The value then provides the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/imorphtransition/" target="_blank" rel="nofollow noopener noreferrer">IMorphTransition</a> interface, whose <a href="https://reference.aspose.com/slides/java/com.aspose.slides/imorphtransition/#setMorphType-int-" target="_blank" rel="nofollow noopener noreferrer">setMorphType</a> method selects the matching mode.
+
+This example opens the presentation created in the previous section and configures the second slide to use word-based Morph animation.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("morph-transition.pptx");
+try {
+    if (presentation.getSlides().size() >= 2) {
+        ISlideShowTransition transition = presentation.getSlides().get_Item(1).getSlideShowTransition();
+        transition.setType(TransitionType.Morph);
+        ITransitionValueBase transitionValue = transition.getValue();
+
+        if (transitionValue instanceof IMorphTransition) {
+            IMorphTransition morphTransition = (IMorphTransition) transitionValue;
+            morphTransition.setMorphType(TransitionMorphType.ByWord);
+            presentation.save("morph-by-word.pptx", SaveFormat.Pptx);
+        } else {
+            System.out.println("Morph transition options are unavailable.");
+        }
+    } else {
+        System.out.println("The input presentation must contain at least two slides.");
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Set Transition Effects**
+
+Some transitions expose additional options, such as direction or whether the effect starts from a black screen. The available options depend on the transition selected with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setType-int-" target="_blank" rel="nofollow noopener noreferrer">setType</a>. Set the type first, then use the appropriate interface from <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#getValue--" target="_blank" rel="nofollow noopener noreferrer">getValue</a>.
+
+The following example applies a Cut transition to the first slide of `input.pptx`. It calls <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ioptionalblacktransition/#setFromBlack-boolean-" target="_blank" rel="nofollow noopener noreferrer">setFromBlack</a> through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ioptionalblacktransition/" target="_blank" rel="nofollow noopener noreferrer">IOptionalBlackTransition</a> so that the transition starts from a black screen.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("input.pptx");
+try {
+    ISlideShowTransition transition = presentation.getSlides().get_Item(0).getSlideShowTransition();
+    transition.setType(TransitionType.Cut);
+    ITransitionValueBase transitionValue = transition.getValue();
+
+    if (transitionValue instanceof IOptionalBlackTransition) {
+        IOptionalBlackTransition cutTransition = (IOptionalBlackTransition) transitionValue;
+        cutTransition.setFromBlack(true);
+        presentation.save("cut-from-black.pptx", SaveFormat.Pptx);
+    } else {
+        System.out.println("Cut transition options are unavailable.");
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+## **FAQ**
+
+**Can I control the playback speed of a slide transition?**
+
+Yes. Prefer <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setDuration-int-" target="_blank" rel="nofollow noopener noreferrer">setDuration</a> when you need an exact effect duration in milliseconds. Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setSpeed-int-" target="_blank" rel="nofollow noopener noreferrer">setSpeed</a> when a predefined <a href="https://reference.aspose.com/slides/java/com.aspose.slides/transitionspeed/" target="_blank" rel="nofollow noopener noreferrer">TransitionSpeed</a> category-Slow, Medium, or Fast-is sufficient and no explicit duration is set. These settings control the transition effect independently of the automatic advancement delay.
+
+**Can I attach audio to a transition and make it loop?**
+
+Yes. Assign embedded audio with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setSound-com.aspose.slides.IAudio-" target="_blank" rel="nofollow noopener noreferrer">setSound</a>, pass StartSound from the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/transitionsoundmode/" target="_blank" rel="nofollow noopener noreferrer">TransitionSoundMode</a> enumeration to <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setSoundMode-int-" target="_blank" rel="nofollow noopener noreferrer">setSoundMode</a>, and enable <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setSoundLoop-boolean-" target="_blank" rel="nofollow noopener noreferrer">setSoundLoop</a> with `true`. The audio loops until the next sound event in the slide show.
+
+**What's the fastest way to apply the same transition to every slide?**
+
+Loop through the presentation's <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/#getSlides--" target="_blank" rel="nofollow noopener noreferrer">getSlides</a> collection and call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#setType-int-" target="_blank" rel="nofollow noopener noreferrer">setType</a> with the same value for each slide's transition. Set any timing and effect options in the same loop to keep the behavior consistent across slides.
+
+**How can I check which transition is currently set on a slide?**
+
+Call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islideshowtransition/#getType--" target="_blank" rel="nofollow noopener noreferrer">getType</a> on the slide's <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ibaseslide/#getSlideShowTransition--" target="_blank" rel="nofollow noopener noreferrer">getSlideShowTransition</a> result. It returns a value from the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/transitiontype/" target="_blank" rel="nofollow noopener noreferrer">TransitionType</a> enumeration; None means that no transition effect is applied.
+
+## Related articles
+
+- <a href="https://docs.aspose.com/slides/java/examples/elements/slide-transition/" target="_blank" rel="nofollow noopener noreferrer">Slide Transition</a>

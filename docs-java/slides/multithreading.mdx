@@ -1,0 +1,111 @@
+---
+title: "Multithreading in Aspose.Slides for Java"
+sidebar_label: "Multithreading in Aspose.Slides for Java"
+sidebar_key: "java-slides-multithreading"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/multithreading.md"
+source_commit: ""
+source_sha256: "b58a02c7ffd8733d0a9fb5ebf7be8a3ba7bfb71dc5a4193b2541e422d7a439f1"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/multithreading/"
+source_markdown_url: "https://docs.aspose.com/slides/java/multithreading.md"
+source_snapshot_sha256: "092ac3510ef91d4e9ff9a915d996ebc3b5dcce49f775ef8ef6c6026859302476"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+a
+
+> Aspose.Slides for Java multithreading boosts PowerPoint and OpenDocument processing. Discover best practices for efficient presentation workflows.
+> 5
+
+## **Introduction**
+
+While parallel work with presentations is possible (besides parsing/loading/cloning) and everything goes well (most times), there is a small chance you might get incorrect results when you use the library in multiple threads.
+
+We strongly recommend that you do **not** use a single <a href="https://reference.aspose.com/slides/java/com.aspose.slides/Presentation" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> instance in a multi-threading environment because it might result in unpredictable errors or failures that are not easily detected.
+
+It is **not** safe to load, save, and/or clone an instance of a <a href="https://reference.aspose.com/slides/java/com.aspose.slides/Presentation" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> class in multiple threads. Such operations are **not** supported.  If you need to perform such tasks, you have to parallel the operations using several single-threaded processes-and each of these processes should use its own presentation instance.
+
+## **Convert Presentation Slides to Images in Parallel**
+
+Let's say we want to convert all the slides from a PowerPoint presentation to PNG images in parallel. Since it is unsafe to use a single `Presentation` instance in multiple threads, we split the presentation slides into separate presentations and convert the slides to images in parallel, using each presentation in a separate thread. The following code example shows how to do this.
+
+```java
+import com.aspose.slides.*;
+import java.awt.geom.Dimension2D;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+String inputFilePath = "sample.pptx";
+String outputFilePathTemplate = "slide_%d.png";
+final float imageScale = 2;
+
+Presentation presentation = new Presentation(inputFilePath);
+
+int slideCount = presentation.getSlides().size();
+Dimension2D slideSize = presentation.getSlideSize().getSize();
+float slideWidth = (float) slideSize.getWidth();
+float slideHeight = (float) slideSize.getHeight();
+
+List<CompletableFuture<Void>> conversionTasks = new ArrayList<>(slideCount);
+
+for (int slideIndex = 0; slideIndex < slideCount; slideIndex++) {
+    // Extract slide i into a separate presentation.
+    Presentation slidePresentation = new Presentation();
+    slidePresentation.getSlideSize().setSize(slideWidth, slideHeight, SlideSizeScaleType.DoNotScale);
+    slidePresentation.getSlides().removeAt(0);
+    slidePresentation.getSlides().addClone(presentation.getSlides().get_Item(slideIndex));
+
+    // Convert the slide to an image in a separate task.
+    final int slideNumber = slideIndex + 1;
+    conversionTasks.add(CompletableFuture.runAsync(() -> {
+        IImage image = null;
+        try {
+            ISlide slide = slidePresentation.getSlides().get_Item(0);
+
+            image = slide.getImage(imageScale, imageScale);
+            String imageFilePath = String.format(outputFilePathTemplate, slideNumber);
+            image.save(imageFilePath, ImageFormat.Png);
+        } finally {
+            if (image != null) image.dispose();
+            slidePresentation.dispose();
+        }
+    }));
+}
+
+// Wait for all tasks to complete.
+CompletableFuture.allOf(conversionTasks.toArray(new CompletableFuture[0])).join();
+
+presentation.dispose();
+```
+
+## **FAQ**
+
+### Do I need to call license setup in every thread?
+
+No. It's enough to do it once per process/app domain before threads start. If [license setup](/java/slides/licensing/) might be invoked concurrently (for example, during lazy initialization), synchronize that call because the license setup method itself is not thread-safe.
+
+### Can I pass `Presentation` or `Slide` objects between threads?
+
+Passing "live" presentation objects between threads is not recommended: use independent instances per thread or precreate separate presentations/slide containers for each thread. This approach follows the general recommendation not to share a single presentation instance across threads.
+
+### Is it safe to parallelize export to different formats (PDF, HTML, images) provided each thread has its own `Presentation` instance?
+
+Yes. With independent instances and separate output paths, such tasks typically parallelize correctly; avoid any shared presentation objects and shared I/O streams.
+
+### What should I do with global font settings (folders, substitutions) in multithreading?
+
+Initialize all global [font settings](/java/slides/powerpoint-fonts/) before starting the threads and do not change them during parallel work. This eliminates races when accessing shared font resources.

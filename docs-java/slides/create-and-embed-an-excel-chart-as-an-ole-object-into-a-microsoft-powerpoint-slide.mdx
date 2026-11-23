@@ -1,0 +1,424 @@
+---
+title: "Create and Embed Excel Charts as OLE Objects Using VSTO and Aspose.Slides for Java"
+sidebar_label: "Create and Embed Excel Charts as OLE Objects Using VSTO and Aspose.Slides for Java"
+sidebar_key: "java-slides-create-and-embed-an-excel-chart-as-an-ole-object-into-a-microsoft-powerpoint-slide"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/create-and-embed-an-excel-chart-as-an-ole-object-into-a-microsoft-powerpoint-slide.md"
+source_commit: ""
+source_sha256: "4c112709556be540cd83bf495c5595a98d30289b6fe4d95051dccaada48e3d82"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/create-and-embed-an-excel-chart-as-an-ole-object-into-a-microsoft-powerpoint-slide/"
+source_markdown_url: "https://docs.aspose.com/slides/java/create-and-embed-an-excel-chart-as-an-ole-object-into-a-microsoft-powerpoint-slide.md"
+source_snapshot_sha256: "a8fa26100d6534fd6d30c2ad95f48c26bacd2c134bd3341b49996eff539df633"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+a
+
+> Migrate from Microsoft Office automation to Aspose.Slides for Java and embed Excel charts as OLE objects into PowerPoint (PPT, PPTX) slides in Java.
+> 3
+
+Charts are visual representations of your data and widely used in presentation slides. This article will show you the code to create and embed an Excel Chart as an OLE Object in the PowerPoint Slide programmatically by using [VSTO](/java/slides/create-and-embed-an-excel-chart-as-an-ole-object-into-a-microsoft-powerpoint-slide/) and [Aspose.Slides for Java](/java/slides/create-and-embed-an-excel-chart-as-an-ole-object-into-a-microsoft-powerpoint-slide/).
+
+## **Creating and Embedding an Excel Chart**
+
+The two code examples below are long and detailed because the task they're describing is involved. You create a Microsoft Excel workbook, create a chart and then create the Microsoft PowerPoint presentation that you'll embed the chart into. OLE objects contain links to the original document so a user that double-clicks the embedded file will launch the file and it's application.
+
+### **VSTO Example**
+
+Using VSTO, the following steps are performed:
+
+1. Create an instance of the Microsoft Excel ApplicationClass object.
+2. Create a new workbook with one sheet in it.
+3. Add chart to the sheet.
+4. Save the workbook.
+5. Open the Excel workbook containing the worksheet with the chart data.
+6. Get the ChartObjects collection for the sheet.
+7. Get the chart to copy.
+8. Create a Microsoft PowerPoint presentation.
+9. Add a blank slide to the presentation.
+10. Copy the chart from the Excel worksheet to the clipboard.
+11. Paste the chart into the PowerPoint presentation.
+12. Position the chart on the slide.
+13. Save the presentation.
+
+```csharp
+CreateNewChartInExcel();
+UseCopyPaste();
+```
+
+<a href="https://gist.githubusercontent.com/aspose-com-gists/a56eda38c01ad33dc653116c7bae4293/raw/60f36b65dcdc5f7368b2d455fe1ae74076eeae08/Examples-CSharp-VSTO-CreateandEmbedExcelChartAsOLEUsingVSTO-CreateAndEmbedExcelChartAsOLEUsingVSTO.cs" target="_blank" rel="nofollow noopener noreferrer">Source: Examples-CSharp-VSTO-CreateandEmbedExcelChartAsOLEUsingVSTO-CreateAndEmbedExcelChartAsOLEUsingVSTO.cs</a>
+
+```csharp
+static void SetCellValue(xlNS.Worksheet targetSheet, string Cell, object Value)
+{
+    targetSheet.get_Range(Cell, Cell).set_Value(xlNS.XlRangeValueDataType.xlRangeValueDefault, Value);
+}
+```
+
+<a href="https://gist.githubusercontent.com/aspose-com-gists/a56eda38c01ad33dc653116c7bae4293/raw/60f36b65dcdc5f7368b2d455fe1ae74076eeae08/Examples-CSharp-VSTO-CreateandEmbedExcelChartAsOLEUsingVSTO-SetCellValue.cs" target="_blank" rel="nofollow noopener noreferrer">Source: Examples-CSharp-VSTO-CreateandEmbedExcelChartAsOLEUsingVSTO-SetCellValue.cs</a>
+
+```csharp
+static void CreateNewChartInExcel()
+{
+    // Declare a variable for the Excel ApplicationClass instance.
+    Microsoft.Office.Interop.Excel.ApplicationClass excelApplication = null;
+
+    // Declare variables for the Workbooks.Open method parameters.
+    string paramWorkbookPath = Application.StartupPath + @"\ChartData.xlsx";
+    object paramMissing = Type.Missing;
+
+    // Declare variables for the Chart.ChartWizard method.
+    object paramChartFormat = 1;
+    object paramCategoryLabels = 0;
+    object paramSeriesLabels = 0;
+    bool paramHasLegend = true;
+    object paramTitle = "Sales by Quarter";
+    object paramCategoryTitle = "Fiscal Quarter";
+    object paramValueTitle = "Billions";
+
+    try
+    {
+        // Create an instance of the Excel ApplicationClass object.
+        excelApplication = new Microsoft.Office.Interop.Excel.ApplicationClass();
+
+        // Create a new workbook with 1 sheet in it.
+        xlNS.Workbook newWorkbook = excelApplication.Workbooks.Add(xlNS.XlWBATemplate.xlWBATWorksheet);
+
+        // Change the name of the sheet.
+        xlNS.Worksheet targetSheet = (xlNS.Worksheet)(newWorkbook.Worksheets[1]);
+        targetSheet.Name = "Quarterly Sales";
+
+        // Insert some data for the chart into the sheet.
+        //              A       B       C       D       E
+        //     1                Q1      Q2      Q3      Q4
+        //     2    N. America  1.5     2       1.5     2.5
+        //     3    S. America  2       1.75    2       2
+        //     4    Europe      2.25    2       2.5     2
+        //     5    Asia        2.5     2.5     2       2.75
+
+        SetCellValue(targetSheet, "A2", "N. America");
+        SetCellValue(targetSheet, "A3", "S. America");
+        SetCellValue(targetSheet, "A4", "Europe");
+        SetCellValue(targetSheet, "A5", "Asia");
+
+        SetCellValue(targetSheet, "B1", "Q1");
+        SetCellValue(targetSheet, "B2", 1.5);
+        SetCellValue(targetSheet, "B3", 2);
+        SetCellValue(targetSheet, "B4", 2.25);
+        SetCellValue(targetSheet, "B5", 2.5);
+
+        SetCellValue(targetSheet, "C1", "Q2");
+        SetCellValue(targetSheet, "C2", 2);
+        SetCellValue(targetSheet, "C3", 1.75);
+        SetCellValue(targetSheet, "C4", 2);
+        SetCellValue(targetSheet, "C5", 2.5);
+
+        SetCellValue(targetSheet, "D1", "Q3");
+        SetCellValue(targetSheet, "D2", 1.5);
+        SetCellValue(targetSheet, "D3", 2);
+        SetCellValue(targetSheet, "D4", 2.5);
+        SetCellValue(targetSheet, "D5", 2);
+
+        SetCellValue(targetSheet, "E1", "Q4");
+        SetCellValue(targetSheet, "E2", 2.5);
+        SetCellValue(targetSheet, "E3", 2);
+        SetCellValue(targetSheet, "E4", 2);
+        SetCellValue(targetSheet, "E5", 2.75);
+
+        // Get the range holding the chart data.
+        xlNS.Range dataRange = targetSheet.get_Range("A1", "E5");
+
+        // Get the ChartObjects collection for the sheet.
+        xlNS.ChartObjects chartObjects = (xlNS.ChartObjects)(targetSheet.ChartObjects(paramMissing));
+
+        // Add a Chart to the collection.
+        xlNS.ChartObject newChartObject = chartObjects.Add(0, 100, 600, 300);
+        newChartObject.Name = "Sales Chart";
+
+        // Create a new chart of the data.
+        newChartObject.Chart.ChartWizard(dataRange, xlNS.XlChartType.xl3DColumn, paramChartFormat, xlNS.XlRowCol.xlRows,
+            paramCategoryLabels, paramSeriesLabels, paramHasLegend, paramTitle, paramCategoryTitle, paramValueTitle, paramMissing);
+
+        // Save the workbook.
+        newWorkbook.SaveAs(paramWorkbookPath, paramMissing, paramMissing, paramMissing, paramMissing,
+            paramMissing, xlNS.XlSaveAsAccessMode.xlNoChange, paramMissing, paramMissing, paramMissing, paramMissing, paramMissing);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+    finally
+    {
+        if (excelApplication != null)
+        {
+            // Close Excel.
+            excelApplication.Quit();
+        }
+    }
+}
+
+```
+
+<a href="https://gist.githubusercontent.com/aspose-com-gists/a56eda38c01ad33dc653116c7bae4293/raw/60f36b65dcdc5f7368b2d455fe1ae74076eeae08/Examples-CSharp-VSTO-CreateandEmbedExcelChartAsOLEUsingVSTO-CreateNewChartInExcel.cs" target="_blank" rel="nofollow noopener noreferrer">Source: Examples-CSharp-VSTO-CreateandEmbedExcelChartAsOLEUsingVSTO-CreateNewChartInExcel.cs</a>
+
+```csharp
+static void UseCopyPaste()
+{
+    // Declare variables to hold references to PowerPoint objects.
+    pptNS.ApplicationClass powerpointApplication = null;
+    pptNS.Presentation pptPresentation = null;
+    pptNS.Slide pptSlide = null;
+    pptNS.ShapeRange shapeRange = null;
+
+    // Declare variables to hold references to Excel objects.
+    xlNS.ApplicationClass excelApplication = null;
+    xlNS.Workbook excelWorkBook = null;
+    xlNS.Worksheet targetSheet = null;
+    xlNS.ChartObjects chartObjects = null;
+    xlNS.ChartObject existingChartObject = null;
+
+    string paramPresentationPath = Application.StartupPath + @"\ChartTest.pptx";
+    string paramWorkbookPath = Application.StartupPath + @"\ChartData.xlsx";
+    object paramMissing = Type.Missing;
+
+    try
+    {
+        // Create an instance of PowerPoint.
+        powerpointApplication = new pptNS.ApplicationClass();
+
+        // Create an instance Excel.
+        excelApplication = new xlNS.ApplicationClass();
+
+        // Open the Excel workbook containing the worksheet with the chart data.
+        excelWorkBook = excelApplication.Workbooks.Open(paramWorkbookPath,
+            paramMissing, paramMissing, paramMissing, paramMissing, paramMissing,
+            paramMissing, paramMissing, paramMissing, paramMissing, paramMissing,
+            paramMissing, paramMissing, paramMissing, paramMissing);
+
+        // Get the worksheet that contains the chart.
+        targetSheet =
+            (xlNS.Worksheet)(excelWorkBook.Worksheets["Quarterly Sales"]);
+
+        // Get the ChartObjects collection for the sheet.
+        chartObjects =
+            (xlNS.ChartObjects)(targetSheet.ChartObjects(paramMissing));
+
+        // Get the chart to copy.
+        existingChartObject =
+            (xlNS.ChartObject)(chartObjects.Item("Sales Chart"));
+
+        // Create a PowerPoint presentation.
+        pptPresentation =
+            powerpointApplication.Presentations.Add(
+            Microsoft.Office.Core.MsoTriState.msoTrue);
+
+        // Add a blank slide to the presentation.
+        pptSlide =
+            pptPresentation.Slides.Add(1, pptNS.PpSlideLayout.ppLayoutBlank);
+
+        // Copy the chart from the Excel worksheet to the clipboard.
+        existingChartObject.Copy();
+
+        // Paste the chart into the PowerPoint presentation.
+        shapeRange = pptSlide.Shapes.Paste();
+
+        // Position the chart on the slide.
+        shapeRange.Left = 60;
+        shapeRange.Top = 100;
+
+        // Save the presentation.
+        pptPresentation.SaveAs(paramPresentationPath, pptNS.PpSaveAsFileType.ppSaveAsOpenXMLPresentation, Microsoft.Office.Core.MsoTriState.msoTrue);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+    finally
+    {
+        // Release the PowerPoint slide object.
+        shapeRange = null;
+        pptSlide = null;
+
+        // Close and release the Presentation object.
+        if (pptPresentation != null)
+        {
+            pptPresentation.Close();
+            pptPresentation = null;
+        }
+
+        // Quit PowerPoint and release the ApplicationClass object.
+        if (powerpointApplication != null)
+        {
+            powerpointApplication.Quit();
+            powerpointApplication = null;
+        }
+
+        // Release the Excel objects.
+        targetSheet = null;
+        chartObjects = null;
+        existingChartObject = null;
+
+        // Close and release the Excel Workbook object.
+        if (excelWorkBook != null)
+        {
+            excelWorkBook.Close(false, paramMissing, paramMissing);
+            excelWorkBook = null;
+        }
+
+        // Quit Excel and release the ApplicationClass object.
+        if (excelApplication != null)
+        {
+            excelApplication.Quit();
+            excelApplication = null;
+        }
+
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+    }
+}
+```
+
+<a href="https://gist.githubusercontent.com/aspose-com-gists/a56eda38c01ad33dc653116c7bae4293/raw/60f36b65dcdc5f7368b2d455fe1ae74076eeae08/Examples-CSharp-VSTO-CreateandEmbedExcelChartAsOLEUsingVSTO-UseCopyPaste.cs" target="_blank" rel="nofollow noopener noreferrer">Source: Examples-CSharp-VSTO-CreateandEmbedExcelChartAsOLEUsingVSTO-UseCopyPaste.cs</a>
+
+### **Aspose.Slides for Java Example**
+
+Using Aspose.Slides for .NET, the following steps are performed:
+
+1. Create a workbook using Aspose.Cells for Java.
+2. Create a Microsoft Excel chart.
+3. Set the OLE size of the Excel Chart.
+4. Get an image of the chart.
+5. Embed the Excel chart as an OLE Object inside PPTX presentation using Aspose.Slides for Java.
+6. Replace the object changed image with the image obtained in step 3 to cater for the object changed issue.
+7. Write the output presentation to disk in PPTX format.
+
+```java
+        
+try {
+    
+    //Create a workbook
+Workbook wb = new Workbook();
+//Add an excel chart
+int chartRows = 55;
+int chartCols = 25;
+int chartSheetIndex = AddExcelChartInWorkbook(wb, chartRows, chartCols);
+//Set chart ole size
+wb.getWorksheets().setOleSize(0, chartRows, 0, chartCols);
+//Get the chart image and save to stream
+com.aspose.cells.ImageOrPrintOptions opts= new com.aspose.cells.ImageOrPrintOptions();
+opts.setImageFormat(com.aspose.cells.ImageFormat.getPng());
+ByteArrayOutputStream imageStream=new ByteArrayOutputStream();
+wb.getWorksheets().get(chartSheetIndex).getCharts().get(0).toImage(imageStream, opts);
+//Save the workbook to stream
+ByteArrayOutputStream bout=new ByteArrayOutputStream();
+ 
+wb.save(bout,com.aspose.cells.SaveFormat.EXCEL_97_TO_2003);
+//Create a presentation
+Presentation pres = new Presentation();
+ISlide sld = pres.getSlides().get_Item(0);
+//Add the workbook on slide
+AddExcelChartInPresentation(pres, sld, bout.toByteArray(), imageStream.toByteArray());
+//Write the presentation to disk
+pres.save("outputJ.pptx", SaveFormat.Pptx);
+    
+} catch (Exception e) {
+}
+```
+
+<a href="https://gist.githubusercontent.com/aspose-com-gists/1f55f0222bc39a382d831900e8de7400/raw/9aa49dcea7f6b5635e44c02fa54f989b47252a75/Examples-src-main-java-com-aspose-slides-examples-Slides-Charts-EmbedChartAsOLEObject-EmbedChartAsOLEObject.java" target="_blank" rel="nofollow noopener noreferrer">Source: Examples-src-main-java-com-aspose-slides-examples-Slides-Charts-EmbedChartAsOLEObject-EmbedChartAsOLEObject.java</a>
+
+```java
+static void AddExcelChartInPresentation(Presentation pres, ISlide sld, byte[] wbArray,    byte[] imgChart) throws Exception
+{
+    double oleHeight = pres.getSlideSize().getSize().getHeight();
+    double oleWidth = pres.getSlideSize().getSize().getWidth();
+    Workbook wb=new Workbook();
+ 
+    //Createing and EXCEL_97_TO_2003 LoadOptions object
+    com.aspose.cells.LoadOptions loadOptions = new com.aspose.cells.LoadOptions(com.aspose.cells.FileFormatType.EXCEL_97_TO_2003);         
+    wb=new Workbook(new ByteArrayInputStream(wbArray),loadOptions);
+ 
+    IOleObjectFrame oof = sld.getShapes().addOleObjectFrame(0f, 0f, (float)oleWidth, (float)oleHeight, "Excel.Sheet.8", wbArray);
+    oof.getSubstitutePictureFormat().getPicture().setImage(pres.getImages().addImage(new ByteArrayInputStream(imgChart)));
+ 
+}
+```
+
+<a href="https://gist.githubusercontent.com/aspose-com-gists/1f55f0222bc39a382d831900e8de7400/raw/2dc498ca51305901fdc54f6337ba6aff05d476b4/Examples-src-main-java-com-aspose-slides-examples-Slides-Charts-EmbedChartAsOLEObject-AddExcelChartInPresentation.java" target="_blank" rel="nofollow noopener noreferrer">Source: Examples-src-main-java-com-aspose-slides-examples-Slides-Charts-EmbedChartAsOLEObject-AddExcelChartInPresentation.java</a>
+
+```java
+static int AddExcelChartInWorkbook(Workbook wb, int chartRows, int chartCols)
+{
+//Array of cell names
+String[] cellsName = new String[]
+        {
+                "A1", "A2", "A3", "A4",
+                "B1", "B2", "B3", "B4",
+                "C1", "C2", "C3", "C4",
+                "D1", "D2", "D3", "D4",
+                "E1", "E2", "E3", "E4"
+        };
+//Array of cell data
+int[] cellsValue = new int[]
+        {
+                67,86,68,91,
+                44,64,89,48,
+                46,97,78,60,
+                43,29,69,26,
+                24,40,38,25
+        };
+//Add a new worksheet to populate cells with data
+int dataSheetIndex =wb.getWorksheets().add();
+Worksheet dataSheet =wb.getWorksheets().get(dataSheetIndex);
+String sheetName = "DataSheet";
+dataSheet.setName(sheetName);
+//Populate DataSheet with data
+int size= Array.getLength(cellsName);
+for (int i = 0; i < size; i++)
+{
+    String cellName = cellsName[i];
+    int cellValue = cellsValue[i];
+    dataSheet.getCells().get(cellName).setValue(cellValue);
+}
+//Add a chart sheet
+int WorksheetIndex = wb.getWorksheets().add(SheetType.CHART);
+Worksheet chartSheet = wb.getWorksheets().get(WorksheetIndex);
+chartSheet.setName("ChartSheet");
+int chartSheetIdx = chartSheet.getIndex();
+//Add a chart in ChartSheet with data series from DataSheet
+int chIndex = chartSheet.getCharts().add(ChartType.COLUMN, 0, chartRows, 0, chartCols);
+Chart chart=chartSheet.getCharts().get(chIndex);
+ 
+chart.getNSeries().add(sheetName + "!A1:E1", false);
+chart.getNSeries().add(sheetName + "!A2:E2", false);
+chart.getNSeries().add(sheetName + "!A3:E3", false);
+chart.getNSeries().add(sheetName + "!A4:E4", false);
+//Set ChartSheet as active sheet
+wb.getWorksheets().setActiveSheetIndex(chartSheetIdx);
+return chartSheetIdx;
+ 
+}
+```
+
+<a href="https://gist.githubusercontent.com/aspose-com-gists/1f55f0222bc39a382d831900e8de7400/raw/6312a1ad9c523b365c5a667131857da7bf03a059/Examples-src-main-java-com-aspose-slides-examples-Slides-Charts-EmbedChartAsOLEObject-AddExcelChartInWorkbook.java" target="_blank" rel="nofollow noopener noreferrer">Source: Examples-src-main-java-com-aspose-slides-examples-Slides-Charts-EmbedChartAsOLEObject-AddExcelChartInWorkbook.java</a>
+
+## Related articles
+
+- [Creating Tables Using VSTO and Aspose.Slides for Java](/java/slides/creating-a-table-on-powerpoint-slide/)
+- [Adding Text Dynamically Using VSTO and Aspose.Slides for Java](/java/slides/adding-text-dynamically-using-vsto-and-aspose-slides-for-java/)
+- [Create Charts Using VSTO and Aspose.Slides for Java](/java/slides/create-a-chart-in-a-microsoft-powerpoint-presentation/)

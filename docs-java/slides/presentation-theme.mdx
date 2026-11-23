@@ -1,0 +1,637 @@
+---
+title: "Manage Presentation Themes in Java"
+sidebar_label: "Manage Presentation Themes in Java"
+sidebar_key: "java-slides-presentation-theme"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/presentation-theme.md"
+source_commit: ""
+source_sha256: "6f38a3f809311d4300668a26f1cc962a8cb6cd62e2ada497179a0b5b7f700fc5"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/presentation-theme/"
+source_markdown_url: "https://docs.aspose.com/slides/java/presentation-theme.md"
+source_snapshot_sha256: "c29835c0d42117e36d31ef3c970c561118263dfb8fd9da9eedc655f039c09ced"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+a
+
+> Master presentation themes in Aspose.Slides for Java to create, customize and convert PowerPoint files with consistent branding.
+> 8
+
+## **Introduction**
+
+A presentation theme defines a coordinated set of colors, fonts, background styles, fills, lines, and effects. Theme-aware objects refer to these shared definitions instead of storing every visual property as a fixed value, so a theme change can update many objects at once.
+
+In Aspose.Slides, the presentation-level theme is available through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation.getMasterTheme</a>. A presentation can also contain theme overrides at lower levels. A master can override the presentation theme through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/masterthememanager/" target="_blank" rel="nofollow noopener noreferrer">MasterThemeManager.getOverrideTheme</a>, while a layout or an individual slide can override its inherited theme through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/baseoverridethememanager/" target="_blank" rel="nofollow noopener noreferrer">BaseOverrideThemeManager.getOverrideTheme</a>. In practice, the effective theme for a slide is resolved through this inheritance chain: presentation theme, master override, layout override, and slide override.
+
+![Theme components: colors, fonts, background styles, and effects](/java/slides/images/bac3abd3273e64a1-theme-constituents.png)
+
+The sections below show the most common theme workflows: inspect a theme, change colors and fonts, copy or apply a theme, update background and effect styles, and read effective values after inheritance and overrides have been resolved.
+
+## **Inspect a Theme**
+
+The <a href="https://reference.aspose.com/slides/java/com.aspose.slides/mastertheme/" target="_blank" rel="nofollow noopener noreferrer">MasterTheme</a> object exposes the theme's color scheme, font scheme, and format scheme through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/mastertheme/" target="_blank" rel="nofollow noopener noreferrer">MasterTheme.getColorScheme</a>, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/mastertheme/" target="_blank" rel="nofollow noopener noreferrer">MasterTheme.getFontScheme</a>, and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/mastertheme/" target="_blank" rel="nofollow noopener noreferrer">MasterTheme.getFormatScheme</a>. Inspecting these collections before changing them is especially useful when a presentation comes from an external source because the number and content of style entries can vary.
+
+The following example reads the main theme properties and reports how many background, fill, line, and effect styles are stored in the theme:
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("input.pptx");
+try {
+    IMasterTheme theme = presentation.getMasterTheme();
+    System.out.println("Theme name: " + theme.getName());
+    System.out.println("Accent 1: " + theme.getColorScheme().getAccent1().getColor());
+    System.out.println("Major Latin font: " + theme.getFontScheme().getMajor().getLatinFont().getFontName());
+    System.out.println("Minor Latin font: " + theme.getFontScheme().getMinor().getLatinFont().getFontName());
+    System.out.println("Background fill styles: " + theme.getFormatScheme().getBackgroundFillStyles().size());
+    System.out.println("Fill styles: " + theme.getFormatScheme().getFillStyles().size());
+    System.out.println("Line styles: " + theme.getFormatScheme().getLineStyles().size());
+    System.out.println("Effect styles: " + theme.getFormatScheme().getEffectStyles().size());
+} finally {
+    presentation.dispose();
+}
+```
+
+If a file uses multiple masters, do not assume that every slide has the same effective theme. Inspect the master associated with the slide, and use the effective-theme workflow shown later in this article when layout or slide overrides may be present.
+
+## **Change Theme Colors**
+
+Theme-aware fills, lines, and text can refer to a logical color from the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/schemecolor/" target="_blank" rel="nofollow noopener noreferrer">SchemeColor</a> enumeration. When you change the corresponding entry in the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icolorscheme/" target="_blank" rel="nofollow noopener noreferrer">IColorScheme</a>, all objects that still reference that theme color are resolved against the new value. Objects that use a direct RGB color are not changed by a theme-color update.
+
+The following end-to-end example creates a shape that uses `Accent4`, changes the theme's `Accent4` color to red, saves the presentation, reopens it, and prints the effective fill color:
+
+```java
+import com.aspose.slides.*;
+import java.awt.Color;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IAutoShape shape = slide.getShapes().addAutoShape(ShapeType.Rectangle, 10, 10, 100, 100);
+    shape.getFillFormat().setFillType(FillType.Solid);
+    shape.getFillFormat().getSolidFillColor().setSchemeColor(SchemeColor.Accent4);
+
+    presentation.getMasterTheme().getColorScheme().getAccent4().setColor(Color.RED);
+
+    presentation.save("theme-color.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+
+Presentation savedPresentation = new Presentation("theme-color.pptx");
+try {
+    ISlide savedSlide = savedPresentation.getSlides().get_Item(0);
+
+    IShape savedShape = savedSlide.getShapes().get_Item(0);
+    IFillFormatEffectiveData effectiveFill = savedShape.getFillFormat().getEffective();
+    System.out.println("Effective fill color: " + effectiveFill.getSolidFillColor());
+} finally {
+    savedPresentation.dispose();
+}
+```
+
+Because the rectangle remains linked to `Accent4`, its visible color becomes red after the theme is changed. If you replace the scheme color with a direct color on the shape, later changes to `Accent4` will no longer affect that fill.
+
+### **Use Colors from the Additional Palette**
+
+PowerPoint derives lighter and darker variants from a theme color by applying color transformations. Aspose.Slides exposes these transformations through the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/colortransformoperation/" target="_blank" rel="nofollow noopener noreferrer">ColorTransformOperation</a> enumeration.
+
+![Main theme colors and lighter and darker colors generated from the additional palette](/java/slides/images/59d98c66b484dad4-additional-palette-colors.png)
+
+**1** - Main theme colors.
+
+**2** - Lighter and darker variants produced from the main theme colors.
+
+The following example creates six rectangles based on `Accent4`, applies luminance transformations to five of them, and saves the result:
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IShape shape1 = slide.getShapes().addAutoShape(ShapeType.Rectangle, 10, 10, 50, 50);
+    shape1.getFillFormat().setFillType(FillType.Solid);
+    shape1.getFillFormat().getSolidFillColor().setSchemeColor(SchemeColor.Accent4);
+
+    IShape shape2 = slide.getShapes().addAutoShape(ShapeType.Rectangle, 10, 70, 50, 50);
+    shape2.getFillFormat().setFillType(FillType.Solid);
+    shape2.getFillFormat().getSolidFillColor().setSchemeColor(SchemeColor.Accent4);
+    shape2.getFillFormat().getSolidFillColor().getColorTransform().add(ColorTransformOperation.MultiplyLuminance, 0.2f);
+    shape2.getFillFormat().getSolidFillColor().getColorTransform().add(ColorTransformOperation.AddLuminance, 0.8f);
+
+    IShape shape3 = slide.getShapes().addAutoShape(ShapeType.Rectangle, 10, 130, 50, 50);
+    shape3.getFillFormat().setFillType(FillType.Solid);
+    shape3.getFillFormat().getSolidFillColor().setSchemeColor(SchemeColor.Accent4);
+    shape3.getFillFormat().getSolidFillColor().getColorTransform().add(ColorTransformOperation.MultiplyLuminance, 0.4f);
+    shape3.getFillFormat().getSolidFillColor().getColorTransform().add(ColorTransformOperation.AddLuminance, 0.6f);
+
+    IShape shape4 = slide.getShapes().addAutoShape(ShapeType.Rectangle, 10, 190, 50, 50);
+    shape4.getFillFormat().setFillType(FillType.Solid);
+    shape4.getFillFormat().getSolidFillColor().setSchemeColor(SchemeColor.Accent4);
+    shape4.getFillFormat().getSolidFillColor().getColorTransform().add(ColorTransformOperation.MultiplyLuminance, 0.6f);
+    shape4.getFillFormat().getSolidFillColor().getColorTransform().add(ColorTransformOperation.AddLuminance, 0.4f);
+
+    IShape shape5 = slide.getShapes().addAutoShape(ShapeType.Rectangle, 10, 250, 50, 50);
+    shape5.getFillFormat().setFillType(FillType.Solid);
+    shape5.getFillFormat().getSolidFillColor().setSchemeColor(SchemeColor.Accent4);
+    shape5.getFillFormat().getSolidFillColor().getColorTransform().add(ColorTransformOperation.MultiplyLuminance, 0.75f);
+
+    IShape shape6 = slide.getShapes().addAutoShape(ShapeType.Rectangle, 10, 310, 50, 50);
+    shape6.getFillFormat().setFillType(FillType.Solid);
+    shape6.getFillFormat().getSolidFillColor().setSchemeColor(SchemeColor.Accent4);
+    shape6.getFillFormat().getSolidFillColor().getColorTransform().add(ColorTransformOperation.MultiplyLuminance, 0.5f);
+
+    presentation.save("theme-color-palette.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+These variants remain based on the theme color. If `Accent4` changes later, the transformed colors are recalculated from the new `Accent4` value.
+
+### **Map `SchemeColor` Values to `IColorScheme` Slots**
+
+The <a href="https://reference.aspose.com/slides/java/com.aspose.slides/schemecolor/" target="_blank" rel="nofollow noopener noreferrer">SchemeColor</a> enumeration uses `Text1`, `Background1`, `Text2`, and `Background2`, while the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icolorscheme/" target="_blank" rel="nofollow noopener noreferrer">IColorScheme</a> exposes the same theme slots as `Dark1`, `Light1`, `Dark2`, and `Light2`. The mapping is fixed:
+
+- `Text1` = `Dark1`
+- `Background1` = `Light1`
+- `Text2` = `Dark2`
+- `Background2` = `Light2`
+
+These are alternate names for the same theme slots; they are not values that are dynamically converted from one form to another.
+
+## **Change Theme Fonts**
+
+A theme font scheme contains a major font set for headings and a minor font set for body text. The <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifontscheme/" target="_blank" rel="nofollow noopener noreferrer">IFontScheme.getMajor</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifontscheme/" target="_blank" rel="nofollow noopener noreferrer">IFontScheme.getMinor</a> methods expose those sets.
+
+PowerPoint-compatible theme font identifiers can be used in text formatting:
+
+- `+mn-lt` - Body Font Latin (Minor Latin Font)
+- `+mj-lt` - Heading Font Latin (Major Latin Font)
+- `+mn-ea` - Body Font East Asian (Minor East Asian Font)
+- `+mj-ea` - Heading Font East Asian (Major East Asian Font)
+- `+mn-cs` - Body Font Complex Script (Minor Complex Script Font)
+- `+mj-cs` - Heading Font Complex Script (Major Complex Script Font)
+
+The following example creates one heading that uses the major Latin theme font and one body line that uses the minor Latin theme font. It then changes the theme fonts and saves the result:
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IAutoShape heading = slide.getShapes().addAutoShape(ShapeType.Rectangle, 40, 40, 500, 60);
+    heading.getTextFrame().setText("Theme heading");
+    heading.getTextFrame().getParagraphs().get_Item(0).getPortions().get_Item(0).getPortionFormat().setLatinFont(new FontData("+mj-lt"));
+
+    IAutoShape body = slide.getShapes().addAutoShape(ShapeType.Rectangle, 40, 120, 500, 60);
+    body.getTextFrame().setText("Theme body text");
+    body.getTextFrame().getParagraphs().get_Item(0).getPortions().get_Item(0).getPortionFormat().setLatinFont(new FontData("+mn-lt"));
+
+    presentation.getMasterTheme().getFontScheme().getMajor().setLatinFont(new FontData("Aptos Display"));
+    presentation.getMasterTheme().getFontScheme().getMinor().setLatinFont(new FontData("Arial"));
+
+    presentation.save("theme-fonts.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+The heading follows the major font and the body text follows the minor font. Text that has an explicit font name instead of a theme identifier will not automatically switch when the theme font scheme changes.
+
+The major and minor font collections can also contain font mappings for individual writing systems, such as Cyrillic, Arabic, Japanese, Georgian, and Thaana. To inspect, add, replace, or remove these mappings, see [Script-Specific Theme Fonts](/java/slides/script-specific-font-mappings/).
+
+For more information about presentation fonts, see [PowerPoint Fonts](/java/slides/powerpoint-fonts/).
+
+### **Resolve Theme Font References**
+
+When inspecting text, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifontdata/#getFontName--" target="_blank" rel="nofollow noopener noreferrer">IFontData.getFontName</a> can return a theme reference such as `+mn-lt` instead of a font family name. Call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifontdata/#getFontName-com.aspose.slides.IThemeEffectiveData-" target="_blank" rel="nofollow noopener noreferrer">IFontData.getFontName</a> with the appropriate <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ithemeeffectivedata/" target="_blank" rel="nofollow noopener noreferrer">IThemeEffectiveData</a> to resolve that reference. The `+mj` and `+mn` prefixes select the major and minor font sets; the `-lt`, `-ea`, and `-cs` suffixes select their Latin, East Asian, and Complex Script fonts, respectively.
+
+Obtain the effective theme through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ithemeable/#createThemeEffective--" target="_blank" rel="nofollow noopener noreferrer">IThemeable.createThemeEffective</a> on the object whose theme applies to the inspected text. For ordinary text on a slide, call this method on the slide so the context includes that slide's inherited theme and local overrides. When inspecting a layout or master itself, use its own effective theme. Do not assume that the first master's theme applies to every slide.
+
+The following example creates a text portion that explicitly references the minor Latin font. It initializes a slide font scheme through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ioverridetheme/#initFontSchemeFromInherited--" target="_blank" rel="nofollow noopener noreferrer">IOverrideTheme.initFontSchemeFromInherited</a> and sets the major and minor Latin families to `Arial` and `Calibri`, making the result reproducible without an input file.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IOverrideTheme theme = slide.getThemeManager().getOverrideTheme();
+    theme.initFontSchemeFromInherited();
+    theme.getFontScheme().getMajor().setLatinFont(new FontData("Arial"));
+    theme.getFontScheme().getMinor().setLatinFont(new FontData("Calibri"));
+
+    IAutoShape shape = slide.getShapes().addAutoShape(ShapeType.Rectangle, 20, 20, 400, 60);
+    shape.getTextFrame().setText("Text using the minor theme font");
+
+    IPortion portion = shape.getTextFrame().getParagraphs().get_Item(0).getPortions().get_Item(0);
+    portion.getPortionFormat().setLatinFont(new FontData("+mn-lt"));
+
+    IFontData font = portion.getPortionFormat().getLatinFont();
+    IThemeEffectiveData effectiveTheme = slide.createThemeEffective();
+    System.out.println(font.getFontName() + " -> " + font.getFontName(effectiveTheme));
+
+    FontData explicitFont = new FontData("Verdana");
+    System.out.println(explicitFont.getFontName() + " -> " + explicitFont.getFontName(effectiveTheme));
+} finally {
+    presentation.dispose();
+}
+```
+
+The output is `+mn-lt -> Calibri` followed by `Verdana -> Verdana`. The stored reference remains unchanged, while an explicit family name is returned as-is. If the portion used `+mj-lt`, it would resolve to `Arial` in this theme.
+
+Resolving a theme reference identifies the font family specified by the theme. It does not check font availability or determine the font file ultimately used after substitution or glyph fallback during rendering. See [Font Selection Sequence](/java/slides/font-selection-sequence/) and [Font Substitution](/java/slides/font-substitution/) for those separate steps.
+
+## **Copy or Apply a Theme**
+
+The workflows below solve different theme-related problems.
+
+### **Apply an External Theme to a Master's Dependent Slides**
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/imasterslide/" target="_blank" rel="nofollow noopener noreferrer">IMasterSlide.applyExternalThemeToDependingSlides</a> when you have a PowerPoint theme file (`.thmx`) and want to restyle every slide that depends on a particular master. Select the master from the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation.getMasters</a> collection, which implements <a href="https://reference.aspose.com/slides/java/com.aspose.slides/imasterslidecollection/" target="_blank" rel="nofollow noopener noreferrer">IMasterSlideCollection</a>, and pass the theme file path to the method.
+
+The method performs the following operations:
+
+1. Creates a new master slide based on the selected master.
+2. Applies the external theme to the new master.
+3. Assigns the new master to all slides that previously depended on the selected master.
+4. Returns the newly created <a href="https://reference.aspose.com/slides/java/com.aspose.slides/imasterslide/" target="_blank" rel="nofollow noopener noreferrer">IMasterSlide</a>.
+
+The following example applies an external theme to the slides that depend on the first master and saves the presentation:
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("presentation.pptx");
+try {
+    IMasterSlide selectedMaster = presentation.getMasters().get_Item(0);
+
+    IMasterSlide themedMaster = selectedMaster.applyExternalThemeToDependingSlides("corporate-theme.thmx");
+    System.out.println("Created master: " + themedMaster.getName());
+
+    presentation.save("presentation-with-external-theme.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+An invalid, corrupted, or unsupported theme can cause <a href="https://reference.aspose.com/slides/java/com.aspose.slides/pptxreadexception/" target="_blank" rel="nofollow noopener noreferrer">PptxReadException</a>. Validate paths supplied by users, handle file-system access failures, and save the presentation only after the theme has been applied successfully.
+
+Only the slides that depended on the selected master are reassigned. Slides associated with other masters retain their existing masters and themes. Theme-aware colors, fonts, fills, lines, backgrounds, and effects are resolved against the external theme. Directly assigned colors, fonts, fills, and other explicit formatting may remain unchanged. Layout-level and slide-level overrides can also take precedence over values inherited from the new master.
+
+The theme can reference fonts that are not available in the runtime environment. For consistent rendering and export, install the required fonts, provide them through [custom font sources](/java/slides/custom-font/), or configure [font substitution](/java/slides/font-substitution/).
+
+This is a direct master-level workflow: the method accepts a file path to a `.thmx` file and does not require manually creating slide-level or layout-level theme overrides.
+
+### **Apply Different External Themes in a Multi-Master Presentation**
+
+When the relevant master is not known in advance, obtain it from a representative slide through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islide/" target="_blank" rel="nofollow noopener noreferrer">ISlide.getLayoutSlide</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ilayoutslide/" target="_blank" rel="nofollow noopener noreferrer">ILayoutSlide.getMasterSlide</a>. Store the original master references before applying any themes because each call creates another master in the presentation.
+
+The following example uses slides from two sections to locate their masters and applies a different external theme to each group:
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("multi-master-presentation.pptx");
+try {
+    if (presentation.getSlides().size() < 5) {
+        System.out.println("The presentation does not contain the expected representative slides.");
+    } else {
+        IMasterSlide firstGroupMaster = presentation.getSlides().get_Item(0).getLayoutSlide().getMasterSlide();
+        IMasterSlide secondGroupMaster = presentation.getSlides().get_Item(4).getLayoutSlide().getMasterSlide();
+
+        if (firstGroupMaster.getSlideId() == secondGroupMaster.getSlideId()) {
+            System.out.println("The representative slides use the same master.");
+        } else {
+            IMasterSlide firstThemedMaster = firstGroupMaster.applyExternalThemeToDependingSlides("blue-theme.thmx");
+            IMasterSlide secondThemedMaster = secondGroupMaster.applyExternalThemeToDependingSlides("green-theme.thmx");
+
+            System.out.println("First themed master: " + firstThemedMaster.getName());
+            System.out.println("Second themed master: " + secondThemedMaster.getName());
+
+            presentation.save("multi-master-with-external-themes.pptx", SaveFormat.Pptx);
+        }
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+The first call affects only slides that depended on `firstGroupMaster`, and the second call affects only slides that depended on `secondGroupMaster`. Slides belonging to any other master are not restyled.
+
+### **Preserve a Source Theme When Moving Slides**
+
+If you want to move a slide to another presentation and preserve its original design, clone the source master into the target presentation with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/imasterslidecollection/" target="_blank" rel="nofollow noopener noreferrer">IMasterSlideCollection.addClone</a>, then clone the slide with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islidecollection/" target="_blank" rel="nofollow noopener noreferrer">ISlideCollection.addClone</a> and the cloned master. This carries the master, its layouts, and the associated theme together.
+
+```java
+import com.aspose.slides.*;
+
+Presentation source = new Presentation("source-theme.pptx");
+try {
+    Presentation target = new Presentation("target.pptx");
+    try {
+        ISlide sourceSlide = source.getSlides().get_Item(0);
+
+        IMasterSlide sourceMaster = sourceSlide.getLayoutSlide().getMasterSlide();
+        IMasterSlide clonedMaster = target.getMasters().addClone(sourceMaster);
+
+        target.getSlides().addClone(sourceSlide, clonedMaster, true);
+
+        target.save("theme-preserved.pptx", SaveFormat.Pptx);
+    } finally {
+        target.dispose();
+    }
+} finally {
+    source.dispose();
+}
+```
+
+This is the preferred workflow when the source slide must look the same in the destination. Simply cloning content onto an unrelated destination master can change theme-driven colors, fonts, backgrounds, and effects.
+
+### **Apply Theme Values to an Existing Slide**
+
+If the target slide must stay on its current master and layout, initialize a slide-level override from the source theme. The <a href="https://reference.aspose.com/slides/java/com.aspose.slides/overridetheme/" target="_blank" rel="nofollow noopener noreferrer">OverrideTheme.initColorSchemeFrom</a>, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/overridetheme/" target="_blank" rel="nofollow noopener noreferrer">OverrideTheme.initFontSchemeFrom</a>, and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/overridetheme/" target="_blank" rel="nofollow noopener noreferrer">OverrideTheme.initFormatSchemeFrom</a> methods copy the three main theme components into the override.
+
+```java
+import com.aspose.slides.*;
+
+Presentation source = new Presentation("source-theme.pptx");
+try {
+    Presentation target = new Presentation("target.pptx");
+    try {
+        ISlide targetSlide = presentation.getSlides().get_Item(0);
+
+        IOverrideTheme overrideTheme = targetSlide.getThemeManager().getOverrideTheme();
+        overrideTheme.initColorSchemeFrom(source.getMasterTheme().getColorScheme());
+        overrideTheme.initFontSchemeFrom(source.getMasterTheme().getFontScheme());
+        overrideTheme.initFormatSchemeFrom(source.getMasterTheme().getFormatScheme());
+
+        target.save("theme-applied-to-slide.pptx", SaveFormat.Pptx);
+    } finally {
+        target.dispose();
+    }
+} finally {
+    source.dispose();
+}
+```
+
+This changes the theme used by that slide without changing the theme inherited by other slides. To remove the local override and return to inherited values, call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/overridetheme/" target="_blank" rel="nofollow noopener noreferrer">OverrideTheme.clear</a>.
+
+### **Apply a Theme Override to a Layout**
+
+A layout-level override applies to slides that use that layout, unless a particular slide has its own override. The same initialization methods can be used through the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/layoutslidethememanager/" target="_blank" rel="nofollow noopener noreferrer">LayoutSlideThemeManager</a>:
+
+```java
+import com.aspose.slides.*;
+
+Presentation source = new Presentation("source-theme.pptx");
+try {
+    Presentation target = new Presentation("target.pptx");
+    try {
+        ISlide targetSlide = presentation.getSlides().get_Item(0);
+
+        ILayoutSlide targetLayout = targetSlide.getLayoutSlide();
+        IOverrideTheme overrideTheme = targetLayout.getThemeManager().getOverrideTheme();
+        overrideTheme.initColorSchemeFrom(source.getMasterTheme().getColorScheme());
+        overrideTheme.initFontSchemeFrom(source.getMasterTheme().getFontScheme());
+        overrideTheme.initFormatSchemeFrom(source.getMasterTheme().getFormatScheme());
+
+        target.save("theme-applied-to-layout.pptx", SaveFormat.Pptx);
+    } finally {
+        target.dispose();
+    }
+} finally {
+    source.dispose();
+}
+```
+
+Use a master or presentation-level theme when many layouts and slides should share the same base design, a layout override when one layout family needs different styling, and a slide override only for true exceptions. Excessive slide-level overrides make later global theme changes harder to predict.
+
+<!-- visual-explanation:presentation-theme:start -->
+
+[![A master theme feeds two layouts; a layout override affects its slides except a slide with a more local override.](/java/slides/images/20ad12f2193b3a98-visual-presentation-theme-20ad12f2193b.svg)](https://docs.aspose.com/slides/java/presentation-theme/visual-presentation-theme-20ad12f2193b.svg)
+
+*A layout override applies to slides using that layout unless a slide supplies its own override. Theme-based values follow their resolved scheme; explicitly formatted objects can retain their local appearance. Keep overrides as narrow as the intended design exception.*
+
+<!-- visual-explanation:presentation-theme:end -->
+
+## **Update Theme Background Styles**
+
+The theme's background fills are stored in <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iformatscheme/" target="_blank" rel="nofollow noopener noreferrer">IFormatScheme.getBackgroundFillStyles</a>. PowerPoint can present more background choices in its UI than the number of fill definitions physically stored in this collection because the UI can combine theme fills with theme colors and other style references.
+
+![PowerPoint background style gallery for a presentation theme](/java/slides/images/fde9cb664f5c699a-presentation-design_8.png)
+
+Before using a background style, inspect the stored collection and the current <a href="https://reference.aspose.com/slides/java/com.aspose.slides/background/" target="_blank" rel="nofollow noopener noreferrer">Background.getStyleIndex</a>. A style index of `0` means no themed fill; positive values are theme background-style references. This is different from indexing the Java collection directly, where `get_Item(0)` means the first stored item. Do not assume that every presentation contains the same number of background fill styles.
+
+The following example reports the available background fill count, assigns a themed background reference to the first master, and saves the presentation:
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("input.pptx");
+try {
+    IFillFormatCollection backgroundStyles = presentation.getMasterTheme().getFormatScheme().getBackgroundFillStyles();
+    System.out.println("Background fill styles: " + backgroundStyles.size());
+    if (backgroundStyles.size() == 0) {
+        throw new IllegalStateException("The presentation theme does not contain background fill styles.");
+    }
+
+    IMasterSlide masterSlide = presentation.getMasters().get_Item(0);
+    masterSlide.getBackground().setType(BackgroundType.Themed);
+    masterSlide.getBackground().setStyleIndex(1);
+
+    presentation.save("theme-background.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+The visible result depends on the theme entry referenced by the master and on any background overrides at the layout or slide level. If a slide uses its own background, changing only the master background may not change that slide. Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/background/" target="_blank" rel="nofollow noopener noreferrer">Background.getEffective</a> when you need to know the final background after inheritance has been applied.
+
+Do not treat the style index as a zero-based collection index. Also avoid hard-coding a style number from one file and assuming it has the same appearance in another file; theme style definitions are presentation-specific.
+
+For direct background formatting and background inheritance, see [Presentation Background](/java/slides/presentation-background/).
+
+## **Update Theme Effects**
+
+A theme format scheme contains separate fill, line, and effect style collections exposed through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iformatscheme/" target="_blank" rel="nofollow noopener noreferrer">IFormatScheme.getFillStyles</a>, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iformatscheme/" target="_blank" rel="nofollow noopener noreferrer">IFormatScheme.getLineStyles</a>, and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iformatscheme/" target="_blank" rel="nofollow noopener noreferrer">IFormatScheme.getEffectStyles</a>. Typical Office themes often contain three principal style entries that correspond visually to subtle, moderate, and intense formatting, but code should inspect each collection instead of assuming a fixed count.
+
+![Subtle, moderate, and intense theme effects applied to the same shape](/java/slides/images/a932fe83444963ad-presentation-design_10.png)
+
+When you access these collections in Java, the collection index is zero-based: `get_Item(0)` is the first stored style and `get_Item(2)` is the third. A shape's style-reference indexes are a separate concept, exposed through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ishapestyle/" target="_blank" rel="nofollow noopener noreferrer">IShapeStyle</a>. Modifying a theme style affects shapes that reference that theme style; shapes with direct formatting may remain unchanged.
+
+The following example checks that the required style entries exist, changes the first line style, changes the third fill style, enables an outer shadow in the third effect style, and saves the result:
+
+```java
+import com.aspose.slides.*;
+import java.awt.Color;
+
+Presentation presentation = new Presentation("Subtle_Moderate_Intense.pptx");
+try {
+    IFormatScheme formatScheme = presentation.getMasterTheme().getFormatScheme();
+    if (formatScheme.getLineStyles().size() < 1 || formatScheme.getFillStyles().size() < 3 || formatScheme.getEffectStyles().size() < 3) {
+        throw new IllegalStateException("The theme does not contain the style entries required by this example.");
+    }
+    formatScheme.getLineStyles().get_Item(0).getFillFormat().setFillType(FillType.Solid);
+    formatScheme.getLineStyles().get_Item(0).getFillFormat().getSolidFillColor().setColor(Color.RED);
+    formatScheme.getFillStyles().get_Item(2).setFillType(FillType.Solid);
+    formatScheme.getFillStyles().get_Item(2).getSolidFillColor().setColor(new Color(34, 139, 34));
+    IEffectFormat effectFormat = formatScheme.getEffectStyles().get_Item(2).getEffectFormat();
+    effectFormat.enableOuterShadowEffect();
+    effectFormat.getOuterShadowEffect().setDistance(10f);
+
+    presentation.save("theme-effects.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+For shapes that reference these slots, the first theme line style becomes red, the third theme fill style becomes solid forest green, and the third effect style gains an outer shadow with a distance of 10 points. The exact visual result still depends on which style slots each shape references and whether direct formatting overrides the theme.
+
+![Theme effect styles after changing line, fill, and shadow settings](/java/slides/images/3eda90987ba54744-presentation-design_11.png)
+
+## **Determine Whether an Effective Solid Fill Uses a Theme Color**
+
+A fill can be stored directly on an object or inherited from a paragraph, layout, master, theme style, or another formatting level. Call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifillformat/" target="_blank" rel="nofollow noopener noreferrer">IFillFormat.getEffective</a> to resolve that hierarchy into immutable <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifillformateffectivedata/" target="_blank" rel="nofollow noopener noreferrer">IFillFormatEffectiveData</a>. First check <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifillformateffectivedata/" target="_blank" rel="nofollow noopener noreferrer">IFillFormatEffectiveData.getFillType</a>. Only when it is `FillType.Solid` should you read the solid-fill properties.
+
+For a solid fill, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifillformateffectivedata/" target="_blank" rel="nofollow noopener noreferrer">IFillFormatEffectiveData.getSolidFillColor</a> returns the final rendered RGB value after inheritance, theme lookup, and color transformations are applied. <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifillformateffectivedata/" target="_blank" rel="nofollow noopener noreferrer">IFillFormatEffectiveData.getSolidFillSchemeColor</a> returns the corresponding logical <a href="https://reference.aspose.com/slides/java/com.aspose.slides/schemecolor/" target="_blank" rel="nofollow noopener noreferrer">SchemeColor</a> slot, such as `Text1` or `Accent6`. A value of `SchemeColor.NotDefined` means that the effective solid fill is not based on a scheme color. In a workflow where fills are either theme colors or direct RGB colors, this value identifies a direct RGB fill.
+
+Do not use the local <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icolorformat/" target="_blank" rel="nofollow noopener noreferrer">IColorFormat.getSchemeColor</a> value alone to classify a fill. For example, a text portion can have no locally defined scheme color, so its local value is `NotDefined`, while its effective fill inherits a theme color and resolves to `Text1` or `Accent6`. Conversely, `getSolidFillSchemeColor` tells you which logical theme slot produced the effective color, but it does not tell you whether that slot came from the object, paragraph, layout, master, or another level of the formatting hierarchy.
+
+The following example loads a presentation, audits both shape fills and text-portion fills, prints each final RGB value and associated scheme color, and flags solid fills that will not track theme color changes:
+
+```java
+import com.aspose.slides.*;
+import java.awt.Color;
+import java.util.function.BiConsumer;
+
+BiConsumer<String, IFillFormat> auditFill = (objectName, localFill) -> {
+    IFillFormatEffectiveData effectiveFill = localFill.getEffective();
+
+    if (effectiveFill.getFillType() != FillType.Solid) {
+        System.out.println(objectName + ": fill type = " + effectiveFill.getFillType() + "; not a solid fill.");
+        return;
+    }
+
+    Color rgb = effectiveFill.getSolidFillColor();
+    int effectiveSchemeColor = effectiveFill.getSolidFillSchemeColor();
+    int localSchemeColor = localFill.getSolidFillColor().getSchemeColor();
+
+    System.out.printf("%s: RGB = #%02X%02X%02X%n", objectName, rgb.getRed(), rgb.getGreen(), rgb.getBlue());
+    System.out.println(objectName + ": local scheme = " + localSchemeColor + ", effective scheme = " + effectiveSchemeColor);
+
+    if (effectiveSchemeColor == SchemeColor.NotDefined) {
+        System.out.println(objectName + ": direct RGB or another non-scheme fill; audit as theme-independent.");
+    } else {
+        System.out.println(objectName + ": theme-dependent through " + effectiveSchemeColor + ".");
+    }
+};
+
+Presentation presentation = new Presentation("input.pptx");
+try {
+    int slideCount = presentation.getSlides().size();
+    for (int slideIndex = 0; slideIndex < slideCount; slideIndex++) {
+        ISlide slide = presentation.getSlides().get_Item(slideIndex);
+
+        int shapeCount = slide.getShapes().size();
+        for (int shapeIndex = 0; shapeIndex < shapeCount; shapeIndex++) {
+            IShape shape = slide.getShapes().get_Item(shapeIndex);
+            String shapeName = "Slide " + (slideIndex + 1) + ", shape " + (shapeIndex + 1);
+            auditFill.accept(shapeName, shape.getFillFormat());
+
+            if (shape instanceof IAutoShape) {
+                IAutoShape autoShape = (IAutoShape) shape;
+                int paragraphCount = autoShape.getTextFrame().getParagraphs().getCount();
+                for (int paragraphIndex = 0; paragraphIndex < paragraphCount; paragraphIndex++) {
+                    IParagraph paragraph = autoShape.getTextFrame().getParagraphs().get_Item(paragraphIndex);
+
+                    int portionCount = paragraph.getPortions().getCount();
+                    for (int portionIndex = 0; portionIndex < portionCount; portionIndex++) {
+                        IPortion portion = paragraph.getPortions().get_Item(portionIndex);
+                        String portionName = shapeName + ", paragraph " + (paragraphIndex + 1) + ", portion " + (portionIndex + 1);
+                        auditFill.accept(portionName, portion.getPortionFormat().getFillFormat());
+                    }
+                }
+            }
+        }
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+The `NotDefined` branch provides an audit list of solid fills that will not respond to changes in theme color slots. Review those objects when a presentation must follow a new brand palette. The reported RGB value still shows the current appearance, while the scheme value explains whether that appearance is connected to the theme.
+
+Effective-format objects are snapshots. After changing the presentation theme, a theme override, or any inherited formatting, call `getEffective` again and read a new `IFillFormatEffectiveData` object before comparing or reporting colors.
+
+## **Read Effective Theme Values**
+
+Raw theme objects tell you what is defined at a particular level. Effective values tell you what a slide or shape actually uses after inheritance and local overrides are resolved. For a slide, call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/baseoverridethememanager/" target="_blank" rel="nofollow noopener noreferrer">BaseOverrideThemeManager.createThemeEffective</a>. For a background, use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/background/" target="_blank" rel="nofollow noopener noreferrer">Background.getEffective</a>, and for a fill, use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/fillformat/" target="_blank" rel="nofollow noopener noreferrer">FillFormat.getEffective</a>.
+
+The following example reads the effective theme, background, and first shape fill from a slide:
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("input.pptx");
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    IThemeEffectiveData effectiveTheme = slide.getThemeManager().createThemeEffective();
+    IBackgroundEffectiveData effectiveBackground = slide.getBackground().getEffective();
+
+    System.out.println("Effective major Latin font: " + effectiveTheme.getFontScheme().getMajor().getLatinFont().getFontName());
+    System.out.println("Effective minor Latin font: " + effectiveTheme.getFontScheme().getMinor().getLatinFont().getFontName());
+    System.out.println("Effective background fill type: " + effectiveBackground.getFillFormat().getFillType());
+
+    if (slide.getShapes().size() > 0) {
+        IFillFormatEffectiveData effectiveFill = slide.getShapes().get_Item(0).getFillFormat().getEffective();
+        System.out.println("First shape effective fill type: " + effectiveFill.getFillType());
+        if (effectiveFill.getFillType() == FillType.Solid) {
+            System.out.println("First shape effective fill color: " + effectiveFill.getSolidFillColor());
+        }
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+Use effective data for rendering diagnostics, validation, and comparisons. If you inspect only <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation.getMasterTheme</a>, you can miss a master, layout, slide, or shape override that changes the final appearance.
+
+## **FAQ**
+
+**Does applying an external theme affect every slide in the presentation?**
+
+No. <a href="https://reference.aspose.com/slides/java/com.aspose.slides/imasterslide/" target="_blank" rel="nofollow noopener noreferrer">IMasterSlide.applyExternalThemeToDependingSlides</a> reassigns only the slides that depend on the selected master. Slides that use other masters retain their existing themes.
+
+**Can I apply a theme to a single slide without changing the master?**
+
+Yes. Use the slide's <a href="https://reference.aspose.com/slides/java/com.aspose.slides/slidethememanager/" target="_blank" rel="nofollow noopener noreferrer">SlideThemeManager</a> and initialize its override theme. The change remains local to that slide; other slides continue to inherit their existing themes.
+
+**What is the safest way to carry a theme from one presentation to another?**
+
+When moving a slide and preserving its source appearance, clone the source master into the destination and clone the slide with that master using <a href="https://reference.aspose.com/slides/java/com.aspose.slides/imasterslidecollection/" target="_blank" rel="nofollow noopener noreferrer">IMasterSlideCollection.addClone</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/islidecollection/" target="_blank" rel="nofollow noopener noreferrer">ISlideCollection.addClone</a>. This keeps the master, layouts, and theme together.
+
+**How can I see the effective values after inheritance and overrides?**
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/baseoverridethememanager/" target="_blank" rel="nofollow noopener noreferrer">BaseOverrideThemeManager.createThemeEffective</a> for a slide or layout theme and the corresponding effective-data methods for format objects such as <a href="https://reference.aspose.com/slides/java/com.aspose.slides/background/" target="_blank" rel="nofollow noopener noreferrer">Background.getEffective</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/fillformat/" target="_blank" rel="nofollow noopener noreferrer">FillFormat.getEffective</a>. These APIs return the resolved values after inheritance and overrides are applied.

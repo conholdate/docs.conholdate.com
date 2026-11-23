@@ -1,0 +1,172 @@
+---
+title: "Resize Shapes on Presentation Slides in Java"
+sidebar_label: "Resize Shapes on Presentation Slides in Java"
+sidebar_key: "java-slides-resizing-shapes-on-slide"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/resizing-shapes-on-slide.md"
+source_commit: ""
+source_sha256: "65e372c4f60ee4086fc8871d76a8aed00304aa776abf10f4a4111853f611427f"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/resizing-shapes-on-slide/"
+source_markdown_url: "https://docs.aspose.com/slides/java/resizing-shapes-on-slide.md"
+source_snapshot_sha256: "caa2f668f2465d1135f2dd312e9cfb7d6fabb1a04e80a37450ac5c4b35ab24bc"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+a
+
+> Easily resize shapes on PowerPoint and OpenDocument slides with Aspose.Slides for Java-automate slide layout adjustments and boost productivity.
+> 8
+
+## **Overview**
+
+When you change a presentation's slide size, you may also need to resize and reposition its shapes to fit the new dimensions. This article shows how to scale shapes manually and how to handle tables on slides, masters, and layouts.
+
+## **Resize Shapes**
+
+To preserve each shape's relative position and size, multiply its horizontal coordinates and width by the ratio of the new slide width to the original width. Apply the corresponding height ratio to its vertical coordinates and height.
+
+The first example loads a presentation whose slides contain no tables, changes the slide size to A4, and saves the result. It uses <a href="https://reference.aspose.com/slides/java/com.aspose.slides/slidesize/#setSize-int-int-" target="_blank" rel="nofollow noopener noreferrer">SlideSize.setSize</a> with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/slidesizescaletype/#DoNotScale" target="_blank" rel="nofollow noopener noreferrer">SlideSizeScaleType.DoNotScale</a> so that the subsequent loop controls the scaling. The ratios are unitless; shape positions and dimensions are measured in points. Different width and height ratios can distort shapes, and changing a shape's dimensions does not scale its font sizes.
+
+```java
+import com.aspose.slides.*;
+import java.awt.geom.Dimension2D;
+
+Presentation presentation = new Presentation("sample.pptx");
+try {
+    // Calculate independent horizontal and vertical scale factors.
+    Dimension2D originalSize = presentation.getSlideSize().getSize();
+    presentation.getSlideSize().setSize(SlideSizeType.A4Paper, SlideSizeScaleType.DoNotScale);
+    Dimension2D targetSize = presentation.getSlideSize().getSize();
+    float widthRatio = (float) (targetSize.getWidth() / originalSize.getWidth());
+    float heightRatio = (float) (targetSize.getHeight() / originalSize.getHeight());
+
+    for (ISlide slide : presentation.getSlides()) {
+        for (IShape shape : slide.getShapes()) {
+            shape.setWidth(shape.getWidth() * widthRatio);
+            shape.setHeight(shape.getHeight() * heightRatio);
+            shape.setX(shape.getX() * widthRatio);
+            shape.setY(shape.getY() * heightRatio);
+        }
+    }
+
+    presentation.save("output.pptx", SaveFormat.Pptx);
+}
+finally {
+    presentation.dispose();
+}
+```
+
+Tables require separate handling: scale their column widths and row heights instead of assigning the table's overall width and height. Row heights may remain larger than requested if the cell content requires more space.
+
+The second example supports tables and processes shapes on masters and layouts as well as individual slides before saving the resized presentation. Its helper handles each <a href="https://reference.aspose.com/slides/java/com.aspose.slides/itable/" target="_blank" rel="nofollow noopener noreferrer">ITable</a> by scaling column widths with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icolumn/#setWidth-double-" target="_blank" rel="nofollow noopener noreferrer">IColumn.setWidth</a> and minimum row heights with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/irow/#setMinimalHeight-double-" target="_blank" rel="nofollow noopener noreferrer">IRow.setMinimalHeight</a>. It then scales the table's position without separately scaling its overall dimensions.
+
+```java
+import com.aspose.slides.*;
+import java.awt.geom.Dimension2D;
+
+class ShapeResizer {
+    void resizeShapes(IShapeCollection shapes, float widthRatio, float heightRatio) {
+        for (IShape shape : shapes) {
+            if (shape instanceof ITable) {
+                ITable table = (ITable) shape;
+                // Table dimensions are controlled by column widths and row heights.
+                for (IColumn column : table.getColumns()) {
+                    column.setWidth(column.getWidth() * widthRatio);
+                }
+
+                for (IRow row : table.getRows()) {
+                    row.setMinimalHeight(row.getMinimalHeight() * heightRatio);
+                }
+            }
+            else {
+                shape.setWidth(shape.getWidth() * widthRatio);
+                shape.setHeight(shape.getHeight() * heightRatio);
+            }
+
+            shape.setX(shape.getX() * widthRatio);
+            shape.setY(shape.getY() * heightRatio);
+        }
+    }
+}
+
+Presentation presentation = new Presentation("sample.pptx");
+try {
+    // Calculate independent horizontal and vertical scale factors.
+    Dimension2D originalSize = presentation.getSlideSize().getSize();
+    presentation.getSlideSize().setSize(SlideSizeType.A4Paper, SlideSizeScaleType.DoNotScale);
+    Dimension2D targetSize = presentation.getSlideSize().getSize();
+    float widthRatio = (float) (targetSize.getWidth() / originalSize.getWidth());
+    float heightRatio = (float) (targetSize.getHeight() / originalSize.getHeight());
+
+    ShapeResizer resizer = new ShapeResizer();
+
+    // Resize shapes defined on masters and layouts as well as individual slides.
+    for (IMasterSlide master : presentation.getMasters()) {
+        resizer.resizeShapes(master.getShapes(), widthRatio, heightRatio);
+
+        for (ILayoutSlide layoutSlide : master.getLayoutSlides()) {
+            resizer.resizeShapes(layoutSlide.getShapes(), widthRatio, heightRatio);
+        }
+    }
+
+    for (ISlide slide : presentation.getSlides()) {
+        resizer.resizeShapes(slide.getShapes(), widthRatio, heightRatio);
+    }
+
+    presentation.save("output.pptx", SaveFormat.Pptx);
+}
+finally {
+    presentation.dispose();
+}
+```
+
+<!-- visual-explanation:resizing-shapes-on-slide:start -->
+
+[![A4 resizing scales X and width by 1.083, and Y and height by 1.333. The original circle becomes taller than it is wide.](/java/slides/images/7f076c67ada479d7-visual-resizing-shapes-on-slide-7f076c67ada4.svg)](https://docs.aspose.com/slides/java/resizing-shapes-on-slide/visual-resizing-shapes-on-slide-7f076c67ada4.svg)
+
+*Horizontal and vertical ratios scale their respective positions and dimensions. Here the unequal ratios turn a circle into an ellipse.*
+
+<!-- visual-explanation:resizing-shapes-on-slide:end -->
+
+## **FAQ**
+
+**Why are shapes distorted or cut off after resizing a slide?**
+
+If you change the slide size without scaling the shapes, they keep their original positions and dimensions and may extend beyond the slide. Scaling width and height by different ratios can also distort shapes.
+
+**Does the provided code work for all shape types?**
+
+The first example changes shape bounds directly and is intended for slides without tables. The second example handles tables separately. Check the resulting layout, particularly text and tables, because these examples do not scale font sizes and table content can constrain row heights.
+
+**How do I resize tables when resizing a slide?**
+
+Scale column widths by the width ratio and minimum row heights by the height ratio, then scale the table's position, as shown in the second example.
+
+**Will this resizing work for master slides and layout slides?**
+
+Yes. The second example iterates through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/#getMasters--" target="_blank" rel="nofollow noopener noreferrer">Presentation.getMasters</a> and each master's <a href="https://reference.aspose.com/slides/java/com.aspose.slides/imasterslide/#getLayoutSlides--" target="_blank" rel="nofollow noopener noreferrer">IMasterSlide.getLayoutSlides</a> and applies the same resizing logic to their shapes.
+
+**Can I change the orientation of a slide (portrait/landscape) along with the resizing?**
+
+Yes. Call <a href="https://reference.aspose.com/slides/java/com.aspose.slides/slidesize/#setOrientation-int-" target="_blank" rel="nofollow noopener noreferrer">SlideSize.setOrientation</a> after changing the slide size and before reading the target dimensions, so the scale factors reflect the final orientation.
+
+**Is there a limit to the slide size I can set?**
+
+You can specify custom slide dimensions with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/slidesize/#setSize-float-float-int-" target="_blank" rel="nofollow noopener noreferrer">SlideSize.setSize</a>. The supported dimensions also depend on the presentation format and the application used to open the file.
+
+**How can I prevent shapes with a fixed aspect ratio from becoming distorted?**
+
+Use the same scale factor for width and height. To fit the original layout within the new slide dimensions, use the smaller of the width and height ratios for both dimensions and positions. This preserves proportions but may leave unused space along one edge.

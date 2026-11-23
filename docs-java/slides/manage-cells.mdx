@@ -1,0 +1,384 @@
+---
+title: "Manage Table Cells in Presentations Using Java"
+sidebar_label: "Manage Table Cells in Presentations Using Java"
+sidebar_key: "java-slides-manage-cells"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/manage-cells.md"
+source_commit: ""
+source_sha256: "b63ccbc2c2c6f45185aa898e6081d2b38b6087f08e727bbbcc497a8cf67bab20"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/manage-cells/"
+source_markdown_url: "https://docs.aspose.com/slides/java/manage-cells.md"
+source_snapshot_sha256: "173838ebe2d23674b79eae5afcea79b2d25f7a44d341e57ab44d09d813ac5839"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+a
+
+> Manage PowerPoint table cells in Java: identify merged cells, remove borders, split cells, and set background colors and images with Aspose.Slides for Java.
+> 7
+
+## **Overview**
+
+Aspose.Slides allows you to access and modify table cells in PowerPoint presentations. This article explains how to identify merged table cells, remove cell borders, work with cell numbering after merging or splitting cells, change a cell's background color, and add an image inside a table cell. The examples show how to create or open a presentation, get a table from a slide, update cell formatting through cell properties, and save the modified presentation as a PPTX file.
+
+Aspose.Slides uses zero-based indices to access table cells in the order `(column, row)`.
+
+## **Identify a Merged Table Cell**
+
+The example opens an existing presentation and accesses the first shape on the first slide as a table. It assumes that the slide and shape exist and that the shape is a table. It then iterates through all rows and columns and uses <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#isMergedCell--" target="_blank" rel="nofollow noopener noreferrer">isMergedCell</a> to identify cells in merged regions. For each match, it prints the cell coordinates in `row;column` order, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#getRowSpan--" target="_blank" rel="nofollow noopener noreferrer">getRowSpan</a>, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#getColSpan--" target="_blank" rel="nofollow noopener noreferrer">getColSpan</a>, and the region's starting coordinates, <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#getFirstRowIndex--" target="_blank" rel="nofollow noopener noreferrer">getFirstRowIndex</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#getFirstColumnIndex--" target="_blank" rel="nofollow noopener noreferrer">getFirstColumnIndex</a>.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("presentation_with_table.pptx");
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+    ITable table = (ITable) slide.getShapes().get_Item(0);
+
+    int rowCount = table.getRows().size();
+    for (int rowIndex = 0; rowIndex < rowCount; rowIndex++)
+    {
+        int columnCount = table.getColumns().size();
+        for (int columnIndex = 0; columnIndex < columnCount; columnIndex++)
+        {
+            ICell cell = table.get_Item(columnIndex, rowIndex);
+            if (cell.isMergedCell())
+            {
+                System.out.printf("Cell %d;%d belongs to a merged region with RowSpan=%d and ColSpan=%d starting at %d;%d.%n", rowIndex, columnIndex, cell.getRowSpan(), cell.getColSpan(), cell.getFirstRowIndex(), cell.getFirstColumnIndex());
+            }
+        }
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Remove Table Cell Borders**
+
+Create a <a href="https://reference.aspose.com/slides/java/com.aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> and add a table to its first slide with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ishapecollection/#addTable-float-float-double---double---" target="_blank" rel="nofollow noopener noreferrer">addTable</a>. Column widths, row heights, and the table position are specified in points. The example sets all four cell borders to <a href="https://reference.aspose.com/slides/java/com.aspose.slides/filltype/" target="_blank" rel="nofollow noopener noreferrer">FillType.NoFill</a>, making them invisible.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    double[] columnWidths = { 50, 50, 50, 50 };
+    double[] rowHeights = { 50, 30, 30, 30, 30 };
+    ITable table = slide.getShapes().addTable(100, 50, columnWidths, rowHeights);
+
+    for (IRow row : table.getRows())
+        for (ICell cell : row)
+        {
+            cell.getCellFormat().getBorderTop().getFillFormat().setFillType(FillType.NoFill);
+            cell.getCellFormat().getBorderBottom().getFillFormat().setFillType(FillType.NoFill);
+            cell.getCellFormat().getBorderLeft().getFillFormat().setFillType(FillType.NoFill);
+            cell.getCellFormat().getBorderRight().getFillFormat().setFillType(FillType.NoFill);
+        }
+
+    presentation.save("table.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Add Diagonal Cell Borders**
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icellformat/#getBorderDiagonalDown--" target="_blank" rel="nofollow noopener noreferrer">getBorderDiagonalDown</a> to draw a line from the top-left corner to the bottom-right, and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icellformat/#getBorderDiagonalUp--" target="_blank" rel="nofollow noopener noreferrer">getBorderDiagonalUp</a> to draw a line from the bottom-left corner to the top-right. A diagonal can mark a corner header; both diagonals can form an X to mark a cell as not applicable.
+
+Each diagonal is an <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ilineformat/" target="_blank" rel="nofollow noopener noreferrer">ILineFormat</a>. In its <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ilineformat/#getFillFormat--" target="_blank" rel="nofollow noopener noreferrer">getFillFormat</a>, use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifillformat/#setFillType-byte-" target="_blank" rel="nofollow noopener noreferrer">setFillType</a> to select <a href="https://reference.aspose.com/slides/java/com.aspose.slides/filltype/" target="_blank" rel="nofollow noopener noreferrer">FillType.Solid</a> and choose a color through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifillformat/#getSolidFillColor--" target="_blank" rel="nofollow noopener noreferrer">getSolidFillColor</a>. Set the line's width in points with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ilineformat/#setWidth-double-" target="_blank" rel="nofollow noopener noreferrer">setWidth</a>.
+
+The example creates three cells in one row: a red downward diagonal, a blue upward diagonal, and both diagonals. It leaves the top, bottom, left, and right cell borders unchanged.
+
+```java
+import com.aspose.slides.*;
+import java.awt.Color;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    double[] columnWidths = { 210, 210, 210 };
+    double[] rowHeights = { 160 };
+    ITable table = slide.getShapes().addTable(45, 130, columnWidths, rowHeights);
+
+    ILineFormat downwardBorder = table.get_Item(0, 0).getCellFormat().getBorderDiagonalDown();
+    downwardBorder.getFillFormat().setFillType(FillType.Solid);
+    downwardBorder.getFillFormat().getSolidFillColor().setColor(Color.RED);
+    downwardBorder.setWidth(3);
+
+    ILineFormat upwardBorder = table.get_Item(1, 0).getCellFormat().getBorderDiagonalUp();
+    upwardBorder.getFillFormat().setFillType(FillType.Solid);
+    upwardBorder.getFillFormat().getSolidFillColor().setColor(Color.BLUE);
+    upwardBorder.setWidth(5);
+
+    ILineFormat crossDownwardBorder = table.get_Item(2, 0).getCellFormat().getBorderDiagonalDown();
+    crossDownwardBorder.getFillFormat().setFillType(FillType.Solid);
+    crossDownwardBorder.getFillFormat().getSolidFillColor().setColor(Color.RED);
+    crossDownwardBorder.setWidth(3);
+
+    ILineFormat crossUpwardBorder = table.get_Item(2, 0).getCellFormat().getBorderDiagonalUp();
+    crossUpwardBorder.getFillFormat().setFillType(FillType.Solid);
+    crossUpwardBorder.getFillFormat().getSolidFillColor().setColor(Color.BLUE);
+    crossUpwardBorder.setWidth(5);
+
+    presentation.save("diagonal_cell_borders.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+A diagonal is a formatting property, not a cell split. Each cell retains a single text frame, accessed through <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#getTextFrame--" target="_blank" rel="nofollow noopener noreferrer">getTextFrame</a>; the regions on either side of a diagonal cannot be edited independently.
+
+The saved table, rendered in Microsoft PowerPoint:
+
+![Three table cells showing a red diagonal from top-left to bottom-right, a blue diagonal from bottom-left to top-right, and both diagonals forming an X.](/java/slides/images/b322ccdac471c5dd-diagonal-cell-borders.png)
+
+*Left to right: downward diagonal (red, 3 pt), upward diagonal (blue, 5 pt), and both diagonals.*
+
+## **Merge Table Cells**
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/itable/#mergeCells-com.aspose.slides.ICell-com.aspose.slides.ICell-boolean-" target="_blank" rel="nofollow noopener noreferrer">mergeCells</a> to combine a rectangular range of table cells into one cell. Specify the cells at the top-left and bottom-right corners of the range. The final argument controls whether the merge may include cells outside the specified range; `false` keeps the merge within that range.
+
+The example creates a 4-by-4 table with 70-point columns and rows, then merges the four central cells from `(1, 1)` through `(2, 2)`. The resulting cell spans two columns and two rows, while the table's underlying grid retains four columns and four rows. To access the merged cell's content or formatting, use its top-left position: `table.get_Item(1, 1)` in this example. The other positions in the merged range remain part of the table grid, so the indices of cells outside the range do not change.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    double[] columnWidths = { 70, 70, 70, 70 };
+    double[] rowHeights = { 70, 70, 70, 70 };
+    ITable table = slide.getShapes().addTable(100, 50, columnWidths, rowHeights);
+
+    table.mergeCells(table.get_Item(1, 1), table.get_Item(2, 2), false);
+
+    presentation.save("merged_cells.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Split Table Cells**
+
+Merging cells in the previous example preserves the table's grid. Splitting a cell can introduce a new grid column and change the column indices of cells to its right. Aspose.Slides follows PowerPoint's table grid model.
+
+This example creates a 4-by-4 table with 70-point columns and rows and calls <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#splitByWidth-double-" target="_blank" rel="nofollow noopener noreferrer">splitByWidth</a> on cell `(1, 1)`. Half of the cell's 70-point width is passed to create two equal-width cells.
+
+After this split, the two halves are accessed as `table.get_Item(1, 1)` and `table.get_Item(2, 1)`. The table grid now has five columns: cells originally in columns 2 and 3 move to columns 3 and 4, respectively. Row indices remain unchanged. Use these updated column indices when accessing cells after the split.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    double[] columnWidths = { 70, 70, 70, 70 };
+    double[] rowHeights = { 70, 70, 70, 70 };
+    ITable table = slide.getShapes().addTable(100, 50, columnWidths, rowHeights);
+
+    table.get_Item(1, 1).splitByWidth(table.get_Item(1, 1).getWidth() / 2);
+
+    presentation.save("split_cells.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+<!-- visual-explanation:manage-cells:start -->
+
+[![An unmerged 70-point cell splits into two 35-point cells, adding a fifth grid column and shifting the indices to its right.](/java/slides/images/04c40789d81cbdbb-visual-manage-cells-04c40789d81c.svg)](https://docs.aspose.com/slides/java/manage-cells/visual-manage-cells-04c40789d81c.svg)
+
+*The width split affects cell (1, 1), using zero-based (column, row) indices. Other rows keep a cell spanning both new column positions.*
+
+<!-- visual-explanation:manage-cells:end -->
+
+### **Split Merged Cells by Row or Column Span**
+
+To prepare merged template cells for data population, use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#splitByRowSpan-int-" target="_blank" rel="nofollow noopener noreferrer">splitByRowSpan</a> to split along an existing row boundary, or <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#splitByColSpan-int-" target="_blank" rel="nofollow noopener noreferrer">splitByColSpan</a> to split along a column boundary.
+
+The `index` argument counts rows in the upper part or columns in the left part of the split; it is relative to the merged region:
+
+- Row split: `0 < index <` <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#getRowSpan--" target="_blank" rel="nofollow noopener noreferrer">getRowSpan</a>.
+- Column split: `0 < index <` <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#getColSpan--" target="_blank" rel="nofollow noopener noreferrer">getColSpan</a>.
+
+The example expects a presentation to have a table as the first shape on the first slide, with `(1, 2)` and `(1, 3)` merged vertically. Starting from the lower position, it uses <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#getFirstColumnIndex--" target="_blank" rel="nofollow noopener noreferrer">getFirstColumnIndex</a> and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#getFirstRowIndex--" target="_blank" rel="nofollow noopener noreferrer">getFirstRowIndex</a> to locate the origin and checks both spans. `splitByRowSpan(1)` then separates rows 2 and 3 for product names. For a horizontal two-column merge, use `splitByColSpan(1)` instead.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("table_template.pptx");
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+    ITable table = (ITable) slide.getShapes().get_Item(0);
+
+    ICell selectedCell = table.get_Item(1, 3);
+    int firstColumnIndex = selectedCell.getFirstColumnIndex();
+    int firstRowIndex = selectedCell.getFirstRowIndex();
+    ICell mergedCell = table.get_Item(firstColumnIndex, firstRowIndex);
+
+    if (mergedCell.isMergedCell() && mergedCell.getRowSpan() == 2 && mergedCell.getColSpan() == 1)
+    {
+        mergedCell.splitByRowSpan(1);
+
+        // Retrieve the resulting cells from the table after splitting.
+        ICell upperCell = table.get_Item(firstColumnIndex, firstRowIndex);
+        ICell lowerCell = table.get_Item(firstColumnIndex, firstRowIndex + 1);
+        System.out.println("Upper cell merged: " + upperCell.isMergedCell());
+        System.out.println("Lower cell merged: " + lowerCell.isMergedCell());
+
+        upperCell.getTextFrame().setText("Product A");
+        lowerCell.getTextFrame().setText("Product B");
+
+        presentation.save("split_template.pptx", SaveFormat.Pptx);
+    }
+    else
+    {
+        System.out.println("Select a merged region spanning exactly two rows and one column.");
+    }
+} finally {
+    presentation.dispose();
+}
+```
+
+The table grid and surrounding cell indices stay unchanged. Retrieve the resulting cells by their coordinates; here, both have spans of 1 and <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#isMergedCell--" target="_blank" rel="nofollow noopener noreferrer">isMergedCell</a> prints `false`. Larger regions can remain partly merged after one split.
+
+The original text and its formatting remain in the upper (or left) cell; the new cell is empty but inherits cell formatting such as fill, borders, and margins. Populate the cells after splitting and set any required text formatting explicitly.
+
+The saved presentation contains separate "Product A" and "Product B" cells with the template's cell formatting retained. See the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/cell/" target="_blank" rel="nofollow noopener noreferrer">Cell API Reference</a> for details.
+
+### **Split a Cell at a Specific Height**
+
+<a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#splitByHeight-double-" target="_blank" rel="nofollow noopener noreferrer">splitByHeight</a> takes the height of the upper part in points. <a href="https://reference.aspose.com/slides/java/com.aspose.slides/icell/#splitByRowSpan-int-" target="_blank" rel="nofollow noopener noreferrer">splitByRowSpan</a> takes the number of existing grid rows in the upper part. To center a 40-point cell in the right column, subtract 40 from the cell's actual height and divide the remaining space equally above and below it.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    double[] columnWidths = { 160, 160 };
+    double[] rowHeights = { 140 };
+    
+    ITable table = slide.getShapes().addTable(50, 50, columnWidths, rowHeights);
+    table.get_Item(0, 0).getTextFrame().setText("Left");
+
+    double height = table.get_Item(1, 0).getHeight();
+    double margin = (height - 40) / 2;
+
+    table.get_Item(1, 0).splitByHeight(margin);
+    table.get_Item(1, 1).splitByHeight(40);
+    table.get_Item(1, 1).getTextFrame().setText("Middle");
+
+    presentation.save("split_by_height.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+The first split adds a grid row and leaves the lower 90 points in cell `(1, 1)`. The second split divides that cell into a 40-point middle cell and a 50-point bottom cell. The right column now has three cells with heights of 50, 40, and 50 points from top to bottom. The left cell spans all three rows and retains its original height of 140 points.
+
+![The left cell spans the full table height beside three cells with Middle in the center.](/java/slides/images/88e8a709ad74addc-split-by-height.png)
+
+## **Change the Table Cell Background Color**
+
+This example creates a table with 150-point columns and 50-point rows. It uses <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifillformat/#setFillType-byte-" target="_blank" rel="nofollow noopener noreferrer">setFillType</a> to select a solid fill and sets the color returned by <a href="https://reference.aspose.com/slides/java/com.aspose.slides/ifillformat/#getSolidFillColor--" target="_blank" rel="nofollow noopener noreferrer">getSolidFillColor</a> to red for cell `(2, 3)`, in the third column and fourth row.
+
+```java
+import com.aspose.slides.*;
+import java.awt.Color;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+
+    double[] columnWidths = { 150, 150, 150, 150 };
+    double[] rowHeights = { 50, 50, 50, 50, 50 };
+    ITable table = slide.getShapes().addTable(50, 50, columnWidths, rowHeights);
+
+    ICell cell = table.get_Item(2, 3);
+    cell.getCellFormat().getFillFormat().setFillType(FillType.Solid);
+    cell.getCellFormat().getFillFormat().getSolidFillColor().setColor(Color.RED);
+
+    presentation.save("cell_background_color.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Add an Image Inside a Table Cell**
+
+Place the input image in the working directory before running this example. It loads the image with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/images/#fromFile-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">Images.fromFile</a> and adds it to the presentation's image collection with <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iimagecollection/#addImage-com.aspose.slides.IImage-" target="_blank" rel="nofollow noopener noreferrer">addImage</a>. It then assigns the image to the picture fill of cell `(0, 0)`, the first cell in the table.
+
+<a href="https://reference.aspose.com/slides/java/com.aspose.slides/picturefillmode/" target="_blank" rel="nofollow noopener noreferrer">PictureFillMode.Stretch</a> stretches the image to fill the cell, which may change its aspect ratio. Column widths and row heights are in points. The loaded image is disposed in a `finally` block after it is added to the presentation.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation();
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+    
+    double[] columnWidths = { 150, 150, 150, 150 };
+    double[] rowHeights = { 100, 100, 100, 100, 90 };
+    ITable table = slide.getShapes().addTable(50, 50, columnWidths, rowHeights);
+
+    IPPImage ppImage;
+    IImage image = Images.fromFile("aspose_logo.jpg");
+    try {
+        ppImage = presentation.getImages().addImage(image);
+    } finally {
+        image.dispose();
+    }
+
+    table.get_Item(0, 0).getCellFormat().getFillFormat().setFillType(FillType.Picture);
+    table.get_Item(0, 0).getCellFormat().getFillFormat().getPictureFillFormat().setPictureFillMode(PictureFillMode.Stretch);
+    table.get_Item(0, 0).getCellFormat().getFillFormat().getPictureFillFormat().getPicture().setImage(ppImage);
+
+    presentation.save("table_cell_with_image.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+## **FAQ**
+
+**Can I set different line thicknesses and styles for different sides of a single cell?**
+
+Yes. The <a href="https://reference.aspose.com/slides/java/com.aspose.slides/cellformat/#getBorderTop--" target="_blank" rel="nofollow noopener noreferrer">top</a>/<a href="https://reference.aspose.com/slides/java/com.aspose.slides/cellformat/#getBorderBottom--" target="_blank" rel="nofollow noopener noreferrer">bottom</a>/<a href="https://reference.aspose.com/slides/java/com.aspose.slides/cellformat/#getBorderLeft--" target="_blank" rel="nofollow noopener noreferrer">left</a>/<a href="https://reference.aspose.com/slides/java/com.aspose.slides/cellformat/#getBorderRight--" target="_blank" rel="nofollow noopener noreferrer">right</a> borders have separate properties, so the thickness and style of each side can differ.
+
+**What happens to the image if I change the column/row size after setting a picture as the cell's background?**
+
+The behavior depends on the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/picturefillmode/" target="_blank" rel="nofollow noopener noreferrer">fill mode</a> (stretch/tile). With stretching, the image adjusts to the new cell; with tiling, the tiles are recalculated.
+
+**Can I assign a hyperlink to all the content of a cell?**
+
+[Hyperlinks](/java/slides/manage-hyperlinks/) are set at the text (portion) level inside the cell's text frame or at the level of the entire table/shape. In practice, you assign the link to a portion or to all the text in the cell.
+
+**Can I set different fonts within a single cell?**
+
+Yes. A cell's text frame supports <a href="https://reference.aspose.com/slides/java/com.aspose.slides/portion/" target="_blank" rel="nofollow noopener noreferrer">portions</a> (runs) with independent formatting-font family, style, size, and color.
+
+## Related articles
+
+- [Create and Customize PowerPoint Tables in Java](/java/slides/powerpoint-table/)
+- [Manage Presentation Tables in Java](/java/slides/manage-table/)
+- <a href="https://docs.aspose.com/slides/java/examples/elements/table/" target="_blank" rel="nofollow noopener noreferrer">Table</a>

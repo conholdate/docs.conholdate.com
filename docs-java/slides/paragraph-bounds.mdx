@@ -1,0 +1,129 @@
+---
+title: "Get Paragraph Bounds from Presentations in Java"
+sidebar_label: "Get Paragraph Bounds from Presentations in Java"
+sidebar_key: "java-slides-paragraph-bounds"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/paragraph-bounds.md"
+source_commit: ""
+source_sha256: "e7396d7b9c8894aeffefc5c680fd42452ba6613cbf73593d56194fdd8877e335"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/paragraph-bounds/"
+source_markdown_url: "https://docs.aspose.com/slides/java/paragraph-bounds.md"
+source_snapshot_sha256: "ad0e137974ee9b5de745f59eac8dec67fd9ee90fc1e926d5e627d6d712d2fdf4"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+a
+
+> Learn how to retrieve paragraph bounds in Aspose.Slides for Java to optimize text positioning in PowerPoint presentations.
+> 8
+
+## **Overview**
+
+This article explains how to get the bounds, size, and coordinates of paragraphs in Aspose.Slides. It shows how to retrieve a paragraph rectangle from an <a href="https://reference.aspose.com/slides/java/com.aspose.slides/itextframe/" target="_blank" rel="nofollow noopener noreferrer">ITextFrame</a> by using <a href="https://reference.aspose.com/slides/java/com.aspose.slides/IParagraph#getRect--" target="_blank" rel="nofollow noopener noreferrer">IParagraph.getRect</a>, how to get paragraph coordinates inside a table cell text frame, and highlights important details such as measurement units, the effect of text wrapping on bounds, pixel conversion, and effective paragraph formatting values.
+
+## **Get Rectangular Coordinates of a Paragraph**
+
+Use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/IParagraph#getRect--" target="_blank" rel="nofollow noopener noreferrer">IParagraph.getRect</a> to get the bounding rectangle of a paragraph.
+
+```java
+import com.aspose.slides.*;
+
+Presentation presentation = new Presentation("Shapes.pptx");
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+    IAutoShape shape = (IAutoShape) slide.getShapes().get_Item(0);
+    IParagraph paragraph = shape.getTextFrame().getParagraphs().get_Item(0);
+    java.awt.geom.Rectangle2D.Float rectangle = paragraph.getRect();
+} finally {
+    presentation.dispose();
+}
+```
+
+## **Get the Size of a Paragraph Inside a Table Cell TextFrame**
+
+To get the size and coordinates of an <a href="https://reference.aspose.com/slides/java/com.aspose.slides/iparagraph/" target="_blank" rel="nofollow noopener noreferrer">IParagraph</a> in a table cell text frame, use <a href="https://reference.aspose.com/slides/java/com.aspose.slides/IParagraph#getRect--" target="_blank" rel="nofollow noopener noreferrer">IParagraph.getRect</a>. The returned rectangle is relative to the table cell text frame, so add the table position and cell offset when you need slide-level coordinates.
+
+The following example gets paragraph bounds inside a table cell and draws rectangles on the slide to visualize those bounds:
+
+```java
+import com.aspose.slides.*;
+import java.awt.Color;
+
+Presentation presentation = new Presentation("source.pptx");
+try {
+    ISlide slide = presentation.getSlides().get_Item(0);
+    ITable table = (ITable) slide.getShapes().get_Item(0);
+    ICell cell = table.getRows().get_Item(1).get_Item(1);
+
+    double cellX = table.getX() + cell.getOffsetX();
+    double cellY = table.getY() + cell.getOffsetY();
+
+    for (IParagraph paragraph : cell.getTextFrame().getParagraphs())
+    {
+        if (paragraph.getText().isEmpty())
+            continue;
+
+        java.awt.geom.Rectangle2D.Float paragraphRectangle = paragraph.getRect();
+        float paragraphRectangleX = paragraphRectangle.x + (float) cellX;
+        float paragraphRectangleY = paragraphRectangle.y + (float) cellY;
+
+        IAutoShape paragraphBoundsShape = slide.getShapes().addAutoShape(
+                ShapeType.Rectangle,
+                paragraphRectangleX,
+                paragraphRectangleY,
+                paragraphRectangle.width,
+                paragraphRectangle.height);
+
+        paragraphBoundsShape.getFillFormat().setFillType(FillType.NoFill);
+        paragraphBoundsShape.getLineFormat().getFillFormat().getSolidFillColor().setColor(Color.YELLOW);
+        paragraphBoundsShape.getLineFormat().getFillFormat().setFillType(FillType.Solid);
+    }
+
+    presentation.save("output.pptx", SaveFormat.Pptx);
+} finally {
+    presentation.dispose();
+}
+```
+
+<!-- visual-explanation:paragraph-bounds:start -->
+
+[![The slide origin leads to the table and cell origins. A wrapped paragraph rectangle is 241.5 points wide and 57.6 points high.](/java/slides/images/eca3cd91c283d57e-visual-paragraph-bounds-eca3cd91c283.svg)](https://docs.aspose.com/slides/java/paragraph-bounds/visual-paragraph-bounds-eca3cd91c283.svg)
+
+*Add the table position and cell offset to the cell-relative paragraph coordinates. The width and height stay the same.*
+
+<!-- visual-explanation:paragraph-bounds:end -->
+
+## **FAQ**
+
+### In what units are paragraph coordinates measured?
+
+They are measured in points, where 1 inch equals 72 points. This applies to all coordinates and dimensions on the slide.
+
+### Does word wrapping affect a paragraph's bounds?
+
+Yes. If <a href="https://reference.aspose.com/slides/java/com.aspose.slides/itextframeformat/#setWrapText-byte-" target="_blank" rel="nofollow noopener noreferrer">ITextFrameFormat.setWrapText</a> is enabled for the <a href="https://reference.aspose.com/slides/java/com.aspose.slides/itextframe/" target="_blank" rel="nofollow noopener noreferrer">ITextFrame</a>, the text breaks to fit the area width, which changes the paragraph's actual bounds.
+
+### Can paragraph coordinates be reliably mapped to pixels in the exported image?
+
+Yes. Convert points to pixels using this formula: pixels = points x (DPI / 72). The result depends on the DPI chosen for rendering or export.
+
+### How do I get the "effective" paragraph formatting parameters, taking style inheritance into account?
+
+Use the [effective paragraph formatting data structure](/java/slides/shape-effective-properties/); it returns the final consolidated values for indents, spacing, wrapping, RTL, and more.
+
+## Related articles
+
+- [Get Text Portion Bounds from Presentations in Java](/java/slides/portion-bounds/)
