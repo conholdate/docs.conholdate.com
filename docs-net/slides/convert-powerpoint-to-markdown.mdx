@@ -1,0 +1,331 @@
+---
+title: "Convert PowerPoint Presentations to Markdown in .NET"
+sidebar_label: "Convert PowerPoint Presentations to Markdown in .NET"
+sidebar_key: "net-slides-convert-powerpoint-to-markdown"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/net"
+source_path: "slides/net/convert-powerpoint-to-markdown.md"
+source_commit: ""
+source_sha256: "2e8c88140a3e55920bc59554edc85acf6e9c0e2011450774248eebe666508435"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/net/convert-powerpoint-to-markdown/"
+source_markdown_url: "https://docs.aspose.com/slides/net/convert-powerpoint-to-markdown.md"
+source_snapshot_sha256: "193f14502432434d434f625daed87201e3b4f3967237d9c718ebba57eb0ebbdc"
+---
+
+:::info
+Aspose.Slides for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+T
+
+> Convert PPT and PPTX presentations to Markdown in .NET and control where exported bitmap, metafile, and SVG images are saved and referenced.
+> 1
+
+## **Overview**
+
+Aspose.Slides for .NET can convert PPT and PPTX presentations to Markdown for documentation, static-site, content-migration, and version-control workflows. You can choose a Markdown flavor, control how slide content is rendered, and decide where exported images are stored and how the generated Markdown references them.
+
+By default, Markdown export uses text-only output. To export visual content, set the <a href="https://reference.aspose.com/slides/net/aspose.slides.export/markdownsaveoptions/exporttype/" target="_blank" rel="nofollow noopener noreferrer">MarkdownSaveOptions.ExportType</a> property to the `Sequential` or `Visual` value from the <a href="https://reference.aspose.com/slides/net/aspose.slides.export/markdownexporttype/" target="_blank" rel="nofollow noopener noreferrer">MarkdownExportType</a> enumeration. `Sequential` renders slide items separately and in order, whereas `Visual` keeps grouped items together to preserve their visual relationship. The `TextOnly` value does not emit image resources, so the image-saving events are not invoked in that mode.
+
+## **Convert a Presentation to Markdown**
+
+Load the source file with the <a href="https://reference.aspose.com/slides/net/aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> class, and then call the <a href="https://reference.aspose.com/slides/net/aspose.slides/presentation/save/" target="_blank" rel="nofollow noopener noreferrer">Presentation.Save</a> method with the `Md` value from the <a href="https://reference.aspose.com/slides/net/aspose.slides.export/saveformat/" target="_blank" rel="nofollow noopener noreferrer">SaveFormat</a> enumeration.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("presentation.pptx");
+presentation.Save("presentation.md", SaveFormat.Md);
+```
+
+## **Select a Markdown Flavor**
+
+The <a href="https://reference.aspose.com/slides/net/aspose.slides.export/markdownsaveoptions/flavor/" target="_blank" rel="nofollow noopener noreferrer">MarkdownSaveOptions.Flavor</a> property controls the Markdown specification used for the output. The <a href="https://reference.aspose.com/slides/net/aspose.slides.export/flavor/" target="_blank" rel="nofollow noopener noreferrer">Flavor</a> enumeration includes CommonMark, GitHub Flavored Markdown, and other supported variants.
+
+The following example exports a presentation as CommonMark:
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("presentation.pptx");
+
+var options = new MarkdownSaveOptions
+{
+    Flavor = Flavor.CommonMark
+};
+
+presentation.Save("presentation.md", SaveFormat.Md, options);
+```
+
+## **Control Repeated Spaces**
+
+When preparing slide text for documentation, text processing, or publication, use <a href="https://reference.aspose.com/slides/net/aspose.slides.export/markdownsaveoptions/handlerepeatedspaces/" target="_blank" rel="nofollow noopener noreferrer">MarkdownSaveOptions.HandleRepeatedSpaces</a> to control consecutive regular spaces.
+
+Single spaces remain regular spaces in all three modes. The following self-contained example creates text with one, two, and three consecutive spaces and exports the same slide using each mode.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+var shape = slide.Shapes.AddAutoShape(ShapeType.Rectangle, 20, 20, 600, 100);
+shape.TextFrame.Text = "One space; two  spaces; three   spaces.";
+
+var modes = new[]
+{
+    HandleRepeatedSpaces.None,
+    HandleRepeatedSpaces.AlternateSpacesToNbsp,
+    HandleRepeatedSpaces.MultipleSpacesToNbsp
+};
+
+foreach (var mode in modes)
+{
+    var options = new MarkdownSaveOptions
+    {
+        Flavor = Flavor.CommonMark,
+        HandleRepeatedSpaces = mode
+    };
+
+    presentation.Save($"spaces-{mode}.md", SaveFormat.Md, options);
+}
+```
+
+The exported text lines are shown below. These excerpts omit the slide separator and the two trailing spaces added by the exporter.
+
+`None`:
+
+```markdown
+One space; two  spaces; three   spaces.
+```
+
+`AlternateSpacesToNbsp`:
+
+```markdown
+One space; two &nbsp;spaces; three &nbsp; spaces.
+```
+
+`MultipleSpacesToNbsp`:
+
+```markdown
+One space; two &nbsp;spaces; three &nbsp;&nbsp;spaces.
+```
+
+In a typical HTML-based Markdown viewer, consecutive regular spaces collapse visually even though they remain in the source. Both replacement modes preserve the visible spacing in this example; their source differs for the three-space sequence.
+
+Choose `None` when downstream tools need ordinary space characters without HTML entities. Choose a replacement mode when visible spacing matters more. A text-processing pipeline consuming that output may need to decode `&nbsp;` and normalize the resulting nonbreaking spaces. Nonbreaking spaces also affect where a viewer can wrap text.
+
+## **Remove Empty Lines**
+
+The <a href="https://reference.aspose.com/slides/net/aspose.slides.export/markdownsaveoptions/removeemptylines/" target="_blank" rel="nofollow noopener noreferrer">MarkdownSaveOptions.RemoveEmptyLines</a> property controls whether empty or whitespace-only lines are removed during export. Its default value is `false`. This controls vertical separation, independently of how repeated spaces within text are represented.
+
+The following example creates two text paragraphs separated by an empty paragraph and a paragraph containing three regular spaces. It exports both settings. The `\r` characters create paragraph boundaries in the text frame; `HandleRepeatedSpaces.None` makes the treatment of ordinary spaces easier to inspect.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+var shape = slide.Shapes.AddAutoShape(ShapeType.Rectangle, 20, 20, 600, 300);
+
+// Include an empty paragraph and a paragraph containing three regular spaces.
+shape.TextFrame.Text = "First paragraph.\r\r   \rSecond paragraph.";
+
+var options = new MarkdownSaveOptions
+{
+    Flavor = Flavor.CommonMark,
+    HandleRepeatedSpaces = HandleRepeatedSpaces.None,
+    RemoveEmptyLines = false
+};
+
+presentation.Save("empty-lines-kept.md", SaveFormat.Md, options);
+
+options.RemoveEmptyLines = true;
+presentation.Save("empty-lines-removed.md", SaveFormat.Md, options);
+```
+
+With `false`, the generated Markdown is:
+
+```markdown
+---  
+
+First paragraph.  
+
+&nbsp;
+  
+     
+Second paragraph.  
+```
+
+With `true`, it becomes:
+
+```markdown
+---  
+
+First paragraph.  
+Second paragraph.  
+```
+
+With `RemoveEmptyLines = false`, the exported Markdown preserves the empty and whitespace-only paragraphs. The `&nbsp;` line represents an empty paragraph.
+
+With `RemoveEmptyLines = true`, these blank paragraphs are removed. The two text paragraphs become a single Markdown paragraph with a line break between them. This line break is preserved by two trailing spaces after `First paragraph.`-Markdown syntax for a hard line break.
+
+The slide separator (`---`) remains in both outputs. Keep `RemoveEmptyLines = false` when you need to preserve paragraph separation. If your presentation contains lists or code blocks, check the exported result in your target Markdown viewer, since blank lines can affect how that content is interpreted.
+
+## **Export Images Using the Default Local-Saving Behavior**
+
+The <a href="https://reference.aspose.com/slides/net/aspose.slides.export/markdownsaveoptions/" target="_blank" rel="nofollow noopener noreferrer">MarkdownSaveOptions</a> class provides two properties for locally saved images:
+
+- <a href="https://reference.aspose.com/slides/net/aspose.slides.export/markdownsaveoptions/basepath/" target="_blank" rel="nofollow noopener noreferrer">BasePath</a> specifies the base directory for the Markdown document and its resources.
+- <a href="https://reference.aspose.com/slides/net/aspose.slides.export/markdownsaveoptions/imagessavefoldername/" target="_blank" rel="nofollow noopener noreferrer">ImagesSaveFolderName</a> specifies the image subdirectory. Its default value is `Images`.
+
+The following example renders visual content, writes images to `output/assets`, and creates relative image references in the Markdown document:
+
+```csharp
+using System.IO;
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+const string outputDirectory = "output";
+Directory.CreateDirectory(outputDirectory);
+
+using var presentation = new Presentation("presentation.pptx");
+
+var options = new MarkdownSaveOptions
+{
+    ExportType = MarkdownExportType.Visual,
+    BasePath = outputDirectory,
+    ImagesSaveFolderName = "assets"
+};
+
+var markdownPath = Path.Combine(outputDirectory, "presentation.md");
+presentation.Save(markdownPath, SaveFormat.Md, options);
+```
+
+This behavior also serves as the fallback when a custom image-saving handler returns `false`.
+
+## **Customize Image Saving and Markdown Links**
+
+Use the <a href="https://reference.aspose.com/slides/net/aspose.slides.export/markdownsaveoptions/imagesaving/" target="_blank" rel="nofollow noopener noreferrer">MarkdownSaveOptions.ImageSaving</a> event for non-SVG bitmap and metafile resources emitted during Markdown export. Its <a href="https://reference.aspose.com/slides/net/aspose.slides.export/markdownsaveoptions.markdownimagesavinghandler/" target="_blank" rel="nofollow noopener noreferrer">MarkdownImageSavingHandler</a> delegate receives the <a href="https://reference.aspose.com/slides/net/aspose.slides/iimage/" target="_blank" rel="nofollow noopener noreferrer">IImage</a> object, its <a href="https://reference.aspose.com/slides/net/aspose.slides/imageformat/" target="_blank" rel="nofollow noopener noreferrer">ImageFormat</a>, and the generated Markdown link as a `ref string` parameter. Save or upload the image with the supplied format, and replace `link` with the reference that must appear in the Markdown output.
+
+Resources emitted in SVG format are handled separately. Subscribe to the <a href="https://reference.aspose.com/slides/net/aspose.slides.export/markdownsaveoptions/svgimagesaving/" target="_blank" rel="nofollow noopener noreferrer">MarkdownSaveOptions.SvgImageSaving</a> event, whose <a href="https://reference.aspose.com/slides/net/aspose.slides.export/markdownsaveoptions.markdownsvgimagesavinghandler/" target="_blank" rel="nofollow noopener noreferrer">MarkdownSvgImageSavingHandler</a> delegate receives an <a href="https://reference.aspose.com/slides/net/aspose.slides/isvgimage/" target="_blank" rel="nofollow noopener noreferrer">ISvgImage</a> object and the `ref string link` parameter. An SVG has no `ImageFormat` argument; write or upload its XML data from the <a href="https://reference.aspose.com/slides/net/aspose.slides/isvgimage/svgdata/" target="_blank" rel="nofollow noopener noreferrer">ISvgImage.SvgData</a> property instead. Depending on the export mode and visual grouping, an SVG in the source presentation can be rasterized or combined with other content; the resulting non-SVG resource is then passed to `ImageSaving`. Subscribe to both events when every exported visual resource requires custom processing.
+
+The handler return value determines who processes the image:
+
+- Return `true` after the handler has saved, uploaded, transformed, or otherwise processed the image and assigned a valid value to `link`. Aspose.Slides writes that value to the Markdown document and does not perform its default local save.
+- Return `false` to let Aspose.Slides save the image locally and generate its link according to <a href="https://reference.aspose.com/slides/net/aspose.slides.export/markdownsaveoptions/basepath/" target="_blank" rel="nofollow noopener noreferrer">MarkdownSaveOptions.BasePath</a> and <a href="https://reference.aspose.com/slides/net/aspose.slides.export/markdownsaveoptions/imagessavefoldername/" target="_blank" rel="nofollow noopener noreferrer">MarkdownSaveOptions.ImagesSaveFolderName</a>.
+
+A handler that returns `true` takes responsibility for the image. If it returns `true` without assigning a valid, nonempty link, the export fails with an `InvalidOperationException`.
+
+### **Save Images to a CDN Origin Directory and Use External URLs**
+
+The following example treats `cdn-origin/presentations/quarterly-report` as a mounted or synchronized CDN origin directory. Each handler extracts the generated file name, saves the image to that custom directory, and replaces the generated local reference with a public CDN URL. The sample itself performs no network upload: the URL becomes valid only after the directory is mounted as the CDN origin or its files are published to the CDN. For object storage, replace the file-system write with the storage SDK's upload operation and assign `link` only after the upload succeeds.
+
+```csharp
+using System;
+using System.IO;
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+const string outputDirectory = "output";
+const string publicBaseUrl = "https://cdn.example.com/presentations/quarterly-report";
+var storageDirectory = Path.Combine("cdn-origin", "presentations", "quarterly-report");
+Directory.CreateDirectory(outputDirectory);
+Directory.CreateDirectory(storageDirectory);
+
+static string GetFileNameFromLink(string generatedLink)
+{
+    var urlCompatibleLink = generatedLink.Replace('\\', '/');
+    return urlCompatibleLink[(urlCompatibleLink.LastIndexOf('/') + 1)..];
+}
+
+static string BuildPublicUrl(string baseUrl, string fileName)
+{
+    return $"{baseUrl}/{Uri.EscapeDataString(fileName)}";
+}
+
+using var presentation = new Presentation("presentation.pptx");
+
+var options = new MarkdownSaveOptions
+{
+    ExportType = MarkdownExportType.Visual,
+    BasePath = outputDirectory,
+    ImagesSaveFolderName = "fallback-images"
+};
+
+options.ImageSaving += (IImage image, ImageFormat format, ref string link) =>
+{
+    if (image.Width < 128 || image.Height < 128)
+    {
+        return false;
+    }
+
+    var fileName = GetFileNameFromLink(link);
+    var storagePath = Path.Combine(storageDirectory, fileName);
+    image.Save(storagePath, format);
+    link = BuildPublicUrl(publicBaseUrl, fileName);
+    return true;
+};
+
+options.SvgImageSaving += (ISvgImage svgImage, ref string link) =>
+{
+    var fileName = GetFileNameFromLink(link);
+    var storagePath = Path.Combine(storageDirectory, fileName);
+    File.WriteAllBytes(storagePath, svgImage.SvgData);
+    link = BuildPublicUrl(publicBaseUrl, fileName);
+    return true;
+};
+
+var markdownPath = Path.Combine(outputDirectory, "presentation.md");
+presentation.Save(markdownPath, SaveFormat.Md, options);
+```
+
+The bitmap handler deliberately returns `false` for images smaller than 128 × 128 pixels, so Aspose.Slides saves those images to `output/fallback-images` using the default behavior. Larger bitmap and metafile resources, as well as SVG resources, are handled by the custom code. For example, a generated local reference such as `fallback-images/image1.png` becomes `https://cdn.example.com/presentations/quarterly-report/image1.png`. The handlers use operating-system paths only when writing files; links written to Markdown use forward slashes and URL-escaped file names. Apply the same rule when building relative links: use `/`, not the platform-specific directory separator.
+
+## **FAQ**
+
+**Can one handler process both raster images and SVG images?**
+
+No. Use <a href="https://reference.aspose.com/slides/net/aspose.slides.export/markdownsaveoptions/imagesaving/" target="_blank" rel="nofollow noopener noreferrer">MarkdownSaveOptions.ImageSaving</a> for emitted bitmap and metafile resources and <a href="https://reference.aspose.com/slides/net/aspose.slides.export/markdownsaveoptions/svgimagesaving/" target="_blank" rel="nofollow noopener noreferrer">MarkdownSaveOptions.SvgImageSaving</a> for resources emitted as SVG. The former provides an <a href="https://reference.aspose.com/slides/net/aspose.slides/iimage/" target="_blank" rel="nofollow noopener noreferrer">IImage</a> object and an <a href="https://reference.aspose.com/slides/net/aspose.slides/imageformat/" target="_blank" rel="nofollow noopener noreferrer">ImageFormat</a>; the latter provides an <a href="https://reference.aspose.com/slides/net/aspose.slides/isvgimage/" target="_blank" rel="nofollow noopener noreferrer">ISvgImage</a> object whose SVG data can be read from <a href="https://reference.aspose.com/slides/net/aspose.slides/isvgimage/svgdata/" target="_blank" rel="nofollow noopener noreferrer">ISvgImage.SvgData</a>. A source SVG that is rasterized during export is processed by `ImageSaving` instead.
+
+**What happens when an image-saving handler returns `false`?**
+
+Aspose.Slides uses its default local-saving behavior. The image location and generated reference are controlled by <a href="https://reference.aspose.com/slides/net/aspose.slides.export/markdownsaveoptions/basepath/" target="_blank" rel="nofollow noopener noreferrer">MarkdownSaveOptions.BasePath</a> and <a href="https://reference.aspose.com/slides/net/aspose.slides.export/markdownsaveoptions/imagessavefoldername/" target="_blank" rel="nofollow noopener noreferrer">MarkdownSaveOptions.ImagesSaveFolderName</a>.
+
+**Can a handler provide a URL without saving the image locally?**
+
+Yes. The handler can upload the image to object storage or pass it to another service, assign the resulting URL to `link`, and return `true`. The handler must complete the processing itself; returning `true` prevents the default local save.
+
+**Why does Markdown export throw an `InvalidOperationException` from a handler?**
+
+This exception occurs when the handler returns `true` but does not provide a valid link. Assign the relative path or external URL that should be written to Markdown before returning `true`.
+
+**Which path separator should image links use?**
+
+Use forward slashes in Markdown links and URLs. Use `Path.Combine` only for file-system paths, then construct or normalize the Markdown reference separately.
+
+**Are hyperlinks preserved during Markdown export?**
+
+Yes. Text [hyperlinks](/net/slides/manage-hyperlinks/) are preserved as standard Markdown links. Slide [transitions](/net/slides/slide-transition/) and [animations](/net/slides/powerpoint-animation/) are not converted.
+
+**Can presentations be converted to Markdown in parallel?**
+
+You can process different presentation files in parallel, but do not share the same <a href="https://reference.aspose.com/slides/net/aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> instance between threads. Follow the [multithreading guidelines](/net/slides/multithreading/) and use a separate instance for each file.
+
+## Related features
+
+- <a href="https://docs.aspose.com/slides/features/markdown-export/" target="_blank" rel="nofollow noopener noreferrer">Export presentations to Markdown</a>

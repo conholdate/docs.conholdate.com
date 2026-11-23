@@ -1,0 +1,265 @@
+---
+title: "Integrate Excel Data into PowerPoint Presentations"
+sidebar_label: "Integrate Excel Data into PowerPoint Presentations"
+sidebar_key: "net-slides-excel-integration"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/net"
+source_path: "slides/net/excel-integration.md"
+source_commit: ""
+source_sha256: "974ff388f0c293952c84d9035ce0600c3d4f4901f82e777b8c9fce360d83524a"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/net/excel-integration/"
+source_markdown_url: "https://docs.aspose.com/slides/net/excel-integration.md"
+source_snapshot_sha256: "4ae50d55cc9a568c552a1949b239899ff2f201d69b4094b1f507918131e095ce"
+---
+
+:::info
+Aspose.Slides for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+s
+
+> Read data from Excel workbooks in Aspose.Slides using the ExcelDataWorkbook API. Load sheets and cells and use values to generate data-driven PowerPoint presentations.
+> 5
+
+## **Introduction**
+
+PowerPoint presentations are a powerful way to display and communicate information. They are often used in conjunction with Excel workbooks, where Excel serves as an excellent source of structured data and PowerPoint excels at visualizing that data for an audience.
+
+There are many practical scenarios where combining Excel and PowerPoint is essential: mail merges, populating data tables, generating one slide per data record (batch slide generation), creating training materials, and consolidating multiple Excel reports into a single presentation, to name a few.
+
+Until now, implementing such features with the Aspose.Slides API required relying on third-party solutions like Aspose.Cells. While these tools are robust, they can be overly complex and costly for users who only need basic data integration functionality.
+
+## **How It Works**
+
+To make working with Excel data easier and more streamlined, Aspose.Slides has introduced new classes for reading data from Excel workbooks and importing content into a presentation. This feature opens up powerful new possibilities for API users who want to leverage Excel as a data source within their presentation workflows.
+
+The new functionality is designed for general-purpose data access and is not integrated into the Presentation Document Object Model (DOM). That means *it does not allow editing or saving Excel files* - its sole purpose is to open workbooks and navigate through their content to retrieve cell data.
+
+At the core of this feature is the new <a href="https://reference.aspose.com/slides/net/aspose.slides.excel/exceldataworkbook/" target="_blank" rel="nofollow noopener noreferrer">ExcelDataWorkbook</a> class. This class allows you to load an Excel workbook from a local file or a stream. Once loaded, it provides several overloads of the <a href="https://reference.aspose.com/slides/net/aspose.slides.excel/exceldataworkbook/getcell/" target="_blank" rel="nofollow noopener noreferrer">GetCell</a> method, which you can use to retrieve specific cells by their position (e.g., row and column indices or named ranges).
+
+Each call to <a href="https://reference.aspose.com/slides/net/aspose.slides.excel/exceldataworkbook/getcell/" target="_blank" rel="nofollow noopener noreferrer">GetCell</a> returns an instance of the <a href="https://reference.aspose.com/slides/net/aspose.slides.excel/exceldatacell/" target="_blank" rel="nofollow noopener noreferrer">ExcelDataCell</a> class. This object represents a single cell in the Excel workbook and gives you access to its value in a simple and intuitive way.
+
+#### **Import an Excel Chart**
+
+The next step to extend functionality is the <a href="https://reference.aspose.com/slides/net/aspose.slides.import/excelworkbookimporter/" target="_blank" rel="nofollow noopener noreferrer">ExcelWorkbookImporter</a> class. This utility class provides functionality for importing content from an Excel workbook into a presentation. It contains several overloads of the <a href="https://reference.aspose.com/slides/net/aspose.slides.import/excelworkbookimporter/addchartfromworkbook/" target="_blank" rel="nofollow noopener noreferrer">AddChartFromWorkbook</a> method, which help you to retrieve the selected chart from the specified Excel workbook and add it to the end of the given shape collection at the specified coordinates.
+
+#### **Import an Excel Table**
+
+The <a href="https://reference.aspose.com/slides/net/aspose.slides.import/excelworkbookimporter/" target="_blank" rel="nofollow noopener noreferrer">ExcelWorkbookImporter</a> class also contains several overloads of the <a href="https://reference.aspose.com/slides/net/aspose.slides.import/excelworkbookimporter/addtablefromworkbook/" target="_blank" rel="nofollow noopener noreferrer">AddTableFromWorkbook</a> method. These methods allow you to import a specified cell range from a specified worksheet and add it as a table to the end of the given shape collection at the specified coordinates.
+
+In short, it's a lightweight and straightforward API for reading Excel data - exactly what many developers need without the overhead of a full spreadsheet processing library.
+
+## **Let's Code**
+
+### **Mail Merge Scenario Example**
+
+In the following example, we'll implement a simple Mail Merge scenario by generating multiple presentations based on data stored in an Excel workbook.
+
+To get started, we need two things:
+
+1. An Excel workbook containing the data
+
+![Excel data example](/net/slides/images/c261a241e3800148-example1_image0.png)
+
+2. PowerPoint presentation template
+
+![PowerPoint template example](/net/slides/images/1f03e4f4dfc1cdd7-example1_image1.png)
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Excel;
+using Aspose.Slides.Export;
+
+// Load the Excel workbook with employee data.
+ExcelDataWorkbook workbook = new ExcelDataWorkbook("TemplateData.xlsx");
+int worksheetIndex = 0;
+
+// Load the presentation template.
+using Presentation templatePresentation = new Presentation("PresentationTemplate.pptx");
+
+// Loop through Excel rows (excluding header at row 0).
+for (int rowIndex = 1; rowIndex <= 4; rowIndex++)
+{
+    // Create a new presentation for each employee record.
+    using Presentation employeePresentation = new Presentation();
+
+    // Remove the default blank slide.
+    employeePresentation.Slides.RemoveAt(0);
+
+    // Clone the template slide into the new presentation.
+    ISlide slide = employeePresentation.Slides.AddClone(templatePresentation.Slides[0]);
+
+    // Get paragraphs from the target shape (assumes shape index 1 is used).
+    IParagraphCollection paragraphs = (slide.Shapes[1] as IAutoShape).TextFrame.Paragraphs;
+
+    // Replace the placeholders with data from Excel.
+    string employeeName = workbook.GetCell(worksheetIndex, rowIndex, 0).Value.ToString();
+    IPortion namePortion = paragraphs[0].Portions[0];
+    namePortion.Text = namePortion.Text.Replace("{{EmployeeName}}", employeeName);
+
+    string department = workbook.GetCell(worksheetIndex, rowIndex, 1).Value.ToString();
+    IPortion departmentPortion = paragraphs[1].Portions[0];
+    departmentPortion.Text = departmentPortion.Text.Replace("{{Department}}", department);
+
+    string yearsOfService = workbook.GetCell(worksheetIndex, rowIndex, 2).Value.ToString();
+    IPortion yearsPortion = paragraphs[2].Portions[0];
+    yearsPortion.Text = yearsPortion.Text.Replace("{{YearsOfService}}", yearsOfService);
+
+    // Save the personalized presentation to a separate file.
+    employeePresentation.Save($"{employeeName} Report.pptx", SaveFormat.Pptx);
+}
+```
+
+![Result](/net/slides/images/449a4ea5fd306be4-example1_image2.png)
+
+### **Excel Table Example**
+
+In the second example, we simply copy data from an Excel table and display it on a PowerPoint slide in a more visually appealing format.
+
+In this example, we reuse the same Excel workbook from the first example, which contains a simple employee table.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Excel;
+using Aspose.Slides.Export;
+
+// Load the Excel workbook containing the employee data.
+ExcelDataWorkbook workbook = new ExcelDataWorkbook("TemplateData.xlsx");
+int worksheetIndex = 0;
+
+// Create a new PowerPoint presentation.
+using Presentation presentation = new Presentation();
+
+// Add a table shape to the first slide.
+ITable table = presentation.Slides[0].Shapes.AddTable(
+    50, 200,
+    new double[] { 200, 200, 200 },
+    new double[] { 30, 30, 30, 30, 30 }
+);
+
+// Fill the PowerPoint table with data from the Excel workbook.
+for (int rowIndex = 0; rowIndex < 5; rowIndex++)
+{
+    for (int columnIndex = 0; columnIndex < 3; columnIndex++)
+    {
+        string cellValue = workbook.GetCell(worksheetIndex, rowIndex, columnIndex).Value.ToString();
+        table[columnIndex, rowIndex].TextFrame.Text = cellValue;
+    }
+}
+
+// Save the resulting presentation to a file.
+presentation.Save("Table.pptx", SaveFormat.Pptx);
+```
+
+![Result](/net/slides/images/506786277c181dd1-example2_image0.png)
+
+### **Import an Excel Chart Example**
+
+In this example, we import a chart from the first worksheet of the Excel workbook used in the previous example. The chart will link to the external workbook in the resulting presentation.
+
+First, we add a Pie chart to the Excel workbook based on the employees table.
+
+![Excel Chart example](/net/slides/images/c04507342a68e3ef-example3_image0.png)
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+using Aspose.Slides.Import;
+
+// Create a new PowerPoint presentation.
+using Presentation presentation = new Presentation();
+
+// Get the shapes collection of the first slide.
+IShapeCollection shapes = presentation.Slides[0].Shapes;
+
+// Import the chart named "Chart 1" from the first sheet of the workbook and add it to the shapes collection.
+ExcelWorkbookImporter.AddChartFromWorkbook(shapes, 10, 10, "TemplateData.xlsx", "Sheet1", "Chart 1", false);
+
+// Save the resulting presentation to a file.
+presentation.Save("Chart.pptx", SaveFormat.Pptx);
+```
+
+![Result](/net/slides/images/9bf5efa5b8b8df4a-example3_image1.png)
+
+### **Import All Excel Charts Example**
+
+Let's imagine you have an Excel workbook full of charts and you need to import them all into a presentation. Each chart should be placed on a new slide.
+
+The following code iterates through all worksheets in the source Excel file, extracts the charts from each worksheet, and adds each chart to a separate slide using a blank slide layout. In the resulting presentation, only the chart data will be embedded, not the entire workbook.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Excel;
+using Aspose.Slides.Export;
+using Aspose.Slides.Import;
+
+// Load the Excel workbook containing the employee data.
+ExcelDataWorkbook workbook = new ExcelDataWorkbook("ExcelWithCharts.xlsx");
+
+// Create a new PowerPoint presentation.
+using Presentation presentation = new Presentation();
+
+// Retrieve the blank slide layout.
+ILayoutSlide blankLayout = presentation.LayoutSlides.GetByType(SlideLayoutType.Blank);
+
+// Get the names of all worksheets contained in the Excel workbook.
+IList<string> worksheetNames = workbook.GetWorksheetNames();
+
+foreach (var name in worksheetNames)
+{
+    // Retrieve a dictionary that maps chart indexes to chart names for the worksheet.
+    IDictionary<int, string> worksheetCharts = workbook.GetChartsFromWorksheet(name);
+    foreach (var chart in worksheetCharts)
+    {
+        // Add a new slide using the blank layout.
+        ISlide slide = presentation.Slides.AddEmptySlide(blankLayout);
+
+        // Import the specified chart from the Excel workbook into the slide's shapes collection.
+        ExcelWorkbookImporter.AddChartFromWorkbook(slide.Shapes, 10, 10, workbook, name, chart.Key, false);
+    }
+}
+
+// Save the resulting presentation to a file.
+presentation.Save("Charts.pptx", SaveFormat.Pptx);
+```
+
+### **Import an Excel Table Example**
+
+In this example, we import a formatted table from an Excel worksheet directly into a PowerPoint presentation.
+
+The source Excel worksheet contains a formatted table with employee data:
+
+![Excel Table example](/net/slides/images/ed9acda8cb3892ab-example4_image0.png)
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+using Aspose.Slides.Import;
+
+// Create a new PowerPoint presentation.
+using Presentation presentation = new Presentation();
+
+// Get the shapes collection of the first slide.
+IShapeCollection shapes = presentation.Slides[0].Shapes;
+
+// Import the table from the first sheet of the workbook and add it to the shapes collection.
+ExcelWorkbookImporter.AddTableFromWorkbook(shapes, 10, 10, "TemplateData.xlsx", "Sheet1", "A1:C5");
+
+// Save the resulting presentation to a file.
+presentation.Save("FormattedTable.pptx", SaveFormat.Pptx);
+```
+
+![Result](/net/slides/images/e9064578472b884d-example4_image1.png)
+
+## **Summary**
+
+This mechanism, available directly in Aspose.Slides, combines working with Excel data and presentations in one place. It allows you to create slides with visual charts and data presented as Excel tables - without any additional libraries or complex integrations.

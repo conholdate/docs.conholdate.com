@@ -1,0 +1,148 @@
+---
+title: "Optimize Chart Calculations for Presentations in .NET"
+sidebar_label: "Optimize Chart Calculations for Presentations in .NET"
+sidebar_key: "net-slides-chart-calculations"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/net"
+source_path: "slides/net/chart-calculations.md"
+source_commit: ""
+source_sha256: "25f7d161ce16511f814b97119974b262062cc9a58e89bc2a047e335c7d9a56a7"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/net/chart-calculations/"
+source_markdown_url: "https://docs.aspose.com/slides/net/chart-calculations.md"
+source_snapshot_sha256: "22b37e3433984d1ad1b3f960c83e7787a35bcd5f326d4d690e94db00690b3360"
+---
+
+:::info
+Aspose.Slides for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+T
+
+> Understand chart calculations, data updates, and precision control in Aspose.Slides for .NET for PPT and PPTX, with practical C# code examples.
+> 5
+
+## **Overview**
+
+Aspose.Slides provides APIs for working with chart calculations and layout data in presentations. This article shows how to retrieve the actual values of chart elements, including the real position and size of elements that implement `IActualLayout` and the actual values of chart axes. It also explains that these values are populated after chart layout validation.
+
+In addition, the article demonstrates how to get the actual position of parent chart elements and how to hide chart components such as the title, axes, legend, and grid lines. Together, these examples help you inspect chart layout information and control the visibility of chart elements in PowerPoint presentations programmatically.
+
+## **Calculate Actual Values of Chart Elements**
+
+Aspose.Slides for .NET provides a simple API for getting these properties. This will help you to Calculates actual values of chart elements. The actual values include position of elements that implement IActualLayout interface (IActualLayout.ActualX, IActualLayout.ActualY, IActualLayout.ActualWidth, IActualLayout.ActualHeight) and actual axes values (IAxis.ActualMaxValue, IAxis.ActualMinValue, IAxis.ActualMajorUnit, IAxis.ActualMinorUnit, IAxis.ActualMajorUnitScale, IAxis.ActualMinorUnitScale).
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using (Presentation pres = new Presentation("test.pptx"))
+{
+    Chart chart = (Chart)pres.Slides[0].Shapes.AddChart(ChartType.ClusteredColumn, 100, 100, 500, 350);
+    chart.ValidateChartLayout();
+    double x = chart.PlotArea.ActualX;
+    double y = chart.PlotArea.ActualY;
+    double w = chart.PlotArea.ActualWidth;
+    double h = chart.PlotArea.ActualHeight;
+	
+	// Saving presentation
+	pres.Save("Result.pptx", SaveFormat.Pptx);
+}
+```
+
+## **Calculate Actual Position of Parent Chart Elements**
+
+Aspose.Slides for .NET provides a simple API for getting these properties. Properties of IActualLayout provide information about actual position of parent chart element. It is necessary to call method IChart.ValidateChartLayout() previously to fill properties with actual values.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+
+// Creating empty presentation
+using (Presentation pres = new Presentation())
+{
+   Chart chart = (Chart)pres.Slides[0].Shapes.AddChart(ChartType.ClusteredColumn, 100, 100, 500, 350);
+   chart.ValidateChartLayout();
+
+   double x = chart.PlotArea.ActualX;
+   double y = chart.PlotArea.ActualY;
+   double w = chart.PlotArea.ActualWidth;
+   double h = chart.PlotArea.ActualHeight;
+}
+```
+
+## **Hide Chart Elements**
+
+This topic helps you to understand how to hide information from chart. Using Aspose.Slides for .NET you can hide **Title, Vertical Axis, Horizontal Axis, Legend** and **Grid Lines** from chart. Below code example shows how to use these properties.
+
+```csharp
+using System.Drawing;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using (Presentation pres = new Presentation())
+{
+    ISlide slide = pres.Slides[0];
+    IChart chart = slide.Shapes.AddChart(ChartType.LineWithMarkers, 140, 118, 320, 370);
+
+    //Hiding chart Title
+    chart.HasTitle = false;
+
+    ///Hiding Values axis
+    chart.Axes.VerticalAxis.IsVisible = false;
+
+    //Category Axis visibility
+    chart.Axes.HorizontalAxis.IsVisible = false;
+
+    //Hiding Legend
+    chart.HasLegend = false;
+
+    //Hiding MajorGridLines of both axes
+    chart.Axes.HorizontalAxis.MajorGridLinesFormat.Line.FillFormat.FillType = FillType.NoFill;
+    chart.Axes.VerticalAxis.MajorGridLinesFormat.Line.FillFormat.FillType = FillType.NoFill;
+
+    //Keeping only the first series
+    for (int i = chart.ChartData.Series.Count - 1; i > 0; i--)
+    {
+        chart.ChartData.Series.RemoveAt(i);
+    }
+
+    IChartSeries series = chart.ChartData.Series[0];
+
+    series.Marker.Symbol = MarkerStyleType.Circle;
+    series.Labels.DefaultDataLabelFormat.ShowValue = true;
+    series.Labels.DefaultDataLabelFormat.Position = LegendDataLabelPosition.Top;
+    series.Marker.Size = 15;
+
+    //Setting series line color
+    series.Format.Line.FillFormat.FillType = FillType.Solid;
+    series.Format.Line.FillFormat.SolidFillColor.Color = Color.Purple;
+    series.Format.Line.DashStyle = LineDashStyle.Solid;
+
+    pres.Save("HideInformationFromChart.pptx", SaveFormat.Pptx);
+}
+```
+
+## **FAQ**
+
+### Do external Excel workbooks work as a data source, and how does that affect recalculation?
+
+Yes. A chart can reference an external workbook: when you connect or refresh the external source, formulas and values are taken from that workbook, and the chart reflects the updates during open/edit operations. The API lets you <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/chartdata/setexternalworkbook/" target="_blank" rel="nofollow noopener noreferrer">specify the external workbook</a> path and manage the linked data.
+
+### Can I compute and display trendlines without implementing regression myself?
+
+Yes. [Trendlines](/net/slides/trend-line/) (linear, exponential, and others) are added and updated by Aspose.Slides; their parameters are recalculated from the series data automatically, so you don't need to implement your own calculations.
+
+### If a presentation has multiple charts with external links, can I control which workbook each chart uses for computed values?
+
+Yes. Each chart can point to its own <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/chartdata/setexternalworkbook/" target="_blank" rel="nofollow noopener noreferrer">external workbook</a>, or you can create/replace an external workbook per chart independently of the others.

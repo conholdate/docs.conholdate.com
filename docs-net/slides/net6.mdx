@@ -1,0 +1,105 @@
+---
+title: "Cross-Platform Package for .NET 6 and Later"
+sidebar_label: "Cross-Platform Package for .NET 6 and Later"
+sidebar_key: "net-slides-net6"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/net"
+source_path: "slides/net/net6.md"
+source_commit: ""
+source_sha256: "1e1c58267f478e6953fbd755bb5bf83f1aa591203366d09246f0987821e461bf"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/net/net6/"
+source_markdown_url: "https://docs.aspose.com/slides/net/net6.md"
+source_snapshot_sha256: "4f1d4e17dbd4b109d437ccb16104f20cfa28b2b050b159b9770fe1da642407e2"
+---
+
+:::info
+Aspose.Slides for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "./_remote-markdown.css";
+
+r
+
+> Learn when to use the Aspose.Slides.NET6.CrossPlatform package: why it exists, the platforms it runs on, and what it needs on Linux instead of libgdiplus.
+> 8
+
+## **Introduction**
+
+Aspose.Slides for .NET is published as two NuGet packages. <a href="https://www.nuget.org/packages/Aspose.Slides.NET/" target="_blank" rel="nofollow noopener noreferrer">Aspose.Slides.NET</a> draws slides through Microsoft's System.Drawing.Common library. <a href="https://www.nuget.org/packages/Aspose.Slides.NET6.CrossPlatform/" target="_blank" rel="nofollow noopener noreferrer">Aspose.Slides.NET6.CrossPlatform</a> draws them with its own graphics engine instead. This article explains why the second package exists, where it runs, what it needs on Linux, and how it coexists with System.Drawing.Common in one project.
+
+## **Why a Separate Package**
+
+Starting with .NET 6, Microsoft supports System.Drawing.Common <a href="https://learn.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/6.0/system-drawing-common-windows-only" target="_blank" rel="nofollow noopener noreferrer">only on Windows</a>. As a result, on Linux Aspose.Slides.NET needs the `System.Drawing.EnableUnixSupport` switch in addition to the `libgdiplus` library, and it fails there if the project references System.Drawing.Common 7 or later. [System Requirements](/net/slides/system-requirements/) describes these conditions.
+
+Aspose.Slides.NET6.CrossPlatform does not use System.Drawing.Common or `libgdiplus`. Its graphics engine is a native library that the package contains in one build per supported platform. Both packages provide the same Aspose.Slides namespaces and classes, so switching from one to the other changes only the package reference, not your code.
+
+<div className="docs-owner-markdown-table">
+
+| Column 1 | Aspose.Slides.NET | Aspose.Slides.NET6.CrossPlatform |
+| ------------------ | -------------------------------------------------------------- | ---------------------------------------------- |
+| Graphics | System.Drawing.Common | Native graphics engine included in the package |
+| Target frameworks | `net462`, `net6.0`, `netstandard2.0` | `net6.0` |
+| Linux requirements | `libgdiplus` and the `System.Drawing.EnableUnixSupport` switch | `fontconfig` |
+| Alpine Linux | Supported | Not supported |
+
+</div>
+
+## **Supported Platforms**
+
+Aspose.Slides.NET6.CrossPlatform works with .NET 6 and later versions on these platforms:
+
+- **Windows**: x86 and x64. The native library uses the Microsoft Visual C++ runtime; see [System Requirements](/net/slides/system-requirements/).
+- **Linux**: x64 with glibc 2.23 or later, and ARM64 with glibc 2.39 or later.
+- **macOS**: x64 (Intel) and ARM64 (Apple silicon).
+
+It does not run on Windows on ARM64, on Alpine Linux or other distributions built on musl instead of glibc, or on distributions with an older glibc, such as CentOS 7. Use Aspose.Slides.NET on those systems.
+
+## **Install on Linux**
+
+On Linux, the package requires the `fontconfig` library, but not `libgdiplus`. On Debian and Ubuntu, install `fontconfig` and then add the package to your project:
+
+```bash
+sudo apt-get update && sudo apt-get install -y libfontconfig1
+dotnet add package Aspose.Slides.NET6.CrossPlatform
+```
+
+On Debian and Ubuntu, `libfontconfig1` also installs the DejaVu fonts, so text renders without further font packages. Without `fontconfig`, creating a <a href="https://reference.aspose.com/slides/net/aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> fails with a `TypeInitializationException` whose inner `DllNotFoundException` reports that `libfontconfig.so.1` cannot be opened. [System Requirements](/net/slides/system-requirements/) includes a short program that checks the setup.
+
+## **Cloud and Container Hosts**
+
+Because it does not need `libgdiplus`, Aspose.Slides.NET6.CrossPlatform is the package to use on Linux hosts where you cannot install `libgdiplus`. It still needs `fontconfig` and fonts, which minimal base images may lack. The AWS Lambda base image for .NET 8, for example, contains neither. In a container image built on it, run `dnf install -y fontconfig`, which also installs the Noto Sans fonts.
+
+For guides to specific cloud platforms, see <a href="https://docs.aspose.com/slides/net/slides-on-cloud-platforms/" target="_blank" rel="nofollow noopener noreferrer">Aspose.Slides on Cloud Platforms</a>.
+
+## **Using System.Drawing.Common in the Same Project (CS0433)**
+
+A project that uses Aspose.Slides.NET6.CrossPlatform can also reference System.Drawing.Common, directly or through another package. The current version of Aspose.Slides exposes no public types in `System` namespaces, so the two libraries do not conflict, and you can import the `Aspose.Slides` and `System.Drawing` namespaces in the same file.
+
+If the compiler reports error CS0433 because a type such as `Image` or `Graphics` exists in both Aspose.Slides and System.Drawing.Common, your project uses an older version of Aspose.Slides. Update the package to the latest version. Aspose.Slides returns rendered images as <a href="https://reference.aspose.com/slides/net/aspose.slides/iimage/" target="_blank" rel="nofollow noopener noreferrer">IImage</a> objects, which are described in [Modern API](/net/slides/modern-api/).
+
+## **FAQ**
+
+**Do I need to change my code when I switch from Aspose.Slides.NET to Aspose.Slides.NET6.CrossPlatform?**
+
+No. Both packages provide the same Aspose.Slides namespaces and classes, so you only replace the package reference. Aspose.Slides.NET6.CrossPlatform does not need the `System.Drawing.EnableUnixSupport` switch. Add only one of the two packages to a project.
+
+**Can I use Aspose.Slides.NET6.CrossPlatform in a .NET Framework project?**
+
+No. The package targets only .NET 6 and later. For .NET Framework 4.6.2 and later, use Aspose.Slides.NET.
+
+## Related features
+
+- <a href="https://docs.aspose.com/slides/features/dotnet-runtimes/" target="_blank" rel="nofollow noopener noreferrer">Choose a .NET runtime</a>
+
+## Related articles
+
+- [Aspose.Slides for .NET 6 Cross-Platform (ZIP Package)](/net/slides/slides-for-net-6-cross-platform-zip-package/)

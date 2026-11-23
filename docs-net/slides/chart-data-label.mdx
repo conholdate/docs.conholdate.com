@@ -1,0 +1,619 @@
+---
+title: "Manage Chart Data Labels in Presentations in .NET"
+sidebar_label: "Manage Chart Data Labels in Presentations in .NET"
+sidebar_key: "net-slides-chart-data-label"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/net"
+source_path: "slides/net/chart-data-label.md"
+source_commit: ""
+source_sha256: "37e891a819eaf149ca8685ad74748ac667c4c32f0ef3df82bdef8514aa1b14f1"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/net/chart-data-label/"
+source_markdown_url: "https://docs.aspose.com/slides/net/chart-data-label.md"
+source_snapshot_sha256: "b4724d11deacb10bb02c353a7055e1ae861e2a0d04bf37dbe095a305b4536244"
+---
+
+:::info
+Aspose.Slides for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "./_remote-markdown.css";
+
+T
+
+> Learn to add and format chart data labels in PowerPoint presentations using Aspose.Slides for .NET for more engaging slides.
+> 7
+
+## **Introduction**
+
+Data labels display information about chart series and individual data points, helping readers identify values and understand the chart. This article explains how to format values, display percentages, read label text, control labels beyond the axis maximum, adjust category axis label spacing, and position pie chart labels.
+
+## **Count Visible Data Labels**
+
+Use <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabelcollection/countofvisibledatalabels/" target="_blank" rel="nofollow noopener noreferrer">CountOfVisibleDataLabels</a> to check how many data labels are enabled for display before publishing a presentation. Unlike <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabelcollection/count/" target="_blank" rel="nofollow noopener noreferrer">Count</a>, which returns the total number of labels in the collection, it takes the series defaults and individual label settings into account.
+
+This example creates a column chart with one series and three data points. It accesses the series' <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartseries/labels/" target="_blank" rel="nofollow noopener noreferrer">Labels</a> collection and prints the visible count as the settings change: **0, 3, 2, 3**. The total count remains **3**.
+
+```csharp
+using System;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+var chart = slide.Shapes.AddChart(ChartType.ClusteredColumn, 50, 50, 500, 300);
+
+chart.ChartData.Series.Clear();
+chart.ChartData.Categories.Clear();
+
+var workbook = chart.ChartData.ChartDataWorkbook;
+var seriesCell = workbook.GetCell(0, 0, 1, "Values");
+var series = chart.ChartData.Series.Add(seriesCell, chart.Type);
+
+for (int i = 0; i < 3; i++)
+{
+    var categoryCell = workbook.GetCell(0, i + 1, 0, $"Category {i + 1}");
+    chart.ChartData.Categories.Add(categoryCell);
+    var valueCell = workbook.GetCell(0, i + 1, 1, (i + 1) * 10);
+    series.DataPoints.AddDataPointForBarSeries(valueCell);
+}
+
+var labels = series.Labels;
+Console.WriteLine($"Total: {labels.Count}; visible: {labels.CountOfVisibleDataLabels}"); // Total: 3; visible: 0
+
+labels.DefaultDataLabelFormat.ShowValue = true;
+Console.WriteLine($"Visible: {labels.CountOfVisibleDataLabels}"); // Visible: 3
+
+labels[1].DataLabelFormat.ShowValue = false;
+Console.WriteLine($"Visible: {labels.CountOfVisibleDataLabels}"); // Visible: 2
+
+labels[1].DataLabelFormat.ShowLegendKey = true;
+Console.WriteLine($"Visible: {labels.CountOfVisibleDataLabels}"); // Visible: 3
+```
+
+The series' <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabelcollection/defaultdatalabelformat/" target="_blank" rel="nofollow noopener noreferrer">DefaultDataLabelFormat</a> supplies the default settings. Enabling <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabelformat/showvalue/" target="_blank" rel="nofollow noopener noreferrer">ShowValue</a> there displays values for all three labels. Setting it to `false` through one label's <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabel/datalabelformat/" target="_blank" rel="nofollow noopener noreferrer">DataLabelFormat</a> overrides that setting for the selected label. Enabling <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabelformat/showlegendkey/" target="_blank" rel="nofollow noopener noreferrer">ShowLegendKey</a> makes that label count as visible again, even though its value remains hidden.
+
+The visible count reflects visibility settings. It does not measure whether labels overlap, are clipped, or are readable in the rendered chart.
+
+## **Set Data Precision in Chart Data Labels**
+
+Use <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartseries/numberformatofvalues/" target="_blank" rel="nofollow noopener noreferrer">NumberFormatOfValues</a> to format series values. This example creates a line chart with default data, displays its data table, and enables value labels for the first series. The format `#,##0.00` displays a thousands separator and two decimal places without changing the underlying values.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+var chart = slide.Shapes.AddChart(ChartType.Line, 50, 50, 450, 300);
+chart.HasDataTable = true;
+
+var series = chart.ChartData.Series[0];
+series.NumberFormatOfValues = "#,##0.00";
+series.Labels.DefaultDataLabelFormat.ShowValue = true;
+
+presentation.Save("PrecisionOfDatalabels_out.pptx", SaveFormat.Pptx);
+```
+
+To format the numeric cells in a chart's embedded workbook, see [Set Custom Number Formats for Workbook Cells](/net/slides/chart-workbook/#set-custom-number-formats-for-workbook-cells). That example also shows value labels following their source cell formats while preserving the stored numeric values.
+
+## **Display Percentage as Labels**
+
+For a stacked column chart, calculate each value as a percentage of its category total and assign the text to <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ioverridabletext/textframeforoverriding/" target="_blank" rel="nofollow noopener noreferrer">TextFrameForOverriding</a>. This example uses the default chart data and displays percentages with two decimal places in an 8-point font. Categories with a total of zero are skipped to avoid division by zero. Recalculate the custom label text if the chart data changes.
+
+```csharp
+using System;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+var chart = slide.Shapes.AddChart(ChartType.StackedColumn, 20, 20, 400, 400);
+
+var categoryTotals = new double[chart.ChartData.Categories.Count];
+for (int k = 0; k < chart.ChartData.Categories.Count; k++)
+{
+    for (int i = 0; i < chart.ChartData.Series.Count; i++)
+    {
+        var series = chart.ChartData.Series[i];
+        var pointValue = Convert.ToDouble(series.DataPoints[k].Value.Data);
+        categoryTotals[k] += pointValue;
+    }
+}
+
+for (int x = 0; x < chart.ChartData.Series.Count; x++)
+{
+    var series = chart.ChartData.Series[x];
+    series.Labels.DefaultDataLabelFormat.ShowLegendKey = false;
+
+    for (int j = 0; j < series.DataPoints.Count; j++)
+    {
+        var label = series.DataPoints[j].Label;
+        if (categoryTotals[j] == 0)
+        {
+            continue;
+        }
+
+        var pointValue = Convert.ToDouble(series.DataPoints[j].Value.Data);
+        var dataPointPercent = (pointValue / categoryTotals[j]) * 100;
+
+        var portion = new Portion();
+        portion.Text = string.Format("{0:F2} %", dataPointPercent);
+        portion.PortionFormat.FontHeight = 8f;
+
+        label.TextFrameForOverriding.Text = "";
+
+        var paragraph = label.TextFrameForOverriding.Paragraphs[0];
+        paragraph.Portions.Add(portion);
+
+        label.DataLabelFormat.ShowValue = true;
+        label.DataLabelFormat.ShowSeriesName = false;
+        label.DataLabelFormat.ShowPercentage = false;
+        label.DataLabelFormat.ShowLegendKey = false;
+        label.DataLabelFormat.ShowCategoryName = false;
+        label.DataLabelFormat.ShowBubbleSize = false;
+    }
+}
+
+presentation.Save("DisplayPercentageAsLabels_out.pptx", SaveFormat.Pptx);
+```
+
+## **Set Percentage Sign with Chart Data Labels**
+
+When values are stored as fractions, use <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabelformat/numberformat/" target="_blank" rel="nofollow noopener noreferrer">NumberFormat</a> to display percentages. Set <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabelformat/isnumberformatlinkedtosource/" target="_blank" rel="nofollow noopener noreferrer">IsNumberFormatLinkedToSource</a> to `false` to apply the label format independently of the source cells.
+
+This example creates a 100% stacked column chart with red and blue series across four categories. Each pair of values adds up to 1. The label format `0.0%` displays 0.30 as 30.0%, while the vertical axis uses two decimal places. Both series use white, 10-point label text.
+
+```csharp
+using System.Drawing;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+var chart = slide.Shapes.AddChart(ChartType.PercentsStackedColumn, 20, 20, 500, 400);
+
+chart.Axes.VerticalAxis.IsNumberFormatLinkedToSource = false;
+chart.Axes.VerticalAxis.NumberFormat = "0.00%";
+
+chart.ChartData.Series.Clear();
+chart.ChartData.Categories.Clear();
+
+var workbook = chart.ChartData.ChartDataWorkbook;
+int worksheetIndex = 0;
+for (int i = 0; i < 4; i++)
+{
+    var categoryCell = workbook.GetCell(worksheetIndex, i + 1, 0, $"Category {i + 1}");
+    chart.ChartData.Categories.Add(categoryCell);
+}
+
+string[] seriesNames = { "Reds", "Blues" };
+Color[] seriesColors = { Color.Red, Color.Blue };
+double[,] values = { { 0.30, 0.50, 0.80, 0.65 }, { 0.70, 0.50, 0.20, 0.35 } };
+
+for (int i = 0; i < seriesNames.Length; i++)
+{
+    var seriesCell = workbook.GetCell(worksheetIndex, 0, i + 1, seriesNames[i]);
+    var series = chart.ChartData.Series.Add(seriesCell, chart.Type);
+    for (int j = 0; j < 4; j++)
+    {
+        var valueCell = workbook.GetCell(worksheetIndex, j + 1, i + 1, values[i, j]);
+        series.DataPoints.AddDataPointForBarSeries(valueCell);
+    }
+
+    series.Format.Fill.FillType = FillType.Solid;
+    series.Format.Fill.SolidFillColor.Color = seriesColors[i];
+
+    var labelFormat = series.Labels.DefaultDataLabelFormat;
+    labelFormat.ShowValue = true;
+    labelFormat.IsNumberFormatLinkedToSource = false;
+    labelFormat.NumberFormat = "0.0%";
+    labelFormat.TextFormat.PortionFormat.FontHeight = 10;
+    labelFormat.TextFormat.PortionFormat.FillFormat.FillType = FillType.Solid;
+    labelFormat.TextFormat.PortionFormat.FillFormat.SolidFillColor.Color = Color.White;
+}
+
+presentation.Save("SetDataLabelsPercentageSign_out.pptx", SaveFormat.Pptx);
+```
+
+## **Read the Actual Text of Data Labels**
+
+Use <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabel/getactuallabeltext/" target="_blank" rel="nofollow noopener noreferrer">GetActualLabelText</a> to retrieve the text produced by a data label's settings. This is useful when extracting labels for reports, searching presentation content, or validating generated charts. In the example below, the default <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabelformat/" target="_blank" rel="nofollow noopener noreferrer">data label format</a> combines each category name, series name, and value. One point formats its value as a percentage, and another uses custom text from <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ioverridabletext/textframeforoverriding/" target="_blank" rel="nofollow noopener noreferrer">TextFrameForOverriding</a>.
+
+```csharp
+using System;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+var chart = slide.Shapes.AddChart(ChartType.ClusteredColumn, 20, 20, 500, 300);
+
+chart.ChartData.Series.Clear();
+chart.ChartData.Categories.Clear();
+
+var workbook = chart.ChartData.ChartDataWorkbook;
+chart.ChartData.Categories.Add(workbook.GetCell(0, 1, 0, "Q1"));
+chart.ChartData.Categories.Add(workbook.GetCell(0, 2, 0, "Q2"));
+
+var north = chart.ChartData.Series.Add(workbook.GetCell(0, 0, 1, "North"), chart.Type);
+north.DataPoints.AddDataPointForBarSeries(workbook.GetCell(0, 1, 1, 0.25));
+north.DataPoints.AddDataPointForBarSeries(workbook.GetCell(0, 2, 1, 0.75));
+
+var south = chart.ChartData.Series.Add(workbook.GetCell(0, 0, 2, "South"), chart.Type);
+south.DataPoints.AddDataPointForBarSeries(workbook.GetCell(0, 1, 2, 0.40));
+south.DataPoints.AddDataPointForBarSeries(workbook.GetCell(0, 2, 2, 0.60));
+
+foreach (var series in chart.ChartData.Series)
+{
+    var format = series.Labels.DefaultDataLabelFormat;
+    format.ShowCategoryName = true;
+    format.ShowSeriesName = true;
+    format.ShowValue = true;
+}
+
+north.Labels[1].DataLabelFormat.IsNumberFormatLinkedToSource = false;
+north.Labels[1].DataLabelFormat.NumberFormat = "0%";
+south.Labels[0].TextFrameForOverriding.Text = "Reviewed";
+
+foreach (var series in chart.ChartData.Series)
+{
+    foreach (var point in series.DataPoints)
+    {
+        var label = point.Label;
+        if (!label.IsVisible)
+        {
+            continue;
+        }
+
+        Console.WriteLine($"Value: {point.Value.Data}; label: {label.GetActualLabelText()}");
+    }
+}
+```
+
+The number stored in a data point remains `0.75`, even when its label shows `75%` along with the category and series names. Custom text replaces the generated label text. <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabel/getactuallabeltext/" target="_blank" rel="nofollow noopener noreferrer">GetActualLabelText</a> returns the resulting label string in either case. Check <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabel/isvisible/" target="_blank" rel="nofollow noopener noreferrer">IsVisible</a> separately, as shown above, when you want to extract only visible labels.
+
+## **Control Data Labels Beyond the Axis Maximum**
+
+When you limit an axis range manually, some data points may exceed its maximum. Use <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichart/showdatalabelsovermaximum/" target="_blank" rel="nofollow noopener noreferrer">ShowDataLabelsOverMaximum</a> to control whether their data labels are shown. This setting changes label visibility; it does not change the axis range or the underlying data values.
+
+The example below creates a 2D clustered column chart with values of 60 and 120. It sets <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/iaxis/isautomaticmaxvalue/" target="_blank" rel="nofollow noopener noreferrer">IsAutomaticMaxValue</a> to `false` and <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/iaxis/maxvalue/" target="_blank" rel="nofollow noopener noreferrer">MaxValue</a> to 100 on the vertical axis. The first slide allows labels beyond the maximum; a copy of that slide disables them. Both slides are saved in `DataLabelsOverMaximum.pptx`.
+
+Enable value labels with <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabelformat/showvalue/" target="_blank" rel="nofollow noopener noreferrer">ShowValue</a>. The chart-level setting does not enable value display by itself or override an individual label's disabled value display. This example enables values for the entire series and uses <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabelformat/position/" target="_blank" rel="nofollow noopener noreferrer">Position</a> to place labels at the outside end of each column.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+var chart = slide.Shapes.AddChart(ChartType.ClusteredColumn, 50, 50, 600, 400);
+chart.HasLegend = false;
+
+chart.ChartData.Series.Clear();
+chart.ChartData.Categories.Clear();
+
+var workbook = chart.ChartData.ChartDataWorkbook;
+
+var firstCategory = workbook.GetCell(0, 1, 0, "Within range");
+var secondCategory = workbook.GetCell(0, 2, 0, "Above maximum");
+
+chart.ChartData.Categories.Add(firstCategory);
+chart.ChartData.Categories.Add(secondCategory);
+
+var seriesName = workbook.GetCell(0, 0, 1, "Values");
+var series = chart.ChartData.Series.Add(seriesName, chart.Type);
+
+var firstValue = workbook.GetCell(0, 1, 1, 60);
+var secondValue = workbook.GetCell(0, 2, 1, 120);
+
+series.DataPoints.AddDataPointForBarSeries(firstValue);
+series.DataPoints.AddDataPointForBarSeries(secondValue);
+
+series.Labels.DefaultDataLabelFormat.ShowValue = true;
+series.Labels.DefaultDataLabelFormat.Position = LegendDataLabelPosition.OutsideEnd;
+
+chart.Axes.VerticalAxis.IsAutomaticMaxValue = false;
+chart.Axes.VerticalAxis.MaxValue = 100;
+chart.ShowDataLabelsOverMaximum = true;
+
+var secondSlide = presentation.Slides.AddClone(slide);
+var secondChart = (IChart)secondSlide.Shapes[0];
+secondChart.ShowDataLabelsOverMaximum = false;
+
+presentation.Save("DataLabelsOverMaximum.pptx", SaveFormat.Pptx);
+```
+
+The following images show the saved slides rendered by Microsoft PowerPoint. With `true`, the label **120** is visible at the upper boundary; with `false`, it is hidden. The label **60** remains visible, the axis maximum stays at **100**, and the second data point remains **120** in both cases.
+
+<div className="docs-owner-markdown-table">
+
+| ShowDataLabelsOverMaximum = true | ShowDataLabelsOverMaximum = false |
+| -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![PowerPoint chart showing the value label 120 with an axis maximum of 100](/net/slides/images/d7a17d92b89e6c32-data-labels-over-maximum-true.png) | ![PowerPoint chart hiding the value label 120 with an axis maximum of 100](/net/slides/images/30869cac821032f9-data-labels-over-maximum-false.png) |
+
+</div>
+
+This example uses a 2D column chart with a value axis. Charts without a value axis, such as pie and doughnut charts, do not have an axis maximum to limit in this way.
+
+## **Set Label Distance from an Axis**
+
+Use <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/iaxis/labeloffset/" target="_blank" rel="nofollow noopener noreferrer">LabelOffset</a> to control the distance between category axis labels and the axis. The value is a percentage of the maximum font size of the axis labels. This example creates a clustered column chart and sets the horizontal axis label offset to 500. This setting affects category axis labels rather than labels attached to individual data points.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+var chart = slide.Shapes.AddChart(ChartType.ClusteredColumn, 20, 20, 500, 300);
+chart.Axes.HorizontalAxis.LabelOffset = 500;
+
+presentation.Save("SetCategoryAxisLabelDistance_out.pptx", SaveFormat.Pptx);
+```
+
+## **Adjust Label Location**
+
+On a pie chart, adjust data label positions to improve spacing and make room for leader lines.
+
+This example displays the value of the first data point, places its label outside the slice, and adjusts its <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ilayoutable/x/" target="_blank" rel="nofollow noopener noreferrer">X</a> and <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ilayoutable/y/" target="_blank" rel="nofollow noopener noreferrer">Y</a> offsets. These offsets are relative to the chart width and height, respectively.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+var chart = slide.Shapes.AddChart(ChartType.Pie, 50, 50, 200, 200);
+var series = chart.ChartData.Series;
+
+var label = series[0].Labels[0];
+label.DataLabelFormat.ShowValue = true;
+label.DataLabelFormat.Position = LegendDataLabelPosition.OutsideEnd;
+label.X = 0.71f;
+label.Y = 0.04f;
+
+presentation.Save("presentation.pptx", SaveFormat.Pptx);
+```
+
+![Pie chart with an adjusted data label position](/net/slides/images/fdd462e60b19fa15-pie-chart-adjusted-label.png)
+
+## **Format Leader Lines**
+
+When pie chart labels sit outside their slices, leader lines help readers match each value to the correct slice. A contrasting color and a slightly thicker line can make these connections easier to follow, while transparency and a dashed style keep the lines visually unobtrusive.
+
+Use <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/datalabelcollection/leaderlinesformat/" target="_blank" rel="nofollow noopener noreferrer">LeaderLinesFormat</a> to format leader lines at the series' data label collection level. The settings in `series.Labels.LeaderLinesFormat.Line` apply to the collection, rather than to an individual label.
+
+This example creates a pie chart with default data, displays values outside the slices, and enables <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabelformat/showleaderlines/" target="_blank" rel="nofollow noopener noreferrer">ShowLeaderLines</a>. It moves two labels farther from their slices using <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ilayoutable/x/" target="_blank" rel="nofollow noopener noreferrer">X</a> and <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ilayoutable/y/" target="_blank" rel="nofollow noopener noreferrer">Y</a> offsets, expressed as fractions of the chart width and height. No input presentation is required.
+
+The line's <a href="https://reference.aspose.com/slides/net/aspose.slides/ilineformat/fillformat/" target="_blank" rel="nofollow noopener noreferrer">FillFormat</a> sets a solid blue color with an alpha value of 191 out of 255, giving approximately 25% transparency. <a href="https://reference.aspose.com/slides/net/aspose.slides/ilineformat/width/" target="_blank" rel="nofollow noopener noreferrer">Width</a> sets the thickness to 2 points, and <a href="https://reference.aspose.com/slides/net/aspose.slides/ilineformat/dashstyle/" target="_blank" rel="nofollow noopener noreferrer">DashStyle</a> makes the line dashed.
+
+```csharp
+using System.Drawing;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+var chart = slide.Shapes.AddChart(ChartType.Pie, 80, 50, 560, 400);
+chart.HasLegend = false;
+
+var series = chart.ChartData.Series[0];
+
+var labelFormat = series.Labels.DefaultDataLabelFormat;
+labelFormat.ShowValue = true;
+labelFormat.Position = LegendDataLabelPosition.OutsideEnd;
+labelFormat.ShowLeaderLines = true;
+
+// Move two labels farther away from their slices.
+series.Labels[0].X = 0.10f;
+series.Labels[0].Y = -0.05f;
+series.Labels[1].X = -0.10f;
+series.Labels[1].Y = 0.05f;
+
+var line = series.Labels.LeaderLinesFormat.Line;
+line.FillFormat.FillType = FillType.Solid;
+line.FillFormat.SolidFillColor.Color = Color.FromArgb(191, 30, 90, 160);
+line.Width = 2;
+line.DashStyle = LineDashStyle.Dash;
+
+presentation.Save("FormattedLeaderLines.pptx", SaveFormat.Pptx);
+```
+
+Enabling leader lines does not guarantee that a line will appear for every label. Visibility depends on label placement and the chart's layout behavior. In this example, the two displaced labels have visible leader lines; the labels that remain close to their slices do not need them.
+
+The following image shows the saved `FormattedLeaderLines.pptx` rendered with Aspose.Slides:
+
+![Pie chart with blue, semitransparent dashed leader lines connecting two outside labels to their slices](/net/slides/images/f7b2500a4f407d51-formatted-leader-lines.png)
+
+## **Add Multiple Rows of Data Labels Above a Column Chart**
+
+This example creates a column chart with two rows of data labels above the plot area. Series A displays the visible columns, while Series B and Series C provide the additional labels. Their columns are hidden by removing the fill and outline. The <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartseriesgroup/overlap/" target="_blank" rel="nofollow noopener noreferrer">Overlap</a> property aligns all three series with the same category centers.
+
+The <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichart/plotarea/" target="_blank" rel="nofollow noopener noreferrer">PlotArea</a> settings reserve space for the label rows. After <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichart/validatechartlayout/" target="_blank" rel="nofollow noopener noreferrer">ValidateChartLayout</a> calculates the default positions, <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ilayoutable/x/" target="_blank" rel="nofollow noopener noreferrer">X</a> and <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ilayoutable/y/" target="_blank" rel="nofollow noopener noreferrer">Y</a> preserve the horizontal alignment and apply vertical offsets to arrange the labels in two rows. The numbers remain data labels linked to the series values; only the row headings are separate text shapes.
+
+```csharp
+using System.Drawing;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+var chart = slide.Shapes.AddChart(ChartType.ClusteredColumn, 40, 40, 640, 200);
+chart.HasTitle = false;
+chart.HasLegend = false;
+chart.TextFormat.PortionFormat.FontHeight = 12;
+
+chart.ChartData.Series.Clear();
+chart.ChartData.Categories.Clear();
+
+var workbook = chart.ChartData.ChartDataWorkbook;
+workbook.Clear(0);
+
+string[] categories = { "North", "South", "East", "West" };
+string[] seriesNames = { "Series A", "Series B", "Series C" };
+double[,] seriesValues = {
+    { 35, 42, 28, 47 },
+    { 22, 31, 19, 26 },
+    { 12, 16, 14, 18 }
+};
+
+for (int categoryIndex = 0; categoryIndex < categories.Length; categoryIndex++)
+{
+    var categoryCell = workbook.GetCell(0, categoryIndex + 1, 0, categories[categoryIndex]);
+    chart.ChartData.Categories.Add(categoryCell);
+}
+
+for (int seriesIndex = 0; seriesIndex < seriesNames.Length; seriesIndex++)
+{
+    var seriesCell = workbook.GetCell(0, 0, seriesIndex + 1, seriesNames[seriesIndex]);
+    var series = chart.ChartData.Series.Add(seriesCell, ChartType.ClusteredColumn);
+
+    for (int categoryIndex = 0; categoryIndex < categories.Length; categoryIndex++)
+    {
+        var valueCell = workbook.GetCell(0, categoryIndex + 1, seriesIndex + 1, seriesValues[seriesIndex, categoryIndex]);
+        series.DataPoints.AddDataPointForBarSeries(valueCell);
+    }
+
+    if (seriesIndex > 0)
+    {
+        // Hide the columns of B and C, but keep their data labels.
+        series.Format.Fill.FillType = FillType.NoFill;
+        series.Format.Line.FillFormat.FillType = FillType.NoFill;
+        var labelFormat = series.Labels.DefaultDataLabelFormat;
+        labelFormat.ShowValue = true;
+        labelFormat.TextFormat.PortionFormat.FontHeight = 12;
+        var labelFill = labelFormat.TextFormat.PortionFormat.FillFormat;
+        labelFill.FillType = FillType.Solid;
+        labelFill.SolidFillColor.Color = Color.Black;
+        labelFormat.Position = LegendDataLabelPosition.InsideBase;
+    }
+}
+
+// Align all three series with the same category centers.
+chart.ChartData.Series[0].ParentSeriesGroup.Overlap = 100;
+
+// Use fewer gridlines for this compact example.
+chart.Axes.VerticalAxis.IsAutomaticMajorUnit = false;
+chart.Axes.VerticalAxis.MajorUnit = 10;
+
+// Reserve space above the plot for two rows of data labels.
+chart.PlotArea.LayoutTargetType = LayoutTargetType.Inner;
+chart.PlotArea.X = 0.15f;
+chart.PlotArea.Y = 0.32f;
+chart.PlotArea.Width = 0.80f;
+chart.PlotArea.Height = 0.48f;
+chart.ValidateChartLayout();
+
+for (int seriesIndex = 1; seriesIndex < seriesNames.Length; seriesIndex++)
+{
+    var series = chart.ChartData.Series[seriesIndex];
+    float rowTop = seriesIndex == 1 ? 0.15f : 0.03f;
+
+    for (int categoryIndex = 0; categoryIndex < categories.Length; categoryIndex++)
+    {
+        var dataLabel = series.DataPoints[categoryIndex].Label;
+        // Keep the default horizontal position. Y is an offset from
+        // the default label position, expressed as a chart-height fraction.
+        dataLabel.X = 0;
+        dataLabel.Y = rowTop - dataLabel.ActualY / chart.Height;
+    }
+
+    // Only the row heading is a separate text shape.
+    var rowHeading = slide.Shapes.AddAutoShape(ShapeType.Rectangle, chart.X, chart.Y + rowTop * chart.Height, 85, 18);
+    rowHeading.FillFormat.FillType = FillType.NoFill;
+    rowHeading.LineFormat.FillFormat.FillType = FillType.NoFill;
+    rowHeading.AddTextFrame(seriesNames[seriesIndex]);
+    rowHeading.TextFrame.TextFrameFormat.MarginTop = 0;
+    rowHeading.TextFrame.TextFrameFormat.MarginBottom = 0;
+    var headingFormat = rowHeading.TextFrame.Paragraphs[0].Portions[0].PortionFormat;
+    headingFormat.FontHeight = 12;
+    headingFormat.FillFormat.FillType = FillType.Solid;
+    headingFormat.FillFormat.SolidFillColor.Color = Color.Black;
+}
+
+presentation.Save("multiple-rows-of-labels.pptx", SaveFormat.Pptx);
+```
+
+![Column chart with two rows of data labels above the plot area](/net/slides/images/61abffe80db45419-multiple-rows-of-labels.png)
+
+## **Change Data Label Shapes**
+
+Aspose.Slides for .NET 26.11 adds <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabel/labelshapetype/" target="_blank" rel="nofollow noopener noreferrer">IDataLabel.LabelShapeType</a> for one label and <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabelcollection/defaultlabelshapetype/" target="_blank" rel="nofollow noopener noreferrer">IDataLabelCollection.DefaultLabelShapeType</a> for all current labels in a series. These change the label's shape, not its point marker. For the separate callout setting, see [Data Label Callouts](/net/slides/callout/).
+
+The collection assignment updates existing labels, so apply individual overrides **after** the collection setting. This complete example requires [Aspose.Slides for .NET](/net/slides/installation/) 26.11 or later. It creates visible value labels, selects ellipses for the first series and then makes its first label rectangular.
+
+```csharp
+using System.Drawing;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var chart = presentation.Slides[0].Shapes.AddChart(ChartType.ClusteredColumn, 50, 50, 600, 350);
+var labels = chart.ChartData.Series[0].Labels;
+labels.DefaultDataLabelFormat.ShowValue = true;
+labels.DefaultLabelShapeType = ShapeType.Ellipse;
+labels[0].LabelShapeType = ShapeType.Rectangle;
+
+foreach (var label in labels)
+{
+    var format = label.DataLabelFormat.Format;
+    format.Fill.FillType = FillType.Solid;
+    format.Fill.SolidFillColor.Color = Color.LightYellow;
+    format.Line.FillFormat.FillType = FillType.Solid;
+    format.Line.FillFormat.SolidFillColor.Color = Color.DarkBlue;
+}
+
+presentation.Save("label-shapes.pptx", SaveFormat.Pptx);
+
+// Reset the explicit shape choices on all current labels.
+labels.DefaultLabelShapeType = ShapeType.NotDefined;
+presentation.Save("label-shapes-reset.pptx", SaveFormat.Pptx);
+```
+
+Assigning the collection shape again also replaces earlier individual shape choices. <a href="https://reference.aspose.com/slides/net/aspose.slides/shapetype/" target="_blank" rel="nofollow noopener noreferrer">NotDefined</a> clears the explicit shape selection; it does not hide the labels or clear their other formatting. Set the desired shapes after populating the series rather than assuming that points added later inherit an earlier assignment. Rectangle and Ellipse are used here; inspect the rendered result when choosing other shape types.
+
+## **FAQ**
+
+**How can I prevent data labels from overlapping on dense charts?**
+
+Combine automatic label placement, leader lines, and reduced font size; if necessary, hide some fields (for example, the category) or show labels only for extreme values or key points.
+
+**How can I disable labels only for zero, negative, or empty values?**
+
+Filter data points before enabling labels and turn off display for values of 0, negative values, or missing values according to a defined rule.
+
+**How can I ensure a consistent label style when exporting to PDF/images?**
+
+Explicitly set the font family and size and verify that the font is available in the rendering environment to avoid fallback.
+
+## Related features
+
+- <a href="https://docs.aspose.com/slides/features/chart-data-labels/" target="_blank" rel="nofollow noopener noreferrer">Format chart data labels</a>

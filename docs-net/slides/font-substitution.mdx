@@ -1,0 +1,189 @@
+---
+title: "Configure Font Substitution in Presentations in .NET"
+sidebar_label: "Configure Font Substitution in Presentations in .NET"
+sidebar_key: "net-slides-font-substitution"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/net"
+source_path: "slides/net/font-substitution.md"
+source_commit: ""
+source_sha256: "5475a65581841c80f4d747bff0ee7f26256d2ba7270ae131ebf7781012c59c85"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/net/font-substitution/"
+source_markdown_url: "https://docs.aspose.com/slides/net/font-substitution.md"
+source_snapshot_sha256: "7e1047cf5dd9ca9fdaa97410d8928204c3d720ffdda2d130d491a6af429a20be"
+---
+
+:::info
+Aspose.Slides for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "./_remote-markdown.css";
+
+T
+
+> Configure font substitution rules and inspect substituted fonts in Aspose.Slides for .NET when rendering or converting PowerPoint and OpenDocument presentations.
+> 8
+
+## **Overview**
+
+Font substitution allows Aspose.Slides to use an available font in place of a font that cannot be accessed when a presentation is rendered or converted. The substitution affects the rendered output; it does not change the font assigned to the presentation content.
+
+You can define the font to use when a particular font is unavailable, and you can inspect the substitutions that Aspose.Slides will make during rendering. This helps keep output consistent across environments with different installed fonts.
+
+If a font is available but has no dedicated bold typeface, see [Handle Fonts Without a Dedicated Bold Typeface](/net/slides/convert-powerpoint-to-pdf/#handle-fonts-without-a-dedicated-bold-typeface). That section explains how to rasterize the affected text during PDF export and the consequences for text selection, searching, and scaling.
+
+## **Get Font Substitutions**
+
+Use the <a href="https://reference.aspose.com/slides/net/aspose.slides/ifontsmanager/getsubstitutions/" target="_blank" rel="nofollow noopener noreferrer">IFontsManager.GetSubstitutions</a> method to determine which fonts will be substituted when the presentation is rendered. The method returns <a href="https://reference.aspose.com/slides/net/aspose.slides/fontsubstitutioninfo/" target="_blank" rel="nofollow noopener noreferrer">FontSubstitutionInfo</a> objects that identify the original and substituted font names.
+
+The following C# example lists all font substitutions for a presentation:
+
+```csharp
+using System;
+using Aspose.Slides;
+
+using var presentation = new Presentation("Presentation.pptx");
+
+foreach (var substitution in presentation.FontsManager.GetSubstitutions())
+{
+    Console.WriteLine($"{substitution.OriginalFontName} -> {substitution.SubstitutedFontName}");
+}
+```
+
+## **Get Font Substitutions for Selected Slides**
+
+Use the <a href="https://reference.aspose.com/slides/net/aspose.slides/ifontsmanager/getsubstitutions/" target="_blank" rel="nofollow noopener noreferrer">IFontsManager.GetSubstitutions</a> overload with an `int[] slides` argument to inspect only the substitutions required to render specific slides. This is useful when you are rendering or exporting part of a presentation, checking a large presentation incrementally, locating slides that depend on unavailable fonts, preparing a minimal font package for a server or container, or diagnosing rendering differences without processing unrelated slides.
+
+The `slides` array contains one-based slide indexes: `1` identifies the first slide. By contrast, the <a href="https://reference.aspose.com/slides/net/aspose.slides/presentation/slides/" target="_blank" rel="nofollow noopener noreferrer">Presentation.Slides</a> collection indexer is zero-based, so that same slide is accessed as `presentation.Slides[0]`. Keep this difference in mind when building the array to avoid off-by-one errors.
+
+Call the overload through the <a href="https://reference.aspose.com/slides/net/aspose.slides/presentation/fontsmanager/" target="_blank" rel="nofollow noopener noreferrer">Presentation.FontsManager</a> property. It returns only the substitutions determined while rendering the selected slides. Each result is a <a href="https://reference.aspose.com/slides/net/aspose.slides/fontsubstitutioninfo/" target="_blank" rel="nofollow noopener noreferrer">FontSubstitutionInfo</a> object containing the original and substituted font names. The result reflects the current font environment and [externally loaded fonts](/net/slides/custom-font/). Substitution rules stored in an <a href="https://reference.aspose.com/slides/net/aspose.slides/ifontsubstrulecollection/" target="_blank" rel="nofollow noopener noreferrer">IFontSubstRuleCollection</a> change the rendered output but are not reflected in the result.
+
+The same substitution can be required by more than one selected slide. Deduplicate the results when you create a font inventory or preflight report. The following example reports every returned substitution and then creates a sorted list of unique font mappings:
+
+```csharp
+using System;
+using System.Linq;
+using Aspose.Slides;
+
+using var presentation = new Presentation("Presentation.pptx");
+
+int[] selectedSlides = { 1, 3, 5 };
+var substitutions = presentation.FontsManager.GetSubstitutions(selectedSlides).ToList();
+
+Console.WriteLine("Substitutions for the selected slides:");
+foreach (var substitution in substitutions)
+{
+    Console.WriteLine($"{substitution.OriginalFontName} -> {substitution.SubstitutedFontName}");
+}
+
+var preflightEntries = substitutions.Select(substitution => $"{substitution.OriginalFontName} -> {substitution.SubstitutedFontName}");
+var uniquePreflightEntries = preflightEntries.Distinct(StringComparer.OrdinalIgnoreCase);
+var sortedPreflightEntries = uniquePreflightEntries.OrderBy(entry => entry, StringComparer.OrdinalIgnoreCase).ToList();
+
+Console.WriteLine("Deduplicated font preflight report:");
+foreach (var entry in sortedPreflightEntries)
+{
+    Console.WriteLine(entry);
+}
+```
+
+The <a href="https://reference.aspose.com/slides/net/aspose.slides/ifontsmanager/" target="_blank" rel="nofollow noopener noreferrer">IFontsManager</a> interface provides both overloads. Choose one according to the scope of the rendering operation:
+
+<div className="docs-owner-markdown-table">
+
+| Overload | Use it when |
+| ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| <a href="https://reference.aspose.com/slides/net/aspose.slides/ifontsmanager/getsubstitutions/" target="_blank" rel="nofollow noopener noreferrer">GetSubstitutions</a> with no arguments | You need substitutions for the entire presentation. |
+| <a href="https://reference.aspose.com/slides/net/aspose.slides/ifontsmanager/getsubstitutions/" target="_blank" rel="nofollow noopener noreferrer">GetSubstitutions</a> with `int[] slides` | You need substitutions for a selected range, incremental check, or partial export. |
+
+</div>
+
+## **Set Font Substitution Rules**
+
+To specify the font that Aspose.Slides should use when a source font is unavailable:
+
+1. Load the presentation.
+2. Create font definitions for the source and substitute fonts.
+3. Create a <a href="https://reference.aspose.com/slides/net/aspose.slides/fontsubstrule/" target="_blank" rel="nofollow noopener noreferrer">FontSubstRule</a> with the <a href="https://reference.aspose.com/slides/net/aspose.slides/fontsubstcondition/" target="_blank" rel="nofollow noopener noreferrer">WhenInaccessible</a> condition.
+4. Add the rule to a <a href="https://reference.aspose.com/slides/net/aspose.slides/fontsubstrulecollection/" target="_blank" rel="nofollow noopener noreferrer">FontSubstRuleCollection</a>.
+5. Assign the collection to the <a href="https://reference.aspose.com/slides/net/aspose.slides/fontsmanager/fontsubstrulelist/" target="_blank" rel="nofollow noopener noreferrer">FontsManager.FontSubstRuleList</a> property.
+6. Render or convert the presentation.
+
+The following C# example substitutes `Arial` for `SomeRareFont` when `SomeRareFont` is unavailable, and then renders the first slide to verify the result. The substitute font must be available to Aspose.Slides.
+
+```csharp
+using Aspose.Slides;
+
+using var presentation = new Presentation("Fonts.pptx");
+
+var sourceFont = new FontData("SomeRareFont");
+var substituteFont = new FontData("Arial");
+var substitutionRule = new FontSubstRule(sourceFont, substituteFont, FontSubstCondition.WhenInaccessible);
+
+var substitutionRules = new FontSubstRuleCollection();
+substitutionRules.Add(substitutionRule);
+presentation.FontsManager.FontSubstRuleList = substitutionRules;
+
+using var image = presentation.Slides[0].GetImage(1f, 1f);
+image.Save("slide.jpg", ImageFormat.Jpeg);
+```
+
+For an unconditional change to the fonts used throughout a presentation, see [Font Replacement](/net/slides/font-replacement/).
+
+## **Limitations for Math Equation Fonts**
+
+Font substitution rules are part of the standard font selection process used during rendering and conversion. They work for regular text when Aspose.Slides can replace an inaccessible font with the available font specified by a rule.
+
+Office Math equations have an additional requirement. If an equation uses **Cambria Math**, Aspose.Slides may need that exact font to calculate and render the equation layout. A rule that substitutes another math font, such as **STIX Two Math**, cannot replace **Cambria Math** for this purpose, and rendering may still report that **Cambria Math** is required.
+
+To render or convert such a presentation, make **Cambria Math** available to Aspose.Slides. Install it in the operating system or load it as an [external font](/net/slides/custom-font/).
+
+This limitation applies to equation layout. The substitution rules described above still apply to regular presentation text.
+
+## **FAQ**
+
+**What is the difference between font replacement and font substitution?**
+
+[Font replacement](/net/slides/font-replacement/) intentionally changes one font to another throughout the presentation. Font substitution selects a font for rendered output when the configured condition is met, such as when the original font is unavailable.
+
+**When are substitution rules applied?**
+
+The rules participate in the [font selection sequence](/net/slides/font-selection-sequence/) during rendering and conversion. With `WhenInaccessible`, a rule is used only when Aspose.Slides cannot access the source font.
+
+**What happens when a font is missing and no substitution rule is configured?**
+
+Aspose.Slides selects the closest available font according to its font selection process. The result depends on the fonts available in the runtime environment.
+
+**Can I load external fonts to avoid substitution?**
+
+Yes. You can [load external fonts](/net/slides/custom-font/) so Aspose.Slides can use them during rendering and conversion.
+
+**Does Aspose distribute fonts with the library?**
+
+No. You are responsible for providing fonts and complying with their licenses.
+
+**Can substitution results differ between Windows, Linux, and macOS?**
+
+Yes. Installed fonts and font search locations differ by operating system, so a font available on one machine may require substitution on another.
+
+**How can I make font selection consistent in batch conversions?**
+
+Use the same font files and versions on every machine or container, [load required external fonts](/net/slides/custom-font/), and [embed fonts](/net/slides/embedded-font/) when licensing permits. You can also call <a href="https://reference.aspose.com/slides/net/aspose.slides/ifontsmanager/getsubstitutions/" target="_blank" rel="nofollow noopener noreferrer">IFontsManager.GetSubstitutions</a> before export to identify unexpected substitutions.
+
+## Related features
+
+- <a href="https://docs.aspose.com/slides/features/font-substitution/" target="_blank" rel="nofollow noopener noreferrer">Set font substitution rules</a>
+
+## Related articles
+
+- [Font Selection Sequence in Aspose.Slides for .NET](/net/slides/font-selection-sequence/)
+- [Streamline Font Replacement in Presentations in .NET](/net/slides/font-replacement/)
+- [Manage Fallback Fonts for Presentations in .NET](/net/slides/fallback-font/)

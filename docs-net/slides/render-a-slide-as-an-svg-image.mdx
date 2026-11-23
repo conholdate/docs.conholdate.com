@@ -1,0 +1,339 @@
+---
+title: "Render Presentation Slides as SVG Images in .NET"
+sidebar_label: "Render Presentation Slides as SVG Images in .NET"
+sidebar_key: "net-slides-render-a-slide-as-an-svg-image"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/net"
+source_path: "slides/net/render-a-slide-as-an-svg-image.md"
+source_commit: ""
+source_sha256: "a2892c2439cd475d8699b593cfbaded6946078d764e398bd3882a9239e18f242"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/net/render-a-slide-as-an-svg-image/"
+source_markdown_url: "https://docs.aspose.com/slides/net/render-a-slide-as-an-svg-image.md"
+source_snapshot_sha256: "f643535bd381876bc70b4156e3716fd13a53f0b5b9edbccf089118301f93892f"
+---
+
+:::info
+Aspose.Slides for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "./_remote-markdown.css";
+
+T
+
+> Export PowerPoint slides as SVG images in .NET and control fonts, text, images, IDs, and events with Aspose.Slides.
+> 1
+
+## **Overview**
+
+SVG is a scalable XML-based image format that works well for web publishing, slide viewers, accessibility workflows, and automated post-processing. Aspose.Slides exports each slide to a separate SVG file and lets you control how text, fonts, pictures, and SVG elements are written.
+
+Use <a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgoptions/" target="_blank" rel="nofollow noopener noreferrer">SVGOptions</a> when the exported SVG must be compact, predictable across browsers, or ready for interactive use.
+
+## **Export a Slide as SVG**
+
+Create a <a href="https://reference.aspose.com/slides/net/aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a>, select a slide, and write it to a stream. The following example exports every slide in a presentation as a separate SVG file.
+
+```csharp
+using Aspose.Slides;
+
+using var presentation = new Presentation("presentation.pptx");
+
+foreach (var slide in presentation.Slides)
+{
+    using var svgStream = File.Create($"slide-{slide.SlideNumber}.svg");
+    slide.WriteAsSvg(svgStream);
+}
+```
+
+The filename uses <a href="https://reference.aspose.com/slides/net/aspose.slides/islide/slidenumber/" target="_blank" rel="nofollow noopener noreferrer">ISlide.SlideNumber</a> rather than the loop index. You can also export an individual shape with <a href="https://reference.aspose.com/slides/net/aspose.slides/ishape/writeassvg/" target="_blank" rel="nofollow noopener noreferrer">IShape.WriteAsSvg</a> when a slide viewer or web page needs only that shape.
+
+## **Configure SVG Output**
+
+<a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgoptions/" target="_blank" rel="nofollow noopener noreferrer">SVGOptions</a> controls SVG rendering. For text frames, <a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgoptions/useframesize/" target="_blank" rel="nofollow noopener noreferrer">SVGOptions.UseFrameSize</a> includes the text frame in the rendering area, and <a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgoptions/useframerotation/" target="_blank" rel="nofollow noopener noreferrer">SVGOptions.UseFrameRotation</a> determines whether the frame rotation is applied. Set <a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgoptions/disablefontligatures/" target="_blank" rel="nofollow noopener noreferrer">SVGOptions.DisableFontLigatures</a> to `true` when text must be rendered without ligatures.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("presentation.pptx");
+
+var svgOptions = new SVGOptions
+{
+    DisableFontLigatures = true,
+    UseFrameSize = true,
+    UseFrameRotation = false
+};
+
+using var svgStream = File.Create("slide-with-custom-options.svg");
+presentation.Slides[0].WriteAsSvg(svgStream, svgOptions);
+```
+
+## **Control Line-End Cropping at Arrowheads**
+
+SVG 1.1 has no marker inset setting to specify where a line should stop beneath an arrowhead. By default, Aspose.Slides shortens the exported line so its stroke does not protrude through the marker. Set <a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgoptions/disablelineendcropping/" target="_blank" rel="nofollow noopener noreferrer">SVGOptions.DisableLineEndCropping</a> to `true` to draw the stroke all the way to the line's original endpoint. This setting affects only the SVG output. The line keeps its position and length on the slide.
+
+The example draws triangle and diamond arrowheads on lines 2 and 10 points wide. It exports the same slide twice, changing only the cropping option.
+
+```csharp
+using System.Drawing;
+using System.IO;
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+var y = 40;
+
+foreach (var style in new[] { LineArrowheadStyle.Triangle, LineArrowheadStyle.Diamond })
+{
+    foreach (var width in new[] { 2, 10 })
+    {
+        var line = slide.Shapes.AddAutoShape(ShapeType.Line, 40, y, 200, 0);
+        var format = line.LineFormat;
+        format.FillFormat.FillType = FillType.Solid;
+        format.FillFormat.SolidFillColor.Color = Color.DarkBlue;
+        format.Width = width;
+        format.EndArrowheadStyle = style;
+        y += 50;
+    }
+}
+
+var options = new SVGOptions { DisableLineEndCropping = false };
+using var cropped = File.Create("cropped.svg");
+slide.WriteAsSvg(cropped, options);
+
+options.DisableLineEndCropping = true;
+using var uncropped = File.Create("uncropped.svg");
+slide.WriteAsSvg(uncropped, options);
+```
+
+The comparison shows the triangular arrowhead on the 10-point line. With cropping enabled, the tip is sharp. With cropping disabled, the stroke protrudes through the sloping sides of the marker and leaves a flat end.
+
+![Enlarged 10-point triangle with a sharp tip when cropping is enabled and a flat end when cropping is disabled](/net/slides/images/5566b52e0eae04ac-line-end-cropping.png)
+
+In the other lines from the example, the protruding stroke is less visible on the 2-point triangle. The filled diamond covers the end of the stroke at both widths.
+
+## **Control Text and Fonts**
+
+When exporting slides to SVG, you can control whether text remains as text or is converted to vector graphics, and how external fonts are included or referenced. The following options help you balance visual consistency, text selection, and font dependencies in the exported SVG.
+
+### **Vectorize All Text**
+
+Set <a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgoptions/vectorizetext/" target="_blank" rel="nofollow noopener noreferrer">SVGOptions.VectorizeText</a> to `true` to write all slide text as vector graphics. This eliminates font dependencies and makes the visual result more consistent across browsers, but the text is no longer selectable or searchable as SVG text.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("presentation.pptx");
+
+var svgOptions = new SVGOptions
+{
+    VectorizeText = true
+};
+
+using var svgStream = File.Create("slide-with-vectorized-text.svg");
+presentation.Slides[0].WriteAsSvg(svgStream, svgOptions);
+```
+
+### **Choose How External Fonts Are Handled**
+
+<a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgoptions/externalfontshandling/" target="_blank" rel="nofollow noopener noreferrer">SVGOptions.ExternalFontsHandling</a> uses a <a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgexternalfontshandling/" target="_blank" rel="nofollow noopener noreferrer">SvgExternalFontsHandling</a> value for fonts that are loaded externally. Choose `AddLinksToFontFiles` to reference separate font files, `Embed` to include font data in the SVG, or `Vectorize` to render only text that uses external fonts as graphics. Verify font licensing before embedding fonts.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("presentation.pptx");
+
+var linkedFontsOptions = new SVGOptions
+{
+    ExternalFontsHandling = SvgExternalFontsHandling.AddLinksToFontFiles
+};
+
+using var linkedFontsStream = File.Create("slide-with-font-links.svg");
+presentation.Slides[0].WriteAsSvg(linkedFontsStream, linkedFontsOptions);
+
+var embeddedFontsOptions = new SVGOptions
+{
+    ExternalFontsHandling = SvgExternalFontsHandling.Embed
+};
+
+using var embeddedFontsStream = File.Create("slide-with-embedded-fonts.svg");
+presentation.Slides[0].WriteAsSvg(embeddedFontsStream, embeddedFontsOptions);
+
+var vectorizedExternalFontsOptions = new SVGOptions
+{
+    ExternalFontsHandling = SvgExternalFontsHandling.Vectorize
+};
+
+using var vectorizedExternalFontsStream = File.Create("slide-with-vectorized-external-fonts.svg");
+presentation.Slides[0].WriteAsSvg(vectorizedExternalFontsStream, vectorizedExternalFontsOptions);
+```
+
+## **Reduce Embedded Image Size**
+
+Use <a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgoptions/picturescompression/" target="_blank" rel="nofollow noopener noreferrer">SVGOptions.PicturesCompression</a> to reduce the resolution of embedded pictures, <a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgoptions/deletepicturescroppedareas/" target="_blank" rel="nofollow noopener noreferrer">SVGOptions.DeletePicturesCroppedAreas</a> to omit cropped source areas, and <a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgoptions/jpegquality/" target="_blank" rel="nofollow noopener noreferrer">SVGOptions.JpegQuality</a> to control JPEG encoding quality. These settings reduce file size at the cost of image fidelity or retained image data.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("presentation.pptx");
+
+var svgOptions = new SVGOptions
+{
+    PicturesCompression = PicturesCompression.Dpi150,
+    DeletePicturesCroppedAreas = true,
+    JpegQuality = 80
+};
+
+using var svgStream = File.Create("compressed-slide.svg");
+presentation.Slides[0].WriteAsSvg(svgStream, svgOptions);
+```
+
+## **Control Metafile Rasterization Resolution**
+
+<a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgoptions/metafilerasterizationdpi/" target="_blank" rel="nofollow noopener noreferrer">SVGOptions.MetafileRasterizationDpi</a> sets the lower resolution limit for rasterizing metafiles during SVG export. Use it to balance detail and file size when an EMF or WMF image is rasterized. It does not define a global DPI for the SVG or force every object on the slide to become a raster image.
+
+Download <a href="https://docs.aspose.com/slides/net/render-a-slide-as-an-svg-image/metafile-rasterization.pptx" target="_blank" rel="nofollow noopener noreferrer">metafile-rasterization.pptx</a>, which contains an EMF image with closely spaced diagonal lines. The following example exports its first slide at three rasterization resolutions through <a href="https://reference.aspose.com/slides/net/aspose.slides/islide/writeassvg/" target="_blank" rel="nofollow noopener noreferrer">ISlide.WriteAsSvg</a>. All other export settings remain identical so that the results can be compared.
+
+```csharp
+using System.IO;
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("metafile-rasterization.pptx");
+
+foreach (var dpi in new[] { 72, 150, 300 })
+{
+    var svgOptions = new SVGOptions
+    {
+        MetafileRasterizationDpi = dpi,
+        PicturesCompression = PicturesCompression.Dpi330,
+        JpegQuality = 90
+    };
+
+    using var svgStream = File.Create($"slide-{dpi}.svg");
+    presentation.Slides[0].WriteAsSvg(svgStream, svgOptions);
+}
+```
+
+In the output, the EMF became one embedded PNG in each SVG. The following measurements are for the supplied presentation; they are not a general formula for converting DPI to pixel dimensions.
+
+<div className="docs-owner-markdown-table">
+
+| Metafile rasterization DPI | Embedded PNG dimensions | SVG file size (bytes) |
+| -------------------------- | ----------------------- | --------------------- |
+| 72 | 1196 × 596 | 170,221 |
+| 150 | 2492 × 1242 | 423,149 |
+| 300 | 4983 × 2483 | 1,027,169 |
+
+</div>
+
+The comparison below shows the same area of the embedded raster at the same enlarged display size. The diagonal lines show visible pixelation at 72 DPI and smoother edges at higher resolutions, while the SVG file grows. Increasing the value does not necessarily improve every detail or change every exported image.
+
+![Enlarged diagonal-line detail at 72, 150, and 300 DPI](/net/slides/images/b633b780d9706099-metafile-rasterization-comparison.png)
+
+<a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgoptions/picturescompression/" target="_blank" rel="nofollow noopener noreferrer">SVGOptions.PicturesCompression</a> controls image resolution reduction and can mask the effect of changing the metafile rasterization resolution. <a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgoptions/jpegquality/" target="_blank" rel="nofollow noopener noreferrer">SVGOptions.JpegQuality</a> controls JPEG encoding quality, not metafile rasterization resolution.
+
+## **Assign Stable IDs to Shapes and Text**
+
+Use <a href="https://reference.aspose.com/slides/net/aspose.slides.export/isvgshapeformattingcontroller/" target="_blank" rel="nofollow noopener noreferrer">ISvgShapeFormattingController</a> to set <a href="https://reference.aspose.com/slides/net/aspose.slides.export/isvgshape/id/" target="_blank" rel="nofollow noopener noreferrer">ISvgShape.Id</a> for each SVG shape. To set <a href="https://reference.aspose.com/slides/net/aspose.slides.export/isvgtspan/id/" target="_blank" rel="nofollow noopener noreferrer">ISvgTSpan.Id</a> values on text `tspan` elements as well, implement <a href="https://reference.aspose.com/slides/net/aspose.slides.export/isvgshapeandtextformattingcontroller/" target="_blank" rel="nofollow noopener noreferrer">ISvgShapeAndTextFormattingController</a>. Assign either controller with <a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgoptions/shapeformattingcontroller/" target="_blank" rel="nofollow noopener noreferrer">SVGOptions.ShapeFormattingController</a>.
+
+The following controller uses <a href="https://reference.aspose.com/slides/net/aspose.slides/ishape/officeinteropshapeid/" target="_blank" rel="nofollow noopener noreferrer">IShape.OfficeInteropShapeId</a>, which is stable for the lifetime of the shape, and a repeatable counter for its text spans. This makes the generated IDs suitable for post-processing an unchanged presentation.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("presentation.pptx");
+
+var svgOptions = new SVGOptions
+{
+    ShapeFormattingController = new StableSvgIdController()
+};
+
+using var svgStream = File.Create("slide-with-stable-ids.svg");
+presentation.Slides[0].WriteAsSvg(svgStream, svgOptions);
+
+class StableSvgIdController : ISvgShapeAndTextFormattingController
+{
+    private string currentShapeId = string.Empty;
+    private int textSpanIndex;
+
+    public ISvgShapeFormattingController AsISvgShapeFormattingController => this;
+
+    public void FormatShape(ISvgShape svgShape, IShape shape)
+    {
+        currentShapeId = $"shape-{shape.OfficeInteropShapeId}";
+        textSpanIndex = 0;
+        svgShape.Id = currentShapeId;
+    }
+
+    public void FormatText(ISvgTSpan svgTSpan, IPortion portion, ITextFrame textFrame)
+    {
+        svgTSpan.Id = $"{currentShapeId}-text-{textSpanIndex++}";
+    }
+}
+```
+
+## **Add SVG Event Handlers**
+
+In an <a href="https://reference.aspose.com/slides/net/aspose.slides.export/isvgshapeformattingcontroller/" target="_blank" rel="nofollow noopener noreferrer">ISvgShapeFormattingController</a>, call <a href="https://reference.aspose.com/slides/net/aspose.slides.export/isvgshape/seteventhandler/" target="_blank" rel="nofollow noopener noreferrer">ISvgShape.SetEventHandler</a> with a <a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgevent/" target="_blank" rel="nofollow noopener noreferrer">SvgEvent</a> value to add a JavaScript event handler to an exported shape. Assign the controller with <a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgoptions/shapeformattingcontroller/" target="_blank" rel="nofollow noopener noreferrer">SVGOptions.ShapeFormattingController</a> and define the JavaScript function in the page or SVG document that hosts the result.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("presentation.pptx");
+
+var svgOptions = new SVGOptions
+{
+    ShapeFormattingController = new SvgEventController()
+};
+
+using var svgStream = File.Create("interactive-slide.svg");
+presentation.Slides[0].WriteAsSvg(svgStream, svgOptions);
+
+class SvgEventController : ISvgShapeFormattingController
+{
+    public void FormatShape(ISvgShape svgShape, IShape shape)
+    {
+        if (shape.Name == "ActionButton")
+        {
+            svgShape.Id = "action-button";
+            svgShape.SetEventHandler(SvgEvent.OnClick, "handleShapeClick(event)");
+        }
+    }
+}
+```
+
+The host page can define the JavaScript function referenced by the handler. Assigning IDs and event handlers enables slide viewers, accessibility enhancements, and other interactive SVG workflows.
+
+## **FAQ**
+
+**When should I use <a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgoptions/vectorizetext/" target="_blank" rel="nofollow noopener noreferrer">SVGOptions.VectorizeText</a> instead of <a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgexternalfontshandling/" target="_blank" rel="nofollow noopener noreferrer">SvgExternalFontsHandling.Vectorize</a>?**
+
+Use <a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgoptions/vectorizetext/" target="_blank" rel="nofollow noopener noreferrer">SVGOptions.VectorizeText</a> when all text must be independent of fonts. Use <a href="https://reference.aspose.com/slides/net/aspose.slides.export/svgexternalfontshandling/" target="_blank" rel="nofollow noopener noreferrer">SvgExternalFontsHandling.Vectorize</a> when only text that uses external fonts should be converted to graphics.
+
+**What is the best way to make an SVG smaller?**
+
+Start by compressing embedded pictures, deleting cropped image areas, and choosing linked font files when the target environment can serve them. Test the result because lower image resolution, lower JPEG quality, and vectorized text each have different quality and size tradeoffs.
+
+**Can I modify exported SVG elements after export?**
+
+Yes. Assign IDs through a formatting controller, then select the matching SVG elements in your post-processing tool or browser script.
+
+## Related features
+
+- <a href="https://docs.aspose.com/slides/features/svg-export/" target="_blank" rel="nofollow noopener noreferrer">Export slides to SVG</a>

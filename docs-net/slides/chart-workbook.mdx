@@ -1,0 +1,713 @@
+---
+title: "Manage Chart Workbooks in Presentations in .NET"
+sidebar_label: "Manage Chart Workbooks in Presentations in .NET"
+sidebar_key: "net-slides-chart-workbook"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/net"
+source_path: "slides/net/chart-workbook.md"
+source_commit: ""
+source_sha256: "84c4c4305fb6e478547059b28bc2519081f0ad04acfe01d84db1fc66c24c5b08"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/net/chart-workbook/"
+source_markdown_url: "https://docs.aspose.com/slides/net/chart-workbook.md"
+source_snapshot_sha256: "9d949c4d080a7c7ae47b525b7489f6beb372362c93d759ba8dc6adf15adf94ae"
+---
+
+:::info
+Aspose.Slides for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "./_remote-markdown.css";
+
+T
+
+> Discover Aspose.Slides for .NET: effortlessly manage chart workbooks in PowerPoint and OpenDocument formats to streamline your presentation data.
+> 7
+
+## **Overview**
+
+This article explains how to work with chart workbooks in Aspose.Slides. It shows how to read and write chart data through workbook streams, use workbook cells as chart data labels, access worksheet collections, and specify the data source type for chart values.
+
+It also covers working with external workbooks as chart data sources. The examples demonstrate how to create and assign an external workbook, retrieve the path of an external workbook linked to a chart, and edit chart data when the workbook is available.
+
+For workbook cells that represent missing data, see [Control the Display of Empty Cells](/net/slides/chart-series/) for the difference between an empty cell and zero, and a line-chart comparison of the available display modes.
+
+## **Include Data from Hidden Rows and Columns**
+
+Use <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichart/plotvisiblecellsonly/" target="_blank" rel="nofollow noopener noreferrer">IChart.PlotVisibleCellsOnly</a> to control whether a chart plots data from hidden worksheet rows and columns. Set it to `true` to plot only visible cells, or `false` to include both visible and hidden cells. This setting controls chart plotting; it does not hide or unhide worksheet rows or columns.
+
+The <a href="https://docs.aspose.com/slides/net/chart-workbook/hidden-source-data.pptx" target="_blank" rel="nofollow noopener noreferrer">sample presentation</a> contains a column chart as the first shape on its first slide. The embedded worksheet, `Sheet1`, contains the following source range, `A1:C4`. Row 3 and column C are hidden, but their cells still contain values.
+
+<div className="docs-owner-markdown-table">
+
+| Worksheet row | A: Month | B: Retail | C: Wholesale (hidden column) |
+| -------------- | -------- | --------- | ---------------------------- |
+| 2 | January | 10 | 30 |
+| 3 (hidden row) | February | 40 | 60 |
+| 4 | March | 20 | 50 |
+
+</div>
+
+Access source cells through <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/chartdataworkbook/" target="_blank" rel="nofollow noopener noreferrer">IChartData.ChartDataWorkbook</a> and read <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdatacell/ishidden/" target="_blank" rel="nofollow noopener noreferrer">IChartDataCell.IsHidden</a> to inspect their hidden status. This property is read-only. In this file, B2 is visible, B3 belongs to the hidden row, and C2 belongs to the hidden column; the example prints `False`, `True`, and `True`, respectively.
+
+For this example, refresh the chart data after changing the plotting setting: retain the embedded workbook with <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/readworkbookstream/" target="_blank" rel="nofollow noopener noreferrer">ReadWorkbookStream</a> and reload it with <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/writeworkbookstream/" target="_blank" rel="nofollow noopener noreferrer">WriteWorkbookStream</a>. When including all cells, also use <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/setrange/" target="_blank" rel="nofollow noopener noreferrer">SetRange</a> to restore the complete range, including the hidden February category. Simply changing the flag is insufficient to refresh this sample's cached chart data and category labels.
+
+```csharp
+using System;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("hidden-source-data.pptx");
+var slide = presentation.Slides[0];
+
+if (slide.Shapes[0] is IChart chart)
+{
+    var workbook = chart.ChartData.ChartDataWorkbook;
+    Console.WriteLine($"B2 hidden: {workbook.GetCell(0, "B2").IsHidden}");
+    Console.WriteLine($"B3 hidden: {workbook.GetCell(0, "B3").IsHidden}");
+    Console.WriteLine($"C2 hidden: {workbook.GetCell(0, "C2").IsHidden}");
+
+    using var workbookStream = chart.ChartData.ReadWorkbookStream();
+    foreach (var visibleOnly in new[] { true, false })
+    {
+        chart.PlotVisibleCellsOnly = visibleOnly;
+
+        // Refresh the chart data from the embedded workbook.
+        workbookStream.Position = 0;
+        chart.ChartData.WriteWorkbookStream(workbookStream);
+        if (!visibleOnly)
+        {
+            // Restore the complete source range, including hidden categories.
+            chart.ChartData.SetRange("Sheet1!$A$1:$C$4");
+        }
+
+        presentation.Save($"hidden_cells_{visibleOnly}.pptx", SaveFormat.Pptx);
+    }
+}
+else
+{
+    Console.WriteLine("The first shape is not a chart.");
+}
+```
+
+The example saves two versions of the presentation: one with only the visible Retail values (10 and 20), and another with all six values. The images below were rendered from the saved presentations after reopening them; both files preserve their assigned plotting setting. Row 3 and column C remain hidden in both embedded workbooks.
+
+<div className="docs-owner-markdown-table">
+
+| Only visible cells (`true`) | All cells (`false`) |
+| -------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Only visible cells: Retail values 10 and 20 for January and March.](/net/slides/images/06667e60f8d9b5c8-hidden_cells_True.png) | ![All cells: Retail and Wholesale values for January, February, and March.](/net/slides/images/044be52dcade7bea-hidden_cells_False.png) |
+
+</div>
+
+A hidden cell containing a value is different from an empty cell. <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichart/displayblanksas/" target="_blank" rel="nofollow noopener noreferrer">IChart.DisplayBlanksAs</a> controls how missing values are displayed; it does not include or exclude hidden source data. See [Control the Display of Empty Cells](/net/slides/chart-series/#control-the-display-of-empty-cells) for an example.
+
+## **Retrieve a Chart's Data Range**
+
+Before updating workbook data in an existing presentation, inspect the source ranges to identify which worksheet cells each chart uses. The <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/getrange/" target="_blank" rel="nofollow noopener noreferrer">IChartData.GetRange</a> method returns the current data range as a worksheet-qualified formula, such as `Sheet1!$A$1:$D$5`. Here, `Sheet1` is the worksheet name, `!` separates it from the cell range, and `$A$1:$D$5` identifies cells A1 through D5, inclusive. The dollar signs indicate absolute row and column references.
+
+The method reads the current range without changing the chart or its workbook. If the chart does not use a workbook as its data source, it throws <a href="https://learn.microsoft.com/en-us/dotnet/api/system.invalidoperationexception" target="_blank" rel="nofollow noopener noreferrer">InvalidOperationException</a>. For more information, see the <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/chartdata/" target="_blank" rel="nofollow noopener noreferrer">ChartData API Reference</a>.
+
+This example opens a presentation and checks the shapes directly on each slide for charts. It prints each chart's name and source range. If a chart does not use a workbook, it prints a message and continues to the next chart.
+
+```csharp
+using System;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+
+using var presentation = new Presentation("presentation.pptx");
+
+foreach (var slide in presentation.Slides)
+{
+    foreach (var shape in slide.Shapes)
+    {
+        if (shape is IChart chart)
+        {
+            try
+            {
+                var range = chart.ChartData.GetRange();
+                Console.WriteLine($"{chart.Name}: {range}");
+            }
+            catch (InvalidOperationException)
+            {
+                Console.WriteLine($"{chart.Name}: The chart does not use a workbook as its data source.");
+            }
+        }
+    }
+}
+```
+
+## **Read and Write Chart Data from a Workbook**
+
+Aspose.Slides for .NET provides the <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/readworkbookstream/" target="_blank" rel="nofollow noopener noreferrer">ReadWorkbookStream</a> and <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/writeworkbookstream/" target="_blank" rel="nofollow noopener noreferrer">WriteWorkbookStream</a> methods that allow you to read and write chart data workbooks (containing chart data edited with Aspose.Cells). **Note** that the chart data has to be organized in the same manner or must have a structure similar to the source.
+
+This example uses a presentation with a chart as the first shape on its first slide. It reads the embedded workbook into a stream, clears the existing series and categories, and writes the same workbook back. The changes remain in memory; the example does not save the presentation.
+
+```csharp
+using System;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+
+using var presentation = new Presentation("chart.pptx");
+var slide = presentation.Slides[0];
+
+var shapeCount = slide.Shapes.Count;
+if (shapeCount > 0 && slide.Shapes[0] is IChart chart)
+{
+    var chartData = chart.ChartData;
+    using var workbookStream = chartData.ReadWorkbookStream();
+
+    chartData.Series.Clear();
+    chartData.Categories.Clear();
+
+    workbookStream.Position = 0;
+    chartData.WriteWorkbookStream(workbookStream);
+}
+else
+{
+    Console.WriteLine("The first shape is not a chart.");
+}
+```
+
+### **Validate Chart Layout After Workbook Modification**
+
+When you replace an embedded workbook with a modified one, the chart retains its original series and category collections. This mismatch can cause <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichart/validatechartlayout/" target="_blank" rel="nofollow noopener noreferrer">IChart.ValidateChartLayout</a> to fail with an index-out-of-range error. Clear the existing series and categories before writing the updated workbook back to the chart. This example uses a chart that is the first shape on the first slide. The comment marks where workbook editing would occur; the runnable example writes the original workbook back and validates the layout in memory.
+
+```csharp
+using System;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+
+using var presentation = new Presentation("chart.pptx");
+var slide = presentation.Slides[0];
+
+var shapeCount = slide.Shapes.Count;
+if (shapeCount > 0 && slide.Shapes[0] is IChart chart)
+{
+    var chartData = chart.ChartData;
+    using var workbookStream = chartData.ReadWorkbookStream();
+
+    // Modify the workbook stream here, for example, using Aspose.Cells.
+
+    chartData.Series.Clear();
+    chartData.Categories.Clear();
+
+    workbookStream.Position = 0;
+    chartData.WriteWorkbookStream(workbookStream);
+    chart.ValidateChartLayout();
+}
+else
+{
+    Console.WriteLine("The first shape is not a chart.");
+}
+```
+
+Clearing the collections removes stale data references before the workbook is written back. Rebuild any required series and category mappings for the updated workbook before using the chart.
+
+## **Set Custom Number Formats for Workbook Cells**
+
+Use <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/chartdatacell/customnumberformat/" target="_blank" rel="nofollow noopener noreferrer">ChartDataCell.CustomNumberFormat</a> to control how numeric values appear in a chart's embedded workbook. For example, a report may need a conversion rate displayed as a percentage with four decimal places and a coefficient displayed with five decimal places. Keep both values numeric so they remain available for calculations and chart plotting.
+
+A number format changes the display, not the stored value. The format `0.0000%` displays `0.125` as `12.5000%`; it does not replace the stored number with `12.5`. Similarly, `0.00000` displays `0.1234567` as `0.12346` without rounding the stored value. If the custom format is an empty string (`""`), <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/chartdatacell/presetnumberformat/" target="_blank" rel="nofollow noopener noreferrer">PresetNumberFormat</a> is used instead.
+
+The following example creates a column chart and accesses its cells through <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/chartdataworkbook/" target="_blank" rel="nofollow noopener noreferrer">ChartDataWorkbook</a>. On worksheet 0, B2 contains the conversion rate and C2 contains the coefficient. Both cells supply chart values. The example also enables value labels linked to the source formats.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+presentation.SlideSize.SetSize(720, 270, SlideSizeScaleType.DoNotScale);
+var slide = presentation.Slides[0];
+
+var chart = slide.Shapes.AddChart(ChartType.ClusteredColumn, 50, 20, 620, 210);
+chart.HasTitle = false;
+
+chart.Axes.VerticalAxis.IsNumberFormatLinkedToSource = false;
+chart.Axes.VerticalAxis.NumberFormat = "0.00";
+chart.Axes.VerticalAxis.IsAutomaticMinValue = false;
+chart.Axes.VerticalAxis.MinValue = 0;
+
+chart.ChartData.Series.Clear();
+chart.ChartData.Categories.Clear();
+
+var workbook = chart.ChartData.ChartDataWorkbook;
+workbook.Clear(0);
+
+var categoryCell = workbook.GetCell(0, "A2", "Sample");
+chart.ChartData.Categories.Add(categoryCell);
+
+var percentageCell = workbook.GetCell(0, "B2", 0.125);
+percentageCell.CustomNumberFormat = "0.0000%";
+var percentageName = workbook.GetCell(0, "B1", "Conversion rate");
+var percentageSeries = chart.ChartData.Series.Add(percentageName, chart.Type);
+percentageSeries.DataPoints.AddDataPointForBarSeries(percentageCell);
+
+var precisionCell = workbook.GetCell(0, "C2", 0.1234567);
+precisionCell.CustomNumberFormat = "0.00000";
+var precisionName = workbook.GetCell(0, "C1", "Coefficient");
+var precisionSeries = chart.ChartData.Series.Add(precisionName, chart.Type);
+precisionSeries.DataPoints.AddDataPointForBarSeries(precisionCell);
+
+foreach (var series in chart.ChartData.Series)
+{
+    var labelFormat = series.DataPoints[0].Label.DataLabelFormat;
+    labelFormat.ShowValue = true;
+    labelFormat.IsNumberFormatLinkedToSource = true;
+}
+
+presentation.Save("CustomCellFormats.pptx", SaveFormat.Pptx);
+```
+
+Workbook cell formats are separate from formats set directly on chart axes or data labels. In this example, each label displays its source cell's value because <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabelformat/showvalue/" target="_blank" rel="nofollow noopener noreferrer">ShowValue</a> is enabled, and follows the source number format because <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabelformat/isnumberformatlinkedtosource/" target="_blank" rel="nofollow noopener noreferrer">IsNumberFormatLinkedToSource</a> is `true`. After saving and reopening the presentation, the labels display `12.5000%` and `0.12346`, as shown below. The vertical axis uses its own <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/iaxis/numberformat/" target="_blank" rel="nofollow noopener noreferrer">NumberFormat</a> of `0.00`, with <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/iaxis/isnumberformatlinkedtosource/" target="_blank" rel="nofollow noopener noreferrer">IsNumberFormatLinkedToSource</a> set to `false`.
+
+To format a data label independently, set its source-link flag to `false` and assign its <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/idatalabelformat/numberformat/" target="_blank" rel="nofollow noopener noreferrer">NumberFormat</a>. This does not change the workbook cell's format. For example, an independent label format of `0.00` displays the first value as `0.13`, while B2 still displays `12.5000%`. See [Chart Data Labels](/net/slides/chart-data-label/#set-percentage-sign-with-chart-data-labels) for direct label formatting.
+
+The image below was rendered from the saved presentation after reopening it:
+
+![Column chart with source-linked labels showing 12.5000% and 0.12346 and an independently formatted numeric axis.](/net/slides/images/63fd80b458894758-custom-cell-formats.png)
+
+## **Set a Workbook Cell as a Chart Data Label**
+
+You can use text from workbook cells as chart data labels.
+
+This example adds a bubble chart with default data to the first slide of an existing presentation. It uses cells A10:A12 on worksheet 0 for the first three labels in the first series, enables labels from cells, and saves the updated presentation.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("chart2.pptx");
+var slide = presentation.Slides[0];
+
+var chart = slide.Shapes.AddChart(ChartType.Bubble, 50, 50, 600, 400, true);
+var series = chart.ChartData.Series[0];
+var workbook = chart.ChartData.ChartDataWorkbook;
+
+series.Labels.DefaultDataLabelFormat.ShowLabelValueFromCell = true;
+series.Labels[0].ValueFromCell = workbook.GetCell(0, "A10", "Label 0 cell value");
+series.Labels[1].ValueFromCell = workbook.GetCell(0, "A11", "Label 1 cell value");
+series.Labels[2].ValueFromCell = workbook.GetCell(0, "A12", "Label 2 cell value");
+
+presentation.Save("resultchart.pptx", SaveFormat.Pptx);
+```
+
+## **Manage Worksheets**
+
+The <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdataworkbook/worksheets/" target="_blank" rel="nofollow noopener noreferrer">IChartDataWorkbook.Worksheets</a> property provides access to the worksheets in a chart workbook. This example creates a pie chart with default data and prints each worksheet name to the console.
+
+```csharp
+using System;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+var chart = slide.Shapes.AddChart(ChartType.Pie, 50, 50, 400, 500);
+var workbook = chart.ChartData.ChartDataWorkbook;
+
+for (var i = 0; i < workbook.Worksheets.Count; i++)
+{
+    Console.WriteLine(workbook.Worksheets[i].Name);
+}
+```
+
+## **Specify the Data Source Type**
+
+Series point values can also be stored directly as numeric literals. See [Set Series Values Using Numeric Literals](/net/slides/chart-series/#set-series-values-using-numeric-literals) for a complete example that saves and reads them. The source type of point values is separate from the chart's internal or external workbook configuration; using numeric literals does not, by itself, remove the embedded workbook.
+
+This example creates a 3D column chart with default data and sets two series names using different data sources. The first name uses a string literal; the second uses cell C1 on worksheet 0. The <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/datasourcetype/" target="_blank" rel="nofollow noopener noreferrer">DataSourceType</a> enumeration selects the source for each name. The example saves the presentation with the updated series names.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+var chart = slide.Shapes.AddChart(ChartType.Column3D, 50, 50, 600, 400, true);
+var literalName = chart.ChartData.Series[0].Name;
+
+literalName.DataSourceType = DataSourceType.StringLiterals;
+literalName.Data = "LiteralString";
+
+var cellName = chart.ChartData.Series[1].Name;
+var nameCell = chart.ChartData.ChartDataWorkbook.GetCell(0, "C1", "NewCell");
+cellName.DataSourceType = DataSourceType.Worksheet;
+cellName.Data = nameCell;
+
+presentation.Save("pres.pptx", SaveFormat.Pptx);
+```
+
+## **Detect Unsupported Embedded Workbook Formats**
+
+Aspose.Slides does not support the Excel binary workbook (.xlsb) format that can be embedded in some charts. You can use the <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/embeddedworkbooktype/" target="_blank" rel="nofollow noopener noreferrer">EmbeddedWorkbookType</a> property on <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/" target="_blank" rel="nofollow noopener noreferrer">IChartData</a> together with the <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/workbooktype/" target="_blank" rel="nofollow noopener noreferrer">WorkbookType</a> enumeration to detect unsupported formats and skip those charts. This example inspects the shapes on the first slide of an existing presentation, skips non-chart shapes, and prints a diagnostic message for each chart with an embedded .xlsb workbook.
+
+```csharp
+using System;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+
+using var presentation = new Presentation("sample.pptx");
+var slide = presentation.Slides[0];
+
+foreach (var shape in slide.Shapes)
+{
+    if (shape is not IChart chart)
+    {
+        continue;
+    }
+
+    var chartData = chart.ChartData;
+    var isInternalWorkbook = chartData.DataSourceType == ChartDataSourceType.InternalWorkbook;
+    var isBinaryMacro = chartData.EmbeddedWorkbookType == WorkbookType.WorkbookBinaryMacro;
+
+    if (isInternalWorkbook && isBinaryMacro)
+    {
+        Console.WriteLine("Skipping a chart with an unsupported .xlsb workbook.");
+        continue;
+    }
+
+    // Read or modify supported chart workbook data here.
+}
+```
+
+## **External Workbook**
+
+Aspose.Slides supports using external workbooks as a data source for charts.
+
+### **Create an External Workbook**
+
+Use <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/readworkbookstream/" target="_blank" rel="nofollow noopener noreferrer">ReadWorkbookStream</a> and <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/setexternalworkbook/" target="_blank" rel="nofollow noopener noreferrer">SetExternalWorkbook</a> to export an embedded chart workbook to a file and link the chart to that external workbook.
+
+This example creates a pie chart with default data and exports its workbook. It closes the output stream before assigning the external workbook as the chart data source, then saves the linked presentation.
+
+```csharp
+using System.IO;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+var chart = slide.Shapes.AddChart(ChartType.Pie, 50, 50, 400, 600);
+var workbookPath = Path.GetFullPath("externalWorkbook1.xlsx");
+
+using (var workbookStream = chart.ChartData.ReadWorkbookStream())
+using (var fileStream = File.Create(workbookPath))
+{
+    workbookStream.CopyTo(fileStream);
+}
+
+chart.ChartData.SetExternalWorkbook(workbookPath);
+presentation.Save("externalWorkbook.pptx", SaveFormat.Pptx);
+```
+
+### **Set an External Workbook**
+
+Using the <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/setexternalworkbook/" target="_blank" rel="nofollow noopener noreferrer">SetExternalWorkbook</a> method, you can assign an external workbook to a chart as its data source. This method can also be used to update a path to the external workbook (if the latter has been moved).
+
+While you cannot edit the data in workbooks stored in remote locations or resources, you can still use such workbooks as an external data source. If the relative path for an external workbook is provided, it gets converted to a full path automatically.
+
+This example uses an external workbook whose worksheet named `Sheet1` contains a series name in B1, category names in A2:A4, and numeric values in B2:B4. The example creates a pie chart, links the workbook, and uses <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/setrange/" target="_blank" rel="nofollow noopener noreferrer">SetRange</a> to map A1:B4 to one series and three categories. It saves the presentation with the linked chart.
+
+```csharp
+using System.IO;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+var chart = slide.Shapes.AddChart(ChartType.Pie, 50, 50, 400, 600, true);
+var chartData = chart.ChartData;
+var workbookPath = Path.GetFullPath("externalWorkbook.xlsx");
+
+chartData.SetExternalWorkbook(workbookPath);
+chartData.SetRange("Sheet1!$A$1:$B$4");
+
+presentation.Save("Presentation_with_externalWorkbook.pptx", SaveFormat.Pptx);
+```
+
+The `updateChartData` parameter of <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/setexternalworkbook/" target="_blank" rel="nofollow noopener noreferrer">SetExternalWorkbook</a> controls whether the workbook is loaded.
+
+- When `updateChartData` is `false`, only the workbook path is updated. The chart data is not loaded or updated from the target workbook, so the workbook can be unavailable.
+- When `updateChartData` is `true`, the chart data is updated from the target workbook.
+
+The following example assigns a placeholder URL with `updateChartData` set to `false`. It retains the pie chart's default data and saves the presentation without loading the unavailable workbook.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+var chart = slide.Shapes.AddChart(ChartType.Pie, 50, 50, 400, 600, true);
+
+chart.ChartData.SetExternalWorkbook("https://example.com/unavailable-workbook.xlsx", false);
+presentation.Save("SetExternalWorkbookWithUpdateChartData.pptx", SaveFormat.Pptx);
+```
+
+### **Get the External Data Source Workbook Path of a Chart**
+
+To identify the workbook linked to a chart, check whether the chart uses an external data source and retrieve its workbook path.
+
+This example inspects the first shape on the first slide of a presentation with a linked external workbook. If it is a chart linked to an external workbook, the example prints <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/externalworkbookpath/" target="_blank" rel="nofollow noopener noreferrer">ExternalWorkbookPath</a> to the console. It then saves a copy of the presentation.
+
+```csharp
+using System;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("externalWorkbook.pptx");
+var slide = presentation.Slides[0];
+
+var shapeCount = slide.Shapes.Count;
+if (shapeCount > 0 && slide.Shapes[0] is IChart chart)
+{
+    var chartData = chart.ChartData;
+    if (chartData.DataSourceType == ChartDataSourceType.ExternalWorkbook)
+    {
+        Console.WriteLine(chartData.ExternalWorkbookPath);
+    }
+    else
+    {
+        Console.WriteLine("The chart does not use an external workbook.");
+    }
+}
+else
+{
+    Console.WriteLine("The first shape is not a chart.");
+}
+
+presentation.Save("Result.pptx", SaveFormat.Pptx);
+```
+
+### **Edit Chart Data**
+
+You can edit the data in external workbooks the same way you make changes to the contents of internal workbooks. When an external workbook cannot be loaded, an exception is thrown.
+
+This example uses a chart that is the first shape on the first slide and is linked to an accessible external workbook. It sets the cell-backed value of the first data point in the first series to 100 and saves the updated presentation. Editing cell values can update the linked external XLSX file, so use a copy if you need to preserve the original workbook.
+
+```csharp
+using System;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("presentation.pptx");
+var slide = presentation.Slides[0];
+
+var shapeCount = slide.Shapes.Count;
+if (shapeCount > 0 && slide.Shapes[0] is IChart chart)
+{
+    var series = chart.ChartData.Series;
+    if (series.Count > 0 && series[0].DataPoints.Count > 0)
+    {
+        var valueCell = series[0].DataPoints[0].Value.AsCell;
+        if (valueCell != null)
+        {
+            valueCell.Value = 100;
+            presentation.Save("presentation_out.pptx", SaveFormat.Pptx);
+        }
+        else
+        {
+            Console.WriteLine("The first data point is not linked to a workbook cell.");
+        }
+    }
+    else
+    {
+        Console.WriteLine("The chart has no data points to edit.");
+    }
+}
+else
+{
+    Console.WriteLine("The first shape is not a chart.");
+}
+```
+
+## **Refresh Chart Data from Source Workbooks**
+
+Aspose.Slides for .NET 26.11 adds <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/refreshdata/" target="_blank" rel="nofollow noopener noreferrer">IChartData.RefreshData</a> for one chart and <a href="https://reference.aspose.com/slides/net/aspose.slides/ipresentation/refreshchartsdata/" target="_blank" rel="nofollow noopener noreferrer">IPresentation.RefreshChartsData</a> for the presentation. Use them after source workbook values change. External workbooks must be accessible and supported.
+
+With [Aspose.Slides for .NET](/net/slides/installation/) 26.11 or later installed, this example refreshes the first chart on the first slide of `charts.pptx`. Its source workbook must be available. Save the result to retain the updated chart data.
+
+```csharp
+using System;
+using System.Linq;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("charts.pptx");
+var chart = presentation.Slides[0].Shapes.OfType<IChart>().FirstOrDefault();
+if (chart == null)
+{
+    Console.WriteLine("The first slide must contain a chart.");
+    return;
+}
+
+chart.ChartData.RefreshData();
+presentation.Save("refreshed-chart.pptx", SaveFormat.Pptx);
+```
+
+To refresh all charts, use a separate presentation instance as follows. Passing `false` makes a refresh failure propagate to the caller; it does not roll back charts already refreshed.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("charts.pptx");
+presentation.RefreshChartsData(skipFailedCharts: false);
+presentation.Save("refreshed-charts.pptx", SaveFormat.Pptx);
+```
+
+The parameter defaults to `true`: <a href="https://reference.aspose.com/slides/net/aspose.slides/ipresentation/refreshchartsdata/" target="_blank" rel="nofollow noopener noreferrer">RefreshChartsData</a> skips a failed chart and continues with others. It returns no per-chart results, so a completed call does not prove that every chart refreshed. Use individual <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/refreshdata/" target="_blank" rel="nofollow noopener noreferrer">RefreshData</a> calls if you need to identify each failing chart.
+
+Refresh reloads source data. It is separate from formula calculation, chart layout validation and updating an OLE preview. Inspect live cell-backed values to check a refresh in memory. A <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdatapoint/cachedvalue/" target="_blank" rel="nofollow noopener noreferrer">CachedValue</a> can still describe the previously saved chart until you save and reopen the presentation.
+
+### **Read Cached Chart Values without a Workbook**
+
+In .NET 26.11, cached-value accessors read the values stored with the chart without opening its workbook. They are useful when the linked file is unavailable and you only need the chart's last stored data. This is different from reconstructing a workbook using the recovery option below.
+
+<div className="docs-owner-markdown-table">
+
+| Object | Cached accessor |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ordinary series data point | <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdatapoint/cachedvalue/" target="_blank" rel="nofollow noopener noreferrer">CachedValue</a> |
+| Scatter or bubble data point | <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdatapoint/cachedxvalue/" target="_blank" rel="nofollow noopener noreferrer">CachedXValue</a>, <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdatapoint/cachedyvalue/" target="_blank" rel="nofollow noopener noreferrer">CachedYValue</a> |
+| Bubble data point | <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdatapoint/cachedbubblesize/" target="_blank" rel="nofollow noopener noreferrer">CachedBubbleSize</a> |
+| Chart category | <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartcategory/cachedvalue/" target="_blank" rel="nofollow noopener noreferrer">CachedValue</a> |
+
+</div>
+
+Each accessor returns <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/icachedchartvalue/" target="_blank" rel="nofollow noopener noreferrer">ICachedChartValue</a>. <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/icachedchartvalue/data/" target="_blank" rel="nofollow noopener noreferrer">Data</a> exposes the stored object; <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/cachedchartvalue/tostring/" target="_blank" rel="nofollow noopener noreferrer">ToString</a> provides text; <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/icachedchartvalue/todouble/" target="_blank" rel="nofollow noopener noreferrer">ToDouble</a> returns `NaN` for an absent or nonnumeric value. A cache can be missing or stale, including on a newly created chart that has not been saved. Do not assume that every field exists or contains a number.
+
+This example reads all those fields from `cached-chart.pptx`, a saved presentation containing charts. A missing external workbook is acceptable because the code does not access <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/chartdataworkbook/" target="_blank" rel="nofollow noopener noreferrer">ChartDataWorkbook</a> or live workbook cells.
+
+```csharp
+using System;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+
+using var presentation = new Presentation("cached-chart.pptx");
+foreach (var slide in presentation.Slides)
+foreach (var shape in slide.Shapes)
+{
+    if (shape is not IChart chart)
+        continue;
+
+    foreach (var category in chart.ChartData.Categories)
+        PrintCache("Category", category.CachedValue);
+
+    foreach (var series in chart.ChartData.Series)
+    foreach (var point in series.DataPoints)
+    {
+        PrintCache("Value", point.CachedValue);
+        PrintCache("X", point.CachedXValue);
+        PrintCache("Y", point.CachedYValue);
+        PrintCache("Bubble size", point.CachedBubbleSize);
+    }
+}
+
+static void PrintCache(string name, ICachedChartValue value)
+{
+    var number = value.ToDouble();
+    if (value.Data == null)
+        Console.WriteLine($"{name}: no cached value");
+    else if (double.IsNaN(number))
+        Console.WriteLine($"{name}: {value} (not numeric)");
+    else
+        Console.WriteLine($"{name}: {number}");
+}
+```
+
+Use refresh when you need current source data; use cached reads when the stored snapshot is sufficient. The cache is not a complete copy of the workbook and cannot supply changes made after it was last updated.
+
+### **Recover a Workbook from the Chart Cache**
+
+If a chart uses an external workbook that is missing or unavailable, Aspose.Slides can reconstruct the chart workbook from the data cached in the presentation. Create <a href="https://reference.aspose.com/slides/net/aspose.slides/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">LoadOptions</a>, configure its <a href="https://reference.aspose.com/slides/net/aspose.slides/loadoptions/spreadsheetoptions/" target="_blank" rel="nofollow noopener noreferrer">SpreadsheetOptions</a>, and set <a href="https://reference.aspose.com/slides/net/aspose.slides/ispreadsheetoptions/recoverworkbookfromchartcache/" target="_blank" rel="nofollow noopener noreferrer">ISpreadsheetOptions.RecoverWorkbookFromChartCache</a> to `true` before opening the presentation.
+
+The following C# example recovers workbook data for a chart that is the first shape on the first slide and references an unavailable external workbook. It accesses the recovered data through <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichart/chartdata/" target="_blank" rel="nofollow noopener noreferrer">IChart.ChartData</a> and <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/ichartdata/chartdataworkbook/" target="_blank" rel="nofollow noopener noreferrer">IChartData.ChartDataWorkbook</a>:
+
+```csharp
+using System;
+using Aspose.Slides;
+using Aspose.Slides.Charts;
+
+var spreadsheetOptions = new SpreadsheetOptions
+{
+    RecoverWorkbookFromChartCache = true
+};
+var loadOptions = new LoadOptions
+{
+    SpreadsheetOptions = spreadsheetOptions
+};
+
+using var presentation = new Presentation("presentation.pptx", loadOptions);
+var slide = presentation.Slides[0];
+
+var shapeCount = slide.Shapes.Count;
+if (shapeCount > 0 && slide.Shapes[0] is IChart chart)
+{
+    var recoveredWorkbook = chart.ChartData.ChartDataWorkbook;
+
+    // Read or modify the recovered workbook data here.
+}
+else
+{
+    Console.WriteLine("The first shape is not a chart.");
+}
+```
+
+If code accesses the external workbook while it is unavailable and recovery is disabled, Aspose.Slides throws an <a href="https://learn.microsoft.com/en-us/dotnet/api/system.invalidoperationexception" target="_blank" rel="nofollow noopener noreferrer">InvalidOperationException</a>. Enable recovery only when using the cached chart data is an acceptable fallback, because the cache may not contain changes made to the external workbook after the presentation was last updated.
+
+## **FAQ**
+
+**Can I determine whether a specific chart is linked to an external or an embedded workbook?**
+
+Yes. A chart has a <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/chartdata/datasourcetype/" target="_blank" rel="nofollow noopener noreferrer">data source type</a> and a <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/chartdata/externalworkbookpath/" target="_blank" rel="nofollow noopener noreferrer">path to an external workbook</a>; if the source is an external workbook, you can read the full path to make sure an external file is being used.
+
+**Are relative paths to external workbooks supported, and how are they stored?**
+
+Yes. If you specify a relative path, it is automatically converted to an absolute path. The presentation stores the absolute path in the PPTX file, so moving the workbook may require updating the link.
+
+**Can I use workbooks located on network resources/shares?**
+
+Yes, such workbooks can be used as an external data source. However, editing remote workbooks directly from Aspose.Slides is not supported-they can only be used as a source.
+
+**Does Aspose.Slides overwrite the external XLSX when saving the presentation?**
+
+The presentation stores a <a href="https://reference.aspose.com/slides/net/aspose.slides.charts/chartdata/externalworkbookpath/" target="_blank" rel="nofollow noopener noreferrer">link to the external file</a>. Editing cell-backed chart data can also update the linked local XLSX file. Use a copy of the workbook if the original must remain unchanged.
+
+**What should I do if the external file is password-protected?**
+
+Aspose.Slides does not accept a password when linking. A common approach is to remove protection in advance or prepare a decrypted copy (for example, using <a href="https://reference.aspose.com/cells/net/" target="_blank" rel="nofollow noopener noreferrer">Aspose.Cells</a>) and link to that copy.
+
+**Can multiple charts reference the same external workbook?**
+
+Yes. Each chart stores its own link. If they all point to the same file, updating that file will be reflected in each chart the next time the data is loaded.
+
+## Related features
+
+- <a href="https://docs.aspose.com/slides/features/chart-workbook/" target="_blank" rel="nofollow noopener noreferrer">Edit a chart's embedded workbook</a>
+- <a href="https://docs.aspose.com/slides/features/external-chart-workbook/" target="_blank" rel="nofollow noopener noreferrer">Link charts to external workbooks</a>
+- <a href="https://docs.aspose.com/slides/features/chart-data-binding/" target="_blank" rel="nofollow noopener noreferrer">Fill editable charts with data</a>

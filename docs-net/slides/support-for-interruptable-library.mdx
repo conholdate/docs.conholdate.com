@@ -1,0 +1,159 @@
+---
+title: "Support For Interruptable Library"
+sidebar_label: "Support For Interruptable Library"
+sidebar_key: "net-slides-support-for-interruptable-library"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/net"
+source_path: "slides/net/support-for-interruptable-library.md"
+source_commit: ""
+source_sha256: "5517b98df9cabc9d6015b99313fc8e9398d62cbe071dc0591411611e476e18ca"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/net/support-for-interruptable-library/"
+source_markdown_url: "https://docs.aspose.com/slides/net/support-for-interruptable-library.md"
+source_snapshot_sha256: "7d1140eeb2017fdc24d3a69fd87fd311daa3123f00d2ecfef4abc1cbcf9c1f48"
+---
+
+:::info
+Aspose.Slides for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+y
+
+> Make long-running tasks cancelable with Aspose.Slides for .NET. Interrupt rendering and conversions for PowerPoint and OpenDocument safely, with examples.
+> 5
+
+## **Overview**
+
+Aspose.Slides for .NET provides an interruptible processing mechanism for long-running presentation tasks, such as deserialization, serialization, and rendering. This mechanism is based on the `InterruptionToken` and `InterruptionTokenSource` classes.
+
+An `InterruptionToken` can be assigned to `LoadOptions` and passed to the `Presentation` constructor. When `InterruptionTokenSource.Interrupt()` is called, the associated long-running task is interrupted. The article also shows how to use this mechanism together with the standard .NET `CancellationToken` by monitoring cancellation requests and calling `Interrupt()` when cancellation is requested.
+
+## **Interruptable Library**
+
+In <a href="https://releases.aspose.com/slides/net/release-notes/2018/aspose-slides-for-net-18-4-release-notes/" target="_blank" rel="nofollow noopener noreferrer">Aspose.Slides 18.4</a>, we introduced the <a href="https://reference.aspose.com/slides/net/aspose.slides/interruptiontoken/" target="_blank" rel="nofollow noopener noreferrer">InterruptionToken</a> and <a href="https://reference.aspose.com/slides/net/aspose.slides/interruptiontokensource/" target="_blank" rel="nofollow noopener noreferrer">InterruptionTokenSource</a> classes. They allow you to interrupt long-running tasks such as deserialization, serialization, and rendering.
+
+- <a href="https://reference.aspose.com/slides/net/aspose.slides/interruptiontokensource/" target="_blank" rel="nofollow noopener noreferrer">InterruptionTokenSource</a> is the source of the token(s) passed to <a href="https://reference.aspose.com/slides/net/aspose.slides/iloadoptions/interruptiontoken/" target="_blank" rel="nofollow noopener noreferrer">ILoadOptions.InterruptionToken</a>.
+- When <a href="https://reference.aspose.com/slides/net/aspose.slides/iloadoptions/interruptiontoken/" target="_blank" rel="nofollow noopener noreferrer">ILoadOptions.InterruptionToken</a> is set and the <a href="https://reference.aspose.com/slides/net/aspose.slides/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">LoadOptions</a> instance is passed to the <a href="https://reference.aspose.com/slides/net/aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> constructor, invoking <a href="https://reference.aspose.com/slides/net/aspose.slides/interruptiontokensource/interrupt/" target="_blank" rel="nofollow noopener noreferrer">InterruptionTokenSource.Interrupt()</a> interrupts any long-running task associated with that <a href="https://reference.aspose.com/slides/net/aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a>.
+
+The following code snippet demonstrates interrupting a running task:
+
+```csharp
+using System.Threading;
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+public static void Run()
+{
+    Action<IInterruptionToken> action = (IInterruptionToken token) =>
+    {
+        LoadOptions options = new LoadOptions { InterruptionToken = token };
+        using (Presentation presentation = new Presentation("sample.pptx", options))
+        {
+            presentation.Save("sample.ppt", SaveFormat.Ppt);
+        }
+    };
+
+    InterruptionTokenSource tokenSource = new InterruptionTokenSource();
+    Run(action, tokenSource.Token); // run the action in a separate thread
+    Thread.Sleep(10000);            // timeout
+    tokenSource.Interrupt();        // stop the conversion
+}
+
+private static void Run(Action<IInterruptionToken> action, IInterruptionToken token)
+{
+    Task.Run(() => { action(token); });
+}
+```
+
+## **.NET CancellationToken and Interruptable Library**
+
+When you need to use a <a href="https://docs.microsoft.com/en-us/dotnet/api/system.threading.cancellationtoken" target="_blank" rel="nofollow noopener noreferrer">CancellationToken</a> alongside the Aspose.Slides Interruptible library, wrap the <a href="https://reference.aspose.com/slides/net/aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> processing and interrupt the <a href="https://reference.aspose.com/slides/net/aspose.slides/interruptiontoken/" target="_blank" rel="nofollow noopener noreferrer">InterruptionToken</a> when <a href="https://learn.microsoft.com/en-us/dotnet/api/system.threading.cancellationtoken.iscancellationrequested" target="_blank" rel="nofollow noopener noreferrer">CancellationToken.IsCancellationRequested</a> is `true`.
+
+This C# code demonstrates the operation:
+
+```cs
+using System.Threading;
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+public static void Main()
+{
+    CancellationTokenSource tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+    ProcessPresentation("sample.pptx", "sample.pdf", tokenSource.Token);
+}
+
+static void ProcessPresentation(string path, string outPath, CancellationToken cancellationToken)
+{
+    Action<IInterruptionToken> action = (IInterruptionToken token) =>
+    {
+        LoadOptions options = new LoadOptions {InterruptionToken = token};
+        using (Presentation presentation = new Presentation(path, options))
+        {
+            presentation.Save(outPath, SaveFormat.Pdf);
+        }
+    };
+    
+    InterruptionTokenSource tokenSource = new InterruptionTokenSource();
+    Task task = Run(action, tokenSource.Token); // run the action in a separate thread
+
+    while (!task.Wait(500)) // wait and monitor whether cancellationToken.IsCancellationRequested is set
+    {
+        if (cancellationToken.IsCancellationRequested)
+        {
+            Console.WriteLine("Presentation processing was canceled");
+            tokenSource.Interrupt(); // interrupt Presentation processing
+        }
+    }
+}
+
+private static Task Run(Action<IInterruptionToken> action, IInterruptionToken token)
+{
+    return Task.Run(() =>
+    {
+        action(token);
+    });
+}
+```
+
+## **FAQ**
+
+### What is the purpose of the Aspose.Slides interrupt library?
+
+It provides a mechanism to interrupt long-running operations-such as loading, saving, or rendering presentations-before they complete. This is useful when processing time must be limited or the task is no longer needed.
+
+### What is the difference between <a href="https://reference.aspose.com/slides/net/aspose.slides/interruptiontoken/" target="_blank" rel="nofollow noopener noreferrer">InterruptionToken</a> and <a href="https://reference.aspose.com/slides/net/aspose.slides/iinterruptiontokensource/" target="_blank" rel="nofollow noopener noreferrer">InterruptionTokenSource</a>?
+
+- `InterruptionToken` is passed to the Aspose.Slides API and checked during long-running operations.
+- `InterruptionTokenSource` is used in your code to create tokens and trigger interruptions by calling `Interrupt()`.
+
+### Can I use .NET <a href="https://learn.microsoft.com/en-us/dotnet/api/system.threading.cancellationtoken" target="_blank" rel="nofollow noopener noreferrer">CancellationToken</a> with the interrupt library?
+
+Yes. You can monitor the <a href="https://learn.microsoft.com/en-us/dotnet/api/system.threading.cancellationtoken" target="_blank" rel="nofollow noopener noreferrer">CancellationToken</a> in your application logic and call <a href="https://reference.aspose.com/slides/net/aspose.slides/iinterruptiontokensource/interrupt/" target="_blank" rel="nofollow noopener noreferrer">InterruptionTokenSource.Interrupt()</a> when cancellation is requested. This enables Aspose.Slides to integrate with standard .NET cancellation workflows.
+
+### What tasks can be interrupted?
+
+Any Aspose.Slides task that accepts an <a href="https://reference.aspose.com/slides/net/aspose.slides/interruptiontoken/" target="_blank" rel="nofollow noopener noreferrer">InterruptionToken</a>-such as loading a presentation with `Presentation(path, loadOptions)` or saving with `Presentation.Save(...)`-can be interrupted.
+
+### Does interruption happen immediately?
+
+No. Interruption is cooperative: the operation periodically checks the token and stops as soon as it detects that <a href="https://reference.aspose.com/slides/net/aspose.slides/iinterruptiontokensource/interrupt/" target="_blank" rel="nofollow noopener noreferrer">Interrupt()</a> has been called.
+
+### What happens if I call <a href="https://reference.aspose.com/slides/net/aspose.slides/iinterruptiontokensource/interrupt/" target="_blank" rel="nofollow noopener noreferrer">Interrupt()</a> after a task has already completed?
+
+Nothing-the call has no effect if the corresponding task has already completed.
+
+### Can I reuse the same <a href="https://reference.aspose.com/slides/net/aspose.slides/iinterruptiontokensource/" target="_blank" rel="nofollow noopener noreferrer">InterruptionTokenSource</a> for multiple tasks?
+
+Yes-but after you call <a href="https://reference.aspose.com/slides/net/aspose.slides/iinterruptiontokensource/interrupt/" target="_blank" rel="nofollow noopener noreferrer">Interrupt()</a> on that source, all tasks using its tokens will be interrupted. Use separate token sources to manage tasks independently.
+
+## Related features
+
+- <a href="https://docs.aspose.com/slides/features/cancel-processing/" target="_blank" rel="nofollow noopener noreferrer">Interrupt presentation processing</a>

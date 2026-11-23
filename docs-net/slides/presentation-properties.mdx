@@ -1,0 +1,283 @@
+---
+title: "Manage Presentation Properties in .NET"
+sidebar_label: "Manage Presentation Properties in .NET"
+sidebar_key: "net-slides-presentation-properties"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/net"
+source_path: "slides/net/presentation-properties.md"
+source_commit: ""
+source_sha256: "e9e32c1a277fe910f0917dfebdb34ab14b018e54a0d29be97adbc0ba58f48926"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/net/presentation-properties/"
+source_markdown_url: "https://docs.aspose.com/slides/net/presentation-properties.md"
+source_snapshot_sha256: "8d80cb88ba73211a5fac812773b0b9f149568f5486de29e711380844996605cb"
+---
+
+:::info
+Aspose.Slides for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+T
+
+> Master presentation properties in Aspose.Slides for .NET and streamline search, branding and workflow in your PowerPoint and OpenDocument files.
+> 2
+
+## **Introduction**
+
+Aspose.Slides for .NET supports **built-in** and **custom** document properties. Use these properties to read and update presentation metadata, such as the author, title, and user-defined values.
+
+Aspose.Slides allows you to work with presentation document properties through the <a href="https://reference.aspose.com/slides/net/aspose.slides/idocumentproperties/" target="_blank" rel="nofollow noopener noreferrer">IDocumentProperties</a> interface. An instance of this interface is returned by <a href="https://reference.aspose.com/slides/net/aspose.slides/ipresentation/documentproperties/" target="_blank" rel="nofollow noopener noreferrer">IPresentation.DocumentProperties</a>. The following examples show how to read, modify, and manage these properties.
+
+Aspose.Slides manages the application and producer metadata when saving presentations; these fields identify the software that created the output.
+
+## **Manage Presentation Properties**
+
+Document properties store descriptive information alongside presentation content. They fall into two categories:
+
+- **Built-in properties** contain standard metadata, such as the title, author, and document statistics.
+- **Custom properties** store user-defined name/value pairs.
+
+Aspose.Slides for .NET provides access to both categories. In PowerPoint, select **File → Info → Properties → Advanced Properties** to inspect document metadata. The dialog groups information into tabs such as **Summary**, **Statistics**, **Contents**, and **Custom**. Use the **Custom** tab to manage user-defined properties.
+
+## **Read Public Properties from an Encrypted Presentation**
+
+An opening password normally protects both presentation content and document properties. When a presentation is encrypted with <a href="https://reference.aspose.com/slides/net/aspose.slides/iprotectionmanager/encryptdocumentproperties/" target="_blank" rel="nofollow noopener noreferrer">IProtectionManager.EncryptDocumentProperties</a> set to `false`, its document properties remain public. An application can then set <a href="https://reference.aspose.com/slides/net/aspose.slides/loadoptions/onlyloaddocumentproperties/" target="_blank" rel="nofollow noopener noreferrer">LoadOptions.OnlyLoadDocumentProperties</a> to `true` and read the public metadata without supplying the opening password.
+
+<a href="https://reference.aspose.com/slides/net/aspose.slides/loadoptions/onlyloaddocumentproperties/" target="_blank" rel="nofollow noopener noreferrer">LoadOptions.OnlyLoadDocumentProperties</a> controls what Aspose.Slides loads; it does not decrypt anything. If the properties were included in encryption, loading them without the password fails. If the presentation is not encrypted, the option is ignored and the complete presentation is loaded.
+
+The example requires an encrypted presentation whose document properties were left public. It verifies the loading mode through <a href="https://reference.aspose.com/slides/net/aspose.slides/iprotectionmanager/isonlydocumentpropertiesloaded/" target="_blank" rel="nofollow noopener noreferrer">IProtectionManager.IsOnlyDocumentPropertiesLoaded</a> and then reads built-in properties through <a href="https://reference.aspose.com/slides/net/aspose.slides/ipresentation/documentproperties/" target="_blank" rel="nofollow noopener noreferrer">IPresentation.DocumentProperties</a>:
+
+```csharp
+using System;
+using Aspose.Slides;
+
+var loadOptions = new LoadOptions { OnlyLoadDocumentProperties = true };
+using var presentation = new Presentation("public-properties-encrypted.pptx", loadOptions);
+
+if (presentation.ProtectionManager.IsOnlyDocumentPropertiesLoaded)
+{
+    var documentProperties = presentation.DocumentProperties;
+
+    Console.WriteLine("Author: " + documentProperties.Author);
+    Console.WriteLine("Title: " + documentProperties.Title);
+    Console.WriteLine("Keywords: " + documentProperties.Keywords);
+}
+else
+{
+    Console.WriteLine("The presentation was not loaded in document-properties-only mode.");
+}
+```
+
+In this mode, slide content is not loaded. Slides, masters, layouts, shapes, media, and other presentation objects are unavailable. Applications should always check <a href="https://reference.aspose.com/slides/net/aspose.slides/iprotectionmanager/isonlydocumentpropertiesloaded/" target="_blank" rel="nofollow noopener noreferrer">IProtectionManager.IsOnlyDocumentPropertiesLoaded</a> before performing an operation that requires the complete presentation object model.
+
+Public metadata may expose author names, titles, subjects, keywords, company information, comments, and custom values. Encrypt sensitive properties together with the presentation. Leave them public only when indexing, classification, search, or document-management systems have a specific requirement to access them without a password.
+
+## **Update Properties of an Encrypted Presentation**
+
+For an encrypted PPTX file, a presentation loaded with <a href="https://reference.aspose.com/slides/net/aspose.slides/loadoptions/onlyloaddocumentproperties/" target="_blank" rel="nofollow noopener noreferrer">LoadOptions.OnlyLoadDocumentProperties</a> is intended for reading public metadata. Aspose.Slides cannot save changed properties from that metadata-only object because the public properties must remain consistent with the corresponding data inside the encrypted presentation. Updating them therefore requires the correct opening password and a complete load.
+
+The example requires an encrypted PPTX presentation with public document properties and a known opening password. It opens the complete presentation with <a href="https://reference.aspose.com/slides/net/aspose.slides/loadoptions/password/" target="_blank" rel="nofollow noopener noreferrer">LoadOptions.Password</a>, updates public built-in properties, and saves the result. It then uses <a href="https://reference.aspose.com/slides/net/aspose.slides/ipresentationinfo/isencrypted/" target="_blank" rel="nofollow noopener noreferrer">IPresentationInfo.IsEncrypted</a> to verify that encryption is preserved and reopens the public metadata without a password to verify the new values:
+
+```csharp
+using System;
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+const string inputPath = "public-properties-encrypted.pptx";
+const string outputPath = "updated-public-properties-encrypted.pptx";
+
+var loadOptions = new LoadOptions { Password = "open_password" };
+using var presentation = new Presentation(inputPath, loadOptions);
+
+var documentProperties = presentation.DocumentProperties;
+documentProperties.Title = "Updated Product Roadmap";
+documentProperties.Keywords = "roadmap, planning, indexed";
+
+presentation.Save(outputPath, SaveFormat.Pptx);
+
+var presentationInfo = PresentationFactory.Instance.GetPresentationInfo(outputPath);
+Console.WriteLine("The presentation is encrypted: " + presentationInfo.IsEncrypted);
+
+var metadataLoadOptions = new LoadOptions { OnlyLoadDocumentProperties = true };
+using var metadataPresentation = new Presentation(outputPath, metadataLoadOptions);
+
+if (metadataPresentation.ProtectionManager.IsOnlyDocumentPropertiesLoaded)
+{
+    Console.WriteLine("Title: " + metadataPresentation.DocumentProperties.Title);
+    Console.WriteLine("Keywords: " + metadataPresentation.DocumentProperties.Keywords);
+}
+else
+{
+    Console.WriteLine("The presentation was not loaded in document-properties-only mode.");
+}
+```
+
+If an application is not allowed to decrypt or load the presentation content, it must treat public properties of an encrypted PPTX file as read-only.
+
+## **Access Built-in Properties**
+
+The <a href="https://reference.aspose.com/slides/net/aspose.slides/idocumentproperties/" target="_blank" rel="nofollow noopener noreferrer">IDocumentProperties</a> interface exposes built-in metadata through typed properties, including <a href="https://reference.aspose.com/slides/net/aspose.slides/idocumentproperties/author/" target="_blank" rel="nofollow noopener noreferrer">Author</a>, <a href="https://reference.aspose.com/slides/net/aspose.slides/idocumentproperties/title/" target="_blank" rel="nofollow noopener noreferrer">Title</a>, and <a href="https://reference.aspose.com/slides/net/aspose.slides/idocumentproperties/createdtime/" target="_blank" rel="nofollow noopener noreferrer">CreatedTime</a>. This example opens an existing presentation and prints its stored metadata to the console. Values depend on the input presentation; some fields may be empty.
+
+```csharp
+using System;
+using Aspose.Slides;
+
+using var presentation = new Presentation("AccessBuiltInProperties.pptx");
+
+var documentProperties = presentation.DocumentProperties;
+
+Console.WriteLine("Category: " + documentProperties.Category);
+Console.WriteLine("Content status: " + documentProperties.ContentStatus);
+Console.WriteLine("Creation date: " + documentProperties.CreatedTime);
+Console.WriteLine("Author: " + documentProperties.Author);
+Console.WriteLine("Comments: " + documentProperties.Comments);
+Console.WriteLine("Keywords: " + documentProperties.Keywords);
+Console.WriteLine("Last modified by: " + documentProperties.LastSavedBy);
+Console.WriteLine("Manager: " + documentProperties.Manager);
+Console.WriteLine("Modified date: " + documentProperties.LastSavedTime);
+Console.WriteLine("Presentation format: " + documentProperties.PresentationFormat);
+Console.WriteLine("Last print date: " + documentProperties.LastPrinted);
+Console.WriteLine("Is shared between producers: " + documentProperties.SharedDoc);
+Console.WriteLine("Subject: " + documentProperties.Subject);
+Console.WriteLine("Title: " + documentProperties.Title);
+```
+
+## **Modify Built-in Properties**
+
+To update built-in metadata, assign values to the writable properties exposed by <a href="https://reference.aspose.com/slides/net/aspose.slides/ipresentation/documentproperties/" target="_blank" rel="nofollow noopener noreferrer">IPresentation.DocumentProperties</a>. This example opens an existing presentation, sets <a href="https://reference.aspose.com/slides/net/aspose.slides/idocumentproperties/author/" target="_blank" rel="nofollow noopener noreferrer">Author</a>, <a href="https://reference.aspose.com/slides/net/aspose.slides/idocumentproperties/title/" target="_blank" rel="nofollow noopener noreferrer">Title</a>, <a href="https://reference.aspose.com/slides/net/aspose.slides/idocumentproperties/subject/" target="_blank" rel="nofollow noopener noreferrer">Subject</a>, <a href="https://reference.aspose.com/slides/net/aspose.slides/idocumentproperties/comments/" target="_blank" rel="nofollow noopener noreferrer">Comments</a>, and <a href="https://reference.aspose.com/slides/net/aspose.slides/idocumentproperties/manager/" target="_blank" rel="nofollow noopener noreferrer">Manager</a>, then saves the updated presentation with <a href="https://reference.aspose.com/slides/net/aspose.slides/presentation/save/" target="_blank" rel="nofollow noopener noreferrer">Presentation.Save</a>. The saved PPTX contains the new metadata.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("ModifyBuiltInProperties.pptx");
+
+var documentProperties = presentation.DocumentProperties;
+
+documentProperties.Author = "Aspose.Slides for .NET";
+documentProperties.Title = "Manage PowerPoint Presentation Properties";
+documentProperties.Subject = "Modify Built-in Properties";
+documentProperties.Comments = "Aspose description";
+documentProperties.Manager = "Aspose manager";
+
+presentation.Save("DocumentProperties_output.pptx", SaveFormat.Pptx);
+```
+
+## **Manage the Hyperlink Base**
+
+<a href="https://reference.aspose.com/slides/net/aspose.slides/idocumentproperties/hyperlinkbase/" target="_blank" rel="nofollow noopener noreferrer">IDocumentProperties.HyperlinkBase</a> stores the document-level base for relative hyperlinks. This is useful when moving a presentation and its linked files to another location. It is separate from an individual hyperlink's <a href="https://reference.aspose.com/slides/net/aspose.slides/ihyperlink/externalurl/" target="_blank" rel="nofollow noopener noreferrer">IHyperlink.ExternalUrl</a>: changing the base does not rewrite the stored link addresses or change absolute destinations.
+
+The example requires a presentation containing both a relative link, such as `target.html`, and an absolute link, such as `https://example.org/absolute.html`. It reads the existing base, assigns a new base address, and saves and reopens the presentation to check the value. It then clears the base with `string.Empty` and verifies the empty value in a separate saved file. Replace the example base address with the location of your linked files.
+
+```csharp
+using System;
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("hyperlinks.pptx");
+Console.WriteLine("Original base: " + presentation.DocumentProperties.HyperlinkBase);
+
+const string newBase = "https://example.com/new/";
+presentation.DocumentProperties.HyperlinkBase = newBase;
+presentation.Save("hyperlinks-updated.pptx", SaveFormat.Pptx);
+
+using var updatedPresentation = new Presentation("hyperlinks-updated.pptx");
+Console.WriteLine("Base preserved: " + (updatedPresentation.DocumentProperties.HyperlinkBase == newBase));
+
+updatedPresentation.DocumentProperties.HyperlinkBase = string.Empty;
+updatedPresentation.Save("hyperlinks-cleared.pptx", SaveFormat.Pptx);
+
+using var clearedPresentation = new Presentation("hyperlinks-cleared.pptx");
+Console.WriteLine("Base cleared: " + (clearedPresentation.DocumentProperties.HyperlinkBase == string.Empty));
+```
+
+The two verification messages should print `True`. Clearing the base leaves the individual hyperlink addresses intact.
+
+A relative link to `target.pptx` opened `old/target.pptx` when the base pointed to the `old` folder. After changing the base to the `new` folder, saving, and reopening the presentation, the same link opened `new/target.pptx`. An absolute link continued to open the same file. Test your relative links in PowerPoint before and after moving the presentation or changing its base.
+
+## **Add Custom Presentation Properties**
+
+Custom properties store metadata that has no corresponding built-in field. The <a href="https://reference.aspose.com/slides/net/aspose.slides/idocumentproperties/item/" target="_blank" rel="nofollow noopener noreferrer">IDocumentProperties indexer</a> lets you assign a value by property name. This example creates a presentation, adds two text values and an integer version value, and saves the presentation with <a href="https://reference.aspose.com/slides/net/aspose.slides/presentation/save/" target="_blank" rel="nofollow noopener noreferrer">Presentation.Save</a>. Assigning a value to an existing name replaces that property's value.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+
+var documentProperties = presentation.DocumentProperties;
+
+documentProperties["Reviewed by"] = "John Smith";
+documentProperties["Confidentiality level"] = "Internal";
+documentProperties["Document version"] = 2;
+
+presentation.Save("CustomDocumentProperties_output.pptx", SaveFormat.Pptx);
+```
+
+## **Access and Modify Custom Properties**
+
+This example opens a presentation containing custom properties and uses <a href="https://reference.aspose.com/slides/net/aspose.slides/idocumentproperties/countofcustomproperties/" target="_blank" rel="nofollow noopener noreferrer">CountOfCustomProperties</a> to iterate over them. <a href="https://reference.aspose.com/slides/net/aspose.slides/idocumentproperties/getcustompropertyname/" target="_blank" rel="nofollow noopener noreferrer">GetCustomPropertyName</a> accepts a zero-based index and returns the name used by the <a href="https://reference.aspose.com/slides/net/aspose.slides/idocumentproperties/item/" target="_blank" rel="nofollow noopener noreferrer">IDocumentProperties indexer</a>. The example prints each original name and value, replaces every value with a numbered string regardless of its original type, and saves the changes. If there are no custom properties, the loop makes no changes.
+
+```csharp
+using System;
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("AccessAndModifyProperties.pptx");
+
+var documentProperties = presentation.DocumentProperties;
+
+for (var i = 0; i < documentProperties.CountOfCustomProperties; i++)
+{
+    var propertyName = documentProperties.GetCustomPropertyName(i);
+    var propertyValue = documentProperties[propertyName];
+
+    Console.WriteLine("Custom property name: " + propertyName);
+    Console.WriteLine("Custom property value: " + propertyValue);
+
+    documentProperties[propertyName] = "New Value " + (i + 1);
+}
+
+presentation.Save("CustomProperties_output.pptx", SaveFormat.Pptx);
+```
+
+## **Live Example**
+
+Try the <a href="https://products.aspose.app/slides/metadata" target="_blank" rel="nofollow noopener noreferrer">**View &amp; Edit PowerPoint Metadata**</a> online app to see how to work with document properties using the Aspose.Slides API:
+
+[![View & Edit PowerPoint Metadata](/net/slides/images/7d0a081ed295adb7-slides-metadata.png)](https://products.aspose.app/slides/metadata)
+
+## **FAQ**
+
+**How can I remove a built-in property from a presentation?**
+
+Built-in properties are an integral part of the presentation and cannot be removed entirely. However, you can either change their values or set them to empty if allowed by the specific property.
+
+**What happens if I add a custom property that already exists?**
+
+If you add a custom property that already exists, its existing value will be overwritten with the new one. You do not need to remove or check the property beforehand, as Aspose.Slides automatically updates the property's value.
+
+**Can I access presentation properties without fully loading the presentation?**
+
+Yes. Use <a href="https://reference.aspose.com/slides/net/aspose.slides/presentationfactory/getpresentationinfo/" target="_blank" rel="nofollow noopener noreferrer">PresentationFactory.GetPresentationInfo</a> and then <a href="https://reference.aspose.com/slides/net/aspose.slides/ipresentationinfo/readdocumentproperties/" target="_blank" rel="nofollow noopener noreferrer">IPresentationInfo.ReadDocumentProperties</a> to read stored document metadata without creating a <a href="https://reference.aspose.com/slides/net/aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> instance. See [Build a Lightweight Presentation Inventory](/net/slides/examine-presentation/) for a complete reporting example and format-specific limitations.
+
+**Can I read public properties of an encrypted presentation without its opening password?**
+
+Yes. The presentation must have been encrypted with <a href="https://reference.aspose.com/slides/net/aspose.slides/iprotectionmanager/encryptdocumentproperties/" target="_blank" rel="nofollow noopener noreferrer">IProtectionManager.EncryptDocumentProperties</a> set to `false`, and it must be loaded with <a href="https://reference.aspose.com/slides/net/aspose.slides/loadoptions/onlyloaddocumentproperties/" target="_blank" rel="nofollow noopener noreferrer">LoadOptions.OnlyLoadDocumentProperties</a> set to `true`.
+
+**Can I update an encrypted PPTX file in document-properties-only mode?**
+
+No. Public and encrypted property data must remain consistent, so updating an encrypted PPTX file requires loading the complete presentation with the correct opening password.
+
+## Related features
+
+- <a href="https://docs.aspose.com/slides/features/document-properties/" target="_blank" rel="nofollow noopener noreferrer">Read and edit document properties</a>
+- <a href="https://docs.aspose.com/slides/features/custom-properties/" target="_blank" rel="nofollow noopener noreferrer">Add custom document properties</a>

@@ -1,0 +1,73 @@
+---
+title: "Update OLE Objects Automatically Using a PowerPoint Add-In"
+sidebar_label: "Update OLE Objects Automatically Using a PowerPoint Add-In"
+sidebar_key: "net-slides-updating-ole-objects-automatically-using-ms-powerpoint-add-in"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/net"
+source_path: "slides/net/updating-ole-objects-automatically-using-ms-powerpoint-add-in.md"
+source_commit: ""
+source_sha256: "35ec8245dc7a1cd05f2f32a4378878ae22d80304c850eb6a72e9384dd47164af"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/net/updating-ole-objects-automatically-using-ms-powerpoint-add-in/"
+source_markdown_url: "https://docs.aspose.com/slides/net/updating-ole-objects-automatically-using-ms-powerpoint-add-in.md"
+source_snapshot_sha256: "73e6acc989c837e129d75c78371ef1c50d317da13aa25985dafacf52d15e0043"
+---
+
+:::info
+Aspose.Slides for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+n
+
+> Discover how to auto-update OLE charts and objects in PowerPoint with an add-in and Aspose.Slides for .NET, featuring practical code and optimization tips.
+> 5
+
+## **Introduction**
+
+One of the most frequent questions asked by Aspose.Slides for .NET customers is how to create or modify editable charts (or other OLE objects) so that they update automatically when the presentation is opened. Unfortunately, PowerPoint doesn't support automatic macros in the same way Excel and Word do. The only macros available are `Auto_Open` and `Auto_Close`, and these only run automatically from an add-in. This short technical tip shows how to achieve that.
+
+## **Update OLE Objects Automatically**
+
+First, several freeware add-ins are available that add the Auto_Open macro feature to PowerPoint, for example <a href="http://skp.mvps.org/autoevents.htm" target="_blank" rel="nofollow noopener noreferrer">AutoEvents Add-in</a> and <a href="https://www.officeoneonline.com/eventgen/eventgen.html" target="_blank" rel="nofollow noopener noreferrer">Event Generator</a>.
+
+After installing one of these add-ins, simply add the `Auto_Open()` macro (or `OnPresentationOpen()` if you're using Event Generator) to your template presentation as shown below:
+
+```vbnet
+Sub Auto_Open()
+    Dim oSlide As Slide
+    Dim oShape As Shape
+    Dim oObject As Object
+
+    ' Loop through each slide in the presentation.
+    For Each oSlide In ActivePresentation.Slides
+
+        ' Loop through all the shapes on the current slide.
+        For Each oShape In oSlide.Shapes
+
+            ' Check whether the shape is an OLE object.
+            If oShape.Type = msoEmbeddedOLEObject Then
+
+                ' Found an OLE object. Obtain its object reference and then update it.
+                Set oObject = oShape.OLEFormat.Object
+                oObject.Application.Update
+
+                ' Now, quit out of the OLE server program.
+                ' This frees memory, and prevents any problems.
+                ' Also, set oObject to Nothing to release the object.
+                oObject.Application.Quit
+                Set oObject = Nothing
+            End If
+        Next oShape
+    Next oSlide
+End Sub
+```
+
+Any changes made to OLE objects with Aspose.Slides for .NET will be automatically updated when PowerPoint opens the presentation. If you have many OLE objects and don't want to update them all, simply add a custom tag to the shapes you need to process and check for it in the macro.

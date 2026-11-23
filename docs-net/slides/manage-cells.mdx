@@ -1,0 +1,359 @@
+---
+title: "Manage Table Cells in Presentations in .NET"
+sidebar_label: "Manage Table Cells in Presentations in .NET"
+sidebar_key: "net-slides-manage-cells"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/net"
+source_path: "slides/net/manage-cells.md"
+source_commit: ""
+source_sha256: "03718ae2a313722cc710c752264bdc3a7ef1952c33ca78ef04ee33114192261d"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/net/manage-cells/"
+source_markdown_url: "https://docs.aspose.com/slides/net/manage-cells.md"
+source_snapshot_sha256: "4471d9799722492509f4ee26fd067dd16813e0577cd680cfa5bf62af343e2f70"
+---
+
+:::info
+Aspose.Slides for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+T
+
+> Manage PowerPoint table cells in C#: identify merged cells, remove borders, split cells, and set background colors and images with Aspose.Slides for .NET.
+> 7
+
+## **Overview**
+
+Aspose.Slides allows you to access and modify table cells in PowerPoint presentations. This article explains how to identify merged table cells, remove cell borders, work with cell numbering after merging or splitting cells, change a cell's background color, and add an image inside a table cell. The examples show how to create or open a presentation, get a table from a slide, update cell formatting through cell properties, and save the modified presentation as a PPTX file.
+
+Aspose.Slides uses zero-based indices to access table cells in the order `(column, row)`.
+
+## **Identify a Merged Table Cell**
+
+The example opens an existing presentation and accesses the first shape on the first slide as a table. It assumes that the slide and shape exist and that the shape is a table. It then iterates through all rows and columns and uses <a href="https://reference.aspose.com/slides/net/aspose.slides/icell/ismergedcell/" target="_blank" rel="nofollow noopener noreferrer">IsMergedCell</a> to identify cells in merged regions. For each match, it prints the cell coordinates in `row;column` order, <a href="https://reference.aspose.com/slides/net/aspose.slides/icell/rowspan/" target="_blank" rel="nofollow noopener noreferrer">RowSpan</a>, <a href="https://reference.aspose.com/slides/net/aspose.slides/icell/colspan/" target="_blank" rel="nofollow noopener noreferrer">ColSpan</a>, and the region's starting coordinates, <a href="https://reference.aspose.com/slides/net/aspose.slides/icell/firstrowindex/" target="_blank" rel="nofollow noopener noreferrer">FirstRowIndex</a> and <a href="https://reference.aspose.com/slides/net/aspose.slides/icell/firstcolumnindex/" target="_blank" rel="nofollow noopener noreferrer">FirstColumnIndex</a>.
+
+```csharp
+using System;
+using Aspose.Slides;
+
+using var presentation = new Presentation("presentation_with_table.pptx");
+var slide = presentation.Slides[0];
+var table = (ITable) slide.Shapes[0];
+
+var rowCount = table.Rows.Count;
+for (var rowIndex = 0; rowIndex < rowCount; rowIndex++)
+{
+    var columnCount = table.Columns.Count;
+    for (var columnIndex = 0; columnIndex < columnCount; columnIndex++)
+    {
+        var cell = table[columnIndex, rowIndex];
+        if (cell.IsMergedCell)
+        {
+            Console.WriteLine($"Cell {rowIndex};{columnIndex} belongs to a merged region with RowSpan={cell.RowSpan} and ColSpan={cell.ColSpan} starting at {cell.FirstRowIndex};{cell.FirstColumnIndex}.");
+        }
+    }
+}
+```
+
+## **Remove Table Cell Borders**
+
+Create a <a href="https://reference.aspose.com/slides/net/aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a> and add a table to its first slide with <a href="https://reference.aspose.com/slides/net/aspose.slides/ishapecollection/addtable/" target="_blank" rel="nofollow noopener noreferrer">AddTable</a>. Column widths, row heights, and the table position are specified in points. The example sets all four cell borders to <a href="https://reference.aspose.com/slides/net/aspose.slides/filltype/" target="_blank" rel="nofollow noopener noreferrer">FillType.NoFill</a>, making them invisible.
+
+```csharp
+using Aspose.Slides;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+double[] columnWidths = { 50, 50, 50, 50 };
+double[] rowHeights = { 50, 30, 30, 30, 30 };
+var table = slide.Shapes.AddTable(100, 50, columnWidths, rowHeights);
+
+foreach (var row in table.Rows)
+    foreach (var cell in row)
+    {
+        cell.CellFormat.BorderTop.FillFormat.FillType = FillType.NoFill;
+        cell.CellFormat.BorderBottom.FillFormat.FillType = FillType.NoFill;
+        cell.CellFormat.BorderLeft.FillFormat.FillType = FillType.NoFill;
+        cell.CellFormat.BorderRight.FillFormat.FillType = FillType.NoFill;
+    }
+
+presentation.Save("table.pptx", SaveFormat.Pptx);
+```
+
+## **Add Diagonal Cell Borders**
+
+Use <a href="https://reference.aspose.com/slides/net/aspose.slides/icellformat/borderdiagonaldown/" target="_blank" rel="nofollow noopener noreferrer">BorderDiagonalDown</a> to draw a line from the top-left corner to the bottom-right, and <a href="https://reference.aspose.com/slides/net/aspose.slides/icellformat/borderdiagonalup/" target="_blank" rel="nofollow noopener noreferrer">BorderDiagonalUp</a> to draw a line from the bottom-left corner to the top-right. A diagonal can mark a corner header; both diagonals can form an X to mark a cell as not applicable.
+
+Each diagonal is an <a href="https://reference.aspose.com/slides/net/aspose.slides/ilineformat/" target="_blank" rel="nofollow noopener noreferrer">ILineFormat</a>. In its <a href="https://reference.aspose.com/slides/net/aspose.slides/ilineformat/fillformat/" target="_blank" rel="nofollow noopener noreferrer">FillFormat</a>, set <a href="https://reference.aspose.com/slides/net/aspose.slides/ifillformat/filltype/" target="_blank" rel="nofollow noopener noreferrer">FillType</a> to <a href="https://reference.aspose.com/slides/net/aspose.slides/filltype/" target="_blank" rel="nofollow noopener noreferrer">FillType.Solid</a> and choose a <a href="https://reference.aspose.com/slides/net/aspose.slides/ifillformat/solidfillcolor/" target="_blank" rel="nofollow noopener noreferrer">SolidFillColor</a>. Set the line's <a href="https://reference.aspose.com/slides/net/aspose.slides/ilineformat/width/" target="_blank" rel="nofollow noopener noreferrer">Width</a> in points.
+
+The example creates three cells in one row: a red downward diagonal, a blue upward diagonal, and both diagonals. It leaves the top, bottom, left, and right cell borders unchanged.
+
+```csharp
+using System.Drawing;
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+double[] columnWidths = { 210, 210, 210 };
+double[] rowHeights = { 160 };
+var table = slide.Shapes.AddTable(45, 130, columnWidths, rowHeights);
+
+var downwardBorder = table[0, 0].CellFormat.BorderDiagonalDown;
+downwardBorder.FillFormat.FillType = FillType.Solid;
+downwardBorder.FillFormat.SolidFillColor.Color = Color.Red;
+downwardBorder.Width = 3;
+
+var upwardBorder = table[1, 0].CellFormat.BorderDiagonalUp;
+upwardBorder.FillFormat.FillType = FillType.Solid;
+upwardBorder.FillFormat.SolidFillColor.Color = Color.Blue;
+upwardBorder.Width = 5;
+
+var crossDownwardBorder = table[2, 0].CellFormat.BorderDiagonalDown;
+crossDownwardBorder.FillFormat.FillType = FillType.Solid;
+crossDownwardBorder.FillFormat.SolidFillColor.Color = Color.Red;
+crossDownwardBorder.Width = 3;
+
+var crossUpwardBorder = table[2, 0].CellFormat.BorderDiagonalUp;
+crossUpwardBorder.FillFormat.FillType = FillType.Solid;
+crossUpwardBorder.FillFormat.SolidFillColor.Color = Color.Blue;
+crossUpwardBorder.Width = 5;
+
+presentation.Save("diagonal_cell_borders.pptx", SaveFormat.Pptx);
+```
+
+A diagonal is a formatting property, not a cell split. Each cell retains a single <a href="https://reference.aspose.com/slides/net/aspose.slides/icell/textframe/" target="_blank" rel="nofollow noopener noreferrer">TextFrame</a>; the regions on either side of a diagonal cannot be edited independently.
+
+The saved table, rendered in Microsoft PowerPoint:
+
+![Three table cells showing a red diagonal from top-left to bottom-right, a blue diagonal from bottom-left to top-right, and both diagonals forming an X.](/net/slides/images/b322ccdac471c5dd-diagonal-cell-borders.png)
+
+*Left to right: downward diagonal (red, 3 pt), upward diagonal (blue, 5 pt), and both diagonals.*
+
+## **Merge Table Cells**
+
+Use <a href="https://reference.aspose.com/slides/net/aspose.slides/itable/mergecells/" target="_blank" rel="nofollow noopener noreferrer">MergeCells</a> to combine a rectangular range of table cells into one cell. Specify the cells at the top-left and bottom-right corners of the range. The final argument controls whether the merge may include cells outside the specified range; `false` keeps the merge within that range.
+
+The example creates a 4-by-4 table with 70-point columns and rows, then merges the four central cells from `(1, 1)` through `(2, 2)`. The resulting cell spans two columns and two rows, while the table's underlying grid retains four columns and four rows. To access the merged cell's content or formatting, use its top-left position: `table[1, 1]` in this example. The other positions in the merged range remain part of the table grid, so the indices of cells outside the range do not change.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+double[] columnWidths = { 70, 70, 70, 70 };
+double[] rowHeights = { 70, 70, 70, 70 };
+var table = slide.Shapes.AddTable(100, 50, columnWidths, rowHeights);
+
+table.MergeCells(table[1, 1], table[2, 2], false);
+
+presentation.Save("merged_cells.pptx", SaveFormat.Pptx);
+```
+
+## **Split Table Cells**
+
+Merging cells in the previous example preserves the table's grid. Splitting a cell can introduce a new grid column and change the column indices of cells to its right. Aspose.Slides follows PowerPoint's table grid model.
+
+This example creates a 4-by-4 table with 70-point columns and rows and calls <a href="https://reference.aspose.com/slides/net/aspose.slides/icell/splitbywidth/" target="_blank" rel="nofollow noopener noreferrer">SplitByWidth</a> on cell `(1, 1)`. Half of the cell's 70-point width is passed to create two equal-width cells.
+
+After this split, the two halves are accessed as `table[1, 1]` and `table[2, 1]`. The table grid now has five columns: cells originally in columns 2 and 3 move to columns 3 and 4, respectively. Row indices remain unchanged. Use these updated column indices when accessing cells after the split.
+
+```csharp
+using System.Drawing;
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+double[] columnWidths = { 70, 70, 70, 70 };
+double[] rowHeights = { 70, 70, 70, 70 };
+var table = slide.Shapes.AddTable(100, 50, columnWidths, rowHeights);
+
+table[1, 1].SplitByWidth(table[1, 1].Width / 2);
+
+presentation.Save("split_cells.pptx", SaveFormat.Pptx);
+```
+
+### **Split Merged Cells by Row or Column Span**
+
+To prepare merged template cells for data population, use <a href="https://reference.aspose.com/slides/net/aspose.slides/icell/splitbyrowspan/" target="_blank" rel="nofollow noopener noreferrer">SplitByRowSpan</a> to split along an existing row boundary, or <a href="https://reference.aspose.com/slides/net/aspose.slides/icell/splitbycolspan/" target="_blank" rel="nofollow noopener noreferrer">SplitByColSpan</a> to split along a column boundary.
+
+The `index` argument counts rows in the upper part or columns in the left part of the split; it is relative to the merged region:
+
+- Row split: `0 < index <` <a href="https://reference.aspose.com/slides/net/aspose.slides/icell/rowspan/" target="_blank" rel="nofollow noopener noreferrer">RowSpan</a>.
+- Column split: `0 < index <` <a href="https://reference.aspose.com/slides/net/aspose.slides/icell/colspan/" target="_blank" rel="nofollow noopener noreferrer">ColSpan</a>.
+
+The example expects a presentation to have a table as the first shape on the first slide, with `(1, 2)` and `(1, 3)` merged vertically. Starting from the lower position, it uses <a href="https://reference.aspose.com/slides/net/aspose.slides/icell/firstcolumnindex/" target="_blank" rel="nofollow noopener noreferrer">FirstColumnIndex</a> and <a href="https://reference.aspose.com/slides/net/aspose.slides/icell/firstrowindex/" target="_blank" rel="nofollow noopener noreferrer">FirstRowIndex</a> to locate the origin and checks both spans. `SplitByRowSpan(1)` then separates rows 2 and 3 for product names. For a horizontal two-column merge, use `SplitByColSpan(1)` instead.
+
+```csharp
+using System;
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("table_template.pptx");
+var slide = presentation.Slides[0];
+var table = (ITable) slide.Shapes[0];
+
+var selectedCell = table[1, 3];
+var firstColumnIndex = selectedCell.FirstColumnIndex;
+var firstRowIndex = selectedCell.FirstRowIndex;
+var mergedCell = table[firstColumnIndex, firstRowIndex];
+
+if (mergedCell.IsMergedCell && mergedCell.RowSpan == 2 && mergedCell.ColSpan == 1)
+{
+    mergedCell.SplitByRowSpan(1);
+
+    // Retrieve the resulting cells from the table after splitting.
+    var upperCell = table[firstColumnIndex, firstRowIndex];
+    var lowerCell = table[firstColumnIndex, firstRowIndex + 1];
+    Console.WriteLine($"Upper cell merged: {upperCell.IsMergedCell}");
+    Console.WriteLine($"Lower cell merged: {lowerCell.IsMergedCell}");
+
+    upperCell.TextFrame.Text = "Product A";
+    lowerCell.TextFrame.Text = "Product B";
+
+    presentation.Save("split_template.pptx", SaveFormat.Pptx);
+}
+else
+{
+    Console.WriteLine("Select a merged region spanning exactly two rows and one column.");
+}
+```
+
+The table grid and surrounding cell indices stay unchanged. Retrieve the resulting cells by their coordinates; here, both have spans of 1 and <a href="https://reference.aspose.com/slides/net/aspose.slides/icell/ismergedcell/" target="_blank" rel="nofollow noopener noreferrer">IsMergedCell</a> prints `False`. Larger regions can remain partly merged after one split.
+
+The original text and its formatting remain in the upper (or left) cell; the new cell is empty but inherits cell formatting such as fill, borders, and margins. Populate the cells after splitting and set any required text formatting explicitly.
+
+The saved presentation contains separate "Product A" and "Product B" cells with the template's cell formatting retained. See the <a href="https://reference.aspose.com/slides/net/aspose.slides/cell/" target="_blank" rel="nofollow noopener noreferrer">Cell API Reference</a> for details.
+
+<!-- visual-explanation:manage-cells:start -->
+
+[![The merged cell at column 1, rows 2 and 3 splits into Product A and Product B with the same grid indices.](/net/slides/images/62c80896698ee667-visual-manage-cells-62c80896698e.svg)](https://docs.aspose.com/slides/net/manage-cells/visual-manage-cells-62c80896698e.svg)
+
+*The row-span split uses the existing boundary. Product A and Product B occupy (1, 2) and (1, 3), respectively.*
+
+<!-- visual-explanation:manage-cells:end -->
+
+### **Split a Cell at a Specific Height**
+
+<a href="https://reference.aspose.com/slides/net/aspose.slides/icell/splitbyheight/" target="_blank" rel="nofollow noopener noreferrer">SplitByHeight</a> takes the height of the upper part in points. <a href="https://reference.aspose.com/slides/net/aspose.slides/icell/splitbyrowspan/" target="_blank" rel="nofollow noopener noreferrer">SplitByRowSpan</a> takes the number of existing grid rows in the upper part. To center a 40-point cell in the right column, subtract 40 from the cell's actual height and divide the remaining space equally above and below it.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+double[] columnWidths = { 160, 160 };
+double[] rowHeights = { 140 };
+
+var table = slide.Shapes.AddTable(50, 50, columnWidths, rowHeights);
+table[0, 0].TextFrame.Text = "Left";
+
+var height = table[1, 0].Height;
+var margin = (height - 40) / 2;
+
+table[1, 0].SplitByHeight(margin);
+table[1, 1].SplitByHeight(40);
+table[1, 1].TextFrame.Text = "Middle";
+
+presentation.Save("split_by_height.pptx", SaveFormat.Pptx);
+```
+
+The first split adds a grid row, leaving the lower 90 points at `[1, 1]`. The second split targets that cell and adds another row below it. The right column now contains `[1, 0]` at 50 points (`margin`), `[1, 1]` at 40 points, and `[1, 2]` at 50 points (`margin`). The left cell spans all three rows at its original height of 140 points.
+
+![The left cell spans the full table height beside three cells with Middle in the center.](/net/slides/images/88e8a709ad74addc-split-by-height.png)
+
+## **Change the Table Cell Background Color**
+
+This example creates a table with 150-point columns and 50-point rows. It sets <a href="https://reference.aspose.com/slides/net/aspose.slides/ifillformat/filltype/" target="_blank" rel="nofollow noopener noreferrer">FillType</a> to solid and <a href="https://reference.aspose.com/slides/net/aspose.slides/ifillformat/solidfillcolor/" target="_blank" rel="nofollow noopener noreferrer">SolidFillColor</a> to red for cell `(2, 3)`, in the third column and fourth row.
+
+```csharp
+using System.Drawing;
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+double[] columnWidths = { 150, 150, 150, 150 };
+double[] rowHeights = { 50, 50, 50, 50, 50 };
+var table = slide.Shapes.AddTable(50, 50, columnWidths, rowHeights);
+
+var cell = table[2, 3];
+cell.CellFormat.FillFormat.FillType = FillType.Solid;
+cell.CellFormat.FillFormat.SolidFillColor.Color = Color.Red;
+
+presentation.Save("cell_background_color.pptx", SaveFormat.Pptx);
+```
+
+## **Add an Image Inside a Table Cell**
+
+Place the input image in the working directory before running this example. It loads the image with <a href="https://reference.aspose.com/slides/net/aspose.slides/images/fromfile/" target="_blank" rel="nofollow noopener noreferrer">Images.FromFile</a> and adds it to the presentation's image collection with <a href="https://reference.aspose.com/slides/net/aspose.slides/iimagecollection/addimage/" target="_blank" rel="nofollow noopener noreferrer">AddImage</a>. It then assigns the image to the picture fill of cell `(0, 0)`, the first cell in the table.
+
+<a href="https://reference.aspose.com/slides/net/aspose.slides/picturefillmode/" target="_blank" rel="nofollow noopener noreferrer">PictureFillMode.Stretch</a> stretches the image to fill the cell, which may change its aspect ratio. Column widths and row heights are in points. The loaded image is disposed automatically by its using declaration.
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation();
+var slide = presentation.Slides[0];
+
+double[] columnWidths = { 150, 150, 150, 150 };
+double[] rowHeights = { 100, 100, 100, 100, 90 };
+var table = slide.Shapes.AddTable(50, 50, columnWidths, rowHeights);
+
+using var image = Images.FromFile("aspose_logo.jpg");
+var ppImage = presentation.Images.AddImage(image);
+
+table[0, 0].CellFormat.FillFormat.FillType = FillType.Picture;
+table[0, 0].CellFormat.FillFormat.PictureFillFormat.PictureFillMode = PictureFillMode.Stretch;
+table[0, 0].CellFormat.FillFormat.PictureFillFormat.Picture.Image = ppImage;
+
+presentation.Save("table_cell_with_image.pptx", SaveFormat.Pptx);
+```
+
+## **FAQ**
+
+**Can I set different line thicknesses and styles for different sides of a single cell?**
+
+Yes. The <a href="https://reference.aspose.com/slides/net/aspose.slides/cellformat/bordertop/" target="_blank" rel="nofollow noopener noreferrer">top</a>/<a href="https://reference.aspose.com/slides/net/aspose.slides/cellformat/borderbottom/" target="_blank" rel="nofollow noopener noreferrer">bottom</a>/<a href="https://reference.aspose.com/slides/net/aspose.slides/cellformat/borderleft/" target="_blank" rel="nofollow noopener noreferrer">left</a>/<a href="https://reference.aspose.com/slides/net/aspose.slides/cellformat/borderright/" target="_blank" rel="nofollow noopener noreferrer">right</a> borders have separate properties, so the thickness and style of each side can differ.
+
+**What happens to the image if I change the column/row size after setting a picture as the cell's background?**
+
+The behavior depends on the <a href="https://reference.aspose.com/slides/net/aspose.slides/picturefillmode/" target="_blank" rel="nofollow noopener noreferrer">fill mode</a> (stretch/tile). With stretching, the image adjusts to the new cell; with tiling, the tiles are recalculated.
+
+**Can I assign a hyperlink to all the content of a cell?**
+
+[Hyperlinks](/net/slides/manage-hyperlinks/) are set at the text (portion) level inside the cell's text frame or at the level of the entire table/shape. In practice, you assign the link to a portion or to all the text in the cell.
+
+**Can I set different fonts within a single cell?**
+
+Yes. A cell's text frame supports <a href="https://reference.aspose.com/slides/net/aspose.slides/portion/" target="_blank" rel="nofollow noopener noreferrer">portions</a> (runs) with independent formatting-font family, style, size, and color.
+
+## Related features
+
+- <a href="https://docs.aspose.com/slides/features/merge-table-cells/" target="_blank" rel="nofollow noopener noreferrer">Merge table cells</a>
+- <a href="https://docs.aspose.com/slides/features/format-table-cells/" target="_blank" rel="nofollow noopener noreferrer">Format table cells</a>
+- <a href="https://docs.aspose.com/slides/features/table-cell-images/" target="_blank" rel="nofollow noopener noreferrer">Add pictures to table cells</a>
+
+## Related articles
+
+- [Create and Customize PowerPoint Tables in .NET](/net/slides/powerpoint-table/)
+- [Manage Presentation Tables in .NET](/net/slides/manage-table/)
+- <a href="https://docs.aspose.com/slides/net/examples/elements/table/" target="_blank" rel="nofollow noopener noreferrer">Table</a>

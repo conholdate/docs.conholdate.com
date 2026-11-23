@@ -1,0 +1,270 @@
+---
+title: "Embed Fonts in Presentations in .NET"
+sidebar_label: "Embed Fonts in Presentations in .NET"
+sidebar_key: "net-slides-embedded-font"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/net"
+source_path: "slides/net/embedded-font.md"
+source_commit: ""
+source_sha256: "c1edba14b6f2ce4852363cdc505301f01d58fec7ad9e7bb86374eb305f22bcf3"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/net/embedded-font/"
+source_markdown_url: "https://docs.aspose.com/slides/net/embedded-font.md"
+source_snapshot_sha256: "2c96be1065a860637ff81676fa3dfe1d66ad0099302a919749a5d67814620967"
+---
+
+:::info
+Aspose.Slides for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+T
+
+> Manage embedded fonts in PowerPoint with Aspose.Slides for .NET. Use C# to add, retrieve, remove, and compress fonts to preserve text appearance and reduce file size.
+> 7
+
+## **Introduction**
+
+Embedding fonts stores font data inside a PowerPoint presentation. When a viewer supports embedded fonts, it can display text using those fonts even if they are not installed on the target system. This helps preserve line breaks, text spacing, and slide layout.
+
+Aspose.Slides for .NET lets you retrieve, add, and remove embedded fonts through the <a href="https://reference.aspose.com/slides/net/aspose.slides/presentation/fontsmanager/" target="_blank" rel="nofollow noopener noreferrer">FontsManager</a> property of a <a href="https://reference.aspose.com/slides/net/aspose.slides/presentation/" target="_blank" rel="nofollow noopener noreferrer">Presentation</a>. You can also reduce the size of embedded font data by removing characters that the presentation does not use.
+
+The examples below work with PPTX files. Before embedding a font, make sure its font data is available to Aspose.Slides and its license permits embedding.
+
+## **Get and Remove Embedded Fonts**
+
+Use <a href="https://reference.aspose.com/slides/net/aspose.slides/fontsmanager/getembeddedfonts/" target="_blank" rel="nofollow noopener noreferrer">GetEmbeddedFonts</a> to list the fonts stored in a presentation. To remove one, pass a font from that list to <a href="https://reference.aspose.com/slides/net/aspose.slides/fontsmanager/removeembeddedfont/" target="_blank" rel="nofollow noopener noreferrer">RemoveEmbeddedFont</a>, then save the presentation.
+
+The following example lists the embedded fonts in `EmbeddedFonts.pptx` and removes Calibri if it is present:
+
+```csharp
+using System;
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("EmbeddedFonts.pptx");
+var fontsManager = presentation.FontsManager;
+var embeddedFonts = fontsManager.GetEmbeddedFonts();
+
+foreach (var font in embeddedFonts)
+{
+    Console.WriteLine(font.FontName);
+}
+
+var fontToRemove = Array.Find(embeddedFonts, font => string.Equals(font.FontName, "Calibri", StringComparison.OrdinalIgnoreCase));
+if (fontToRemove != null)
+{
+    fontsManager.RemoveEmbeddedFont(fontToRemove);
+    presentation.Save("WithoutEmbeddedCalibri.pptx", SaveFormat.Pptx);
+}
+else
+{
+    Console.WriteLine("Calibri is not embedded. No output file was created.");
+}
+```
+
+Removing an embedded font removes its stored font data; it does not change the font assigned to the text. If the font is installed on the target system, the text can still use it. Otherwise, rendering may require [font substitution](/net/slides/font-substitution/), which can affect the layout.
+
+## **Inspect Font Data and Embedding Permissions**
+
+Use the <a href="https://reference.aspose.com/slides/net/aspose.slides/ifontsmanager/" target="_blank" rel="nofollow noopener noreferrer">IFontsManager</a> interface to inspect fonts before embedding them. Call <a href="https://reference.aspose.com/slides/net/aspose.slides/ifontsmanager/getfonts/" target="_blank" rel="nofollow noopener noreferrer">IFontsManager.GetFonts</a> to retrieve the fonts used in the presentation. For each font, pass an <a href="https://reference.aspose.com/slides/net/aspose.slides/ifontdata/" target="_blank" rel="nofollow noopener noreferrer">IFontData</a> object and the required <a href="https://reference.aspose.com/slides/net/aspose.slides/fontstyletype/" target="_blank" rel="nofollow noopener noreferrer">FontStyleType</a> value to <a href="https://reference.aspose.com/slides/net/aspose.slides/ifontsmanager/getfontbytes/" target="_blank" rel="nofollow noopener noreferrer">IFontsManager.GetFontBytes</a>. The method returns the binary data for that font style, or `null` when the requested font or style is unavailable. Do not pass a `null` result to <a href="https://reference.aspose.com/slides/net/aspose.slides/ifontsmanager/getfontembeddinglevel/" target="_blank" rel="nofollow noopener noreferrer">IFontsManager.GetFontEmbeddingLevel</a>, because that method requires a byte array.
+
+<a href="https://reference.aspose.com/slides/net/aspose.slides/embeddinglevel/" target="_blank" rel="nofollow noopener noreferrer">EmbeddingLevel</a> is a flags enumeration that reports the embedding restrictions stored in the font:
+
+- `Installable` permits embedding and permanent installation on another system, subject to the font license.
+- `Restricted` prohibits embedding unless permission is obtained from the font's legal owner when it is the only usage-permission flag.
+- `PreviewPrint` permits temporary use for viewing and printing; a document containing the font must be read-only.
+- `Editable` permits temporary use and allows the document to be edited and saved.
+- `NoSubsetting` is an additional restriction that prohibits embedding only a subset of the glyphs. Embed all characters when this flag is present.
+- `BitmapOnly` is an additional restriction that permits only bitmap strikes to be embedded, not outline data. If the font has no bitmap strikes, it cannot be embedded.
+
+The first four values describe usage permission, while `NoSubsetting` and `BitmapOnly` can be combined with them. Check the modifiers with bitwise operations. Because `Installable` is zero, do not use `HasFlag` to detect it; mask the usage-permission bits and compare the result with `Installable`. Current fonts should set at most one usage-permission bit. For compatibility with older fonts that set more than one, the helper below selects the least restrictive permission: `Editable`, then `PreviewPrint`, then `Restricted`.
+
+The following example audits the regular, bold, italic, and bold-italic data available for every font returned by `GetFonts`. It skips unavailable styles, restricted fonts, bitmap-only fonts, fonts limited to preview and print because the output remains editable, and fonts that are already embedded. If any available style has `NoSubsetting`, it embeds all characters for that font family.
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+static EmbeddingLevel GetUsagePermission(EmbeddingLevel level)
+{
+    const EmbeddingLevel permissionMask = EmbeddingLevel.Restricted | EmbeddingLevel.PreviewPrint | EmbeddingLevel.Editable;
+    var permissions = level & permissionMask;
+
+    if ((permissions & EmbeddingLevel.Editable) != 0)
+    {
+        return EmbeddingLevel.Editable;
+    }
+
+    if ((permissions & EmbeddingLevel.PreviewPrint) != 0)
+    {
+        return EmbeddingLevel.PreviewPrint;
+    }
+
+    if ((permissions & EmbeddingLevel.Restricted) != 0)
+    {
+        return EmbeddingLevel.Restricted;
+    }
+
+    return EmbeddingLevel.Installable;
+}
+
+using var presentation = new Presentation("Fonts.pptx");
+var fontsManager = presentation.FontsManager;
+var fontStyles = new[]
+{
+    FontStyleType.Regular,
+    FontStyleType.Bold,
+    FontStyleType.Italic,
+    FontStyleType.Bold | FontStyleType.Italic
+};
+
+var embeddedFontNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+foreach (var embeddedFont in fontsManager.GetEmbeddedFonts())
+{
+    embeddedFontNames.Add(embeddedFont.FontName);
+}
+
+var embeddingPlan = new List<(IFontData Font, EmbedFontCharacters Rule)>();
+foreach (var font in fontsManager.GetFonts())
+{
+    if (embeddedFontNames.Contains(font.FontName))
+    {
+        Console.WriteLine($"{font.FontName}: already embedded.");
+        continue;
+    }
+
+    var hasAvailableData = false;
+    var allAvailableStylesCanBeEmbedded = true;
+    var previewPrintOnly = false;
+    var requiresFullFont = false;
+
+    foreach (var fontStyle in fontStyles)
+    {
+        var fontBytes = fontsManager.GetFontBytes(font, fontStyle);
+        if (fontBytes == null)
+        {
+            Console.WriteLine($"{font.FontName} ({fontStyle}): font data is unavailable.");
+            continue;
+        }
+
+        hasAvailableData = true;
+        var embeddingLevel = fontsManager.GetFontEmbeddingLevel(fontBytes, font.FontName);
+        var usagePermission = GetUsagePermission(embeddingLevel);
+        var noSubsetting = (embeddingLevel & EmbeddingLevel.NoSubsetting) != 0;
+        var bitmapOnly = (embeddingLevel & EmbeddingLevel.BitmapOnly) != 0;
+
+        requiresFullFont |= noSubsetting;
+        previewPrintOnly |= usagePermission == EmbeddingLevel.PreviewPrint;
+        allAvailableStylesCanBeEmbedded &= usagePermission != EmbeddingLevel.Restricted && !bitmapOnly;
+
+        Console.WriteLine($"{font.FontName} ({fontStyle}): {embeddingLevel}.");
+    }
+
+    if (!hasAvailableData)
+    {
+        Console.WriteLine($"{font.FontName}: skipped because no requested style is available.");
+    }
+    else if (!allAvailableStylesCanBeEmbedded)
+    {
+        Console.WriteLine($"{font.FontName}: skipped because at least one available style does not permit outline embedding.");
+    }
+    else if (previewPrintOnly)
+    {
+        Console.WriteLine($"{font.FontName}: skipped because this example produces an editable presentation.");
+    }
+    else
+    {
+        var rule = requiresFullFont ? EmbedFontCharacters.All : EmbedFontCharacters.OnlyUsed;
+        embeddingPlan.Add((font, rule));
+    }
+}
+
+foreach (var item in embeddingPlan)
+{
+    fontsManager.AddEmbeddedFont(item.Font, item.Rule);
+}
+
+presentation.Save("WithAuditedFonts.pptx", SaveFormat.Pptx);
+```
+
+This inspection reports the restrictions encoded in each font file. It does not grant a license, prove that you obtained the font legally, or replace checking the font's license agreement before distributing an embedded copy.
+
+## **Add Embedded Fonts**
+
+Use <a href="https://reference.aspose.com/slides/net/aspose.slides/fontsmanager/addembeddedfont/" target="_blank" rel="nofollow noopener noreferrer">AddEmbeddedFont</a> to embed a font. Its overloads accept either an <a href="https://reference.aspose.com/slides/net/aspose.slides/ifontdata/" target="_blank" rel="nofollow noopener noreferrer">IFontData</a> object or a byte array containing the font data. The <a href="https://reference.aspose.com/slides/net/aspose.slides.export/embedfontcharacters/" target="_blank" rel="nofollow noopener noreferrer">EmbedFontCharacters</a> enumeration controls which characters are included:
+
+- <a href="https://reference.aspose.com/slides/net/aspose.slides.export/embedfontcharacters/" target="_blank" rel="nofollow noopener noreferrer">All</a> embeds all characters in the font. Use this option when recipients need to edit the presentation and enter new text.
+- <a href="https://reference.aspose.com/slides/net/aspose.slides.export/embedfontcharacters/" target="_blank" rel="nofollow noopener noreferrer">OnlyUsed</a> embeds only the characters used in the presentation to reduce file size. Choose this option for a finished presentation that is primarily intended for viewing.
+
+The following example uses <a href="https://reference.aspose.com/slides/net/aspose.slides/fontsmanager/getfonts/" target="_blank" rel="nofollow noopener noreferrer">GetFonts</a> to retrieve the fonts used in `Fonts.pptx` and embeds those that are not already embedded. The fonts to add must be available on the machine running the code. Existing embedded fonts retain their current character sets.
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Aspose.Slides;
+using Aspose.Slides.Export;
+
+using var presentation = new Presentation("Fonts.pptx");
+var fontsManager = presentation.FontsManager;
+var allFonts = fontsManager.GetFonts();
+var embeddedFonts = fontsManager.GetEmbeddedFonts();
+var embeddedFontNames = embeddedFonts.Select(font => font.FontName);
+var embeddedNames = new HashSet<string>(embeddedFontNames, StringComparer.OrdinalIgnoreCase);
+
+foreach (var font in allFonts)
+{
+    if (!embeddedNames.Contains(font.FontName))
+    {
+        fontsManager.AddEmbeddedFont(font, EmbedFontCharacters.All);
+        embeddedNames.Add(font.FontName);
+    }
+}
+
+presentation.Save("WithEmbeddedFonts.pptx", SaveFormat.Pptx);
+```
+
+## **Compress Embedded Fonts**
+
+<a href="https://reference.aspose.com/slides/net/aspose.slides.lowcode/compress/compressembeddedfonts/" target="_blank" rel="nofollow noopener noreferrer">CompressEmbeddedFonts</a> reduces embedded font data by removing unused characters. It operates on fonts that are already embedded, so the size reduction depends on how much unused font data the presentation contains.
+
+The following example compresses the fonts in `EmbeddedFonts.pptx` and saves the result as a separate file:
+
+```csharp
+using Aspose.Slides;
+using Aspose.Slides.Export;
+using Aspose.Slides.LowCode;
+
+using var presentation = new Presentation("EmbeddedFonts.pptx");
+Compress.CompressEmbeddedFonts(presentation);
+presentation.Save("CompressedEmbeddedFonts.pptx", SaveFormat.Pptx);
+```
+
+Keep the original file if recipients may need to add text later. Characters removed during compression are no longer available from the embedded font, even if you originally embedded all characters.
+
+To let a matching registered font take priority during export without removing the embedded font, see [Prefer Registered Fonts over Embedded Fonts](/net/slides/font-selection-sequence/#prefer-registered-fonts-over-embedded-fonts) (.NET 26.11 or later).
+
+## **FAQ**
+
+**How can I check whether an embedded font will still be substituted during rendering?**
+
+Call <a href="https://reference.aspose.com/slides/net/aspose.slides/fontsmanager/getsubstitutions/" target="_blank" rel="nofollow noopener noreferrer">GetSubstitutions</a> in the environment where you render the presentation to see which fonts Aspose.Slides will replace. Also check [font substitution](/net/slides/font-substitution/) settings and [font fallback](/net/slides/fallback-font/) rules. Fallback handles missing characters, so embedding a font does not resolve characters that the font itself does not contain.
+
+**Should I embed common fonts such as Arial and Calibri?**
+
+Base the decision on the target environment. If the required fonts are available on every machine that opens or renders the presentation, embedding them may add unnecessary file size. If recipients or servers may lack those fonts, embedding them can help preserve the intended appearance, provided their licenses allow it.
+
+## Related features
+
+- <a href="https://docs.aspose.com/slides/features/embed-fonts/" target="_blank" rel="nofollow noopener noreferrer">Embed fonts in presentations</a>
+- <a href="https://docs.aspose.com/slides/features/list-embedded-fonts/" target="_blank" rel="nofollow noopener noreferrer">List embedded fonts</a>
