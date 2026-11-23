@@ -1,0 +1,133 @@
+---
+title: "Text Box"
+sidebar_label: "Text Box"
+sidebar_key: "java-slides-examples-elements-text-box"
+sidebar_position: 100
+description: ""
+product: "slides"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/slides/java"
+source_path: "slides/java/examples/elements/text-box.md"
+source_commit: ""
+source_sha256: "9c87d8d04217fd0fde23d321e5f3f2290b27860246db261c9907b7018f9bae7c"
+vendor: "aspose"
+source_type: "remote-markdown"
+source_url: "https://docs.aspose.com/slides/java/examples/elements/text-box/"
+source_markdown_url: "https://docs.aspose.com/slides/java/examples/elements/text-box.md"
+source_snapshot_sha256: "20d0fc552343ce11786612ab5b63923e90d1fc2bdc3a534bf7a2dde200f92b39"
+---
+
+:::info
+Aspose.Slides for Java is included in Conholdate.Total for Java.
+:::
+
+
+x
+
+> Work with text boxes in Aspose.Slides for Java: add, format, align, wrap, autofit, and style text using Java for PPT, PPTX, and ODP presentations.
+> 5
+
+In Aspose.Slides, a **text box** is represented by an `AutoShape`. Nearly any shape can contain text, but a typical text box has no fill or border and displays only text.
+
+This guide explains how to add, access, and remove text boxes programmatically.
+
+## **Add a Text Box**
+
+A text box is simply an `AutoShape` with no fill or border and some formatted text. Here's how to create one:
+
+```java
+import com.aspose.slides.*;
+import java.awt.Color;
+
+public static void addTextBox() {
+    Presentation presentation = new Presentation();
+    try {
+        ISlide slide = presentation.getSlides().get_Item(0);
+
+        // Create a rectangle shape (defaults to filled with border and no text).
+        IAutoShape textBox = slide.getShapes().addAutoShape(ShapeType.Rectangle, 50, 75, 150, 100);
+
+        // Remove fill and border to make it look like a typical text box.
+        textBox.getFillFormat().setFillType(FillType.NoFill);
+        textBox.getLineFormat().getFillFormat().setFillType(FillType.NoFill);
+
+        // Set text formatting.
+        IParagraph paragraph = textBox.getTextFrame().getParagraphs().get_Item(0);
+        IPortionFormat textFormat = paragraph.getParagraphFormat().getDefaultPortionFormat();
+        textFormat.getFillFormat().setFillType(FillType.Solid);
+        textFormat.getFillFormat().getSolidFillColor().setColor(Color.BLACK);
+
+        // Assign the actual text content.
+        textBox.getTextFrame().setText("Some text...");
+    } finally {
+        presentation.dispose();
+    }
+}
+```
+
+> 💡 **Note:** Any `AutoShape` that contains a non-empty `TextFrame` can function as a text box.
+
+## **Access Text Boxes by Content**
+
+To find all text boxes containing a specific keyword (e.g. "Slide"), iterate through the shapes and check their text:
+
+```java
+import com.aspose.slides.*;
+
+public static void accessTextBox() {
+    Presentation presentation = new Presentation();
+    try {
+        ISlide slide = presentation.getSlides().get_Item(0);
+
+        for (IShape shape : slide.getShapes()) {
+            // Only AutoShapes can contain editable text.
+            if (shape instanceof IAutoShape) {
+                IAutoShape autoShape = (IAutoShape) shape;
+                if (autoShape.getTextFrame().getText().contains("Slide")) {
+                    // Do something with the matching text box.
+                }
+            }
+        }
+    } finally {
+        presentation.dispose();
+    }
+}
+```
+
+## **Remove Text Boxes by Content**
+
+This example finds and deletes all text boxes on the first slide that contain a specific keyword:
+
+```java
+import com.aspose.slides.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public static void removeTextBox() {
+    Presentation presentation = new Presentation();
+    try {
+        ISlide slide = presentation.getSlides().get_Item(0);
+
+        List<IShape> shapesToRemove = new ArrayList<IShape>();
+        for (IShape shape : slide.getShapes()) {
+            if (shape instanceof IAutoShape) {
+                IAutoShape autoShape = (IAutoShape) shape;
+                if (autoShape.getTextFrame().getText().contains("Slide")) {
+                    shapesToRemove.add(shape);
+                }
+            }
+        }
+
+        for (IShape shape : shapesToRemove) {
+            slide.getShapes().remove(shape);
+        }
+    } finally {
+        presentation.dispose();
+    }
+}
+```
+
+> 💡 **Tip:** Always create a copy of the shape collection before modifying it during iteration to avoid collection modification errors.
