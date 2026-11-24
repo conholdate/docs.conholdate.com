@@ -1,0 +1,311 @@
+---
+title: "Creating and Managing PST Files"
+sidebar_label: "Creating and Managing PST Files"
+sidebar_key: "net-email-create-and-manage-pst-files"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/create-and-manage-pst-files.html"
+source_commit: ""
+source_sha256: "9f6f26502d280ddf5d3e44ae5ea58ead848f7ea2911bf5b43e24a3428191e68a"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/create-and-manage-pst-files/"
+source_snapshot_sha256: "55eef694ac447255b8bfcaae8eedc8b316d0b83b3d9af51c5c224934ad76956f"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+As well as parsing an existing PST file, Aspose.Email provides the means to create a PST file from scratch. This article demonstrates how to create Outlook PST files and add sub-folders or messages to them.
+
+## Creating PST Files {#creating-pst-files}
+
+To create a new PST file on a local disk, you will need to use the <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/" target="_blank" rel="nofollow noopener noreferrer">PersonalStorage</a> class. With this class, you can create, read, and manipulate PST files in your .NET applications. Create a storage file from scratch with a line of code:
+
+```csharp
+// Create new PST
+using var pst = PersonalStorage.Create(path, FileFormatVersion.Unicode);
+```
+
+## Create a PST in a Stream {#create-a-pst-in-a-stream}
+
+Besides creating a PST on disk, <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/create/" target="_blank" rel="nofollow noopener noreferrer">PersonalStorage.Create</a> can write the storage into any writable, seekable `Stream`. Use it to build a PST in memory, stream it straight to another destination, or keep control of the underlying file handle. Two stream overloads are available:
+
+- `static PersonalStorage Create(Stream stream, FileFormatVersion version)`
+- `static PersonalStorage Create(Stream stream, FileFormatVersion version, bool leaveStreamOpen)`
+
+Pass `leaveStreamOpen: true` when the caller owns the stream and still needs it after the `PersonalStorage` object is disposed.
+
+```cs
+using var stream = new FileStream("storage.pst", FileMode.Create, FileAccess.ReadWrite);
+
+using (var pst = PersonalStorage.Create(stream, FileFormatVersion.Unicode, true))
+{
+    var inbox = pst.CreatePredefinedFolder("Inbox", StandardIpmFolder.Inbox);
+    inbox.AddMessage(MapiMessage.Load("message.msg"));
+}
+
+// The stream is still usable here because leaveStreamOpen was true
+Console.WriteLine("stream length: " + stream.Length);
+```
+
+:::info
+Create storages that have to grow beyond 2 GB with `FileFormatVersion.Unicode`. The older `FileFormatVersion.ANSI` format is limited to 2 GB.
+:::
+
+### Reduce the Size of the Created PST {#reduce-the-size-of-the-created-pst}
+
+Message bodies dominate the size of a PST. Compressing the RTF body while composing a message keeps both the message and the resulting storage smaller - see [RTF Compression for MAPI Message Body](/net/email/creating-and-saving-outlook-files/#rtf-compression-for-mapi-message-body).
+
+```cs
+var msg = new MapiMessage("from@domain.com", "to@domain.com", "subject", "body");
+
+// Store the HTML body in compressed RTF form
+msg.SetBodyContent("<html><body>Report</body></html>", BodyContentType.Html, true);
+
+using var pst = PersonalStorage.Create("storage.pst", FileFormatVersion.Unicode);
+var folder = pst.CreatePredefinedFolder("Inbox", StandardIpmFolder.Inbox);
+folder.AddMessage(msg);
+```
+
+## Add Sub-folders to PST {#add-sub-folders-to-pst}
+
+Add a sub-folder at the root of the PST file by accessing the Root folder and then calling the <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/addsubfolder/#addsubfolder/" target="_blank" rel="nofollow noopener noreferrer">AddSubFolder</a> method.
+
+The following code snippet shows you how to add a subfolder called Inbox:
+
+```csharp
+// Add new folder "Test"
+pst.RootFolder.AddSubFolder("Inbox");
+```
+
+## Check the Folder Container Class {#check-the-folder-container-class}
+
+When creating new folders or adding items to existing folders, it is important to ensure that the container class of the new item or folder aligns with the container class of the parent folder to maintain the organizational hierarchy within the PST storage file. For this purpose, Aspose.Email has the <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/foldercreationoptions/enforcecontainerclassmatching/" target="_blank" rel="nofollow noopener noreferrer">EnforceContainerClassMatching</a> property of the <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/foldercreationoptions/#foldercreationoptions-class" target="_blank" rel="nofollow noopener noreferrer">FolderCreationOptions</a> class. The property specifies whether to enforce checking the container class of the folder being added against the container class of the parent folder. If set to 'true', an exception will be thrown if the container classes do not match. Default is 'false'.
+
+The following code sample demonstrates the use of the <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/foldercreationoptions/enforcecontainerclassmatching/" target="_blank" rel="nofollow noopener noreferrer">EnforceContainerClassMatching</a> property to control whether an exception should be thrown when adding folders with mismatching container classes:
+
+```cs
+using (var pst = PersonalStorage.Create("storage.pst", FileFormatVersion.Unicode))
+{
+    // Create a standard Contacts folder with the IPF.Contacts container class.
+    var contacts = pst.CreatePredefinedFolder("Contacts", StandardIpmFolder.Contacts);
+    
+    // An exception will not arise. EnforceContainerClassMatching is false by default.
+    contacts.AddSubFolder("Subfolder1", "IPF.Note");
+    
+    // An exception will occur as the container class of the subfolder being added (IPF.Note) 
+    // does not match the container class of the parent folder (IPF.Contact).
+    contacts.AddSubFolder("Subfolder3", new FolderCreationOptions {EnforceContainerClassMatching = true, ContainerClass = "IPF.Note"});
+}
+```
+
+> Note: Ensure proper handling of exceptions when enforcing container class matching to prevent unexpected behavior during folder creation in PST.
+
+## Change the Folder Container Class {#change-the-folder-container-class}
+
+Sometimes it is necessary to change the folder container class. A common example is where messages of different types (appointments, messages, etc.) are added to the same folder. In such cases, the folder class needs to be changed for all elements in the folder to display properly. The following code snippet shows you how to change the container class of a folder in PST for this purpose.
+
+```csharp
+using var pst = PersonalStorage.FromFile("PersonalStorage1.pst");
+var folder = pst.RootFolder.GetSubFolder("Inbox");
+
+folder.ChangeContainerClass("IPF.Note");
+```
+
+## Adding Files to PST {#adding-files-to-pst}
+
+The key functionality of Microsoft Outlook is managing emails, calendars, tasks, contacts and journal entries. In addition, files can also be added to a PST folder and the resulting PST keeps a record of the documents added. Aspose.Email provides the facility to add files to a folder in the same way together with adding messages, contacts, tasks and journal entries to PST. The following code snippet shows you how to add documents to a PST folder using Aspose.Email.
+
+```csharp
+using (var personalStorage = PersonalStorage.Create(dataDir + "Ps1_out.pst", FileFormatVersion.Unicode))
+{
+    var folder = personalStorage.RootFolder.AddSubFolder("Files");
+
+    // Add Document.doc file with the "IPM.Document" message class by default.
+    folder.AddFile(dataDir + "attachment_1.doc", null);
+}
+```
+
+## Adding Messages to PST Files {#adding-messages-to-pst-files}
+
+With Aspose.Email you can add messages to subfolders of a PST file that you have created or loaded. This article adds two messages from disk to the Inbox subfolder of a PST. Use the <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/" target="_blank" rel="nofollow noopener noreferrer">PersonalStorage</a> and <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/" target="_blank" rel="nofollow noopener noreferrer">FolderInfo</a> classes to add messages to PST files. To add messages to a PST file Inbox folder:
+
+1. Create an instance of the FolderInfo class and load it with the contents of the Inbox folder.
+2. Add messages from a disk to the Inbox folder by calling the <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/addmessage/#addmessage" target="_blank" rel="nofollow noopener noreferrer">FolderInfo.AddMessage()</a> method. The <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/" target="_blank" rel="nofollow noopener noreferrer">FolderInfo</a> class exposes the <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/addmessages/#addmessages" target="_blank" rel="nofollow noopener noreferrer">AddMessages</a> method that enables to add large number of messages to the folder, reducing I/O operations to a disc and improving performance.
+
+The code snippet below shows how to add messages to a PST subfolder called Inbox.
+
+```csharp
+// Create new PST            
+var personalStorage = PersonalStorage.Create(dataDir, FileFormatVersion.Unicode);
+
+// Add new folder "Inbox"
+personalStorage.RootFolder.AddSubFolder("Inbox");
+
+// Select the "Inbox" folder
+var inboxFolder = personalStorage.RootFolder.GetSubFolder("Inbox");
+
+// Add some messages to "Inbox" folder
+inboxFolder.AddMessage(MapiMessage.FromFile(RunExamples.GetDataDir_Outlook() + "MapiMsgWithPoll.msg"));
+```
+
+### Add Bulk Messages with Improved Performance {#add-bulk-messages-with-improved-performance}
+
+Adding individual messages to a PST implies more I/O operations to the disc and may slow down the performance. To improve the performance, messages can be added to the PST in the bulk mode to minimize I/O operations. The <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/addmessages/" target="_blank" rel="nofollow noopener noreferrer">AddMessages</a> method allows you to add messages in bulk and can be used as in the following scenarios. In addition, the <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/messageadded/" target="_blank" rel="nofollow noopener noreferrer">MessageAdded</a> event occurs when a message is added to the folder.
+
+#### Add Messages from Another PST {#add-messages-from-another-pst}
+
+To add messages from another PST, use the <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/enumeratemapimessages/" target="_blank" rel="nofollow noopener noreferrer">FolderInfo.EnumerateMapiMessages</a> method that returns `IEnumerable<MapiMessage>`:
+
+```csharp
+using var srcPst = PersonalStorage.FromFile(@"source.pst", false);
+using var destPst = PersonalStorage.FromFile(@"destination.pst");
+
+// Get the folder by name
+var srcFolder = srcPst.RootFolder.GetSubFolder("SomeFolder");
+var destFolder = destPst.RootFolder.GetSubFolder("SomeFolder");
+
+destFolder.MessageAdded += new MessageAddedEventHandler(OnMessageAdded);
+destFolder.AddMessages(srcFolder.EnumerateMapiMessages());
+
+
+// Handles the MessageAdded event.
+static void OnMessageAdded(object sender, MessageAddedEventArgs e)
+{
+    Console.WriteLine($"Added: {e.EntryId}");
+}
+```
+
+#### Add Messages from Directory {#add-messages-from-directory}
+
+To add messages from directory, create the `GetMessages(string pathToDir)` named iterator method that returns `IEnumerable<MapiMessage>`:
+
+```csharp
+using var pst = PersonalStorage.FromFile(@"storage.pst");
+var folder = pst.RootFolder.GetSubFolder("SomeFolder");
+folder.MessageAdded += OnMessageAdded;
+folder.AddMessages(GetMessages(@"MessageDirectory"));
+
+// Named iterator method to read messages from directory.
+static IEnumerable<MapiMessage> GetMessages(string pathToDir)
+{
+    string[] files = Directory.GetFiles(pathToDir, "*.msg");
+
+    foreach (var file in files)
+    {
+        yield return MapiMessage.Load(file);
+    }
+}
+
+// Handles the MessageAdded event.
+static void OnMessageAdded(object sender, MessageAddedEventArgs e)
+{
+    Console.WriteLine($"Added: {e.EntryId}");
+}
+```
+
+### Load Messages from Disk {#load-messages-from-disk}
+
+The following code snippet shows you how to load messages from a disc.
+
+```csharp
+private static void AddMessagesInBulkMode(string fileName, string msgFolderName)
+{
+    using (PersonalStorage personalStorage = PersonalStorage.FromFile(fileName))
+    {
+        FolderInfo folder = personalStorage.RootFolder.GetSubFolder("myInbox");
+        folder.MessageAdded += OnMessageAdded;
+        folder.AddMessages(new MapiMessageCollection(msgFolderName));
+    }
+}
+static void OnMessageAdded(object sender, MessageAddedEventArgs e)
+{
+    Console.WriteLine(e.EntryId);
+    Console.WriteLine(e.Message.Subject);
+}
+```
+
+### IEnumerable Implementation {#ienumerable-implementation}
+
+The following code snippet shows you how IEnumerable Implementation can be used.
+
+```csharp
+public class MapiMessageCollection : IEnumerable<MapiMessage>
+{
+    private string path;
+
+    public MapiMessageCollection(string path)
+    {
+        this.path = path;
+    }
+
+    public IEnumerator<MapiMessage> GetEnumerator()
+    {
+        return new MapiMessageEnumerator(path);
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+}
+
+public class MapiMessageEnumerator : IEnumerator<MapiMessage>
+{
+    private readonly string[] files;
+
+    private int position = -1;
+
+    public MapiMessageEnumerator(string path)
+    {
+        string path1 = RunExamples.GetDataDir_Outlook();
+        files = Directory.GetFiles(path1);
+    }
+
+    public bool MoveNext()
+    {
+        position++;
+        return (position < files.Length);
+    }
+
+    public void Reset()
+    {
+        position = -1;
+    }
+
+    object IEnumerator.Current
+    {
+        get
+        {
+            return Current;
+        }
+    }
+
+    public MapiMessage Current
+    {
+        get
+        {
+            try
+            {
+                return MapiMessage.FromFile(files[position]);
+            }
+            catch (IndexOutOfRangeException)
+            {
+                throw new InvalidOperationException();
+            }
+        }
+    }
+    public void Dispose()
+    {
+    }
+}
+```

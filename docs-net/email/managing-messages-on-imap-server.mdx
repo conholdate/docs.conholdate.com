@@ -1,0 +1,565 @@
+---
+title: "Retrieve and List Emails from IMAP Server"
+sidebar_label: "Retrieve and List Emails from IMAP Server"
+sidebar_key: "net-email-managing-messages-on-imap-server"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/managing-messages-on-imap-server.html"
+source_commit: ""
+source_sha256: "9db2a01fdf4171c42b27d60fd6255fd3e99d76d7b7245d0af5e262e1d47f1691"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/managing-messages-on-imap-server/"
+source_snapshot_sha256: "c26238ce7419ae98d91f1ef5dbed5969eeec9e34a3b23dc273ca3ec092c4f6b1"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Retrieving and Listing Messages {#retrieving-and-listing-messages}
+
+### How to Obtain Identification Information for Messages in a Mailbox {#how-to-obtain-identification-information-for-messages-in-a-mailbox}
+
+When retrieving and processing email messages, you can obtain detailed identification information, such as sequence numbers and unique IDs, using the following features provided by the latest version of Aspose.Email for .NET:
+
+<a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapmessageinfo/#imapmessageinfo-class" target="_blank" rel="nofollow noopener noreferrer">Aspose.Email.ImapMessageInfo</a> class: Represents the identification information about a message in an IMAP mailbox.
+
+<a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapmessageinfo/sequencenumber/" target="_blank" rel="nofollow noopener noreferrer">ImapMessageInfo.SequenceNumber</a> property: Retrieves the sequence number of the message.
+
+<a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapmessageinfo/uniqueid/" target="_blank" rel="nofollow noopener noreferrer">ImapMessageInfo.UniqueId</a> property: Retrieves the unique identifier of the message.
+
+<a href="https://reference.aspose.com/email/net/aspose.email/mailmessage/itemid/" target="_blank" rel="nofollow noopener noreferrer">Aspose.Email.MailMessage.ItemId</a> property: Represents additional identification information about the message within the mailbox.
+
+The following code snippet demonstrates how to obtain identification information for messages in an IMAP mailbox:
+
+1. Create an instance of the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/" target="_blank" rel="nofollow noopener noreferrer">ImapClient</a> class by providing the necessary parameters such as the IMAP server host, port, email address, password, and security options.
+2. Use the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/listmessages/#listmessages_20" target="_blank" rel="nofollow noopener noreferrer">ListMessages</a> method to retrieve a list of messages from the "INBOX" folder. Limit the list to the first five messages using the Take(5) method.
+3. Extract the sequence numbers of the listed messages by using the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapmessageinfo/sequencenumber/" target="_blank" rel="nofollow noopener noreferrer">SequenceNumber</a> property of each message.
+4. Use the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/fetchmessages/#fetchmessages_2" target="_blank" rel="nofollow noopener noreferrer">FetchMessages</a> method to retrieve the full details of the messages from the server, using the sequence numbers obtained in the previous step.
+5. Loop through the fetched messages and for each message, retrieve and display the following information:
+
+- The sequence number of the message.
+- The ItemId.SequenceNumber property.
+- The subject of the message.
+
+```cs
+using (var client = new ImapClient(imapHost, port, emailAddress, password, securityOption))
+{
+    // List the first 5 messages from the inbox
+    var msgs = client.ListMessages("INBOX").Take(5);
+    
+    // Get sequence numbers of the messages
+    var seqIds = msgs.Select(t => t.SequenceNumber);
+    
+    // Fetch messages based on sequence numbers
+    var msgsViaFetch = client.FetchMessages(seqIds);
+    
+    for (var i = 0; i < 5; i++)
+    {
+        var thisMsg = msgsViaFetch[i];
+        Console.WriteLine($"Message ID: {seqIds.ElementAt(i)} SequenceNumber: {thisMsg.ItemId.SequenceNumber} Subject: {thisMsg.Subject}");
+    }
+}
+```
+
+### List MIME Message IDs from Server {#list-mime-message-ids-from-server}
+
+<a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapmessageinfo/" target="_blank" rel="nofollow noopener noreferrer">ImapMessageInfo</a> provides the MIME <a href="https://reference.aspose.com/email/net/aspose.email.clients/messageinfobase/messageid/" target="_blank" rel="nofollow noopener noreferrer">MessageId</a> for message identification without extracting the complete message. The following code snippet shows you how to list MIME messageId.
+
+```csharp
+ImapClient client = new ImapClient();
+client.Host = "domain.com";
+client.Username = "username";
+client.Password = "password";
+    
+try
+{
+    ImapMessageInfoCollection messageInfoCol = client.ListMessages("Inbox");
+    foreach (ImapMessageInfo info in messageInfoCol)
+    {
+        // Display MIME Message ID
+        Console.WriteLine("Message Id = " + info.MessageId);
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine(ex.Message);
+}
+```
+
+### List Messages from Server {#list-messages-from-server}
+
+Aspose.Email provides a 2-member overloaded variant of <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/listmessages/#listmessages_12" target="_blank" rel="nofollow noopener noreferrer">ListMessages()</a> to retrieve a specified number of messages based on a query. The following code snippet shows you how to list Messages.
+
+```csharp
+
+imapClient.SelectFolder("Inbox");
+ImapQueryBuilder builder = new ImapQueryBuilder();
+MailQuery query =
+	builder.Or(
+	builder.Or(
+	builder.Or(
+	builder.Or(
+	builder.Subject.Contains(" (1) "),
+	builder.Subject.Contains(" (2) ")),
+	builder.Subject.Contains(" (3) ")),
+	builder.Subject.Contains(" (4) ")),
+	builder.Subject.Contains(" (5) "));
+ImapMessageInfoCollection messageInfoCol4 = imapClient.ListMessages(query, 4);
+Console.WriteLine((messageInfoCol4.Count == 4) ? "Success" : "Failure");
+```
+
+### List Messages Recursively {#list-messages-recursively}
+
+The IMAP protocol supports listing messages recursively from a mailbox folder. This helps list messages from subfolders of a folder as well. The following code snippet shows you how to list messages recursively.
+
+```csharp
+// Create an imapclient with host, user and password
+ImapClient client = new ImapClient();
+client.Host = "domain.com";
+client.Username = "username";
+client.Password = "password";
+client.SelectFolder("InBox");
+ImapMessageInfoCollection msgsColl = client.ListMessages(true);
+Console.WriteLine("Total Messages: " + msgsColl.Count);
+```
+
+### List Messages with MultiConnection {#list-messages-with-multiconnection}
+
+<a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/" target="_blank" rel="nofollow noopener noreferrer">ImapClient</a> provides a <a href="https://reference.aspose.com/email/net/aspose.email.clients/emailclient/usemulticonnection/" target="_blank" rel="nofollow noopener noreferrer">UseMultiConnection</a> property which can be used to create multiple connections for heavy operations. You may also set the number of connections to be used during multiconnection mode by using <a href="https://reference.aspose.com/email/net/aspose.email.clients/emailclient/connectionsquantity/" target="_blank" rel="nofollow noopener noreferrer">ImapClient.ConnectionsQuantity</a>. The following code snippet demonstrates the use of the multiconnection mode for listing messages and compares its performance with single connection mode.
+
+```csharp
+ImapClient imapClient = new ImapClient();
+imapClient.Host = "<HOST>";
+imapClient.Port = 993;
+imapClient.Username = "<USERNAME>";
+imapClient.Password = "<PASSWORD>";
+imapClient.SupportedEncryption = EncryptionProtocols.Tls;
+imapClient.SecurityOptions = SecurityOptions.SSLImplicit;
+
+imapClient.SelectFolder("Inbox");
+imapClient.ConnectionsQuantity = 5;
+imapClient.UseMultiConnection = MultiConnectionMode.Enable;
+DateTime multiConnectionModeStartTime = DateTime.Now;
+ImapMessageInfoCollection messageInfoCol1 = imapClient.ListMessages(true);
+TimeSpan multiConnectionModeTimeSpan = DateTime.Now - multiConnectionModeStartTime;
+
+imapClient.UseMultiConnection = MultiConnectionMode.Disable;
+DateTime singleConnectionModeStartTime = DateTime.Now;
+ImapMessageInfoCollection messageInfoCol2 = imapClient.ListMessages(true);
+TimeSpan singleConnectionModeTimeSpan = DateTime.Now - singleConnectionModeStartTime;
+            
+double performanceRelation = singleConnectionModeTimeSpan.TotalMilliseconds / multiConnectionModeTimeSpan.TotalMilliseconds;
+Console.WriteLine("Performance Relation: " + performanceRelation);
+```
+
+:::info
+Please note that the usage of multiconnection mode does not guarantee performance increase.
+:::
+
+### List Messages with Paging Support {#list-messages-with-paging-support}
+
+In scenarios, where the email server contains a large number of messages in the mailbox, it is often desired to list or retrieve the messages with paging support. Aspose.Email API's <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/" target="_blank" rel="nofollow noopener noreferrer">ImapClient</a> lets you retrieve the messages from the server with paging support.
+
+```csharp
+///<summary>
+/// This example shows the paging support of ImapClient for listing messages from the server
+/// Available in Aspose.Email for .NET 6.4.0 and onwards
+///</summary>
+using (ImapClient client = new ImapClient("host.domain.com", 993, "username", "password"))
+{
+    try
+    {
+        int messagesNum = 12;
+        int itemsPerPage = 5;
+        MailMessage message = null;
+        // Create some test messages and append these to server's inbox
+        for (int i = 0; i < messagesNum; i++)
+        {
+            message = new MailMessage(
+                "from@domain.com",
+                "to@domain.com",
+                "EMAILNET-35157 - " + Guid.NewGuid(),
+                "EMAILNET-35157 Move paging parameters to separate class");
+            client.AppendMessage(ImapFolderInfo.InBox, message);
+        }
+
+        // List messages from inbox
+        client.SelectFolder(ImapFolderInfo.InBox);
+        ImapMessageInfoCollection totalMessageInfoCol = client.ListMessages();
+        // Verify the number of messages added
+        Console.WriteLine(totalMessageInfoCol.Count);
+
+        ////////////////// RETREIVE THE MESSAGES USING PAGING SUPPORT////////////////////////////////////
+
+        List<ImapPageInfo> pages = new List<ImapPageInfo>();
+        PageSettings pageSettings = new PageSettings();
+        ImapPageInfo pageInfo = client.ListMessagesByPage(itemsPerPage, 0, pageSettings);
+        Console.WriteLine(pageInfo.TotalCount);
+        pages.Add(pageInfo);
+        while (!pageInfo.LastPage)
+        {
+            pageInfo = client.ListMessagesByPage(itemsPerPage, pageInfo.NextPage.PageOffset, pageSettings);
+            pages.Add(pageInfo);
+        }
+        int retrievedItems = 0;
+        foreach (ImapPageInfo folderCol in pages)
+            retrievedItems += folderCol.Items.Count;
+        Console.WriteLine(retrievedItems);
+    }
+    finally
+    {
+    }
+}
+```
+
+### List Message Attachments {#list-message-attachments}
+
+To get information about attachments such as name, size without fetching the attachment data, try the following APIs:
+
+- *Aspose.Email.Clients.Imap.ImapAttachmentInfo* - Represents an attachment information.
+- *Aspose.Email.Clients.Imap.ImapAttachmentInfoCollection* - Represents a collection of the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapattachmentinfo/" target="_blank" rel="nofollow noopener noreferrer">ImapAttachmentInfo</a> class.
+- *Aspose.Email.Clients.Imap.ListAttachments(int sequenceNumber)* - Gets an information for each attachment in a message.
+
+The code sample with steps below will show you how to use the APIs:
+
+1. Call the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/listmessages/" target="_blank" rel="nofollow noopener noreferrer">ListMessages()</a> method on the imapClient object. This method will return an ImapMessageInfoCollection containing information about the messages in the mailbox.
+2. Iterate through each message in the messageInfoCollection using a foreach loop.
+3. Call the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/listattachments/#imapclientlistattachments-method" target="_blank" rel="nofollow noopener noreferrer">ListAttachments()</a> method on the imapClient object, passing the SequenceNumber property of the message object as a parameter. This method will return an ImapAttachmentInfoCollection containing information about the attachments in the message.
+4. Iterate through each attachment in the attachmentInfoCollection using a foreach loop.
+5. Within the inner loop, you can access the information about each attachment using properties of the attachmentInfo object.
+
+```cs
+var messageInfoCollection = imapClient.ListMessages();
+    
+foreach (var message in messageInfoCollection)
+{
+    var attachmentInfoCollection = imapClient.ListAttachments(message.SequenceNumber);
+
+    foreach (var attachmentInfo in attachmentInfoCollection)
+    {
+        Console.WriteLine("Attachment: {0} (size: {1})", attachmentInfo.Name, attachmentInfo.Size);
+    }
+}
+```
+
+### Get the Message UID and Sequence Number {#get-the-message-uid-and-sequence-number}
+
+IMAP identifies a message in two ways: by a *unique identifier* (UID), which stays stable for the lifetime of the folder, and by a *sequence number*, which is the position of the message in the current session and shifts when messages are removed. <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapmessageinfo/" target="_blank" rel="nofollow noopener noreferrer">ImapMessageInfo</a> exposes both, so you can store the UID for later and use the sequence number within the session.
+
+Most <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/" target="_blank" rel="nofollow noopener noreferrer">ImapClient</a> methods come in both flavours - one overload takes a `string uniqueId`, the other an `int sequenceNumber`.
+
+```cs
+using var client = new ImapClient("imap.domain.com", 993, "user", "password", SecurityOptions.Auto);
+client.SelectFolder(ImapFolderInfo.InBox);
+
+foreach (ImapMessageInfo info in client.ListMessages())
+{
+    Console.WriteLine(info.Subject);
+    Console.WriteLine("  UID:             " + info.UniqueId);
+    Console.WriteLine("  Sequence number: " + info.SequenceNumber);
+
+    // Both identifiers can be used to fetch the same message
+    MailMessage byUid = client.FetchMessage(info.UniqueId);
+    MailMessage bySequence = client.FetchMessage(info.SequenceNumber);
+}
+```
+
+### Organize Messages into Conversations (Threading) {#organize-messages-into-conversations-threading}
+
+When the server advertises the THREAD capability, Aspose.Email can ask it to group the messages of a folder into conversations instead of returning a flat list. Check <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/threadsupported/" target="_blank" rel="nofollow noopener noreferrer">ThreadSupported</a> first, pick one of the algorithms the server offers in <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/threadalgorithms/" target="_blank" rel="nofollow noopener noreferrer">ThreadAlgorithms</a> (typically `REFERENCES` or `ORDEREDSUBJECT`), and call <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/getmessagethreads/" target="_blank" rel="nofollow noopener noreferrer">GetMessageThreads</a>.
+
+The result is a list of <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/messagethreadresult/" target="_blank" rel="nofollow noopener noreferrer">MessageThreadResult</a> items. Each one carries the identifiers of a message plus its replies in `ChildMessages`, so a conversation is a tree that you walk recursively.
+
+```cs
+using var client = new ImapClient("imap.domain.com", 993, "user", "password", SecurityOptions.Auto);
+client.SelectFolder(ImapFolderInfo.InBox);
+
+if (!client.ThreadSupported)
+{
+    Console.WriteLine("The server does not support threading.");
+    return;
+}
+
+Console.WriteLine("Algorithms: " + string.Join(", ", client.ThreadAlgorithms));
+
+var conditions = new ThreadSearchConditions { Algorithm = client.ThreadAlgorithms.First() };
+
+List<MessageThreadResult> threads = client.GetMessageThreads(conditions);
+
+foreach (MessageThreadResult thread in threads)
+{
+    PrintThread(thread, 0);
+}
+```
+
+The helper below prints a conversation as an indented tree:
+
+```cs
+private static void PrintThread(MessageThreadResult thread, int depth)
+{
+    Console.WriteLine(new string(' ', depth * 2) + thread.UniqueId + " (seq " + thread.SequenceNumber + ")");
+
+    foreach (MessageThreadResult child in thread.ChildMessages)
+    {
+        PrintThread(child, depth + 1);
+    }
+}
+```
+
+## Fetching and Saving Messages {#fetching-and-saving-messages}
+
+### Fetch Messages from Server {#fetch-messages-from-server}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/" target="_blank" rel="nofollow noopener noreferrer">ImapClient</a> class can fetch messages from an IMAP server and save the messages in EML format to a local disk. The following steps are required to save the messages to disk:
+
+1. Create an instance of the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/" target="_blank" rel="nofollow noopener noreferrer">ImapClient</a> class.
+2. Specify a hostname, port, username, and password in the ImapClient <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/imapclient/#constructor" target="_blank" rel="nofollow noopener noreferrer">constructor</a>.
+3. Select the folder using <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/selectfolder/#selectfolder/" target="_blank" rel="nofollow noopener noreferrer">SelectFolder()</a> method.
+4. Call the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/listmessages/#listmessages" target="_blank" rel="nofollow noopener noreferrer">ListMessages</a> method to get the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapmessageinfocollection/" target="_blank" rel="nofollow noopener noreferrer">ImapMessageInfoCollection</a> object.
+5. Iterate through the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapmessageinfocollection/" target="_blank" rel="nofollow noopener noreferrer">ImapMessageInfoCollection</a> collection, call the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/savemessage/#savemessage/" target="_blank" rel="nofollow noopener noreferrer">SaveMessage()</a> method and provide the output path and file name.
+
+The following code snippet shows you how to fetch email messages from a server and save them.
+
+```csharp
+// Select the inbox folder and Get the message info collection
+client.SelectFolder(ImapFolderInfo.InBox);
+ImapMessageInfoCollection list = client.ListMessages();
+
+// Download each message
+for (int i = 0; i < list.Count; i++)
+{
+    // Save the EML file locally
+    client.SaveMessage(list[i].UniqueId, dataDir + list[i].UniqueId + ".eml");
+}
+```
+
+### Fetch Messages in Descending Order {#fetch-messages-in-descending-order}
+
+Aspose.Email provides <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/listmessagesbypage/#listmessagesbypage/" target="_blank" rel="nofollow noopener noreferrer">ImapClient.ListMessagesByPage</a> method which lists messages with paging support. Some overloads of <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/listmessagesbypage/#listmessagesbypage/" target="_blank" rel="nofollow noopener noreferrer">ImapClient.ListMessagesByPage</a> accept <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/pagesettings/" target="_blank" rel="nofollow noopener noreferrer">PageSettings</a> as a parameter. <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/pagesettings/" target="_blank" rel="nofollow noopener noreferrer">PageSettings</a> provides an <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/pagesettings/ascendingsorting/" target="_blank" rel="nofollow noopener noreferrer">AscendingSorting</a> property which, when set to **false**, returns emails in descending order.
+
+The following example code demonstrates the use of <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/pagesettings/ascendingsorting/" target="_blank" rel="nofollow noopener noreferrer">AscendingSorting</a> property of the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/pagesettings/" target="_blank" rel="nofollow noopener noreferrer">PageSettings</a> class to change the order of emails.
+
+```csharp
+ImapClient imapClient = new ImapClient();
+imapClient.Host = "<HOST>";
+imapClient.Port = 993;
+imapClient.Username = "<USERNAME>";
+imapClient.Password = "<PASSWORD>";
+imapClient.SupportedEncryption = EncryptionProtocols.Tls;
+imapClient.SecurityOptions = SecurityOptions.SSLImplicit;
+
+PageSettings pageSettings = new PageSettings { AscendingSorting = false };
+ImapPageInfo pageInfo = imapClient.ListMessagesByPage(5, pageSettings);
+ImapMessageInfoCollection messages = pageInfo.Items;
+
+foreach (ImapMessageInfo message in messages)
+{
+    Console.WriteLine(message.Subject + " -> " + message.Date.ToString());
+}
+```
+
+### Save Messages in MSG Format {#save-messages-in-msg-format}
+
+To save emails in MSG format, the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/fetchmessage/#fetchmessage/" target="_blank" rel="nofollow noopener noreferrer">ImapClient.FetchMessage()</a> method needs to be called. It returns the message in an instance of the <a href="https://reference.aspose.com/email/net/aspose.email/mailmessage/" target="_blank" rel="nofollow noopener noreferrer">MailMessage</a> class. The <a href="https://reference.aspose.com/email/net/aspose.email/mailmessage/save/#save/" target="_blank" rel="nofollow noopener noreferrer">MailMessage.Save()</a> method can then be called to save the message to MSG. The following code snippet shows you how to save messages in MSG Format.
+
+```csharp
+// The path to the file directory.
+string dataDir = RunExamples.GetDataDir_IMAP();
+
+// Create an imapclient with host, user and password
+ImapClient client = new ImapClient("localhost", "user", "password");
+
+// Select the inbox folder and Get the message info collection
+client.SelectFolder(ImapFolderInfo.InBox);
+ImapMessageInfoCollection list = client.ListMessages();
+
+// Download each message
+for (int i = 0; i < list.Count; i++)
+{
+    // Save the message in MSG format
+    MailMessage message = client.FetchMessage(list[i].UniqueId);
+    message.Save(dataDir + list[i].UniqueId + "_out.msg", SaveOptions.DefaultMsgUnicode);
+}
+```
+
+### Group Fetched Messages {#group-fetched-messages}
+
+<a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/" target="_blank" rel="nofollow noopener noreferrer">ImapClient</a> provides a <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/fetchmessages/#fetchmessages/" target="_blank" rel="nofollow noopener noreferrer">FetchMessages</a> method which accepts iterable of Sequence Numbers or Unique ID and returns a list of <a href="https://reference.aspose.com/email/net/aspose.email/mailmessage/" target="_blank" rel="nofollow noopener noreferrer">MailMessage</a>. The following code snippet demonstrates the use of the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/fetchmessages/#fetchmessages/" target="_blank" rel="nofollow noopener noreferrer">FetchMessages</a> method to fetch messages by Sequence Numbers and Unique ID.
+
+```csharp
+ImapClient imapClient = new ImapClient();
+imapClient.Host = "<HOST>";
+imapClient.Port = 993;
+imapClient.Username = "<USERNAME>";
+imapClient.Password = "<PASSWORD>";
+imapClient.SupportedEncryption = EncryptionProtocols.Tls;
+imapClient.SecurityOptions = SecurityOptions.SSLImplicit;
+
+ImapMessageInfoCollection messageInfoCol = imapClient.ListMessages();
+Console.WriteLine("ListMessages Count: " + messageInfoCol.Count);
+int[] sequenceNumberAr = messageInfoCol.Select((ImapMessageInfo mi) => mi.SequenceNumber).ToArray();
+string[] uniqueIdAr = messageInfoCol.Select((ImapMessageInfo mi) => mi.UniqueId).ToArray();
+
+IList<MailMessage> fetchedMessagesBySNumMC = imapClient.FetchMessages(sequenceNumberAr);
+Console.WriteLine("FetchMessages-sequenceNumberAr Count: " + fetchedMessagesBySNumMC.Count);
+
+IList<MailMessage> fetchedMessagesByUidMC = imapClient.FetchMessages(uniqueIdAr);
+Console.WriteLine("FetchMessages-uniqueIdAr Count: " + fetchedMessagesByUidMC.Count);
+```
+
+### Fetch Folders and Read Messages Recursively {#fetch-folders-and-read-messages-recursively}
+
+In this article, most of the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/" target="_blank" rel="nofollow noopener noreferrer">ImapClient</a> features are used to create an application that lists all the folders and sub-folders recursively from an IMAP server. It also saves the messages in each folder and sub-folder in MSG format on a local disk. On the disk, folders and messages are created and saved in the same hierarchical structure as on the IMAP server. The following code snippet shows you how to get the messages and sub-folders information recursively.
+
+```csharp
+public static void Run()
+{
+    // Create an instance of the ImapClient class
+    ImapClient client = new ImapClient();
+
+    // Specify host, username, password, Port and SecurityOptions for your client
+    client.Host = "imap.gmail.com";
+    client.Username = "your.username@gmail.com";
+    client.Password = "your.password";
+    client.Port = 993;
+    client.SecurityOptions = SecurityOptions.Auto;
+    try
+    {
+        // The root folder (which will be created on disk) consists of host and username
+        string rootFolder = client.Host + "-" + client.Username;
+
+        // Create the root folder and List all the folders from IMAP server
+        Directory.CreateDirectory(rootFolder);
+        ImapFolderInfoCollection folderInfoCollection = client.ListFolders();
+        foreach (ImapFolderInfo folderInfo in folderInfoCollection)
+        {
+            // Call the recursive method to read messages and get sub-folders
+            ListMessagesInFolder(folderInfo, rootFolder, client);
+        }
+        // Disconnect to the remote IMAP server
+        client.Dispose();
+    }
+    catch (Exception ex)
+    {
+        Console.Write(Environment.NewLine + ex);
+    }
+
+    Console.WriteLine(Environment.NewLine + "Downloaded messages recursively from IMAP server.");
+}
+
+/// Recursive method to get messages from folders and sub-folders
+private static void ListMessagesInFolder(ImapFolderInfo folderInfo, string rootFolder, ImapClient client)
+{
+    // Create the folder in disk (same name as on IMAP server)
+    string currentFolder = RunExamples.GetDataDir_IMAP();
+    Directory.CreateDirectory(currentFolder);
+
+    // Read the messages from the current folder, if it is selectable
+    if (folderInfo.Selectable)
+    {
+        // Send status command to get folder info
+        ImapFolderInfo folderInfoStatus = client.GetFolderInfo(folderInfo.Name);
+        Console.WriteLine(folderInfoStatus.Name + " folder selected. New messages: " + folderInfoStatus.NewMessageCount + ", Total messages: " + folderInfoStatus.TotalMessageCount);
+
+        // Select the current folder and List messages
+        client.SelectFolder(folderInfo.Name);
+        ImapMessageInfoCollection msgInfoColl = client.ListMessages();
+        Console.WriteLine("Listing messages....");
+        foreach (ImapMessageInfo msgInfo in msgInfoColl)
+        {
+            // Get subject and other properties of the message
+            Console.WriteLine("Subject: " + msgInfo.Subject);
+            Console.WriteLine("Read: " + msgInfo.IsRead + ", Recent: " + msgInfo.Recent + ", Answered: " + msgInfo.Answered);
+
+            // Get rid of characters like ? and :, which should not be included in a file name and Save the message in MSG format
+            string fileName = msgInfo.Subject.Replace(":", " ").Replace("?", " ");
+            MailMessage msg = client.FetchMessage(msgInfo.SequenceNumber);
+            msg.Save(currentFolder + "\\" + fileName + "-" + msgInfo.SequenceNumber + ".msg", SaveOptions.DefaultMsgUnicode);
+        }
+        Console.WriteLine("============================\n");
+    }
+    else
+    {
+        Console.WriteLine(folderInfo.Name + " is not selectable.");
+    }
+
+    try
+    {
+        // If this folder has sub-folders, call this method recursively to get messages
+        ImapFolderInfoCollection folderInfoCollection = client.ListFolders(folderInfo.Name);
+        foreach (ImapFolderInfo subfolderInfo in folderInfoCollection)
+        {
+            ListMessagesInFolder(subfolderInfo, rootFolder, client);
+        }
+    }
+    catch (Exception) { }            
+}
+```
+
+## Handling Special Message Information {#handling-special-message-information}
+
+### Retrieve Extra Parameters as Summary Information {#retrieve-extra-parameters-as-summary-information}
+
+```csharp
+using (ImapClient client = new ImapClient("host.domain.com", "username", "password"))
+{
+    MailMessage message = new MailMessage("from@domain.com", "to@doman.com", "EMAILNET-38466 - " + Guid.NewGuid().ToString(), "EMAILNET-38466 Add extra parameters for UID FETCH command");
+
+    // append the message to the server
+    string uid = client.AppendMessage(message);
+
+    // wait for the message to be appended
+    Thread.Sleep(5000);
+
+    // Define properties to be fetched from server along with the message
+    string[] messageExtraFields = new string[] { "X-GM-MSGID", "X-GM-THRID" };
+
+    // retreive the message summary information using it's UID
+    ImapMessageInfo messageInfoUID = client.ListMessage(uid, messageExtraFields);
+
+    // retreive the message summary information using it's sequence number
+    ImapMessageInfo messageInfoSeqNum = client.ListMessage(1, messageExtraFields);
+
+    // List messages in general from the server based on the defined properties
+    ImapMessageInfoCollection messageInfoCol = client.ListMessages(messageExtraFields);
+
+    ImapMessageInfo messageInfoFromList = messageInfoCol[0];
+
+    // verify that the parameters are fetched in the summary information
+    foreach (string paramName in messageExtraFields)
+    {
+        Console.WriteLine(messageInfoFromList.ExtraParameters.ContainsKey(paramName));
+        Console.WriteLine(messageInfoUID.ExtraParameters.ContainsKey(paramName));
+        Console.WriteLine(messageInfoSeqNum.ExtraParameters.ContainsKey(paramName));
+    }
+}
+```
+
+### Get List-Unsubscribe Header Information {#get-list-unsubscribe-header-information}
+
+List-Unsubscribe header contains the URL for unsubscribing from email lists e.g. advertisements, newsletters, etc. To get the List-Unsubscribe header, use the <a href="https://reference.aspose.com/email/net/aspose.email.clients/messageinfobase/listunsubscribe/" target="_blank" rel="nofollow noopener noreferrer">ListUnsubscribe</a> property of the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapmessageinfo/" target="_blank" rel="nofollow noopener noreferrer">ImapMessageInfo</a> class. The following example shows the use of the <a href="https://reference.aspose.com/email/net/aspose.email.clients/messageinfobase/listunsubscribe/" target="_blank" rel="nofollow noopener noreferrer">ListUnsubscribe</a> property to get the List-Unsubscribe header.
+
+```csharp
+ImapClient imapClient = new ImapClient();
+imapClient.Host = "<HOST>";
+imapClient.Port = 993;
+imapClient.Username = "<USERNAME>";
+imapClient.Password = "<PASSWORD>";
+imapClient.SupportedEncryption = EncryptionProtocols.Tls;
+imapClient.SecurityOptions = SecurityOptions.SSLImplicit;
+
+ImapMessageInfoCollection messageInfoCol = imapClient.ListMessages();
+foreach (ImapMessageInfo imapMessageInfo in messageInfoCol)
+{
+    Console.WriteLine("ListUnsubscribe Header: " + imapMessageInfo.ListUnsubscribe);
+}
+```

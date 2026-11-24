@@ -1,0 +1,242 @@
+---
+title: "Utility Features in Aspose.Email for .NET"
+sidebar_label: "Utility Features in Aspose.Email for .NET"
+sidebar_key: "net-email-utility-features"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/utility-features.html"
+source_commit: ""
+source_sha256: "8f2eafeab8abfdd81b452d1f0cc296ea94cfff1f2475e8c32ca5e20b5bbf9df3"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/utility-features/"
+source_snapshot_sha256: "049325a9ffb6605d2ee24055ef977d5d497ee145779fd87ba27fbff53de780c5"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Working with Unified Messaging {#working-with-unified-messaging}
+
+Aspose.Email can retrieve unified messaging information from Exchange Server 2010. Unified messaging such as getting configuration information, initiating an outbound call, retrieving phone call information by call ID and disconnecting a phone call by ID is supported at present. The following code sample shows how to retrieve unified messaging configuration information from Microsoft Exchange Server 2010.
+
+```csharp
+IEWSClient client = EWSClient.GetEWSClient(mailboxUri, credential);
+UnifiedMessagingConfiguration umConf = client.GetUMConfiguration();
+```
+
+## Getting Mail Tips {#getting-mail-tips}
+
+Microsoft Exchange Server added several new features with Exchange Server 2010 and 2013. One of them lets users get mail tips when composing an email message. These tips are very useful as they provide information before the email is sent. For example, if an email address is wrong in the recipient list, a tip is displayed to let you know that the email address is invalid. Mail tips also let you see out of office replies before sending an email: Exchange Server (2010 & 2013) sends the mail tip when the email is being composed if one or more of the recipients have set out of office replies. Microsoft Exchange Server 2010 Service Pack 1 is required for all the features demonstrated in this article. The following code snippet shows you how to use the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/ewsclient/" target="_blank" rel="nofollow noopener noreferrer">EWSClient</a> class which uses Exchange Web Services, available in Microsoft Exchange Server 2007 and later versions.
+
+```csharp
+// Create instance of EWSClient class by giving credentials
+IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+Console.WriteLine("Connected to Exchange server...");
+// Provide mail tips options
+MailAddressCollection addrColl = new MailAddressCollection();
+addrColl.Add(new MailAddress("test.exchange@ex2010.local", true));
+addrColl.Add(new MailAddress("invalid.recipient@ex2010.local", true));
+GetMailTipsOptions options = new GetMailTipsOptions("administrator@ex2010.local", addrColl, MailTipsType.All);
+
+// Get Mail Tips
+MailTips[] tips = client.GetMailTips(options);
+
+// Display information about each Mail Tip
+foreach (MailTips tip in tips)
+{
+    // Display Out of office message, if present
+    if (tip.OutOfOffice != null)
+    {
+        Console.WriteLine("Out of office: " + tip.OutOfOffice.ReplyBody.Message);
+    }
+
+    // Display the invalid email address in recipient, if present
+    if (tip.InvalidRecipient == true)
+    {
+        Console.WriteLine("The recipient address is invalid: " + tip.RecipientAddress);
+    }
+}
+```
+
+## Exchange Impersonation {#exchange-impersonation}
+
+Exchange impersonation allows someone to impersonate another account and perform tasks and operations using the impersonated account permissions instead of their own. Where delegation lets users act on behalf of other users, Impersonation allows them to act as other users. Aspose.Email supports Exchange Impersonation. The <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/ewsclient/" target="_blank" rel="nofollow noopener noreferrer">EWSClient</a> class provides the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/impersonateuser/" target="_blank" rel="nofollow noopener noreferrer">ImpersonateUser</a> and <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/resetimpersonation/" target="_blank" rel="nofollow noopener noreferrer">ResetImpersonation</a> methods to facilitate this feature.
+
+To perform this task:
+
+1. Initialize the ExchangeWebServiceClient for user 1.
+2. Initialize the ExchangeWebServiceClient for user 2.
+3. Append test messages to the accounts.
+4. Enable Impersonation.
+5. Reset Impersonation.
+
+The following code snippet shows you how to use the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/ewsclient/" target="_blank" rel="nofollow noopener noreferrer">EWSClient</a> class to implement the Impersonation feature.
+
+```csharp
+// Create instance's of EWSClient class by giving credentials
+IEWSClient client1 = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser1", "pwd", "domain");
+IEWSClient client2 = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser2", "pwd", "domain");
+{
+    string folder = "Drafts";
+    try
+    {
+        foreach (ExchangeMessageInfo messageInfo in client1.ListMessages(folder))
+            client1.DeleteItem(messageInfo.UniqueUri, DeletionOptions.DeletePermanently);
+        string subj1 = string.Format("NETWORKNET_33354 {0} {1}", "User", "User1");
+        client1.AppendMessage(folder, new MailMessage("User1@exchange.conholdate.local", "To@aspsoe.com", subj1, ""));
+
+        foreach (ExchangeMessageInfo messageInfo in client2.ListMessages(folder))
+            client2.DeleteItem(messageInfo.UniqueUri, DeletionOptions.DeletePermanently);
+        string subj2 = string.Format("NETWORKNET_33354 {0} {1}", "User", "User2");
+        client2.AppendMessage(folder, new MailMessage("User2@exchange.conholdate.local", "To@aspose.com", subj2, ""));
+
+        ExchangeMessageInfoCollection messInfoColl = client1.ListMessages(folder);
+        //Assert.AreEqual(1, messInfoColl.Count);
+        //Assert.AreEqual(subj1, messInfoColl[0].Subject);
+
+        client1.ImpersonateUser(ItemChoice.PrimarySmtpAddress, "User2@exchange.conholdate.local");
+        ExchangeMessageInfoCollection messInfoColl1 = client1.ListMessages(folder);
+        //Assert.AreEqual(1, messInfoColl1.Count);
+        //Assert.AreEqual(subj2, messInfoColl1[0].Subject);
+
+        client1.ResetImpersonation();
+        ExchangeMessageInfoCollection messInfoColl2 = client1.ListMessages(folder);
+        //Assert.AreEqual(1, messInfoColl2.Count);
+        //Assert.AreEqual(subj1, messInfoColl2[0].Subject);
+    }
+    finally
+    {
+        try
+        {
+            foreach (ExchangeMessageInfo messageInfo in client1.ListMessages(folder))
+                client1.DeleteItem(messageInfo.UniqueUri, DeletionOptions.DeletePermanently);
+            foreach (ExchangeMessageInfo messageInfo in client2.ListMessages(folder))
+                client2.DeleteItem(messageInfo.UniqueUri, DeletionOptions.DeletePermanently);
+        }
+        catch { }
+    }
+}
+```
+
+## Auto Discover Feature using EWS {#auto-discover-feature-using-ews}
+
+Aspose.Email API lets you discover about the Exchange Server settings using the EWS Client. 
+
+```csharp
+string email = "asposeemail.test3@aspose.com";
+string password = "Aspose@2017";
+AutodiscoverService svc = new AutodiscoverService();
+svc.Credentials = new NetworkCredential(email, password);
+
+IDictionary<UserSettingName, object> userSettings = svc.GetUserSettings(email, UserSettingName.ExternalEwsUrl).Settings;
+string ewsUrl = (string)userSettings[UserSettingName.ExternalEwsUrl];
+Console.WriteLine("Auto discovered EWS Url: "  + ewsUrl);
+```
+
+Several settings can be requested at once, and <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange/getusersettingsresponse/trygetsettingvalue/" target="_blank" rel="nofollow noopener noreferrer">TryGetSettingValue</a> reads one of them safely. The discovered URL can be passed straight to <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/ewsclient/getewsclient/" target="_blank" rel="nofollow noopener noreferrer">EWSClient.GetEWSClient</a> to open the mailbox:
+
+```cs
+var service = new AutodiscoverService
+{
+    Credentials = new NetworkCredential("user@domain.com", "password")
+};
+
+GetUserSettingsResponse response = service.GetUserSettings(
+    "user@domain.com",
+    new[]
+    {
+        UserSettingName.ExternalEwsUrl,
+        UserSettingName.InternalEwsUrl,
+        UserSettingName.UserDisplayName
+    });
+
+foreach (KeyValuePair<UserSettingName, object> setting in response.Settings)
+{
+    Console.WriteLine($"{setting.Key} = {setting.Value}");
+}
+
+// Connect to the discovered endpoint
+if (response.TryGetSettingValue(UserSettingName.ExternalEwsUrl, out string ewsUrl))
+{
+    using IEWSClient client = EWSClient.GetEWSClient(ewsUrl, "user@domain.com", "password");
+    Console.WriteLine(client.MailboxInfo.MailboxUri);
+}
+```
+
+## Send a Message with Voting Options {#send-a-message-with-voting-options}
+
+Exchange lets the sender attach voting buttons to a message so recipients answer with a single click. Build the buttons as a semicolon-separated string in the <a href="https://reference.aspose.com/email/net/aspose.email.mapi/followupoptions/votingbuttons/" target="_blank" rel="nofollow noopener noreferrer">VotingButtons</a> property of <a href="https://reference.aspose.com/email/net/aspose.email.mapi/followupoptions/" target="_blank" rel="nofollow noopener noreferrer">FollowUpOptions</a> and pass the options to the `Send(MailMessage, FollowUpOptions)` overload of <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a>.
+
+```cs
+using IEWSClient client = EWSClient.GetEWSClient(
+    "https://outlook.office365.com/ews/exchange.asmx", "user@domain.com", "password");
+
+var message = new MailMessage("from@domain.com", "to@domain.com", "Team lunch", "Are you joining?");
+
+var options = new FollowUpOptions { VotingButtons = "Yes;No;Maybe" };
+
+client.Send(message, options);
+```
+
+For reading the responses back from a message, see [Working with Voting Options and Reactions in MSG](/net/email/working-with-voting-options-and-reactions-msg/).
+
+## Abort PST Restore to Exchange Server Operation {#abort-pst-restore-to-exchange-server-operation}
+
+Aspose.Email API lets you restore a PST file to Exchange Server. However, if the operation is taking long due to large size PST file, it may be required to specify criterion for aborting the operation. This can be achieved using the API as shown in the following sample code.
+
+**Note:** The example needs the following class to be added as well.
+
+```cs
+
+ public class CustomAbortRestoreException : Exception { }
+```
+
+```csharp
+using (IEWSClient client = EWSClient.GetEWSClient("https://exchange.office365.com/ews/exchange.asmx", "username", "password"))
+{
+    DateTime startTime = DateTime.Now;
+    TimeSpan maxRestoreTime = TimeSpan.FromSeconds(15);
+    int processedItems = 0;
+
+    BeforeItemCallback callback = delegate
+    {
+        if (DateTime.Now >= startTime.Add(maxRestoreTime))
+        {
+            throw new CustomAbortRestoreException();
+        }
+
+        processedItems++;
+    };
+
+    try
+    {
+        //create a test pst and add some test messages to it
+        var pst = PersonalStorage.Create(new MemoryStream(), FileFormatVersion.Unicode);
+        var folder = pst.RootFolder.AddSubFolder("My test folder");
+        for (int i = 0; i < 20; i++)
+        {
+            var message = new MapiMessage("from@gmail.com", "to@gmail.com", "subj", new string('a', 10000));
+            folder.AddMessage(message);
+        }
+
+        //now restore the PST with callback
+        client.Restore(pst, new Aspose.Email.Clients.Exchange.WebService.RestoreSettings
+        {
+            BeforeItemCallback = callback
+        });
+        Console.WriteLine("Success!");
+    }
+    catch (CustomAbortRestoreException)
+    {
+        Console.WriteLine($"Timeout! {processedItems}");
+    }
+```

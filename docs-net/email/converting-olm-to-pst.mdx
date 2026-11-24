@@ -1,0 +1,124 @@
+---
+title: "Converting OLM to PST"
+sidebar_label: "Converting OLM to PST"
+sidebar_key: "net-email-converting-olm-to-pst"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/converting-olm-to-pst.html"
+source_commit: ""
+source_sha256: "3b3060666dbf71ca46b3465f56ea28293e778f14e379b757107af1c248725c6b"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/converting-olm-to-pst/"
+source_snapshot_sha256: "4f0bf73349d48565250f55bf75ba8086781bbcc655fd493d0bffc11c5c1d5325"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+<a href="https://docs.fileformat.com/email/olm/" target="_blank" rel="nofollow noopener noreferrer">OLM</a> is a database file format used by Microsoft Outlook for Mac. OLM files store email messages, calendar data, contacts, and application settings, and they are not supported by Outlook for Windows. To migrate a mailbox from Outlook for Mac to Outlook for Windows, you need to convert the OLM file to the Outlook <a href="https://docs.fileformat.com/email/pst/" target="_blank" rel="nofollow noopener noreferrer">PST</a> format. Aspose.Email for .NET lets you do this in code, without Microsoft Outlook installed.
+
+## How the Conversion Works {#how-the-conversion-works}
+
+To convert an OLM file to PST, follow these steps:
+
+1. Create an instance of the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmstorage/" target="_blank" rel="nofollow noopener noreferrer">OlmStorage</a> class to open the source OLM file.
+2. Create a new PST file with the <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/create/" target="_blank" rel="nofollow noopener noreferrer">PersonalStorage.Create</a> method.
+3. Implement a `GetContainerClass` method that maps a message class to the corresponding folder (container) class, so each folder is created with the correct type in the PST.
+4. Implement an `AddToPst` method that recursively reads each folder and its messages from the OLM file - using <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmfolder/enumeratemapimessages/" target="_blank" rel="nofollow noopener noreferrer">EnumerateMapiMessages</a> - and adds them to the PST in the same order, using the `AddSubFolder` and `AddMessage` methods of <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/" target="_blank" rel="nofollow noopener noreferrer">FolderInfo</a>.
+
+## Code Sample {#code-sample}
+
+The following code shows how to convert an OLM file to PST.
+
+**Main** method:
+
+```cs
+// create an instance of OlmStorage class to open the source OLM
+using (var olm = new OlmStorage("my.olm"))
+// create a new PST file
+using (var pst = PersonalStorage.Create("my.pst", FileFormatVersion.Unicode))
+{
+    // recursively read each folder and its messages
+    // and add them to the PST in the same order
+    foreach (var olmFolder in olm.FolderHierarchy)
+    {
+        AddToPst(pst.RootFolder, olmFolder);
+    }
+}
+```
+
+**GetContainerClass** method:
+
+```cs
+public string GetContainerClass(string messageClass)
+{
+    if (messageClass.StartsWith("IPM.Contact") || messageClass.StartsWith("IPM.DistList"))
+    {
+        return "IPF.Contact";
+    }
+
+    if (messageClass.StartsWith("IPM.StickyNote"))
+    {
+        return "IPF.StickyNote";
+    }
+
+    if (messageClass.StartsWith("IPM.Activity"))
+    {
+        return "IPF.Journal";
+    }
+
+    if (messageClass.StartsWith("IPM.Task"))
+    {
+        return "IPF.Task";
+    }
+
+    if (messageClass.StartsWith("IPM.Appointment") || messageClass.StartsWith("IPM.Schedule.meeting"))
+    {
+        return "IPF.Appointment";
+    }
+
+    return "IPF.Note";
+}
+```
+
+**AddToPst** method:
+
+```cs
+public void AddToPst(FolderInfo pstFolder, OlmFolder olmFolder)
+{
+    FolderInfo pstSubFolder = pstFolder.GetSubFolder(olmFolder.Name);
+
+    foreach (var msg in olmFolder.EnumerateMapiMessages())
+    {
+        if (pstSubFolder == null)
+        {
+            pstSubFolder = pstFolder.AddSubFolder(olmFolder.Name, GetContainerClass(msg.MessageClass));
+        }
+
+        pstSubFolder.AddMessage(msg);
+    }
+
+    if (pstSubFolder == null)
+    {
+        pstSubFolder = pstFolder.AddSubFolder(olmFolder.Name);
+    }
+
+    foreach (var olmSubFolder in olmFolder.SubFolders)
+    {
+        AddToPst(pstSubFolder, olmSubFolder);
+    }
+}
+```
+
+:::info
+Conversion in the opposite direction (PST to OLM) is not supported, because an OLM file is always created by Outlook for Mac when an account is added and synchronized with the mail server.
+:::

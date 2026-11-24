@@ -1,0 +1,191 @@
+---
+title: "Managing Distribution Lists in PST Files"
+sidebar_label: "Managing Distribution Lists in PST Files"
+sidebar_key: "net-email-managing-distribution-lists-in-pst-files"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/managing-distribution-lists-in-pst-files.html"
+source_commit: ""
+source_sha256: "978c1650cfb5829db9432b91fff157203043c50af6779b05339ff9fe6a28890e"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/managing-distribution-lists-in-pst-files/"
+source_snapshot_sha256: "343f99eb6d2e965c615e65b1ef5215a0dd116c7cbe12ec028bd8bfff84c79b53"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+This article covers creating, reading, and updating Outlook distribution lists (`MapiDistributionList`) inside a PST file. To work with standalone distribution lists and vCard (VCF) files, see [Working with Distribution Lists](/net/email/working-with-distribution-lists/).
+
+## Creating and Managing Distribution Lists {#creating-and-managing-distribution-lists}
+
+### Create and Save Distribution Lists {#create-and-save-distribution-lists}
+
+This code is used when you want to create a distribution list inside a PST file, with its members linked to existing contact items within the same PST.
+
+1. Create or load a PST and get the "Contacts" folder.
+2. Create <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapicontact/" target="_blank" rel="nofollow noopener noreferrer">MapiContact</a> objects for the list members and add them to the "Contacts" folder using <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/methods/addmapimessageitem/" target="_blank" rel="nofollow noopener noreferrer">AddMapiMessageItem</a>. This returns a unique entry ID for each contact.
+3. Create <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapidistributionlistmember/" target="_blank" rel="nofollow noopener noreferrer">MapiDistributionListMember</a> objects for each contact. Set their <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapidistributionlistmember/properties/entryidtype/" target="_blank" rel="nofollow noopener noreferrer">EntryIdType</a> to <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapidistributionlistentryidtype/" target="_blank" rel="nofollow noopener noreferrer">MapiDistributionListEntryIdType.Contact</a> and assign the contact's entry ID.
+4. Add these members to a <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapidistributionlistmembercollection/" target="_blank" rel="nofollow noopener noreferrer">MapiDistributionListMemberCollection</a>.
+5. Create a <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapidistributionlist/" target="_blank" rel="nofollow noopener noreferrer">MapiDistributionList</a> object, providing a name and the member collection.
+6. Set additional properties like <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessageitembase/body/" target="_blank" rel="nofollow noopener noreferrer">Body</a> and <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessageitembase/subject/" target="_blank" rel="nofollow noopener noreferrer">Subject</a>.
+7. Add the distribution list to the "Contacts" folder using <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/methods/addmapimessageitem/" target="_blank" rel="nofollow noopener noreferrer">AddMapiMessageItem</a>.
+
+**Code Example:**
+
+```csharp
+using Aspose.Email.Storage.Pst;
+using Aspose.Email.Mapi;
+
+// Load or create the PST file
+using (var pst = PersonalStorage.FromFile("your.pst"))
+{
+    // Get the Contacts folder
+    var folder = pst.GetPredefinedFolder(StandardIpmFolder.Contacts);
+
+    if (folder != null)
+    {
+        // Create individual contact items
+        var contact1 = new MapiContact("Susanne Nielsen", "SusanneNielsen@example.com");
+        var contact2 = new MapiContact("Lars Rosing", "LarsRosing@example.com");
+
+        // Add contacts to the folder and retrieve their entry IDs
+        var idContact1 = folder.AddMapiMessageItem(contact1);
+        var idContact2 = folder.AddMapiMessageItem(contact2);
+
+        // Create distribution list members linked to the contacts
+        var member1 = new MapiDistributionListMember(contact1.NameInfo.DisplayName, contact1.ElectronicAddresses.Email1.EmailAddress)
+        {
+            EntryIdType = MapiDistributionListEntryIdType.Contact,
+            EntryId = Convert.FromBase64String(idContact1)
+        };
+        var member2 = new MapiDistributionListMember(contact2.NameInfo.DisplayName, contact2.ElectronicAddresses.Email1.EmailAddress)
+        {
+            EntryIdType = MapiDistributionListEntryIdType.Contact,
+            EntryId = Convert.FromBase64String(idContact2)
+        };
+
+        // Create a collection of distribution list members
+        var members = new MapiDistributionListMemberCollection
+        {
+            member1,
+            member2
+        };
+
+        // Create the distribution list
+        var distributionList = new MapiDistributionList("Contact list", members)
+        {
+            Body = "Distribution List Body",
+            Subject = "Sample Distribution List using Aspose.Email"
+        };
+
+        // Add the distribution list to the Contacts folder in the PST
+        folder.AddMapiMessageItem(distributionList);
+    }
+}
+```
+
+### Read Distribution Lists {#read-distribution-lists}
+
+This code is used to find and read all distribution lists stored within the "Contacts" folder of a PST file.
+
+1. Load the PST file using <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/methods/fromfile/" target="_blank" rel="nofollow noopener noreferrer">PersonalStorage.FromFile</a>.
+2. Retrieve the predefined "Contacts" folder with <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/getpredefinedfolder/" target="_blank" rel="nofollow noopener noreferrer">GetPredefinedFolder</a>.
+3. Enumerate all messages in the folder using <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/methods/enumeratemessages/" target="_blank" rel="nofollow noopener noreferrer">EnumerateMessages()</a>.
+4. For each message, check if its <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessageitembase/messageclass/" target="_blank" rel="nofollow noopener noreferrer">MessageClass</a> property is `"IPM.DistList"` to identify it as a distribution list.
+5. Extract the full message using <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/methods/extractmessage/" target="_blank" rel="nofollow noopener noreferrer">ExtractMessage</a> and convert it to a <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapidistributionlist/" target="_blank" rel="nofollow noopener noreferrer">MapiDistributionList</a> object using <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessage/methods/tomapimessageitem/" target="_blank" rel="nofollow noopener noreferrer">ToMapiMessageItem()</a>.
+
+**Code Example:**
+
+```csharp
+using Aspose.Email.Storage.Pst;
+using Aspose.Email.Mapi;
+
+// Load the PST file
+using (var pst = PersonalStorage.FromFile("your.pst"))
+{
+    // Get the built-in Contacts folder
+    var folder = pst.GetPredefinedFolder(StandardIpmFolder.Contacts);
+    
+    if (folder != null)
+    {
+        // Loop through all items in the Contacts folder
+        foreach (var msgInfo in folder.EnumerateMessages())
+        {
+            // Check if the item is a distribution list by its message class
+            if (msgInfo.MessageClass == "IPM.DistList")
+            {
+                // Extract the distribution list message
+                var distList = (MapiDistributionList)pst.ExtractMessage(msgInfo).ToMapiMessageItem();
+
+                // Access distribution list properties
+                Console.WriteLine($"Name: {distList.DisplayName}");
+
+                // Iterate through members
+                foreach (var member in distList.Members)
+                {
+                    Console.WriteLine($"Member: {member.DisplayName}, Email: {member.EmailAddress}");
+                }
+            }
+        }
+    }
+}
+```
+
+### Update Distribution Lists {#update-distribution-lists}
+
+The following code snippet shows you how to update a distribution list in PST.
+
+1. Load the PST file using <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/methods/fromfile/" target="_blank" rel="nofollow noopener noreferrer">PersonalStorage.FromFile</a>.
+2. Retrieve the predefined "Contacts" folder with <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/methods/getpredefinedfolder/" target="_blank" rel="nofollow noopener noreferrer">GetPredefinedFolder</a>(<a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/standardipmfolder/" target="_blank" rel="nofollow noopener noreferrer">StandardIpmFolder.Contacts</a>).
+3. Enumerate all messages in the folder using <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/methods/enumeratemessages/" target="_blank" rel="nofollow noopener noreferrer">EnumerateMessages()</a>.
+4. For each message, check if its <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessageitembase/messageclass/" target="_blank" rel="nofollow noopener noreferrer">MessageClass</a> property is `"IPM.DistList"` to identify it as a distribution list.
+5. Extract the distribution list message using <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/methods/extractmessage/" target="_blank" rel="nofollow noopener noreferrer">ExtractMessage</a> and convert it to a <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapidistributionlist/" target="_blank" rel="nofollow noopener noreferrer">MapiDistributionList</a> object using <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessage/methods/tomapimessageitem/" target="_blank" rel="nofollow noopener noreferrer">ToMapiMessageItem()</a>.
+6. Create a new <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapidistributionlistmember/" target="_blank" rel="nofollow noopener noreferrer">MapiDistributionListMember</a> object with the member's display name and email address.
+7. Add the new member to the distribution list's <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapidistributionlist/properties/members/" target="_blank" rel="nofollow noopener noreferrer">Members</a> collection.
+8. Update the distribution list in the PST folder using <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/methods/updatemessage/" target="_blank" rel="nofollow noopener noreferrer">UpdateMessage</a> with the message's entry ID.
+
+**Code Example:**
+
+```csharp
+using Aspose.Email.Mapi;
+using Aspose.Email.Storage.Pst;
+
+// Load PST file
+using (PersonalStorage pst = PersonalStorage.FromFile("my.pst"))
+{
+    // Get Contacts folder
+    var folder = pst.GetPredefinedFolder(StandardIpmFolder.Contacts);
+
+    // Add a new member to each distribution list in PST
+    foreach (var msg in folder.EnumerateMessages())
+    {
+        // Check if the message has the "IPM.DistList" message class
+        if (msg.MessageClass == "IPM.DistList")
+        {
+            var distList = (MapiDistributionList)pst.ExtractMessage(msg).ToMapiMessageItem();
+
+            // Create a new member to add
+            var member = new MapiDistributionListMember("Edward R. Manuel", "EdwardRManuel@example.com");
+            distList.Members.Add(member);
+
+            // Update Distribution List in PST
+            folder.UpdateMessage(msg.EntryIdString, distList);
+        }
+    }
+}
+```
+
+## See Also {#see-also}
+
+- [Working with Distribution Lists](/net/email/working-with-distribution-lists/) - create and manage standalone `MapiDistributionList` items (MSG/VCF).
+- [Managing Contacts in PST Files](/net/email/managing-contacts-in-pst-files/) - manage the contacts that make up a distribution list.

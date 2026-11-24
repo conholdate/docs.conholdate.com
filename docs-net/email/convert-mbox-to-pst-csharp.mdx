@@ -1,0 +1,70 @@
+---
+title: "Converting MBOX to PST"
+sidebar_label: "Converting MBOX to PST"
+sidebar_key: "net-email-convert-mbox-to-pst-csharp"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/convert-mbox-to-pst-csharp.html"
+source_commit: ""
+source_sha256: "da67f4f1675c79d9389441a3f6985e080487bf0ed0c90613ec118449c930ac5f"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/convert-mbox-to-pst-csharp/"
+source_snapshot_sha256: "d53d83a4b111b78e731ceb5f4857702a3908881bfae362b6252a1670a6ac2054"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Convert MBOX to PST. Basic Conversion {#convert-mbox-to-pst-basic-conversion}
+
+When migrating mail data from clients like Mozilla Thunderbird to Microsoft Outlook, converting MBOX archives to the PST (Personal Storage Table) format is often required. The PST format is native to Outlook and Exchange and supports advanced features like folder structures and MAPI-based message handling.
+
+Aspose.Email for .NET allows developers to manually transfer messages from MBOX files into Outlook-compatible storage with full control over the conversion process. Below is an example that demonstrates how to load messages from an MBOX archive and save them into a structured Outlook data file:
+
+1. Initialize the MBOX reader using <a href="https://reference.aspose.com/email/net/aspose.email.storage.mbox/mboxstoragereader/createreader/#createreader_2" target="_blank" rel="nofollow noopener noreferrer">MboxStorageReader.CreateReader()</a>.
+2. Generate a PST file using <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/create/#create_4" target="_blank" rel="nofollow noopener noreferrer">PersonalStorage.Create()</a>.
+3. Add a mail folder (e.g., "Inbox") to the storage.
+4. Loop through each message, convert it to a <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessage/" target="_blank" rel="nofollow noopener noreferrer">MapiMessage</a>, and insert it into the folder.
+
+```cs
+// Load the source file
+var mbox = MboxStorageReader.CreateReader(mboxFilePath, new MboxLoadOptions());
+
+// Create the destination Outlook data file
+using (var personalStorage = PersonalStorage.Create(pstFilePath, FileFormatVersion.Unicode))
+{
+    // Add a folder to hold imported messages
+    var folderInfo = personalStorage.CreatePredefinedFolder("Inbox", StandardIpmFolder.Inbox);
+
+    // Process each message from the source file
+    foreach (var eml in mbox.EnumerateMessages())
+    {
+        var msg = MapiMessage.FromMailMessage(eml);
+        folderInfo.AddMessage(msg);
+    }
+}
+```
+
+## Remove Digital Signatures During Conversion {#remove-digital-signatures-during-conversion}
+
+In some cases, digital signatures embedded in messages are not needed in the target file. To exclude them during the transfer, set the `RemoveSignature` property in the <a href="https://reference.aspose.com/email/net/aspose.email.storage/mboxtopstconversionoptions/" target="_blank" rel="nofollow noopener noreferrer">MboxToPstConversionOptions</a> to *true*.
+
+The following code sample shows how to utilize this property:
+
+```cs
+var pstDataStream = new MemoryStream();
+var personalStorage = PersonalStorage.Create(pstDataStream, FileFormatVersion.Unicode);
+MailStorageConverter.MboxToPst(new MboxrdStorageReader(new FileStream(fileName, FileMode.Open, FileAccess.Read), new MboxLoadOptions()),
+personalStorage,
+    "Inbox",
+new MboxToPstConversionOptions() { RemoveSignature = true });
+```

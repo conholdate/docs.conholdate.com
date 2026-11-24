@@ -1,0 +1,573 @@
+---
+title: "Signing Emails with DKIM for Authentication and Deliverability"
+sidebar_label: "Signing Emails with DKIM for Authentication and Deliverability"
+sidebar_key: "net-email-signing-emails-with-dkim"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/signing-emails-with-dkim.html"
+source_commit: ""
+source_sha256: "488ecb503a0c9646cdb754070a19ae9c929fa2ffa912015db1807b4242ef9320"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/signing-emails-with-dkim/"
+source_snapshot_sha256: "f3a0bd8074d3f6cee24e2c72039803a1fd85b9f005ac45972d30be5d0b418f02"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "./_remote-markdown.css";
+
+:::info
+**_NOTE:_** The feature is accessible only for the library versions targeting .NET Framework. Versions targeting .NET Core do not have this feature.
+:::
+
+DKIM (DomainKeys Identified Mail, <a href="https://tools.ietf.org/html/rfc6376" target="_blank" rel="nofollow noopener noreferrer">RFC 6376</a>) lets a domain owner attach a cryptographic signature to outgoing email. Receiving servers fetch the matching public key from DNS, recompute the hash, and confirm two things at once: the message body was not modified in transit, and the message really originated from a sender authorized by the domain. Without DKIM, modern providers (Gmail, Microsoft 365, Yahoo) flag mail as spam, drop it silently, or refuse delivery - DKIM is no longer optional for production mail.
+
+This guide is a complete walkthrough of `Aspose.Email`'s DKIM namespace for .NET. Every code block in this article is taken from a runnable example in the <a href="https://docs.aspose.com/email/net/signing-emails-with-dkim/DKIMExamples" target="_blank" rel="nofollow noopener noreferrer">DKIMExamples</a> project and has been verified end-to-end against the library.
+
+## Prerequisites {#prerequisites}
+
+DKIM types live in the `Aspose.Email.DKIM` namespace and ship only with the **.NET Framework 4.0/4.5** builds of the library. They are intentionally excluded from the .NET Standard 2.0 and .NET 6/8 packages. To follow the examples below, your project must reference an Aspose.Email assembly built for `net45` (target `net48` in the consuming `.csproj`).
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Aspose.Email">
+      <HintPath>..\path\to\net45\Aspose.Email.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>
+```
+
+You also need an RSA key pair. The private key is held in your application and used to sign; the public key is published as a DNS TXT record so receivers can verify. A 2048-bit key is the standard today:
+
+```bash
+openssl genrsa -out sample-private-key.pem 2048
+```
+
+Aspose's `PemReader` accepts both PKCS#1 (`-----BEGIN RSA PRIVATE KEY-----`) and PKCS#8 (`-----BEGIN PRIVATE KEY-----`) formatted files.
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Class
+
+</th>
+<th>
+
+Role
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`DKIMSignatureInfo`
+
+</td>
+<td>
+
+Describes the signature: selector, domain, hash algorithm, canonicalization, and which headers to cover.
+
+</td>
+</tr>
+<tr>
+<td>
+
+`PemReader`
+
+</td>
+<td>
+
+Loads an RSA private key from a PEM-formatted file or stream into an `RSACryptoServiceProvider`.
+
+</td>
+</tr>
+<tr>
+<td>
+
+`MailMessage.DKIMSign(rsa, info)`
+
+</td>
+<td>
+
+Extension/instance method that returns a signed copy of the message with the `DKIM-Signature` header populated.
+
+</td>
+</tr>
+<tr>
+<td>
+
+`DkimVerifier`
+
+</td>
+<td>
+
+Performs DNS-based verification of a signed message - file, stream, sync, or async.
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+The full flow is always: **load key → describe signature → build message → sign → (optionally) verify**.
+
+## The minimal signing example {#the-minimal-signing-example}
+
+This is the smallest amount of code that produces a valid DKIM-signed message:
+
+```csharp
+// Load private key from PEM file
+var rsa = PemReader.GetPrivateKey(PrivateKeyPath);
+
+// Create DKIM signature information
+var signInfo = new DKIMSignatureInfo("dkim", "example.com")
+{
+    // Default: Relaxed/Relaxed canonicalization
+    // Default: RSASha1 hash algorithm
+};
+
+// Add headers to sign
+signInfo.Headers.Add("From");
+signInfo.Headers.Add("To");
+signInfo.Headers.Add("Subject");
+
+// Create a test email
+var mailMessage = new MailMessage(
+    "sender@example.com",
+    "recipient@example.com",
+    "Test Subject",
+    "This is a test email body signed with DKIM.")
+{
+    From = new MailAddress("sender@example.com", "Sender Name")
+};
+
+// Sign the message
+var signedMsg = mailMessage.DKIMSign(rsa, signInfo);
+
+// Save the signed message
+string outputPath = Path.Combine(DataDir, "basic-signed.eml");
+signedMsg.Save(outputPath);
+
+Console.WriteLine($"DKIM-Signature header: {signedMsg.Headers["DKIM-Signature"]?.Substring(0, 50)}...");
+```
+
+The two arguments to `DKIMSignatureInfo` - `"dkim"` and `"example.com"` - are the **selector** and the **domain**. Together they tell receivers where to look up your public key: at the DNS TXT record `dkim._domainkey.example.com`. Pick a short selector name (often `default`, `mail`, or a date like `2026jan`); the selector lets you rotate keys without throwing away the old one.
+
+A critical detail: `DKIMSign` returns a *new* `MailMessage` instance with the `DKIM-Signature` header added. The original message is unchanged. Save or send the returned object, not the input.
+
+## Choosing which headers to sign {#choosing-which-headers-to-sign}
+
+The headers listed in `signInfo.Headers` are the only ones whose values are bound to the signature. Anything not listed can be modified by relays without breaking the signature, which is sometimes desirable (e.g. `Received:` headers added downstream) and sometimes dangerous (e.g. leaving `From` unsigned makes the signature meaningless).
+
+**Rule of thumb: always sign `From`, `To`, `Subject`, `Date`.** `From` in particular is mandatory for DMARC alignment.
+
+```csharp
+var signInfo = new DKIMSignatureInfo("dkim2", "example.com")
+{
+    Headers =
+    {
+        "From",
+        "To",
+        "Subject",
+        "Date",
+        "MIME-Version"
+    }
+};
+
+// Create email with additional headers
+var mailMessage = new MailMessage(
+    "sender@example.com",
+    "recipient@example.com",
+    "Custom Headers Test",
+    "This message includes custom headers in the DKIM signature.")
+{
+    From = new MailAddress("sender@example.com", "Sender"),
+    Date = DateTime.UtcNow
+};
+
+// Ensure headers listed in DKIM signature are present on the message
+mailMessage.Headers.Add("MIME-Version", "1.0");
+mailMessage.Headers.Add("X-Custom-Header", "CustomValue");
+
+// Sign with custom headers
+var signedMsg = mailMessage.DKIMSign(rsa, signInfo);
+
+string outputPath = Path.Combine(DataDir, "custom-headers-signed.eml");
+signedMsg.Save(outputPath);
+```
+
+If you list `Date` but never set `mailMessage.Date`, `DKIMSign` throws `The following headers to be signed do not exist: Date`. Always populate the headers first, then sign.
+
+## Hash algorithms - RSA-SHA1 vs RSA-SHA256 {#hash-algorithms--rsa-sha1-vs-rsa-sha256}
+
+DKIM supports two signing algorithms. The default in Aspose.Email is `RSASha1` for backwards compatibility, but **every new deployment should use `RSASha256`**. Many providers now mark SHA-1 signatures as invalid even when they verify cryptographically.
+
+```csharp
+// Example with RSASha1 (older, less secure but widely supported)
+var signInfoSha1 = new DKIMSignatureInfo("dkim-sha1", "example.com")
+{
+    HashAlgorithm = DKIMHashAlgorithm.RSASha1,
+    Headers = { "From", "To", "Subject" }
+};
+
+var mailMessage1 = new MailMessage(
+    "sender@example.com",
+    "recipient@example.com",
+    "SHA1 Test",
+    "Signed with RSASha1 algorithm.");
+
+mailMessage1.From = new MailAddress("sender@example.com");
+var signedMsgSha1 = mailMessage1.DKIMSign(rsa, signInfoSha1);
+
+string pathSha1 = Path.Combine(DataDir, "sha1-signed.eml");
+signedMsgSha1.Save(pathSha1);
+
+// Example with RSASha256 (newer, more secure)
+var signInfoSha256 = new DKIMSignatureInfo("dkim-sha256", "example.com")
+{
+    HashAlgorithm = DKIMHashAlgorithm.RSASha256,
+    Headers = { "From", "To", "Subject" }
+};
+
+var mailMessage2 = new MailMessage(
+    "sender@example.com",
+    "recipient@example.com",
+    "SHA256 Test",
+    "Signed with RSASha256 algorithm.");
+
+mailMessage2.From = new MailAddress("sender@example.com");
+var signedMsgSha256 = mailMessage2.DKIMSign(rsa, signInfoSha256);
+
+string pathSha256 = Path.Combine(DataDir, "sha256-signed.eml");
+signedMsgSha256.Save(pathSha256);
+```
+
+The resulting `DKIM-Signature` header advertises the algorithm via the `a=` tag (`a=rsa-sha1` vs `a=rsa-sha256`). Receivers consult that tag to decide which hash to recompute.
+
+## Canonicalization - Simple vs Relaxed {#canonicalization--simple-vs-relaxed}
+
+Canonicalization is how DKIM agrees on a stable, byte-exact form of the message before hashing. Two algorithms are defined for headers and bodies independently:
+
+- **`Simple`** - almost no normalization. Trailing empty lines in the body are removed, but no other whitespace is touched. A single space added by a relay will invalidate the signature.
+- **`Relaxed`** - folds whitespace inside header values, lowercases header names, and collapses runs of whitespace in the body. Tolerant of the trivial reformatting that mail transport agents tend to do.
+
+Choose `Relaxed` for both header and body unless you have a specific reason not to. Almost every production deployment does.
+
+```csharp
+// Simple canonicalization - almost no changes allowed
+var signInfoSimple = new DKIMSignatureInfo("dkim-simple", "example.com")
+{
+    HeaderCanonicalization = CanonicalizationType.Simple,
+    BodyCanonicalization = CanonicalizationType.Simple,
+    Headers = { "From", "To", "Subject" }
+};
+
+var mailMessage1 = new MailMessage(
+    "sender@example.com",
+    "recipient@example.com",
+    "Simple Canonicalization",
+    "This message uses Simple canonicalization.");
+
+mailMessage1.From = new MailAddress("sender@example.com");
+var signedSimple = mailMessage1.DKIMSign(rsa, signInfoSimple);
+
+string pathSimple = Path.Combine(DataDir, "simple-canonical.eml");
+signedSimple.Save(pathSimple);
+
+// Relaxed canonicalization - minor changes allowed (whitespace normalization)
+var signInfoRelaxed = new DKIMSignatureInfo("dkim-relaxed", "example.com")
+{
+    HeaderCanonicalization = CanonicalizationType.Relaxed,
+    BodyCanonicalization = CanonicalizationType.Relaxed,
+    Headers = { "From", "To", "Subject" }
+};
+
+var mailMessage2 = new MailMessage(
+    "sender@example.com",
+    "recipient@example.com",
+    "Relaxed Canonicalization",
+    "This message uses Relaxed canonicalization.");
+
+mailMessage2.From = new MailAddress("sender@example.com");
+var signedRelaxed = mailMessage2.DKIMSign(rsa, signInfoRelaxed);
+
+string pathRelaxed = Path.Combine(DataDir, "relaxed-canonical.eml");
+signedRelaxed.Save(pathRelaxed);
+```
+
+Header and body canonicalization are independent - `relaxed/simple` is a perfectly valid combination, written that way in the `c=` tag of the DKIM header.
+
+## Loading the private key {#loading-the-private-key}
+
+`PemReader` handles both PEM encodings transparently. There is no separate `Pkcs1Reader` / `Pkcs8Reader` - just pass the path or stream:
+
+```csharp
+// Check if private key file exists
+if (!File.Exists(PrivateKeyPath))
+{
+    Console.WriteLine($"Private key file not found: {PrivateKeyPath}");
+    Console.WriteLine("Creating a sample private key for demonstration...");
+
+    // Create a sample RSA key (for testing only - in production, use real keys)
+    using var rsa = new System.Security.Cryptography.RSACryptoServiceProvider(2048);
+    var privateKeyParams = rsa.ExportParameters(true);
+
+    Console.WriteLine("Sample RSA key created (2048 bits).");
+    Console.WriteLine("In production, load your actual private key from a secure location.");
+    Console.WriteLine("PEM file format should contain either:");
+    Console.WriteLine("  - BEGIN RSA PRIVATE KEY (PKCS#1)");
+    Console.WriteLine("  - BEGIN PRIVATE KEY (PKCS#8)");
+}
+else
+{
+    // Load the private key
+    var rsa = PemReader.GetPrivateKey(PrivateKeyPath);
+    Console.WriteLine($"Private key loaded successfully from: {PrivateKeyPath}");
+    Console.WriteLine("Key size: 2048 bits (typical for DKIM)");
+}
+
+Console.WriteLine("\nPEM File Format Examples:");
+Console.WriteLine("--------------------------");
+Console.WriteLine("PKCS#1 format:");
+Console.WriteLine("-----BEGIN RSA PRIVATE KEY-----");
+Console.WriteLine("MIIEpAIBAAKCAQEA0Z3VS5JJcds3xfn/ygWyF8PbnGy...");
+Console.WriteLine("-----END RSA PRIVATE KEY-----");
+Console.WriteLine();
+Console.WriteLine("PKCS#8 format:");
+Console.WriteLine("-----BEGIN PRIVATE KEY-----");
+Console.WriteLine("MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC...");
+Console.WriteLine("-----END PRIVATE KEY-----");
+```
+
+`PemReader.GetPrivateKey` returns an `RSACryptoServiceProvider` ready to hand to `DKIMSign`. There is also a `GetPrivateKey(Stream)` overload for cases where the key comes from a key vault, encrypted blob, or embedded resource rather than the file system.
+
+**Key handling rules:**
+
+1. Never commit private keys to version control. `*.pem` belongs in `.gitignore`.
+2. In production, load keys from a secrets manager (Azure Key Vault, AWS Secrets Manager, HashiCorp Vault), not from disk.
+3. Rotate keys every 6-12 months. Publish the new selector first, switch signing, then withdraw the old DNS record after a grace period.
+
+## Verifying a signed message from a file {#verifying-a-signed-message-from-a-file}
+
+Verification is the symmetric operation: given a signed `.eml`, `DkimVerifier` extracts the `DKIM-Signature` header, performs a DNS lookup against `<selector>._domainkey.<domain>` for the public key, and recomputes the hash. The result is a `DkimResult` with `IsValid` and `ErrorMessage`.
+
+```csharp
+// For this example, we need a signed message
+if (!File.Exists(signedMessagePath))
+{
+    Console.WriteLine($"Signed message file not found: {signedMessagePath}");
+    Console.WriteLine("Please provide a DKIM-signed .eml file for verification.");
+    return;
+}
+
+// Verify the signature
+DkimResult result = DkimVerifier.Verify(signedMessagePath);
+
+// Check the result
+if (result.IsValid)
+{
+    Console.WriteLine("[OK] DKIM signature verification successful!");
+    Console.WriteLine("The message was signed by the claimed domain.");
+}
+else
+{
+    Console.WriteLine("[FAIL] DKIM signature verification failed!");
+    Console.WriteLine($"Error: {result.ErrorMessage}");
+}
+
+Console.WriteLine("\nVerification Process:");
+Console.WriteLine("1. Extracts DKIM-Signature header from the message");
+Console.WriteLine("2. Queries DNS for the public key (selector._domainkey.domain)");
+Console.WriteLine("3. Verifies the signature using the public key");
+Console.WriteLine("4. Compares computed body hash with the signed body hash");
+```
+
+> Verifying a message signed with `d=example.com` will always fail with "key not in dictionary" or a similar DNS-lookup error, because `example.com` doesn't publish a DKIM record. Use a domain you control (or a known-good test message) for real verification tests.
+
+## Verifying from a stream {#verifying-from-a-stream}
+
+When the message isn't on disk - it came from an IMAP fetch, a queue, an HTTP upload, or blob storage - use the `Stream` overload. It accepts any seekable read stream:
+
+```csharp
+// Load the signed message into a stream
+using (var stream = File.OpenRead(signedMessagePath))
+{
+    DkimResult result = DkimVerifier.Verify(stream);
+
+    if (result.IsValid)
+    {
+        Console.WriteLine("[OK] DKIM signature verified successfully from stream!");
+    }
+    else
+    {
+        Console.WriteLine("[FAIL] Verification failed!");
+        Console.WriteLine($"Error: {result.ErrorMessage}");
+    }
+}
+
+Console.WriteLine("\nStream-based verification is useful when:");
+Console.WriteLine("  - Working with email from IMAP/POP3 clients");
+Console.WriteLine("  - Processing emails from databases or cloud storage");
+Console.WriteLine("  - Building web applications that receive emails via HTTP");
+```
+
+`Verify(Stream)` and `Verify(string)` are functionally identical - both block until DNS lookup completes. For anything user-facing, use the async variants below.
+
+## Async verification {#async-verification}
+
+DKIM verification involves a DNS round-trip, which can take tens of milliseconds even on a fast network. Inside an ASP.NET request handler, message-processing loop, or any UI thread, that adds up fast. `VerifyAsync` returns a `Task<DkimResult>` that you can `await`:
+
+```csharp
+if (!File.Exists(signedMessagePath))
+{
+    Console.WriteLine("Signed message file not found.");
+    return;
+}
+
+// Async verification
+DkimResult result = await DkimVerifier.VerifyAsync(signedMessagePath);
+
+if (result.IsValid)
+{
+    Console.WriteLine("[OK] Async verification successful!");
+}
+else
+{
+    Console.WriteLine("[FAIL] Async verification failed!");
+    Console.WriteLine($"Error: {result.ErrorMessage}");
+}
+
+Console.WriteLine("\nAsync verification is recommended for:");
+Console.WriteLine("  - Web applications (ASP.NET, etc.)");
+Console.WriteLine("  - Services that process multiple emails");
+Console.WriteLine("  - Any application where you want to avoid blocking the main thread");
+```
+
+There is also a `VerifyAsync(Stream)` overload. As with the sync API, the method declares `async Task` (not `async void`) - call sites should `await` it, and console-app entrypoints can do `VerifySignatureAsync().GetAwaiter().GetResult()` when an `async Main` is unavailable.
+
+## End-to-end: load, sign, save, verify {#end-to-end-load-sign-save-verify}
+
+The pieces above combine into a single workflow. This is the full sign-and-verify pipeline you'd embed inside a transactional-email service:
+
+```csharp
+// Step 1: Load private key
+var rsa = PemReader.GetPrivateKey(PrivateKeyPath);
+
+// Step 2: Create signature information
+var signInfo = new DKIMSignatureInfo("dkim", "example.com")
+{
+    HeaderCanonicalization = CanonicalizationType.Relaxed,
+    BodyCanonicalization = CanonicalizationType.Relaxed,
+    HashAlgorithm = DKIMHashAlgorithm.RSASha256,
+    Headers =
+    {
+        "From",
+        "To",
+        "Subject",
+        "Date",
+        "MIME-Version"
+    }
+};
+
+// Step 3: Create email message
+var mailMessage = new MailMessage(
+    "john.doe@example.com",
+    "jane.smith@example.org",
+    "Important Document - DKIM Signed",
+    "Please find the attached document.\n\nBest regards,\nJohn Doe");
+
+mailMessage.From = new MailAddress("john.doe@example.com", "John Doe");
+mailMessage.To.Add(new MailAddress("jane.smith@example.org", "Jane Smith"));
+mailMessage.Date = DateTime.UtcNow;
+mailMessage.Headers.Add("MIME-Version", "1.0");
+
+// Step 4: Sign the message
+var signedMessage = mailMessage.DKIMSign(rsa, signInfo);
+
+// Step 5: Save the signed message
+string signedPath = Path.Combine(DataDir, "end-to-end-signed.eml");
+signedMessage.Save(signedPath);
+
+// Step 6: Verify the signature
+var result = DkimVerifier.Verify(signedPath);
+
+if (result.IsValid)
+{
+    Console.WriteLine("  [OK] Signature verification successful!");
+    Console.WriteLine("  [OK] The message integrity is confirmed.");
+    Console.WriteLine("  [OK] The sender domain is authenticated.");
+}
+else
+{
+    Console.WriteLine($"  [FAIL] Verification failed: {result.ErrorMessage}");
+}
+
+// Step 7: Display DKIM-Signature header
+Console.WriteLine("\nStep 7: DKIM-Signature header:");
+Console.WriteLine("  " + signedMessage.Headers["DKIM-Signature"]);
+```
+
+A complete `DKIM-Signature` header produced by this code looks like this:
+
+```text
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=example.com;
+ h=from:to:subject:date:mime-version; q=dns/txt; s=dkim; t=1780252880;
+ bh=e2RkwEm0k0yLcVmhi3KeXpt14Ppx3Xx49S33/+J8OGc=;
+ b=Zd3sfCGGD9YdOLw1o3YHLFs7DO6V9cc7anye5E3kQ/MEdkU14daTru0sXTZCtCryvJubCs...
+```
+
+The interesting tags:
+
+- `v=1` - DKIM version.
+- `a=rsa-sha256` - algorithm; reflects `HashAlgorithm`.
+- `c=relaxed/relaxed` - canonicalization (header/body).
+- `d=example.com` / `s=dkim` - selector and domain; together they form the DNS lookup name.
+- `h=from:to:subject:date:mime-version` - signed headers, in order.
+- `bh=` - base64 hash of the canonicalized body.
+- `b=` - the actual RSA signature over the canonicalized headers.
+
+If you change any signed header value, or modify the body, `bh` and `b` no longer match and verification fails.
+
+## Publishing the public key in DNS {#publishing-the-public-key-in-dns}
+
+Signing locally is only half the job. For receivers to verify, the public counterpart of your RSA key must be published as a DNS TXT record at `<selector>._domainkey.<domain>`:
+
+```text
+Record: dkim._domainkey.example.com
+Type:   TXT
+Value:  v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBC...
+```
+
+Extract the public key from your PEM with OpenSSL:
+
+```bash
+openssl rsa -in sample-private-key.pem -pubout -out sample-public-key.pem
+```
+
+Strip the header/footer lines and concatenate the base64 content for the `p=` value. Then confirm the record is live before relying on it:
+
+```bash
+dig dkim._domainkey.example.com TXT
+```
+
+Online tools like <a href="https://dkimvalidator.com/" target="_blank" rel="nofollow noopener noreferrer">DKIM Validator</a> and <a href="https://mxtoolbox.com/dkim.aspx" target="_blank" rel="nofollow noopener noreferrer">MXToolbox DKIM Checker</a> will tell you whether a real message you send is verifiable end-to-end. Use them before flipping production traffic over.

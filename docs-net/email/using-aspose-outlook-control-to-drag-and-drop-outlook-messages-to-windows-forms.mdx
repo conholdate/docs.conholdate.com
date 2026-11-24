@@ -1,0 +1,150 @@
+---
+title: "Using Aspose Outlook Control to Drag and Drop Outlook Messages to Windows Forms"
+sidebar_label: "Using Aspose Outlook Control to Drag and Drop Outlook Messages to Windows Forms"
+sidebar_key: "net-email-using-aspose-outlook-control-to-drag-and-drop-outlook-messages-to-windows-forms"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/using-aspose-outlook-control-to-drag-and-drop-outlook-messages-to-windows-forms.html"
+source_commit: ""
+source_sha256: "1dc74000310b7fb831590666439ba27aff6719d3f9a8881b5f11d8866ef3bc2c"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/using-aspose-outlook-control-to-drag-and-drop-outlook-messages-to-windows-forms/"
+source_snapshot_sha256: "63250e558183750440960349a0b65ac7be146160ed95540e5cad9b44e29ae527"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "./_remote-markdown.css";
+
+Aspose.Email supports the drag and drop feature of Microsoft Outlook. It enables developers to easily create UI elements that respond to Outlook drag-drop events. The following sample shows how to create a panel onto which users can drag a message from Outlook and drop it, and the program to save messages to MSG files. The following code snippet shows you how to set up an Aspose Outlook control that can receive dropped Microsoft Outlook messages.
+
+- Create a windows form application.
+- Add a reference to the Aspose.Email assembly.
+- Browse to the Aspose.Email.dll and click **OK**.
+
+The UI element created in this sample is a panel. To create a panel:
+
+- Right-click your project in the solution panel and choose **Add** and then **New item** from the menu.
+- Create a class called MyPanel:
+- Let MyPanel be a subclass of System.Windows.Forms.Panel, and add a Aspose.Email.Windows.Forms.FileDropTargetManager field to MyPanel.
+- Override the OnHandleCreated and OnHandleDestroyed methods to register and unregister MyPanel using Aspose.Email.Windows.Forms.FileDropTargetManager:
+
+```csharp
+class MyPanel : System.Windows.Forms.Panel	
+{
+    private Aspose.Email.Windows.Forms.FileDropTargetManager manager;
+
+    // Hook up
+    protected override void OnHandleCreated(EventArgs e)
+    {
+        this.manager = new Aspose.Email.Windows.Forms.FileDropTargetManager(this);
+        this.manager.EnsureRegistered(this);
+        base.OnHandleCreated(e);
+    }
+
+    // Unhook
+    protected override void OnHandleDestroyed(EventArgs e)
+    {
+        this.manager.EnsureUnRegistered(this);
+        base.OnHandleDestroyed(e);
+    }
+}
+```
+
+- Build the project.
+
+MyPanel is ready to use. This panel accepts drag and drop events from Outlook.
+
+- Open your toolbox panel and drag MyPanel onto your windows form:
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+![todo:image_alt_text](/net/email/images/a5e1f5c44111709f-using-aspose-outlook-control-to-drag-and-drop-outlook-messages-to-windows-forms_1.png)
+
+</th>
+</tr>
+</thead>
+<tbody>
+
+</tbody>
+</table>
+</div>
+
+- Add an event handler to MyPanel's DragDrop event. (Don't forget to set the AllowDrop property to true from the properties panel and change MyPanel's BackColor property to your favorite.)
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+![todo:image_alt_text](/net/email/images/ae7b8940953e01d7-using-aspose-outlook-control-to-drag-and-drop-outlook-messages-to-windows-forms_2.png)
+
+</th>
+</tr>
+</thead>
+<tbody>
+
+</tbody>
+</table>
+</div>
+
+- Add the following line in the InitializeComponent() method of the main Form:
+
+```csharp
+this.myPanel1.AllowDrop = true;
+```
+
+- Implement the DragDrop event handler to save the messages dragged from Outlook to MSG files.
+- Cast DragEventArgs to Aspose.Email.Windows.Forms.FileDragEventArgs which contains an array Files property that stands for the user's drag target.
+
+If a user drags several messages from Outlook and drops them onto MyPanel, Files.Count is the number of messages, and Files\[i] gives each individual message.
+
+```csharp
+private void myPanel1_DragDrop(object sender, DragEventArgs e)
+{
+
+    Aspose.Email.Windows.Forms.FileDragEventArgs args;
+    args = (Aspose.Email.Windows.Forms.FileDragEventArgs)e;
+    if (args != null && args.Files.Count > 0)
+    {
+        for (int i = 0; i < args.Files.Count; i++)
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.FileName = args.Files[i].FileName;
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    System.IO.FileStream output;
+                    output = new System.IO.FileStream(dialog.FileName, System.IO.FileMode.CreateNew);
+                    args.Files[i].Save(output);
+                    MessageBox.Show("Save success:" + dialog.FileName);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Save failed:" + ex.ToString());
+                }
+            }
+        }
+    }
+}
+```
+
+- Run the project and test it.
+
+Now you can drag messages from Outlook and drop them onto your application. The application prompts you to save those messages to MSG files.

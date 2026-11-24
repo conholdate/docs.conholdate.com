@@ -1,0 +1,233 @@
+---
+title: "Filter and Sort Messages in Exchange Server Mailbox Using EWS"
+sidebar_label: "Filter and Sort Messages in Exchange Server Mailbox Using EWS"
+sidebar_key: "net-email-filter-messages-from-exchange-mailbox"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/filter-messages-from-exchange-mailbox.html"
+source_commit: ""
+source_sha256: "9d57390ad7d59e15ecc83b9bb9c6c4dc8e949ef6bf103b218f7fa289c16beeaf"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/filter-messages-from-exchange-mailbox/"
+source_snapshot_sha256: "d5e053a4d0a06448e59d7d6f3c65c8e558f746f9fa86b645191bdefc293945dd"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+Aspose.Email for .NET provides the capability to filter messages from Exchange Mailbox using the EWSClient and ExchangeQueryBuilder. Messages can be filtered via different criteria such as by date, domain, message-id, and by Mail Delivery Notifications. This article shows how to filter messages from Exchange Server using different Criteria.
+:::
+
+## Filter and Sort Messages using EWS {#filter-and-sort-messages-using-ews}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a> interface provides the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/listmessages/#listmessages" target="_blank" rel="nofollow noopener noreferrer">ListMessages()</a> method which gets all messages from a mailbox. To get only messages which match some condition, use the overloaded <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/listmessages/#listmessages" target="_blank" rel="nofollow noopener noreferrer">ListMessages()</a> method which takes the <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquery/" target="_blank" rel="nofollow noopener noreferrer">MailQuery</a> class as an argument. The <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquery/" target="_blank" rel="nofollow noopener noreferrer">MailQuery</a> class provides various properties for specifying conditions, for example, date, subject, sender and recipient. In addition, the API also allows applying case-sensitivity filters for retrieving emails from the mailbox.
+
+### Filter Messages by Criteria {#filter-messages-by-criteria}
+
+To get filtered messages from a mailbox:
+
+1. Connect to the Exchange server.
+2. Create an instance of <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquery/" target="_blank" rel="nofollow noopener noreferrer">MailQuery</a> and set the desired properties.
+3. Call the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/listmessages/#listmessages" target="_blank" rel="nofollow noopener noreferrer">IEWSClient.ListMessages()</a> method and pass the <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquery/" target="_blank" rel="nofollow noopener noreferrer">MailQuery</a> in the parameters to get the filtered messages only.
+
+The following code snippet shows you how to connect to an IMAP mailbox and get messages that have the string "Newsletter" in the subject and were sent today.
+
+```csharp
+try
+{                
+    // Connect to EWS
+    const string mailboxUri = "https://outlook.office365.com/ews/exchange.asmx";
+    const string username = "username";
+    const string password = "password";
+    const string domain = "domain";
+
+    IEWSClient client = EWSClient.GetEWSClient(mailboxUri, username, password, domain);
+
+    // Query building by means of ExchangeQueryBuilder class
+    ExchangeQueryBuilder builder = new ExchangeQueryBuilder();
+
+    // Set Subject and Emails that arrived today
+    builder.Subject.Contains("Newsletter");
+    builder.InternalDate.On(DateTime.Now);
+
+    MailQuery query = builder.GetQuery();
+
+    // Get list of messages
+    ExchangeMessageInfoCollection messages = client.ListMessages(client.MailboxInfo.InboxUri, query, false);
+    Console.WriteLine("EWS: " + messages.Count + " message(s) found.");
+
+    // Disconnect from EWS
+    client.Dispose();                
+}
+catch (Exception ex)
+{
+    Console.WriteLine(ex.Message);
+}
+```
+
+#### By Today's Date {#by-today}
+
+The following code snippet shows you how to filter all emails on the basis of today's date.
+
+```csharp
+// Emails that arrived today
+MailQueryBuilder builder = new MailQueryBuilder();
+builder.InternalDate.On(DateTime.Now);
+```
+
+#### By Date Range {#by-date-range}
+
+The following code snippet shows you how to filter all emails on the basis of the date range.
+
+```csharp
+// Emails that arrived in last 7 days
+builder.InternalDate.Before(DateTime.Now);
+builder.InternalDate.Since(DateTime.Now.AddDays(-7));
+```
+
+#### By Sender {#by-sender}
+
+The following code snippet shows you how to filter all emails on the basis of a specific sender.
+
+```csharp
+// Get emails from specific sender
+builder.From.Contains("saqib.razzaq@127.0.0.1");
+```
+
+#### By Domain {#by-domain}
+
+The following code snippet shows you how to filter all emails on the basis of a specific domain.
+
+```csharp
+// Get emails from specific domain
+builder.From.Contains("SpecificHost.com");
+```
+
+#### By Recipient {#by-recipient}
+
+The following code snippet shows you how to filter all emails on the basis of a specific recipient.
+
+```csharp
+// Get emails sent to specific recipient
+builder.To.Contains("recipient");
+```
+
+#### By MessageID {#by-messageid}
+
+The following code snippet shows you how to filter all emails on the basis of MessageID.
+
+```csharp
+// Get email with specific MessageId
+ExchangeQueryBuilder builder1 = new ExchangeQueryBuilder();
+builder1.MessageId.Equals("MessageID");
+```
+
+#### By Mail Delivery Notifications {#by-mail-delivery-notifications}
+
+The following code snippet shows you how to filter all emails on the basis of all mail delivery notifications.
+
+```csharp
+// Get Mail Delivery Notifications
+builder1 = new ExchangeQueryBuilder();
+builder1.ContentClass.Equals(ContentClassType.MDN.ToString());
+```
+
+#### By Message Size {#by-message-size}
+
+```csharp
+builder1 = new ExchangeQueryBuilder();
+builder1.ItemSize.Greater(80000);
+```
+
+### Building Complex Queries {#building-complex-queries}
+
+If different <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquerybuilder/" target="_blank" rel="nofollow noopener noreferrer">MailQueryBuilder</a> properties are set in a separate statement, all the conditions are matched. For example, to get a message in a particular date range and from a specific host, write three statements:
+
+#### Combining Queries with AND {#combining-queries-with-and}
+
+The following code snippet shows you how to Combine Queries with AND.
+
+```csharp
+// Emails from specific host, get all emails that arrived before today and all emails that arrived since 7 days ago
+builder.From.Contains("SpecificHost.com");
+builder.InternalDate.Before(DateTime.Now);
+builder.InternalDate.Since(DateTime.Now.AddDays(-7));
+```
+
+#### Combining Queries with OR {#combining-queries-with-or}
+
+<a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquerybuilder/" target="_blank" rel="nofollow noopener noreferrer">MailQueryBuilder</a> provides the <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquerybuilder/or/#or" target="_blank" rel="nofollow noopener noreferrer">Or()</a> method which takes two <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquery/" target="_blank" rel="nofollow noopener noreferrer">MailQuery</a> instances as parameters. It gets messages that match any of the two conditions specified. The example below filters messages that either have the word "test" in the subject or "noreply@host.com" as the sender. The following code snippet shows you how to combine queries with OR.
+
+```csharp
+builder.Or(builder.Subject.Contains("test"), builder.From.Contains("noreply@host.com"));
+```
+
+#### Case-Sensitive Email Filtering {#case-sensitive-email-filtering}
+
+Emails can be filtered based on case-sensitivity by specifying the IgnoreCase flag in the filter criteria as shown in the following code snippet.
+
+```csharp
+// Query building by means of ExchangeQueryBuilder class
+ExchangeQueryBuilder builder = new ExchangeQueryBuilder();                
+builder.Subject.Contains("Newsletter", true);
+builder.InternalDate.On(DateTime.Now);
+MailQuery query = builder.GetQuery();
+```
+
+### Filter Messages with Paging Support {#filter-messages-with-paging-support}
+
+```csharp
+int itemsPerPage = 5;
+string sGuid = Guid.NewGuid().ToString();
+string str1 = sGuid + " - " + "Query 1";
+string str2 = sGuid + " - " + "Query 2";
+
+MailQueryBuilder queryBuilder1 = new MailQueryBuilder();
+queryBuilder1.Subject.Contains(str1);
+MailQuery query1 = queryBuilder1.GetQuery();
+List<ExchangeMessagePageInfo> pages = new List<ExchangeMessagePageInfo>();
+ExchangeMessagePageInfo pageInfo = client.ListMessagesByPage(client.MailboxInfo.InboxUri, query1, itemsPerPage);
+pages.Add(pageInfo);
+int str1Count = pageInfo.Items.Count;
+while (!pageInfo.LastPage)
+{
+    pageInfo = client.ListMessagesByPage(client.MailboxInfo.InboxUri, query1, itemsPerPage, pageInfo.PageOffset + 1);
+    pages.Add(pageInfo);
+    str1Count += pageInfo.Items.Count;
+}
+```
+
+### Sort Filtered messages in Ascending/Descending Order {#sort-filtered-messages-in-ascendingdescending-order}
+
+Email filtering can be supported with sorting of messages in ascending/descending order. In this case, <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/comparisonfield/orderby/" target="_blank" rel="nofollow noopener noreferrer">OrderBy</a> method is used to specify the order in which the results of an email search are sorted using the MailQueryBuilder class. This method allows you to define sorting criteria for a search query, specifying whether the results should be sorted in ascending or descending order based on a particular property.
+
+The method accepts the ascending parameter, which specifies the sort order for the specified property. If the ascending parameter is true, it means that the search results should be sorted in ascending order. Conversely, if the ascending parameter is false, it means that the search results should be sorted in descending order.
+
+```cs
+MailQueryBuilder builder = new MailQueryBuilder();
+builder.Subject.Contains("Report");
+builder.InternalDate.Since(new DateTime(2020, 1, 1));
+builder.Subject.OrderBy(true); // sort the subject ascending
+builder.InternalDate.OrderBy(false); // sort the date descending
+
+MailQuery query = builder.GetQuery();
+
+// Get list of messages
+ExchangeMessageInfoCollection messages = client.ListMessages(client.MailboxInfo.InboxUri, query, false);
+```
+
+In the above code snippet, the OrderBy method is applied twice, once for the subject and once for the date of the emails. As a result of executing the ListMessages method with the passed request, we will get a list of messages with the subject containing the word "Report" which were received on the specified date or later. At the same time, the results will be sorted by subject in ascending order. This means that the messages will be sorted alphabetically from A to Z, depending on their subject. Also, the results will be sorted by date in descending order. This means that posts will be ordered from newest to oldest.
+
+### Filter Messages Using AQS {#filter-messages-using-aqs}
+
+With Aspose.Email for .NET, users can leverage the powerful capabilities of Advanced Query Syntax (AQS) to filter messages directly from an Exchange mailbox. AQS provides a robust and intuitive means of constructing queries that can precisely target emails based on specific criteria such as date, sender, and subject. For more detailed insights on its itegration into your email filtering processes and comprehensive code samples on implementing message filtering using AQS with Aspose.Email for .NET, please refer to the [Filter Messages With AQS From Exchange Mailbox](/net/email/filter-messages-with-aqs-from-exchange-mailbox/) article.

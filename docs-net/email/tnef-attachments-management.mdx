@@ -1,0 +1,222 @@
+---
+title: "TNEF Attachments Handling in Email Messages"
+sidebar_label: "TNEF Attachments Handling in Email Messages"
+sidebar_key: "net-email-tnef-attachments-management"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/tnef-attachments-management.html"
+source_commit: ""
+source_sha256: "f8c7bce42bce9ed171241c3e3e1b4b09ad0642e0df5bad6cba9c2de52db5d394"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/tnef-attachments-management/"
+source_snapshot_sha256: "093c0cfa647edb74f46db77279d301f0ce3cf94d62260ad333f1eeb6b0d3d4df"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+**TNEF (Transport Neutral Encapsulation Format)** is a proprietary format used by Microsoft Outlook to encapsulate rich content in attachments - most commonly stored as winmail.dat. The Aspose.Email API allows you to read email messages that have TNEF attachments and modify the contents of the attachment. The email can then be saved as a normal email or to the same format, preserving TNEF attachments. This article shows different code samples for working with messages containing TNEF attachments. This article also shows how to create TNEF EML files from Outlook MSG files.
+
+## Read a Message with TNEF Attachment {#read-a-message-with-tnef-attachment}
+
+The following code snippet shows you how to read a message preserving TNEF attachments.
+
+```csharp
+// The path to the File directory.
+string dataDir = RunExamples.GetDataDir_Email();
+
+MsgLoadOptions options = new MsgLoadOptions();
+options.PreserveTnefAttachments = true;
+MailMessage eml = MailMessage.Load(dataDir + "EmbeddedImage1.msg", options);
+foreach (Attachment attachment in eml.Attachments)
+{
+    Console.WriteLine(attachment.Name);
+}
+```
+
+## Read a Message without TNEF Attachment {#read-a-message-without-tnef-attachment}
+
+The following code snippet shows you how to read a message without preserving TNEF attachments. Setting <a href="https://reference.aspose.com/email/net/aspose.email/msgloadoptions/preservetnefattachments/" target="_blank" rel="nofollow noopener noreferrer">PreserveTnefAttachments</a> to *false* is the default behavior: the TNEF container is decoded and its contents are exposed as regular attachments instead of a single winmail.dat file.
+
+```csharp
+// The path to the File directory.
+string dataDir = RunExamples.GetDataDir_Email();
+
+MsgLoadOptions options = new MsgLoadOptions();
+options.PreserveTnefAttachments = false;
+MailMessage eml = MailMessage.Load(dataDir + "EmbeddedImage1.msg", options);
+foreach (Attachment attachment in eml.Attachments)
+{
+    Console.WriteLine(attachment.Name);
+}
+```
+
+## Load and Save TNEF Attachments {#load-and-save-tnef-attachments}
+
+With Aspose.Email for .NET, you can load TNEF attachments directly into a <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiattachment/" target="_blank" rel="nofollow noopener noreferrer">MapiAttachment</a> object using a file path or stream, and then save the object to TNEF format. This enables the creation of winmail.dat files or preservation of Outlook-specific formatting in email workflows.
+
+The API provides the following members in the <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiattachment/" target="_blank" rel="nofollow noopener noreferrer">MapiAttachment</a> class:
+
+**Load TNEF Attachments**
+
+- static MapiAttachment <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiattachment/loadfromtnef/#loadfromtnef_1" target="_blank" rel="nofollow noopener noreferrer">LoadFromTnef(string fileName)</a> - Loads a TNEF attachment from a .dat file.
+
+- static MapiAttachment <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiattachment/loadfromtnef/#loadfromtnef" target="_blank" rel="nofollow noopener noreferrer">LoadFromTnef(Stream stream)</a> - Loads a TNEF attachment from a stream (e.g., MemoryStream or file stream).
+
+**Save TNEF Attachments**
+
+- void <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiattachment/savetotnef/#savetotnef_1" target="_blank" rel="nofollow noopener noreferrer">SaveToTnef(string filename)</a> - Saves a MapiAttachment to a TNEF file.
+
+- void <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiattachment/savetotnef/#savetotnef" target="_blank" rel="nofollow noopener noreferrer">SaveToTnef(Stream stream)</a> - Saves a MapiAttachment to a stream in TNEF format.
+
+The code sample below demonstrates how to extract a winmail.dat attachment from an email message, preserve it, and re-add it as an attachment to the message:
+
+```cs
+// message.eml contains a winmail.dat attachment, but by default, the attachment is not preserved.
+var msg = MapiMessage.Load("message.eml");
+
+// Save the attachment to TNEF format in a stream and load it back
+var ms = new MemoryStream();
+msg.Attachments[0].SaveToTnef(ms);
+
+ms.Position = 0;
+var fromTnefAttachment = MapiAttachment.LoadFromTnef(ms);
+msg.Attachments.Add(fromTnefAttachment);
+
+// The same can be done through a file
+msg.Attachments[0].SaveToTnef("winmail.dat");
+
+fromTnefAttachment = MapiAttachment.LoadFromTnef("winmail.dat");
+msg.Attachments.Add(fromTnefAttachment);
+```
+
+## Update Resources in TNEF Attachment {#update-resources-in-tnef-attachment}
+
+The following code snippet shows you how to update resources in a TNEF attachment and preserve TNEF format.
+
+```csharp
+public static void TestUpdateResources(string dataDir)
+{
+    string fileName = dataDir + "tnefEML1.eml";
+    string imgFileName = dataDir + "Untitled.jpg";
+    string outFileName = dataDir + "UpdateTNEFAttachments_out.eml";
+    MailMessage originalMailMessage = MailMessage.Load(fileName);
+    UpdateResources(originalMailMessage, imgFileName);
+    EmlSaveOptions emlSo = new EmlSaveOptions(MailMessageSaveType.EmlFormat);
+    emlSo.FileCompatibilityMode = FileCompatibilityMode.PreserveTnefAttachments;
+    originalMailMessage.Save(outFileName, emlSo);
+}
+
+private static void UpdateResources(MailMessage msg, string imgFileName)
+{
+    for (int i = 0; i < msg.Attachments.Count; i++)
+    {
+        if ((msg.Attachments[i].ContentType.MediaType == "image/png") || (msg.Attachments[i].ContentType.MediaType == "application/octet-stream" && Path.GetExtension(msg.Attachments[i].ContentType.Name) == ".jpg"))
+        {
+            msg.Attachments[i].ContentStream = new MemoryStream(File.ReadAllBytes(imgFileName));
+        }
+        else if ((msg.Attachments[i].ContentType.MediaType == "message/rfc822") || (msg.Attachments[i].ContentType.MediaType == "application/octet-stream" && Path.GetExtension(msg.Attachments[i].ContentType.Name) == ".msg"))
+        {
+            MemoryStream ms = new MemoryStream();
+            msg.Attachments[i].Save(ms);
+            ms.Position = 0;
+            MailMessage embeddedMessage = MailMessage.Load(ms);
+            UpdateResources(embeddedMessage, imgFileName);
+            MemoryStream msProcessedEmbedded = new MemoryStream();
+            embeddedMessage.Save(msProcessedEmbedded, SaveOptions.DefaultMsgUnicode);
+            msProcessedEmbedded.Position = 0;
+            msg.Attachments[i].ContentStream = msProcessedEmbedded;
+        }
+    }
+
+    foreach (LinkedResource att in msg.LinkedResources)
+    {
+        if (att.ContentType.MediaType == "image/png")
+            att.ContentStream = new MemoryStream(File.ReadAllBytes(imgFileName));
+    }
+}
+```
+
+## Add Attachment to TNEF Message {#add-attachment-to-tnef-message}
+
+The following code snippet shows you how to add new attachments to the main message containing TNEF.
+
+```csharp
+
+string fileName = "MainMessage.eml";
+string attachName = "s.png";
+string outFileName = "test.eml";
+
+MailMessage mailMessage = MailMessage.Load(fileName);
+mailMessage.Attachments.Add(new Attachment(File.OpenRead(attachName), "s.png", "image/png"));
+
+// The TNEF content of the original message is preserved via EmlSaveOptions
+EmlSaveOptions emlSaveOptions = new EmlSaveOptions(MailMessageSaveType.EmlFormat)
+{
+    FileCompatibilityMode = FileCompatibilityMode.PreserveTnefAttachments
+};
+mailMessage.Save(outFileName, emlSaveOptions);
+```
+
+## Creating TNEF EML from MSG {#creating-tnef-eml-from-msg}
+
+Outlook MSGs sometimes contain information such as tables and text styles that may get disturbed if these are converted to EML. Creating TNEF messages from such MSG files allows to retain the formatting and even send such messages via the email clients retaining the formatting. The <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mailconversionoptions/convertastnef/" target="_blank" rel="nofollow noopener noreferrer">MailConversionOptions.ConvertAsTnef</a> property is used to achieve this. The following code snippet shows you how to create TNEF EML from MSG.
+
+```csharp
+MapiMessage mapiMsg = MapiMessage.FromFile(dataDir + "Message.msg");
+
+MailConversionOptions mco = new MailConversionOptions();
+
+mco.ConvertAsTnef = true;
+
+MailMessage message = mapiMsg.ToMailMessage(mco); 
+```
+
+Alternatively, a TNEF EML can be produced by loading the MSG file with the <a href="https://reference.aspose.com/email/net/aspose.email/msgloadoptions/preservetnefattachments/" target="_blank" rel="nofollow noopener noreferrer">PreserveTnefAttachments</a> option of the <a href="https://reference.aspose.com/email/net/aspose.email/msgloadoptions/" target="_blank" rel="nofollow noopener noreferrer">MsgLoadOptions</a> class enabled, and then saving the result as EML.
+
+```csharp
+// Loading the MSG with PreserveTnefAttachments will create the TNEF eml.
+MsgLoadOptions options = new MsgLoadOptions();
+options.PreserveTnefAttachments = true;
+
+MailMessage eml = MailMessage.Load(msgFileName, options);
+eml.Save(emlFileName, SaveOptions.DefaultEml);
+```
+
+:::info
+The `MailMessageLoadOptions` class is obsolete. Use the format-specific descendants of the <a href="https://reference.aspose.com/email/net/aspose.email/loadoptions/" target="_blank" rel="nofollow noopener noreferrer">LoadOptions</a> class instead - <a href="https://reference.aspose.com/email/net/aspose.email/msgloadoptions/" target="_blank" rel="nofollow noopener noreferrer">MsgLoadOptions</a>, <a href="https://reference.aspose.com/email/net/aspose.email/emlloadoptions/" target="_blank" rel="nofollow noopener noreferrer">EmlLoadOptions</a>, and so on.
+:::
+
+## Identify TNEF Format Messages {#identify-tnef-format-messages}
+
+The following code snippet shows you how to detect if a message is TNEF.
+
+```csharp
+MailMessage mail = MailMessage.Load(dataDir + "tnefEml1.eml");
+
+bool isTnef = mail.OriginalIsTnef;
+
+Console.WriteLine("Is input EML originally TNEF? {0}", isTnef.ToString());
+```
+
+## Identify TNEF Format Attachments {#identify-tnef-format-attachments}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email/attachment/istnef/#attachmentistnef-property" target="_blank" rel="nofollow noopener noreferrer">Attachment.IsTnef</a> property allows to detect whether the message attachment is TNEF formatted message.
+
+```cs
+var eml = MailMessage.Load(fileName);
+
+foreach (var attachment in eml.Attachments)
+{
+    Console.WriteLine($"Is Attachment TNEF?: {attachment.IsTnef}");
+}
+```

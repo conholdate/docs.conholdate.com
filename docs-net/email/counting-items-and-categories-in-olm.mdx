@@ -1,0 +1,130 @@
+---
+title: "Counting Items and Working with Categories"
+sidebar_label: "Counting Items and Working with Categories"
+sidebar_key: "net-email-counting-items-and-categories-in-olm"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/counting-items-and-categories-in-olm.html"
+source_commit: ""
+source_sha256: "d26fab60c2fcfb9ca54f28c822c7de1c90a056cfabb72801a6fa8673464746f2"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/counting-items-and-categories-in-olm/"
+source_snapshot_sha256: "5fa6f0e65a510f580f2a39c96f6bb2451739037c20306d73cd983e9c19f634b2"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+Beyond reading individual messages, Aspose.Email for .NET lets you inspect how many items an OLM file or a folder contains and read the Outlook categories - including their colors - that are stored in the file. This article covers both.
+
+## Check Whether a Folder Has Messages {#check-whether-a-folder-has-messages}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmfolder/hasmessages/" target="_blank" rel="nofollow noopener noreferrer">OlmFolder.HasMessages</a> property indicates whether a folder contains any messages, and the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmfolder/messagecount/" target="_blank" rel="nofollow noopener noreferrer">OlmFolder.MessageCount</a> property returns how many.
+
+```cs
+using (var olm = OlmStorage.FromFile(fileName))
+{
+    var folder = olm.GetFolder("Inbox", true);
+
+    if (folder.HasMessages)
+    {
+        Console.WriteLine($"Message count: {folder.MessageCount}");
+    }
+}
+```
+
+## Count Items in Each Folder {#count-items-in-each-folder}
+
+Use the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmfolder/messagecount/" target="_blank" rel="nofollow noopener noreferrer">OlmFolder.MessageCount</a> property to report the number of items in every folder of the file:
+
+```cs
+using (var storage = new OlmStorage("SampleOLM.olm"))
+{
+    PrintMessageCount(storage.FolderHierarchy);
+}
+
+public static void PrintMessageCount(IEnumerable<OlmFolder> folders)
+{
+    foreach (OlmFolder folder in folders)
+    {
+        Console.WriteLine($"Message Count [{folder.Name}]: {folder.MessageCount}");
+
+        PrintMessageCount(folder.SubFolders);
+    }
+}
+```
+
+## Get the Total Number of Items in the Storage {#get-the-total-number-of-items-in-the-storage}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmstorage/" target="_blank" rel="nofollow noopener noreferrer">OlmStorage</a> class has a <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmstorage/gettotalitemscount/" target="_blank" rel="nofollow noopener noreferrer">GetTotalItemsCount()</a> method that returns the total number of message items contained in the whole OLM storage:
+
+```cs
+using (var olm = new OlmStorage("storage.olm"))
+{
+    var count = olm.GetTotalItemsCount();
+    Console.WriteLine($"Total items: {count}");
+}
+```
+
+## Retrieve Outlook Category Colors {#retrieve-outlook-category-colors}
+
+To work with the Outlook item categories stored in an OLM file, Aspose.Email offers:
+
+- the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmitemcategory/" target="_blank" rel="nofollow noopener noreferrer">OlmItemCategory</a> class - represents an Outlook item category, available by its <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmitemcategory/name/" target="_blank" rel="nofollow noopener noreferrer">Name</a> and associated <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmitemcategory/color/" target="_blank" rel="nofollow noopener noreferrer">Color</a>, represented in hexadecimal format;
+- the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmstorage/getcategories/" target="_blank" rel="nofollow noopener noreferrer">GetCategories()</a> method of the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmstorage/" target="_blank" rel="nofollow noopener noreferrer">OlmStorage</a> class - retrieves the list of categories used in the storage.
+
+The following sample lists every category used in the storage along with its color:
+
+```cs
+using (var olm = OlmStorage.FromFile("storage.olm"))
+{
+    var categories = olm.GetCategories();
+
+    foreach (var category in categories)
+    {
+        Console.WriteLine($"Category name: {category.Name}");
+
+        // Color is represented as a hexadecimal value: #rrggbb
+        Console.WriteLine($"Category color: {category.Color}");
+    }
+}
+```
+
+### Get the Category Color of a Message {#get-the-category-color-of-a-message}
+
+You can match the categories assigned to a particular message against the storage's category list to resolve each category's color. The example below reads the categories of every message in a folder and prints the color of each one:
+
+```cs
+using (var olm = OlmStorage.FromFile("storage.olm"))
+{
+    var categories = olm.GetCategories();
+    var folder = olm.GetFolder("Inbox", true);
+
+    foreach (var msg in folder.EnumerateMapiMessages())
+    {
+        if (msg.Categories != null)
+        {
+            foreach (var msgCategory in msg.Categories)
+            {
+                Console.WriteLine($"Category name: {msgCategory}");
+
+                var category = categories
+                    .FirstOrDefault(c => c.Name.Equals(msgCategory, StringComparison.OrdinalIgnoreCase));
+
+                Console.WriteLine(category != null
+                    ? $"Category color: {category.Color}"
+                    : "Category color: Not found");
+            }
+        }
+    }
+}
+```

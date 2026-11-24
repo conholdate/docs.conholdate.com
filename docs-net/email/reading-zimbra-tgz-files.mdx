@@ -1,0 +1,134 @@
+---
+title: "Reading Zimbra TGZ Files"
+sidebar_label: "Reading Zimbra TGZ Files"
+sidebar_key: "net-email-reading-zimbra-tgz-files"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/reading-zimbra-tgz-files.html"
+source_commit: ""
+source_sha256: "74593e3570e5045ac1b94509b30d9755c5b9cfc1872f7bcbce390ad209825c58"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/reading-zimbra-tgz-files/"
+source_snapshot_sha256: "c9c28d48124af7936cdc843721fddc5e22b02d87a0346452e3f2ea25450eab32"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+Aspose.Email for .NET reads a Zimbra TGZ backup with the <a href="https://reference.aspose.com/email/net/aspose.email.storage.zimbra/tgzreader/" target="_blank" rel="nofollow noopener noreferrer">TgzReader</a> class. The reader streams through the archive one item at a time, so it can process very large mailboxes without loading the whole backup into memory. This article shows how to open a TGZ file from a path or a stream, iterate over its items, read the current folder and message, and get the total number of items.
+
+## Open a TGZ File {#open-a-tgz-file}
+
+A TGZ file can be opened by passing the full file name to the <a href="https://reference.aspose.com/email/net/aspose.email.storage.zimbra/tgzreader/" target="_blank" rel="nofollow noopener noreferrer">TgzReader</a> constructor. Because `TgzReader` implements `IDisposable`, wrap it in a `using` statement so that the underlying file handle is released when you are done.
+
+```cs
+var fileName = "mailbox.tgz";
+using (var reader = new TgzReader(fileName))
+{
+    // work with the backup
+}
+```
+
+## Open a TGZ File from a Stream {#open-a-tgz-file-from-a-stream}
+
+When the TGZ data does not come from a local path - for example, it is received from a database, a network resource, or cloud storage - you can open it directly from a `Stream` with the <a href="https://reference.aspose.com/email/net/aspose.email.storage.zimbra/tgzreader/#constructors" target="_blank" rel="nofollow noopener noreferrer">TgzReader(Stream)</a> constructor.
+
+```cs
+using (var stream = File.OpenRead("mailbox.tgz"))
+using (var reader = new TgzReader(stream))
+{
+    // work with the backup
+}
+```
+
+:::info
+Keep the source stream open for as long as you read from the reader. Disposing the stream before you finish iterating over the items will cause read errors.
+:::
+
+## Iterate Over the Items {#iterate-over-the-items}
+
+When a `TgzReader` is created, it is positioned at the first item in the archive. The <a href="https://reference.aspose.com/email/net/aspose.email.storage.zimbra/tgzreader/currentdirectory/" target="_blank" rel="nofollow noopener noreferrer">CurrentDirectory</a> property returns the folder of the current item, and the <a href="https://reference.aspose.com/email/net/aspose.email.storage.zimbra/tgzreader/currentmessage/" target="_blank" rel="nofollow noopener noreferrer">CurrentMessage</a> property returns the current message as a <a href="https://reference.aspose.com/email/net/aspose.email/mailmessage/" target="_blank" rel="nofollow noopener noreferrer">MailMessage</a>. The <a href="https://reference.aspose.com/email/net/aspose.email.storage.zimbra/tgzreader/readnextmessage/" target="_blank" rel="nofollow noopener noreferrer">ReadNextMessage</a> method advances the reader to the next item and returns `true` while there are more items to read, and `false` once the end of the archive is reached.
+
+Because the reader already points at the first item, use a `do...while` loop so that the first item is processed before the reader is advanced:
+
+```cs
+using (var reader = new TgzReader("mailbox.tgz"))
+{
+    do
+    {
+        Console.WriteLine($"Folder: {reader.CurrentDirectory}");
+
+        var message = reader.CurrentMessage;
+        if (message != null)
+        {
+            Console.WriteLine($"Subject: {message.Subject}");
+        }
+    }
+    while (reader.ReadNextMessage());
+}
+```
+
+## Read Message Properties {#read-message-properties}
+
+<a href="https://reference.aspose.com/email/net/aspose.email.storage.zimbra/tgzreader/currentmessage/" target="_blank" rel="nofollow noopener noreferrer">CurrentMessage</a> is a full <a href="https://reference.aspose.com/email/net/aspose.email/mailmessage/" target="_blank" rel="nofollow noopener noreferrer">MailMessage</a> object, so all of the standard message properties - subject, sender, recipients, date, body, and attachments - are available while you iterate.
+
+```cs
+using (var reader = new TgzReader("mailbox.tgz"))
+{
+    do
+    {
+        var message = reader.CurrentMessage;
+        if (message == null)
+        {
+            continue;
+        }
+
+        Console.WriteLine($"Folder:  {reader.CurrentDirectory}");
+        Console.WriteLine($"Subject: {message.Subject}");
+        Console.WriteLine($"From:    {message.From}");
+        Console.WriteLine($"To:      {message.To}");
+        Console.WriteLine($"Date:    {message.Date}");
+        Console.WriteLine($"Attachments: {message.Attachments.Count}");
+        Console.WriteLine(new string('-', 30));
+    }
+    while (reader.ReadNextMessage());
+}
+```
+
+## Count the Items in a Backup {#count-the-items-in-a-backup}
+
+To find out how many message items a backup contains - for example, to show progress while processing - call the <a href="https://reference.aspose.com/email/net/aspose.email.storage.zimbra/tgzreader/gettotalitemscount/" target="_blank" rel="nofollow noopener noreferrer">GetTotalItemsCount</a> method.
+
+```cs
+using (var reader = new TgzReader("mailbox.tgz"))
+{
+    int totalItems = reader.GetTotalItemsCount();
+    Console.WriteLine($"The backup contains {totalItems} items.");
+}
+```
+
+You can combine the count with the iteration to report progress:
+
+```cs
+using (var reader = new TgzReader("mailbox.tgz"))
+{
+    int total = reader.GetTotalItemsCount();
+    int processed = 0;
+
+    do
+    {
+        processed++;
+        Console.WriteLine($"Processing item {processed} of {total}: {reader.CurrentMessage?.Subject}");
+    }
+    while (reader.ReadNextMessage());
+}
+```

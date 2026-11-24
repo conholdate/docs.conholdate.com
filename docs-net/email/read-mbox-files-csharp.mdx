@@ -1,0 +1,162 @@
+---
+title: "Reading MBOX Files"
+sidebar_label: "Reading MBOX Files"
+sidebar_key: "net-email-read-mbox-files-csharp"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/read-mbox-files-csharp.html"
+source_commit: ""
+source_sha256: "5006ed5876bcca3f8e023cc964e3d5843583f3d5ec271054c96acbe0288a57b8"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/read-mbox-files-csharp/"
+source_snapshot_sha256: "d4a04b295371d27f3d79df40266f8e98270760e1fe7338fc19a15d5b5c94ed32"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Aspose.Email Reading Capabilities {#asposeemail-reading-capabilities}
+
+<a href="https://www.thunderbird.net/en-US/" target="_blank" rel="nofollow noopener noreferrer">Mozilla Thunderbird</a> is an open-source, cross-platform email client, developed by the Mozilla Foundation. It stores emails in its own file structure, managing message indexes and subfolders through proprietary file formats. Thunderbird creates one .mbox file for each email folder (e.g., Inbox, Sent, Trash), and stores these files in the user's profile directory. Each file contains all messages from that folder in a concatenated form.
+
+Aspose.Email for .NET provides APIs for reading messages from Thunderbird .mbox files using the <a href="https://reference.aspose.com/email/net/aspose.email.storage.mbox/mboxrdstoragereader/" target="_blank" rel="nofollow noopener noreferrer">MboxrdStorageReader</a> class which allows developers to:
+
+- Open and read messages sequentially, one by one
+- Retrieve metadata like Subject, From, To, Date, etc., without loading full content
+- Extract individual messages using unique identifiers (EntryId)
+- Preserve encoding, TNEF attachments, and formatting
+- Read files asynchronously for better performance on large archives
+
+## Read MBOX Files Synchronously {#read-mbox-files-synchronously}
+
+Aspose.Email lets you read messages from a Mozilla Thunderbird mail storage file. This article shows how to read the messages from Thunderbird email storage:
+
+1. Open the Thunderbird storage file in *FileStream*.
+2. Create an instance of the <a href="https://reference.aspose.com/email/net/aspose.email.storage.mbox/mboxrdstoragereader/" target="_blank" rel="nofollow noopener noreferrer">MboxrdStorageReader</a> class and pass the above stream to the constructor.
+3. Call <a href="https://reference.aspose.com/email/net/aspose.email.storage.mbox/mboxrdstoragereader/readnextmessage/#readnextmessage/" target="_blank" rel="nofollow noopener noreferrer">ReadNextMessage()</a> to get the first message.
+4. Use the same <a href="https://reference.aspose.com/email/net/aspose.email.storage.mbox/mboxrdstoragereader/readnextmessage/#readnextmessage/" target="_blank" rel="nofollow noopener noreferrer">ReadNextMessage()</a> in a while loop to read all the messages.
+5. Close all the streams.
+
+The following code snippet shows you how to read all the messages from a Thunderbird mail storage.
+
+```cs
+// The path to the File directory.
+var dataDir = RunExamples.GetDataDir_Thunderbird();
+
+// Open the storage file with FileStream
+var stream = new FileStream(dataDir + "ExampleMbox.mbox", FileMode.Open, FileAccess.Read);
+// Create an instance of the MboxrdStorageReader class and pass the stream
+var reader = new MboxrdStorageReader(stream, new MboxLoadOptions());
+// Start reading messages
+var message = reader.ReadNextMessage();
+
+// Read all messages in a loop
+while (message != null)
+{
+    // Manipulate message - show contents
+    Console.WriteLine("Subject: " + message.Subject);
+    // Save this message in EML or MSG format
+    message.Save(message.Subject + ".eml", SaveOptions.DefaultEml);
+    message.Save(message.Subject + ".msg", SaveOptions.DefaultMsgUnicode);
+
+    // Get the next message
+    message = reader.ReadNextMessage();
+}
+
+// Close the streams
+reader.Dispose();
+stream.Close();
+```
+
+## Read MBOX Files Asynchronously {#read-mbox-files-asynchronously}
+
+To enhance performance and responsiveness when processing large MBOX files, Aspose.Email for .NET provides asynchronous MBOX reading through the <a href="https://reference.aspose.com/email/net/aspose.email.storage.mbox/mboxstoragereader/#methods" target="_blank" rel="nofollow noopener noreferrer">CreateReaderAsync</a> method. This feature is especially useful in applications that handle large email archives or run I/O-bound operations in background threads or web services. The following code sample demonstrates how to read email messages from an MBOX file asynchronously using an Aspose.Email storage reader:
+
+```cs
+string mboxFilePath = "emails.mbox";
+
+// Create a reader for the MBOX file asynchronously
+using (var reader = await MboxStorageReader.CreateReaderAsync(mboxFilePath, CancellationToken.None))
+{
+    Console.WriteLine("MBOX reader initialized.");
+
+    // Read messages from the MBOX file
+    while (reader.ReadNextMessage() is var message && message != null)
+    {
+        Console.WriteLine($"Subject: {message.Subject}");
+    }
+}
+```
+
+## Read Email Messages in Batches with Pagination Support {#read-email-messages-in-batches-with-pagination-support}
+
+Get paginated access to messages stored in mailbox files. This feature enables developers to process large email archives more efficiently by retrieving messages in smaller portions - improving performance and reducing memory load. Use the following methods of the <a href="https://reference.aspose.com/email/net/aspose.email.storage.mbox/mboxstoragereader/#mboxstoragereader-class" target="_blank" rel="nofollow noopener noreferrer">MboxStorageReader</a> class:
+
+- <a href="https://reference.aspose.com/email/net/aspose.email.storage.mbox/mboxstoragereader/enumeratemessages/#enumeratemessages_5" target="_blank" rel="nofollow noopener noreferrer">EnumerateMessages(int startIndex, int count)</a> - Returns an enumerable collection of MailMessage instances, starting from the specified index and limited by the given count.
+
+- <a href="https://reference.aspose.com/email/net/aspose.email.storage.mbox/mboxstoragereader/enumeratemessageinfo/#enumeratemessageinfo_2" target="_blank" rel="nofollow noopener noreferrer">EnumerateMessageInfo(int startIndex, int count)</a> - Returns an enumerable collection of MboxMessageInfo objects with metadata only, also paged by index and count.
+
+The code sample below demonstrates how to read a specific range of messages from a mail archive by defining a starting index and batch size. In the example, the method retrieves 10 messages starting from index 0.
+
+```cs
+using Aspose.Email.Storage.Mbox;
+using Aspose.Email;
+
+var reader = MboxStorageReader.CreateReader("input.mbox", new MboxLoadOptions());
+int startIndex = 0;
+int count = 10; // Retrieve messages in batches of 10
+
+foreach (var message in reader.EnumerateMessages(startIndex, count))
+{
+    Console.WriteLine("Subject: " + message.Subject);
+}
+```
+
+## Set Preferred Text Encoding when Loading MBOX Files for Reading {#set-preferred-text-encoding-when-loading-mbox-files-for-reading}
+
+Encoding option is available for <a href="https://reference.aspose.com/email/net/aspose.email.storage.mbox/mboxrdstoragereader/" target="_blank" rel="nofollow noopener noreferrer">MboxrdStorageReader</a> class. This provides additional options for loading the mbox file and ensures that messages with the encoded content will be correctly read and processed. The following code snippet shows how you can set text encoding that satisfies your needs:
+
+```cs
+var reader = new MboxrdStorageReader("sample.mbox", new MboxLoadOptions() { PreferredTextEncoding = Encoding.UTF8});
+var message = reader.ReadNextMessage();
+```
+
+## Get Total Number of Messages from MBOX Files {#get-total-number-of-messages-from-mbox-files}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.storage.mbox/mboxrdstoragereader/" target="_blank" rel="nofollow noopener noreferrer">MboxrdStorageReader</a> class provides the capability to read the number of items available in an MBox file. This can be used to develop applications for showing the progress of activity while processing such a file.
+
+```cs
+// The path to the File directory.
+var dataDir = RunExamples.GetDataDir_Thunderbird();
+
+using (var stream = new FileStream(dataDir + "ExampleMbox.mbox", FileMode.Open, FileAccess.Read))
+using (var reader = new MboxrdStorageReader(stream, new MboxLoadOptions()))
+{
+    Console.WriteLine("Total number of messages in Mbox file: " + reader.GetTotalItemsCount());
+}
+```
+
+## Get Current Message Size {#get-current-message-size}
+
+```cs
+using (var stream = new FileStream(dataDir + "ExampleMbox.mbox", FileMode.Open, FileAccess.Read))
+using (var reader = new MboxrdStorageReader(stream, new MboxLoadOptions()))
+{
+    MailMessage msg;
+    while ((msg = reader.ReadNextMessage()) != null)
+    {
+        long currentDataSize = reader.CurrentDataSize;
+
+        msg.Dispose();
+    }
+}
+```

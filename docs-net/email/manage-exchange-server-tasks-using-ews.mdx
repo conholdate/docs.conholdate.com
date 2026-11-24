@@ -1,0 +1,205 @@
+---
+title: "Create, Manage, and Delete Exchange Server Tasks with EWS"
+sidebar_label: "Create, Manage, and Delete Exchange Server Tasks with EWS"
+sidebar_key: "net-email-manage-exchange-server-tasks-using-ews"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/manage-exchange-server-tasks-using-ews.html"
+source_commit: ""
+source_sha256: "e61392df8d070e3a559c2b8878ea55f73e0695d8666ea4ed769c810fe4270403"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/manage-exchange-server-tasks-using-ews/"
+source_snapshot_sha256: "4db3b30f4462f1f4622171425a3cd7d91c2a9552a0746669e80c67676ede6af9"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+Aspose.Email supports processing tasks on Exchange using the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/exchangetask/" target="_blank" rel="nofollow noopener noreferrer">ExchangeTask</a> class. Different properties exposed by <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/exchangetask/" target="_blank" rel="nofollow noopener noreferrer">ExchangeTask</a>, like <a href="https://reference.aspose.com/email/net/aspose.email.calendar/task/subject/" target="_blank" rel="nofollow noopener noreferrer">Subject</a>, <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/exchangetask/status/" target="_blank" rel="nofollow noopener noreferrer">Status</a>, <a href="https://reference.aspose.com/email/net/aspose.email.calendar/task/duedate/" target="_blank" rel="nofollow noopener noreferrer">DueDate</a>, and <a href="https://reference.aspose.com/email/net/aspose.email.calendar/task/priority/" target="_blank" rel="nofollow noopener noreferrer">Priority</a>, can be used to configure the task on Exchange. The <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/ewsclient/" target="_blank" rel="nofollow noopener noreferrer">EWSClient</a> class exposes functions like <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/createtask/#createtask/" target="_blank" rel="nofollow noopener noreferrer">CreateTask</a>, <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/updatetask/#updatetask/" target="_blank" rel="nofollow noopener noreferrer">UpdateTask</a>, and <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/deleteitem/" target="_blank" rel="nofollow noopener noreferrer">DeleteTask</a> which are used to process tasks on Exchange. This article shows how to:
+
+- Create a new task.
+- Set a task's timezone.
+- Update a task.
+- Delete a task.
+- Send Task Request
+- Save Task to Disc
+
+## Create Tasks {#create-tasks}
+
+The following code snippet shows you how to create a new task.
+
+```csharp
+// Create instance of EWSClient class by giving credentials
+IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+
+// Create Exchange task object
+ExchangeTask task = new ExchangeTask();
+
+// Set task subject and status to In progress
+task.Subject = "New-Test";
+task.Status = ExchangeTaskStatus.InProgress;
+client.CreateTask(client.MailboxInfo.TasksUri, task);
+```
+
+### Specify Timezone {#specify-timezone}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a> interface and <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/exchangetask/" target="_blank" rel="nofollow noopener noreferrer">ExchangeTask</a> provide the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/timezoneid/" target="_blank" rel="nofollow noopener noreferrer">TimeZoneId</a> property for setting timezone information when creating a task. The following code snippet shows you how to specify Timezone.
+
+```csharp
+client.TimezoneId = "Central Europe Standard Time";
+```
+
+## Update Tasks {#update-tasks}
+
+The following code snippets show how to update a task on an Exchange server.
+
+```csharp
+// Create and initialize credentials
+var credentials = new NetworkCredential("username", "12345");
+
+// Create instance of ExchangeClient class by giving credentials
+IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+
+// Get all tasks info collection from exchange
+ExchangeMessageInfoCollection tasks = client.ListMessages(client.MailboxInfo.TasksUri);
+
+// Parse all the tasks info in the list
+foreach (ExchangeMessageInfo info in tasks)
+{
+    // Fetch task from exchange using current task info
+    ExchangeTask task = client.FetchTask(info.UniqueUri);
+
+    // Update the task status to NotStarted
+    task.Status = ExchangeTaskStatus.NotStarted;
+
+    // Set the task due date
+    task.DueDate = new DateTime(2013, 2, 26);
+
+    // Set task priority
+    task.Priority = MailPriority.Low;
+
+    // Update task on exchange
+    client.UpdateTask(task);
+}
+```
+
+## Delete Tasks {#delete-tasks}
+
+The following code snippet shows you how to delete a task on an Exchange server.
+
+```csharp
+// Create instance of ExchangeClient class by giving credentials
+IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+
+// Get all tasks info collection from exchange
+ExchangeMessageInfoCollection tasks = client.ListMessages(client.MailboxInfo.TasksUri);
+
+// Parse all the tasks info in the list
+foreach (ExchangeMessageInfo info in tasks)
+{
+    // Fetch task from exchange using current task info
+    ExchangeTask task = client.FetchTask(info.UniqueUri);
+
+    // Check if the current task fulfills the search criteria
+    if (task.Subject.Equals("test"))
+    {
+        //Delete task from exchange
+        client.DeleteItem(task.UniqueUri, DeletionOptions.DeletePermanently);
+    }
+}
+```
+
+## Send Task Requests {#send-task-requests}
+
+Aspose.Email Exchange service provides the capability to send task requests similar to Outlook. The following code snippet shows you how to load a task request message from the disc and send it using the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a>.
+
+```csharp
+string dataDir = RunExamples.GetDataDir_Exchange();
+// Create instance of ExchangeClient class by giving credentials
+IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+
+MsgLoadOptions options = new MsgLoadOptions();
+options.PreserveTnefAttachments = true;
+
+// load task from .msg file
+MailMessage eml = MailMessage.Load(dataDir + "task.msg", options);
+eml.From = "firstname.lastname@domain.com";
+eml.To.Clear();
+eml.To.Add(new MailAddress("firstname.lastname@domain.com"));
+client.Send(eml);
+```
+
+## Save Tasks to Disc {#save-tasks-to-disc}
+
+Aspose.Email also allows saving Exchange Tasks to disc in Outlook MSG format. The following code snippet shows you how to save a task to disc.
+
+```csharp
+ExchangeTask task = new ExchangeTask();
+task.Subject = "TASK-ID - " + Guid.NewGuid();
+task.Status = ExchangeTaskStatus.InProgress;
+task.StartDate = DateTime.Now;
+task.DueDate = task.StartDate.AddDays(3);
+task.Save(dstEmail);
+```
+
+## List Tasks {#list-tasks}
+
+<a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a> provides the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/listtasks/#listtasks/" target="_blank" rel="nofollow noopener noreferrer">ListTasks</a> method that can be used to fetch tasks from an Exchange Web Service. It has several overloads that can be used to retrieve the list of tasks from a specific folder or using some search criteria. The below code sample illustrates getting all or specific tasks from the Tasks folder.
+
+```csharp
+// Set mailboxURI, Username, password, domain information
+string mailboxUri = "https://ex2010/ews/exchange.asmx";
+string username = "test.exchange";
+string password = "pwd";
+string domain = "ex2010.local";
+NetworkCredential credentials = new NetworkCredential(username, password, domain);
+IEWSClient client = EWSClient.GetEWSClient(mailboxUri, credentials);
+
+//Listing Tasks from Server
+client.TimezoneId = "Central Europe Standard Time";
+TaskCollection taskCollection = client.ListTasks(client.MailboxInfo.TasksUri);
+
+//print retrieved tasks' details
+foreach (ExchangeTask task in taskCollection)
+{
+    Console.WriteLine(client.TimezoneId);
+    Console.WriteLine(task.Subject);
+    Console.WriteLine(task.StartDate);
+    Console.WriteLine(task.DueDate);
+}
+
+//Listing Tasks from server based on Query - Completed and In-Progress
+ExchangeQueryBuilder builder = new ExchangeQueryBuilder();
+ExchangeTaskStatus[] selectedStatuses = new ExchangeTaskStatus[]
+{
+    ExchangeTaskStatus.Completed,
+    ExchangeTaskStatus.InProgress
+};
+builder.TaskStatus.In(selectedStatuses);
+
+MailQuery query = builder.GetQuery();
+
+taskCollection = client.ListTasks(client.MailboxInfo.TasksUri, query);
+
+//print retrieved tasks' details
+foreach (ExchangeTask task in taskCollection)
+{
+    Console.WriteLine(client.TimezoneId);
+    Console.WriteLine(task.Subject);
+    Console.WriteLine(task.StartDate);
+    Console.WriteLine(task.DueDate);
+}
+```
+
+## Filter Tasks {#filter-tasks}
+
+Aspose.Email provides the capability to retrieve specific tasks from the server instead of retrieving all tasks from the server. The API can be used to retrieve tasks by task status such as Completed, Deferred, In Progress, Not started or Waiting on others. The <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange/exchangequerybuilder/" target="_blank" rel="nofollow noopener noreferrer">ExchangeQueryBuilder</a> class can be used to specify the desired criterion utilizing the Status property. It also allows specifying multiple conditions for retrieving desired tasks from Exchange Server. This is demonstrated by the following code sample.

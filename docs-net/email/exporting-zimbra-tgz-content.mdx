@@ -1,0 +1,112 @@
+---
+title: "Exporting and Extracting Zimbra TGZ Content"
+sidebar_label: "Exporting and Extracting Zimbra TGZ Content"
+sidebar_key: "net-email-exporting-zimbra-tgz-content"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/exporting-zimbra-tgz-content.html"
+source_commit: ""
+source_sha256: "fb787d50e66c877904069211ea979383fe526af8b93c307b4a9d5580dbe283dd"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/exporting-zimbra-tgz-content/"
+source_snapshot_sha256: "328295462e6ae9a5b542705ed951fd9db0001fd80ca8a2ea52a5d0859c4f6d25"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+Once you can [read a Zimbra TGZ backup](/net/email/reading-zimbra-tgz-files/), the next step is usually to get its content out of the archive - either by exporting the entire mailbox to disk in one call, or by extracting selected messages while you iterate. This article covers both approaches with the <a href="https://reference.aspose.com/email/net/aspose.email.storage.zimbra/tgzreader/" target="_blank" rel="nofollow noopener noreferrer">TgzReader</a> class.
+
+## Export the Whole Mailbox to Disk {#export-the-whole-mailbox-to-disk}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.storage.zimbra/tgzreader/exportto/" target="_blank" rel="nofollow noopener noreferrer">ExportTo</a> method saves every message in the backup, together with its folder structure, under the path you provide. The reader recreates the Zimbra folder hierarchy as a tree of directories on disk and writes each message into the directory that matches its original folder.
+
+```cs
+using (var reader = new TgzReader("mailbox.tgz"))
+{
+    // recreate the mailbox structure under the given folder
+    reader.ExportTo(@"C:\Export\Mailbox");
+}
+```
+
+:::info
+Make sure the target directory exists and that your application has write permission to it before calling `ExportTo`.
+:::
+
+## Export the Whole Mailbox Asynchronously {#export-the-whole-mailbox-asynchronously}
+
+For large backups, use the <a href="https://reference.aspose.com/email/net/aspose.email.storage.zimbra/tgzreader/exporttoasync/" target="_blank" rel="nofollow noopener noreferrer">ExportToAsync</a> method to export the mailbox without blocking the calling thread. The method returns a `Task` and accepts a `CancellationToken` so the operation can be cancelled.
+
+```cs
+using (var reader = new TgzReader("mailbox.tgz"))
+{
+    using (var cts = new CancellationTokenSource())
+    {
+        await reader.ExportToAsync(@"C:\Export\Mailbox", cts.Token);
+    }
+}
+```
+
+## Save Selected Messages {#save-selected-messages}
+
+When you only need some of the messages - for example, the contents of a single folder, or messages that match a condition - iterate over the backup and save the <a href="https://reference.aspose.com/email/net/aspose.email.storage.zimbra/tgzreader/currentmessage/" target="_blank" rel="nofollow noopener noreferrer">CurrentMessage</a> yourself. Because `CurrentMessage` is a <a href="https://reference.aspose.com/email/net/aspose.email/mailmessage/" target="_blank" rel="nofollow noopener noreferrer">MailMessage</a>, you can save it in any supported format, such as EML or MSG.
+
+The example below saves only the messages from the `Inbox` folder in EML format:
+
+```cs
+using (var reader = new TgzReader("mailbox.tgz"))
+{
+    int index = 0;
+
+    do
+    {
+        var message = reader.CurrentMessage;
+        if (message == null)
+        {
+            continue;
+        }
+
+        if (reader.CurrentDirectory.StartsWith("Inbox", StringComparison.OrdinalIgnoreCase))
+        {
+            message.Save($@"C:\Export\Inbox\message_{index++}.eml", SaveOptions.DefaultEml);
+        }
+    }
+    while (reader.ReadNextMessage());
+}
+```
+
+To save messages in Outlook MSG format instead, use the corresponding <a href="https://reference.aspose.com/email/net/aspose.email/saveoptions/" target="_blank" rel="nofollow noopener noreferrer">SaveOptions</a>:
+
+```cs
+message.Save($@"C:\Export\Inbox\message_{index++}.msg", SaveOptions.DefaultMsgUnicode);
+```
+
+## Filter Messages While Extracting {#filter-messages-while-extracting}
+
+Since each item is exposed as a full `MailMessage`, you can apply any condition on its properties before saving. The following example extracts only the messages that have attachments:
+
+```cs
+using (var reader = new TgzReader("mailbox.tgz"))
+{
+    int index = 0;
+
+    do
+    {
+        var message = reader.CurrentMessage;
+        if (message != null && message.Attachments.Count > 0)
+        {
+            message.Save($@"C:\Export\WithAttachments\message_{index++}.eml", SaveOptions.DefaultEml);
+        }
+    }
+    while (reader.ReadNextMessage());
+}
+```

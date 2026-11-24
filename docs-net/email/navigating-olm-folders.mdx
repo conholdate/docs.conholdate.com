@@ -1,0 +1,116 @@
+---
+title: "Navigating OLM Folders"
+sidebar_label: "Navigating OLM Folders"
+sidebar_key: "net-email-navigating-olm-folders"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/navigating-olm-folders.html"
+source_commit: ""
+source_sha256: "2b42f9edf1789d898620986fd7cf1a7a1274510d82698ff2a322b460282763ae"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/navigating-olm-folders/"
+source_snapshot_sha256: "622655a29680c6cde2e2760f652d909c8898f152c411fbb82c59fcb7b40a37b1"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+An OLM file organizes its data into a tree of folders, each represented by an <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmfolder/" target="_blank" rel="nofollow noopener noreferrer">OlmFolder</a> object. This article shows how to enumerate the folder hierarchy, retrieve a specific folder by name, navigate sub-folders, and read folder paths.
+
+## Retrieve the Folder Hierarchy {#retrieve-the-folder-hierarchy}
+
+Once a file is open, access its directory structure through the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmstorage/folderhierarchy/" target="_blank" rel="nofollow noopener noreferrer">FolderHierarchy</a> property. This property returns a list of <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmfolder/" target="_blank" rel="nofollow noopener noreferrer">OlmFolder</a> objects, each representing a top-level directory in the OLM file. To explore deeper, read the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmfolder/subfolders/" target="_blank" rel="nofollow noopener noreferrer">SubFolders</a> property of each folder, which returns its sub-directories. Using these two members you can walk the entire hierarchy.
+
+The example below prints all folders in hierarchical order:
+
+```cs
+using (var olm = new OlmStorage(fileName))
+{
+    PrintAllFolders(olm.FolderHierarchy, string.Empty);
+}
+
+private void PrintAllFolders(IEnumerable<OlmFolder> folderHierarchy, string indent)
+{
+    foreach (var folder in folderHierarchy)
+    {
+        Console.WriteLine($"{indent}{folder.Name}");
+        PrintAllFolders(folder.SubFolders, indent + "-");
+    }
+}
+```
+
+### FolderHierarchy and the FromFile Method {#folderhierarchy-and-the-fromfile-method}
+
+The way you open the file affects how `FolderHierarchy` behaves:
+
+- When you open the file with the constructor, the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmstorage/folderhierarchy/" target="_blank" rel="nofollow noopener noreferrer">FolderHierarchy</a> property is initialized automatically.
+- When you open the file with the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmstorage/fromfile/" target="_blank" rel="nofollow noopener noreferrer">FromFile</a> method, `FolderHierarchy` is **not** initialized by default and returns `null`. In this case, call the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmstorage/getfolders/" target="_blank" rel="nofollow noopener noreferrer">GetFolders</a> method explicitly to initialize the hierarchy and retrieve the list of directories:
+
+```cs
+using (var olm = OlmStorage.FromFile(fileName))
+{
+    var folders = olm.GetFolders();
+}
+```
+
+## Get a Folder by Name {#get-a-folder-by-name}
+
+To retrieve a single folder by name, call the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmstorage/getfolder/" target="_blank" rel="nofollow noopener noreferrer">GetFolder</a> method. Pass the folder name as the first argument and a boolean as the second argument that indicates whether case should be ignored during the search.
+
+```cs
+using (var olm = OlmStorage.FromFile(fileName))
+{
+    // get the Inbox folder by name, ignoring case
+    OlmFolder folder = olm.GetFolder("Inbox", true);
+}
+```
+
+## Get a Sub-folder by Name {#get-a-sub-folder-by-name}
+
+Each <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmfolder/" target="_blank" rel="nofollow noopener noreferrer">OlmFolder</a> also lets you locate a child folder directly with the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmfolder/getsubfolder/" target="_blank" rel="nofollow noopener noreferrer">GetSubFolder</a> method. Pass the sub-folder name and whether case should be ignored. This is useful when you already hold a parent folder and want to drill down without re-scanning the whole hierarchy.
+
+```cs
+using (var olm = OlmStorage.FromFile(fileName))
+{
+    OlmFolder inbox = olm.GetFolder("Inbox", true);
+
+    // get a sub-folder of Inbox by name
+    OlmFolder archive = inbox.GetSubFolder("Archive", true);
+
+    if (archive != null)
+    {
+        Console.WriteLine($"Found sub-folder: {archive.Name}");
+    }
+}
+```
+
+## Retrieve Folder Paths {#retrieve-folder-paths}
+
+You can read the full path of any folder through the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmfolder/path/" target="_blank" rel="nofollow noopener noreferrer">OlmFolder.Path</a> property. The following snippet prints the path of every folder in the file:
+
+```cs
+using (var storage = new OlmStorage("SampleOLM.olm"))
+{
+    PrintPath(storage.FolderHierarchy);
+}
+
+public static void PrintPath(IEnumerable<OlmFolder> folders)
+{
+    foreach (OlmFolder folder in folders)
+    {
+        // print the current folder path
+        Console.WriteLine(folder.Path);
+
+        PrintPath(folder.SubFolders);
+    }
+}
+```

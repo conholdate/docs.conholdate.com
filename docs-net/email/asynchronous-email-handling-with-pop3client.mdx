@@ -1,0 +1,115 @@
+---
+title: "Asynchronous Email Handling with POP3 Client"
+sidebar_label: "Asynchronous Email Handling with POP3 Client"
+sidebar_key: "net-email-asynchronous-email-handling-with-pop3client"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/asynchronous-email-handling-with-pop3client.html"
+source_commit: ""
+source_sha256: "25c48a26a3a36a4386d09c04725addce0d073ac18a4c2b2e002dd4065a443a90"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/asynchronous-email-handling-with-pop3client/"
+source_snapshot_sha256: "c0513b4137cc77f295f22b83d1b8f0829824018bcbac951b037ff9f45d32a7c6"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Asynchronous Operations with Pop3Client {#asynchronous-operations-with-pop3client}
+
+Working with messages can also be performed asynchronously using the Aspose.Email <a href="https://reference.aspose.com/email/net/aspose.email.clients.pop3/pop3client/" target="_blank" rel="nofollow noopener noreferrer">Pop3Client</a>. This article shows how to retrieve messages from a mailbox asynchronously. It also shows how to list messages by providing search criteria using <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquery/" target="_blank" rel="nofollow noopener noreferrer">MailQuery</a>. It will be shown separately how to interrupt an operation with a mailbox started by a task-based asynchronous pattern (<a href="https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/task-based-asynchronous-pattern-tap" target="_blank" rel="nofollow noopener noreferrer">TAP</a>) method.
+
+### Retrieve Messages Asynchronously {#retrieve-messages-asynchronously}
+
+The following code snippet shows you how to retrieve messages asynchronously.
+
+```csharp
+Pop3Client client = new Pop3Client();
+client.Host = "pop.gmail.com";
+client.Port = 995;
+client.SecurityOptions = SecurityOptions.SSLImplicit;
+client.Username = "username";
+client.Password = "password";
+            
+try
+{
+    Pop3MessageInfoCollection messages = client.ListMessages();
+    Console.WriteLine("Total Number of Messages in inbox:" + messages.Count);
+    AutoResetEvent evnt = new AutoResetEvent(false);
+    MailMessage message = null;
+    AsyncCallback callback = delegate(IAsyncResult ar)
+    {
+        message = client.EndFetchMessage(ar);
+        evnt.Set();
+    };
+    client.BeginFetchMessage(messages[0].SequenceNumber, callback, null);
+    evnt.WaitOne();
+}
+catch (Exception ex)
+{
+    Console.WriteLine(ex.Message);
+}
+```
+
+### List Messages Asynchronously with MailQuery {#list-messages-asynchronously-with-mailquery}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquery/" target="_blank" rel="nofollow noopener noreferrer">MailQuery</a> class can be used to specify search criteria for retrieving a list of messages asynchronously as is shown in the following code sample.
+
+```csharp
+MailQueryBuilder builder = new MailQueryBuilder();
+builder.Subject.Contains("Subject");
+MailQuery query = builder.GetQuery();
+IAsyncResult asyncResult = client.BeginListMessages(query);
+Pop3MessageInfoCollection messages = client.EndListMessages(asyncResult);
+```
+
+### Interrupting a TAP Method {#interrupting-a-tap-method}
+
+Starting with .NET Framework 4.5, you can use asynchronous methods implemented according to TAP model. The code snippet below shows how to receive information about a mailbox using the task-based asynchronous pattern method named `GetMailboxInfoAsync` and then interrupt this process after a while.
+
+```csharp
+
+using (Pop3Client client = new Pop3Client(host, 995, senderEmail, password, SecurityOptions.Auto))
+{
+    CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+    AutoResetEvent autoResetEvent = new AutoResetEvent(false);
+    Exception exception = null;
+
+    ThreadPool.QueueUserWorkItem(delegate
+    {
+        try
+        {
+            // start receiving mailbox information
+            var task = client.GetMailboxInfoAsync(cancellationTokenSource.Token);
+            Pop3MailboxInfo mailboxInfo = task.GetAwaiter().GetResult();
+            Console.WriteLine("Message count: " + mailboxInfo.MessageCount);
+        }
+        catch (Exception e)
+        {
+            exception = e;
+        }
+        finally
+        {
+            autoResetEvent.Set();
+        }
+    });
+
+    Thread.Sleep(2000);
+
+    // stop receiving mailbox information
+    cancellationTokenSource.Cancel();
+    autoResetEvent.WaitOne();
+
+    if (exception is OperationCanceledException)
+        Console.WriteLine("Operation has been interrupted: " + exception.Message);
+}
+```

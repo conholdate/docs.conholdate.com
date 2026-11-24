@@ -1,0 +1,188 @@
+---
+title: "Manage Google Contacts using Gmail Client"
+sidebar_label: "Manage Google Contacts using Gmail Client"
+sidebar_key: "net-email-manage-google-contacts"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/manage-google-contacts.html"
+source_commit: ""
+source_sha256: "9ae272d5750bdd384e7d35a23fa2b10f604c46cc0656b39dd47a758f8f380aa6"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/manage-google-contacts/"
+source_snapshot_sha256: "ced98a515c4aaa585dfa259cb29c044c7cedeba03a236b5a4c8c843e403be1f6"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+Aspose.Email supports working with Gmail contacts. Using the <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/" target="_blank" rel="nofollow noopener noreferrer">IGmailClient</a> interface, users can retrieve contacts from a Gmail account, create new contacts, and update as well as delete existing contacts. Gmail allows developers to perform all these using its public developer's API. The following user information is required for working with Gmail contacts: User name, email address, password, client ID, client secret refresh token. This article shows how to:
+
+- [Access Gmail contacts](/net/email/manage-google-contacts/#access-gmail-contacts).
+- [Create new Gmail contacts](/net/email/manage-google-contacts/#create-google-contacts).
+- [Update existing contacts](/net/email/manage-google-contacts/#update-google-contacts).
+- [Delete a contact](/net/email/manage-google-contacts/#delete-google-contacts).
+- [Save contact](/net/email/manage-google-contacts/#save-google-contacts).
+
+## Access Gmail Contacts {#access-gmail-contacts}
+
+The following is a sample application which can be used to access the detail of contacts in all the groups.
+
+```csharp
+GoogleTestUser User2 = new GoogleTestUser("user", "email address", "password", "clientId", "client secret");
+string accessToken;
+string refreshToken;
+GoogleOAuthHelper.GetAccessToken(User2, out accessToken, out refreshToken);
+
+// Get IGmailclient
+using (IGmailClient client = GmailClient.GetInstance(accessToken, User2.EMail))
+{
+    Contact[] contacts = client.GetAllContacts();
+    foreach (Contact contact in contacts)
+        Console.WriteLine(contact.DisplayName + ", " + contact.EmailAddresses[0]);
+
+    // Fetch contacts from a specific group
+    ContactGroupCollection groups = client.GetAllGroups();
+    GoogleContactGroup group = null;
+    foreach (GoogleContactGroup g in groups)
+        switch (g.Title)
+        {
+            case "TestGroup": group = g;
+                break;
+        }
+
+    // Retrieve contacts from the Group
+    if (group != null)
+    {
+        Contact[] contacts2 = client.GetContactsFromGroup(group.Id);
+        foreach (Contact con in contacts2)
+            Console.WriteLine(con.DisplayName + "," + con.EmailAddresses[0].ToString());
+    }
+}
+```
+
+## Create Google Contacts {#create-google-contacts}
+
+The following code snippet shows you how to create a contact in Gmail.
+
+```csharp
+GoogleTestUser User2 = new GoogleTestUser("user", "email address", "password", "clientId", "client secret");
+string accessToken;
+string refreshToken;
+GoogleOAuthHelper.GetAccessToken(User2, out accessToken, out refreshToken);
+
+// Gmail Client
+IGmailClient client = GmailClient.GetInstance(accessToken, User2.EMail);
+
+// Create a Contact
+Contact contact = new Contact();
+contact.Prefix = "Prefix";
+contact.GivenName = "GivenName";
+contact.Surname = "Surname";
+contact.MiddleName = "MiddleName";
+contact.DisplayName = "Test User 1";
+contact.Suffix = "Suffix";
+contact.JobTitle = "JobTitle";
+contact.DepartmentName = "DepartmentName";
+contact.CompanyName = "CompanyName";
+contact.Profession = "Profession";
+contact.Notes = "Notes";
+PostalAddress address = new PostalAddress();
+address.Category = PostalAddressCategory.Work;
+address.Address = "Address";
+address.Street = "Street";
+address.PostOfficeBox = "PostOfficeBox";
+address.City = "City";
+address.StateOrProvince = "StateOrProvince";
+address.PostalCode = "PostalCode";
+address.Country = "Country";
+contact.PhysicalAddresses.Add(address);
+PhoneNumber pnWork = new PhoneNumber();
+pnWork.Number = "323423423423";
+pnWork.Category = PhoneNumberCategory.Work;
+contact.PhoneNumbers.Add(pnWork);
+PhoneNumber pnHome = new PhoneNumber();
+pnHome.Number = "323423423423";
+pnHome.Category = PhoneNumberCategory.Home;
+contact.PhoneNumbers.Add(pnHome);
+PhoneNumber pnMobile = new PhoneNumber();
+pnMobile.Number = "323423423423";
+pnMobile.Category = PhoneNumberCategory.Mobile;
+contact.PhoneNumbers.Add(pnMobile);
+contact.Urls.Blog = "Blog.ru";
+contact.Urls.BusinessHomePage = "BusinessHomePage.ru";
+contact.Urls.HomePage = "HomePage.ru";
+contact.Urls.Profile = "Profile.ru";
+contact.Events.Birthday = DateTime.Now.AddYears(-30);
+contact.Events.Anniversary = DateTime.Now.AddYears(-10);
+contact.InstantMessengers.AIM = "AIM";
+contact.InstantMessengers.GoogleTalk = "GoogleTalk";
+contact.InstantMessengers.ICQ = "ICQ";
+contact.InstantMessengers.Jabber = "Jabber";
+contact.InstantMessengers.MSN = "MSN";
+contact.InstantMessengers.QQ = "QQ";
+contact.InstantMessengers.Skype = "Skype";
+contact.InstantMessengers.Yahoo = "Yahoo";
+contact.AssociatedPersons.Spouse = "Spouse";
+contact.AssociatedPersons.Sister = "Sister";
+contact.AssociatedPersons.Relative = "Relative";
+contact.AssociatedPersons.ReferredBy = "ReferredBy";
+contact.AssociatedPersons.Partner = "Partner";
+contact.AssociatedPersons.Parent = "Parent";
+contact.AssociatedPersons.Mother = "Mother";
+contact.AssociatedPersons.Manager = "Manager";
+
+// Email Address
+EmailAddress eAddress = new EmailAddress();
+eAddress.Address = "email@gmail.com";
+contact.EmailAddresses.Add(eAddress);
+string contactUri = client.CreateContact(contact);
+```
+
+## Update Google Contacts {#update-google-contacts}
+
+Once a contact is retrieved, its attributes can be updated and the contact can be saved back to the Gmail account. The following code snippet shows you how to retrieve contacts from a Gmail account and then modify one of these which is then saved back.
+
+```csharp
+GoogleTestUser User2 = new GoogleTestUser("user", "email address", "password", "clientId", "client secret");
+string accessToken;
+string refreshToken;
+GoogleOAuthHelper.GetAccessToken(User2, out accessToken, out refreshToken);
+
+// Get IGmailclient
+using (IGmailClient client = GmailClient.GetInstance(accessToken, User2.EMail))
+{
+    Contact[] contacts = client.GetAllContacts();
+    Contact contact = contacts[0];
+    contact.JobTitle = "Manager IT";
+    contact.DepartmentName = "Customer Support";
+    contact.CompanyName = "Aspose";
+    contact.Profession = "Software Developer";
+    client.UpdateContact(contact);
+}
+```
+
+## Delete Google Contacts {#delete-google-contacts}
+
+In order to delete a Gmail contact, the Gmail client <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/deletecontact/#igmailclientdeletecontact-method" target="_blank" rel="nofollow noopener noreferrer">DeleteContact</a> method is used as shown in the following sample snippet.
+
+```csharp
+client.DeleteContact(contact.Id.GoogleId);
+```
+
+## Save Google Contacts {#save-google-contacts}
+
+Aspose.Email allows saving contacts to various output formats such as MSG and VCF. The <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo/contact/save/" target="_blank" rel="nofollow noopener noreferrer">Save</a> method provides the capability to achieve this. The following code snippet shows you how to save a contact.
+
+```csharp
+contact.Save(dataDir + "contact_out.msg", ContactSaveFormat.Msg);
+contact.Save(dataDir + "contact_out.vcf", ContactSaveFormat.VCard);
+```

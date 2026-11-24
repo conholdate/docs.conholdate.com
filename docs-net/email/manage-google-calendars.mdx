@@ -1,0 +1,521 @@
+---
+title: "Manage Google Calendars using Gmail Client"
+sidebar_label: "Manage Google Calendars using Gmail Client"
+sidebar_key: "net-email-manage-google-calendars"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/manage-google-calendars.html"
+source_commit: ""
+source_sha256: "83493d5aafc7664c749cc2722bbc418056e506e88584d6b468994fcdfdf785bd"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/manage-google-calendars/"
+source_snapshot_sha256: "c6e73cf0689561d6f92e93a3e26e98931b29dfeadb3b416c1b5354d3690624a4"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Add, Edit and Delete Gmail Calendars {#add-edit-and-delete-gmail-calendars}
+
+Aspose.Email allows applications to manage the Gmail calendars using <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/" target="_blank" rel="nofollow noopener noreferrer">IGmailClient</a> which provides features like adding, deleting and updating Gmail calendars. This client class returns a list of ExtendedCalendar type objects which contain information about the Gmail calendar items. <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/" target="_blank" rel="nofollow noopener noreferrer">IGmailClient</a> class exposes the following functions for calendars:
+
+- <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/createcalendar/#createcalendar" target="_blank" rel="nofollow noopener noreferrer">CreateCalendar</a> It can be used to insert new calendar
+- <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/listcalendars/" target="_blank" rel="nofollow noopener noreferrer">ListCalendars</a> It can be used to get the list of all calendars of a client
+- <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/deletecalendar/" target="_blank" rel="nofollow noopener noreferrer">DeleteCalendar</a> It can be used to delete a calendar
+- <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/fetchcalendar/" target="_blank" rel="nofollow noopener noreferrer">FetchCalendar</a> It can be used to fetch particular calendar of a client
+- <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/updatecalendar/" target="_blank" rel="nofollow noopener noreferrer">UpdateCalendar</a> This function is used to insert back a modified calendar of a client
+
+To Access the calendars, GoogleTestUser is initialized using gmail account credentials. GoogleOAuthHelper is used to get the access token for the user which is further used to initialize IGmailClient.
+
+## Insert, Fetch and Update Gmail Calendars {#insert-fetch-and-update-gmail-calendars}
+
+For inserting a calendar, initialize a Calendar type object and insert it using <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/createcalendar/#createcalendar" target="_blank" rel="nofollow noopener noreferrer">CreateCalendar()</a> function. <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/createcalendar/#createcalendar" target="_blank" rel="nofollow noopener noreferrer">CreateCalendar()</a> returns the id of the newly inserted calendar. This id can be used to fetch the calendar from the server. The following code snippet shows you how to insert, fetch and update calendar.
+
+```csharp
+// Get access token
+GoogleTestUser User2 = new GoogleTestUser("user", "email address", "password", "clientId", "client secret");
+string accessToken;
+string refreshToken;
+GoogleOAuthHelper.GetAccessToken(User2, out accessToken, out refreshToken);
+
+using (IGmailClient client = GmailClient.GetInstance(accessToken, User2.EMail))
+{
+    // Insert, get and update calendar
+    Aspose.Email.Clients.Google.Calendar calendar = new Aspose.Email.Clients.Google.Calendar("summary - " + Guid.NewGuid().ToString(), null, null, "America/Los_Angeles");
+    
+    // Insert calendar and Retrieve same calendar using id
+    string id = client.CreateCalendar(calendar);
+    Aspose.Email.Clients.Google.Calendar cal = client.FetchCalendar(id);
+
+    //Match the retrieved calendar info with local calendar
+    if ((calendar.Summary == cal.Summary) && (calendar.TimeZone == cal.TimeZone))
+    {
+        Console.WriteLine("fetched calendar information matches");
+    }
+    else
+    {
+        Console.WriteLine("fetched calendar information does not match");
+    }
+
+    // Change information in the fetched calendar and Update calendar
+    cal.Description = "Description - " + Guid.NewGuid().ToString();
+    cal.Location = "Location - " + Guid.NewGuid().ToString();
+    client.UpdateCalendar(cal);
+}
+```
+
+## Delete Specific Google Calendars {#delete-specific-google-calendars}
+
+For deleting a particular calendar, we need to get the list of all the calendars of a client and then delete as required. <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/listcalendars/#listcalendars" target="_blank" rel="nofollow noopener noreferrer">ListCalendars()</a> returns the list of <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/extendedcalendar/" target="_blank" rel="nofollow noopener noreferrer">ExtendedCalendar</a> which contains Gmail calendars. The following code snippet shows you how to delete particular calendar.
+
+```csharp
+// Get access token
+GoogleTestUser User2 = new GoogleTestUser("user", "email address", "password", "clientId", "client secret");
+string accessToken;
+string refreshToken;
+GoogleOAuthHelper.GetAccessToken(User2, out accessToken, out refreshToken);
+
+using (IGmailClient client = GmailClient.GetInstance(accessToken, User2.EMail))
+{
+    // Access and delete calendar with summary starting from "Calendar summary - "
+    string summary = "Calendar summary - ";
+
+    // Get calendars list
+    ExtendedCalendar[] lst0 = client.ListCalendars();
+
+    foreach (ExtendedCalendar extCal in lst0)
+    {
+        // Delete selected calendars
+        if (extCal.Summary.StartsWith(summary))
+            client.DeleteCalendar(extCal.Id);
+    }
+}
+```
+
+## Calendar Access Control {#calendar-access-control}
+
+Aspose.Email provides full control over the access to the calendar items. <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/listaccessrules/" target="_blank" rel="nofollow noopener noreferrer">ListAccessRules()</a> function is exposed by <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/" target="_blank" rel="nofollow noopener noreferrer">IGmailClient</a> which returns the list of <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/accesscontrolrule/" target="_blank" rel="nofollow noopener noreferrer">AccessControlRule</a>. Individual rule information can be retrieved, modified and saved back for the calendar of a client. <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/" target="_blank" rel="nofollow noopener noreferrer">IGmailClient</a> contains the following functions for managing the access control rules.
+
+- <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/listaccessrules/" target="_blank" rel="nofollow noopener noreferrer">ListAccessRules</a> This function provides the list of AccessControlRule
+- <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/createaccessrule/" target="_blank" rel="nofollow noopener noreferrer">CreateAccessRule</a> This function creates a new access rule for a calendar.
+- <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/updateaccessrule/" target="_blank" rel="nofollow noopener noreferrer">UpdateAccessRule</a> This function is used for updating an access rule.
+- <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/fetchaccessrule/" target="_blank" rel="nofollow noopener noreferrer">FetchAccessRule</a> It can be used to fetch particular access rule for calendar of a client
+- <a href="https://search.aspose.com/q/deleteaccessrule.html" target="_blank" rel="nofollow noopener noreferrer">DeleteAccessRule</a> This function is used for deleting an access rule.
+
+The following code snippet shows you how to use functions for managing the access rules:
+
+```csharp
+GoogleTestUser User2 = new GoogleTestUser("user", "email address", "password", "clientId", "client secret");
+string accessToken;
+string refreshToken;
+GoogleOAuthHelper.GetAccessToken(User2, out accessToken, out refreshToken);
+
+using (IGmailClient client = GmailClient.GetInstance(accessToken, User2.EMail))
+{
+    // Retrieve list of calendars for the current client
+    ExtendedCalendar[] calendarList = client.ListCalendars();
+
+    // Get first calendar id and retrieve list of AccessControlRule for the first calendar
+    string calendarId = calendarList[0].Id;
+    AccessControlRule[] roles1 = client.ListAccessRules(calendarId);
+
+    // Create a local access control rule and Set rule properties
+    AccessControlRule rule = new AccessControlRule();
+    rule.Role = AccessRole.reader;
+    rule.Scope = new AclScope(AclScopeType.user, User2.EMail);
+
+    // Insert new rule for the calendar. It returns the newly created rule
+    AccessControlRule createdRule = client.CreateAccessRule(calendarId, rule);
+
+    // Confirm if local created rule and returned rule are equal
+    if ((rule.Role == createdRule.Role) && (rule.Scope.Type == createdRule.Scope.Type) && (rule.Scope.Value.ToLower() == createdRule.Scope.Value.ToLower()))
+    {
+        Console.WriteLine("local rule and returned rule after creation are equal");
+    }
+    else
+    {
+        Console.WriteLine("Rule could not be created successfully");
+        return;
+    }
+
+    // Get list of rules
+    AccessControlRule[] roles2 = client.ListAccessRules(calendarId);
+
+    // Current list length should be 1 more than the earlier one
+    if (roles1.Length + 1 == roles2.Length)
+    {
+        Console.WriteLine("List lengths are ok");
+    }
+    else
+    {
+        Console.WriteLine("List lengths are not ok");
+        return;
+    }
+
+    // Change rule and Update the rule for the selected calendar
+    createdRule.Role = AccessRole.writer;
+    AccessControlRule updatedRule = client.UpdateAccessRule(calendarId, createdRule);
+
+    // Check if returned access control rule after update is ok
+    if ((createdRule.Role == updatedRule.Role) && (createdRule.Id == updatedRule.Id))
+    {
+        Console.WriteLine("Rule is updated successfully");
+    }
+    else
+    {
+        Console.WriteLine("Rule is not updated");
+        return;
+    }
+
+    // Retrieve individaul rule against a calendar
+    AccessControlRule fetchedRule = client.FetchAccessRule(calendarId, createdRule.Id);
+
+    //Check if rule parameters are ok
+    if ((updatedRule.Id == fetchedRule.Id) && (updatedRule.Role == fetchedRule.Role) && (updatedRule.Scope.Type == fetchedRule.Scope.Type) && (updatedRule.Scope.Value.ToLower() == fetchedRule.Scope.Value.ToLower()))
+    {
+        Console.WriteLine("Rule parameters are ok");
+    }
+    else
+    {
+        Console.WriteLine("Rule parameters are not ok");
+    }
+
+    // Delete particular rule against a given calendar and Retrieve the all rules list for the same calendar
+    client.DeleteAccessRule(calendarId, createdRule.Id);
+    AccessControlRule[] roles3 = client.ListAccessRules(calendarId);
+
+    // Check that current rules list length should be equal to the original list length before adding and deleting the rule
+    if (roles1.Length == roles3.Length)
+    {
+        Console.WriteLine("List lengths are same");
+    }
+    else
+    {
+        Console.WriteLine("List lengths are not equal");
+        return;
+    }
+}
+```
+
+## Calendar Client Settings and Color Information {#calendar-client-settings-and-color-information}
+
+Aspose.Email supports accessing the Client settings by using <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/getsettings/#igmailclientgetsettings-method" target="_blank" rel="nofollow noopener noreferrer">IGmailClient.GetSettings()</a>. It returns the list of settings as given below:
+
+1. dateFieldOrder
+2. displayAllTimezones
+3. hideInvitations
+4. format24HourTime
+5. defaultCalendarMode
+6. defaultEventLength
+7. locale
+8. remindOnRespondedEventsOnly
+9. alternateCalendar
+10. userLocation
+11. hideWeekends
+12. showDeclinedEvents
+13. weekStart
+14. weather
+15. customCalendarMode
+16. timezoneLabel
+17. timezone
+18. useKeyboardShortcuts
+19. country
+
+Similarly color info for clients can also be retrieved using <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/getcolors/#igmailclientgetcolors-method" target="_blank" rel="nofollow noopener noreferrer">IGmailClient.GetColors()</a>. This color info object returns the list of Foreground colors, background colors and update date and time.
+
+### Access Client Settings {#access-client-settings}
+
+The following code snippet shows you how the functions can be used for accessing the client settings:
+
+```csharp
+GoogleTestUser User2 = new GoogleTestUser("user", "email address", "password", "clientId", "client secret");
+string accessToken;
+string refreshToken;
+GoogleOAuthHelper.GetAccessToken(User2, out accessToken, out refreshToken);
+
+using (IGmailClient client = GmailClient.GetInstance(accessToken, User2.EMail))
+{
+    // Retrieve client settings
+    Dictionary<string, string> settings = client.GetSettings();
+    if (settings.Count < 1)
+    {
+        Console.WriteLine("No settings are available.");
+        return;
+    }
+
+    // Traverse the settings list
+    foreach (KeyValuePair<string, string> pair in settings)
+    {
+        // Get the setting value and test if settings are ok
+        string value = client.GetSetting(pair.Key);
+        if (pair.Value == value)
+        {
+            Console.WriteLine("Key = " + pair.Key + ", Value = " + pair.Value);
+        }
+        else
+        {
+            Console.WriteLine("Settings could not be retrieved");
+        }
+    }
+}
+```
+
+### Access Color Information {#access-color-information}
+
+The following code snippet shows you how the functions can be used for accessing the client color settings.
+
+```csharp
+GoogleTestUser User2 = new GoogleTestUser("user", "email address", "password", "clientId", "client secret");
+string accessToken;
+string refreshToken;
+GoogleOAuthHelper.GetAccessToken(User2, out accessToken, out refreshToken);
+
+using (IGmailClient client = GmailClient.GetInstance(accessToken, User2.EMail))
+{
+    ColorsInfo colors = client.GetColors();
+    Dictionary<string, Colors> palettes = colors.Calendar;
+
+    // Traverse the settings list
+    foreach (KeyValuePair<string, Colors> pair in palettes)
+    {
+        Console.WriteLine("Key = " + pair.Key + ", Color = " + pair.Value);
+    }
+    Console.WriteLine("Update Date = " + colors.Updated);
+}
+```
+
+## Manage Google Calendar Appointments {#manage-google-calendar-appointments}
+
+Aspose.Email provides features for working with Appointments in Google calendars. The following tasks can be performed on appointments in google calendar:
+
+1. Add Appointments.
+2. Retrieve list off appointments.
+3. Retrieve particular appointment.
+4. Update an appointment.
+5. Move appointment from one calendar to another.
+6. Delete appointment.
+
+<a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/" target="_blank" rel="nofollow noopener noreferrer">IGmailClient</a> provides functions like <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/createappointment/#igmailclientcreateappointment-method" target="_blank" rel="nofollow noopener noreferrer">CreateAppointment</a>, <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/fetchappointment/#igmailclientfetchappointment-method" target="_blank" rel="nofollow noopener noreferrer">FetchAppointment</a>, <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/updateappointment/#igmailclientupdateappointment-method" target="_blank" rel="nofollow noopener noreferrer">UpdateAppointment</a>, <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/listappointments/#igmailclientlistappointments-method" target="_blank" rel="nofollow noopener noreferrer">ListAppointments</a>, <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/moveappointment/#moveappointment" target="_blank" rel="nofollow noopener noreferrer">MoveAppointment</a> and <a href="https://reference.aspose.com/email/net/aspose.email.clients.google/igmailclient/deleteappointment/#igmailclientdeleteappointment-method" target="_blank" rel="nofollow noopener noreferrer">DeleteAppointment</a>.
+
+### Add Appointments to Google Calendar {#add-appointments-to-google-calendar}
+
+The following code sample demonstrates the feature of adding an appointment in a calendar. To achieve this, follow the steps:
+
+1. Create and insert a calendar.
+2. Retrieve the list of appointments from a new calendar.
+3. Create an appointment.
+4. Insert an appointment.
+
+```csharp
+
+                GoogleTestUser User2 = new GoogleTestUser("user", "email address", "password", "clientId", "client secret");
+                string accessToken;
+                string refreshToken;
+                GoogleOAuthHelper.GetAccessToken(User2, out accessToken, out refreshToken);
+
+                // Get IGmailclient
+                using (IGmailClient client = GmailClient.GetInstance(accessToken, User2.EMail))
+                {
+                    // Create local calendar	
+                    Aspose.Email.Clients.Google.Calendar calendar1 = new Aspose.Email.Clients.Google.Calendar("summary - " + Guid.NewGuid().ToString(), null, null, "Europe/Kiev");
+
+                    // Insert calendar and get id of inserted calendar and Get back calendar using an id
+                    string id = client.CreateCalendar(calendar1);
+                    Aspose.Email.Clients.Google.Calendar cal1 = client.FetchCalendar(id);
+                    string calendarId1 = cal1.Id;
+
+                    try
+                    {
+                        // Retrieve list of appointments from the first calendar
+                        Appointment[] appointments = client.ListAppointments(calendarId1);
+                        if (appointments.Length > 0)
+                        {
+                            Console.WriteLine("Wrong number of appointments");
+                            return;
+                        }
+
+                        // Get current time and Calculate time after an hour from now
+                        DateTime startDate = DateTime.Now;
+                        DateTime endDate = startDate.AddHours(1);
+
+                        // Initialize a mail address collection and set attendees mail address
+                        MailAddressCollection attendees = new MailAddressCollection();
+                        attendees.Add("User1.EMail@domain.com");
+                        attendees.Add("User3.EMail@domain.com");
+
+                        // Create an appointment with above attendees
+                        Appointment app1 = new Appointment("Location - " + Guid.NewGuid().ToString(), startDate, endDate, User2.EMail, attendees);
+
+                        // Set appointment summary, description, start/end time zone
+                        app1.Summary = "Summary - " + Guid.NewGuid().ToString();
+                        app1.Description = "Description - " + Guid.NewGuid().ToString();
+                        app1.StartTimeZone = "Europe/Kiev";
+                        app1.EndTimeZone = "Europe/Kiev";
+
+                        // Insert appointment in the first calendar inserted above and get back inserted appointment
+                        Appointment app2 = client.CreateAppointment(calendarId1, app1);
+
+                        // Retrieve appointment using unique id
+                        Appointment app3 = client.FetchAppointment(calendarId1, app2.UniqueId);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+```
+
+### Retrieve and Update Google Calendar Appointments {#retrieve-and-update-google-calendar-appointments}
+
+Here retrieving and updating of calendar is demonstrated as follows:
+
+1. Rerieve particaulr appointment.
+2. Modify the appointment.
+3. Update the appointment in calendar.
+
+It is assumed that a calendar with id "calendarId" and appointment unique id "AppointmentUniqueId" are already extracted. The following code snippet shows you how to retrieve and update an appointment.
+
+```csharp
+GoogleTestUser User2 = new GoogleTestUser("user", "email address", "password", "clientId", "client secret");
+string accessToken;
+string refreshToken;
+GoogleOAuthHelper.GetAccessToken(User2, out accessToken, out refreshToken);
+             
+// Get IGmailclient
+using (IGmailClient client = GmailClient.GetInstance(accessToken, User2.EMail))
+{
+    string calendarId = client.ListCalendars()[0].Id;
+    string AppointmentUniqueId = client.ListAppointments(calendarId)[0].UniqueId;
+
+    // Retrieve Appointment
+    Appointment app3 = client.FetchAppointment(calendarId, AppointmentUniqueId);
+    // Change the appointment information
+    app3.Summary = "New Summary - " + Guid.NewGuid().ToString();
+    app3.Description = "New Description - " + Guid.NewGuid().ToString();
+    app3.Location = "New Location - " + Guid.NewGuid().ToString();
+    app3.Flags = AppointmentFlags.AllDayEvent;
+    app3.StartDate = DateTime.Now.AddHours(2);
+    app3.EndDate = app3.StartDate.AddHours(1);
+    app3.StartTimeZone = "Europe/Kiev";
+    app3.EndTimeZone = "Europe/Kiev";
+    // Update the appointment and get back updated appointment
+    Appointment app4 = client.UpdateAppointment(calendarId, app3);
+}
+```
+
+### Move and Delete Appointments in Google Calendar {#move-and-delete-appointments-in-google-calendar}
+
+Appointment can be moved by providing the source calendar, destination calendar and the unique id of an appointment in the source calendar. The following code snippet shows you how to move and delete an appointment.
+
+```csharp
+GoogleTestUser User2 = new GoogleTestUser("user", "email address", "password", "clientId", "client secret");
+string accessToken;
+string refreshToken;
+GoogleOAuthHelper.GetAccessToken(User2, out accessToken, out refreshToken);
+
+// Get IGmailclient
+using (IGmailClient client = Aspose.Email.Clients.Google.GmailClient.GetInstance(accessToken, User2.EMail))
+{
+    string SourceCalendarId = client.ListCalendars()[0].Id;
+    string DestinationCalendarId = client.ListCalendars()[1].Id;
+    string TargetAppUniqueId = client.ListAppointments(SourceCalendarId)[0].UniqueId;
+
+    // Retrieve the list of appointments in the destination calendar before moving the appointment
+    Appointment[] appointments = client.ListAppointments(DestinationCalendarId);
+    Console.WriteLine("Before moving count = " + appointments.Length);
+    Appointment Movedapp = client.MoveAppointment(SourceCalendarId, DestinationCalendarId, TargetAppUniqueId);
+
+    // Retrieve the list of appointments in the destination calendar after moving the appointment
+    appointments = client.ListAppointments(DestinationCalendarId);
+    Console.WriteLine("After moving count = " + appointments.Length);
+
+    // Delete particular appointment from a calendar using unique id
+    client.DeleteAppointment(DestinationCalendarId, Movedapp.UniqueId);
+
+    // Retrieve the list of appointments. It should be one less than the earlier appointments in the destination calendar
+    appointments = client.ListAppointments(DestinationCalendarId);
+    Console.WriteLine("After deleting count = " + appointments.Length);
+}
+```
+
+### FreeBusy Query for Google Calendar {#freebusy-query-for-google-calendar}
+
+Aspose.Email provides querying mechanism to check whether an appointment is due or not as per the criteria. FreebusyQuery class is provided for this purpose which allows to prepare a query for a particular calendar.
+
+This code sample demonstrates the feature of querying a calendar. The following tasks are performed in this sample:
+
+1. Create and insert a calendar
+2. Create an appointment
+3. Insert appointment
+4. Prepare a FreeBusyQuery
+5. Get the FreebusyResponse
+
+```csharp
+
+// Use the GoogleUser and GoogleOAuthHelper classes below to receive an access token
+using (IGmailClient client = GmailClient.GetInstance(accessToken, user.Email))
+{
+    // Initialize calendar item
+    Aspose.Email.Clients.Google.Calendar calendar1 = new Aspose.Email.Clients.Google.Calendar("summary - " + Guid.NewGuid().ToString(), null, null, "Europe/Kiev");
+
+    // Insert calendar and get back id of newly inserted calendar and Fetch the same calendar using calendar id
+    string id = client.CreateCalendar(calendar1);
+    Aspose.Email.Clients.Google.Calendar cal1 = client.FetchCalendar(id);
+    string calendarId1 = cal1.Id;
+    try
+    {
+        // Get list of appointments in newly inserted calendar. It should be zero
+        Appointment[] appointments = client.ListAppointments(calendarId1);
+        if (appointments.Length != 0)
+        {
+            Console.WriteLine("Wrong number of appointments");
+            return;
+        }
+
+        // Create a new appointment and Calculate appointment start and finish time
+        DateTime startDate = DateTime.Now;
+        DateTime endDate = startDate.AddHours(1);
+
+        // Create attendees list for appointment
+        MailAddressCollection attendees = new MailAddressCollection();
+        attendees.Add("user1@domain.com");
+        attendees.Add("user2@domain.com");
+
+        // Create appointment
+        Appointment app1 = new Appointment("Location - " + Guid.NewGuid().ToString(), startDate, endDate, "user2@domain.com", attendees);
+        app1.Summary = "Summary - " + Guid.NewGuid().ToString();
+        app1.Description = "Description - " + Guid.NewGuid().ToString();
+        app1.StartTimeZone = "Europe/Kiev";
+        app1.EndTimeZone = "Europe/Kiev";
+
+        // Insert the newly created appointment and get back the same in case of successful insertion
+        Appointment app2 = client.CreateAppointment(calendarId1, app1);
+
+        // Create Freebusy query by setting min/max timeand time zone
+        FreebusyQuery query = new FreebusyQuery();
+        query.TimeMin = DateTime.Now.AddDays(-1);
+        query.TimeMax = DateTime.Now.AddDays(1);
+        query.TimeZone = "Europe/Kiev";
+
+        // Set calendar item to search and Get the reponse of query containing 
+        query.Items.Add(cal1.Id);
+        FreebusyResponse resp = client.GetFreebusyInfo(query);
+        // Delete the appointment
+        client.DeleteAppointment(calendarId1, app2.UniqueId);
+    }
+    finally
+    {
+        // Delete the calendar
+        client.DeleteCalendar(cal1.Id);
+    }
+}
+```

@@ -1,0 +1,94 @@
+---
+title: "Converting Zimbra TGZ to PST"
+sidebar_label: "Converting Zimbra TGZ to PST"
+sidebar_key: "net-email-converting-zimbra-tgz-to-pst"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/converting-zimbra-tgz-to-pst.html"
+source_commit: ""
+source_sha256: "ba033eda7ead467db0f7c83ef08a74c7458f070fcd12f33395a340f39a595016"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/converting-zimbra-tgz-to-pst/"
+source_snapshot_sha256: "16240943da48892dc48c5bb26804cffeee0b971b5c9c0f1d227522bf02594d2d"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+A common migration scenario is moving a mailbox from Zimbra to Microsoft Outlook. Because a Zimbra <a href="https://docs.fileformat.com/compression/tar/" target="_blank" rel="nofollow noopener noreferrer">TGZ</a> backup stores each message together with the path of its folder, you can rebuild the same folder hierarchy inside an Outlook <a href="https://docs.fileformat.com/email/pst/" target="_blank" rel="nofollow noopener noreferrer">PST</a> file and add every message to the matching folder. Aspose.Email for .NET lets you do this in code, without Zimbra or Outlook installed.
+
+## How the Conversion Works {#how-the-conversion-works}
+
+To convert a Zimbra TGZ backup to PST, follow these steps:
+
+1. Open the source backup with the <a href="https://reference.aspose.com/email/net/aspose.email.storage.zimbra/tgzreader/" target="_blank" rel="nofollow noopener noreferrer">TgzReader</a> class.
+2. Create a new PST file with the <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/create/" target="_blank" rel="nofollow noopener noreferrer">PersonalStorage.Create</a> method.
+3. Iterate over the items in the backup. For each item, use the <a href="https://reference.aspose.com/email/net/aspose.email.storage.zimbra/tgzreader/currentdirectory/" target="_blank" rel="nofollow noopener noreferrer">CurrentDirectory</a> property to find or create the corresponding folder in the PST, and add the <a href="https://reference.aspose.com/email/net/aspose.email.storage.zimbra/tgzreader/currentmessage/" target="_blank" rel="nofollow noopener noreferrer">CurrentMessage</a> to it.
+4. Convert each <a href="https://reference.aspose.com/email/net/aspose.email/mailmessage/" target="_blank" rel="nofollow noopener noreferrer">MailMessage</a> to a <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessage/" target="_blank" rel="nofollow noopener noreferrer">MapiMessage</a> with <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessage/frommailmessage/" target="_blank" rel="nofollow noopener noreferrer">MapiMessage.FromMailMessage</a> before adding it, because PST folders store messages in the MAPI format.
+
+## Code Sample {#code-sample}
+
+The following code shows how to convert a Zimbra TGZ backup to PST while preserving its folder structure.
+
+**Main** method:
+
+```cs
+// open the source TGZ backup
+using (var reader = new TgzReader("mailbox.tgz"))
+// create a new PST file
+using (var pst = PersonalStorage.Create("mailbox.pst", FileFormatVersion.Unicode))
+{
+    do
+    {
+        var message = reader.CurrentMessage;
+        if (message == null)
+        {
+            continue;
+        }
+
+        // find or create the folder that matches the message's directory
+        FolderInfo folder = GetOrCreateFolder(pst, reader.CurrentDirectory);
+
+        // PST folders store messages in MAPI format
+        folder.AddMessage(MapiMessage.FromMailMessage(message));
+    }
+    while (reader.ReadNextMessage());
+}
+```
+
+**GetOrCreateFolder** method:
+
+The folder path reported by `CurrentDirectory` uses the forward slash (`/`) as a separator, for example `Inbox/Projects/2023`. The helper below walks that path segment by segment, creating each missing sub-folder so that the PST mirrors the original Zimbra hierarchy.
+
+```cs
+public static FolderInfo GetOrCreateFolder(PersonalStorage pst, string directory)
+{
+    FolderInfo folder = pst.RootFolder;
+
+    if (string.IsNullOrEmpty(directory))
+    {
+        return folder;
+    }
+
+    foreach (var name in directory.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries))
+    {
+        FolderInfo subFolder = folder.GetSubFolder(name);
+        folder = subFolder ?? folder.AddSubFolder(name);
+    }
+
+    return folder;
+}
+```
+
+:::info
+The Zimbra backup stores messages in the MIME format, so converting them to PST through <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessage/frommailmessage/" target="_blank" rel="nofollow noopener noreferrer">MapiMessage.FromMailMessage</a> preserves the standard message fields, body, and attachments. Server-specific Zimbra metadata that has no MAPI equivalent is not carried over.
+:::

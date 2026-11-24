@@ -1,0 +1,298 @@
+---
+title: "Working with MAPI Properties"
+sidebar_label: "Working with MAPI Properties"
+sidebar_key: "net-email-working-with-mapi-properties"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/working-with-mapi-properties.html"
+source_commit: ""
+source_sha256: "94dc77e6db8cceed587ccef944ce2723ca8ab2fcef8b4ad876279872a0ad76f4"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/working-with-mapi-properties/"
+source_snapshot_sha256: "4a24202ab33f5fc4367495bb0f296262521e7338cf33e775c9de1ea95b716375"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Accessing and Setting Outlook MAPI Property {#accessing-and-setting-outlook-mapi-property}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiproperty/" target="_blank" rel="nofollow noopener noreferrer">MapiProperty</a> class represents a MAPI property, which contains:
+
+- <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiproperty/name/" target="_blank" rel="nofollow noopener noreferrer">Name</a>: a string that represents the name property.
+- <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiproperty/tag/" target="_blank" rel="nofollow noopener noreferrer">Tag</a>: a long type value that represents the tag property.
+- <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiproperty/data/" target="_blank" rel="nofollow noopener noreferrer">Data</a>: a byte array which represents the data property.
+
+### Get MAPI Properties Using Property Tags {#get-mapi-properties-using-property-tags}
+
+To get MAPI properties:
+
+1. Create an instance of <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessage/" target="_blank" rel="nofollow noopener noreferrer">MapiMessage</a> by [loading from files or stream](/net/email/loading-and-parsing-msg-files/#load-from-stream).
+2. Get the <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiproperty/" target="_blank" rel="nofollow noopener noreferrer">MapiProperty</a> from <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapipropertycontainer/properties/" target="_blank" rel="nofollow noopener noreferrer">MapiMessage.Properties</a> by <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapipropertytag/" target="_blank" rel="nofollow noopener noreferrer">MapiPropertyTag</a> keys.
+
+The following code snippet shows you how to get MAPI property using the MAPI property tag.
+
+```csharp
+// The path to the File directory.
+string dataDir = RunExamples.GetDataDir_Outlook();
+            
+ // Load from file
+MapiMessage msg = MapiMessage.FromFile(dataDir + @"message.msg");
+
+string subject;
+
+// Access the MapiPropertyTag.PR_SUBJECT property
+MapiProperty prop = msg.Properties[MapiPropertyTag.PR_SUBJECT];
+
+// If the property is not found, check the MapiPropertyTag.PR_SUBJECT_W (which is a Unicode peer of the MapiPropertyTag.PR_SUBJECT)
+if (prop == null)
+{
+    prop = msg.Properties[MapiPropertyTag.PR_SUBJECT_W];
+}
+
+// Still not found
+if (prop == null)
+{
+    Console.WriteLine("No property found!");
+    return;
+}
+
+// Get the property data as string
+subject = prop.GetString();
+
+Console.WriteLine("Subject:" + subject);
+// Read internet code page property
+prop = msg.Properties[MapiPropertyTag.PR_INTERNET_CPID];
+if (prop != null)
+{
+    Console.WriteLine("CodePage:" + prop.GetLong());
+}
+```
+
+### Set MAPI Properties {#set-mapi-properties}
+
+The following code snippet shows you how to set MAPI properties.
+
+```csharp
+// The path to the File directory.
+string dataDir = RunExamples.GetDataDir_Outlook();
+
+// Create a sample Message
+MapiMessage mapiMsg = new MapiMessage("user1@gmail.com", "user2@gmail.com", "This is subject", "This is body");
+
+// Set multiple properties
+mapiMsg.SetProperty(new MapiProperty(MapiPropertyTag.PR_SENDER_ADDRTYPE_W, Encoding.Unicode.GetBytes("EX")));
+MapiRecipient recipientTo = mapiMsg.Recipients[0];
+MapiProperty propAddressType = new MapiProperty(MapiPropertyTag.PR_RECEIVED_BY_ADDRTYPE_W, Encoding.UTF8.GetBytes("MYFAX"));
+recipientTo.SetProperty(propAddressType);
+string faxAddress = "My Fax User@/FN=fax#/VN=voice#/CO=My Company/CI=Local";
+MapiProperty propEmailAddress = new MapiProperty(MapiPropertyTag.PR_RECEIVED_BY_EMAIL_ADDRESS_W, Encoding.UTF8.GetBytes(faxAddress));
+recipientTo.SetProperty(propEmailAddress);
+mapiMsg.SetMessageFlags(MapiMessageFlags.MSGFLAG_UNSENT | MapiMessageFlags.MSGFLAG_FROMME);
+mapiMsg.SetProperty(new MapiProperty(MapiPropertyTag.PR_RTF_IN_SYNC, BitConverter.GetBytes((long)1)));
+
+// Set DateTime property
+MapiProperty modificationTime = new MapiProperty(MapiPropertyTag.PR_LAST_MODIFICATION_TIME, ConvertDateTime(new DateTime(2013, 9, 11)));
+mapiMsg.SetProperty(modificationTime);
+mapiMsg.Save(dataDir + "MapiProp_out.msg");
+```
+
+where the definition of the ConvertDateTime method is as follows:
+
+```csharp
+private static byte[] ConvertDateTime(DateTime t)
+{
+    long filetime = t.ToFileTime();
+    byte[] d = new byte[8];
+    d[0] = (byte)(filetime & 0xFF);
+    d[1] = (byte)((filetime & 0xFF00) >> 8);
+    d[2] = (byte)((filetime & 0xFF0000) >> 16);
+    d[3] = (byte)((filetime & 0xFF000000) >> 24);
+    d[4] = (byte)((filetime & 0xFF00000000) >> 32);
+    d[5] = (byte)((filetime & 0xFF0000000000) >> 40);
+    d[6] = (byte)((filetime & 0xFF000000000000) >> 48);
+    d[7] = (byte)(((ulong)filetime & 0xFF00000000000000) >> 56);
+    return d;
+}
+```
+
+### Additional Properties {#additional-properties}
+
+The following code snippet shows you how to set additional MAPI properties.
+
+```csharp
+MapiMessage msg = new MapiMessage("sender@test.com", "recipient@test.com", "subj", "Body of test msg");
+
+// PT_MV_FLOAT, PT_MV_R4, mv.float
+IList<object> values = new List<object>();
+values.Add((float)1);
+values.Add((float)2);
+msg.SetProperty(new MapiProperty(0x23901004, values));
+
+// PT_MV_DOUBLE, PT_MV_R8
+values = new List<object>();
+values.Add((double)1);
+values.Add((double)2);
+msg.SetProperty(new MapiProperty(0x23901005, values));
+
+// PT_MV_CURRENCY, mv.fixed.14.4
+values = new List<object>();
+values.Add((decimal)123.34);
+values.Add((decimal)289.45);
+msg.SetProperty(new MapiProperty(0x23901006, values));
+
+// PT_MV_APPTIME
+values = new List<object>();
+values.Add(30456.34);
+values.Add(40655.45);
+msg.SetProperty(new MapiProperty(0x23901007, values));
+
+// PT_MV_I8, PT_MV_LONGLONG
+values = new List<object>();
+values.Add((long)30456);
+values.Add((long)40655);
+msg.SetProperty(new MapiProperty(0x23901014, values));
+
+// PT_MV_CLSID, mv.uuid
+values = new List<object>();
+values.Add(Guid.NewGuid());
+values.Add(Guid.NewGuid());
+msg.SetProperty(new MapiProperty(0x23901048, values));
+
+// PT_MV_SHORT, PT_MV_I2, mv.i2
+values = new List<object>();
+values.Add((short)1);
+values.Add((short)2);
+msg.SetProperty(new MapiProperty(0x23901002, values));
+
+// PT_MV_SYSTIME
+values = new List<object>();
+values.Add(DateTime.Now);
+values.Add(DateTime.Now);
+msg.SetProperty(new MapiProperty(0x23901040, values));
+
+// PT_MV_BOOLEAN
+values = new List<object>();
+values.Add(true);
+values.Add(false);
+msg.SetProperty(new MapiProperty(0x2390100b, values));
+
+// PT_MV_BINARY
+values = new List<object>();
+values.Add(Guid.NewGuid().ToByteArray());
+values.Add(new byte[]{1,2,4,5,6,7,5,4,3,5,6,7,8,6,4,3,4,5,6,7,8,6,5,4,3,7,8,9,0,2,3,4,});
+msg.SetProperty(new MapiProperty(0x23901102, values));
+
+// PT_NULL
+msg.SetProperty(new MapiProperty(0x67400001, new byte[1]));
+MapiMessage message = new MapiMessage("sender@test.com", "recipient@test.com", "subj", "Body of test msg");
+
+// PT_MV_LONG
+values = new List<object>();
+values.Add((int)4);
+MapiProperty property = new MapiProperty(message.NamedPropertyMapping.GetNextAvailablePropertyId(MapiPropertyType.PT_MV_LONG), values);
+message.NamedPropertyMapping.AddNamedPropertyMapping(property, 0x00008028, new Guid("00062004-0000-0000-C000-000000000046"));
+message.SetProperty(property);
+
+// OR you can set the custom property (with the custom name)
+message = new MapiMessage("sender@test.com", "recipient@test.com", "subj", "Body of test msg");
+values = new List<object>();
+values.Add((int)4);
+property = new MapiProperty(message.NamedPropertyMapping.GetNextAvailablePropertyId(MapiPropertyType.PT_MV_LONG), values);
+message.AddCustomProperty(property, "customProperty");
+
+//PT_FLOAT
+//Please note that you need explicit cast to float value for this to work
+float floatValue = (float)123.456;
+MapiMessage newMsg = new MapiMessage();
+long floatTag = newMsg.NamedPropertyMapping.GetNextAvailablePropertyId(MapiPropertyType.PT_FLOAT);
+Guid guid = Guid.NewGuid();
+MapiProperty newMapiProperty = new MapiProperty(floatTag, BitConverter.GetBytes(floatValue));
+newMsg.NamedPropertyMapping.AddNamedPropertyMapping(newMapiProperty, 12, guid);
+newMsg.SetProperty(newMapiProperty);
+```
+
+### Read Named MAPI Properties from MSG Files {#read-named-mapi-properties-from-msg-files}
+
+The following code snippet shows you how to read named MAPI properties from the MSG file.
+
+```csharp
+// The path to the File directory.
+string dataDir = RunExamples.GetDataDir_Outlook();
+
+// Load from file
+MapiMessage message = MapiMessage.FromFile(dataDir + @"message.msg");
+
+// Get all named MAPI properties
+MapiPropertyCollection properties = message.NamedProperties;
+// Read all properties in foreach loop
+foreach (MapiNamedProperty mapiNamedProp in properties.Values)
+{
+    // Read any specific property
+    switch (mapiNamedProp.NameId)
+    {
+        case "TEST":
+            Console.WriteLine("{0} = {1}", mapiNamedProp.NameId, mapiNamedProp.GetString());
+            break;
+        case "MYPROP":
+            Console.WriteLine("{0} = {1}", mapiNamedProp.NameId, mapiNamedProp.GetString());
+            break;
+        default: break;
+    }
+}
+```
+
+### Read Named MAPI Properties from Attachments {#read-named-mapi-properties-from-attachments}
+
+Aspose.Email also allows you to traverse through the properties of a <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiattachment/" target="_blank" rel="nofollow noopener noreferrer">MapiAttachment</a> and search for a named property, in a way similar to the example above, for <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessage/" target="_blank" rel="nofollow noopener noreferrer">MapiMessage</a>. The following code snippet shows you how to search for a named property through the attachment property collection.
+
+```csharp
+private static string GetCustomAttachmentGuid(string dataDir)
+{
+    // Load from file
+    MailMessage mail = MailMessage.Load(dataDir + "outputAttachments.msg");
+
+    var mapi = MapiMessage.FromMailMessage(mail);
+
+    foreach (MapiNamedProperty namedProperty in mapi.Attachments[0].NamedProperties.Values)
+    {
+        if (string.Compare(namedProperty.NameId, "CustomAttGuid", StringComparison.OrdinalIgnoreCase) == 0)
+        {
+            return namedProperty.GetString();
+        }
+    }
+
+    return string.Empty;
+}
+```
+
+### Remove Properties from MSGs and Attachments {#remove-properties-from-msgs-and-attachments}
+
+The following code snippet shows you how to remove properties from MSGs and attachments.
+
+```csharp
+// The path to the File directory.
+string dataDir = RunExamples.GetDataDir_Outlook();
+
+MapiMessage mapi = new MapiMessage("from@domain.com", "to@domain.com", "subject", "body");
+mapi.SetBodyContent("<html><body><h1>This is the body content</h1></body></html>", BodyContentType.Html);
+MapiMessage attachment = MapiMessage.FromFile(dataDir + @"message.msg");
+mapi.Attachments.Add("Outlook2 Test subject.msg", attachment);
+Console.WriteLine("Before removal = " + mapi.Attachments[mapi.Attachments.Count - 1].Properties.Count);
+
+mapi.Attachments[mapi.Attachments.Count - 1].RemoveProperty(923467779);// Delete any one property
+Console.WriteLine("After removal = " + mapi.Attachments[mapi.Attachments.Count - 1].Properties.Count);
+mapi.Save(@"EMAIL_589265.msg");
+
+MapiMessage mapi2 = MapiMessage.FromFile(@"EMAIL_589265.msg");
+Console.WriteLine("Reloaded = " + mapi2.Attachments[mapi2.Attachments.Count - 1].Properties.Count);
+```

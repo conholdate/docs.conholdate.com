@@ -1,0 +1,423 @@
+---
+title: "List, Manage, and Backup Exchange Server Folders using EWS"
+sidebar_label: "List, Manage, and Backup Exchange Server Folders using EWS"
+sidebar_key: "net-email-manage-folders-on-exchange-server"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/manage-folders-on-exchange-server.html"
+source_commit: ""
+source_sha256: "b2f563432953324d05b6c7932452a888aabf00516cf9abea26c2c1b5a74d0fed"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/manage-folders-on-exchange-server/"
+source_snapshot_sha256: "5efcf907c9160f4e4e0973b06f627801a39b1169cfd833694ef80d196fcf7543"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## List All Folders from Server {#list-all-folders-from-server}
+
+Aspose.Email API provides the capability to connect to the Exchange Server and list all the folders and sub-folders. You can also retrieve all the sub-folders from each folder recursively. It also provides the capability to enumerate folders with paging from the Exchange client using Exchange Web Serice (EWS). This article shows how to retrieve all the sub-folders from the Exchange server and retrieve folders with pagination.
+
+The following code snippet shows you how to List folders from Exchange Server.
+
+```csharp
+public static void Run()
+{
+    try
+    {
+        IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+        Console.WriteLine("Downloading all messages from Inbox....");
+
+        ExchangeMailboxInfo mailboxInfo = client.GetMailboxInfo();
+        Console.WriteLine("Mailbox URI: " + mailboxInfo.MailboxUri);
+        string rootUri = client.GetMailboxInfo().RootUri;
+        // List all the folders from Exchange server
+        ExchangeFolderInfoCollection folderInfoCollection = client.ListSubFolders(rootUri);
+        foreach (ExchangeFolderInfo folderInfo in folderInfoCollection)
+        {
+            // Call the recursive method to read messages and get sub-folders
+            ListSubFolders(client, folderInfo);
+        }
+
+        Console.WriteLine("All messages downloaded.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+private static void ListSubFolders(IEWSClient client, ExchangeFolderInfo folderInfo)
+{
+    // Create the folder in disk (same name as on IMAP server)
+    Console.WriteLine(folderInfo.DisplayName);
+    try
+    {
+        // If this folder has sub-folders, call this method recursively to get messages
+        ExchangeFolderInfoCollection folderInfoCollection = client.ListSubFolders(folderInfo.Uri);
+        foreach (ExchangeFolderInfo subfolderInfo in folderInfoCollection)
+        {
+            ListSubFolders(client, subfolderInfo);
+        }
+    }
+    catch (Exception)
+    {
+    }
+}
+```
+
+## Retrieve Folder Type Information {#retrieve-folder-type-information}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange/exchangefolderinfo/foldertype/" target="_blank" rel="nofollow noopener noreferrer">FolderType</a> property provided by <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange/exchangefolderinfo/" target="_blank" rel="nofollow noopener noreferrer">ExchangeFolderInfo</a> class can be used to get information about the type of the folder. It is shown in the code sample below.
+
+```csharp
+const string mailboxUri = "https://exchange/ews/exchange.asmx";
+const string domain = @"";
+const string username = @"username@ASE305.onmicrosoft.com";
+const string password = @"password";
+NetworkCredential credentials = new NetworkCredential(username, password, domain);
+
+IEWSClient client = EWSClient.GetEWSClient(mailboxUri, credentials);
+
+ExchangeFolderInfoCollection folderInfoCol = client.ListSubFolders(client.MailboxInfo.RootUri);
+foreach (ExchangeFolderInfo folderInfo in folderInfoCol)
+{
+    switch (folderInfo.FolderType)
+    {
+        case ExchangeFolderType.Appointment:
+            // handle Appointment
+            break;
+        case ExchangeFolderType.Contact:
+            // handle Contact
+            break;
+        case ExchangeFolderType.Task:
+            // handle Task
+            break;
+        case ExchangeFolderType.Note:
+            // handle email message
+            break;
+        case ExchangeFolderType.StickyNote:
+            // handle StickyNote
+            break;
+        case ExchangeFolderType.Journal:
+            // handle Journal
+            break;
+        default:
+            break;
+    }
+```
+
+## Enumerate Folders with Paging Support {#enumerate-folders-with-paging-support}
+
+The following code snippet shows you how to use paging support using EWS.
+
+```csharp
+// Create instance of ExchangeWebServiceClient class by giving credentials
+IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "UserName", "Password");
+
+// Call ListMessages method to list messages info from Inbox
+ExchangeMessageInfoCollection msgCollection = client.ListMessages(client.GetMailboxInfo().InboxUri);
+int itemsPerPage = 5;
+List<PageInfo> pages = new List<PageInfo>();
+PageInfo pagedMessageInfoCol = client.ListMessagesByPage(client.MailboxInfo.InboxUri, itemsPerPage);
+pages.Add(pagedMessageInfoCol);
+while (!pagedMessageInfoCol.LastPage)
+{
+    pagedMessageInfoCol = client.ListMessagesByPage(client.MailboxInfo.InboxUri, itemsPerPage);
+    pages.Add(pagedMessageInfoCol);
+}
+pagedMessageInfoCol = client.ListMessagesByPage(client.MailboxInfo.InboxUri, itemsPerPage);
+while (!pagedMessageInfoCol.LastPage)
+{
+    client.ListMessages(client.MailboxInfo.InboxUri);
+}
+            }
+catch (Exception ex)
+            {
+
+Console.Write(ex.Message);
+            }
+finally
+            {
+
+            }
+```
+
+## Access Custom Folders/Subfolders {#access-custom-folderssubfolders}
+
+<a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a> lets developers access any custom folder or subfolder from the mailbox. The <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/folderexists/#folderexists/" target="_blank" rel="nofollow noopener noreferrer">FolderExists()</a> function of <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a> returns the URI of a specified custom folder/sub-folder, which can be used then to access the target folder. In the following example, a custom folder named "TestInbox", which is created under INBOX is accessed and all the messages are displayed from this custom folder. To perform this task, make the following steps:
+
+1. Initialize the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a> object by providing valid credentials.
+2. Access the default mailbox.
+3. Access the parent folder, which is INBOX in this example. This parent folder can also be a custom folder itself.
+4. Use <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/folderexists/#folderexists/" target="_blank" rel="nofollow noopener noreferrer">FolderExists()</a> to search the specified custom subfolder, for example "TestInbox". It will return the URI of "TestInbox".
+5. Use this Uri to access all the messages in that custom folder.
+
+The following code snippet shows you how to access mailbox custom folders or subfolders with EWS.
+
+```csharp
+// Create instance of EWSClient class by giving credentials
+IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+
+// Create ExchangeMailboxInfo, ExchangeMessageInfoCollection instance
+ExchangeMailboxInfo mailbox = client.GetMailboxInfo();
+ExchangeMessageInfoCollection messages = null;
+ExchangeFolderInfo subfolderInfo = new ExchangeFolderInfo();
+
+// Check if specified custom folder exisits and Get all the messages info from the target Uri
+client.FolderExists(mailbox.InboxUri, "TestInbox", out subfolderInfo);
+
+//if custom folder exists
+if (subfolderInfo != null)
+{
+    messages = client.ListMessages(subfolderInfo.Uri);
+
+    // Parse all the messages info collection
+    foreach (ExchangeMessageInfo info in messages)
+    {
+        string strMessageURI = info.UniqueUri;
+        // now get the message details using FetchMessage()
+        MailMessage msg = client.FetchMessage(strMessageURI);
+        Console.WriteLine("Subject: " + msg.Subject);
+    }
+}
+else
+{
+    Console.WriteLine("No folder with this name found.");
+}
+```
+
+## List Public Folders {#list-public-folders}
+
+Microsoft Exchange Server lets users create public folders and post messages in them. To do this through your application, use Aspose.Email <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/ewsclient/" target="_blank" rel="nofollow noopener noreferrer">EWSClient</a> class to connect to the Exchange Server and read and download messages and posts from public folders. The following code snippet shows you how to read all public folders, and subfolders, and list and download any messages found in these folders. This example only works with Microsoft Exchange Server 2007 or above since only these support EWS.
+
+```csharp
+public static string dataDir = RunExamples.GetDataDir_Exchange();
+public static string mailboxUri = "https://exchange/ews/exchange.asmx"; // EWS
+public static string username = "administrator";
+public static string password = "pwd";
+public static string domain = "ex2013.local";
+
+public static void Run()
+{
+    try
+    {
+        ReadPublicFolders();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+
+private static void ReadPublicFolders()
+{
+    NetworkCredential credential = new NetworkCredential(username, password, domain);
+    IEWSClient client = EWSClient.GetEWSClient(mailboxUri, credential);
+
+    ExchangeFolderInfoCollection folders = client.ListPublicFolders();
+    foreach (ExchangeFolderInfo publicFolder in folders)
+    {
+        Console.WriteLine("Name: " + publicFolder.DisplayName);
+        Console.WriteLine("Subfolders count: " + publicFolder.ChildFolderCount);
+        ListMessagesFromSubFolder(publicFolder, client);
+
+    }
+}
+
+private static void ListMessagesFromSubFolder(ExchangeFolderInfo publicFolder, IEWSClient client)
+{
+    Console.WriteLine("Folder Name: " + publicFolder.DisplayName);
+    ExchangeMessageInfoCollection msgInfoCollection = client.ListMessagesFromPublicFolder(publicFolder);
+    foreach (ExchangeMessageInfo messageInfo in msgInfoCollection)
+    {
+        MailMessage msg = client.FetchMessage(messageInfo.UniqueUri);
+        Console.WriteLine(msg.Subject);
+        msg.Save(dataDir +  msg.Subject + ".msg",  SaveOptions.DefaultMsgUnicode);
+    }
+
+    // Call this method recursively for any subfolders
+    if (publicFolder.ChildFolderCount > 0)
+    {
+        ExchangeFolderInfoCollection subfolders = client.ListSubFolders(publicFolder);
+        foreach (ExchangeFolderInfo subfolder in subfolders)
+        {
+            ListMessagesFromSubFolder(subfolder, client);
+        }
+    }
+}
+```
+
+## Copy Messages to Another Folder {#copy-messages-to-another-folder}
+
+Aspose.Email API allows copying a message from one folder to another folder using the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/copyitem/#copyitem" target="_blank" rel="nofollow noopener noreferrer">CopyItem</a> method. The overloaded version of this method returns the Unique URI of the copied message as shown in this article.
+
+```csharp
+try
+{
+    // Create instance of EWSClient class by giving credentials
+    IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+    MailMessage message = new MailMessage("from@domain.com", "to@domain.com", "EMAILNET-34997 - " + Guid.NewGuid().ToString(), "EMAILNET-34997 Exchange: Copy a message and get reference to the new Copy item");
+    string messageUri = client.AppendMessage(message);
+    string newMessageUri = client.CopyItem(messageUri, client.MailboxInfo.DeletedItemsUri);
+}
+catch (Exception ex)
+{
+    Console.WriteLine(ex.Message);
+}
+```
+
+## Sync Folder Items {#sync-folder-items}
+
+Aspose.Email for .NET API <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a> interface provides the feature of syncing an Exchange folder for its contents. The <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/syncfolder/#syncfolder/" target="_blank" rel="nofollow noopener noreferrer">SyncFolder</a> method exposed by the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a> class can be used to perform folder sync information on a specified folder. The following code snippet shows you how to sync exchange folder information.
+
+```csharp
+IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+MailMessage message1 = new MailMessage("user@domain.com", "user@domain.com", "EMAILNET-34738 - " + Guid.NewGuid().ToString(),  "EMAILNET-34738 Sync Folder Items");
+client.Send(message1);
+
+MailMessage message2 = new MailMessage("user@domain.com", "user@domain.com", "EMAILNET-34738 - " + Guid.NewGuid().ToString(),"EMAILNET-34738 Sync Folder Items");
+client.Send(message2);
+
+ExchangeMessageInfoCollection messageInfoCol = client.ListMessages(client.MailboxInfo.InboxUri);
+SyncFolderResult result = client.SyncFolder(client.MailboxInfo.InboxUri, null);
+Console.WriteLine(result.NewItems.Count);
+Console.WriteLine(result.ChangedItems.Count);
+Console.WriteLine(result.ReadFlagChanged.Count);
+Console.WriteLine(result.DeletedItems.Length);
+```
+
+## Retrieve Folder Permissions {#retrieve-folder-permissions}
+
+Users are assigned permissions to public folders on Exchange Server, which limits/determines the level of access a user has to these folders. The <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange/exchangefolderpermission/" target="_blank" rel="nofollow noopener noreferrer">ExchangeFolderPermission</a> class provides a set of permission properties for Exchange folders such as the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange/exchangefolderpermission/permissionlevel/" target="_blank" rel="nofollow noopener noreferrer">PermissionLevel</a>, whether they can <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange/exchangebasepermission/cancreateitems/" target="_blank" rel="nofollow noopener noreferrer">CanCreateItems</a>, <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange/exchangebasepermission/deleteitems/" target="_blank" rel="nofollow noopener noreferrer">DeleteItems</a>, and perform other tasks as specified by the permission properties. Permissions can be retrieved using the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/getfolderpermissions/#getfolderpermissions" target="_blank" rel="nofollow noopener noreferrer">GetFolderPermissions()</a> method of <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a>. This article shows how to retrieve the permissions applied to a public folder for all the users who have access to the shared folders.
+
+To perform this task:
+
+1. Initialize the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/ewsclient/" target="_blank" rel="nofollow noopener noreferrer">EWSClient</a>.
+2. Use the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/listpublicfolders/#listpublicfolders" target="_blank" rel="nofollow noopener noreferrer">ListPublicFolders</a> to get a list of all public folders
+3. Retrieve the permissions associated with a folder using the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/getfolderpermissions/#getfolderpermissions" target="_blank" rel="nofollow noopener noreferrer">GetFolderPermisssions()</a> method
+
+The following code snippet shows you how to use the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/ewsclient/" target="_blank" rel="nofollow noopener noreferrer">EWSClient</a> class to retrieve permissions applied to a folder.
+
+```csharp
+string folderName = "DesiredFolderName";
+
+// Create instance of EWSClient class by giving credentials
+IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+
+ExchangeFolderInfoCollection folders = client.ListPublicFolders();
+ExchangeFolderPermissionCollection permissions = new ExchangeFolderPermissionCollection();
+
+ExchangeFolderInfo publicFolder = null;
+try
+{
+    foreach (ExchangeFolderInfo folderInfo in folders)
+        if (folderInfo.DisplayName.Equals(folderName))
+            publicFolder = folderInfo;
+
+    if (publicFolder == null)
+        Console.WriteLine("public folder was not created in the root public folder");
+
+    ExchangePermissionCollection folderPermissionCol = client.GetFolderPermissions(publicFolder.Uri);
+    foreach (ExchangeBasePermission perm in folderPermissionCol)
+    {
+        ExchangeFolderPermission permission = perm as ExchangeFolderPermission;
+        if (permission == null)
+            Console.WriteLine("Permission is null.");
+        else
+        {
+            Console.WriteLine("User's primary smtp address: {0}", permission.UserInfo.PrimarySmtpAddress);
+            Console.WriteLine("User can create Items: {0}", permission.CanCreateItems.ToString());
+            Console.WriteLine("User can delete Items: {0}", permission.DeleteItems.ToString());
+            Console.WriteLine("Is Folder Visible: {0}", permission.IsFolderVisible.ToString());
+            Console.WriteLine("Is User owner of this folder: {0}", permission.IsFolderOwner.ToString());
+            Console.WriteLine("User can read items: {0}", permission.ReadItems.ToString());
+        }
+    }
+    ExchangeMailboxInfo mailboxInfo = client.GetMailboxInfo();
+    //Get the Permissions for the Contacts and Calendar Folder
+    ExchangePermissionCollection contactsPermissionCol = client.GetFolderPermissions(mailboxInfo.ContactsUri);
+    ExchangePermissionCollection calendarPermissionCol = client.GetFolderPermissions(mailboxInfo.CalendarUri);
+}
+finally
+{
+    //Do the needfull
+}
+```
+
+## Create and Manage Folders/Sub-Folders {#create-and-manage-folderssub-folders}
+
+Aspose.Email API provides the capability to create folders in an Exchange mailbox. The <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/createfolder/#createfolder/" target="_blank" rel="nofollow noopener noreferrer">CreateFolder</a> method of <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a> can be used for this purpose. In order to create a folder in the Exchange server mailbox, the following steps can be used.
+
+1. Create an instance of <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a>.
+2. Set the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/useslashasfolderseparator/" target="_blank" rel="nofollow noopener noreferrer">UseSlashAsFolderSeparator</a> property as required. If set to **true**, the application will consider the "Slash" as folder separator and the subfolder will be created after the slash.
+3. Use the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/createfolder/#createfolder/" target="_blank" rel="nofollow noopener noreferrer">CreateFolder</a> method to create the folder.
+
+The following code snippet shows you how to create folders and sub-Folders.
+
+```csharp
+
+            // Create instance of EWSClient class by giving credentials
+            IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+
+            string inbox = client.MailboxInfo.InboxUri;
+            string folderName1 = "EMAILNET-35054";
+            string subFolderName0 = "2015";
+            string folderName2 = folderName1 + "/" + subFolderName0;
+            string folderName3 = folderName1 + " / 2015";
+            ExchangeFolderInfo rootFolderInfo = null;
+            ExchangeFolderInfo folderInfo = null;
+
+            try
+            {
+                client.UseSlashAsFolderSeparator = true;
+                client.CreateFolder(client.MailboxInfo.InboxUri, folderName1);
+                client.CreateFolder(client.MailboxInfo.InboxUri, folderName2);
+            }
+            finally
+            {
+                if (client.FolderExists(inbox, folderName1, out rootFolderInfo))
+                {
+                    if (client.FolderExists(inbox, folderName2, out folderInfo))
+                        client.DeleteFolder(folderInfo.Uri, true);
+                    client.DeleteFolder(rootFolderInfo.Uri, true);
+                }
+            }
+```
+
+## Backup Folders to PST {#backup-folders-to-pst}
+
+It often so happens that users may want to take a backup of all or some of the mailbox folders. Aspose.Email provides the capability to take a backup of all or specified Exchange mailbox folders to a PST. This article describes taking backup of Exchange folders to a PST with sample code. In order to take the backup of Exchange server folders, the following steps may be followed.
+
+1. Initiate the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a> with user credentials
+2. Add the required folder's info to <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange/exchangefolderinfocollection/" target="_blank" rel="nofollow noopener noreferrer">ExchangeFolderInfoCollection</a>
+3. User the client's <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/backup/#backup/" target="_blank" rel="nofollow noopener noreferrer">Backup</a> method to export the folder's contents to PST
+
+The following code snippet shows you how to backup exchange folders to PST.
+
+```csharp
+string dataDir = RunExamples.GetDataDir_Exchange();
+// Create instance of IEWSClient class by providing credentials
+const string mailboxUri = "https://ews.domain.com/ews/Exchange.asmx";
+const string domain = @"";
+const string username = @"username";
+const string password = @"password";
+NetworkCredential credential = new NetworkCredential(username, password, domain);
+IEWSClient client = EWSClient.GetEWSClient(mailboxUri, credential);
+
+// Get Exchange mailbox info of other email account
+ExchangeMailboxInfo mailboxInfo = client.GetMailboxInfo();
+ExchangeFolderInfo info = client.GetFolderInfo(mailboxInfo.InboxUri);
+ExchangeFolderInfoCollection fc = new ExchangeFolderInfoCollection();
+fc.Add(info);
+client.Backup(fc, dataDir + "Backup_out.pst", BackupOptions.None);
+```

@@ -1,0 +1,210 @@
+---
+title: "Managing Calendar Items in PST Files"
+sidebar_label: "Managing Calendar Items in PST Files"
+sidebar_key: "net-email-managing-calendar-items-in-pst-files"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/managing-calendar-items-in-pst-files.html"
+source_commit: ""
+source_sha256: "a4f62a0768bb3f38a908ec1a313940949d9ff1800b19c6af08462b8c021972fc"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/managing-calendar-items-in-pst-files/"
+source_snapshot_sha256: "f43d21a78443991e85a4f1e79749611c5beeaea076008b22ee7668bf68f02689"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "./_remote-markdown.css";
+
+This article covers storing and reading Outlook `MapiCalendar` items inside a PST file. To work with standards-based iCalendar (ICS) appointments and meeting requests, see [Manage Appointments](/net/email/create-and-manipulate-appointments-convert-ics-to-msg/); for standalone `MapiCalendar` (MSG) items, see [Managing Outlook Calendar Items](/net/email/managing-outlook-calendar-items/).
+
+## Add MAPI Calendar to PST {#add-mapi-calendar-to-pst}
+
+[Creating and Managing PST Files](/net/email/create-and-manage-pst-files/) shows how to create a PST file and add a subfolder to it. With Aspose.Email you can add MapiCalendar to the Calendar subfolder of a PST file that you have created or loaded. Below are the steps to add MapiCalendar to a PST:
+
+1. Create a <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapicalendar/" target="_blank" rel="nofollow noopener noreferrer">MapiCalendar</a> object.
+2. Set the <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapicalendar/" target="_blank" rel="nofollow noopener noreferrer">MapiCalendar</a> properties using a constructor and methods.
+3. Create a PST using the <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/create/#create/" target="_blank" rel="nofollow noopener noreferrer">PersonalStorage.Create()</a> method.
+4. Create a pre-defined folder (Calendar) at the root of the PST file by accessing the root folder and then calling the <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/addmapimessageitem/#addmapimessageitem" target="_blank" rel="nofollow noopener noreferrer">AddMapiMessageItem()</a> method.
+
+The following code snippet shows you how to create a <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapicalendar/" target="_blank" rel="nofollow noopener noreferrer">MapiCalendar</a> and then add it to the calendar folder of a newly created PST file.
+
+```csharp
+string dataDir = RunExamples.GetDataDir_Outlook();
+
+// Create the appointment
+MapiCalendar appointment = new MapiCalendar(
+    "LAKE ARGYLE WA 6743",
+    "Appointment",
+    "This is a very important meeting :)",
+    new DateTime(2012, 10, 2, 13, 0, 0),
+    new DateTime(2012, 10, 2, 14, 0, 0));
+
+// Create the meeting
+MapiRecipientCollection attendees = new MapiRecipientCollection();
+attendees.Add("ReneeAJones@armyspy.com", "Renee A. Jones", MapiRecipientType.MAPI_TO);
+attendees.Add("SzllsyLiza@dayrep.com", "Szollosy Liza", MapiRecipientType.MAPI_TO);
+
+MapiCalendar meeting = new MapiCalendar(
+    "Meeting Room 3 at Office Headquarters",
+    "Meeting",
+    "Please confirm your availability.",
+    new DateTime(2012, 10, 2, 13, 0, 0),
+    new DateTime(2012, 10, 2, 14, 0, 0),
+    "CharlieKhan@dayrep.com",
+    attendees
+    );
+
+string path = dataDir + "AddMapiCalendarToPST_out.pst";
+
+if (File.Exists(path))
+{
+    File.Delete(path);
+}
+
+using (PersonalStorage pst = PersonalStorage.Create(dataDir + "AddMapiCalendarToPST_out.pst", FileFormatVersion.Unicode))
+{
+    FolderInfo calendarFolder = pst.CreatePredefinedFolder("Calendar", StandardIpmFolder.Appointments);
+    calendarFolder.AddMapiMessageItem(appointment);
+    calendarFolder.AddMapiMessageItem(meeting);
+}
+```
+
+## Save Calendar Items to Disk in ICS Format {#save-calendar-items-to-disk-in-ics-format}
+
+This article shows how to access calendar items from an Outlook PST file and save the calendar to disk in ICS format. Use the <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/" target="_blank" rel="nofollow noopener noreferrer">PersonalStorage</a> and <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapicalendar/" target="_blank" rel="nofollow noopener noreferrer">MapiCalendar</a> classes to get the calendar information. Below are the steps to save calendar items :
+
+1. Load the PST file in the <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/" target="_blank" rel="nofollow noopener noreferrer">PersonalStorage</a> class.
+2. Browse the Calendar folder.
+3. Get the contents of the Calendar folder to get the message collection.
+4. Loop through the message collection.
+5. Call <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/extractmessage/#extractmessage/" target="_blank" rel="nofollow noopener noreferrer">PersonalStorage.ExtractMessage()</a> method to get the contact information in the <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapicalendar/" target="_blank" rel="nofollow noopener noreferrer">MapiCalendar</a> class.
+6. Call the <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapicalendar/save/#save/" target="_blank" rel="nofollow noopener noreferrer">MapiCalendar.Save()</a> method to save the calendar item to disk in ICS format.
+
+The program below loads a PST file from disk and saves all the calendar items in ICS format. The ICS files can then be used in any other program that can load the standard ICS calendar file. Opened in Microsoft Outlook, an ICS file looks like the one in the below screenshot.
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+![todo:image_alt_text](/net/email/images/ec9acd878f1fa850-working-with-calendar-items-in-pst-file_1.png)
+
+</th>
+</tr>
+</thead>
+<tbody>
+
+</tbody>
+</table>
+</div>
+
+The following code snippet shows you how to export the calendar items from Outlook PST to ICS format.
+
+```csharp
+// The path to the documents directory.
+string dataDir = RunExamples.GetDataDir_Outlook();
+
+// Load the Outlook PST file
+PersonalStorage pst = PersonalStorage.FromFile(dataDir + "Sub.pst");
+// Get the Calendar folder
+FolderInfo folderInfo = pst.RootFolder.GetSubFolder("Calendar");
+// Loop through all the calendar items in this folder
+MessageInfoCollection messageInfoCollection = folderInfo.GetContents();
+foreach (MessageInfo messageInfo in messageInfoCollection)
+{
+    // Get the calendar information
+    MapiCalendar calendar = (MapiCalendar)pst.ExtractMessage(messageInfo).ToMapiMessageItem();
+    // Display some contents on screen
+    Console.WriteLine("Name: " + calendar.Subject);
+    // Save to disk in ICS format
+    calendar.Save(dataDir + @"\Calendar\" + calendar.Subject + "_out.ics");
+}
+```
+
+### Save with Original Timestamp {#save-with-original-timestamp}
+
+The following features are available to save calendar items as ICS preserving their original date and time information:
+
+- <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapicalendaricssaveoptions/" target="_blank" rel="nofollow noopener noreferrer">MapiCalendarIcsSaveOptions</a> - Allows to specify additional options when saving MapiCalendar to Ics format.
+
+- <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapicalendaricssaveoptions/keeporiginaldatetimestamp/" target="_blank" rel="nofollow noopener noreferrer">MapiCalendarIcsSaveOptions.KeepOriginalDateTimeStamp</a> - Allows keep original DateTimeStamp value in output file.
+
+Use the code sample below to implement the features to your project:
+
+```cs
+var cal = pst.ExtractMessage(msgInfo).ToMapiMessageItem() as MapiCalendar;
+
+if (cal != null)
+{
+  cal.Save("cal.ics", new MapiCalendarIcsSaveOptions() { KeepOriginalDateTimeStamp = true});
+}
+```
+
+## Modify/Delete Occurrences from Recurrences {#modifydelete-occurrences-from-recurrences}
+
+Exceptions can be added to existing recurrences using Aspose.Email for .NET API. The following code sample illustrates the usage of this feature.
+
+```csharp
+DateTime startDate = DateTime.Now.Date.AddHours(12);
+
+MapiCalendarEventRecurrence recurrence = new MapiCalendarEventRecurrence();
+MapiCalendarRecurrencePattern pattern = recurrence.RecurrencePattern = new MapiCalendarDailyRecurrencePattern();
+pattern.PatternType = MapiCalendarRecurrencePatternType.Day;
+pattern.Period = 1;
+pattern.EndType = MapiCalendarRecurrenceEndType.NeverEnd;
+
+DateTime exceptionDate = startDate.AddDays(1);
+
+// adding one exception
+pattern.Exceptions.Add(new MapiCalendarExceptionInfo
+{
+    Location = "London",
+    Subject = "Subj",
+    OriginalStartDate = exceptionDate,
+    StartDateTime = exceptionDate,
+    EndDateTime = exceptionDate.AddHours(5)
+});
+pattern.ModifiedInstanceDates.Add(exceptionDate);
+// every modified instance also has to have an entry in the DeletedInstanceDates field with the original instance date.
+pattern.DeletedInstanceDates.Add(exceptionDate);
+
+// adding one deleted instance
+pattern.DeletedInstanceDates.Add(exceptionDate.AddDays(2));
+
+
+MapiRecipientCollection recColl = new MapiRecipientCollection();
+recColl.Add("receiver@domain.com", "receiver", MapiRecipientType.MAPI_TO);
+MapiCalendar newCal = new MapiCalendar(
+    "This is Location",
+    "This is Summary",
+    "This is recurrence test",
+    startDate,
+    startDate.AddHours(3),
+    "organizer@domain.com",
+    recColl);
+newCal.Recurrence = recurrence;
+
+using (MemoryStream memory = new MemoryStream())
+{
+    PersonalStorage pst = PersonalStorage.Create(memory, FileFormatVersion.Unicode);
+    FolderInfo calendarFolder = pst.CreatePredefinedFolder("Calendar", StandardIpmFolder.Appointments);
+    calendarFolder.AddMapiMessageItem(newCal);
+}
+```
+
+## See Also {#see-also}
+
+- [Manage Appointments](/net/email/create-and-manipulate-appointments-convert-ics-to-msg/) - work with iCalendar (ICS) appointments and meeting requests.
+- [Managing Outlook Calendar Items](/net/email/managing-outlook-calendar-items/) - create and manage calendar items as standalone `MapiCalendar` (MSG) objects.

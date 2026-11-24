@@ -1,0 +1,284 @@
+---
+title: "IMAP Email Filtering - Methods, Criteria & Code Examples"
+sidebar_label: "IMAP Email Filtering - Methods, Criteria & Code Examples"
+sidebar_key: "net-email-filter-messages-from-imap-server"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/filter-messages-from-imap-server.html"
+source_commit: ""
+source_sha256: "b67471158fb62b5fd91bcdf6e141c0b8686774fd22309222acc0efd28c4e1991"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/filter-messages-from-imap-server/"
+source_snapshot_sha256: "037db5a34406aeec1f634e0097b77a39ec358e78fa9be866202909b4d477dcd5"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Basic Message Filtering {#basic-message-filtering}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/" target="_blank" rel="nofollow noopener noreferrer">ImapClient</a> class provides the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/listmessages/#listmessages" target="_blank" rel="nofollow noopener noreferrer">ListMessages()</a> method which gets all the messages from a mailbox. To get only messages which match some condition, use the overloaded <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/listmessages/#listmessages" target="_blank" rel="nofollow noopener noreferrer">ListMessages()</a> method which takes <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquery/" target="_blank" rel="nofollow noopener noreferrer">MailQuery</a> as an argument. The <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquery/" target="_blank" rel="nofollow noopener noreferrer">MailQuery</a> class provides various properties for specifying the conditions, for example, date, subject, sender, recipient and so on. The first example illustrates how to filter messages based on date and subject. We also show how to filter on other criteria and how to build more complex queries. The API also provides the capability to apply case-sensitive searching criteria to match exact filtering criteria. The API also allows specifying the search string encoding for filtering messages from the mailbox.
+
+### Filter Messages from Mailbox {#filter-messages-from-mailbox}
+
+1. [Connect and log in to an IMAP server](/net/email/connecting-to-imap-server/#standard-imap-connection)
+2. Create an instance of the <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquery/" target="_blank" rel="nofollow noopener noreferrer">MailQuery</a> and set the properties
+3. Call the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/listmessages/#listmessages_14" target="_blank" rel="nofollow noopener noreferrer">ImapClient.ListMessages(MailQuery query)</a> method and pass the <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquery/" target="_blank" rel="nofollow noopener noreferrer">MailQuery</a> with the parameters to get filtered messages only.
+
+The following code snippet shows you how to connect to an IMAP mailbox and get messages that arrived today and have the word "newsletter" in the subject.
+
+```csharp
+// Connect and log in to IMAP
+const string host = "host";
+const int port = 143;
+const string username = "user@host.com";
+const string password = "password";
+ImapClient client = new ImapClient(host, port, username, password);
+client.SelectFolder("Inbox");
+// Set conditions, Subject contains "Newsletter", Emails that arrived today
+ImapQueryBuilder builder = new ImapQueryBuilder();
+builder.Subject.Contains("Newsletter");
+builder.InternalDate.On(DateTime.Now);
+// Build the query and Get list of messages
+MailQuery query = builder.GetQuery();
+ImapMessageInfoCollection messages = client.ListMessages(query);
+Console.WriteLine("Imap: " + messages.Count + " message(s) found.");
+// Disconnect from IMAP
+client.Dispose();
+```
+
+### Filter Messages by Specific Criteria {#filter-messages-by-specific-criteria}
+
+[The code samples above](/net/email/filter-messages-from-imap-server/#filter-messages-from-mailbox) filters messages based on the email subject and date. We can use other properties to set other supported conditions as well. Below are some examples of setting the conditions using <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquery/" target="_blank" rel="nofollow noopener noreferrer">MailQuery</a>. The code snippets that follow show how to filter emails on:
+
+1. Today's date.
+2. A date range.
+3. From a specific sender.
+4. From a specific domain.
+5. From a specific recipient.
+
+#### Today's Date {#today}
+
+The following code snippet shows you how to filter emails on Today's Date.
+
+```csharp
+// Emails that arrived today
+MailQueryBuilder builder = new MailQueryBuilder();
+builder.InternalDate.On(DateTime.Now);
+```
+
+#### Date Range {#date-range}
+
+The following code snippet shows you how to filter emails on the date range.
+
+```csharp
+// Emails that arrived in last 7 days
+builder.InternalDate.Before(DateTime.Now);
+builder.InternalDate.Since(DateTime.Now.AddDays(-7));
+```
+
+#### Specific Sender {#specific-sender}
+
+The following code snippet shows you how to filter emails on a specific sender.
+
+```csharp
+// Get emails from specific sender
+builder.From.Contains("saqib.razzaq@127.0.0.1");
+```
+
+#### Specific Domain {#specific-domain}
+
+The following code snippet shows you how to filter emails on a specific domain.
+
+```csharp
+// Get emails from specific domain
+builder.From.Contains("SpecificHost.com");
+```
+
+#### Specific Recipient {#specific-recipient}
+
+The following code snippet shows you how to filter emails on a specific recipient.
+
+```csharp
+// Get emails sent to specific recipient
+builder.To.Contains("recipient");
+```
+
+## Advanced Query Building {#advanced-query-building}
+
+If different <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquerybuilder/" target="_blank" rel="nofollow noopener noreferrer">MailQueryBuilder</a> properties are set in separate statements, then all the conditions would be matched. For example, if we want to get messages between a date range and from a specific host, we need to write three statements.
+
+### Combine Queries with AND {#combine-queries-with-and}
+
+The following code snippet shows you how to combine queries with AND.
+
+```csharp
+// Emails from specific host, get all emails that arrived before today and all emails that arrived since 7 days ago
+builder.From.Contains("SpecificHost.com");
+builder.InternalDate.Before(DateTime.Now);
+builder.InternalDate.Since(DateTime.Now.AddDays(-7));
+```
+
+### Combine Queries with OR {#combine-queries-with-or}
+
+<a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquerybuilder/" target="_blank" rel="nofollow noopener noreferrer">MailQueryBuilder</a> provides the <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquerybuilder/or/#or" target="_blank" rel="nofollow noopener noreferrer">Or()</a> method which takes two <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquery/" target="_blank" rel="nofollow noopener noreferrer">MailQuery</a> instances as parameters. It gets the messages that match any of the two conditions specified. The following code snippet shows how to filter messages that either have "test" in the subject or "noreply@host.com" as the sender. The following code snippet shows you how to combine queries with OR.
+
+```csharp
+// Specify OR condition
+builder.Or(builder.Subject.Contains("test"), builder.From.Contains("noreply@host.com"));
+```
+
+### Filtration Based on InternalDate {#filtration-based-on-internaldate}
+
+Messages can be extracted from the server based upon the InternalDate however sometimes the server does not return all messages as visible in the inbox. Its reason can be the server timezone because it may not be UTC for all the servers like <a href="https://www.google.com.ua/search?client=opera\&q=timezone+gmail\&sourceid=opera\&ie=utf-8\&oe=utf-8\&channel=suggest#channel=suggest\&q=gmail+server+timezone++" target="_blank" rel="nofollow noopener noreferrer">Gmail</a>. Aspose sends commands like 008 SEARCH ON 4-May-2014 as per the <a href="https://www.rfc-editor.org/rfc/rfc1730" target="_blank" rel="nofollow noopener noreferrer">IMAP protocol</a> however result can differ due to server timezone settings. A new member is added in <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapmessageinfo/" target="_blank" rel="nofollow noopener noreferrer">ImapMessageInfo</a> as <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapmessageinfo/internaldate/" target="_blank" rel="nofollow noopener noreferrer">InternalDate</a> which further helps in filtering the messages. The following code snippet shows the use of <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapmessageinfo/internaldate/" target="_blank" rel="nofollow noopener noreferrer">InternalDate</a> to filter messages.
+
+```csharp
+// Connect and log in to IMAP
+const string host = "host";
+const int port = 143;
+const string username = "user@host.com";
+const string password = "password";
+ImapClient client = new ImapClient(host, port, username, password);
+client.SelectFolder("Inbox");
+
+// Set conditions, Subject contains "Newsletter", Emails that arrived today
+ImapQueryBuilder builder = new ImapQueryBuilder();
+builder.Subject.Contains("Newsletter");
+builder.InternalDate.On(DateTime.Now);
+
+// Build the query and Get list of messages
+MailQuery query = builder.GetQuery();
+ImapMessageInfoCollection messages = client.ListMessages(query);
+foreach (ImapMessageInfo info in messages)
+{
+    Console.WriteLine("Internal Date: " + info.InternalDate);
+}
+            
+// Disconnect from IMAP
+client.Dispose();
+```
+
+### Case-Sensitive Filtering {#case-sensitive-filtering}
+
+The following code snippet shows you how to use case-sensitive emails filtering.
+
+```csharp
+// Set conditions, Subject contains "Newsletter", Emails that arrived today
+ImapQueryBuilder builder = new ImapQueryBuilder();
+builder.Subject.Contains("Newsletter", true);
+builder.InternalDate.On(DateTime.Now);
+MailQuery query = builder.GetQuery();
+```
+
+### Specify Encoding for Query Builder {#specify-encoding-for-query-builder}
+
+The API's <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapquerybuilder/" target="_blank" rel="nofollow noopener noreferrer">ImapQueryBuilder</a> constructor can be used to specify the Encoding for the search string. This can also be set using the <a href="https://reference.aspose.com/email/net/aspose.email.tools.search/mailquerybuilder/defaultencoding/" target="_blank" rel="nofollow noopener noreferrer">DefaultEncoding</a> property of the MailQueryBuilder. The following code snippet shows you how to specify the encoding for query builder.
+
+```csharp
+// Set conditions
+ImapQueryBuilder builder = new ImapQueryBuilder(Encoding.UTF8);
+builder.Subject.Contains("ğüşıöç", true);
+MailQuery query = builder.GetQuery();
+```
+
+## Custom Filtering Options {#custom-filtering-options}
+
+### Filter Messages with Custom Flag {#filter-messages-with-custom-flag}
+
+```csharp
+ImapQueryBuilder queryBuilder = new ImapQueryBuilder();
+
+queryBuilder.HasFlags(ImapMessageFlags.Keyword("custom1"));
+
+queryBuilder.HasNoFlags(ImapMessageFlags.Keyword("custom2"));
+```
+
+### Custom Search for Filtering {#custom-search-for-filtering}
+
+For example, RFC 3501 standard does not allow a message search based on the existence of attachments in messages. But **Gmail** provides <a href="https://developers.google.com/gmail/imap/imap-extensions?hl=ru" target="_blank" rel="nofollow noopener noreferrer">IMAP Extensions</a> that allow performing such a search. The next code snippet shows how to make a corresponding query.
+
+```csharp
+ImapQueryBuilder queryBuilder = new ImapQueryBuilder();
+queryBuilder.CustomSearch("X-GM-RAW \"has:attachment\"");
+
+MailQuery mailQuery = queryBuilder.GetQuery();
+ImapMessageInfoCollection messageInfoCollection = imapClient.ListMessages(mailQuery);
+```
+
+### Filter Messages with Paging Support {#filter-messages-with-paging-support}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/" target="_blank" rel="nofollow noopener noreferrer">ImapClient</a> provides the capability to search for messages from the mailbox and list them with paging support. The following code snippet shows you how to filter messages with paging support.
+
+```csharp
+///<summary>
+/// This example shows how to search for messages using ImapClient of the API with paging support
+/// Introduced in Aspose.Email for .NET 6.4.0
+///</summary>
+using (ImapClient client = new ImapClient("host.domain.com", 84, "username", "password"))
+{
+    try
+    {
+        // Append some test messages
+        int messagesNum = 12;
+        int itemsPerPage = 5;
+        MailMessage message = null;
+        for (int i = 0; i < messagesNum; i++)
+        {
+            message = new MailMessage(
+                "from@domain.com",
+                "to@domain.com",
+                "EMAILNET-35128 - " + Guid.NewGuid(),
+                "111111111111111");
+            client.AppendMessage(ImapFolderInfo.InBox, message);
+        }
+        string body = "2222222222222";
+        for (int i = 0; i < messagesNum; i++)
+        {
+            message = new MailMessage(
+                "from@domain.com",
+                "to@domain.com",
+                "EMAILNET-35128 - " + Guid.NewGuid(),
+                body);
+            client.AppendMessage(ImapFolderInfo.InBox, message);
+        }
+
+        client.SelectFolder("Inbox");
+        ImapQueryBuilder iqb = new ImapQueryBuilder();
+        iqb.Body.Contains(body);
+        MailQuery query = iqb.GetQuery();
+
+        client.SelectFolder(ImapFolderInfo.InBox);
+        ImapMessageInfoCollection totalMessageInfoCol = client.ListMessages(query);
+        Console.WriteLine(totalMessageInfoCol.Count);
+
+        //////////////////////////////////////////////////////
+
+        List<ImapPageInfo> pages = new List<ImapPageInfo>();
+        PageSettings pageSettings = new PageSettings();
+        pageSettings.FolderName = ImapFolderInfo.InBox;
+
+        ImapPageInfo pageInfo = client.ListMessagesByPage(query, new PageInfo(itemsPerPage, 0), pageSettings);
+        pages.Add(pageInfo);
+        while (!pageInfo.LastPage)
+        {
+            pageInfo = client.ListMessagesByPage(query, pageInfo.NextPage, pageSettings);
+            pages.Add(pageInfo);
+        }
+        int retrievedItems = 0;
+        foreach (ImapPageInfo folderCol in pages)
+            retrievedItems += folderCol.Items.Count;
+    }
+    finally
+    {
+    }
+}
+```

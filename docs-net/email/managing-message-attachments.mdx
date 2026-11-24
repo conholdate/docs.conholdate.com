@@ -1,0 +1,324 @@
+---
+title: "Managing Message Attachments"
+sidebar_label: "Managing Message Attachments"
+sidebar_key: "net-email-managing-message-attachments"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/managing-message-attachments.html"
+source_commit: ""
+source_sha256: "29acdf24d60c053d9d3a32aac178cc45b6ba11f86c363b502b7cebc26fd3b37d"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/managing-message-attachments/"
+source_snapshot_sha256: "9a67db5a2e8156edcd07867f8938c093ed25d30d8f5bd6ed207aa9153772d4af"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Handling Attachments in Outlook {#handling-attachments-in-outlook}
+
+[Creating and Saving Outlook Message (MSG) Files](/net/email/creating-and-saving-outlook-files/) explains how to create and save messages, and how to create MSG files with attachments. This article explains how to manage Microsoft Outlook attachments with Aspose.Email. Attachments from a message file are accessed and saved to disk using the <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessage/" target="_blank" rel="nofollow noopener noreferrer">MapiMessage</a> class <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessageitembase/attachments/" target="_blank" rel="nofollow noopener noreferrer">Attachments</a> property. The <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessageitembase/attachments/" target="_blank" rel="nofollow noopener noreferrer">Attachments</a> property is a collection of type <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiattachmentcollection/" target="_blank" rel="nofollow noopener noreferrer">MapiAttachmentCollection</a> class.
+
+### Check Attachment Type (Inline or Regular) {#check-attachment-type-inline-or-regular}
+
+Inline and regular attachments serve different purposes. Inline attachments are visually integrated into the email message and are typically images or media files. Meanwhile, regular attachments are separate files attached to the email and can include various types of files. The <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiattachment/isinline/" target="_blank" rel="nofollow noopener noreferrer">MapiAttachment.IsInline</a> property of the <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiattachment/#mapiattachment-class" target="_blank" rel="nofollow noopener noreferrer">MapiAttachment</a> class gets a value indicating whether the attachment is inline or regular.
+
+The following code sample extracts and displays information about each attachment in the loaded MapiMessage, including their display names and whether they are inline attachments or not.
+
+```cs
+var message = MapiMessage.Load(fileName);
+
+foreach (var attach in message.Attachments)
+{
+    Console.WriteLine($"{attach.DisplayName} : {attach.IsInline}");
+}
+```
+
+### Check Attachment Type (IsReference) {#check-attachment-type-isreference}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiattachment/#mapiattachment-class" target="_blank" rel="nofollow noopener noreferrer">MapiAttachment</a> class includes the <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiattachment/isreference/" target="_blank" rel="nofollow noopener noreferrer">IsReference</a> property which allows developers to identify reference attachments in a message. With the following code sample, you can check if an attachment is a reference attachment:
+
+```cs
+foreach (var attachment in msg.Attachments)
+{
+    if (attachment.IsReference)
+    {
+        // Process reference attachment
+    }
+}
+```
+
+### Save Attachments from MSG Files {#save-attachments-from-msg-files}
+
+To save attachments from an MSG file:
+
+1. Iterate through the <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiattachmentcollection/" target="_blank" rel="nofollow noopener noreferrer">MapiAttachmentCollection</a> collection and get the individual attachments.
+2. To save the attachments, call the MapiAttachment class Save() method.
+
+The following code snippet shows you how to save attachments to the local disk.
+
+```csharp
+// Create an instance of MapiMessage from file
+MapiMessage message = MapiMessage.FromFile(dataDir + fileName);
+
+// Iterate through the attachments collection
+foreach (MapiAttachment attachment in message.Attachments)
+{
+    // Save the individual attachment
+    attachment.Save(dataDir + attachment.FileName);
+}
+```
+
+### Extract Attachments from RTF-Formatted MSG Files {#extract-attachments-from-rtf-formatted-msg-files}
+
+For messages formatted as RTF, the following code can be used to differentiate and extract attachments that are either Inline or appear as Icon in the message body. The following code snippet shows you how to Identify and Extract an embedded attachment from MSG formatted as RTF.
+
+```csharp
+
+var eml = MapiMessage.Load("MSG file with RTF Formatting.msg");
+
+foreach (var attachment in eml.Attachments)
+{
+    if (IsAttachmentInline(attachment))
+    {
+        try
+        {
+            SaveAttachment(attachment, Guid.NewGuid().ToString());
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+}
+
+static bool IsAttachmentInline(MapiAttachment attachment)
+{
+    foreach (var property in attachment.ObjectData.Properties.Values)
+    {
+        if (property.Name == "\x0003ObjInfo")
+        {
+            var odtPersist1 = BitConverter.ToUInt16(property.Data, 0);
+            return (odtPersist1 & (1 << (7 - 1))) == 0;
+        }
+    }
+    return false;
+}
+
+static void SaveAttachment(MapiAttachment attachment, string fileName)
+{
+    foreach (var property in attachment.ObjectData.Properties.Values)
+    {
+        if (property.Name == "Package")
+        {
+            using var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write);
+            fs.Write(property.Data, 0, property.Data.Length);
+        }
+    }
+}
+```
+
+### Get Nested Mail Message Attachments {#get-nested-mail-message-attachments}
+
+Embedded OLE attachments also appear in the <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessage/" target="_blank" rel="nofollow noopener noreferrer">MapiMessage</a> class Attachment collection. The following code example parses a message file for embedded message attachments and saves it to the disk. The <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessage/" target="_blank" rel="nofollow noopener noreferrer">MapiMessage</a> class FromProperties() static method can create a new message from embedded attachment. The following code snippet shows you how to get nested mail message attachments.
+
+```csharp
+// Create a MapiMessage object from the individual attachment
+MapiMessage getAttachment = MapiMessage.FromProperties(attachment.ObjectData.Properties);
+
+// Convert the embedded message to a MailMessage and save it to disk
+MailMessage mailMessage = getAttachment.ToMailMessage(new MailConversionOptions());
+mailMessage.Save(dataDir + @"NestedMailMessageAttachments_out.eml", SaveOptions.DefaultEml);
+```
+
+### Remove Attachments {#remove-attachments}
+
+Aspose Outlook library provides the functionality to remove attachments from Microsoft Outlook Message (.msg) files:
+
+- Call the RemoveAttachments() method. It takes the path of the message file as a parameter. It is implemented as a public static method, so you don't need to instantiate the object.
+
+The following code snippet shows you how to remove attachments.
+
+```csharp
+MapiMessage.RemoveAttachments(dataDir + "AttachmentsToRemove_out.msg");
+```
+
+You can also call the <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessage/" target="_blank" rel="nofollow noopener noreferrer">MapiMessage</a> class static method <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessage/destroyattachments/" target="_blank" rel="nofollow noopener noreferrer">DestroyAttachments()</a>. It works faster than RemoveAttachments(), because the RemoveAttachments() method parses the message file.
+
+```csharp
+MapiMessage.DestroyAttachments(dataDir + "AttachmentsToDestroy_out.msg");
+```
+
+### Add MSG Attachments {#add-msg-attachments}
+
+An Outlook message can contain other Microsoft Outlook messages in attachments either as regular or embedded messages. The <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiattachmentcollection/" target="_blank" rel="nofollow noopener noreferrer">MapiAttachmentCollection</a> provides overloaded members of the <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiattachmentcollection/add/" target="_blank" rel="nofollow noopener noreferrer">Add</a> method to create Outlook messages with both types of attachments:
+
+- `Add(string name, byte[] data)` - adds a regular attachment from a byte array.
+- `Add(string name, MapiMessage message)` - adds another Outlook message as an embedded message.
+
+The following code snippet shows you how to add both types of attachments to a message.
+
+```csharp
+MapiMessage message = new MapiMessage("from@test.com", "to@test.com", "Subj", "This is a message body");
+
+// Add a regular attachment from a byte array
+message.Attachments.Add("note.txt", File.ReadAllBytes(dataDir + "note.txt"));
+
+// Add another Outlook message as an embedded message
+MapiMessage attachMsg = MapiMessage.FromFile(dataDir + "Message.msg");
+message.Attachments.Add("Weekly report.msg", attachMsg);
+
+message.Save(dataDir + "WithAttachments_out.msg");
+```
+
+:::info
+**Try it out!**
+
+Add or remove email attachments with the free <a href="https://products.aspose.app/email/editor" target="_blank" rel="nofollow noopener noreferrer">**Aspose.Email Editor App**</a>.
+:::
+
+### Add Reference Attachments to MapiMessages {#add-reference-attachments-to-mapimessages}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.mapi/referenceattachmentoptions/" target="_blank" rel="nofollow noopener noreferrer">ReferenceAttachmentOptions</a> class simplifies the addition of reference attachments by encapsulating all necessary properties in a single object.
+
+**Parameters of ReferenceAttachmentOptions:**
+
+- **sharedLink**: A fully qualified shared link to the attachment provided by the web service hosting the file.
+- **url**: The file location or resource URL.
+- **providerName**: The name of the reference attachment provider (e.g., Google Drive, Dropbox).
+- **Example**: Adding a Reference Attachment with ReferenceAttachmentOptions
+
+```cs
+var options = new ReferenceAttachmentOptions(
+    "https://drive.google.com/file/d/1HJ-M3F2qq1oRrTZ2GZhUdErJNy2CT3DF/",
+    "https://drive.google.com/drive/my-drive",
+    "GoogleDrive");
+
+// Add reference attachment
+msg.Attachments.Add("Document.pdf", options);
+```
+
+### Embed Messages as Attachments {#embed-messages-as-attachments}
+
+The following code snippet shows you how to embed an MSG file attachment to a message.
+
+```csharp
+MapiMessage message = new MapiMessage("from@test.com", "to@test.com", "Subj", "This is a message body");
+MapiMessage attachMsg = MapiMessage.FromFile(dataDir + "Message.msg");
+message.Attachments.Add("Weekly report.msg", attachMsg);
+message.Save(dataDir + "WithEmbeddedMsg_out.msg");
+```
+
+### Read Embedded Messages from Attachments {#read-embedded-messages-from-attachments}
+
+The following code snippet shows you how to read embedded messages from attachments.
+
+```csharp
+var message = MapiMessage.FromFile(fileName);
+if (message.Attachments[0].ObjectData.IsOutlookMessage)
+{
+    var getData = message.Attachments[0].ObjectData.ToMapiMessage();
+}
+```
+
+## Inserting and Replacing Attachment {#inserting-and-replacing-attachment}
+
+Aspose.Email API provides the capability to insert attachments at specific index in the parent message. It also provides the facility to replace contents of an attachment with another message attachment.
+
+:::info
+**Try it out!**
+
+Run the <a href="https://github.com/aspose-email/Aspose.Email-for-.NET/tree/master/Sample%20Apps/ReplaceAttach/ReplaceAttach" target="_blank" rel="nofollow noopener noreferrer">ReplaceAttach</a> simple app project, and try the Aspose.Email capabilities to replace attachments in action.
+:::
+
+### Insert Attachments at Specific Locations {#insert-attachments-at-specific-locations}
+
+Aspose.Email API provides the capability to insert a MSG attachment to a parent MSG using the MapiAttachmentCollection's Insert method MapiAttachmentCollection Insert(int index, string name, MapiMessage msg). The following code snippet shows you how to insert an attachment at a specific location.
+
+```csharp
+var message = MapiMessage.FromFile(fileName);
+var memoryStream = new MemoryStream();
+message.Attachments[2].Save(memoryStream);
+           
+var getData = MapiMessage.FromStream(memoryStream);
+message.Attachments.Insert(1, "new 11", getData);
+```
+
+### Replace Attachment Contents {#replace-attachment-contents}
+
+This can be used to replace embedded attachment contents with the new ones using the Replace method. However, it can not be used to insert attachment with PR_ATTACH_NUM = 4(for example) in the collection with collection.Count = 2. The following code snippet shows you how to replace attachment contents.
+
+```csharp
+var message = MapiMessage.FromFile(fileName);
+var memoryStream = new MemoryStream();
+message.Attachments[2].Save(memoryStream);
+var getData = MapiMessage.FromStream(memoryStream);
+message.Attachments.Replace(1, "new 1", getData);
+```
+
+### Rename Attachments in MapiMessage {#rename-attachments-in-mapimessage}
+
+It is possible to edit the DisplayName property value in MapiMessage attachments.
+
+```cs
+var msg = MapiMessage.Load(fileName);
+msg.Attachments[0].DisplayName = "New display name 1";
+msg.Attachments[1].DisplayName = "New display name 2";
+```
+
+## Save Attachments from Digitally Signed Messages {#save-attachments-from-digitally-signed-messages}
+
+Aspose.Email API provides the capability to get or set a value indicating whether clear-signed message will be decoded. 
+
+For signed EML files, see [Retrieve Attachments from Signed Emails](/net/email/manage-email-attachments-and-embedded-objects/#retrieve-attachments-from-signed-emails).
+
+## Extract Embedded OLE Objects from oledata.mso {#extract-embedded-ole-objects-from-oledatamso}
+
+Sometimes embedded OLE data is represented as an `oledata.mso` attachment in a <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapiattachment/" target="_blank" rel="nofollow noopener noreferrer">MapiAttachment</a> and needs to be extracted manually. These `oledata.mso` files are in the Microsoft Compound Document File (MCDF) format, and support for such files is beyond the scope of Aspose.Email. However, Aspose.Email can be used in combination with other open-source libraries, such as <a href="http://sourceforge.net/projects/openmcdf/" target="_blank" rel="nofollow noopener noreferrer">OpenMCDF</a>, to read the contents of these files and save them to disk. Aspose.Email provides the <a href="https://reference.aspose.com/email/net/aspose.email.mapi/inlineattachmentextractor/" target="_blank" rel="nofollow noopener noreferrer">InlineAttachmentExtractor</a> class to enumerate the MSO packages contained in the binary data of `oledata.mso`, which can then be passed to a compound-file reading library for content extraction.
+
+When a message body type is HTML (not RTF) and there are OLE objects in the message, the `MapiPropertyTag.PR_ATTACH_DATA_OBJ` property is absent. In this case, the information about the OLE objects is contained in `oledata.mso`.
+
+To extract the contents using Aspose.Email and OpenMCDF:
+
+- Enumerate the MSO packages from the binary data of the `oledata.mso` attachment.
+- For each OLE item, read the compound file.
+- Read the stream named `CONTENTS`.
+- Save the contents to a `FileStream`.
+
+```csharp
+// The path to the File directory
+string dataDir = RunExamples.GetDataDir_Email();
+
+MapiMessage msg = MapiMessage.FromFile(dataDir + "double.msg");
+foreach (MapiAttachment mapiAttachment in msg.Attachments)
+{
+    if (mapiAttachment.LongFileName == "oledata.mso")
+    {
+        IDictionary<string, byte[]> oledata = InlineAttachmentExtractor.EnumerateMsoPackage(new MemoryStream(mapiAttachment.BinaryData));
+        int index = 0;
+        foreach (var oleItem in oledata)
+        {
+            // Using the OpenMCDF library
+            CompoundFile cf = new CompoundFile(new MemoryStream(oleItem.Value));
+            CFStream contents = cf.RootStorage.GetStream("CONTENTS");
+            using (FileStream fs = File.OpenWrite(index + ".pdf"))
+            {
+                byte[] data = contents.GetData();
+                fs.Write(data, 0, data.Length);
+                fs.Flush();
+                fs.Close();
+            }
+            index++;
+        }
+    }
+}
+```

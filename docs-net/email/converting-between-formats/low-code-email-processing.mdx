@@ -1,0 +1,406 @@
+---
+title: "Convert and Transform Messages with Minimal Code"
+sidebar_label: "Convert and Transform Messages with Minimal Code"
+sidebar_key: "net-email-converting-between-formats-low-code-email-processing"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/converting-between-formats/low-code-email-processing.html"
+source_commit: ""
+source_sha256: "9f74f67973403b322ce862ac8e7bf57e65208b128df2c46b7f857859998b8c33"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/converting-between-formats/low-code-email-processing/"
+source_snapshot_sha256: "fe34c573321a1c613d198b2ffc5baf67b64bc6ef37426ceb8f93c8274c260745"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "../_remote-markdown.css";
+
+Converting an email used to mean loading it into a `MailMessage`, picking the right `SaveOptions`, wiring up streams, and remembering which format needs which switches. The <a href="https://reference.aspose.com/email/net/aspose.email.lowcode/" target="_blank" rel="nofollow noopener noreferrer">`Aspose.Email.LowCode`</a> namespace collapses all of that into a single static call. You hand it a stream, the file name, and the format you want - it figures out the rest and writes the result wherever you tell it to.
+
+This article walks through every conversion the namespace supports, using the runnable <a href="https://docs.aspose.com/email/net/converting-between-formats/src/LowCodeEmailConversion" target="_blank" rel="nofollow noopener noreferrer">LowCodeEmailConversion</a> project that ships alongside it.
+
+## Why a "low-code" namespace? {#why-a-low-code-namespace}
+
+`Aspose.Email.LowCode` is a thin, task-oriented surface over the full email API. It exists for the 80% case - "I just need to turn this message into that format" - where you don't want to think about message models, MIME, or persistence options.
+
+It is built around three types:
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Type
+
+</th>
+<th>
+
+Role
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+<a href="https://reference.aspose.com/email/net/aspose.email.lowcode/converter/" target="_blank" rel="nofollow noopener noreferrer">`Converter`</a>
+
+</td>
+<td>
+
+Static methods that perform the conversion.
+
+</td>
+</tr>
+<tr>
+<td>
+
+<a href="https://reference.aspose.com/email/net/aspose.email.lowcode/ioutputhandler/" target="_blank" rel="nofollow noopener noreferrer">`IOutputHandler`</a>
+
+</td>
+<td>
+
+A contract that decides *where* the converted bytes go.
+
+</td>
+</tr>
+<tr>
+<td>
+
+<a href="https://reference.aspose.com/email/net/aspose.email.lowcode/folderoutputhandler/" target="_blank" rel="nofollow noopener noreferrer">`FolderOutputHandler`</a>
+
+</td>
+<td>
+
+A ready-made `IOutputHandler` that writes to a folder.
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+The split between *what to convert* (`Converter`) and *where it lands* (`IOutputHandler`) is the key design idea: the same one-line conversion can target disk, memory, a database, a cloud bucket, or an HTTP response simply by swapping the handler.
+
+## The Converter API at a glance {#the-converter-api-at-a-glance}
+
+Every method is `static`, returns a `Task`, and follows the same shape:
+
+```csharp
+Task Converter.ConvertToEml  (Stream input, string nameWithExtension, IOutputHandler handler);
+Task Converter.ConvertToMsg  (Stream input, string nameWithExtension, IOutputHandler handler);
+Task Converter.ConvertToHtml (Stream input, string nameWithExtension, IOutputHandler handler);
+Task Converter.ConvertToMht  (Stream input, string nameWithExtension, IOutputHandler handler);
+Task Converter.ConvertToMhtml(Stream input, string nameWithExtension, IOutputHandler handler);
+
+// Format chosen at run time via the outputType string ("eml", "msg", "html", ...):
+Task Converter.Convert        (Stream input, string nameWithExtension, IOutputHandler handler, string outputType);
+Task Converter.ConvertEmlOrMsg(Stream input, string nameWithExtension, IOutputHandler handler, string outputType);
+```
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Parameter
+
+</th>
+<th>
+
+Meaning
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`input`
+
+</td>
+<td>
+
+The source message as a `Stream` (a file, an upload, a memory buffer…).
+
+</td>
+</tr>
+<tr>
+<td>
+
+`nameWithExtension`
+
+</td>
+<td>
+
+The original file name, e.g. `"message.msg"`. The **extension tells the Converter the source format**, so it must be accurate.
+
+</td>
+</tr>
+<tr>
+<td>
+
+`handler`
+
+</td>
+<td>
+
+The `IOutputHandler` that receives the converted output stream.
+
+</td>
+</tr>
+<tr>
+<td>
+
+`outputType`
+
+</td>
+<td>
+
+(Run-time overloads only) the target format as a string.
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+Supported source formats are **EML** and **MSG**; supported targets are **EML**, **MSG**, **HTML**, **MHT**, and **MHTML**.
+
+> **Note:** these methods are asynchronous - always `await` them. The Converter writes to the handler as part of that task, so the output isn't guaranteed to be flushed until the returned `Task` completes.
+
+## Auto-detecting conversion {#auto-detecting-conversion}
+
+`Convert` reads the extension of `nameWithExtension`, detects the source format, and produces whatever `outputType` you ask for. This is the most flexible entry point when the target format is decided at run time (for example, from user input or configuration).
+
+```csharp
+using Aspose.Email.LowCode;
+
+using FileStream input = File.OpenRead("message.msg");
+var handler = new FolderOutputHandler(@"C:\output\auto");
+
+await Converter.Convert(input, "message.msg", handler, "eml");
+```
+
+## MSG → EML {#msg--eml}
+
+When the destination is fixed and known at compile time, prefer the explicit, intent-revealing method. `ConvertToEml` turns an Outlook `.msg` into a standard RFC 822 `.eml`:
+
+```csharp
+using FileStream input = File.OpenRead("message.msg");
+var handler = new FolderOutputHandler(@"C:\output\eml");
+
+await Converter.ConvertToEml(input, "message.msg", handler);
+```
+
+## EML → MSG {#eml--msg}
+
+The reverse direction. Use `ConvertToMsg` when an application or recipient expects native Outlook items:
+
+```csharp
+using FileStream input = File.OpenRead("message.eml");
+var handler = new FolderOutputHandler(@"C:\output\msg");
+
+await Converter.ConvertToMsg(input, "message.eml", handler);
+```
+
+## Email → HTML {#email--html}
+
+`ConvertToHtml` renders a message as a standalone HTML document - ideal for previewing email in a browser or embedding it in a web page. It accepts either `.eml` or `.msg` input:
+
+```csharp
+using FileStream input = File.OpenRead("message.eml");
+var handler = new FolderOutputHandler(@"C:\output\html");
+
+await Converter.ConvertToHtml(input, "message.eml", handler);
+```
+
+## Email → MHT and MHTML {#email--mht-and-mhtml}
+
+Both formats bundle the message body and its resources into a single web-archive file, which is convenient for archiving or sharing a self-contained snapshot. MHTML is the richer variant and typically preserves the email headers (From / To / Subject / Date) in the rendered output.
+
+```csharp
+// MHT
+using (FileStream input = File.OpenRead("message.msg"))
+    await Converter.ConvertToMht(input, "message.msg", new FolderOutputHandler(@"C:\output\mht"));
+
+// MHTML
+using (FileStream input = File.OpenRead("message.eml"))
+    await Converter.ConvertToMhtml(input, "message.eml", new FolderOutputHandler(@"C:\output\mhtml"));
+```
+
+## Convert only when needed {#convert-only-when-needed}
+
+`ConvertEmlOrMsg` converts the input to the requested format **only if it isn't already in that format**. Point it at a mixed pile of `.eml` and `.msg` files and ask for `"eml"`: the `.eml` files pass through, the `.msg` files are converted - without you branching on the extension yourself. This makes it perfect for *normalizing* an inbox to one format.
+
+```csharp
+// .eml input requesting "eml" -> passes through
+using (FileStream input = File.OpenRead("message.eml"))
+    await Converter.ConvertEmlOrMsg(input, "message.eml", handler, "eml");
+
+// .msg input requesting "eml" -> converted
+using (FileStream input = File.OpenRead("message.msg"))
+    await Converter.ConvertEmlOrMsg(input, "message.msg", handler, "eml");
+```
+
+## Batch-converting a folder {#batch-converting-a-folder}
+
+Because each conversion is just a method call, scaling to bulk work needs almost no extra code - enumerate the files and reuse the handler. Here every message in a folder is rendered to HTML:
+
+```csharp
+foreach (string path in Directory.EnumerateFiles(inputDir)
+             .Where(f => f.EndsWith(".eml") || f.EndsWith(".msg")))
+{
+    var handler = new FolderOutputHandler(Path.Combine(outputDir, Path.GetFileNameWithoutExtension(path)));
+    using FileStream input = File.OpenRead(path);
+    await Converter.Convert(input, Path.GetFileName(path), handler, "html");
+}
+```
+
+> **Tip:** `FolderOutputHandler` writes into an *existing* folder but does not create it. Call `Directory.CreateDirectory(...)` first. Giving each source its own subfolder also prevents collisions when several messages share a base name (two `message.*` files would otherwise both want to write `message.html`).
+
+## Sending output somewhere other than disk {#sending-output-somewhere-other-than-disk}
+
+This is where the `IOutputHandler` abstraction pays off. The interface is tiny:
+
+```csharp
+public interface IOutputHandler
+{
+    void AddOutputStream(string name, Action<Stream> writeAction);
+    Task AddOutputStream(string name, Func<Stream, Task> writeActionAsync);
+}
+```
+
+The Converter calls one of these overloads with the output file name and a writer. Your implementation supplies a `Stream` and decides what to do with the bytes. A handler that captures everything in memory looks like this:
+
+```csharp
+public sealed class InMemoryOutputHandler : IOutputHandler
+{
+    private readonly Dictionary<string, byte[]> _files = new(StringComparer.OrdinalIgnoreCase);
+    public IReadOnlyDictionary<string, byte[]> Files => _files;
+
+    public void AddOutputStream(string name, Action<Stream> writeAction)
+    {
+        using var buffer = new MemoryStream();
+        writeAction(buffer);
+        _files[name] = buffer.ToArray();
+    }
+
+    public async Task AddOutputStream(string name, Func<Stream, Task> writeActionAsync)
+    {
+        using var buffer = new MemoryStream();
+        await writeActionAsync(buffer);
+        _files[name] = buffer.ToArray();
+    }
+}
+```
+
+The conversion call itself is unchanged - only the handler differs:
+
+```csharp
+var handler = new InMemoryOutputHandler();
+using (FileStream input = File.OpenRead("message.msg"))
+    await Converter.ConvertToHtml(input, "message.msg", handler);
+
+byte[] html = handler.Files["message.html"]; // stream it, store it, return it...
+```
+
+From here it's a short step to a `Stream`-to-cloud or `Stream`-to-HTTP-response handler.
+
+## Choosing the right method {#choosing-the-right-method}
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Goal
+
+</th>
+<th>
+
+Use
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+Target format known at compile time
+
+</td>
+<td>
+
+`ConvertToEml` / `ConvertToMsg` / `ConvertToHtml` / `ConvertToMht` / `ConvertToMhtml`
+
+</td>
+</tr>
+<tr>
+<td>
+
+Target format decided at run time
+
+</td>
+<td>
+
+`Convert(..., outputType)`
+
+</td>
+</tr>
+<tr>
+<td>
+
+Normalize files, skipping ones already in the target format
+
+</td>
+<td>
+
+`ConvertEmlOrMsg(..., outputType)`
+
+</td>
+</tr>
+<tr>
+<td>
+
+Write results to a folder
+
+</td>
+<td>
+
+`FolderOutputHandler`
+
+</td>
+</tr>
+<tr>
+<td>
+
+Write results to memory / cloud / HTTP / database
+
+</td>
+<td>
+
+A custom `IOutputHandler`
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>

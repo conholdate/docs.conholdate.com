@@ -1,0 +1,113 @@
+---
+title: "Opening OLM Files"
+sidebar_label: "Opening OLM Files"
+sidebar_key: "net-email-opening-olm-files"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/opening-olm-files.html"
+source_commit: ""
+source_sha256: "9961fca1aca7b36178cef4059bec0e1f26129ed86bda883d9f64f1cb8f69ade0"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/opening-olm-files/"
+source_snapshot_sha256: "19546c49eee7e8137386f43a77d56a115a25ba99c1db513140c73cf207fddac6"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+Aspose.Email for .NET represents an Outlook for Mac storage file with the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmstorage/" target="_blank" rel="nofollow noopener noreferrer">OlmStorage</a> class. This article shows how to open an OLM file from a path or a stream, and how to safely load a file that may be corrupted.
+
+## Open an OLM File {#open-an-olm-file}
+
+An OLM file can be opened in two ways:
+
+- using a constructor;
+- using the static `FromFile` method.
+
+There is a difference in behavior between these two approaches that affects how the folder hierarchy is initialized. See [Navigating OLM Folders](/net/email/navigating-olm-folders/) for details.
+
+### Using the Constructor {#using-the-constructor}
+
+To open a file, call the constructor of the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmstorage/" target="_blank" rel="nofollow noopener noreferrer">OlmStorage</a> class and pass the full file name as an argument. Because `OlmStorage` implements `IDisposable`, wrap it in a `using` statement so that the underlying file handle is released when you are done.
+
+```cs
+var fileName = "MyStorage.olm";
+using (var olm = new OlmStorage(fileName))
+{
+    // work with the storage
+}
+```
+
+### Using the Static FromFile Method {#using-the-static-fromfile-method}
+
+To open a file, use the static <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmstorage/fromfile/" target="_blank" rel="nofollow noopener noreferrer">FromFile</a> method and pass the full file name as an argument:
+
+```cs
+var fileName = "MyStorage.olm";
+using (var olm = OlmStorage.FromFile(fileName))
+{
+    // work with the storage
+}
+```
+
+## Open an OLM File from a Stream {#open-an-olm-file-from-a-stream}
+
+When the OLM data does not come from a local path - for example, it is received from a database, a network resource, or cloud storage - you can open it directly from a `Stream`. Use the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmstorage/#constructors" target="_blank" rel="nofollow noopener noreferrer">OlmStorage(Stream)</a> constructor or the static <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmstorage/fromstream/" target="_blank" rel="nofollow noopener noreferrer">FromStream</a> method.
+
+```cs
+using (var stream = File.OpenRead("MyStorage.olm"))
+using (var olm = new OlmStorage(stream))
+{
+    // work with the storage
+}
+```
+
+The static method works the same way:
+
+```cs
+using (var stream = File.OpenRead("MyStorage.olm"))
+using (var olm = OlmStorage.FromStream(stream))
+{
+    // work with the storage
+}
+```
+
+:::info
+Keep the source stream open for as long as you access the storage. Disposing the stream before you finish reading folders and messages will cause read errors.
+:::
+
+## Open a Corrupted OLM File {#open-a-corrupted-olm-file}
+
+If a file may be partially corrupted, you can still extract as much data as possible without stopping on the first error. To do this, create the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmstorage/" target="_blank" rel="nofollow noopener noreferrer">OlmStorage</a> instance with the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmstorage/#constructors" target="_blank" rel="nofollow noopener noreferrer">OlmStorage(TraversalExceptionsCallback callback)</a> constructor, then load the file with the <a href="https://reference.aspose.com/email/net/aspose.email.storage.olm/olmstorage/load/" target="_blank" rel="nofollow noopener noreferrer">Load</a> method instead of `FromFile`.
+
+The callback receives the exceptions raised during loading and traversal, so you can log or ignore them. The `Load` method returns `true` if the file was loaded successfully and traversal is possible, and `false` if the file is too corrupted to traverse.
+
+```cs
+using (var olm = new OlmStorage((exception, id) =>
+{
+    // Exception handling code.
+    Console.WriteLine($"Failed to process item '{id}': {exception.Message}");
+}))
+{
+    if (olm.Load(fileName))
+    {
+        // The file was loaded and can be traversed.
+        var folderHierarchy = olm.GetFolders();
+    }
+    else
+    {
+        Console.WriteLine("The OLM file is corrupted and cannot be traversed.");
+    }
+}
+```
+
+For a complete example of extracting items from a corrupted file, see [Reading and Extracting OLM Messages](/net/email/reading-and-extracting-olm-messages/#extract-items-using-the-traversal-api).

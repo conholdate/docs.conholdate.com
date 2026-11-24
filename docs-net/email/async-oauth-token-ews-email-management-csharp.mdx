@@ -1,0 +1,191 @@
+---
+title: "Asynchronous Email Operations with OAuth Authentication & EWS Client"
+sidebar_label: "Asynchronous Email Operations with OAuth Authentication & EWS Client"
+sidebar_key: "net-email-async-oauth-token-ews-email-management-csharp"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/async-oauth-token-ews-email-management-csharp.html"
+source_commit: ""
+source_sha256: "baa4083adc81fff960e2e7bd969b8507c1aeec948127f32b94893e9a8a49014c"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/async-oauth-token-ews-email-management-csharp/"
+source_snapshot_sha256: "19470e5381f897da988c407a642620e741128ddcc857c392c774a079e29e2a27"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Async Method to Fetch OAuth Token {#async-method-to-fetch-oauth-token}
+
+Unlike the synchronous methods, the asynchronous methods are non-blocking and allow to perform multiple requests simultaneously. Asynchronous methods are named with the Async postfix.
+
+> **_NOTE:_** Async methods are available in versions targeting .NET Core, .NET Framework 4.5, and later.
+
+The following code sample defines a `SomeAsyncTokenProvider` class, which implements the <a href="https://reference.aspose.com/email/net/aspose.email.clients/iasynctokenprovider/" target="_blank" rel="nofollow noopener noreferrer">IAsyncTokenProvider</a> interface. The class implements <a href="https://reference.aspose.com/email/net/aspose.email.clients/iasynctokenprovider/getaccesstokenasync/" target="_blank" rel="nofollow noopener noreferrer">GetAccessTokenAsync</a> asynchronous method that returns a Task of type OAuthToken. This method fetches a valid <a href="https://reference.aspose.com/email/net/aspose.email.clients/oauthtoken/" target="_blank" rel="nofollow noopener noreferrer">OAuthToken</a> asynchronously.
+
+```cs
+private class SomeAsyncTokenProvider : IAsyncTokenProvider
+{
+    public SomeAsyncTokenProvider( /*some parameters*/)
+    {
+        ...
+    }
+
+    public async Task<OAuthToken> GetAccessTokenAsync(bool ignoreExistingToken = false,
+        CancellationToken cancellationToken = default)
+    {
+        //Some asynchronous code to get a valid OAuthToken
+        ...
+    }
+
+    public void Dispose()
+    {
+        ...
+    }
+}
+```
+
+## Asynchronous EWS Client Setup with OAuth Authentication {#asynchronous-ews-client-setup-with-oauth-authentication}
+
+The next code example obtains an Exchange Web Services (EWS) client asynchronously using OAuth authentication. The code performs the following steps:
+
+1. Creates a new <a href="https://reference.aspose.com/tasks/net/aspose.tasks/loadoptions/cancellationtoken/" target="_blank" rel="nofollow noopener noreferrer">CancellationToken</a> object that can be used to cancel asynchronous operations.
+2. Instantiates `SomeAsyncTokenProvider` class that implements the <a href="https://reference.aspose.com/email/net/aspose.email.clients/iasynctokenprovider/" target="_blank" rel="nofollow noopener noreferrer">IAsyncTokenProvider</a> interface. This class is used as a parameter for constructing a new <a href="https://reference.aspose.com/email/net/aspose.email.clients/oauthnetworkcredential/oauthnetworkcredential/" target="_blank" rel="nofollow noopener noreferrer">OAuthNetworkCredential</a> object.
+3. Sets the mailbox URI to the Exchange Web Services endpoint.
+4. Calls the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/ewsclient/getewsclientasync/" target="_blank" rel="nofollow noopener noreferrer">GetEwsClientAsync</a> method of the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/ewsclient/" target="_blank" rel="nofollow noopener noreferrer">EWSClient</a> class with the `mailboxUri` and `OAuthNetworkCredential` object as parameters. This method returns a Task object, so it awaits the result before continuing. The `cancellationToken` object is passed as an optional parameter to the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/ewsclient/getewsclientasync/" target="_blank" rel="nofollow noopener noreferrer">GetEwsClientAsync</a> method.
+
+```cs
+//The cancellationToken can be used
+var cancellationToken = new CancellationToken();
+
+//Create IAsyncEwsClientInstance
+IAsyncTokenProvider tokenProvider = new SomeAsyncTokenProvider(/*some parameters*/);
+const string mailboxUri = "https://outlook.office365.com/ews/exchange.asmx";
+var ewsClient = await EWSClient.GetEwsClientAsync(mailboxUri, new OAuthNetworkCredential(tokenProvider),
+    cancellationToken: cancellationToken);
+```
+
+## Send Email Messages {#send-email-messages}
+
+The code example below is attempting to send an email message asynchronously. The code performs the following steps:
+
+1. Creates a new <a href="https://reference.aspose.com/email/net/aspose.email/mailmessage/" target="_blank" rel="nofollow noopener noreferrer">MailMessage</a> object with the message parameters.
+2. Calls the <a href="https://reference.aspose.com/email/net/aspose.email.clients.deliveryservice.sendgrid/sendgridclient/sendasync/" target="_blank" rel="nofollow noopener noreferrer">SendAsync</a> method of the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/ewsclient/" target="_blank" rel="nofollow noopener noreferrer">EWSClient</a> object, passing the MailMessage as a parameter. Method is awaited since it returns a Task object. The `cancellationToken` object is passed as an optional parameter to the <a href="https://reference.aspose.com/email/net/aspose.email.clients.deliveryservice.sendgrid/sendgridclient/sendasync/" target="_blank" rel="nofollow noopener noreferrer">SendAsync</a> method.
+
+```cs
+MailMessage message = new MailMessage("from@aspose.com", "to@aspose.com", "Some subject", "Some body");
+await ewsClient.SendAsync(message, cancellationToken: cancellationToken);
+```
+
+## Fetch Email Messages {#fetch-email-messages}
+
+To fetch an email message asynchronously, use the following code example with the steps described below:
+
+1. Call the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iasyncewsclient/fetchitemasync/" target="_blank" rel="nofollow noopener noreferrer">FetchItemAsync</a> method of an EWSclient. The method takes two parameters:
+
+   - `messageUri` is a string representing the URI of the message to fetch
+   - `cancellationToken` is an optional parameter that can be used to cancel the asynchronous operation. The method returns a Task object that resolves to a <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessage/" target="_blank" rel="nofollow noopener noreferrer">MapiMessage</a> object when the asynchronous operation is complete. The "await" keyword is used to wait for the Task object to complete before proceeding.
+2. Assign to the `fetched` variable the result of the completed Task, which is a <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessage/" target="_blank" rel="nofollow noopener noreferrer">MapiMessage</a> object containing the fetched message data.
+
+   ```cs
+      var fetched = await ewsClient.FetchItemAsync(messageUri, cancellationToken: cancellationToken);
+   ```
+
+## Append Email Messages {#append-email-messages}
+
+The code example below is attempting to append email messages asynchronously. The code performs the following steps:
+
+1. Calls the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/appendmessagesasync/" target="_blank" rel="nofollow noopener noreferrer">AppendMessagesAsync</a> method of an <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/ewsclient/" target="_blank" rel="nofollow noopener noreferrer">EWSclient</a> object. The method takes an <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice.models/ewsappendmessage/" target="_blank" rel="nofollow noopener noreferrer">EwsAppendMessage</a> object that contains paremeters: the messages to append, the target folder URI, and the cancellation token.
+
+2. Creates the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice.models/ewsappendmessage/" target="_blank" rel="nofollow noopener noreferrer">EwsAppendMessage</a> object using the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice.models/ewsappendmessage/create/" target="_blank" rel="nofollow noopener noreferrer">Create</a> method and configures it with the following method calls:
+
+   - <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice.models/ewsappendmessage/addmessage/" target="_blank" rel="nofollow noopener noreferrer">AddMessage</a> adds a message to the append operation.
+   - <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice.models/ewsappendmessage/setfolder/" target="_blank" rel="nofollow noopener noreferrer">SetFolder</a> sets the target folder URI for the append operation.
+   - <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice.models/ewsappendmessage/setcancellationtoken/" target="_blank" rel="nofollow noopener noreferrer">SetCancellationToken</a> sets the cancellation token that can be used to cancel the asynchronous operation.
+
+3. The <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/appendmessagesasync/" target="_blank" rel="nofollow noopener noreferrer">AppendMessagesAsync</a> method returns a Task object that resolves to an IEnumerable object when the asynchronous operation is complete. The "await" keyword is used to wait for the Task object to complete before proceeding.
+
+4. The `uris` variable is assigned the result of the completed Task, which is an IEnumerable object containing the URIs of the appended messages.
+
+```cs
+IEnumerable<string> uris = await ewsClient.AppendMessagesAsync(
+    EwsAppendMessage.Create()
+        .AddMessage(message)
+        .AddMessage(fetched)
+        .SetFolder(folderUri)
+        .SetCancellationToken(cancellationToken));
+```
+
+## Copy Items {#copy-items}
+
+The code sample below shows how to copy items and performs the following steps:
+
+1. Calls the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iasyncewsclient/copyitemasync/" target="_blank" rel="nofollow noopener noreferrer">CopyItemAsync</a> method of an <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/ewsclient/" target="_blank" rel="nofollow noopener noreferrer">EWSClient</a> object. The method takes three parameters:
+
+   - `messageUri` is a string representing the URI of the message to copy
+   - `destinationFolderUri` is a string representing the URI of the destination folder
+   - `cancellationToken` is an optional parameter that can be used to cancel the asynchronous operation.
+
+   The method returns a Task object that resolves to a string when the asynchronous operation is complete. The "await" keyword is used to wait for the Task object to complete before proceeding.
+
+2. `newItemUri` variable is assigned the result of the completed Task, which is a string containing the URI of the newly created copy of the message.
+
+```cs
+string newItemUri = await ewsClient.CopyItemAsync(messageUri, destinationFolderUri, cancellationToken);
+```
+
+## Delete Items {#delete-items}
+
+The following code is attempting to delete an email message asynchronously.
+
+It calls the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iasyncewsclient/deleteitemasync/" target="_blank" rel="nofollow noopener noreferrer">DeleteItemAsync</a> method of an EWSClient object. The method takes three parameters:
+
+- `newItemUri` is a string representing the URI of the item to delete
+- `DeletionOptions.DeletePermanently` specifies that the item should be deleted permanently
+- `cancellationToken` is an optional parameter that can be used to cancel the asynchronous operation.
+
+The method returns a Task object that completes when the asynchronous operation is complete. The "await" keyword is used to wait for the Task object to complete before proceeding.
+
+```cs
+await ewsClient.DeleteItemAsync(newItemUri, DeletionOptions.DeletePermanently, cancellationToken);
+```
+
+## Delete Folders {#delete-folders}
+
+The following code is attempting to delete a folder asynchronously.
+
+It calls the <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/deletefolderasync/" target="_blank" rel="nofollow noopener noreferrer">DeleteFolderAsync</a> method of an EWSClient object. The method takes three parameters:
+
+- `folderUri` is a string representing the URI of the folder to delete
+- `deletePermanently` specifies whether to delete the folder permanently or move it to the "Deleted Items" folder
+- `cancellationToken` is an optional parameter that can be used to cancel the asynchronous operation.
+
+The method returns a Task object that completes when the asynchronous operation is complete. The "await" keyword is used to wait for the Task object to complete before proceeding.
+
+```cs
+const bool deletePermanently = true;
+await ewsClient.DeleteFolderAsync(folderUri, deletePermanently, cancellationToken);
+```
+
+## Update Items {#update-items}
+
+The code example below is attempting to update an item asynchronously. It performs the following steps:
+
+1. Creates an <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice.models/ewsupdateitem/" target="_blank" rel="nofollow noopener noreferrer">EwsUpdateItem</a> object using the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice.models/ewsupdateitem/create/#create_2" target="_blank" rel="nofollow noopener noreferrer">Create</a> method, passing in an item object. The EwsUpdateItem represents an update operation parameters. The <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice.models/ewsappendmessage/setcancellationtoken/" target="_blank" rel="nofollow noopener noreferrer">SetCancellationToken</a> method is called on the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice.models/ewsupdateitem/" target="_blank" rel="nofollow noopener noreferrer">EwsUpdateItem</a> object, passing in the `cancellationToken` parameter, which is an optional parameter that can be used to cancel the asynchronous operation.
+2. Passes the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice.models/ewsupdateitem/" target="_blank" rel="nofollow noopener noreferrer">EwsUpdateItem</a> object as a parameter to the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iasyncewsclient/updateitemasync/" target="_blank" rel="nofollow noopener noreferrer">UpdateItemAsync</a> method of an <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/ewsclient/" target="_blank" rel="nofollow noopener noreferrer">EWSClient</a>.
+3. The <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iasyncewsclient/updateitemasync/" target="_blank" rel="nofollow noopener noreferrer">UpdateItemAsync</a> method returns a Task object that completes when the asynchronous operation is complete. The "await" keyword is used to wait for the Task object to complete before proceeding.
+
+```cs
+await ewsClient.UpdateItemAsync(
+    EwsUpdateItem.Create(mapiNote)
+        .SetCancellationToken(cancellationToken));
+```

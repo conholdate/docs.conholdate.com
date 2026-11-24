@@ -1,0 +1,172 @@
+---
+title: "Manage Exchange Server Rules with EWS"
+sidebar_label: "Manage Exchange Server Rules with EWS"
+sidebar_key: "net-email-manage-exchange-server-rules-with-ews"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/manage-exchange-server-rules-with-ews.html"
+source_commit: ""
+source_sha256: "36502e7e96ce77c47f77d724f5f97428e6a6bf50ad67ef80f1389595315b4504"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/manage-exchange-server-rules-with-ews/"
+source_snapshot_sha256: "79312b15cea827dcb2df2d57d1f03dd7d483fc56428e60b233308969809bb871"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+Aspose.Email for .NET can be used to manage the rules on Exchange Server using the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/ewsclient/" target="_blank" rel="nofollow noopener noreferrer">EWSClient</a> class. This class uses Exchange Web Services (EWS), which are available in Exchange Server 2007 and later releases. This article explains how to manage the rules:
+
+- Read the rules already on the server.
+- Create a new rule.
+- Update an existing rule.
+
+Microsoft Exchange Server 2010 Service Pack 1 is required for all features described in this article.
+
+## Read Rules {#read-rules}
+
+To get all the rules from the Exchange Server:
+
+1. Connect to an Exchange Server using the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a> class.
+2. Call the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/getinboxrules/#getinboxrules" target="_blank" rel="nofollow noopener noreferrer">IEWSClient.GetInboxRules()</a> method to get all the rules.
+3. In a foreach loop, browse through all the rules and display the rule properties like conditions, actions, and name.
+
+The following code snippet shows you how to read rules.
+
+```csharp
+// Set mailboxURI, Username, password, domain information
+string mailboxURI = "https://ex2010/ews/exchange.asmx";
+string username = "test.exchange";
+string password = "pwd";
+string domain = "ex2010.local";
+
+// Connect to the Exchange Server
+NetworkCredential credential = new NetworkCredential(username, password, domain);
+IEWSClient client = EWSClient.GetEWSClient(mailboxURI, credential);
+            
+Console.WriteLine("Connected to Exchange server");
+
+// Get all Inbox Rules
+InboxRule[] inboxRules = client.GetInboxRules();
+
+// Display information about each rule
+foreach (InboxRule inboxRule in inboxRules)
+{
+    Console.WriteLine("Display Name: " + inboxRule.DisplayName);
+
+    // Check if there is a "From Address" condition
+    if (inboxRule.Conditions.FromAddresses.Count > 0)
+    {
+        foreach (MailAddress fromAddress in inboxRule.Conditions.FromAddresses)
+        {
+            Console.WriteLine("From: " + fromAddress.DisplayName + " - " + fromAddress.Address);
+        }
+    }
+    // Check if there is a "Subject Contains" condition
+    if (inboxRule.Conditions.ContainsSubjectStrings.Count > 0)
+    {
+        foreach (String subject in inboxRule.Conditions.ContainsSubjectStrings)
+        {
+            Console.WriteLine("Subject contains: " + subject);
+        }
+    }
+    // Check if there is a "Move to Folder" action
+    if (inboxRule.Actions.MoveToFolder.Length > 0)
+    {
+        Console.WriteLine("Move message to folder: " + inboxRule.Actions.MoveToFolder);
+    }
+}
+```
+
+## Create Rules {#create-rules}
+
+To create a new rule on the Exchange Server, perform the following steps:
+
+1. Connect to an Exchange Server using the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a> interface.
+2. Create a new instance of the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange/inboxrule/" target="_blank" rel="nofollow noopener noreferrer">InboxRule</a> class and set the following mandatory properties:
+   1. DisplayName
+   2. Conditions
+   3. Actions
+3. Call the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/createinboxrule/#createinboxrule" target="_blank" rel="nofollow noopener noreferrer">IEWSClient.CreateInboxRule()</a> method to create the rule.
+
+The following code snippet shows you how to create a new rule.
+
+```csharp
+// Set Exchange Server web service URL, Username, password, domain information
+string mailboxURI = "https://ex2010/ews/exchange.asmx";
+string username = "test.exchange";
+string password = "pwd";
+string domain = "ex2010.local";
+
+// Connect to the Exchange Server
+NetworkCredential credential = new NetworkCredential(username, password, domain);
+IEWSClient client = EWSClient.GetEWSClient(mailboxURI, credential);
+
+Console.WriteLine("Connected to Exchange server");
+
+InboxRule rule = new InboxRule();
+rule.DisplayName = "Message from client ABC";
+
+// Add conditions
+RulePredicates newRules = new RulePredicates();
+// Set Subject contains string "ABC" and Add the conditions
+newRules.ContainsSubjectStrings.Add("ABC");
+newRules.FromAddresses.Add(new MailAddress("administrator@ex2010.local", true));
+rule.Conditions = newRules;
+
+// Add Actions and Move the message to a folder
+RuleActions newActions = new RuleActions();
+newActions.MoveToFolder = "120:AAMkADFjMjNjMmNjLWE3NzgtNGIzNC05OGIyLTAwNTgzNjRhN2EzNgAuAAAAAABbwP+Tkhs0TKx1GMf0D/cPAQD2lptUqri0QqRtJVHwOKJDAAACL5KNAAA=AQAAAA==";
+rule.Actions = newActions;
+client.CreateInboxRule(rule);
+```
+
+## Update Rules {#update-rules}
+
+To update a rule on the Exchange Server:
+
+1. Connect to an Exchange Server using the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a> class.
+2. Call the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/getinboxrules/#getinboxrules" target="_blank" rel="nofollow noopener noreferrer">IEWSClient.GetInboxRules()</a> method to get all the rules.
+3. In a foreach loop, browse through all the rules and get the rule you want to change by matching the DisplayName in a condition.
+4. Update the rule properties.
+5. Call the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/updateinboxrule/#updateinboxrule/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient.UpdateInboxRule()</a> method to update the rule.
+
+The following code snippet shows you how to update a rule.
+
+```csharp
+// Set mailboxURI, Username, password, domain information
+string mailboxURI = "https://ex2010/ews/exchange.asmx";
+string username = "test.exchange";
+string password = "pwd";
+string domain = "ex2010.local";
+
+// Connect to the Exchange Server
+NetworkCredential credential = new NetworkCredential(username, password, domain);
+IEWSClient client = EWSClient.GetEWSClient(mailboxURI, credential);
+
+Console.WriteLine("Connected to Exchange server");
+
+// Get all Inbox Rules
+InboxRule[] inboxRules = client.GetInboxRules();
+
+// Loop through each rule
+foreach (InboxRule inboxRule in inboxRules)
+{
+    Console.WriteLine("Display Name: " + inboxRule.DisplayName);
+    if (inboxRule.DisplayName == "Message from client ABC")
+    {
+        Console.WriteLine("Updating the rule....");
+        inboxRule.Conditions.FromAddresses[0] = new MailAddress("administrator@ex2010.local", true);
+        client.UpdateInboxRule(inboxRule);
+    }
+}
+```

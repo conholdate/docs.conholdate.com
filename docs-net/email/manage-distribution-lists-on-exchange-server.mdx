@@ -1,0 +1,163 @@
+---
+title: "How to Create, Manage, and Use Distribution Lists in Exchange Server"
+sidebar_label: "How to Create, Manage, and Use Distribution Lists in Exchange Server"
+sidebar_key: "net-email-manage-distribution-lists-on-exchange-server"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/manage-distribution-lists-on-exchange-server.html"
+source_commit: ""
+source_sha256: "0616399c42f3668c843f9f5e675ce89de823a408f627cd6dff6df37ce7479fc1"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/manage-distribution-lists-on-exchange-server/"
+source_snapshot_sha256: "c81cf48a8ddee65b1b06efdc3a0428d3bf175c6c73dd607623200e07aab8d9c2"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+Aspose.Email API provides the capability to create and read distributions lists from the Exchange server. Distribution lists can be created on the server as well as members can be added to it using the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a>. This article shows how to work with distribution lists on the Exchange server.
+
+## Create Distribution Lists {#create-distribution-lists}
+
+The following code snippet shows you how to create a distribution list.
+
+```csharp
+IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+ExchangeDistributionList distributionList = new ExchangeDistributionList();
+distributionList.DisplayName = "test private list";
+MailAddressCollection members = new MailAddressCollection();
+members.Add("address1@host.com");
+members.Add("address2@host.com");
+members.Add("address3@host.com");
+client.CreateDistributionList(distributionList, members);
+```
+
+### Fetch Private Distribution Lists {#fetch-private-distribution-lists}
+
+The following code snippet shows you how to fetch a private distribution list.
+
+```csharp
+IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+ExchangeDistributionList[] distributionLists = client.ListDistributionLists();
+foreach (ExchangeDistributionList distributionList in distributionLists)
+{
+    MailAddressCollection members = client.FetchDistributionList(distributionList);
+    foreach (MailAddress member in members)
+    {
+        Console.WriteLine(member.Address);
+    }
+}
+```
+
+### Create MailAddress from List ID {#create-mailaddress-from-list-id}
+
+The following code snippet shows you how to create MailAddress from distribution list Id.
+
+```csharp
+
+ExchangeDistributionList[] distributionLists = client.ListDistributionLists();
+String id = distributionLists[0].Id;
+MailAddress distributionListAddress = new MailAddress("privateDL", true);
+distributionListAddress.Id.EWSId = id;
+```
+
+### Expand Public Distribution Lists {#expand-public-distribution-lists}
+
+The following code snippet shows you how to expand the public distribution List.
+
+```csharp
+
+                MailAddressCollection members = client.ExpandDistributionList(new MailAddress("public.distribution.list@host.com"));
+                foreach (MailAddress member in members)
+                {
+                    Console.WriteLine(member.Address);
+                }
+```
+
+## Add Members {#add-members}
+
+### Add Members to Private Lists {#add-members-to-private-lists}
+
+The following code snippet shows you how to add members to a private distribution list.
+
+```csharp
+IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+ExchangeDistributionList[] distributionLists = client.ListDistributionLists();
+MailAddressCollection newMembers = new MailAddressCollection();
+newMembers.Add("address4@host.com");
+newMembers.Add("address5@host.com");
+client.AddToDistributionList(distributionLists[0], newMembers);
+```
+
+### Add Members without Listing {#add-members-without-listing}
+
+The following code snippet shows you how to add members without listing.
+
+```csharp
+IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+ExchangeDistributionList distributionList = new ExchangeDistributionList();
+distributionList.Id = "list's id";
+distributionList.ChangeKey = "list's change key";
+MailAddressCollection newMembers = new MailAddressCollection();
+newMembers.Add("address6@host.com");
+client.AddToDistributionList(distributionList, newMembers);
+```
+
+### Send to Private Distribution List {#send-to-private-distribution-list}
+
+The following code snippet shows you how to send a message to a private distribution list.
+
+```csharp
+
+                ExchangeDistributionList[] distributionLists = client.ListDistributionLists();
+                MailAddress distributionListAddress = distributionLists[0].ToMailAddress();
+                MailMessage message = new MailMessage(new MailAddress("from@host.com"), distributionListAddress);
+                message.Subject = "sendToPrivateDistributionList";
+                client.Send(message);
+```
+
+## Delete Members {#delete-members}
+
+### Delete Members from Private Lists {#delete-members-from-private-lists}
+
+The following code snippet shows you how to delete members from a private distribution list.
+
+```csharp
+IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+ExchangeDistributionList[] distributionLists = client.ListDistributionLists();
+MailAddressCollection members = client.FetchDistributionList(distributionLists[0]);
+MailAddressCollection membersToDelete = new MailAddressCollection();
+membersToDelete.Add(members[0]);
+membersToDelete.Add(members[1]);
+client.DeleteFromDistributionList(distributionLists[0], membersToDelete);
+```
+
+### Delete Members without Listing {#delete-members-without-listing}
+
+The following code snippet shows you how to delete members without listing.
+
+```csharp
+IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+ExchangeDistributionList distributionList = new ExchangeDistributionList();
+distributionList.Id = "list's id";
+client.DeleteDistributionList(distributionList,true);
+```
+
+### Delete Private Distribution List {#delete-private-distribution-list}
+
+The following code snippet shows you how to delete a private distribution list.
+
+```csharp
+IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+ExchangeDistributionList[] distributionLists = client.ListDistributionLists();
+client.DeleteDistributionList(distributionLists[0],true);
+```

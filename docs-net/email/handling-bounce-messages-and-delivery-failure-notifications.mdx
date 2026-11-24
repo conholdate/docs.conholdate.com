@@ -1,0 +1,777 @@
+---
+title: "Handling Bounce Messages and Delivery Failure Notifications"
+sidebar_label: "Handling Bounce Messages and Delivery Failure Notifications"
+sidebar_key: "net-email-handling-bounce-messages-and-delivery-failure-notifications"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/handling-bounce-messages-and-delivery-failure-notifications.html"
+source_commit: ""
+source_sha256: "11e6999ef70f33334e3df582e492ae66e603ab568e6f299764979eab3e95e89c"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/handling-bounce-messages-and-delivery-failure-notifications/"
+source_snapshot_sha256: "fd47216a9b55afc81d3e2179b36aeb95b79c41f9c085ad7366d1b02f1bc93da1"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "./_remote-markdown.css";
+
+This article describes how to detect, analyze, and process bounce messages (delivery failure notifications).
+
+The `Aspose.Email.Bounce` namespace has classes and methods to detect and analyze bounce messages. The main features include:
+
+- Detecting whether an email message is a bounce message
+- Extracting bounce details (recipient, status code, reason, action)
+- Accessing the original message from bounce notifications
+- Handling different types of Delivery Status Notification (DSN) actions
+
+## Core Classes and Methods {#core-classes-and-methods}
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Class/Method
+
+</th>
+<th>
+
+Description
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+<a href="https://reference.aspose.com/email/net/aspose.email.bounce/bounceresult/" target="_blank" rel="nofollow noopener noreferrer">`BounceResult`</a>
+
+</td>
+<td>
+
+Contains the results of bounce detection
+
+</td>
+</tr>
+<tr>
+<td>
+
+<a href="https://reference.aspose.com/email/net/aspose.email.bounce/dsnaction/" target="_blank" rel="nofollow noopener noreferrer">`DSNAction`</a>
+
+</td>
+<td>
+
+Enum representing Delivery Status Notification actions
+
+</td>
+</tr>
+<tr>
+<td>
+
+<a href="https://reference.aspose.com/email/net/aspose.email/mailmessage/checkbounced/" target="_blank" rel="nofollow noopener noreferrer">`MailMessage.CheckBounced()`</a>
+
+</td>
+<td>
+
+Method to check if a message is a bounce
+
+</td>
+</tr>
+<tr>
+<td>
+
+<a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapimessage/checkbounced/" target="_blank" rel="nofollow noopener noreferrer">`MapiMessage.CheckBounced()`</a>
+
+</td>
+<td>
+
+Method to check if a message is a bounce
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+## Checking if a Message is a Bounce {#checking-if-a-message-is-a-bounce}
+
+To determine whether an email message is a bounce message, use the `CheckBounced()` method. This method returns a `BounceResult` object that contains information about the bounce.
+
+:::info
+The `CheckBounced()` method automatically detects bounce messages and extracts relevant information.
+:::
+
+```csharp
+using Aspose.Email;
+using Aspose.Email.Bounce;
+
+// Load a message
+MailMessage message = MailMessage.Load("message.eml");
+
+// Check if it's a bounce
+BounceResult result = message.CheckBounced();
+
+if (result.IsBounced)
+{
+    Console.WriteLine($"This is a bounce message!");
+}
+```
+
+## Extracting Bounce Details {#extracting-bounce-details}
+
+Once a bounce is detected, you can extract detailed information about the delivery failure:
+
+- **Recipient**: The original recipient address
+- **Status**: DSN status code (e.g., "5.1.1", "4.2.2")
+- **Reason**: Human-readable diagnostic code
+- **Action**: The delivery action performed (Failed, Delayed, etc.)
+
+```csharp
+if (result.IsBounced)
+{
+    Console.WriteLine($"Failed to: {result.Recipient}");
+    Console.WriteLine($"Status: {result.Status}");
+    Console.WriteLine($"Reason: {result.Reason}");
+    Console.WriteLine($"Action: {result.Action}");
+}
+```
+
+## Accessing the Original Message {#accessing-the-original-message}
+
+Bounce notifications may include the original message that was returned. You can access it through the `OriginalMessage` property of `BounceResult`:
+
+```csharp
+if (result.OriginalMessage != null)
+{
+    MailMessage original = result.OriginalMessage;
+    Console.WriteLine($"Original subject: {original.Subject}");
+    Console.WriteLine($"Original from: {original.From.Address}");
+}
+```
+
+## Handling Different DSN Actions {#handling-different-dsn-actions}
+
+The `DSNAction` enum represents different delivery status notification actions. Each action requires a different response:
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Action
+
+</th>
+<th>
+
+Description
+
+</th>
+<th>
+
+Recommended Action
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`Failed`
+
+</td>
+<td>
+
+Delivery permanently failed
+
+</td>
+<td>
+
+Remove recipient from list
+
+</td>
+</tr>
+<tr>
+<td>
+
+`Delayed`
+
+</td>
+<td>
+
+Delivery delayed
+
+</td>
+<td>
+
+Retry later
+
+</td>
+</tr>
+<tr>
+<td>
+
+`Delivered`
+
+</td>
+<td>
+
+Successfully delivered
+
+</td>
+<td>
+
+No action needed
+
+</td>
+</tr>
+<tr>
+<td>
+
+`Expanded`
+
+</td>
+<td>
+
+Expanded to multiple recipients
+
+</td>
+<td>
+
+Monitor for failures
+
+</td>
+</tr>
+<tr>
+<td>
+
+`Relayed`
+
+</td>
+<td>
+
+Relayed to non-DSN system
+
+</td>
+<td>
+
+No action needed
+
+</td>
+</tr>
+<tr>
+<td>
+
+`None`
+
+</td>
+<td>
+
+No action specified
+
+</td>
+<td>
+
+Investigate further
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+```csharp
+switch (result.Action)
+{
+    case DSNAction.Failed:
+        Console.WriteLine("Delivery permanently failed");
+        // Remove from mailing list
+        break;
+
+    case DSNAction.Delayed:
+        Console.WriteLine("Delivery delayed");
+        // Retry later
+        break;
+
+    case DSNAction.Delivered:
+        Console.WriteLine("Successfully delivered");
+        break;
+}
+```
+
+## Processing Multiple Bounce Messages {#processing-multiple-bounce-messages}
+
+To process multiple bounce messages from a directory:
+
+```csharp
+foreach (string file in Directory.GetFiles("bounces", "*.eml"))
+{
+    MailMessage message = MailMessage.Load(file);
+    BounceResult result = message.CheckBounced();
+
+    if (result.IsBounced)
+    {
+        // Process each bounce
+        Console.WriteLine($"Bounce for: {result.Recipient}");
+    }
+}
+```
+
+## DSN Status Codes {#dsn-status-codes}
+
+Bounce status codes follow the DSN (Delivery Status Notification) format defined in RFC 3463.
+
+### Permanent Failures (Start with "5.") {#permanent-failures-start-with}
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Status Code
+
+</th>
+<th>
+
+Description
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`5.1.1`
+
+</td>
+<td>
+
+Recipient not found (address not recognized)
+
+</td>
+</tr>
+<tr>
+<td>
+
+`5.1.2`
+
+</td>
+<td>
+
+Domain not found (DNS lookup failed)
+
+</td>
+</tr>
+<tr>
+<td>
+
+`5.2.1`
+
+</td>
+<td>
+
+Mailbox disabled (recipient account inactive)
+
+</td>
+</tr>
+<tr>
+<td>
+
+`5.2.2`
+
+</td>
+<td>
+
+Mailbox full (storage limit exceeded)
+
+</td>
+</tr>
+<tr>
+<td>
+
+`5.3.0`
+
+</td>
+<td>
+
+Message too large
+
+</td>
+</tr>
+<tr>
+<td>
+
+`5.4.0`
+
+</td>
+<td>
+
+Routing error
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+### Temporary Failures (Start with "4.") {#temporary-failures-start-with}
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Status Code
+
+</th>
+<th>
+
+Description
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`4.2.1`
+
+</td>
+<td>
+
+Mailbox temporarily disabled
+
+</td>
+</tr>
+<tr>
+<td>
+
+`4.2.2`
+
+</td>
+<td>
+
+Mailbox full
+
+</td>
+</tr>
+<tr>
+<td>
+
+`4.4.1`
+
+</td>
+<td>
+
+Connection timeout
+
+</td>
+</tr>
+<tr>
+<td>
+
+`4.4.2`
+
+</td>
+<td>
+
+Timeout waiting for connection
+
+</td>
+</tr>
+<tr>
+<td>
+
+`4.5.0`
+
+</td>
+<td>
+
+Temporary server error
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+## Common Bounce Handling Patterns {#common-bounce-handling-patterns}
+
+### Removing Invalid Recipients from Mailing List {#removing-invalid-recipients-from-mailing-list}
+
+When a bounce has a `Failed` action, the recipient address should be removed from your mailing list:
+
+```csharp
+if (result.IsBounced && result.Action == DSNAction.Failed)
+{
+    string failedRecipient = result.Recipient;
+    
+	// Remove from your mailing list
+}
+```
+
+### Logging Bounce Information {#logging-bounce-information}
+
+For compliance and analytics, you may want to log bounce information:
+
+```csharp
+var bounceLog = new BounceLogEntry
+{
+    Recipient = result.Recipient,
+    StatusCode = result.Status,
+    Reason = result.Reason,
+    Action = result.Action,
+    BounceDate = DateTime.UtcNow
+};
+
+// Save to database or file
+```
+
+### Retrying Temporary Failures {#retrying-temporary-failures}
+
+For temporary failures (`Delayed` action), add the recipient to a retry queue:
+
+```csharp
+if (result.Action == DSNAction.Delayed)
+{
+    // Add to retry queue
+}
+```
+
+### Extracting and Saving the Original Message {#extracting-and-saving-the-original-message}
+
+When the original message is included in the bounce notification, you may want to save it:
+
+```csharp
+if (result.OriginalMessage != null)
+{
+    string originalFileName = $"original_{Guid.NewGuid()}.eml";
+    result.OriginalMessage.Save(originalFileName, SaveOptions.DefaultEml);
+}
+```
+
+## Working with MapiMessage (Outlook MSG Files) {#working-with-mapimessage-outlook-msg-files}
+
+Bounce detection also works with Outlook MSG files using `MapiMessage`:
+
+```csharp
+// For Outlook MSG files
+MapiMessage msg = MapiMessage.Load("bounce.msg");
+BounceResult result = msg.CheckBounced();
+
+if (result.IsBounced)
+{
+    Console.WriteLine($"Bounce detected: {result.Recipient}");
+}
+```
+
+## IMAP Integration {#imap-integration}
+
+When using IMAP, you can automatically detect and handle bounce messages:
+
+```csharp
+using (ImapClient client = new ImapClient("imap.domain.com", "user", "pass"))
+{
+    client.SelectFolder(ImapFolderInfo.InBox);
+
+    ImapMessageInfoCollection messages = client.ListMessages();
+
+    foreach (ImapMessageInfo info in messages)
+    {
+        MailMessage message = client.FetchMessage(info.UniqueId);
+        BounceResult result = message.CheckBounced();
+
+        if (result.IsBounced)
+        {
+            // Move bounce to special folder
+            client.MoveMessage(info.UniqueId, "Bounced");
+        }
+    }
+}
+```
+
+## Troubleshooting {#troubleshooting}
+
+### Empty Recipient Field {#empty-recipient-field}
+
+Some bounce messages may not populate the `Recipient` field. In such cases, check for the `X-Failed-Recipients` header:
+
+```csharp
+if (string.IsNullOrEmpty(result.Recipient))
+{
+    string failedRecipients = message.Headers["X-Failed-Recipients"];
+    if (!string.IsNullOrEmpty(failedRecipients))
+    {
+        // Process failed recipients from header
+    }
+}
+```
+
+### Missing Original Message {#missing-original-message}
+
+Many bounce notifications do not include the original message. Always check if it's available:
+
+```csharp
+if (result.OriginalMessage == null)
+{
+    Console.WriteLine("Original message not included in bounce notification");
+    // Extract recipient from headers or other sources
+}
+```
+
+## BounceResult Properties {#bounceresult-properties}
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Property
+
+</th>
+<th>
+
+Type
+
+</th>
+<th>
+
+Description
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`IsBounced`
+
+</td>
+<td>
+
+`bool`
+
+</td>
+<td>
+
+True if the message is a bounce message
+
+</td>
+</tr>
+<tr>
+<td>
+
+`Action`
+
+</td>
+<td>
+
+`DSNAction`
+
+</td>
+<td>
+
+The delivery action performed (Failed, Delayed, etc.)
+
+</td>
+</tr>
+<tr>
+<td>
+
+`Recipient`
+
+</td>
+<td>
+
+`string`
+
+</td>
+<td>
+
+The original recipient email address
+
+</td>
+</tr>
+<tr>
+<td>
+
+`Status`
+
+</td>
+<td>
+
+`string`
+
+</td>
+<td>
+
+DSN status code (e.g., "5.1.1")
+
+</td>
+</tr>
+<tr>
+<td>
+
+`Reason`
+
+</td>
+<td>
+
+`string`
+
+</td>
+<td>
+
+Human-readable diagnostic reason
+
+</td>
+</tr>
+<tr>
+<td>
+
+`OriginalMessage`
+
+</td>
+<td>
+
+`MailMessage`
+
+</td>
+<td>
+
+The original message (if included in bounce)
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+## Best Practices {#best-practices}
+
+1. **Regular Processing**: Process bounce messages regularly to keep your mailing lists clean
+2. **Log Everything**: Maintain logs for compliance and troubleshooting
+3. **Respect Temporary Failures**: Implement retry logic for `Delayed` bounces
+4. **Immediate Removal**: Remove recipients immediately for `Failed` bounces
+5. **Verify Headers**: Check `X-Failed-Recipients` header when `Recipient` is empty
+6. **Use Dedicated Folder**: In IMAP, move bounces to a dedicated folder for easier processing

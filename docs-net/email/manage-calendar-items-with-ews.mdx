@@ -1,0 +1,373 @@
+---
+title: "Managing Calendar Items with Exchange Web Services (EWS)"
+sidebar_label: "Managing Calendar Items with Exchange Web Services (EWS)"
+sidebar_key: "net-email-manage-calendar-items-with-ews"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/manage-calendar-items-with-ews.html"
+source_commit: ""
+source_sha256: "74eda76e183671b2712da27500aa1ee9b31022fe42b509f5a55e275a58ff13c4"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/manage-calendar-items-with-ews/"
+source_snapshot_sha256: "b60e8c2eb540136a626b45084aeda1fa44e842f49725185366db94d8c009debf"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Send Meeting Requests {#send-meeting-requests}
+
+This article shows how to send a meeting request to multiple recipients using Exchange Web Services and Aspose.Email.
+
+1. Create a meeting request using the <a href="https://reference.aspose.com/email/net/aspose.email.calendar/appointment/" target="_blank" rel="nofollow noopener noreferrer">Appointment</a> class and set the location, time and attendees.
+2. Create an instance of the <a href="https://reference.aspose.com/email/net/aspose.email/mailmessage/" target="_blank" rel="nofollow noopener noreferrer">MailMessage</a> class and set the appointment using the <a href="https://reference.aspose.com/email/net/aspose.email/mailmessage/addalternateview/#addalternateview" target="_blank" rel="nofollow noopener noreferrer">MailMessage.AddAlternateView()</a> method.
+3. Connect to the Exchange Server and send the meeting request using the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/send/#send" target="_blank" rel="nofollow noopener noreferrer">Send(MailMessage)</a> method.
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/ewsclient/" target="_blank" rel="nofollow noopener noreferrer">EWSClient</a> class can be used to connect to an Exchange Server with Exchange Web Services (EWS) support. For this to work, the server has to be Exchange Server 2007 or later. The following code snippet shows you how to use EWS to send meeting requests.
+
+```csharp
+try
+{
+    // Create instance of IEWSClient class by giving credentials
+    IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain");
+
+    // Create the meeting request
+    Appointment app = new Appointment("meeting request", DateTime.Now.AddHours(1), DateTime.Now.AddHours(1.5), "administrator@test.com", "bob@test.com");
+    app.Summary = "meeting request summary";
+    app.Description = "description";
+
+
+    RecurrencePattern pattern = new Aspose.Email.Calendar.Recurrences.DailyRecurrencePattern(DateTime.Now.AddDays(5));
+    app.Recurrence = pattern;
+
+    // Create the message and set the meeting request
+    MailMessage msg = new MailMessage();
+    msg.From = "administrator@test.com";
+    msg.To = "bob@test.com";
+    msg.IsBodyHtml = true;
+    msg.HtmlBody = "<h3>HTML Heading</h3><p>Email Message detail</p>";
+    msg.Subject = "meeting request";
+    msg.AddAlternateView(app.RequestApointment(0));
+
+    // send the appointment
+    client.Send(msg);
+    Console.WriteLine("Appointment request sent");
+}
+catch (Exception ex)
+{
+    Console.WriteLine(ex.Message);
+}
+```
+
+## Manage Calendar Items via EWS {#manage-calendar-items-via-ews}
+
+Aspose.Email provides the capability to add, update and cancel appointments using Exchange Web Service (EWS) client. The IEWSClient <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/createappointment/#createappointment/" target="_blank" rel="nofollow noopener noreferrer">CreateAppointment</a>, <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/updateappointment/#updateappointment/" target="_blank" rel="nofollow noopener noreferrer">UpdateAppointment</a>, and <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/cancelappointment/#cancelappointment/" target="_blank" rel="nofollow noopener noreferrer">CancelAppointment</a> methods allow manipulating calendar items using EWS. This article provides a detailed code sample of working with Calendar items. The following code sample shows how to:
+
+1. Create an appointment.
+2. Update an appointment.
+3. Delete/Cancel an appointment.
+
+```csharp
+IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "your.username", "your.Password");
+DateTime date = DateTime.Now;
+DateTime startTime = new DateTime(date.Year, date.Month, date.Day, date.Hour, 0, 0);
+DateTime endTime = startTime.AddHours(1);
+string timeZone = "America/New_York";
+
+Appointment app = new Appointment("Room 112", startTime, endTime, "organizeraspose-email.test3@domain.com","attendee@gmail.com");
+app.SetTimeZone(timeZone);
+app.Summary = "NETWORKNET-34136" + Guid.NewGuid().ToString();
+app.Description = "NETWORKNET-34136 Exchange 2007/EWS: Provide support for Add/Update/Delete calendar items";
+
+string uid = client.CreateAppointment(app);
+Appointment fetchedAppointment1 = client.FetchAppointment(uid);
+app.Location = "Room 115";
+app.Summary = "New summary for " + app.Summary;
+app.Description = "New Description";
+client.UpdateAppointment(app);
+
+Appointment[] appointments1 = client.ListAppointments();
+Console.WriteLine("Total Appointments: "  + appointments1.Length);
+Appointment fetchedAppointment2 = client.FetchAppointment(uid);
+Console.WriteLine("Summary: " + fetchedAppointment2.Summary);
+Console.WriteLine("Location: " + fetchedAppointment2.Location);
+Console.WriteLine("Description: " + fetchedAppointment2.Description);
+client.CancelAppointment(app);
+Appointment[] appointments2 = client.ListAppointments();
+Console.WriteLine("Total Appointments: " + appointments2.Length);
+```
+
+## List Appointments with Paging Support {#list-appointments-with-paging-support}
+
+The ListAppointments method exposed by the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a> API retrieves the complete list of appointments from the Exchange server. This may take time if there is a large number of appointments on the Exchange Server. The API provides overloaded methods of <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/listappointments/#listappointments/" target="_blank" rel="nofollow noopener noreferrer">ListAppointments</a> method that gives paging support to the operation. This can be used in different combinations with the querying feature as well. The following overloaded methods are available to list appointments from Exchange Server with Paging support.
+
+- AppointmentCollection IEWSClient.ListAppointments(int itemsPerPage).
+- AppointmentCollection IEWSClient.ListAppointments(string folderUri, int itemsPerPage).
+- AppointmentCollection IEWSClient.ListAppointments(MailQuery query, int itemsPerPage).
+- AppointmentCollection IEWSClient.ListAppointments(string folderUri, MailQuery query, int itemsPerPage).
+- AppointmentCollection IEWSClient.ListAppointments(int itemsPerPage, int itemOffset).
+- AppointmentCollection IEWSClient.ListAppointments(string folderUri, int itemsPerPage, int itemOffset).
+- AppointmentCollection IEWSClient.ListAppointments(MailQuery query, int itemsPerPage, int itemOffset).
+- AppointmentCollection IEWSClient.ListAppointments(string folderUri, MailQuery query, int itemsPerPage, int itemOffset).
+
+The following code snippet shows you how to list appointments with paging support.
+
+```csharp
+using (IEWSClient client = EWSClient.GetEWSClient("exchange.domain.com", "username", "password"))
+{
+    try
+    {
+        Appointment[] appts = client.ListAppointments();
+        Console.WriteLine(appts.Length);
+        DateTime date = DateTime.Now;
+        DateTime startTime = new DateTime(date.Year, date.Month, date.Day, date.Hour, 0, 0);
+        DateTime endTime = startTime.AddHours(1);
+        int appNumber = 10;
+        Dictionary<string, Appointment> appointmentsDict = new Dictionary<string, Appointment>();
+        for (int i = 0; i < appNumber; i++)
+        {
+            startTime = startTime.AddHours(1);
+            endTime = endTime.AddHours(1);
+            string timeZone = "America/New_York";
+            Appointment appointment = new Appointment(
+                "Room 112",
+                startTime,
+                endTime,
+                "from@domain.com",
+                "to@domain.com");
+            appointment.SetTimeZone(timeZone);
+            appointment.Summary = "NETWORKNET-35157_3 - " + Guid.NewGuid().ToString();
+            appointment.Description = "EMAILNET-35157 Move paging parameters to separate class";
+            string uid = client.CreateAppointment(appointment);
+            appointmentsDict.Add(uid, appointment);
+        }
+        AppointmentCollection totalAppointmentCol = client.ListAppointments();
+
+        ///// LISTING APPOINTMENTS WITH PAGING SUPPORT ///////
+        int itemsPerPage = 2;
+        List<AppointmentPageInfo> pages = new List<AppointmentPageInfo>();
+        AppointmentPageInfo pagedAppointmentCol = client.ListAppointmentsByPage(itemsPerPage);
+        Console.WriteLine(pagedAppointmentCol.Items.Count);
+        pages.Add(pagedAppointmentCol);
+        while (!pagedAppointmentCol.LastPage)
+        {
+            pagedAppointmentCol = client.ListAppointmentsByPage(itemsPerPage, pagedAppointmentCol.PageOffset + 1);
+            pages.Add(pagedAppointmentCol);
+        }
+        int retrievedItems = 0;
+        foreach (AppointmentPageInfo folderCol in pages)
+            retrievedItems += folderCol.Items.Count;
+    }
+    finally
+    {
+    }
+}
+```
+
+## Add Event to Secondary Calendar Folder {#add-event-to-secondary-calendar-folder}
+
+Aspose.Email API lets you create a secondary Calendar folder on Exchange Server using the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a>. Appointments can then be added, updated or canceled from the secondary calendar using the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/createappointment/#createappointment/" target="_blank" rel="nofollow noopener noreferrer">CreateAppointment</a>, <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/updateappointment/#updateappointment/" target="_blank" rel="nofollow noopener noreferrer">UpdateAppointment</a> and <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/cancelappointment/#cancelappointment/" target="_blank" rel="nofollow noopener noreferrer">CancelAppointment</a> methods. The following API methods and properties are used in the code samples below to show the functionality of this feature. Please note that this feature is supported by Aspose.Email for .NET 6.5.0 onwards.
+
+- Method IEWSClient.CancelAppointment(Appointment, String).
+- Method IEWSClient.CancelAppointment(String, String).
+- Method IEWSClient.CreateAppointment(Appointment, String).
+- Method IEWSClient.CreateFolder(String, String, ExchangeFolderPermissionCollection, String).
+- Method IEWSClient.FetchAppointment(String, String).
+- Method IEWSClient.UpdateAppointment(Appointment, String).
+- Property IEWSClient.CurrentCalendarFolderUri.
+
+The following code snippet shows you how to add an event to the secondary calendar folder on the exchange server.
+
+```csharp
+using (IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "your.username", "your.Password"))
+{
+    try
+    {
+        // Create an appointmenta that will be added to secondary calendar folder
+
+        DateTime date = DateTime.Now;
+        DateTime startTime = new DateTime(date.Year, date.Month, date.Day, date.Hour, 0, 0);
+        DateTime endTime = startTime.AddHours(1);
+
+        string timeZone = "America/New_York";
+
+        Appointment[] listAppointments;
+        Appointment appointment = new Appointment("Room 121", startTime, endTime, "from@domain.com", "attendee@domain.com");
+        appointment.SetTimeZone(timeZone);
+        appointment.Summary = "EMAILNET-35198 - " + Guid.NewGuid().ToString();
+        appointment.Description = "EMAILNET-35198 Ability to add event to Secondary Calendar of Office 365";
+
+        // Verify that the new folder has been created
+        ExchangeFolderInfoCollection calendarSubFolders = client.ListSubFolders(client.MailboxInfo.CalendarUri);
+
+        string getfolderName;
+        string setFolderName = "New Calendar";
+        bool alreadyExits = false;
+
+        // Verify that the new folder has been created already exits or not 
+
+        for (int i = 0; i < calendarSubFolders.Count; i++)
+        {
+            getfolderName = calendarSubFolders[i].DisplayName;
+
+            if (getfolderName.Equals(setFolderName))
+            {
+                alreadyExits = true;
+            }
+        }
+
+        if (alreadyExits)
+        {
+            Console.WriteLine("Folder Already Exists");
+        }
+        else
+        {
+            // Create new calendar folder
+            client.CreateFolder(client.MailboxInfo.CalendarUri, setFolderName, null, "IPF.Appointment");
+
+            Console.WriteLine(calendarSubFolders.Count);
+
+            // Get the created folder URI
+            string newCalendarFolderUri = calendarSubFolders[0].Uri;
+
+            // appointment api with calendar folder uri
+            // Create
+            client.CreateAppointment(appointment, newCalendarFolderUri);
+            appointment.Location = "Room 122";
+            // update
+            client.UpdateAppointment(appointment, newCalendarFolderUri);
+            // list
+            listAppointments = client.ListAppointments(newCalendarFolderUri);
+
+            // list default calendar folder
+            listAppointments = client.ListAppointments(client.MailboxInfo.CalendarUri);
+
+            // Cancel
+            client.CancelAppointment(appointment, newCalendarFolderUri);
+            listAppointments = client.ListAppointments(newCalendarFolderUri);
+
+            // appointment api with context current calendar folder uri
+            client.CurrentCalendarFolderUri = newCalendarFolderUri;
+            // Create
+            client.CreateAppointment(appointment);
+            appointment.Location = "Room 122";
+            // update
+            client.UpdateAppointment(appointment);
+            // list
+            listAppointments = client.ListAppointments();
+
+            // list default calendar folder
+            listAppointments = client.ListAppointments(client.MailboxInfo.CalendarUri);
+
+            // Cancel
+            client.CancelAppointment(appointment);
+            listAppointments = client.ListAppointments();
+
+        }
+    }
+    finally
+    {
+    }
+}
+```
+
+## Share Calendar Invitation {#share-calendar-invitation}
+
+Microsoft Exchange server provides the capability to share calendars by sending calendar invitations to other users, registered on the same Exchange server. Aspose.Email API provides the same capability by allowing to share the calendar using the EWS API.
+
+```csharp
+using (IEWSClient client = EWSClient.GetEWSClient("https://outlook.office365.com/ews/exchange.asmx", "testUser", "pwd", "domain"))
+{
+    // delegate calendar access permission
+    ExchangeDelegateUser delegateUser = new ExchangeDelegateUser("sharingfrom@domain.com", ExchangeDelegateFolderPermissionLevel.NotSpecified);
+    delegateUser.FolderPermissions.CalendarFolderPermissionLevel = ExchangeDelegateFolderPermissionLevel.Reviewer;
+    client.DelegateAccess(delegateUser, "sharingfrom@domain.com");
+
+    // Create invitation
+    MapiMessage mapiMessage = client.CreateCalendarSharingInvitationMessage("sharingfrom@domain.com");
+    MailConversionOptions options = new MailConversionOptions();
+    options.ConvertAsTnef = true;
+    MailMessage mail = mapiMessage.ToMailMessage(options);
+    client.Send(mail);
+}
+```
+
+## Retrieve Extended Attributes {#retrieve-extended-attributes}
+
+```csharp
+IEWSClient client = EWSClient.GetEWSClient("https://exchange.office365.com/Exchange.asmx", "username","password");
+            
+//Fetch all calendars from Exchange calendar's folder
+string[] uriList = client.ListItems(client.MailboxInfo.CalendarUri);
+
+//Define the Extended Attribute Property Descriptor for searching purpose
+//In this case, we have a K1 Long named property for Calendar item
+PropertyDescriptor propertyDescriptor = new PidNamePropertyDescriptor("K1", PropertyDataType.Integer32, new Guid("00020329-0000-0000-C000-000000000046"));
+
+//Fetch calendars that have the custom property
+IList<MapiCalendar> mapiCalendarList = client.FetchMapiCalendar(uriList, new PropertyDescriptor[] { propertyDescriptor });
+
+foreach (MapiCalendar cal in mapiCalendarList)
+{
+    foreach (MapiNamedProperty namedProperty in cal.NamedProperties.Values)
+    {
+        Console.WriteLine(namedProperty.NameId + " = " + namedProperty.GetInt32());
+    }
+}
+```
+
+## Return Recurring Calendar Items {#return-recurring-calendar-items}
+
+<a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/ewsclient/" target="_blank" rel="nofollow noopener noreferrer">EWSClient</a> supports the return of the recurring calendar items within the range specified by StartDate and EndDate. <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange/appointmentquerybuilder/setcalendarview/" target="_blank" rel="nofollow noopener noreferrer">AppointmentQueryBuilder.SetCalendarView</a> method is used to define a specific date range and limit the number of returned appointments to retrieve relevant information. By setting the following parameters you can retrieve the appointments matching the specified criteria.
+
+- startDate: The start date of the calendar view. Appointments starting from this date will be included in the query result.
+
+- endDate: The end date of the calendar view. Appointments ending before or on this date will be included in the query result.
+
+- maxEntriesReturned: The maximum number of appointments to be returned in the query result. The value of -1 indicates that there is no specific limit.
+
+```cs
+ExchangeQueryBuilder builder = new ExchangeQueryBuilder();
+builder.Appointment.SetCalendarView(DateTime.Now, DateTime.Now.AddMonths(1), -1);
+
+Appointment[] appointments = client.ListAppointments(builder.GetQuery());
+```
+
+## Filter Appointments {#filter-appointments}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange.webservice/iewsclient/" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a> provides the facility to filter appointments from the Exchange server using the <a href="https://reference.aspose.com/email/net/aspose.email.clients.exchange/exchangequerybuilder/" target="_blank" rel="nofollow noopener noreferrer">ExchangeQueryBuilder</a>. Appointments can be filtered based on:
+
+- Dates
+- Recurrences
+
+### Filter Appointments by Dates {#filter-appointments-by-dates}
+
+```csharp
+IEWSClient client = EWSClient.GetEWSClient(mailboxUri, username, password, domain);
+
+DateTime startTime = new DateTime(2017,09, 15);
+DateTime endTime = new DateTime(2017, 10, 10);
+ExchangeQueryBuilder builder = new ExchangeQueryBuilder();
+builder.Appointment.Start.Since(startTime);
+builder.Appointment.End.BeforeOrEqual(endTime);
+MailQuery query = builder.GetQuery();
+Appointment[] appointments = client.ListAppointments(query);
+```
+
+### Filter Appointments by Recurring Events {#filter-appointments-by-recurring-events}
+
+```csharp
+builder = new ExchangeQueryBuilder();
+builder.Appointment.IsRecurring.Equals(false);
+query = builder.GetQuery();
+appointments = client.ListAppointments(query);
+```

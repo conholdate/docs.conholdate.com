@@ -1,0 +1,121 @@
+---
+title: "Multithreading Support and Connection Pool in Mail Clients"
+sidebar_label: "Multithreading Support and Connection Pool in Mail Clients"
+sidebar_key: "net-email-multithreading-support-in-mail-clients"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/multithreading-support-in-mail-clients.html"
+source_commit: ""
+source_sha256: "8d661fadb357d44b11bfd3202b4f4705a5de58db7dd186def2d8c2689bb1d2b2"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/multithreading-support-in-mail-clients/"
+source_snapshot_sha256: "1803687918a96f765fe0cc89a880ac86d10a9ad277d50e4c5d95c09708aa8cb2"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+Mail clients such as <a href="https://reference.aspose.com/email/net/aspose.email.clients.imap/imapclient/" target="_blank" rel="nofollow noopener noreferrer">ImapClient</a>, <a href="https://reference.aspose.com/email/net/aspose.email.clients.pop3/pop3client/" target="_blank" rel="nofollow noopener noreferrer">Pop3Client</a>, and <a href="https://reference.aspose.com/email/net/aspose.email.clients.smtp/smtpclient/" target="_blank" rel="nofollow noopener noreferrer">SmtpClient</a> can be used in a multithreaded environment. A client can keep one or more connections with a server. To manage the set of connections inside a client, a **connection pool** is used. The number of connections that can be created and used at the same time is limited by the <a href="https://reference.aspose.com/email/net/aspose.email.clients/credentialsbyhostclient/maxconnectionsperserver/" target="_blank" rel="nofollow noopener noreferrer">CredentialsByHostClient.MaxConnectionsPerServer</a> property. This property may be set to 1 or a greater value. By default, it is equal to 10.
+
+A commands queue is implemented for each connection to support multithreading operations. Commands implement the simplest operations defined in the protocol, such as `Noop`, `Authenticate`, and so on. A user may start the execution of more commands than there are available connections, but they will only be executed when the client is able to create a connection for the operation.
+
+## How Mail Clients Behave in a Multithreaded Environment {#how-mail-clients-behave-in-a-multithreaded-environment}
+
+Email clients have the following behavior:
+
+1. When `MaxConnectionsPerServer = 1`, the client creates one connection and performs authentication and authorization. This connection is kept in a working state until the client is disposed. All operations from different threads are directed into one commands queue placed in the main connection.
+
+2. When `MaxConnectionsPerServer > 1`, the client creates the required number of connections and performs authentication and authorization for every connection. One connection is reserved as the main connection. This connection is kept in a working state until the client is disposed. All other connections are created and disposed on demand. The maximum number of such connections is defined by the `MaxConnectionsPerServer` property. For instance, if `MaxConnectionsPerServer = 2`, then one connection is reserved as the main connection, and a second connection is used as an additional one for operations executed in other threads. Accordingly, if `MaxConnectionsPerServer = 3`, then the first connection is reserved as the main connection, and two other connections are used as additional ones for operations executed in other threads. When a request for a connection comes from a new thread and all connections are already in use, the client waits until the number of used connections decreases. This is a very important moment that clarifies why correctly disposing of connections is so important.
+
+## Examples of Using Mail Clients in a Multithreaded Environment {#examples-of-using-mail-clients-in-a-multithreaded-environment}
+
+A user may execute operations in different threads in several ways. They can be divided into two types.
+
+### Using Asynchronous (Begin/End) Methods {#using-asynchronous-beginend-methods}
+
+A user uses the asynchronous (Begin/End) methods defined in the client. In this case, the mail client launches new threads when needed. A tasks queue is implemented in the client (do not confuse it with the commands queue in the connection). A task may be executed if a connection is available. Once the number of used connections becomes less than the limit value, the client creates a new connection, creates a thread for the current task, and executes this task. An example of using asynchronous operations:
+
+```csharp
+// Create an imapclient with host, user and password
+ImapClient client = new ImapClient();
+client.Host = "domain.com";
+client.Username = "username";
+client.Password = "password";
+client.SelectFolder("InBox");
+
+ImapMessageInfoCollection messages = client.ListMessages();
+IAsyncResult res1 = client.BeginFetchMessage(messages[0].UniqueId);
+IAsyncResult res2 = client.BeginFetchMessage(messages[1].UniqueId);
+MailMessage msg1 = client.EndFetchMessage(res1);
+MailMessage msg2 = client.EndFetchMessage(res2);
+```
+
+### Using User-Created Threads {#using-user-created-threads}
+
+A user may create threads using objects such as `Thread`, `ThreadPool`, `Task`, or any other objects intended for this purpose. A user may also use threads created in third-party code. In this case, the client has two models of behavior.
+
+**a.** If the user has not taken care of creating additional connections for operations in the thread, all operations for this thread will be sent to the command queue of the main connection. The following is an example of operations in an additional thread without creating a new connection - all transactions are made via the main connection:
+
+```csharp
+List<MailMessage> List = new List<MailMessage>();
+ThreadPool.QueueUserWorkItem(delegate(object o)
+{
+    client.SelectFolder("folderName");
+    ImapMessageInfoCollection messageInfoCol = client.ListMessages();
+    foreach (ImapMessageInfo messageInfo in messageInfoCol)
+    {
+        List.Add(client.FetchMessage(messageInfo.UniqueId));
+    }
+});
+```
+
+**b.** When the user runs a method to create a new connection for an additional thread, this thread is blocked until the quota value for new connections changes to allow a new connection. Then a new connection is created. This connection is set as the default connection for all operations in this thread. After all operations in this thread are completed, the connection must be disposed. To create new connections, use the <a href="https://reference.aspose.com/email/net/aspose.email.clients/emailclient/createconnection/" target="_blank" rel="nofollow noopener noreferrer">CredentialsByHostClient.CreateConnection</a> method. This method returns an object that implements the `IDisposable` interface. To release the connection, the `Dispose` method must be invoked. Creating and disposing of a connection must be executed inside the thread where the mail operations are executed. An attempt to create a new connection in the thread where the mail client was created leads to an error, because this thread cannot be used to create a new connection at that moment. Creating a new connection is also not possible when `MaxConnectionsPerServer = 1`. A code example of creating a new connection in an additional thread:
+
+```csharp
+List<MailMessage> List1 = new List<MailMessage>();
+ThreadPool.QueueUserWorkItem(delegate(object o)
+{
+    using (IDisposable connection = client.CreateConnection())
+    {
+        client.SelectFolder("FolderName");
+        ImapMessageInfoCollection messageInfoCol = client.ListMessages();
+        foreach (ImapMessageInfo messageInfo in messageInfoCol)
+            List1.Add(client.FetchMessage(messageInfo.UniqueId));
+    }
+});
+```
+
+## Connection Pool {#connection-pool}
+
+Starting with Aspose.Email 19.3, the connection pool was refactored. The <a href="https://reference.aspose.com/email/net/aspose.email.clients/emailclient/" target="_blank" rel="nofollow noopener noreferrer">EmailClient</a> class was introduced, which eventually replaces the `CredentialsByHostClient` class. The <a href="https://reference.aspose.com/email/net/aspose.email.clients/emailclient/" target="_blank" rel="nofollow noopener noreferrer">EmailClient</a> class provides a <a href="https://reference.aspose.com/email/net/aspose.email.clients/emailclient/connectionasgmtmode/" target="_blank" rel="nofollow noopener noreferrer">ConnectionAsgmtMode</a> property which defines the mode of connection allocation in a multithreaded environment. `EmailClient.ConnectionAsgmtMode` is set using the <a href="https://reference.aspose.com/email/net/aspose.email.clients/connectionasgmttype/" target="_blank" rel="nofollow noopener noreferrer">ConnectionAsgmtType</a> enumeration.
+
+### Connection Types {#connection-types}
+
+There are three connection types:
+
+- **The main connection.** This is the connection created and disposed together with the mail client. It cannot be created or disposed manually.
+- **Default connection.** A user can create default connections for threads with the <a href="https://reference.aspose.com/email/net/aspose.email.clients/emailclient/createconnection/" target="_blank" rel="nofollow noopener noreferrer">CreateConnection</a> method. If a default connection exists, all methods of the email client executed in a thread will implicitly use this connection. Only one default connection can exist per thread. It can be created manually or automatically, depending on the `EmailClient.ConnectionAsgmtMode` property. These connections can be created manually with the `EmailClient.CreateConnection(createAsDefaultConnection = true)` method. If a default connection is not used (depends on the connection allocation mode), the main connection is used implicitly instead.
+- **Independent connections.** These are connections that are not linked to threads. They can be created manually and have to be used explicitly as a method parameter. These connections can be created manually with the `EmailClient.CreateConnection()` method or the `EmailClient.CreateConnection(createAsDefaultConnection = false)` method.
+
+### Connection Allocation Types {#connection-allocation-types}
+
+To set up the <a href="https://reference.aspose.com/email/net/aspose.email.clients/emailclient/connectionasgmtmode/" target="_blank" rel="nofollow noopener noreferrer">EmailClient.ConnectionAsgmtMode</a> property, the <a href="https://reference.aspose.com/email/net/aspose.email.clients/connectionasgmttype/" target="_blank" rel="nofollow noopener noreferrer">ConnectionAsgmtType</a> enumeration is used. The allocation types it provides are listed below.
+
+- **ConnectionAsgmtType.UseMainOrDefault** This mode is used by default in email clients. The email client uses the main connection for all operations from multiple threads if a default connection has not been created, or if a connection has not been passed as a method parameter explicitly. The main connection is created at the same time as the email client. The user can create default connections for threads with the `CreateConnection` method. If a default connection for a thread is created, it is used implicitly for all methods of the email client invoked in that thread. If a default connection for a thread is not created, the main connection is used for all methods invoked in that thread. The user can also create connections not linked to threads (not default connections) with the `CreateConnection` method. To use other connections (not main and not default), the user has to pass the connection explicitly as a parameter of the method. The user can additionally create any number of connections. Only one default connection can exist per thread. Please note that default connections work correctly if the user uses `Thread` objects for multitasking programming. If the user uses a connection pool or `Task` objects for multitasking, this mode may lead to incorrect behavior. To avoid this problem, the user has to manually dispose of the default connection (if it is used) at the end of the code execution.
+
+- **ConnectionAsgmtType.UseMain** The email client uses the main connection for all operations from multiple threads. The main connection is created at the same time as the email client. The user cannot create default connections, but can create connections not linked to threads with the `CreateConnection` method. To use other connections, the user has to pass them explicitly as a method parameter.
+
+- **ConnectionAsgmtType.UseDefault** The email client uses only default connections implicitly for all operations from multiple threads. The main connection is not used in this mode. If a default connection has not been created for a thread (at the first invocation of an email client method), the email client creates a default connection implicitly for the thread before the first operation is executed. The user cannot create default connections for threads with the `CreateConnection` method because they are created automatically. The user can also create connections not linked to threads with the `CreateConnection` method. To use other connections, the user has to pass them explicitly as a method parameter. The user can additionally create any number of connections. Only one default connection can be used per thread. Please note that default connections work correctly if the user uses `Thread` objects for multitasking programming. If the user uses a connection pool or `Task` objects for multitasking, this mode may lead to incorrect behavior. To avoid this problem, the user has to manually dispose of the default connection at the end of the code execution.
+
+## Recommendations {#recommendations}
+
+If the user sends all commands to the main connection, a situation may arise where commands from different threads are mixed. The user should understand which commands depend on their sequence and take measures to synchronize such commands. It is also necessary to consider the possibility of executing commands in different sessions (IMAP/POP3). The most time-consuming operations are `FetchMessage`, `AppendMessage`, and `Send`. It probably makes sense to perform these operations with a new thread and a new connection. Quick operations such as `Delete` make sense to perform with the main connection. Please note that the initialization of a new connection is a fairly time-consuming operation.

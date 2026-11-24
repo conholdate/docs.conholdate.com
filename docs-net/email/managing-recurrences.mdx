@@ -1,0 +1,600 @@
+---
+title: "Managing Recurrences"
+sidebar_label: "Managing Recurrences"
+sidebar_key: "net-email-managing-recurrences"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/managing-recurrences.html"
+source_commit: ""
+source_sha256: "db778ce525f10aa5e882ad601f09e87fcfb10b7109ce860bfae2cb9afdb76a37"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/managing-recurrences/"
+source_snapshot_sha256: "dda923c24aa11278e00bdc732cc2d72f6ba8933bbc2bb40b91f9bf93a34e815c"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Working with Daily Recurrences {#working-with-daily-recurrences}
+
+Aspose.Email supports creation of daily recurrences using MapiCalendarDailyRecurrencePattern. Three different Mapi calendar recurrence end types can be used including EndAfterNOccurrences, EndAfterDate and NeverEnd. This section demonstrates the creation of different daily recurrence patterns.
+
+### Daily Recurrences with Occurrence Count {#daily-recurrences-with-occurrence-count}
+
+In this type of recurrence, number of recurrences is to be set along with other information as follows:
+
+1. Set start, end and due date.
+2. Create a MapiTask.
+3. Set task state to NotAssigned.
+4. Create the daily recurrence object by setting the properties like PatternType, Period, WeekStartDay, EndType and OccurenceCount.
+5. Set MapiTask.Recurrence property to this daily recurrence object.
+6. Save this message on disc.
+
+The following code snippet shows you how to create task with recurrence end type as EndAfterNOccurrence.
+
+```csharp
+// The path to the File directory.
+string dataDir = RunExamples.GetDataDir_Outlook();
+
+TimeZone localZone = TimeZone.CurrentTimeZone;
+TimeSpan timeSpan = localZone.GetUtcOffset(DateTime.Now);
+DateTime StartDate = new DateTime(2015, 7, 16);
+StartDate = StartDate.Add(timeSpan);
+
+DateTime DueDate = new DateTime(2015, 7, 16);
+DateTime endByDate = new DateTime(2015, 8, 1);
+DueDate = DueDate.Add(timeSpan);
+endByDate = endByDate.Add(timeSpan);
+ 
+MapiTask task = new MapiTask("This is test task", "Sample Body", StartDate, DueDate);
+task.State = MapiTaskState.NotAssigned;
+
+// Set the Daily recurrence
+var rec = new MapiCalendarDailyRecurrencePattern
+{
+    PatternType = MapiCalendarRecurrencePatternType.Day,
+    Period = 1,
+    WeekStartDay = DayOfWeek.Sunday,
+    EndType = MapiCalendarRecurrenceEndType.EndAfterNOccurrences,
+    OccurrenceCount = GetOccurrenceCount(StartDate, endByDate, "FREQ=DAILY"),
+};
+
+if (rec.OccurrenceCount==0)
+{
+    rec.OccurrenceCount = 1;
+}
+
+task.Recurrence = rec;
+task.Save(dataDir + "Daily_out.msg", TaskSaveFormat.Msg);
+```
+
+Following function can be used to calculate the number of events between the two dates:
+
+```csharp
+private static uint GetOccurrenceCount(DateTime start, DateTime endBy, string rrule)
+{
+    CalendarRecurrence pattern = new CalendarRecurrence(string.Format("DTSTART:{0}\r\nRRULE:{1}", start.ToString("yyyyMMdd"), rrule));
+    DateCollection dates = pattern.GenerateOccurrences(start, endBy);
+    return (uint)dates.Count;
+}
+```
+
+#### Setting the Occurrences Count Value {#setting-the-occurrences-count-value}
+
+The following code snippet shows you how to set the occurrences count value.
+
+```csharp
+// Set the Daily recurrence
+var record = new MapiCalendarDailyRecurrencePattern
+{
+    PatternType = MapiCalendarRecurrencePatternType.Day,
+    Period = 1,
+    WeekStartDay = DayOfWeek.Sunday,
+    EndType = MapiCalendarRecurrenceEndType.EndAfterNOccurrences,
+    OccurrenceCount = 5,
+};
+task.Recurrence = record;
+```
+
+### Daily Recurrences: EndAfterDate Recurrance Type {#daily-recurrences-endafterdate-recurrance-type}
+
+"End By" option in the Mapi Task is achieved by setting the OccurrenceCount property calculated by the GetOccurrenceCount() function. This function takes start date , end date and RRULE string.
+
+#### Daily Recurrences: Setting the Every Day value {#daily-recurrences-setting-the-every-day-value}
+
+The following code snippet shows you how to set the period value to 1 and INTERVAL value to 1 in the RRULE string as well.
+
+```csharp
+// Set the Daily recurrence
+var record = new MapiCalendarDailyRecurrencePattern
+{
+    PatternType = MapiCalendarRecurrencePatternType.Day,
+    Period = 1,
+    EndType = MapiCalendarRecurrenceEndType.EndAfterDate,
+    OccurrenceCount = GetOccurrenceCount(StartDate, endByDate, "FREQ=DAILY;INTERVAL=1"),
+    EndDate = endByDate
+};
+```
+
+Every Day value can be set to any appropriate value as shown in the following example:
+
+```csharp
+
+// Set the Daily recurrence
+var record = new MapiCalendarDailyRecurrencePattern
+{
+	PatternType = MapiCalendarRecurrencePatternType.Day,
+	Period = 2,
+	EndType = MapiCalendarRecurrenceEndType.EndAfterDate,
+	OccurrenceCount = GetOccurrenceCount(StartDate, endByDate, "FREQ=DAILY;INTERVAL=2"),
+};
+```
+
+### Daily Recurrences: NeverEnd Recurrance Type {#daily-recurrences-neverend-recurrance-type}
+
+End type can be set by using MapiCalendarRecurrenceEndType.NeverEnd. Period or INTERVAL can be set to required value say 1 in the following example.
+
+```csharp
+// Set the Daily recurrence
+var record = new MapiCalendarDailyRecurrencePattern
+{
+    PatternType = MapiCalendarRecurrencePatternType.Day,
+    Period = 1,
+    EndType = MapiCalendarRecurrenceEndType.NeverEnd,
+};
+```
+
+## Working with Weekly Recurrences {#working-with-weekly-recurrences}
+
+Aspose.Email provides rich features for creation of weekly recurrences using MapiCalendarWeeklyRecurrencePattern. Three different Mapi calendar recurrence end types can be used including EndAfterNOccurrences, EndAfterDate and NeverEnd. This section demonstrates the creation of different weekly recurrence patterns.
+
+### Weekly Recurrences: EndAfterNOccurrences Recurrance Type {#weekly-recurrences-endafternoccurrences-recurrance-type}
+
+In this type of recurrence, number of recurrences is to be set along with other information as follows:
+
+1. Set start, end and due date.
+2. Create a MapiTask.
+3. Set task state to NotAssigned.
+4. Create the weekly recurrence object by setting the properties like PatternType, Period, WeekStartDay, EndType and OccurenceCount.
+5. Set MapiTask.Recurrence property to this weekly recurrence object.
+6. Save this message on disc.
+
+The following code snippet shows you how to create a task with recurrence end type as EndAfterNOccurrence.
+
+```csharp
+// The path to the File directory.
+string dataDir = RunExamples.GetDataDir_Outlook();
+TimeZone localZone = TimeZone.CurrentTimeZone;
+TimeSpan ts = localZone.GetUtcOffset(DateTime.Now);
+DateTime StartDate = new DateTime(2015, 7, 16);
+StartDate = StartDate.Add(ts);
+
+DateTime DueDate = new DateTime(2015, 7, 16);
+DateTime endByDate = new DateTime(2015, 9, 1);
+DueDate = DueDate.Add(ts);
+endByDate = endByDate.Add(ts);
+
+MapiTask task = new MapiTask("This is test task", "Sample Body", StartDate, DueDate);
+task.State = MapiTaskState.NotAssigned;
+
+// Set the weekly recurrence
+var rec = new MapiCalendarWeeklyRecurrencePattern
+{
+    EndType = MapiCalendarRecurrenceEndType.EndAfterNOccurrences,
+    PatternType = MapiCalendarRecurrencePatternType.Week,
+    Period = 1,
+    WeekStartDay = DayOfWeek.Sunday,
+    DayOfWeek = MapiCalendarDayOfWeek.Friday,
+    OccurrenceCount = GetOccurrenceCount(StartDate, endByDate, "FREQ=WEEKLY;BYDAY=FR"),
+};
+
+if (rec.OccurrenceCount == 0)
+{
+    rec.OccurrenceCount = 1;
+}
+
+task.Recurrence = rec;
+task.Save(dataDir + "Weekly_out.msg", TaskSaveFormat.Msg);
+```
+
+Following function can be used to calculate the number of events between the two dates:
+
+```csharp
+private static uint GetOccurrenceCount(DateTime start, DateTime endBy, string rrule)
+{            
+    CalendarRecurrence pattern = new CalendarRecurrence(string.Format("DTSTART:{0}\r\nRRULE:{1}", start.ToString("yyyyMMdd"),rrule));            
+    DateCollection dates = pattern.GenerateOccurrences(start, endBy);            
+    return (uint)dates.Count;
+}
+```
+
+#### Selecting Multiple Days in a Week {#selecting-multiple-days-in-a-week}
+
+The following code snippet shows you how to select multiple days in a week.
+
+```csharp
+// Set the weekly recurrence
+var rec = new MapiCalendarWeeklyRecurrencePattern
+{
+    EndType = MapiCalendarRecurrenceEndType.EndAfterNOccurrences,
+    PatternType = MapiCalendarRecurrencePatternType.Week,
+    Period = 1,
+    WeekStartDay = DayOfWeek.Sunday,
+    DayOfWeek = MapiCalendarDayOfWeek.Friday | MapiCalendarDayOfWeek.Monday,
+    OccurrenceCount = GetOccurrenceCount(StartDate, endByDate, "FREQ=WEEKLY;BYDAY=FR,MO"),
+};
+```
+
+#### Selecting Multiple Days in a Week and Setting Intervals {#selecting-multiple-days-in-a-week-and-setting-intervals}
+
+The following code snippet shows you how to select multiple days in a week and set intervals.
+
+```csharp
+// Set the weekly recurrence
+var rec = new MapiCalendarWeeklyRecurrencePattern
+{
+    EndType = MapiCalendarRecurrenceEndType.EndAfterNOccurrences,
+    PatternType = MapiCalendarRecurrencePatternType.Week,
+    Period = 2,
+    WeekStartDay = DayOfWeek.Sunday,
+    DayOfWeek = MapiCalendarDayOfWeek.Friday | MapiCalendarDayOfWeek.Monday,
+    OccurrenceCount = GetOccurrenceCount(StartDate, endByDate, "FREQ=WEEKLY;BYDAY=FR,MO;INTERVAL=2"),
+};
+```
+
+### Weekly Recurrences: EndAfterDate Recurrance Type {#weekly-recurrences-endafterdate-recurrance-type}
+
+"End By" option in the Mapi Task is achieved by setting the OccurrenceCount property calculated by the GetOccurrenceCount() function. This function takes start date , end date and RRULE string.
+
+#### Weekly Recurrences: Setting the Every Day value {#weekly-recurrences-setting-the-every-day-value}
+
+The following code snippet shows you how to set the period value to 1 and INTERVAL value to 1 in the RRULE string as well.
+
+```csharp
+// Set the weekly recurrence
+var rec = new MapiCalendarWeeklyRecurrencePattern
+{
+    EndType = MapiCalendarRecurrenceEndType.EndAfterDate,
+    PatternType = MapiCalendarRecurrencePatternType.Week,
+    Period = 1,
+    WeekStartDay = DayOfWeek.Sunday,
+    DayOfWeek = MapiCalendarDayOfWeek.Friday,
+    EndDate = endByDate,
+    OccurrenceCount = GetOccurrenceCount(StartDate, endByDate, "FREQ=WEEKLY;BYDAY=FR;INTERVAL=1"),
+};
+```
+
+Every Day value can be set to any appropriate value and multiple days can be selected as shown in the following example:
+
+```csharp
+var record = new MapiCalendarWeeklyRecurrencePattern
+{
+    EndType = MapiCalendarRecurrenceEndType.EndAfterDate,
+    PatternType = MapiCalendarRecurrencePatternType.Week,
+    Period = 2,
+    WeekStartDay = DayOfWeek.Sunday,
+    EndDate = endByDate,
+    DayOfWeek = MapiCalendarDayOfWeek.Friday | MapiCalendarDayOfWeek.Monday,
+    OccurrenceCount = GetOccurrenceCount(StartDate, endByDate, "FREQ=WEEKLY;BYDAY=FR,MO;INTERVAL=2"),
+};
+```
+
+### Weekly Recurrences: NeverEnd Recurrance Type {#weekly-recurrences-neverend-recurrance-type}
+
+End type can be set by using MapiCalendarRecurrenceEndType.NeverEnd. Period or INTERVAL can be set to required value say 1 in the following example.
+
+```csharp
+// Set the weekly recurrence
+var recurrence = new MapiCalendarWeeklyRecurrencePattern
+{
+    EndType = MapiCalendarRecurrenceEndType.NeverEnd,
+    PatternType = MapiCalendarRecurrencePatternType.Week,
+    Period = 1,
+    WeekStartDay = DayOfWeek.Sunday,
+    DayOfWeek = MapiCalendarDayOfWeek.Friday,
+    OccurrenceCount = GetOccurrenceCount(StartDate, endByDate, "FREQ=WEEKLY;BYDAY=FR"),
+};
+```
+
+## Working with Monthly Recurrences {#working-with-monthly-recurrences}
+
+Aspose.Email supports creation of monthly recurrences using MapiCalendarMonthlyRecurrencePattern. Three different Mapi calendar recurrence end types can be used including EndAfterNOccurrences, EndAfterDate and NeverEnd. This section demonstrates the creation of different monthly recurrence patterns.
+
+### Monthly Recurrences: EndAfterNOccurrences Recurrance Type {#monthly-recurrences-endafternoccurrences-recurrance-type}
+
+In this type of recurrence, number of recurrences is to be set along with other information as follows:
+
+1. Set start, end and due date.
+2. Create a MapiTask.
+3. Set task state to NotAssigned.
+4. Create the monthly recurrence object by setting the properties like PatternType, Period, WeekStartDay, EndType and OccurenceCount.
+5. Set MapiTask.Recurrence property to this monthly recurrence object.
+6. Save this message on disc.
+
+The following code snippet shows you how to create a task with recurrence end type as EndAfterNOccurrence.
+
+```csharp
+// The path to the File directory.
+string dataDir = RunExamples.GetDataDir_Outlook();
+TimeZone localZone = TimeZone.CurrentTimeZone;
+TimeSpan ts = localZone.GetUtcOffset(DateTime.Now);
+DateTime StartDate = new DateTime(2015, 7, 16);
+StartDate = StartDate.Add(ts);
+
+DateTime DueDate = new DateTime(2015, 7, 16);
+DateTime endByDate = new DateTime(2015, 12, 31);
+DueDate = DueDate.Add(ts);
+endByDate = endByDate.Add(ts);
+
+MapiTask task = new MapiTask("This is test task", "Sample Body", StartDate, DueDate);
+task.State = MapiTaskState.NotAssigned;
+
+// Set the Monthly recurrence
+var rec = new MapiCalendarMonthlyRecurrencePattern
+{
+    Day = 15,
+    Period = 1,
+    PatternType = MapiCalendarRecurrencePatternType.Month,
+    EndType = MapiCalendarRecurrenceEndType.EndAfterNOccurrences,
+    OccurrenceCount = GetOccurrenceCount(StartDate, endByDate, "FREQ=MONTHLY;BYMONTHDAY=15;INTERVAL=1"),
+    WeekStartDay = DayOfWeek.Monday,
+
+};
+
+if (rec.OccurrenceCount == 0)
+{
+    rec.OccurrenceCount = 1;
+}
+
+task.Recurrence = rec;
+//task.Save(dataDir + "Monthly_out.msg", TaskSaveFormat.Msg);
+```
+
+Following function can be used to calculate the number of events between the two dates:
+
+```csharp
+private static uint GetOccurrenceCount(DateTime start, DateTime endBy, string rrule)
+{
+    CalendarRecurrence pattern = new CalendarRecurrence(string.Format("DTSTART:{0}\r\nRRULE:{1}", start.ToString("yyyyMMdd"), rrule));
+    DateCollection dates = pattern.GenerateOccurrences(start, endBy);       
+    return (uint)dates.Count;
+}
+```
+
+#### Set fix number of occurrences {#set-fix-number-of-occurrences}
+
+The following code snippet shows you how to set fix number of occurrences.
+
+```csharp
+// Set the Monthly recurrence
+var records = new MapiCalendarMonthlyRecurrencePattern
+{
+    Day = 15,
+    Period = 1,
+    PatternType = MapiCalendarRecurrencePatternType.Month,
+    EndType = MapiCalendarRecurrenceEndType.EndAfterNOccurrences,
+    OccurrenceCount = 5,
+    WeekStartDay = DayOfWeek.Monday
+};
+```
+
+### Monthly Recurrences: EndAfterDate Recurrance Type {#monthly-recurrences-endafterdate-recurrance-type}
+
+"End By" option in the Mapi Task is achieved by setting the OccurrenceCount property calculated by the GetOccurrenceCount() function. This function takes start date , end date and RRULE string. The following code snippet shows you how to create a recurrence on 15th of each month between start and end by date.
+
+```csharp
+// The path to the File directory.
+string dataDir = RunExamples.GetDataDir_Outlook();
+
+TimeZone localZone = TimeZone.CurrentTimeZone;
+TimeSpan ts = localZone.GetUtcOffset(DateTime.Now);
+DateTime StartDate = new DateTime(2015, 7, 1);
+StartDate = StartDate.Add(ts);
+
+DateTime DueDate = new DateTime(2015, 7, 1);
+DateTime endByDate = new DateTime(2015, 12, 31);
+DueDate = DueDate.Add(ts);
+endByDate = endByDate.Add(ts);
+
+MapiTask task = new MapiTask("This is test task", "Sample Body", StartDate, DueDate);
+task.State = MapiTaskState.NotAssigned;
+
+// Set the Monthly recurrence
+var recurrence = new MapiCalendarMonthlyRecurrencePattern
+{
+    Day = 15,
+    Period = 1,
+    PatternType = MapiCalendarRecurrencePatternType.Month,
+    EndType = MapiCalendarRecurrenceEndType.EndAfterDate,
+    OccurrenceCount = GetOccurrenceCount(StartDate, endByDate, "FREQ=MONTHLY;BYMONTHDAY=15;INTERVAL=1"),
+    WeekStartDay = DayOfWeek.Monday,
+    EndDate = endByDate
+};
+
+task.Recurrence = recurrence;
+//task.Save(dataDir + "SetMonthlyEndAfterDateRecurrence_out.msg", TaskSaveFormat.Msg);
+```
+
+### Monthly Recurrences: NeverEnd Recurrance Type {#monthly-recurrences-neverend-recurrance-type}
+
+The following code snippet shows you how to set the end type using MapiCalendarRecurrenceEndType.NeverEnd.
+
+```csharp
+var recurrence = new MapiCalendarMonthlyRecurrencePattern
+{
+    Day = 15,
+    Period = 1,
+    PatternType = MapiCalendarRecurrencePatternType.Month,
+    EndType = MapiCalendarRecurrenceEndType.NeverEnd,
+    WeekStartDay = DayOfWeek.Monday,
+};
+```
+
+## Working with Yearly Recurrences {#working-with-yearly-recurrences}
+
+Aspose.Email supports creation of yearly recurrences using MapiCalendarMonthlyRecurrencePattern. By setting the period property to 12, we can achieve the yearly recurrence pattern. Three different Mapi calendar recurrence end types can be used including EndAfterNOccurrences, EndAfterDate and NeverEnd. This section demonstrates the creation of different yearly recurrence patterns.
+
+### Yearly Recurrences: EndAfterNOccurrences Recurrance Type {#yearly-recurrences-endafternoccurrences-recurrance-type}
+
+In this type of recurrence, number of recurrences is to be set along with other information as follows:
+
+1. Set start, end and due date.
+2. Create a MapiTask.
+3. Set task state to NotAssigned.
+4. Create the monthly recurrence object by setting the properties like PatternType, Period, WeekStartDay, EndType and OccurenceCount.
+5. Set MapiTask.Recurrence property to this monthly recurrence object to achieve the yearly recurrence.
+6. Save this message on disc.
+
+The following code snippet shows you how to create a task with recurrence end type as EndAfterNOccurrence.
+
+```csharp
+
+TimeZone localZone = TimeZone.CurrentTimeZone;
+TimeSpan ts = localZone.GetUtcOffset(DateTime.Now);
+DateTime StartDate = new DateTime(2015, 7, 1);
+StartDate = StartDate.Add(ts);
+DateTime DueDate = new DateTime(2015, 7, 1);
+DateTime endByDate = new DateTime(2020, 12, 31);
+DueDate = DueDate.Add(ts);
+endByDate = endByDate.Add(ts);
+MapiTask task = new MapiTask("This is test task", "Sample Body", StartDate, DueDate);
+task.State = MapiTaskState.NotAssigned;
+
+// Set the Yearly recurrence
+var recurrence = new MapiCalendarMonthlyRecurrencePattern
+{
+	Day = 15,
+	Period = 12,
+	PatternType = MapiCalendarRecurrencePatternType.Month,
+	EndType = MapiCalendarRecurrenceEndType.EndAfterNOccurrences,
+	OccurrenceCount = 3,
+};
+task.Recurrence = recurrence;
+task.Save("Yearly.msg", TaskSaveFormat.Msg);
+```
+
+### Yearly Recurrences: EndAfterDate Recurrance Type {#yearly-recurrences-endafterdate-recurrance-type}
+
+"End By" option in the Mapi Task is achieved by setting the OccurrenceCount property calculated by the GetOccurrenceCount() function. This function takes start date, end date and RRULE string. The following code snippet shows you how to create a recurrence on 15th of each 7th month between start and end by date.
+
+```csharp
+// Set the Yearly recurrence
+var rec = new MapiCalendarMonthlyRecurrencePattern
+{
+    Day = 15,
+    Period = 12,
+    PatternType = MapiCalendarRecurrencePatternType.Month,
+    EndType = MapiCalendarRecurrenceEndType.EndAfterDate,
+    EndDate = endByDate,
+    OccurrenceCount = GetOccurrenceCount(StartDate, endByDate, "FREQ=YEARLY;BYMONTHDAY=15;BYMONTH=7;INTERVAL=1"),
+};
+task.Recurrence = rec;
+```
+
+### Yearly Recurrences: NeverEnd Recurrance Type {#yearly-recurrences-neverend-recurrance-type}
+
+The following code snippet shows you how to set the end type using MapiCalendarRecurrenceEndType.NeverEnd.
+
+```csharp
+// Set the Yearly recurrence
+var recurrence = new MapiCalendarMonthlyRecurrencePattern
+{
+    Day = 15,
+    Period = 12,
+    PatternType = MapiCalendarRecurrencePatternType.Month,
+    EndType = MapiCalendarRecurrenceEndType.NeverEnd,
+};            
+```
+
+## Generate Recurrence from Recurrence Rule {#generate-recurrence-from-recurrence-rule}
+
+Aspose.Email API provides the capability to generate Recurrence Pattern from Recurrence Rule (RRULE). It parses the information from the RRULE as per RFC 5545 iCal specifications and generates the recurrence pattern using the MapiCalendarRecurrencePatternFactory.FromString method. The following code snippet shows you how to generate recurrence pattern from recurrence rule.
+
+```csharp
+// The path to the File directory.
+string dataDir = RunExamples.GetDataDir_Outlook();
+
+DateTime startDate = new DateTime(2015, 7, 16);
+DateTime endDate = new DateTime(2015, 8, 1);
+MapiCalendar app1 = new MapiCalendar("test location", "test summary", "test description", startDate, endDate);
+
+app1.StartDate = startDate;
+app1.EndDate = endDate;
+
+string pattern = "DTSTART;TZID=Europe/London:20150831T080000\r\nDTEND;TZID=Europe/London:20150831T083000\r\nRRULE:FREQ=DAILY;INTERVAL=1;COUNT=7\r\nEXDATE:20150831T070000Z,20150904T070000Z";
+app1.Recurrence.RecurrencePattern = MapiCalendarRecurrencePatternFactory.FromString(pattern);
+```
+
+## Add an Attachment to Recurring Calendar Events {#add-an-attachment-to-recurring-calendar-events}
+
+Aspose.Email API provides the capability to add attachments to recurring calendar events.
+
+```csharp
+DateTime startDate = new DateTime(2018, 7, 19).AddHours(12);
+MapiCalendar calendar = new MapiCalendar("location1", "summary1", "description1", startDate, startDate.AddHours(1));
+
+MapiCalendarEventRecurrence recurrence = new MapiCalendarEventRecurrence();
+MapiCalendarRecurrencePattern pattern = recurrence.RecurrencePattern = new MapiCalendarDailyRecurrencePattern();
+pattern.PatternType = MapiCalendarRecurrencePatternType.Day;
+pattern.Period = 1;
+pattern.EndType = MapiCalendarRecurrenceEndType.NeverEnd;
+
+DateTime exceptionDate = startDate.AddDays(3);
+MapiCalendarExceptionInfo exception = new MapiCalendarExceptionInfo
+{
+    Location = "exceptionLoc",
+    Subject = "exceptionSubj",
+    Body = "exceptionBody",
+    OriginalStartDate = exceptionDate,
+    StartDateTime = exceptionDate,
+    EndDateTime = exceptionDate.AddHours(5),
+    Attachments = new MapiAttachmentCollection(calendar)
+};
+exception.Attachments.Add("file.txt", Encoding.ASCII.GetBytes("hello, world!"));
+
+pattern.Exceptions.Add(exception);
+pattern.ModifiedInstanceDates.Add(exceptionDate);
+pattern.DeletedInstanceDates.Add(exceptionDate);
+calendar.Recurrence = recurrence;
+
+using (var newPst = PersonalStorage.Create(dataDir + "AddAttachmentToMapiExceptionInfo.pst", FileFormatVersion.Unicode))
+{
+    var newFolder = newPst.CreatePredefinedFolder("Calendar", StandardIpmFolder.Appointments);
+    newFolder.AddMapiMessageItem(calendar);
+}
+```
+
+## Set the Calendar Event Time Zone {#set-the-calendar-event-time-zone}
+
+A recurring event has to record the time zone its start and end times belong to, otherwise the occurrences shift when the file is opened in another zone. <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapicalendar/" target="_blank" rel="nofollow noopener noreferrer">MapiCalendar</a> exposes `StartDateTimeZone` and `EndDateTimeZone`, both of type <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapicalendartimezone/" target="_blank" rel="nofollow noopener noreferrer">MapiCalendarTimeZone</a>. The class has a constructor that takes a standard .NET `TimeZoneInfo`, so no manual rule building is required.
+
+```cs
+var timeZone = TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time");
+
+var calendar = new MapiCalendar(
+    "Meeting Room 3", "Planning", "Quarterly planning",
+    new DateTime(2026, 3, 2, 10, 0, 0),
+    new DateTime(2026, 3, 2, 11, 0, 0))
+{
+    StartDateTimeZone = new MapiCalendarTimeZone(timeZone),
+    EndDateTimeZone = new MapiCalendarTimeZone(timeZone)
+};
+
+calendar.Save("event.msg", AppointmentSaveFormat.Msg);
+
+// Read the time zone back
+var loaded = (MapiCalendar)MapiMessage.Load("event.msg").ToMapiMessageItem();
+
+Console.WriteLine(loaded.StartDateTimeZone.KeyName);
+```
+
+The `KeyName` property holds the time zone identifier, so a round-trip through MSG preserves the zone the event was created in.

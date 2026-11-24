@@ -1,0 +1,301 @@
+---
+title: "Working with vCard (VCF) Files in C#"
+sidebar_label: "Working with vCard (VCF) Files in C#"
+sidebar_key: "net-email-working-with-vcard-files"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/working-with-vcard-files.html"
+source_commit: ""
+source_sha256: "52ca0d7b200009198053f44af35fcff69f3fb0f8d29c313f0b64171e2bf71585"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/working-with-vcard-files/"
+source_snapshot_sha256: "02d272b04b18883bfdcdd4fe44b764c8a8e824dd8423ae059d1ff56de8620ab0"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+This article covers the <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardcontact/" target="_blank" rel="nofollow noopener noreferrer">VCardContact</a> class from the <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/" target="_blank" rel="nofollow noopener noreferrer">Aspose.Email.PersonalInfo.VCard</a> namespace, which reads and writes vCard (VCF) files independently of Outlook and MAPI. To create and manage Outlook `MapiContact` items - which can also be exported to VCF - see [Outlook Contacts Management](/net/email/outlook-contacts-management/).
+
+## VCardContact vs MapiContact {#vcardcontact-vs-mapicontact}
+
+Aspose.Email exposes contacts through two different classes, and choosing the right one avoids a lot of confusion:
+
+- <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardcontact/" target="_blank" rel="nofollow noopener noreferrer">VCardContact</a> (namespace <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/" target="_blank" rel="nofollow noopener noreferrer">Aspose.Email.PersonalInfo.VCard</a>) - a pure vCard object. Use it when your source and target are vCard (VCF) files and you do not need Outlook/MAPI features. It reads and writes VCF directly, supports vCard 2.1/3.0/4.0, multiple contacts per file, and asynchronous loading.
+- <a href="https://reference.aspose.com/email/net/aspose.email.mapi/mapicontact/" target="_blank" rel="nofollow noopener noreferrer">MapiContact</a> (namespace `Aspose.Email.Mapi`) - an Outlook contact. Use it when you work with MSG/PST or need MAPI-specific properties. `MapiContact` can also import from and export to VCF via its `FromVCard` and `Save` methods (see [Outlook Contacts Management](/net/email/outlook-contacts-management/)).
+
+The rest of this article focuses on `VCardContact`.
+
+## Create a vCard and Save It {#create-a-vcard-and-save-it}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardcontact/" target="_blank" rel="nofollow noopener noreferrer">VCardContact</a> class has a parameterless constructor and exposes strongly-typed property sets such as <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardidentificationinfo/" target="_blank" rel="nofollow noopener noreferrer">IdentificationInfo</a>, <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardorganization/" target="_blank" rel="nofollow noopener noreferrer">Organization</a>, <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardemailcollection/" target="_blank" rel="nofollow noopener noreferrer">Emails</a>, <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardtelephonenumbercollection/" target="_blank" rel="nofollow noopener noreferrer">TelephoneNumbers</a>, and <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcarddeliveryaddresscollection/" target="_blank" rel="nofollow noopener noreferrer">DeliveryAddresses</a>.
+
+The following code snippet shows you how to build a contact from scratch and save it as a vCard (VCF) file.
+
+```cs
+using Aspose.Email.PersonalInfo.VCard;
+
+var contact = new VCardContact
+{
+    IdentificationInfo = new VCardIdentificationInfo
+    {
+        DisplayName = "Bertha Buell",
+        FullName = "Bertha A. Buell",
+        Nickname = "Bertie",
+        Birthday = new DateTime(1980, 5, 20)
+    },
+    Organization = new VCardOrganization
+    {
+        Organization = "Awthentikz",
+        Title = "Social work assistant"
+    },
+    Emails = new VCardEmailCollection
+    {
+        new VCardEmail
+        {
+            EmailAddress = "BerthaABuell@example.com",
+            EmailType = VCardEmailType.INTERNET
+        }
+    }
+};
+
+// Save as a vCard (VCF) file
+contact.Save("contact.vcf");
+```
+
+## The Contact Property Model {#the-contact-property-model}
+
+Beyond the name and email shown above, a `VCardContact` exposes the full vCard data model through strongly-typed property sets. The snippets below extend the `contact` created earlier. Each collection can be assigned with a collection initializer or appended to with `Add`.
+
+### Postal Addresses {#postal-addresses}
+
+Postal addresses live in the <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcarddeliveryaddresscollection/" target="_blank" rel="nofollow noopener noreferrer">DeliveryAddresses</a> collection as <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcarddeliveryaddress/" target="_blank" rel="nofollow noopener noreferrer">VCardDeliveryAddress</a> items. The `AddressType` property takes a combination of <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcarddeliveryaddresstype/" target="_blank" rel="nofollow noopener noreferrer">VCardDeliveryAddressType</a> flags (`HOME`, `WORK`, `POSTAL`, `PARCEL`, `DOM`, `INTL`, `PREF`).
+
+```cs
+contact.DeliveryAddresses = new VCardDeliveryAddressCollection
+{
+    new VCardDeliveryAddress
+    {
+        AddressType = VCardDeliveryAddressType.WORK | VCardDeliveryAddressType.PREF,
+        Street = "4 Darwinia Loop",
+        Locality = "Eighty Mile Beach",
+        Region = "WA",
+        PostalCode = "6725",
+        CountryName = "Australia"
+    }
+};
+```
+
+### Telephone Numbers {#telephone-numbers}
+
+Phone numbers live in the <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardtelephonenumbercollection/" target="_blank" rel="nofollow noopener noreferrer">TelephoneNumbers</a> collection as <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardtelephonenumber/" target="_blank" rel="nofollow noopener noreferrer">VCardTelephoneNumber</a> items. The `TelephoneType` property takes a combination of <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardtelephonetype/" target="_blank" rel="nofollow noopener noreferrer">VCardTelephoneType</a> flags (`VOICE`, `WORK`, `HOME`, `CELL`, `FAX`, `PAGER`, `PREF`, and more).
+
+```cs
+contact.TelephoneNumbers = new VCardTelephoneNumberCollection
+{
+    new VCardTelephoneNumber
+    {
+        TelephoneNumber = "(08) 9080 1183",
+        TelephoneType = VCardTelephoneType.WORK | VCardTelephoneType.VOICE
+    },
+    new VCardTelephoneNumber
+    {
+        TelephoneNumber = "(925) 599 3355",
+        TelephoneType = VCardTelephoneType.CELL
+    }
+};
+```
+
+### Geographic Position {#geographic-position}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardgeo/" target="_blank" rel="nofollow noopener noreferrer">Geo</a> property stores a global position as `float` latitude and longitude.
+
+```cs
+contact.Geo = new VCardGeo
+{
+    Latitude = 48.858844f,
+    Longitude = 2.294351f
+};
+```
+
+### Photo {#photo}
+
+A contact photo is set on `IdentificationInfo.Photo` as a <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardphoto/" target="_blank" rel="nofollow noopener noreferrer">VCardPhoto</a>. It can be embedded inline from image bytes or referenced by URL. The image format is given by <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardphototype/" target="_blank" rel="nofollow noopener noreferrer">VCardPhotoType</a> and the storage mode by <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardvaluelocation/" target="_blank" rel="nofollow noopener noreferrer">VCardValueLocation</a>.
+
+```cs
+// Embed the image bytes inline
+contact.IdentificationInfo.Photo = new VCardPhoto
+{
+    Data = File.ReadAllBytes("portrait.jpg"),
+    PhotoType = VCardPhotoType.JPEG,
+    ValueLocation = VCardValueLocation.INLINE
+};
+
+// Or reference an external image by URL
+contact.IdentificationInfo.Photo = new VCardPhoto
+{
+    Uri = "https://example.com/portrait.jpg",
+    PhotoType = VCardPhotoType.JPEG,
+    ValueLocation = VCardValueLocation.URL
+};
+```
+
+### Formatted Address Labels {#formatted-address-labels}
+
+A label is the formatted, ready-to-print text of a delivery address. Labels live in the <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardlabelcollection/" target="_blank" rel="nofollow noopener noreferrer">Labels</a> collection as <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardlabel/" target="_blank" rel="nofollow noopener noreferrer">VCardLabel</a> items, each tagged with an address type.
+
+```cs
+contact.Labels = new VCardLabelCollection
+{
+    new VCardLabel
+    {
+        AddressType = VCardDeliveryAddressType.WORK,
+        Address = "4 Darwinia Loop\r\nEighty Mile Beach WA 6725\r\nAustralia"
+    }
+};
+```
+
+### Read the Model Back {#read-the-model-back}
+
+After loading a vCard, the same property sets expose the parsed data.
+
+```cs
+var loaded = VCardContact.Load("contact.vcf");
+
+Console.WriteLine(loaded.IdentificationInfo?.DisplayName);
+
+foreach (var address in loaded.DeliveryAddresses)
+{
+    Console.WriteLine($"{address.AddressType}: {address.Street}, {address.Locality}");
+}
+
+foreach (var phone in loaded.TelephoneNumbers)
+{
+    Console.WriteLine($"{phone.TelephoneType}: {phone.TelephoneNumber}");
+}
+
+if (loaded.Geo != null)
+{
+    Console.WriteLine($"Geo: {loaded.Geo.Latitude}, {loaded.Geo.Longitude}");
+}
+```
+
+### Security (Public Key or Certificate) {#security-public-key-or-certificate}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardsecurity/" target="_blank" rel="nofollow noopener noreferrer">Security</a> property exposes the public key or authentication certificate stored in the vCard (the `KEY` property). Its `SaveToPEM` method writes that key to a PEM file.
+
+```cs
+var signed = VCardContact.Load("signed.vcf");
+
+if (signed.Security != null && signed.Security.Key != null)
+{
+    Console.WriteLine("Key type: " + signed.Security.Type);
+
+    // Export the embedded public key / certificate to a PEM file
+    signed.Security.SaveToPEM("public-key.pem");
+}
+```
+
+## Load a vCard {#load-a-vcard}
+
+Use the static <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardcontact/load/" target="_blank" rel="nofollow noopener noreferrer">VCardContact.Load</a> method to read a vCard from a file or a stream. Once loaded, the contact's properties are available through the same property sets used when creating it.
+
+```cs
+// Load from a file
+var contact = VCardContact.Load("contact.vcf");
+Console.WriteLine(contact.IdentificationInfo.DisplayName);
+
+// Load from a stream
+using (var stream = File.OpenRead("contact.vcf"))
+{
+    var fromStream = VCardContact.Load(stream);
+}
+```
+
+### Load with a Specific Encoding {#load-with-a-specific-encoding}
+
+To control the text encoding used while reading, pass a <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardloadoptions/" target="_blank" rel="nofollow noopener noreferrer">VCardLoadOptions</a> object with its <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardloadoptions/preferredencoding/" target="_blank" rel="nofollow noopener noreferrer">PreferredEncoding</a> property set.
+
+```cs
+var loadOptions = new VCardLoadOptions { PreferredEncoding = Encoding.UTF8 };
+var contact = VCardContact.Load("contact.vcf", loadOptions);
+```
+
+## Read Multiple Contacts from a Single File {#read-multiple-contacts-from-a-single-file}
+
+A vCard file may contain more than one contact. Use the static <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardcontact/ismulticontacts/" target="_blank" rel="nofollow noopener noreferrer">IsMultiContacts</a> method to check whether a file or stream holds multiple contacts, and <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardcontact/loadasmultiple/" target="_blank" rel="nofollow noopener noreferrer">LoadAsMultiple</a> to read them all into a `List<VCardContact>`. Both methods have file, stream, and load-options overloads:
+
+- `static bool IsMultiContacts(string filePath)` / `IsMultiContacts(Stream stream)`
+- `static List<VCardContact> LoadAsMultiple(string filePath)` / `LoadAsMultiple(string filePath, VCardLoadOptions options)`
+- `static List<VCardContact> LoadAsMultiple(Stream stream)` / `LoadAsMultiple(Stream stream, VCardLoadOptions options)`
+
+```cs
+using (var stream = new FileStream("contacts.vcf", FileMode.Open, FileAccess.Read))
+{
+    if (VCardContact.IsMultiContacts(stream))
+    {
+        List<VCardContact> contacts = VCardContact.LoadAsMultiple(stream);
+
+        foreach (var contact in contacts)
+        {
+            Console.WriteLine(contact.IdentificationInfo.DisplayName);
+        }
+    }
+}
+```
+
+## Load Contacts Asynchronously {#load-contacts-asynchronously}
+
+For large contact lists or I/O-bound applications (desktop, web, or mobile), `VCardContact` provides asynchronous loading that does not block the calling thread. Use <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardcontact/loadasync/" target="_blank" rel="nofollow noopener noreferrer">LoadAsync</a> for a single contact and <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardcontact/loadasmultipleasync/" target="_blank" rel="nofollow noopener noreferrer">LoadAsMultipleAsync</a> for several. Both accept a `CancellationToken`.
+
+```cs
+// A single contact
+var contact = await VCardContact.LoadAsync("contact.vcf", CancellationToken.None);
+Console.WriteLine(contact.IdentificationInfo.DisplayName);
+
+// Multiple contacts
+var contacts = await VCardContact.LoadAsMultipleAsync(
+    "contacts.vcf", new VCardLoadOptions(), CancellationToken.None);
+
+foreach (var loaded in contacts)
+{
+    Console.WriteLine(loaded.IdentificationInfo.DisplayName);
+}
+```
+
+## Save Options {#save-options}
+
+The <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardsaveoptions/" target="_blank" rel="nofollow noopener noreferrer">VCardSaveOptions</a> class customizes how a contact is written:
+
+- <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardsaveoptions/version/" target="_blank" rel="nofollow noopener noreferrer">Version</a> - the output vCard version from the <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardversion/" target="_blank" rel="nofollow noopener noreferrer">VCardVersion</a> enumeration: `V21` (vCard 2.1, the default), `V30` (3.0), or `V40` (4.0).
+- <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardsaveoptions/preferredtextencoding/" target="_blank" rel="nofollow noopener noreferrer">PreferredTextEncoding</a> - the encoding used when writing the file.
+- <a href="https://reference.aspose.com/email/net/aspose.email.personalinfo.vcard/vcardsaveoptions/useextensions/" target="_blank" rel="nofollow noopener noreferrer">UseExtensions</a> - whether extended (`X-`) properties may be written. Default is `true`.
+- `ProductId` - the value written to the `PRODID` property.
+
+```cs
+var contact = VCardContact.Load("contact.vcf");
+
+var saveOptions = new VCardSaveOptions
+{
+    Version = VCardVersion.V30,             // write vCard 3.0 (default is V21)
+    PreferredTextEncoding = Encoding.UTF8,  // encoding used when writing
+    UseExtensions = true,                   // allow extended (X-) properties
+    ProductId = "My Company"                // PRODID value
+};
+
+contact.Save("contact_v3.vcf", saveOptions);
+```
+
+## See Also {#see-also}
+
+- [Outlook Contacts Management](/net/email/outlook-contacts-management/) - create, save, and read Outlook `MapiContact` items, including VCF import and export.
+- [Managing Contacts in PST Files](/net/email/managing-contacts-in-pst-files/) - store and read contacts inside a PST.

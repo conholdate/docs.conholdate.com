@@ -1,0 +1,89 @@
+---
+title: "Read Corrupted PST/OST Files"
+sidebar_label: "Read Corrupted PST/OST Files"
+sidebar_key: "net-email-read-corrupted-pst-ost-files"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/net"
+source_path: "email/net/read-corrupted-pst-ost-files.html"
+source_commit: ""
+source_sha256: "cb2982b5593ddd2933fc569336c51eb3a5e83f5c50c8ff06d02e74542bda684e"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/net/read-corrupted-pst-ost-files/"
+source_snapshot_sha256: "0327d8c42467180b88d5c88240a92635468d363fd61ee6ab44d778241b2e466a"
+---
+
+:::info
+Aspose.Email for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Handling Corrupted Storage Files {#handling-corrupted-storage-files}
+
+Sometimes it may not be possible to read a PST/OST due to some issues. For example, some data blocks may be corrupted. In such cases, exceptions usually arise when calling the <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/enumeratefolders/" target="_blank" rel="nofollow noopener noreferrer">EnumerateFolders</a>, <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/enumeratemessages/" target="_blank" rel="nofollow noopener noreferrer">EnumerateMessages</a>, <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/getcontents/" target="_blank" rel="nofollow noopener noreferrer">GetContents</a>, <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/folderinfo/getsubfolders/" target="_blank" rel="nofollow noopener noreferrer">GetSubfolders</a>, etc. methods. But individual messages or folders may remain undamaged in the storage.
+
+### Methods to Find the Item Identifiers {#methods-to-find-the-item-identifiers}
+
+The following methods allow to find item identifiers in a hierarchical manner.
+
+- <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/findmessages/" target="_blank" rel="nofollow noopener noreferrer">FindMessages(string parentEntryId)</a> - finds the identifiers of messages for the folder.
+- <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/findsubfolders/" target="_blank" rel="nofollow noopener noreferrer">FindSubfolders(string parentEntryId)</a> - finds the identifiers of subfolders for the folder.
+
+Identifiers obtained using the methods can be used to retrieve messages and folders.
+
+> **_NOTE:_** It should be noted that despite its advantages, there are corrupted storages that cannot be read even using these methods.
+
+### PST File Traversing {#pst-file-traversing}
+
+The following code sample shows PST file traversing and extracting folders and messages. To get the list of identifiers use FindMessages and FindSubfolders methods. Then the identifier is passed to the <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/extractmessage/" target="_blank" rel="nofollow noopener noreferrer">ExtractMessage</a> or <a href="https://reference.aspose.com/email/net/aspose.email.storage.pst/personalstorage/getfolderbyid/" target="_blank" rel="nofollow noopener noreferrer">GetFolderById</a> method to extract elements.
+
+```csharp
+using (var pst = PersonalStorage.FromFile(fileName))
+{
+    ExploreCorruptedPst(pst, pst.RootFolder.EntryIdString);
+}
+
+public static void ExploreCorruptedPst(PersonalStorage pst, string rootFolderId)
+{
+    var messageIdList = pst.FindMessages(rootFolderId);
+
+    foreach (var messageId in messageIdList)
+    {
+        try
+        {
+            var msg = pst.ExtractMessage(messageId);
+            Console.WriteLine( "- " + msg.Subject);
+        }
+        catch
+        {
+            Console.WriteLine("Message reading error. Entry id: " + messageId);
+        }
+    }
+
+    var folderIdList = pst.FindSubfolders(rootFolderId);
+
+    foreach (var subFolderId in folderIdList)
+    {
+        if (subFolderId != rootFolderId)
+        {
+            try
+            {
+                FolderInfo subfolder = pst.GetFolderById(subFolderId);
+                Console.WriteLine(subfolder.DisplayName);
+            }
+            catch
+            {
+                Console.WriteLine("Message reading error. Entry id: " + subFolderId);
+            }
+
+            ExploreCorruptedPst(pst, subFolderId);
+        }
+    }
+}
+```
