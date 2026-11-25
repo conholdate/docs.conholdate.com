@@ -1,0 +1,127 @@
+---
+title: "Read corrupted PST/OST files"
+sidebar_label: "Read corrupted PST/OST files"
+sidebar_key: "java-email-read-corrupted-pst-ost-files"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/java"
+source_path: "email/java/read-corrupted-pst-ost-files.html"
+source_commit: ""
+source_sha256: "329f2652ee5b2a7d36822460c2b3dfa058669d3cd2c0ab76d31570279f590e73"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/java/read-corrupted-pst-ost-files/"
+source_snapshot_sha256: "d886a0cc42b300b47402300fc64c8ebf0b2e45dc2063b7d84e7fc81ca93152a9"
+---
+
+:::info
+Aspose.Email for Java is included in Conholdate.Total for Java.
+:::
+
+
+## Read corrupted PST/OST files {#read-corrupted-pstost-files}
+
+Sometimes it may not be possible to read the PST/OST due to some issues. For example, some data blocks may be corrupted. In such cases, exceptions usually arise when calling the <a href="https://reference.aspose.com/email/java/com.aspose.email/folderinfo/#enumerateFolders--" target="_blank" rel="nofollow noopener noreferrer">EnumerateFolders</a>, <a href="https://reference.aspose.com/email/java/com.aspose.email/folderinfo/#enumerateMessages--" target="_blank" rel="nofollow noopener noreferrer">EnumerateMessages</a>, <a href="https://reference.aspose.com/email/java/com.aspose.email/folderinfo/#getContents--" target="_blank" rel="nofollow noopener noreferrer">GetContents</a>, <a href="https://reference.aspose.com/email/java/com.aspose.email/folderinfo/#getSubFolders--" target="_blank" rel="nofollow noopener noreferrer">GetSubfolders</a>, etc. methods. But individual messages or folders may remain undamaged in the storage.
+
+Aspose.Email users can find item identifiers in a hierarchical manner. Further, you can extract items by identifiers. For this purpose, the library offers the following methods:
+
+- <a href="https://reference.aspose.com/email/java/com.aspose.email/personalstorage/#findMessages-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">PersonalStorage.findMessages(String parentEntryId)</a> - finds the identifiers of messages for the folder.
+- <a href="https://reference.aspose.com/email/java/com.aspose.email/personalstorage/#findSubfolders-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">PersonalStorage.findSubfolders(String parentEntryId)</a> - finds the identifiers of subfolders for the folder.
+
+**Note**, that despite the advantages, there are corrupted storages that cannot be read even using these methods.
+
+The following code snippet demonstrates the use of these methods to read corrupted PST/OST files:
+
+```java
+try (PersonalStorage pst = PersonalStorage.fromFile(fileName)) {
+    exploreCorruptedPst(pst, pst.getRootFolder().getEntryIdString());
+}
+
+public static void exploreCorruptedPst(PersonalStorage pst, String rootFolderId) {
+    Iterable<String> messageIdList = pst.findMessages(rootFolderId);
+
+    for (String messageId : messageIdList) {
+        try {
+            MapiMessage msg = pst.extractMessage(messageId);
+            System.out.println("- " + msg.getSubject());
+        } catch (Exception e) {
+            System.out.println("Message reading error. Entry id: " + messageId);
+        }
+    }
+
+    Iterable<String> folderIdList = pst.findSubfolders(rootFolderId);
+
+    for (String subFolderId : folderIdList) {
+        if (subFolderId != rootFolderId) {
+            try {
+                FolderInfo subfolder = pst.getFolderById(subFolderId);
+                System.out.println(subfolder.getDisplayName());
+            } catch (Exception e) {
+                System.out.println("Message reading error. Entry id: " + subFolderId);
+            }
+
+            exploreCorruptedPst(pst, subFolderId);
+        }
+    }
+}
+```
+
+## Extract PST Items from Corrupted Files {#extract-pst-items-from-corrupted-files}
+
+The traversal API allows extracting all PST items as far as possible, without throwing out exceptions, even if some data of the original file is corrupted.
+
+Use the <a href="https://reference.aspose.com/email/java/com.aspose.email/personalstorage/#PersonalStorage-com.aspose.email.TraversalExceptionsCallback-" target="_blank" rel="nofollow noopener noreferrer">PersonalStorage(TraversalExceptionsCallback callback)</a> constructor and the <a href="https://reference.aspose.com/email/java/com.aspose.email/personalstorage/#load-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">load(String fileName)</a> method instead of the <a href="https://reference.aspose.com/email/java/com.aspose.email/personalstorage/#fromFile-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">fromFile</a> method.
+
+The constructor allows defining a callback method.
+
+```java
+TraversalExceptionsCallback exceptionsCallback = new TraversalExceptionsCallback() {
+    @Override
+    public void invoke(TraversalAsposeException exception, String itemId) {
+        /* Exception handling  code. */
+    }
+};
+
+try (PersonalStorage pst = new PersonalStorage(exceptionsCallback)) { }
+```
+
+Loading and traversal exceptions will be available through the callback method.
+
+The load method returns 'true' if the file has been loaded successfully and further traversal is possible. If a file is corrupted and no traversal is possible, 'false' is returned.
+
+```java
+if (currentPst.load(inputStream))
+```
+
+The following code sample shows how to implement PST file traversal API into a project:
+
+```java
+public static void main(String[] args) {
+    TraversalExceptionsCallback exceptionsCallback = new TraversalExceptionsCallback() {
+        @Override
+        public void invoke(TraversalAsposeException exception, String itemId) {
+            /* Exception handling  code. */
+        }
+    };
+
+    try (PersonalStorage pst = new PersonalStorage(exceptionsCallback)) {
+        if (pst.load("test.pst")) {
+            getAllMessages(pst, pst.getRootFolder());
+        }
+    }
+}
+
+private static void getAllMessages(PersonalStorage pst, FolderInfo folder) {
+    for (String messageEntryId : folder.enumerateMessagesEntryId()) {
+        MapiMessage message = pst.extractMessage(messageEntryId);
+    }
+    for (FolderInfo subFolder : folder.getSubFolders()) {
+        getAllMessages(pst, subFolder);
+    }
+}
+```

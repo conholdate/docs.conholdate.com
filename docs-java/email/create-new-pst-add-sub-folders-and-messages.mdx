@@ -1,0 +1,180 @@
+---
+title: "Create New PST, Add Sub-folders and Messages"
+sidebar_label: "Create New PST, Add Sub-folders and Messages"
+sidebar_key: "java-email-create-new-pst-add-sub-folders-and-messages"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/java"
+source_path: "email/java/create-new-pst-add-sub-folders-and-messages.html"
+source_commit: ""
+source_sha256: "432d55759092268c95b9b231c86dbb785da094cc7c9d0e327d369b497ce633ae"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/java/create-new-pst-add-sub-folders-and-messages/"
+source_snapshot_sha256: "0e391e8dd69582f94e8d8eb24e490bba2704cd14a533d4aede5af602fd7ef844"
+---
+
+:::info
+Aspose.Email for Java is included in Conholdate.Total for Java.
+:::
+
+
+As well as parsing an existing PST file, Aspose.Email provides the means to create a PST file from scratch. This article demonstrates how to create an Outlook PST file and add a subfolder to it.
+
+1. [Creating a new PST file](/java/email/create-new-pst-add-sub-folders-and-messages/).
+2. [Changing Container class of a folder](/java/email/create-new-pst-add-sub-folders-and-messages/#changing-a-folder-container-class).
+3. [Add Bulk Messages with Improved Performance](/java/email/create-new-pst-add-sub-folders-and-messages/#add-bulk-messages-with-improved-performance)
+
+Use the <a href="https://reference.aspose.com/email/java/com.aspose.email/personalstorage/" target="_blank" rel="nofollow noopener noreferrer">PersonalStorage</a> class to create a PST file at some location on a local disk. To create a PST file from scratch:
+
+1. Create a PST using the <a href="https://reference.aspose.com/email/java/com.aspose.email/personalstorage/#create-java.io.OutputStream-int-" target="_blank" rel="nofollow noopener noreferrer">PersonalStorage.create()</a> method.
+2. Add a sub-folder at the root of the PST file by accessing the Root folder and then calling the <a href="https://reference.aspose.com/email/java/com.aspose.email/folderinfo/#addSubFolder-java.lang.String-" target="_blank" rel="nofollow noopener noreferrer">addSubFolder()</a> method.
+
+The following code snippet shows you how to create a PST file and add a subfolder called Inbox.
+
+```java
+// Create new PST
+try (PersonalStorage pst = PersonalStorage.create(path, FileFormatVersion.Unicode)) {
+    // Add new folder "Test"
+    pst.getRootFolder().addSubFolder("Inbox");
+}
+```
+
+## Create PST with Size more than 2Gb using OutputStream {#create-pst-with-size-more-than-2gb-using-outputstream}
+
+Aspose.Email users can optimize PST internal cache using the PersonalStorage constructor:
+
+- **blockSize** - The optimal block size to expand cache buffer(in bytes).
+
+```java
+PersonalStorage create(OutputStream stream, int blockSize, /*FileFormatVersion*/int version)
+```
+
+## Reduce the message size and the size of the created PST file {#reduce-the-message-size-and-the-size-of-the-created-pst-file}
+
+Aspose.Email offers the capability to compress the body content, which can help reduce the message size. This can be particularly useful when sending large messages or when dealing with limited bandwidth or storage constraints. For this purpose, the library provides the compression parameter included in the following methods:
+
+- <a href="https://reference.aspose.com/email/java/com.aspose.email/mapimessageitembase/#setBodyContent-java.lang.String-int-boolean-" target="_blank" rel="nofollow noopener noreferrer">MapiMessageItemBase.setBodyContent(String content, /*BodyContentType*/int contentType, boolean compression)</a> - Sets the content of the body.
+- <a href="https://reference.aspose.com/email/java/com.aspose.email/mapimessageitembase/#setBodyRtf-java.lang.String-boolean-" target="_blank" rel="nofollow noopener noreferrer">MapiMessageItemBase.setBodyRtf(String content, boolean compression)</a> - Gets or sets the RTF formatted message text.
+
+The code snippet below demonstrates how to use RTF Compression while setting the MAPI message body:
+
+```java
+MapiMessage msg = new MapiMessage("from@doamin.com", "to@domain.com", "subject", "body");
+// set the html body and keep it compressed
+// this will reduce the message size
+msg.setBodyContent(htmlBody, BodyContentType.Html, true);
+```
+
+## Create PersonalStorage based on SeekableByteChannel Stream {#create-personalstorage-based-on-seekablebytechannel-stream}
+
+Aspose.Email for Java makes it possible to work with Personal Storage (PST) files using java.nio.channels. It allows you create a PersonalStorage instance using a SeekableByteChannel stream. The following code snippet demonstrates how to create a PersonalStorage instance based on a FileChannel stream, add a subfolder named "messageFolder" to the root folder, and import messages from files in the "messageFolder" directory:
+
+```cs
+try (RandomAccessFile raf = new RandomAccessFile("test.pst", "rw")) {
+    FileChannel channel = raf.getChannel();
+    try (PersonalStorage pst = PersonalStorage.create(channel, FileFormatVersion.Unicode)) {
+        FolderInfo messageFolder = pst.getRootFolder().addSubFolder("messageFolder");
+
+        for (File f : new File("messageFolder").listFiles()) {
+            messageFolder.addMessage(MapiMessage.load(f.getAbsolutePath()));
+        }
+    }
+}
+```
+
+## Check the Folder Container Class {#check-the-folder-container-class}
+
+When creating new folders or adding items to existing folders, it is important to ensure that the container class of the new item or folder aligns with the container class of the parent folder, to maintain the organizational hierarchy within the PST storage file. For this purpose, Aspose.Email has the `EnforceContainerClassMatching` property of the <a href="https://reference.aspose.com/email/java/com.aspose.email/foldercreationoptions/" target="_blank" rel="nofollow noopener noreferrer">FolderCreationOptions</a> class. The property specifies whether to enforce checking the container class of the folder being added against the container class of the parent folder. If set to `true`, an exception is thrown when the container classes do not match. The default is `false`.
+
+The following code sample demonstrates the use of this property to control whether an exception should be thrown when adding folders with mismatching container classes:
+
+```java
+try (PersonalStorage pst = PersonalStorage.create("storage.pst", FileFormatVersion.Unicode)) {
+    // Create a standard Contacts folder with the IPF.Contact container class
+    FolderInfo contacts = pst.createPredefinedFolder("Contacts", StandardIpmFolder.Contacts);
+
+    // An exception will not arise: EnforceContainerClassMatching is false by default
+    contacts.addSubFolder("Subfolder1", "IPF.Note");
+
+    // An exception will occur, as the container class of the subfolder being added (IPF.Note)
+    // does not match the container class of the parent folder (IPF.Contact)
+    FolderCreationOptions options = new FolderCreationOptions();
+    options.setEnforceContainerClassMatching(true);
+    options.setContainerClass("IPF.Note");
+
+    contacts.addSubFolder("Subfolder3", options);
+}
+```
+
+:::info
+Ensure proper handling of exceptions when enforcing container class matching, to prevent unexpected behavior during folder creation in a PST.
+:::
+
+## Changing a Folder Container Class {#changing-a-folder-container-class}
+
+Sometimes it is necessary to change a folder class. A common example is where messages of different types (appointments, messages, etc.) are added to the same folder. In such cases, the folder class needs to be changed for all elements in the folder to display properly. The following code snippet shows you how to change the container class of a folder in PST for this purpose.
+
+```java
+try (PersonalStorage pst = PersonalStorage.fromFile("PersonalStorage1.pst")) {
+    FolderInfo folder = pst.getRootFolder().getSubFolder("Inbox");
+
+    folder.changeContainerClass("IPF.Note");
+}
+```
+
+## Add Bulk Messages with Improved Performance {#add-bulk-messages-with-improved-performance}
+
+Adding individual messages to a PST implies more I/O operations to disc and may slow down the performance. For improved performance, messages can be added to the PST in bulk mode to minimize I/O operations. The <a href="https://reference.aspose.com/email/java/com.aspose.email/folderinfo/#addMessages-java.lang.Iterable-com.aspose.email.MapiMessage--" target="_blank" rel="nofollow noopener noreferrer">addMessages(Iterable messages)</a> method allows you to add messages in bulk and can be used as in the following scenarios. In addition, the <a href="https://reference.aspose.com/email/java/com.aspose.email/folderinfo/#MessageAdded" target="_blank" rel="nofollow noopener noreferrer">MessageAdded</a> event occurs when a message is added to the folder.
+
+### Add Messages from Another PST {#add-messages-from-another-pst}
+
+To add messages from another PST, use the <a href="https://reference.aspose.com/email/java/com.aspose.email/folderinfo/#enumerateMapiMessages--" target="_blank" rel="nofollow noopener noreferrer">FolderInfo.enumerateMapiMessages()</a> method that returns `Iterable<MapiMessage>`:
+
+```java
+try (PersonalStorage srcPst = PersonalStorage.fromFile("source.pst", false)) {
+    try (PersonalStorage destPst = PersonalStorage.fromFile("destination.pst")) {
+
+        // Get the folder by name
+        FolderInfo srcFolder = srcPst.getRootFolder().getSubFolder("SomeFolder");
+        FolderInfo destFolder = destPst.getRootFolder().getSubFolder("SomeFolder");
+
+        destFolder.MessageAdded.add(new MessageAddedEventHandler() {
+            // Handles the MessageAdded event.
+            public void invoke(Object sender, MessageAddedEventArgs e) {
+                System.out.println("Added: " + e.getEntryId());
+            }
+        });
+        destFolder.addMessages(srcFolder.enumerateMapiMessages());
+    }
+}
+```
+
+### Add Messages from Directory {#add-messages-from-directory}
+
+To add messages from directory, create the `getMessages(String pathToDir)` method that returns `Iterable<MapiMessage>`:
+
+```java
+// Read messages from directory.
+static Iterable<MapiMessage> getMessages (String pathToDir)
+{
+    return Arrays.stream(listDirectory(pathToDir, "*.msg"))
+            .map(MapiMessage::load).collect(Collectors.toList());
+}
+
+try ( PersonalStorage pst = PersonalStorage.fromFile("storage.pst")) {
+    FolderInfo folder = pst.getRootFolder().getSubFolder("SomeFolder");
+    folder.MessageAdded.add(new MessageAddedEventHandler() {
+        // Handles the MessageAdded event.
+        public void invoke(Object sender, MessageAddedEventArgs e) {
+            System.out.println("Added: " + e.getEntryId());
+        }
+    });
+    folder.addMessages(getMessages("MessageDirectory"));
+}
+```

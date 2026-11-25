@@ -1,0 +1,76 @@
+---
+title: "Using a Microsoft Word Document as the Message Body and Sending Email"
+sidebar_label: "Using a Microsoft Word Document as the Message Body and Sending Email"
+sidebar_key: "java-email-using-a-microsoft-word-document-as-the-message-body-and-sending-email"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/java"
+source_path: "email/java/using-a-microsoft-word-document-as-the-message-body-and-sending-email.html"
+source_commit: ""
+source_sha256: "50762caa8762f7dcc29249f4d70d031dcc38ee171cafa085e87a7a37e6f18398"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/java/using-a-microsoft-word-document-as-the-message-body-and-sending-email/"
+source_snapshot_sha256: "248453d9c6e4b6552ed172fa15d21cf4a5950c72e7571c2e4a5584f1d7d49fcb"
+---
+
+:::info
+Aspose.Email for Java is included in Conholdate.Total for Java.
+:::
+
+
+This article shows you how to use a Microsoft Word document as the email body and send it to recipients. The sample document is a sales invoice from the Northwind database sample, exported to Microsoft Word format. Aspose.Email for Java deals with network protocols and Microsoft Outlook features and cannot handle Microsoft Word documents. To overcome this, the samples in this article use <a href="https://products.aspose.com/words/java/" target="_blank" rel="nofollow noopener noreferrer">Aspose.Words for Java</a> to load the Word document and convert it to MHTML format. Aspose.Email for Java uses the MHTML document in the email body.
+
+## Using Microsoft Word Documents as Email Body {#using-microsoft-word-documents-as-email-body}
+
+The programming samples below illustrate how to send a Word document as an email body using Aspose.Words for Java and Aspose.Email for Java:
+
+1. Load a Microsoft Word document using Aspose.Word for Java's <a href="https://apireference.aspose.com/words/java/com.aspose.words/Document" target="_blank" rel="nofollow noopener noreferrer">Document</a> class.
+2. Save it in MHTML format.
+3. Load the MHTML document using Aspose.Email for Java's <a href="https://apireference.aspose.com/email/java/com.aspose.email/MailMessage" target="_blank" rel="nofollow noopener noreferrer">MailMessage</a> class to set the email body.
+4. Set other message properties using different <a href="https://apireference.aspose.com/email/java/com.aspose.email/MailMessage" target="_blank" rel="nofollow noopener noreferrer">MailMessage</a> class properties and methods.
+5. Send the email using Aspose.Email for Java's <a href="https://apireference.aspose.com/email/java/com.aspose.email/smtpclient" target="_blank" rel="nofollow noopener noreferrer">SMTPClient</a> class.
+
+The source document, a sales invoice exported to Microsoft Word from the Microsoft Northwind sample can be seen below.
+
+![todo:image_alt_text](/java/email/images/65f7dc96c22199cd-using-a-microsoft-word-document-as-the-message-body-and-sending-email_1.png)
+
+When the message has been sent and received in Microsoft Outlook, it looks like the message below.
+
+![todo:image_alt_text](/java/email/images/626e9d01249d9aab-using-a-microsoft-word-document-as-the-message-body-and-sending-email_2.png)
+
+The HTML formatting and images are preserved as in the original source document when viewed in either Outlook or a web email client like Gmail or Hotmail. Below is a screenshot of the message when opened with Gmail in a Chrome browser.
+
+![todo:image_alt_text](/java/email/images/8c20ce8cebd0cfed-using-a-microsoft-word-document-as-the-message-body-and-sending-email_3.png)
+
+The following code snippet shows you how to use a Microsoft Word document as the message body and send an email by using <a href="https://apireference.aspose.com/email/java/com.aspose.email/smtpclient" target="_blank" rel="nofollow noopener noreferrer">SmtpClient</a> class instance.
+
+```Java
+// The path to the File directory
+String dataDir = "data/";
+
+// Load a Word document from disk and save it to stream as MHTML
+Document wordDocument = new Document(dataDir + "Test.doc");
+ByteArrayOutputStream mhtmlStream = new ByteArrayOutputStream();
+wordDocument.save(mhtmlStream, SaveFormat.MHTML);
+
+// Load the MHTML in a MailMessage object
+MailMessage message = MailMessage.load(new ByteArrayInputStream(mhtmlStream.toByteArray()), new MhtmlLoadOptions());
+message.setSubject("Sending Invoice in Email");
+message.setFrom(new MailAddress("sender@gmail.com"));
+message.setTo(MailAddressCollection.to_MailAddressCollection("recipient@gmail.com"));
+
+// Save the message in MSG format to disk
+message.save(dataDir + "WordDocAsEmailBody_out.msg", SaveOptions.getDefaultMsgUnicode());
+
+    // Send the email message
+try (SmtpClient client = new SmtpClient("smtp.gmail.com", 587, "sender@gmail.com", "pwd")) {
+    client.setSecurityOptions(SecurityOptions.SSLExplicit);
+    client.send(message);
+}
+```

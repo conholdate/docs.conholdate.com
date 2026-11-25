@@ -1,0 +1,110 @@
+---
+title: "Working with ImapClient Asynchronously"
+sidebar_label: "Working with ImapClient Asynchronously"
+sidebar_key: "java-email-working-with-imapclient-asynchronously"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/java"
+source_path: "email/java/working-with-imapclient-asynchronously.html"
+source_commit: ""
+source_sha256: "4188a341cc3afeb39a495bd395accffd61ee8b67bb02169ef98c913842a07c4d"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/java/working-with-imapclient-asynchronously/"
+source_snapshot_sha256: "e3bce1ca179ff886f099089493ea647cb5710649aba594723d1f1c520a1e1f30"
+---
+
+:::info
+Aspose.Email for Java is included in Conholdate.Total for Java.
+:::
+
+
+Messages can be retrieved from mailbox asynchronously by using the Aspose.Email <a href="https://reference.aspose.com/email/java/com.aspose.email/imapclient/" target="_blank" rel="nofollow noopener noreferrer">ImapClient</a>. This article shows retrieving messages from mailbox Asynchronously. This article also shows how to list messages by providing search criteria using <a href="https://reference.aspose.com/email/java/com.aspose.email/mailquery/" target="_blank" rel="nofollow noopener noreferrer">MailQuery</a>.
+
+## Retrieve Messages Asynchronously {#retrieve-messages-asynchronously}
+
+The following code snippet shows you how to retrieve messages asynchronously.
+
+```Java
+// For complete examples and data files, please go to https://github.com/aspose-email/Aspose.Email-for-Java
+// Connect and log in to IMAP
+try (ImapClient client = new ImapClient("host", "username", "password")) {
+    client.selectFolder("Issues/SubFolder");
+    ImapMessageInfoCollection messages = client.listMessages();
+    IAsyncResult ar = client.beginFetchMessage(messages.get_Item(0).getSequenceNumber());
+    MailMessage message = client.endFetchMessage(ar);
+}
+```
+
+## List Messages Asynchronously with MailQuery {#list-messages-asynchronously-with-mailquery}
+
+The <a href="https://reference.aspose.com/email/java/com.aspose.email/mailquery/" target="_blank" rel="nofollow noopener noreferrer">MailQuery</a> class can be used to specify search criteria for retrieving a specified list of messages asynchronously as is shown in the following code sample.
+
+```Java
+// For complete examples and data files, please go to https://github.com/aspose-email/Aspose.Email-for-Java
+ImapQueryBuilder builder = new ImapQueryBuilder();
+builder.getSubject().contains("Subject");
+MailQuery query = builder.getQuery();
+IAsyncResult asyncResult = client.beginListMessages(query);
+ImapMessageInfoCollection messages = client.endListMessages(asyncResult);
+```
+
+## Append Messages Asynchronously {#append-messages-asynchronously}
+
+Uploading messages asynchronously is convenient, as the process does not block the execution of the program or thread. Instead of waiting for the whole batch to be appended before proceeding with other tasks, the program can continue running while the messages are uploaded in the background.
+
+Aspose.Email for Java implements asynchronous operations with the classic `beginXxx` / `endXxx` pair, which returns an `IAsyncResult`:
+
+```java
+List<MailMessage> mailMessages = new ArrayList<MailMessage>();
+
+// Create the mail messages
+for (int i = 0; i < 100; i++) {
+    mailMessages.add(new MailMessage("sender@domain.com", "receiver@domain.com", "Message #" + i, "Text"));
+}
+
+try (ImapClient client = new ImapClient("host", 993, "sender@domain.com", "password", SecurityOptions.SSLImplicit)) {
+    client.selectFolder(ImapFolderInfo.IN_BOX);
+
+    // Start uploading the messages
+    IAsyncResult asyncResult = client.beginAppendMessages(mailMessages);
+
+    // ... do other work here ...
+
+    // Wait for the operation to complete
+    AppendMessagesResult result = client.endAppendMessages(asyncResult);
+    System.out.println("All messages have been appended: " + result);
+}
+```
+
+## Cancel Asynchronous Operations {#cancel-asynchronous-operations}
+
+Sometimes you may need to stop an asynchronous operation before it completes. The `cancelAsyncOperation` method, inherited from <a href="https://reference.aspose.com/email/java/com.aspose.email/emailclient/" target="_blank" rel="nofollow noopener noreferrer">EmailClient</a>, interrupts an operation started with any of the `beginXxx` methods - pass it the `IAsyncResult` returned when the operation was started:
+
+```java
+List<MailMessage> mailMessages = new ArrayList<MailMessage>();
+for (int i = 0; i < 100; i++) {
+    mailMessages.add(new MailMessage("sender@domain.com", "receiver@domain.com", "Message #" + i, "Text"));
+}
+
+try (ImapClient client = new ImapClient("host", 993, "sender@domain.com", "password", SecurityOptions.SSLImplicit)) {
+    client.selectFolder(ImapFolderInfo.IN_BOX);
+
+    IAsyncResult asyncResult = client.beginAppendMessages(mailMessages);
+
+    // Let the upload run for a while, then interrupt it
+    Thread.sleep(5000);
+    client.cancelAsyncOperation(asyncResult);
+
+    System.out.println("Operation has been interrupted.");
+}
+```
+
+:::info
+The task-based asynchronous pattern (TAP) of Aspose.Email for .NET - `ListMessagesAsync`, `AppendMessagesAsync` and the `CancellationToken` parameter - has no counterpart in Aspose.Email for Java. Use the `beginXxx` / `endXxx` pair together with `cancelAsyncOperation` as shown above, or run the synchronous methods on an `ExecutorService`.
+:::

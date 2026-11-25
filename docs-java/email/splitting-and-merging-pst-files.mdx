@@ -1,0 +1,274 @@
+---
+title: "Splitting and Merging PST Files"
+sidebar_label: "Splitting and Merging PST Files"
+sidebar_key: "java-email-splitting-and-merging-pst-files"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/java"
+source_path: "email/java/splitting-and-merging-pst-files.html"
+source_commit: ""
+source_sha256: "3e62420764db07aebe0f96be05e536c638ab7a101f54354a5c166acfbd17c87c"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/java/splitting-and-merging-pst-files/"
+source_snapshot_sha256: "1f0325ac6616e5d31659d91c04eaeca658c883ed7a5f4215ec89b09773d9f503"
+---
+
+:::info
+Aspose.Email for Java is included in Conholdate.Total for Java.
+:::
+
+
+Aspose.Email API provides the capability to split a single PST file into multiple PST files of desired file size. It can also merge multiple PST files into a single PST file. Both the splitting and merging of PSTs operations can be tracked by adding events to these operations.
+
+## Split and Merge PST Files {#split-and-merge-pst-files}
+
+The following code samples illustrate how to split a large PST file into multiple small chunks of PST files.
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-email/Aspose.Email-for-Java
+String sourceFileName = dataDir + "source.pst";
+		
+final PersonalStorage pst = PersonalStorage.fromFile(sourceFileName);
+try {
+	pst.StorageProcessed.add(new StorageProcessedEventHandler() {
+		public void invoke(Object sender, StorageProcessedEventArgs e) {
+			pstSplit_OnStorageProcessed(sender, e);
+		}
+	});
+	pst.ItemMoved.add(new ItemMovedEventHandler() {
+		public void invoke(Object sender, ItemMovedEventArgs e) {
+			pstSplit_OnItemMoved(sender, e);
+		}
+	});
+			
+	deleteAllFilesInDirectory(new File(dataDir + "chunks/"));
+	pst.splitInto(542720 , dataDir + "chunks/");
+} finally {
+	if (pst != null)
+		(pst).dispose();
+}
+```
+
+## Merging of Multiple PSTs into a Single PST {#merging-of-multiple-psts-into-a-single-pst}
+
+The following code sample shows how multiple PSTs can be merged into a single large PST file.
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-email/Aspose.Email-for-Java
+
+// Path to files that will be merged into "source.pst".
+String mergeWithFolderPath = dataDir + "MergeWith";
+
+String mergeIntoFolderPath = dataDir + "MergeInto" + File.separator;
+
+// This will ensure that we can run this example as many times as we want. 
+// It will discard changes made to to the Source file in last run of this example.
+deleteAndRecopySampleFiles(mergeIntoFolderPath, dataDir + "MergeMultiplePSTsIntoASinglePST/");
+
+final PersonalStorage pst = PersonalStorage.fromFile(mergeIntoFolderPath + "source.pst");
+try {
+	pst.StorageProcessed.add(new StorageProcessedEventHandler() {
+		public void invoke(Object sender, StorageProcessedEventArgs e) {
+			pstMerge_OnStorageProcessed(sender, e);
+		}
+	});
+	pst.ItemMoved.add(new ItemMovedEventHandler() {
+		public void invoke(Object sender, ItemMovedEventArgs e) {
+			pstMerge_OnItemMoved(sender, e);
+		}
+	});
+	//Get a collection of all files in the directory
+	ArrayList<String> results = new ArrayList<String>();
+
+	File[] files = new File(mergeWithFolderPath).listFiles();
+	//If this path name does not denote a directory, then listFiles() returns null.
+	if (files == null)
+		return;
+
+	for (File file : files) {
+		if (file.isFile() && file.getName().endsWith(".pst")) {
+			results.add(file.getAbsolutePath());
+		}
+	}
+	
+	String[] fileNames = results.toArray(new String[0]);
+	pst.mergeWith(fileNames);
+} finally {
+	if (pst != null)
+		(pst).dispose();
+}
+```
+
+:::info
+**Try it out!**
+
+Merge and combine multiple email files into a single one with the free <a href="https://products.aspose.app/email/merger" target="_blank" rel="nofollow noopener noreferrer">**Aspose.Email Merger App**</a>.
+:::
+
+## Merge Folders from another PST {#merge-folders-from-another-pst}
+
+Aspose.Email API allows merging complete folders from another PST to a destination PST, thus resulting in a large size PST.
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-email/Aspose.Email-for-Java
+String sourceFileName = dataDir +  "Sources/source.pst";
+String destinationFolder = dataDir + "Destination" + File.separator;
+String destinationFileName = "destination.pst";
+
+// This will ensure that we can run this example as many times as we want. 
+// It will discard changes made to to the destination file "destination.pst" in last run of this example.
+deleteAndRecopySampleFiles(destinationFolder, dataDir + "MergeFoldersFromAnotherPST" + File.separator);
+
+final PersonalStorage destinationPst = PersonalStorage.fromFile(destinationFolder + destinationFileName);
+try {
+	final PersonalStorage sourcePst = PersonalStorage.fromFile(sourceFileName);
+	try {
+		
+		FolderInfo destFolder = destinationPst.getRootFolder().addSubFolder("FolderFromOtherPst" + (int) (Math.random() * 100));
+		
+		FolderInfo sourceFolder = sourcePst.getPredefinedFolder(StandardIpmFolder.Inbox);
+
+		destFolder.ItemMoved.add(new ItemMovedEventHandler() {
+			public void invoke(Object sender, ItemMovedEventArgs e) {
+				destinationFolder_ItemMoved(sender, e);
+			}
+		});
+
+		destFolder.mergeWith(sourceFolder);
+
+		System.out.println("Total messages added: " + totalAdded);
+	} finally {
+		if (sourcePst != null)
+			(sourcePst).dispose();
+	}
+} finally {
+	if (destinationPst != null)
+		(destinationPst).dispose();
+}
+```
+
+## Split PST based on Defined Criterion {#split-pst-based-on-defined-criterion}
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-email/Aspose.Email-for-Java
+String fileName = dataDir + "source.pst";
+java.util.Calendar c = java.util.Calendar.getInstance();
+
+List<MailQuery> criteria = new List<MailQuery>();
+
+//Define a criterion based on Time
+PersonalStorageQueryBuilder pstQueryBuilder = new PersonalStorageQueryBuilder();
+c.set(2015, 1, 1, 0, 0, 0);
+pstQueryBuilder.getSentDate().since(c.getTime());
+c.set(2015, 12, 12, 0, 0, 0);
+pstQueryBuilder.getSentDate().before(c.getTime());
+criteria.addItem(pstQueryBuilder.getQuery());
+
+//specify some other criterion as well
+pstQueryBuilder = new PersonalStorageQueryBuilder();
+c.set(2012, 1, 1, 0, 0, 0);
+pstQueryBuilder.getSentDate().since(c.getTime());
+c.set(2012, 12, 12, 0, 0, 0);
+pstQueryBuilder.getSentDate().before(c.getTime());
+criteria.addItem(pstQueryBuilder.getQuery());
+
+final PersonalStorage pst = PersonalStorage.fromFile(fileName);
+try {
+	deleteAllOutputFiles();
+	pst.splitInto(criteria, dataDir);
+} finally {
+	if (pst != null)
+		pst.dispose();
+}
+```
+
+## Helping Methods {#helping-methods}
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-email/Aspose.Email-for-Java
+private static void destinationFolder_ItemMoved(Object sender, ItemMovedEventArgs e) {
+	totalAdded++;
+}
+
+private static void pstMerge_OnStorageProcessed(Object sender, StorageProcessedEventArgs e) {
+	System.out.println("*** The storage is merging: {0}" + e.getFileName());
+}
+
+private static void pstMerge_OnItemMoved(Object sender, ItemMovedEventArgs e) {
+	if (currentFolder == null) {
+		currentFolder = e.getDestinationFolder().retrieveFullPath();
+	}
+
+	String folderPath = e.getDestinationFolder().retrieveFullPath();
+
+	if (!folderPath.equals(currentFolder)) {
+		System.out.println(" Added " + messageCount + " messages to " + currentFolder);
+		messageCount = 0;
+		currentFolder = folderPath;
+	}
+
+	messageCount++;
+	totalAdded++;
+}
+
+private static void pstSplit_OnStorageProcessed(Object sender, StorageProcessedEventArgs e) {
+	if (currentFolder != null) {
+		System.out.println(" Added " + messageCount + " messages to " + currentFolder);
+	}
+
+	messageCount = 0;
+	currentFolder = null;
+	System.out.println("*** The chunk is processed: " + e.getFileName());
+}
+
+private static void pstSplit_OnItemMoved(Object sender, ItemMovedEventArgs e) {
+	if (currentFolder == null) {
+		currentFolder = e.getDestinationFolder().retrieveFullPath();
+	}
+
+	String folderPath = e.getDestinationFolder().retrieveFullPath();
+
+	if (!folderPath.equals(currentFolder)) {
+		System.out.println(" Added " + messageCount + " messages to " + currentFolder);
+		messageCount = 0;
+		currentFolder = folderPath;
+	}
+
+	messageCount++;
+}
+
+public static void deleteAndRecopySampleFiles(String destFolder, String srcFolder) {
+	
+	try {
+		deleteAllFilesInDirectory(new File(destFolder));
+		File source = new File(srcFolder);
+		File dest = new File(destFolder);
+		FileUtils.copyDirectory(source, dest);
+	} catch(IOException e) {
+		System.out.println(e.getLocalizedMessage());
+	}
+}
+
+public static void deleteAllFilesInDirectory(File dir) {
+	for(String s: dir.list()){
+	    File currentFile = new File(dir.getPath(), s);
+	    currentFile.delete();
+	}
+}
+
+public static void deleteAllOutputFiles() {
+	File dir = new File(dataDir);
+	for(String s: dir.list()){
+		if(s.startsWith("Test_part") || s.startsWith("Personal folders_part")) {
+			File file = new File(dir.getPath(), s);
+			file.delete();
+		}
+	}
+}
+```

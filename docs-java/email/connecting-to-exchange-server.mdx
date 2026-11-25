@@ -1,0 +1,151 @@
+---
+title: "Connecting to Exchange Server"
+sidebar_label: "Connecting to Exchange Server"
+sidebar_key: "java-email-connecting-to-exchange-server"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/java"
+source_path: "email/java/connecting-to-exchange-server.html"
+source_commit: ""
+source_sha256: "b264b69446ade3fee53760e5281d1486a3a33162035bc7f7371397b57e8caa53"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/java/connecting-to-exchange-server/"
+source_snapshot_sha256: "0fb460803106022b6271b55e5290f5b9fa28cc63b0d4e0f1634aec38bf0cb354"
+---
+
+:::info
+Aspose.Email for Java is included in Conholdate.Total for Java.
+:::
+
+
+In order to connect to Exchange servers 2007, 2010 and 2013 using Exchange Web Service, Aspose.Email provides the <a href="https://apireference.aspose.com/email/java/com.aspose.email/IEWSClient" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a> interface that implements the <a href="https://apireference.aspose.com/email/java/com.aspose.email/ewsclient" target="_blank" rel="nofollow noopener noreferrer">EWSClient</a> class. The <a href="https://apireference.aspose.com/email/java/com.aspose.email/EWSClient#getEWSClient%5C%28java.lang.String,%20java.lang.String,%20java.lang.String,%20java.lang.String%5C%29" target="_blank" rel="nofollow noopener noreferrer">EWSClient.getEWSClient</a> method instantiates and returns an <a href="https://apireference.aspose.com/email/java/com.aspose.email/IEWSClient" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a> object that is further used to perform operations related to an Exchange mailbox and other folders. This article shows how to instantiate objects of <a href="https://apireference.aspose.com/email/java/com.aspose.email/IEWSClient" target="_blank" rel="nofollow noopener noreferrer">IEWSClient</a>.
+
+## Connecting to Exchange Server using EWS {#connecting-to-exchange-server-using-ews}
+
+The following code snippet shows you how to connect using Exchange Web Service (EWS).
+
+```Java
+private static IEWSClient getExchangeEWSClient() {
+    final String mailboxUri = "https://outlook.office365.com/ews/exchange.asmx";
+    final String domain = "";
+    final String username = "username@onmicrosoft.com";
+    final String password = "password";
+    NetworkCredential credentials = new NetworkCredential(username, password, domain);
+    IEWSClient client = EWSClient.getEWSClient(mailboxUri, credentials);
+    return client;
+}
+```
+
+## Connecting to Exchange Server using IMAP {#connecting-to-exchange-server-using-imap}
+
+Microsoft Exchange Server supports the IMAP protocol for accessing items in a mailbox. Use Aspose.Email's <a href="https://apireference.aspose.com/email/java/com.aspose.email/ImapClient" target="_blank" rel="nofollow noopener noreferrer">ImapClient</a> class to connect to the Exchange Server using the IMAP protocol. For more information about the <a href="https://apireference.aspose.com/email/java/com.aspose.email/ImapClient" target="_blank" rel="nofollow noopener noreferrer">ImapClient</a> class. First, make sure that IMAP services are enabled for your Exchange Server:
+
+1. Open the Control Panel.
+2. Go to Administrator Tools, then Services.
+3. Check the status of the Microsoft Exchange IMAP4 service.
+4. If it is not already running, enable/start it.
+
+The following code snippet shows you how to connect and list messages from the Inbox folder of Microsoft exchange server using IMAP protocol.
+
+```Java
+// Connect to Exchange Server using ImapClient class
+ImapClient imapClient = new ImapClient("ex07sp1", "Administrator", "Evaluation1");
+imapClient.setSecurityOptions(SecurityOptions.Auto);
+
+// Select the Inbox folder
+imapClient.selectFolder(ImapFolderInfo.IN_BOX);
+
+// Get the list of messages
+ImapMessageInfoCollection msgCollection = imapClient.listMessages();
+for (ImapMessageInfo msgInfo : (Iterable<ImapMessageInfo>) msgCollection) {
+    System.out.println(msgInfo.getSubject());
+}
+// Disconnect from the server
+imapClient.dispose();
+```
+
+The following code snippet shows you how to use SSL.
+
+```Java
+public static void run() {
+    // Connect to Exchange Server using ImapClient class
+    ImapClient imapClient = new ImapClient("ex07sp1", 993, "Administrator", "Evaluation1");
+    imapClient.setSecurityOptions(SecurityOptions.SSLExplicit);
+
+    // Select the Inbox folder
+    imapClient.selectFolder(ImapFolderInfo.IN_BOX);
+
+    // Get the list of messages
+    ImapMessageInfoCollection msgCollection = imapClient.listMessages();
+    for (ImapMessageInfo msgInfo : (Iterable<ImapMessageInfo>) msgCollection) {
+        System.out.println(msgInfo.getSubject());
+    }
+    // Disconnect from the server
+    imapClient.dispose();
+}
+```
+
+After connecting to an Exchange server using IMAP and getting the <a href="https://apireference.aspose.com/email/java/com.aspose.email/ImapMessageInfoCollection" target="_blank" rel="nofollow noopener noreferrer">IMapMessageInfoCollection</a>, The following code snippet shows you how to use the <a href="https://apireference.aspose.com/email/java/com.aspose.email/MessageInfo" target="_blank" rel="nofollow noopener noreferrer">MessageInfo</a> object's sequence number to save a specific message.
+
+```Java
+// Select the Inbox folder
+imapClient.selectFolder(ImapFolderInfo.IN_BOX);
+// Get the list of messages
+ImapMessageInfoCollection msgCollection = imapClient.listMessages();
+for (ImapMessageInfo msgInfo : (Iterable<ImapMessageInfo>) msgCollection) {
+    // Fetch the message from inbox using its SequenceNumber from msgInfo
+    MailMessage message = imapClient.fetchMessage(msgInfo.getSequenceNumber());
+
+    // Save the message to disc now
+    message.save(dataDir + msgInfo.getSequenceNumber() + "_out.msg", SaveOptions.getDefaultMsgUnicode());
+}
+```
+
+## Ignore or Bypass Invalid or Expired SSL Certificate {#ignore-or-bypass-invalid-or-expired-ssl-certificate}
+
+Aspose.Email connects to Exchange Server over HTTPS, so the JVM validates the server certificate before any EWS request is made. If the certificate has expired, is self-signed, or its subject does not match the host name, the connection fails with an `SSLHandshakeException`.
+
+The supported fix is to install the server certificate (or the CA that issued it) into the JVM trust store:
+
+```bash
+keytool -importcert -alias exchange -file exchange.cer -keystore "%JAVA_HOME%\lib\security\cacerts"
+```
+
+For a test or development environment where that is not practical, you can register a permissive `TrustManager` and host name verifier before creating the client. Call this method once during application start-up:
+
+```java
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.security.cert.X509Certificate;
+
+public class SslBypass {
+
+  public static void trustAllCertificates() throws Exception {
+      TrustManager[] trustAll = new TrustManager[] {
+          new X509TrustManager() {
+              public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+              public void checkClientTrusted(X509Certificate[] chain, String authType) { }
+              public void checkServerTrusted(X509Certificate[] chain, String authType) { }
+          }
+      };
+
+      SSLContext sslContext = SSLContext.getInstance("TLS");
+      sslContext.init(null, trustAll, new java.security.SecureRandom());
+
+      HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+      HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+  }
+}
+```
+
+:::info
+Disabling certificate validation removes the protection against man-in-the-middle attacks for **every** HTTPS connection the JVM makes, not only the ones to Exchange. Never ship this code to production - import the certificate into the trust store instead.
+:::

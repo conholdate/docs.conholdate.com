@@ -1,0 +1,88 @@
+---
+title: "Detecting New Email Messages on POP3 Server"
+sidebar_label: "Detecting New Email Messages on POP3 Server"
+sidebar_key: "java-email-detecting-new-email-messages-on-pop3-server"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/java"
+source_path: "email/java/detecting-new-email-messages-on-pop3-server.html"
+source_commit: ""
+source_sha256: "b68da92494c21622db007f93f713095585b8ef1f03e850faf38b1579feaf8c5a"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/java/detecting-new-email-messages-on-pop3-server/"
+source_snapshot_sha256: "42de1d9e11b21e0b441fc28e425c11b4dd71e95b526dbe67f75d7b8b4a3b3394"
+---
+
+:::info
+Aspose.Email for Java is included in Conholdate.Total for Java.
+:::
+
+
+With POP3 accounts you can leave messages on the server when downloading and reading them. Leaving emails on the server means that they are available to other applications and individuals, for example, users who access their email from several devices. Or you might want to only download messages that meet some special criteria, for example, messages with a particular subject line. To manage email, you can;
+
+- Read all the messages from the POP3 mail server using Aspose.Email.
+- Download the messages to your local database.
+
+The messages don't get deleted but stay on the server. The first time it runs, this process works fine. All the required messages are downloaded to the database. But the second time it runs, the same messages are downloaded because they are still on the email server. This causes duplicate records. To solve this issue, use the <a href="https://apireference.aspose.com/email/java/com.aspose.email/Pop3MessageInfo#getUniqueId%5C%28%5C%29" target="_blank" rel="nofollow noopener noreferrer">Pop3MessageInfo.UniqueID</a> property to check whether a message has already been downloaded. The message's unique ID must be stored in the database: it is the search key for detecting new messages.
+
+## Detecting New Messages {#detecting-new-messages}
+
+To identify new emails from a list of emails on a POP3 server:
+
+1. Connect to the server.
+2. Get a list of emails.
+3. Connect to the database.
+4. Get a list of emails.
+5. Compare the lists.
+6. Save new emails to the database.
+
+The process is faster when you:
+
+1. Fetch all the unique IDs of messages into a hash table.
+2. Search the hash table instead of the database for each email message in a for(…) loop.
+
+Instead of querying the database for each message, requiring many database calls, this method only requires one call. The following code snippet shows you how to detect New Email messages on the POP3 server.
+
+```Java
+public static void run() {
+    try {
+        // Connect to the POP3 mail server and check messages.
+        Pop3Client pop3Client = new Pop3Client("pop.domain.com", 993, "username", "password");
+
+        // List all the messages
+        Pop3MessageInfoCollection msgList = pop3Client.listMessages();
+        for (Pop3MessageInfo msgInfo : msgList) {
+            // Get the POP3 message's unique ID
+            String strUniqueID = msgInfo.getUniqueId();
+
+            // Search your local database or data store on the unique ID. If a match is found, that means it's already downloaded. Otherwise download and save it.
+            if (searchPop3MsgInLocalDB(strUniqueID) == true) {
+                // The message is already in the database. Nothing to do with this message. Go to next message.
+            } else {
+                // Save the message
+                savePop3MsgInLocalDB(msgInfo);
+            }
+        }
+    } catch (Exception ex) {
+        System.err.println(ex);
+    }
+
+}
+
+private static void savePop3MsgInLocalDB(Pop3MessageInfo msgInfo) {
+    // Open the database connection according to your database. Use public properties (for example msgInfo.Subject) and store in database,
+    // for example, " INSERT INTO POP3Mails (UniqueID, Subject) VALUES ('" + msgInfo.UniqueID + "' , '" + msgInfo.Subject + "') and Run the query to store in database.
+}
+
+private static boolean searchPop3MsgInLocalDB(String strUniqueID) {
+    // Open the database connection according to your database. Use strUniqueID in the search query to find existing records,
+    // for example, " SELECT COUNT(*) FROM POP3Mails WHERE UniqueID = '" + strUniqueID + "' Run the query, return true if count == 1. Return false if count == 0.
+    return false;
+}
+```

@@ -1,0 +1,130 @@
+---
+title: "Working with large PST files"
+sidebar_label: "Working with large PST files"
+sidebar_key: "java-email-working-with-large-pst-files"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/java"
+source_path: "email/java/working-with-large-pst-files.html"
+source_commit: ""
+source_sha256: "c0045c33a1772636f97c80b8ec4c035dce012e09a0535403eff697d7b2f0ab2a"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/java/working-with-large-pst-files/"
+source_snapshot_sha256: "749282d5d0bf117c2805bd5784cc52d304ecc7dae866156a59b7926d42965e45"
+---
+
+:::info
+Aspose.Email for Java is included in Conholdate.Total for Java.
+:::
+
+
+Processing large Personal Storage Table (PST) files can reduce performance and increase memory usage. Aspose.Email for Java provides several techniques and APIs that allow developers to access, process, and manage mailbox data efficiently without overloading system resources.
+
+## Use Iterable Methods for Traversing Folders and Messages {#use-iterable-methods-for-traversing-folders-and-messages}
+
+When iterating through folders and messages, prefer methods that return `Iterable`. This reduces memory overhead and improves performance.
+
+```java
+try (PersonalStorage pst = PersonalStorage.fromFile("storage.pst")) {
+    for (FolderInfo folder : pst.getRootFolder().enumerateFolders()) {
+        for (MessageInfo messageInfo : folder.enumerateMessages()) {
+            // Process message
+        }
+    }
+}
+```
+
+## Use MessageInfo for Basic Message Properties {#use-messageinfo-for-basic-message-properties}
+
+If you need only basic message details, use <a href="https://reference.aspose.com/email/java/com.aspose.email/messageinfo/" target="_blank" rel="nofollow noopener noreferrer">MessageInfo</a> instead of loading the full message. This is faster and consumes less memory.
+
+```java
+for (MessageInfo messageInfo : folder.enumerateMessages()) {
+    System.out.println("Subject: " + messageInfo.getSubject());
+    System.out.println("To: " + messageInfo.getDisplayTo());
+    System.out.println("Importance: " + messageInfo.getImportance());
+    System.out.println("Message Class: " + messageInfo.getMessageClass());
+}
+```
+
+## Avoid Extracting Full Messages Unless Necessary {#avoid-extracting-full-messages-unless-necessary}
+
+Do not use <a href="https://reference.aspose.com/email/java/com.aspose.email/personalstorage/#extractMessage-com.aspose.email.MessageInfo-" target="_blank" rel="nofollow noopener noreferrer">ExtractMessage</a> or <a href="https://reference.aspose.com/email/java/com.aspose.email/folderinfo/#enumerateMapiMessages--" target="_blank" rel="nofollow noopener noreferrer">EnumerateMapiMessages</a> methods for all messages unless you need all properties.
+
+Instead, consider:
+
+**a) Retrieving Message IDs**
+
+Use `enumerateMessagesEntryId` to get all message IDs in a folder. You can then selectively extract properties, messages, or attachments.
+
+```java
+for (String id : folder.enumerateMessagesEntryId()) {
+    // Retrieve a property using ID (extractProperty),
+    // Extract a MapiMessage (extractMessage),
+    // Extract message attachments (extractAttachments),
+    // Save message to a stream (saveMessageToStream).
+}
+```
+
+**b) Extracting a Single Property**
+
+Use `ExtractProperty` if you need only a specific property missing in <a href="https://reference.aspose.com/email/java/com.aspose.email/messageinfo/" target="_blank" rel="nofollow noopener noreferrer">MessageInfo</a>.
+
+```java
+for (String msgId : folder.enumerateMessagesEntryId()) {
+    String transportMessageHeaders =
+        pst.extractProperty(
+            org.apache.commons.codec.binary.Base64.decodeBase64(msgId),
+            KnownPropertyList.TRANSPORT_MESSAGE_HEADERS.getTag()
+        ).getString();
+}
+```
+
+**c) Extracting Attachments Only**
+
+If only attachments are needed, use `ExtractAttachments`.
+
+```java
+for (String msgId : folder.enumerateMessagesEntryId()) {
+    MapiAttachmentCollection attachments = pst.extractAttachments(msgId);
+}
+```
+
+## Use Search Criteria to Filter Messages {#use-search-criteria-to-filter-messages}
+
+Filtering messages using [seach criteria](/java/email/working-with-messages-in-a-pst-file/#searching-messages-and-folders-in-pst) reduces the number of messages loaded and improves performance.
+
+```java
+try (PersonalStorage pst = PersonalStorage.fromFile("storage.pst")) {
+
+    PersonalStorageQueryBuilder builder = new PersonalStorageQueryBuilder();
+    // Unread messages
+    builder.hasNoFlags(MapiMessageFlags.MSGFLAG_READ);
+
+    for (FolderInfo folder : pst.getRootFolder().enumerateFolders()) {
+        MessageInfoCollection unread = folder.getContents(builder.getQuery());
+    }
+}
+```
+
+## Save Messages to Stream {#save-messages-to-stream}
+
+Instead of extracting and saving messages one by one, use <a href="https://reference.aspose.com/email/java/com.aspose.email/personalstorage/#saveMessageToStream-java.lang.String-java.io.OutputStream-" target="_blank" rel="nofollow noopener noreferrer">SaveMessageToStream</a> for better performance.
+
+```java
+for (String id : folder.enumerateMessagesEntryId()) {
+    try (OutputStream fos  = new FileOutputStream("message.msg")) {
+        pst.saveMessageToStream(id, fos);
+    }
+}
+```
+
+## Use Bulk Methods When Possible {#use-bulk-methods-when-possible}
+
+Whenever you need to [add](/java/email/working-with-messages-in-a-pst-file/#adding-bulk-messages) or [delete](/java/email/working-with-messages-in-a-pst-file/#delete-items-in-bulk-from-pst-file) multiple items, prefer bulk methods over individual operations. This reduces overhead and improves performance.

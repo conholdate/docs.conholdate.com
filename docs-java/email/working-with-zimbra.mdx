@@ -1,0 +1,301 @@
+---
+title: "Working with Zimbra"
+sidebar_label: "Working with Zimbra"
+sidebar_key: "java-email-working-with-zimbra"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/java"
+source_path: "email/java/working-with-zimbra.html"
+source_commit: ""
+source_sha256: "f499e04b7265df3bfb37372e202edbf14567d2f2bf000dcc022434c567eb248a"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/java/working-with-zimbra/"
+source_snapshot_sha256: "ce54db02862c93883be81fb3c4d8f814fae36e2b76184c9eaefcf30b30a7dcbc"
+---
+
+:::info
+Aspose.Email for Java is included in Conholdate.Total for Java.
+:::
+
+
+## About Zimbra {#about-zimbra}
+
+Zimbra is an email, calendar and collaboration suite built for the cloud. Zimbra includes complete email, contacts, calendar, file sharing, tasks and messaging/videoconferencing, all accessed from the Zimbra Web Client from any device. TGZ is the archive format that Zimbra Collaboration Suite uses to export and back up mailbox data. A `.tgz` file is a <a href="https://docs.fileformat.com/compression/tar/" target="_blank" rel="nofollow noopener noreferrer">tar</a> archive compressed with <a href="https://docs.fileformat.com/compression/gz/" target="_blank" rel="nofollow noopener noreferrer">gzip</a>: the tar part preserves the mailbox folder structure, and the gzip part compresses it so the backup is small and easy to move between systems. Inside the archive, each mail item is stored as an individual message together with the path of the folder it belongs to.
+
+Aspose.Email for Java reads a Zimbra TGZ backup with the <a href="https://reference.aspose.com/email/java/com.aspose.email/tgzreader/" target="_blank" rel="nofollow noopener noreferrer">TgzReader</a> class. The reader streams through the archive one item at a time, so it can process very large mailboxes without loading the whole backup into memory. It exposes the current folder and message through the `getCurrentDirectory()` and `getCurrentMessage()` methods.
+
+## Open a TGZ File {#open-a-tgz-file}
+
+A TGZ file can be opened by passing the full file name to the <a href="https://reference.aspose.com/email/java/com.aspose.email/tgzreader/" target="_blank" rel="nofollow noopener noreferrer">TgzReader</a> constructor. Because `TgzReader` implements `Closeable`, wrap it in a try-with-resources statement so that the underlying file handle is released when you are done.
+
+```java
+String fileName = "mailbox.tgz";
+try (TgzReader reader = new TgzReader(fileName)) {
+    // work with the backup
+}
+```
+
+### Open a TGZ File from a Stream {#open-a-tgz-file-from-a-stream}
+
+When the TGZ data does not come from a local path - for example, it is received from a database, a network resource, or cloud storage - you can open it from a stream. Wrap the Java `InputStream` with `Stream.fromJava` and pass the result to the constructor:
+
+```java
+try (InputStream stream = Files.newInputStream(Paths.get("mailbox.tgz"));
+     TgzReader reader = new TgzReader(com.aspose.email.system.io.Stream.fromJava(stream))) {
+    // work with the backup
+}
+```
+
+:::info
+Keep the source stream open for as long as you read from the reader. Closing the stream before you finish iterating over the items will cause read errors.
+:::
+
+## Read all messages from Zimbra TGZ storage {#read-all-messages-from-zimbra-tgz-storage}
+
+Aspose.Email provides the <a href="https://apireference.aspose.com/email/java/com.aspose.email/TgzReader" target="_blank" rel="nofollow noopener noreferrer">TgzReader</a> class to read Zimbra TGZ storage files. The following sample code demonstrates the use of the <a href="https://apireference.aspose.com/email/java/com.aspose.email/TgzReader" target="_blank" rel="nofollow noopener noreferrer">TgzReader</a> class to read all messages from the file. 
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-email/Aspose.Email-for-Java
+// The path to the resource directory.
+String dataDir = Utils.getSharedDataDir(ReadAllMessagesFromZimbraTgzStorage.class) + "email/";
+
+TgzReader reader = new TgzReader(dataDir + "ZimbraSample.tgz");
+try {
+	while (reader.readNextMessage()) {
+		String directoryName = reader.getCurrentDirectory();
+		System.out.println(directoryName);
+		MailMessage eml = reader.getCurrentMessage();
+		System.out.println(eml.getSubject());
+	}
+} finally {
+	reader.dispose();
+}
+```
+
+### Iterate Over the Items {#iterate-over-the-items}
+
+When a `TgzReader` is created, it is positioned at the first item in the archive. The `getCurrentDirectory()` method returns the folder of the current item, and `getCurrentMessage()` returns the current message as a <a href="https://reference.aspose.com/email/java/com.aspose.email/mailmessage/" target="_blank" rel="nofollow noopener noreferrer">MailMessage</a>. The `readNextMessage()` method advances the reader to the next item and returns `true` while there are more items to read, and `false` once the end of the archive is reached.
+
+Because the reader already points at the first item, use a `do...while` loop so that the first item is processed before the reader is advanced:
+
+```java
+try (TgzReader reader = new TgzReader("mailbox.tgz")) {
+    do {
+        System.out.println("Folder: " + reader.getCurrentDirectory());
+
+        MailMessage message = reader.getCurrentMessage();
+        if (message != null) {
+            System.out.println("Subject: " + message.getSubject());
+        }
+    } while (reader.readNextMessage());
+}
+```
+
+### Read Message Properties {#read-message-properties}
+
+`getCurrentMessage()` returns a full <a href="https://reference.aspose.com/email/java/com.aspose.email/mailmessage/" target="_blank" rel="nofollow noopener noreferrer">MailMessage</a> object, so all of the standard message properties - subject, sender, recipients, date, body, and attachments - are available while you iterate.
+
+```java
+try (TgzReader reader = new TgzReader("mailbox.tgz")) {
+    do {
+        MailMessage message = reader.getCurrentMessage();
+        if (message == null) {
+            continue;
+        }
+
+        System.out.println("Folder:  " + reader.getCurrentDirectory());
+        System.out.println("Subject: " + message.getSubject());
+        System.out.println("From:    " + message.getFrom());
+        System.out.println("To:      " + message.getTo());
+        System.out.println("Date:    " + message.getDate());
+        System.out.println("Attachments: " + message.getAttachments().size());
+        System.out.println("------------------------------");
+    } while (reader.readNextMessage());
+}
+```
+
+### Count the Items in a Backup {#count-the-items-in-a-backup}
+
+To find out how many message items a backup contains - for example, to show progress while processing - call the `getTotalItemsCount()` method.
+
+```java
+try (TgzReader reader = new TgzReader("mailbox.tgz")) {
+    int totalItems = reader.getTotalItemsCount();
+    System.out.println("The backup contains " + totalItems + " items.");
+}
+```
+
+You can combine the count with the iteration to report progress:
+
+```java
+try (TgzReader reader = new TgzReader("mailbox.tgz")) {
+    int total = reader.getTotalItemsCount();
+    int processed = 0;
+
+    do {
+        processed++;
+        MailMessage message = reader.getCurrentMessage();
+        System.out.println("Processing item " + processed + " of " + total + ": "
+                + (message == null ? "" : message.getSubject()));
+    } while (reader.readNextMessage());
+}
+```
+
+## Save Messages and Directory Structure {#save-messages-and-directory-structure}
+
+You may also save all the message with directory structure from the Zimbra TGZ storage file. For this, the <a href="https://apireference.aspose.com/email/java/com.aspose.email/TgzReader" target="_blank" rel="nofollow noopener noreferrer">TgzReader</a> class provides a method <a href="https://apireference.aspose.com/email/java/com.aspose.email/TgzReader#exportTo%5C%28java.lang.String%5C%29" target="_blank" rel="nofollow noopener noreferrer">ExportTo</a> which takes the output path as a parameter.
+
+The following code snippet demonstrates the use of the <a href="https://apireference.aspose.com/email/java/com.aspose.email/TgzReader#exportTo%5C%28java.lang.String%5C%29" target="_blank" rel="nofollow noopener noreferrer">TgzReader.ExportTo</a> method to save all messages from the Zimbra TGZ storage file.
+
+```java
+// For complete examples and data files, please go to https://github.com/aspose-email/Aspose.Email-for-Java
+// The path to the resource directory.
+String dataDir = Utils.getSharedDataDir(SaveMessagesFromZimbraTgzStorage.class) + "email/";
+String outputDir = Utils.getSharedDataDir(SaveMessagesFromZimbraTgzStorage.class) + "email/Zimbra/";
+
+TgzReader reader = new TgzReader(dataDir + "ZimbraSample.tgz");
+try {
+	reader.exportTo(outputDir);
+} finally {
+	reader.dispose();
+}
+```
+
+## Export calendar and contact items from Zimbra backup files {#export-calendar-and-contact-items-from-zimbra-backup-files}
+
+Aspose.Email makes it possible to export Zimbra's calendar and contacts to iCalendar and VCard formats. The code sample below shows how to implement this feature into our project:
+
+```java
+try (TgzReader reader = new TgzReader("test2.tgz")) {
+    //contacts files can be found in Contacts and Emailed Contacts subfolders
+    //calendar files can be found in Calendar subfolder
+    reader.exportTo("out");
+}
+```
+
+## Save Selected Messages {#save-selected-messages}
+
+When you only need some of the messages - for example, the contents of a single folder, or messages that match a condition - iterate over the backup and save the current message yourself. Because it is a <a href="https://reference.aspose.com/email/java/com.aspose.email/mailmessage/" target="_blank" rel="nofollow noopener noreferrer">MailMessage</a>, you can save it in any supported format, such as EML or MSG.
+
+The example below saves only the messages from the `Inbox` folder in EML format:
+
+```java
+try (TgzReader reader = new TgzReader("mailbox.tgz")) {
+    int index = 0;
+
+    do {
+        MailMessage message = reader.getCurrentMessage();
+        if (message == null) {
+            continue;
+        }
+
+        if (reader.getCurrentDirectory().toLowerCase().startsWith("inbox")) {
+            message.save("Export/Inbox/message_" + index++ + ".eml", SaveOptions.getDefaultEml());
+        }
+    } while (reader.readNextMessage());
+}
+```
+
+To save messages in Outlook MSG format instead, use the corresponding <a href="https://reference.aspose.com/email/java/com.aspose.email/saveoptions/" target="_blank" rel="nofollow noopener noreferrer">SaveOptions</a>:
+
+```java
+try (TgzReader reader = new TgzReader("mailbox.tgz")) {
+    int index = 0;
+
+    do {
+        MailMessage message = reader.getCurrentMessage();
+        if (message != null) {
+            message.save("Export/Inbox/message_" + index++ + ".msg", SaveOptions.getDefaultMsgUnicode());
+        }
+    } while (reader.readNextMessage());
+}
+```
+
+## Filter Messages While Extracting {#filter-messages-while-extracting}
+
+Since each item is exposed as a full `MailMessage`, you can apply any condition on its properties before saving. The following example extracts only the messages that have attachments:
+
+```java
+try (TgzReader reader = new TgzReader("mailbox.tgz")) {
+    int index = 0;
+
+    do {
+        MailMessage message = reader.getCurrentMessage();
+        if (message != null && message.getAttachments().size() > 0) {
+            message.save("Export/WithAttachments/message_" + index++ + ".eml", SaveOptions.getDefaultEml());
+        }
+    } while (reader.readNextMessage());
+}
+```
+
+## Converting Zimbra TGZ to PST {#converting-zimbra-tgz-to-pst}
+
+A common migration scenario is moving a mailbox from Zimbra to Microsoft Outlook. Because a Zimbra TGZ backup stores each message together with the path of its folder, you can rebuild the same folder hierarchy inside an Outlook <a href="https://docs.fileformat.com/email/pst/" target="_blank" rel="nofollow noopener noreferrer">PST</a> file and add every message to the matching folder. Aspose.Email for Java lets you do this in code, without Zimbra or Outlook installed.
+
+### How the Conversion Works {#how-the-conversion-works}
+
+1. Open the source backup with the <a href="https://reference.aspose.com/email/java/com.aspose.email/tgzreader/" target="_blank" rel="nofollow noopener noreferrer">TgzReader</a> class.
+2. Create a new PST file with the <a href="https://reference.aspose.com/email/java/com.aspose.email/personalstorage/" target="_blank" rel="nofollow noopener noreferrer">PersonalStorage.create</a> method.
+3. Iterate over the items in the backup. For each item, use `getCurrentDirectory()` to find or create the corresponding folder in the PST, and add `getCurrentMessage()` to it.
+4. Convert each <a href="https://reference.aspose.com/email/java/com.aspose.email/mailmessage/" target="_blank" rel="nofollow noopener noreferrer">MailMessage</a> to a <a href="https://reference.aspose.com/email/java/com.aspose.email/mapimessage/" target="_blank" rel="nofollow noopener noreferrer">MapiMessage</a> with `MapiMessage.fromMailMessage` before adding it, because PST folders store messages in the MAPI format.
+
+### Code Sample {#code-sample}
+
+The following code shows how to convert a Zimbra TGZ backup to PST while preserving its folder structure.
+
+```java
+// Open the source TGZ backup and create a new PST file
+try (TgzReader reader = new TgzReader("mailbox.tgz");
+     PersonalStorage pst = PersonalStorage.create("mailbox.pst", FileFormatVersion.Unicode)) {
+
+    do {
+        MailMessage message = reader.getCurrentMessage();
+        if (message == null) {
+            continue;
+        }
+
+        // Find or create the folder that matches the message directory
+        FolderInfo folder = getOrCreateFolder(pst, reader.getCurrentDirectory());
+
+        // PST folders store messages in the MAPI format
+        folder.addMessage(MapiMessage.fromMailMessage(message));
+    } while (reader.readNextMessage());
+}
+```
+
+The folder path reported by `getCurrentDirectory()` uses the forward slash (`/`) as a separator, for example `Inbox/Projects/2023`. The helper below walks that path segment by segment, creating each missing sub-folder so that the PST mirrors the original Zimbra hierarchy.
+
+```java
+public static FolderInfo getOrCreateFolder(PersonalStorage pst, String directory) {
+    FolderInfo folder = pst.getRootFolder();
+
+    if (directory == null || directory.isEmpty()) {
+        return folder;
+    }
+
+    for (String name : directory.split("/")) {
+        if (name.isEmpty()) {
+            continue;
+        }
+
+        FolderInfo subFolder = folder.getSubFolder(name);
+        folder = (subFolder != null) ? subFolder : folder.addSubFolder(name);
+    }
+
+    return folder;
+}
+```
+
+:::info
+The Zimbra backup stores messages in the MIME format, so converting them to PST through `MapiMessage.fromMailMessage` preserves the standard message fields, body, and attachments. Server-specific Zimbra metadata that has no MAPI equivalent is not carried over.
+:::
+
+:::info
+The asynchronous export method (`ExportToAsync`) available in Aspose.Email for .NET has no counterpart in Aspose.Email for Java - run `exportTo` on a worker thread if you need to keep the calling thread free.
+:::

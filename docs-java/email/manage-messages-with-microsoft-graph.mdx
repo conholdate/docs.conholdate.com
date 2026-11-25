@@ -1,0 +1,163 @@
+---
+title: "Work with Messages using Microsoft Graph"
+sidebar_label: "Work with Messages using Microsoft Graph"
+sidebar_key: "java-email-manage-messages-with-microsoft-graph"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/java"
+source_path: "email/java/manage-messages-with-microsoft-graph.html"
+source_commit: ""
+source_sha256: "c931bb6babb59ca4ab3d7939484f9fd2eb5e3b32217be8ba8251b20e09cf980f"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/java/manage-messages-with-microsoft-graph/"
+source_snapshot_sha256: "9899197e240afe71444c3900218d2af38357f048b1102dfabfe9e12536228b28"
+---
+
+:::info
+Aspose.Email for Java is included in Conholdate.Total for Java.
+:::
+
+
+**Aspose.Email for Java** provides a rich set of APIs for managing messages through Microsoft Graph. You can list, fetch, create, update, move, copy, and delete messages, as well as handle pagination and attachments. The code samples below are examples of the most common operations.
+
+## List Messages {#list-messages}
+
+You can retrieve messages from a specific folder, such as Inbox, and fetch their full content:
+
+```java
+GraphMessageInfoCollection messageInfoColl = client.listMessages(GraphKnownFolders.Inbox);
+for (GraphMessageInfo messageInfo : messageInfoColl) {
+    MapiMessage message = client.fetchMessage(messageInfo.getItemId());
+}
+```
+
+### List Messages by Date Sent {#list-messages-by-date-sent}
+
+To sort messages by sent date in ascending order, you can use the `OrderBy` feature of <a href="https://reference.aspose.com/email/java/com.aspose.email/graphquerybuilder/" target="_blank" rel="nofollow noopener noreferrer">GraphQueryBuilder</a>:
+
+```java
+// create orderby messages query 'ASC'
+GraphQueryBuilder builder = new GraphQueryBuilder();
+builder.getSentDate().orderBy(true);
+MailQuery query = builder.getQuery();
+
+GraphMessagePageInfo pageInfo = client.listMessages(GraphKnownFolders.Inbox, new PageInfo(10), query);
+```
+
+## Fetch Message {#fetch-message}
+
+Once you have a message reference, you can fetch its complete content:
+
+```java
+GraphMessageInfo messageInfo = messageInfoColl.get(0);
+MapiMessage fetchedMessage = client.fetchMessage(messageInfo.getItemId());
+```
+
+## Update a Message {#update-a-message}
+
+After fetching a message, you can modify its content and update it on the server:
+
+```java
+fetchedMessage.setSubject("Update message");
+MapiMessage updatedMessage = client.updateMessage(fetchedMessage);
+```
+
+## Pagination in Message Listing {#pagination-in-message-listing}
+
+When working with large mailboxes, you can use paging to retrieve messages in chunks. The example below demonstrates listing unread messages in pages of two items each:
+
+```java
+// send ping test messages
+for (int i = 0; i < 5; i++) {
+    MailMessage eml = new MailMessage(user.EMail, user.EMail, "ping" + i, "test body");
+    client.send(MapiMessage.fromMailMessage(eml));
+}
+// waiting for inbox
+Thread.sleep(10000);
+
+// paging option
+int itemsPerPage = 2;
+// create unread messages filter
+GraphQueryBuilder builder = new GraphQueryBuilder();
+builder.isRead().equals(false);
+MailQuery query = builder.getQuery();
+
+// list messages
+GraphMessagePageInfo pageInfo = client.listMessages(GraphKnownFolders.Inbox, new PageInfo(itemsPerPage), query);
+GraphMessageInfoCollection messages = pageInfo.getItems();
+while (!pageInfo.getLastPage())
+{
+    pageInfo = client.listMessages(GraphKnownFolders.Inbox, pageInfo.getNextPage(), query);
+    // add next page items to common collection
+    messages.addRange(pageInfo.getItems());
+}
+
+// set messages state as read
+for (GraphMessageInfo message : messages) {
+    client.setRead(message.getItemId());
+}
+```
+
+## Create a Message {#create-a-message}
+
+You can create new messages with subject, body, and properties:
+
+```java
+MapiMessage message = new MapiMessage();
+message.setSubject("Subject");
+message.setBody("Body");
+message.setProperty(KnownPropertyList.DISPLAY_TO, "to@host.com");
+message.setProperty(KnownPropertyList.SENDER_NAME, "from");
+message.setProperty(KnownPropertyList.SENT_REPRESENTING_EMAIL_ADDRESS, "from@host.com");
+
+MapiMessage createdMessage = client.createMessage(GraphKnownFolders.Inbox, message);
+```
+
+## Send Message {#send-message}
+
+You can send a message directly:
+
+```java
+client.send(message);
+```
+
+Or send a draft message after creating it in the Drafts folder:
+
+```java
+MapiMessage draftMessage = client.createMessage(GraphKnownFolders.Drafts, message);
+client.send(draftMessage.getItemId());
+```
+
+## Copy and Move Messages {#copy-and-move-messages}
+
+Messages can be copied or moved between folders:
+
+```java
+MapiMessage copiedMessage = client.copyMessage(GraphKnownFolders.Inbox, draftMessage.getItemId());
+MapiMessage movedMessage = client.moveMessage(GraphKnownFolders.Inbox, draftMessage.getItemId());
+```
+
+## Manage Attachments {#manage-attachments}
+
+To list and remove attachments from a message, use the following code sample:
+
+```java
+MapiAttachmentCollection attachments = client.listAttachments(fetchedMessage.getItemId());
+for (MapiAttachment att : attachments) {
+    client.deleteAttachment(att.getItemId());
+}
+```
+
+## Delete a Message {#delete-a-message}
+
+Finally, you can delete a message permanently:
+
+```java
+client.delete(message.getItemId());
+```

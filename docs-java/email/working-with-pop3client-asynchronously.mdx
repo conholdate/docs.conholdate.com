@@ -1,0 +1,85 @@
+---
+title: "Working with Pop3Client Asynchronously"
+sidebar_label: "Working with Pop3Client Asynchronously"
+sidebar_key: "java-email-working-with-pop3client-asynchronously"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/java"
+source_path: "email/java/working-with-pop3client-asynchronously.html"
+source_commit: ""
+source_sha256: "70ee4582e64767a72e6b220cfed6c9524aed912def7b993eb721e0f1ef5ed58a"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/java/working-with-pop3client-asynchronously/"
+source_snapshot_sha256: "8114a2ca48081610073c3544fa3e549b8c63418eb25dfae1bc4caf70dc540d4d"
+---
+
+:::info
+Aspose.Email for Java is included in Conholdate.Total for Java.
+:::
+
+
+## Working with Pop3Client Asynchronously {#working-with-pop3client-asynchronously}
+
+Messages can be retrieved from mailboxes asynchronously as well by using the Aspose.Email <a href="https://reference.aspose.com/email/java/com.aspose.email/pop3client/" target="_blank" rel="nofollow noopener noreferrer">Pop3Client</a>. This article shows how to retrieve messages from a mailbox asynchronously. It also shows how to list messages by providing search criteria using <a href="https://reference.aspose.com/email/java/com.aspose.email/mailquery/" target="_blank" rel="nofollow noopener noreferrer">MailQuery</a>.
+
+### Retrieving Messages Asynchronously {#retrieving-messages-asynchronously}
+
+```Java
+// For complete examples and data files, please go to https://github.com/aspose-email/Aspose.Email-for-Java
+
+Pop3Client client = new Pop3Client();
+client.setHost("pop.gmail.com");
+client.setPort(995);
+client.setSecurityOptions(SecurityOptions.SSLImplicit);
+client.setUsername("username");
+client.setPassword("password");
+
+try {
+    Pop3MessageInfoCollection messages = client.listMessages();
+    System.out.println("Total Number of Messages in inbox:" + messages.size());
+    IAsyncResult asyncResult = client.beginFetchMessage(messages.get_Item(0).getSequenceNumber());
+    MailMessage message = client.endFetchMessage(asyncResult);
+} catch (Exception ex) {
+    System.out.println(ex.getMessage());
+}
+```
+
+### List Messages Asynchronously with MailQuery {#list-messages-asynchronously-with-mailquery}
+
+The <a href="https://reference.aspose.com/email/java/com.aspose.email/mailquery/" target="_blank" rel="nofollow noopener noreferrer">MailQuery</a> class can be used to specify search criteria for retrieving a list of messages asynchronously as is shown in the following code sample.
+
+```Java
+// For complete examples and data files, please go to https://github.com/aspose-email/Aspose.Email-for-Java
+
+MailQueryBuilder builder = new MailQueryBuilder();
+builder.getSubject().contains("Subject");
+MailQuery query = builder.getQuery();
+IAsyncResult asyncResult = client.beginListMessages(query);
+Pop3MessageInfoCollection messages = client.endListMessages(asyncResult);
+```
+
+## Cancel an Asynchronous Operation {#cancel-an-asynchronous-operation}
+
+An operation started with any of the `beginXxx` methods can be interrupted with the `cancelAsyncOperation` method inherited from <a href="https://reference.aspose.com/email/java/com.aspose.email/emailclient/" target="_blank" rel="nofollow noopener noreferrer">EmailClient</a>. Pass it the `IAsyncResult` returned when the operation was started:
+
+```java
+try (Pop3Client client = new Pop3Client("host", 995, "username", "password", SecurityOptions.SSLImplicit)) {
+    IAsyncResult asyncResult = client.beginListMessages();
+
+    // Let the operation run for a while, then interrupt it
+    Thread.sleep(2000);
+    client.cancelAsyncOperation(asyncResult);
+
+    System.out.println("Operation has been interrupted.");
+}
+```
+
+:::info
+The task-based asynchronous pattern (TAP) of Aspose.Email for .NET - the `*Async` methods and the `CancellationToken` parameter - has no counterpart in Aspose.Email for Java. Use the `beginXxx` / `endXxx` pair together with `cancelAsyncOperation` as shown above.
+:::

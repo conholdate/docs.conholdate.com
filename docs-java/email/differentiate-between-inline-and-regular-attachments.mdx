@@ -1,0 +1,91 @@
+---
+title: "Differentiate between Inline and Regular Attachments"
+sidebar_label: "Differentiate between Inline and Regular Attachments"
+sidebar_key: "java-email-differentiate-between-inline-and-regular-attachments"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/java"
+source_path: "email/java/differentiate-between-inline-and-regular-attachments.html"
+source_commit: ""
+source_sha256: "2e60b86f5ea973842e8db753264d83a3e3c2ee17165c866fe9e0bde073d31bf6"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/java/differentiate-between-inline-and-regular-attachments/"
+source_snapshot_sha256: "e6257f3620cce0f5d5ac1dab8b2d15660d6e0e807c6a52aae19359f5d2abca1d"
+---
+
+:::info
+Aspose.Email for Java is included in Conholdate.Total for Java.
+:::
+
+
+:::info
+Email messages may contain inline images as well as attachments. Using <a href="http://www.aspose.com/api/java/email/com.aspose.email/classes/MailMessage" target="_blank" rel="nofollow noopener noreferrer">MailMessage</a>, the inline attachments can be extracted from the <a href="https://apireference.aspose.com/email//java/com.aspose.email/linkedresourcecollection" target="_blank" rel="nofollow noopener noreferrer">LinkedResourceCollection</a> collection, while the regular attachments can be accessed and extracted with a message's <a href="https://apireference.aspose.com/email//java/com.aspose.email/attachmentcollection" target="_blank" rel="nofollow noopener noreferrer">AttachmentCollection</a> collection. However, this is different when the message is loaded using <a href="https://apireference.aspose.com/email//java/com.aspose.email/mapimessage" target="_blank" rel="nofollow noopener noreferrer">MapiMessage</a>, as all the inline images and regular attachments are accessible to user in the same <a href="https://apireference.aspose.com/email//java/com.aspose.email/mapiattachmentcollection" target="_blank" rel="nofollow noopener noreferrer">MapiAttachmentCollection</a>. Hence, a method that can differentiate between an inline and a regular attachment when <a href="https://apireference.aspose.com/email//java/com.aspose.email/mapimessage" target="_blank" rel="nofollow noopener noreferrer">MapiMessage</a> is used is needed.
+:::
+
+This article explains how to differentiate inline attachments from regular ones using <a href="https://apireference.aspose.com/email//java/com.aspose.email/mapimessage" target="_blank" rel="nofollow noopener noreferrer">MapiMessage</a>. When deciding, the body type of <a href="https://apireference.aspose.com/email//java/com.aspose.email/mapimessage" target="_blank" rel="nofollow noopener noreferrer">MapiMessage</a> is taken into account as follow:
+
+- **Plain text body**: Email messages with plain text body type need not be checked, as all attachments in such messages are always regular attachments.
+- **HTML body**: For messages with a HTML body, the attachment should not only contain the PR_ATTACH_FLAGS (0x37140003) property, but its value should be equal to 0x00000004 for inline attachments. If this condition is met, then it further depends on the PR_ATTACH_CONTENT_LOCATION and PR_ATTACH_CONTENT_ID tags to determine the nature of attachment. However, in the absence of the PR_ATTACH_FLAGS MAPI tag, the attachment is checked for PR_ATTACH_DISPOSITION (0x3716001F or 0x3716001E) property to determine the attachment type.
+- **RTF body**: If the body is RTF, then all OLE attachments are inline attachments. The value of PR_ATTACH_METHOD for all OLE attachments is equal to 0x00000006.
+
+The following code sample demonstrates to programatically differentiate between inline and regular attachments. The function isInlineAttachment takes an attachment and MapiMessage as input parameters and returns true if the attachment is an inline attachment.
+
+```java
+public static boolean isInlineAttachment(MapiAttachment att, MapiMessage msg) {
+    if (msg.getBodyType() == BodyContentType.PlainText)
+        // ignore indications for plain text messages
+        return false;
+    else if (msg.getBodyType() == BodyContentType.Html) {
+        // check the PidTagAttachFlags property
+        Long attachFlagsValue = att.getPropertyLong(MapiPropertyTag.PR_ATTACH_FLAGS);
+        if (attachFlagsValue != null && (attachFlagsValue > 3 || attachFlagsValue < 1)) {
+            // check PidTagAttachContentId property
+            String contentId = att.getProperties().containsKey(MapiPropertyTag.PR_ATTACH_CONTENT_ID)
+                    ? att.getPropertyString(MapiPropertyTag.PR_ATTACH_CONTENT_ID)
+                    : att.getPropertyString(MapiPropertyTag.PR_ATTACH_CONTENT_ID_W);
+            if (contentId != null && !contentId.isEmpty() && msg.getBodyHtml().contains("cid:" + contentId)) {
+                return true;
+            }
+            // check PidTagAttachContentLocation property
+            String contentLocation = att.getProperties().containsKey(MapiPropertyTag.PR_ATTACH_CONTENT_LOCATION)
+                    ? att.getPropertyString(MapiPropertyTag.PR_ATTACH_CONTENT_LOCATION)
+                    : att.getPropertyString(MapiPropertyTag.PR_ATTACH_CONTENT_LOCATION_W);
+            if (contentLocation != null && !contentLocation.isEmpty() && msg.getBodyHtml().contains(contentLocation)) {
+                return true;
+            }
+        }
+        return "inline".equals(att.getPropertyString(0x3716001F)) || "inline".equals(att.getPropertyString(0x3716001E));
+    } else if (msg.getBodyType() == BodyContentType.Rtf) {
+        // If the body is RTF, then all OLE attachments are inline attachments.
+        // OLE attachments have 0x00000006 for the value of the PidTagAttachMethod property
+        Long attachMethod = att.getPropertyLong(MapiPropertyTag.PR_ATTACH_METHOD);
+        return attachMethod != null && attachMethod == 0x00000006;
+    } else {
+        throw new ArgumentOutOfRangeException();
+    }
+}
+```
+
+This code snippet uses the isInlineAttachment() function to evaluate attachments.
+
+**Java**
+
+```java
+String fileName = ("Sample.msg");
+MapiMessage message = MapiMessage.fromFile(fileName);
+MapiAttachmentCollection attachments = message.getAttachments();
+for (int i = 0; i < attachments.size(); i++) {
+    MapiAttachment attachment = (MapiAttachment) attachments.get(i);
+    if (isInlineAttachment(attachment, message)) {
+        System.out.println(attachment.getLongFileName() + " is inline attachment");
+    } else {
+        System.out.println(attachment.getLongFileName() + " is regular attachment");
+    }
+}
+```

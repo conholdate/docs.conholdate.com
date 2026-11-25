@@ -1,0 +1,154 @@
+---
+title: "Identify and Extract Embedded Attachment from MSG Formatted as RTF"
+sidebar_label: "Identify and Extract Embedded Attachment from MSG Formatted as RTF"
+sidebar_key: "java-email-identify-and-extract-embedded-attachment-from-msg-formatted-as-rtf"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/java"
+source_path: "email/java/identify-and-extract-embedded-attachment-from-msg-formatted-as-rtf.html"
+source_commit: ""
+source_sha256: "540dc60b130529b25a33e41edbc2450059cf496fa027fe9bfed7f30199483e51"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/java/identify-and-extract-embedded-attachment-from-msg-formatted-as-rtf/"
+source_snapshot_sha256: "4423f5981d54c89d3aa1c5fcdd3f6f13257be13298b9565a64d0f922873352ac"
+---
+
+:::info
+Aspose.Email for Java is included in Conholdate.Total for Java.
+:::
+
+
+:::info
+Email messages with an RTF formatted body may contain inline attachments that are either embedded as a whole object or as an icon. In order to differentiate between these two types of attachments, certain properties of the attachment need to be investigated first. After meeting certain criteria based on the attachment properties, the attachment can be saved by extracting it from its ObjectData.
+:::
+
+This article identifies and extracts embedded attachment from MSG file formatted as RTF.
+
+**Java**
+
+```java
+
+   static void ExtractInlineAttachments()
+
+  {
+
+        MapiMessage message = MapiMessage.fromFile("Test.msg");
+
+    MapiAttachmentCollection attachments = message.getAttachments();
+
+    for (Object untypedAttachment : attachments)
+
+    {
+
+          MapiAttachment attachment = (MapiAttachment) untypedAttachment;
+
+          if(IsAttachmentInline(attachment))
+
+          {
+
+                try
+
+                {
+
+                      SaveAttachment(attachment, UUID.randomUUID().toString());
+
+                }
+
+                catch (IOException | FileNotFoundException e)
+
+                {
+
+                      // TODO Auto-generated catch block
+
+                          e.printStackTrace();
+
+                    }
+
+              }
+
+        }
+
+  }
+
+  static boolean IsAttachmentInline(MapiAttachment attachment)
+
+  {
+
+        MapiObjectProperty objectData = attachment.getObjectData();
+
+        if (objectData == null)
+
+              return false;
+
+        for (Object prop : attachment.getObjectData().getProperties().getValues())
+
+        {
+
+              MapiProperty property = (MapiProperty)prop;
+
+              if ("\u0003ObjInfo".equals(property.getName()))
+
+              {
+
+                    byte[] data = property.getData();
+
+                    int odtPersist1 = data[1] << 8 | data[0];
+
+                    return (odtPersist1 & 0x40) == 0;
+
+              }
+
+        }
+
+        return false;
+
+  }
+
+  static void SaveAttachment(MapiAttachment attachment, String fileName) throws IOException, FileNotFoundException
+
+  {
+
+        for (Object prop : attachment.getObjectData().getProperties().getValues())
+
+        {
+
+              MapiProperty property = (MapiProperty)prop;
+
+              if ("Package".equals(property.getName()))
+
+          {
+
+                FileOutputStream fs;
+
+                try
+
+                {
+
+                      fs = new FileOutputStream(fileName);
+
+                      fs.write(property.getData(), 0, property.getData().length);
+
+                }
+
+                catch (java.io.IOException e)
+
+                {
+
+                      // TODO Auto-generated catch block
+
+                          e.printStackTrace();
+
+                    }
+
+              }
+
+        }
+
+  }
+```

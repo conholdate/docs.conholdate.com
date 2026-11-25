@@ -1,0 +1,134 @@
+---
+title: "Work with Folders using Microsoft Graph"
+sidebar_label: "Work with Folders using Microsoft Graph"
+sidebar_key: "java-email-manage-folders-with-microsoft-graph"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/java"
+source_path: "email/java/manage-folders-with-microsoft-graph.html"
+source_commit: ""
+source_sha256: "73a2c619c2cdda9492ecc69b31a0cdd6b9754b4a0716f7cb8196e10b43383fcb"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/java/manage-folders-with-microsoft-graph/"
+source_snapshot_sha256: "b83af3fe44279d470857b01cb03635524d07a6ad77e8144a859eed083e406903"
+---
+
+:::info
+Aspose.Email for Java is included in Conholdate.Total for Java.
+:::
+
+
+**Aspose.Email for Java** allows you to perform a variety of folder operations in Microsoft Graph, such as listing, creating, updating, copying, moving, and deleting folders. Below are examples of common scenarios.
+
+## List Folders {#list-folders}
+
+The following example retrieves all folders and prints their display names along with their properties:
+
+```Java
+GraphFolderInfoCollection folders = client.listFolders();
+for (GraphFolderInfo folderInfo : folders) {
+    System.out.println(folderInfo.getDisplayName());
+    for (KeyValuePair<Long, MapiProperty> prop : folderInfo.getProperties()) {
+        System.out.println(prop.getValue().getDescriptor().toString() + " " + prop.getValue().getString());
+    }
+}
+```
+
+## List Subfolders from Inbox Folder {#list-subfolders-from-inbox-folder}
+
+You can also list subfolders under a specific folder, such as Inbox:
+
+```Java
+GraphFolderInfoCollection inboxFolders = client.listFolders(GraphKnownFolders.Inbox);
+```
+
+## Create Folders {#create-folders}
+
+You can create both root-level folders and subfolders.
+
+### Create a Root Folder {#create-a-root-folder}
+
+```Java
+GraphFolderInfo newFolder = client.createFolder("TEST_FOLDER");
+```
+
+### Create Subfolders {#create-subfolders}
+
+The following code sample shows how to create a subfolder under the Inbox folder:
+
+```Java
+GraphFolderInfo inboxTestSubFolder1 = client.createFolder(GraphKnownFolders.Inbox, "TEST_SUBFOLDER_1");
+GraphFolderInfo inboxTestSubFolder2 = client.createFolder(newFolder.getItemId(), "TEST_SUBFOLDER_2");
+```
+
+## Get Folder {#get-folder}
+
+The following code sample demonstrates how to retrieve a specific folder, such as Sent Items:
+
+```Java
+GraphFolderInfo sentItemsFolder = client.getFolder(GraphKnownFolders.SentItems);
+```
+
+## Update Folder {#update-folder}
+
+You can update folder properties, for example, its display name:
+
+```Java
+GraphFolderInfo originalFolder = client.createFolder("TEST_FOLDER");
+originalFolder.setDisplayName("NEW_TEST_FOLDER");
+GraphFolderInfo updatedFolder = client.updateFolder(originalFolder);
+```
+
+## Copy Folder and Its Content {#copy-folder-and-its-content}
+
+The following example shows how to copy a folder along with its subfolders and messages:
+
+```Java
+GraphFolderInfo parentFolder = client.createFolder("PARENT_FOLDER");
+GraphFolderInfo testFolder = client.createFolder("TEST_FOLDER");
+GraphFolderInfo testSubFolder = client.createFolder(testFolder.getItemId(), "TEST_SUBFOLDER");
+
+MapiMessage message = new MapiMessage();
+message.setSubject("Test subject");
+message.setBody("Test body");
+message.setProperty(KnownPropertyList.DISPLAY_TO, "to@host.com");
+message.setProperty(KnownPropertyList.SENDER_NAME, "from");
+message.setProperty(KnownPropertyList.SENT_REPRESENTING_EMAIL_ADDRESS, "from@host.com");
+MapiMessage createdMessage = client.createMessage(testSubFolder.getItemId(), message);
+
+GraphFolderInfo folderCopy = client.copyFolder(parentFolder.getItemId(), testFolder.getItemId());
+
+GraphFolderInfoCollection folderColl = client.listFolders(parentFolder.getItemId());
+// TEST_FOLDER
+System.out.println(folderColl.get(0).getDisplayName());
+
+folderColl = client.listFolders(folderColl.get(0).getItemId());
+// TEST_SUBFOLDER
+System.out.println(folderColl.get(0).getDisplayName());
+
+GraphMessageInfoCollection listMessages = client.listMessages(folderColl.get(0).getItemId());
+// Test subject
+System.out.println(listMessages.get(0).getSubject());
+```
+
+## Move Folder and Its Content {#move-folder-and-its-content}
+
+You can also move a folder with all its content to another location:
+
+```Java
+GraphFolderInfo folder = client.moveFolder(parentFolder.getItemId(), testFolder.getItemId());
+```
+
+### Delete Folder {#delete-folder}
+
+Use the following code sample to remove a folder permanently:
+
+```Java
+client.delete(testFolder.getItemId());
+```

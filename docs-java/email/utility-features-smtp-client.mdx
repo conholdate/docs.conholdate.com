@@ -1,0 +1,109 @@
+---
+title: "Utility Features - SMTP Client"
+sidebar_label: "Utility Features - SMTP Client"
+sidebar_key: "java-email-utility-features-smtp-client"
+sidebar_position: 100
+description: ""
+product: "email"
+platform: "java"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/email/java"
+source_path: "email/java/utility-features-smtp-client.html"
+source_commit: ""
+source_sha256: "18ad8d3c6cb5c3208c350404e4eff61b6814ed078078ea535c7b730d1091b8f2"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/email/java/utility-features-smtp-client/"
+source_snapshot_sha256: "b8a5d894a6d02b9300b77cd7fcef07ff7bbf75025a79790f45efb50daa915269"
+---
+
+:::info
+Aspose.Email for Java is included in Conholdate.Total for Java.
+:::
+
+
+## Listing Extension Servers using Smtp Client {#listing-extension-servers-using-smtp-client}
+
+Aspose.Email <a href="https://reference.aspose.com/email/java/com.aspose.email/smtpclient/" target="_blank" rel="nofollow noopener noreferrer">SmtpClient</a> lets you retrieve the server extensions that a server supports such as IDLE, UNSELECT, QUOTA, etc. This helps in identifying the availability of an extension before using the client for that particular functionality. The <a href="https://reference.aspose.com/email/java/com.aspose.email/smtpclient/#getCapabilities--" target="_blank" rel="nofollow noopener noreferrer">getCapabilities()</a> method returns the supported extension types in the form of a string array.
+
+### Retrieving Server Extensions {#retrieving-server-extensions}
+
+The following code snippet shows you how to retrieve server extensions.
+
+```Java
+// For complete examples and data files, please go to https://github.com/aspose-email/Aspose.Email-for-Java
+
+SmtpClient client = new SmtpClient("smtp.gmail.com",587,"username","password");
+client.setSecurityOptions(SecurityOptions.Auto);
+String[] caps = client.getCapabilities();
+for (String str:caps)
+	System.out.println(str);
+```
+
+## Working with Signed Message {#working-with-signed-message}
+
+Aspose.Email API provides the capability to create Signed messages using certificates. The <a href="https://reference.aspose.com/email/java/com.aspose.email/mailmessage/#attachSignature-com.aspose.ms.System.Security.Cryptography.X509Certificates.X509Certificate2-" target="_blank" rel="nofollow noopener noreferrer">attachSignature</a> method of the <a href="https://reference.aspose.com/email/java/com.aspose.email/mailmessage/" target="_blank" rel="nofollow noopener noreferrer">MailMessage</a> class can be used to sign a message for saving or even sending it using the <a href="https://reference.aspose.com/email/java/com.aspose.email/smtpclient/" target="_blank" rel="nofollow noopener noreferrer">SmtpClient</a>.
+
+:::info
+Please note that the Aspose.Email for Java API depends on Bouncy Castle for cryptography features.
+:::
+
+### Bouncy Castle Maven Dependencies {#bouncy-castle-maven-dependencies}
+
+```text
+<dependency>
+<groupId>org.bouncycastle</groupId>
+<artifactId>bcprov-jdk15on</artifactId>
+<version>1.60</version>
+</dependency>
+
+<dependency>
+<groupId>org.bouncycastle</groupId>
+<artifactId>bcpkix-jdk15on</artifactId>
+<version>1.60</version>
+</dependency>
+```
+
+### Enable Bouncy Castle Security Provider {#enable-bouncy-castle-security-provider}
+
+```java
+import java.security.Security;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+if (Security.getProvider("BC") == null)
+    Security.addProvider(new BouncyCastleProvider());
+```
+
+### Sign a Message {#sign-a-message}
+
+The following code snippet shows you how to Sign a Message.
+
+```Java
+// For complete examples and data files, please go to https://github.com/aspose-email/Aspose.Email-for-Java
+
+byte[] privateCert = Files.readAllBytes(new File("sample.pfx").toPath());
+byte[] publicCert = Files.readAllBytes(new File("sample.cer").toPath());
+
+MailMessage msg = new MailMessage("userfrom@gmail.com", "userto@gmail.com", "Signed message only", "Test Body of signed message");
+MailMessage signed = msg.attachSignature(privateCert, "password");
+MailMessage encrypted = signed.encrypt(publicCert, "password");
+MailMessage decrypted = encrypted.decrypt(privateCert, "password");
+MailMessage unsigned = decrypted.removeSignature();// The original message with proper body
+MapiMessage mapi = MapiMessage.fromMailMessage(unsigned);
+```
+
+### Using Detached Certificate Option {#using-detached-certificate-option}
+
+Web-based email clients may not be able to display body contents of a Signed message. This can be taken care of by detaching the certificate before sending it to web-based email clients. The detached flag in the overloaded method of <a href="https://reference.aspose.com/email/java/com.aspose.email/mailmessage/#attachSignature-com.aspose.ms.System.Security.Cryptography.X509Certificates.X509Certificate2-" target="_blank" rel="nofollow noopener noreferrer">attachSignature</a> can be used to achieve this. If set to **true**, the certificate is detached from the email and vice versa. To see Signed Message body in Web-based clients, you need to create <a href="https://reference.aspose.com/email/java/com.aspose.email/mailmessage/" target="_blank" rel="nofollow noopener noreferrer">MailMessage</a> with detached signature. The following code snippet shows you how to use detached certificate option.
+
+```Java
+// For complete examples and data files, please go to https://github.com/aspose-email/Aspose.Email-for-Java
+
+MailMessage msg = new MailMessage("dr38445@gmail.com", "dr38445@gmail.com", "subject:Signed message only by AE", "body:Test Body of signed message by AE");
+MailMessage signed = msg.attachSignature(privateCert, "password", true);
+SmtpClient smtp = getSmtpClient(); //some test smtp client
+
+smtp.send(signed);
+```
