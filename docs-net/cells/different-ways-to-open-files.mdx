@@ -1,0 +1,147 @@
+---
+title: "Different Ways to Open Files"
+sidebar_label: "Different Ways to Open Files"
+sidebar_key: "net-cells-different-ways-to-open-files"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/different-ways-to-open-files.html"
+source_commit: ""
+source_sha256: "431a94105a12b16cd2af89913adcba4aaabfde03c9db9e2a87c34d3874a08fd6"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/different-ways-to-open-files/"
+source_snapshot_sha256: "fd85aad62dde8e710e4c2d87adaff02e6b72c93c1f4ea54eadc96c51cfde0165"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+With Aspose.Cells, it is simple to open files, for example to retrieve data or to use a designer template to speed up the development process.
+:::
+
+## How to Open an Excel File via a Path {#how-to-open-an-excel-file-via-a-path}
+
+Developers can open a Microsoft Excel file using its file path on the local computer by specifying it in the <a href="https://reference.aspose.com/cells/net/aspose.cells/workbook" target="_blank" rel="nofollow noopener noreferrer">**Workbook**</a> class constructor. Simply pass the path in the constructor as a *string*. Aspose.Cells will automatically detect the file format type.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+            
+// Opening through Path
+// Creating a Workbook object and opening an Excel file using its file path
+Workbook workbook1 = new Workbook(dataDir + "Book1.xlsx");
+Console.WriteLine("Workbook opened using path successfully!");
+```
+
+## How to Open an Excel File via a Stream {#how-to-open-an-excel-file-via-a-stream}
+
+It is also simple to open an Excel file as a stream. To do so, use an overloaded version of the constructor that takes the *Stream* object that contains the file.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+// Opening through Stream
+// Create a Stream object
+FileStream fstream = new FileStream(dataDir + "Book2.xls", FileMode.Open);
+
+// Creating a Workbook object, open the file from a Stream object
+// That contains the content of file and it should support seeking
+Workbook workbook2 = new Workbook(fstream);
+Console.WriteLine("Workbook opened using stream successfully!");
+fstream.Close();
+```
+
+## How to Open a File with Data Only {#how-to-open-a-file-with-data-only}
+
+To open a file with data only, use the <a href="https://reference.aspose.com/cells/net/aspose.cells/loadoptions" target="_blank" rel="nofollow noopener noreferrer">**LoadOptions**</a> and <a href="https://reference.aspose.com/cells/net/aspose.cells/loadfilter" target="_blank" rel="nofollow noopener noreferrer">**LoadFilter**</a> classes to set the related attributes and options for the template file to be loaded.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+// Load only specific sheets with data and formulas
+// Other objects, items etc. would be discarded
+
+// Instantiate LoadOptions specified by the LoadFormat
+LoadOptions loadOptions = new LoadOptions(LoadFormat.Xlsx);
+
+// Set LoadFilter property to load only data & cell formatting
+loadOptions.LoadFilter = new LoadFilter(LoadDataFilterOptions.CellData);
+            
+
+// Create a Workbook object and opening the file from its path
+Workbook book = new Workbook(dataDir + "Book1.xlsx", loadOptions);
+Console.WriteLine("File data imported successfully!");
+```
+
+## How to Load Visible Sheets Only {#how-to-load-visible-sheets-only}
+
+While loading a <a href="https://reference.aspose.com/cells/net/aspose.cells/workbook" target="_blank" rel="nofollow noopener noreferrer">**Workbook**</a>, you may only need data in visible worksheets in a workbook. Aspose.Cells allows you to skip data in invisible worksheets while loading a workbook. To do this, create a custom class that inherits the <a href="https://reference.aspose.com/cells/net/aspose.cells/loadfilter" target="_blank" rel="nofollow noopener noreferrer">**LoadFilter**</a> class and pass its instance to the <a href="https://reference.aspose.com/cells/net/aspose.cells/loadoptions/properties/loadfilter" target="_blank" rel="nofollow noopener noreferrer">**LoadOptions.LoadFilter**</a> property.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+string sampleFile = "output.xlsx";
+string samplePath = dataDir + sampleFile;
+
+// Create a sample workbook
+// and put some data in first cell of all 3 sheets
+Workbook createWorkbook = new Workbook();
+createWorkbook.Worksheets["Sheet1"].Cells["A1"].Value = "Aspose";
+createWorkbook.Worksheets.Add("Sheet2").Cells["A1"].Value = "Aspose";
+createWorkbook.Worksheets.Add("Sheet3").Cells["A1"].Value = "Aspose";
+createWorkbook.Worksheets["Sheet3"].IsVisible = false;
+createWorkbook.Save(samplePath);
+
+// Load the sample workbook
+           
+LoadOptions loadOptions = new LoadOptions();
+loadOptions.LoadFilter = new CustomLoad();
+
+Workbook loadWorkbook = new Workbook(samplePath, loadOptions);
+Console.WriteLine("Sheet1: A1: {0}", loadWorkbook.Worksheets["Sheet1"].Cells["A1"].Value);
+Console.WriteLine("Sheet1: A2: {0}", loadWorkbook.Worksheets["Sheet2"].Cells["A1"].Value);
+Console.WriteLine("Sheet1: A3: {0}", loadWorkbook.Worksheets["Sheet3"].Cells["A1"].Value);
+```
+
+Here is the implementation of the *CustomLoad* class referenced in the above snippet.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+class CustomLoad : LoadFilter
+{
+    public override void StartSheet(Worksheet sheet)
+    {
+        if (sheet.IsVisible)
+        {
+            // Load everything from visible worksheet
+            this.LoadDataFilterOptions = LoadDataFilterOptions.All;
+        }
+        else
+        {
+            // Load nothing
+            this.LoadDataFilterOptions = LoadDataFilterOptions.Structure;
+        }
+    }
+}
+```
+
+:::info
+An exception will be thrown if you try to open non‑native Excel files or other file formats (for example PPT/PPTX, DOC/DOCX, etc.) using Aspose.Cells.
+:::
+
+:::info
+There is a fair chance that the <a href="https://reference.aspose.com/cells/net/aspose.cells/workbook" target="_blank" rel="nofollow noopener noreferrer">**Workbook**</a> constructor may throw *System.OutOfMemoryException* while loading large spreadsheets. This exception indicates that the available memory is insufficient to completely load the spreadsheet into memory; therefore, the spreadsheet must be loaded with the Memory Preferences enabled.
+:::

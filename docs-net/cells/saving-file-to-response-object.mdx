@@ -1,0 +1,185 @@
+---
+title: "Saving File to Response Object"
+sidebar_label: "Saving File to Response Object"
+sidebar_key: "net-cells-saving-file-to-response-object"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/saving-file-to-response-object.html"
+source_commit: ""
+source_sha256: "3780851342725d79912f6b14b1f2f6c5c68f2624b4b0018407c73c133dc0f4ff"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/saving-file-to-response-object/"
+source_snapshot_sha256: "ec18480116ca6ea96c22e612d3275ee4837a98664b17ed0183428a95e80e34b6"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "./_remote-markdown.css";
+
+:::info
+Aspose.Cells makes it possible to manipulate files. This article explains the various ways in which files can be saved to a response object.
+:::
+
+## Saving File to Response Object {#saving-file-to-response-object}
+
+It is also possible to generate a file dynamically and send it directly to a client browser. In order to do so, use a special overloaded version of the <a href="https://reference.aspose.com/cells/net/aspose.cells.workbook/save/methods/5" target="_blank" rel="nofollow noopener noreferrer">**Save**</a> method that accepts the following parameters:
+
+- ASP.NET <a href="https://docs.microsoft.com/en-gb/dotnet/api/system.web.httpresponse?view=netframework-4.8" target="_blank" rel="nofollow noopener noreferrer">**HttpResponse**</a> object.
+- File name.
+- <a href="https://reference.aspose.com/cells/net/aspose.cells/contentdisposition" target="_blank" rel="nofollow noopener noreferrer">**ContentDisposition**</a>, the content‑disposition type of the output file.
+- <a href="https://reference.aspose.com/cells/net/aspose.cells/saveoptions" target="_blank" rel="nofollow noopener noreferrer">**SaveOptions**</a>, the file format type.
+
+The <a href="https://reference.aspose.com/cells/net/aspose.cells/contentdisposition" target="_blank" rel="nofollow noopener noreferrer">**ContentDisposition**</a> enumeration determines whether the file being sent to the browser provides the option to open itself directly in the browser or in an application associated with .xls/.xlsx or another extension.
+
+The enumeration contains the following pre‑defined save types:
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+**Type**
+
+</th>
+<th>
+
+**Description**
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+Attachment
+
+</td>
+<td>
+
+Sends the spreadsheet to the browser and opens it in an application as an attachment associated with .xls/.xlsx or other extensions
+
+</td>
+</tr>
+<tr>
+<td>
+
+Inline
+
+</td>
+<td>
+
+Sends the document to the browser and presents an option to save the spreadsheet to disk or open it inside the browser
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+### XLS Files {#xls-files}
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+HttpResponse Response = null;
+
+// Load your source workbook
+Workbook workbook = new Workbook();
+
+if (Response != null)
+{
+    // Save in Excel2003 XLS format
+    workbook.Save(Response, dataDir + "output.xls", ContentDisposition.Inline, new XlsSaveOptions());
+	Response.End();
+}
+```
+
+### XLSX Files {#xlsx-files}
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+HttpResponse Response = null;
+
+// Load your source workbook
+Workbook workbook = new Workbook();
+
+if (Response != null)
+{
+    // Save in Xlsx format
+    workbook.Save(Response, dataDir + "output.xlsx", ContentDisposition.Attachment, new OoxmlSaveOptions());
+    Response.End();
+}
+```
+
+### PDF Files {#pdf-files}
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+HttpResponse Response = null;
+
+// Creating a Workbook object
+Workbook workbook = new Workbook();
+
+if (Response != null)
+{
+    // Save in Pdf format
+    workbook.Save(Response, dataDir + "output.pdf", ContentDisposition.Attachment, new PdfSaveOptions());
+    Response.End();
+}
+```
+
+### Note {#note}
+
+Because the `System.Web.HttpResponse` object is not included in .NET 5 and .NET Standard, this function does not exist in Aspose.Cells .NET 5 and .NET Standard versions. You can refer to the following code to save the file to a stream and then operate on the stream.
+
+```csharp
+public async Task<IActionResult> DownloadExcel()
+{
+    // For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+    // The path to the documents directory.
+    string dataDir = "./";
+    string filePath = dataDir + "Book1.xlsx";
+    // Load your source workbook
+    Workbook workbook = new Workbook(filePath);
+    // Save the workbook to a memory stream
+    var stream = new MemoryStream();
+    workbook.Save(stream, SaveFormat.Xlsx);
+
+    // Reset the position of the stream to 0
+    stream.Position = 0;
+
+    // Set the content type and file name
+    var contentType = "application/octet-stream";
+    var fileName = "output.xlsx";
+
+    // Set the response headers
+    Response.Headers.Add("Content-Disposition", $"attachment; filename=\"{fileName}\"");
+    Response.ContentType = contentType;
+
+    // Write the file contents to the response body stream
+    await stream.CopyToAsync(Response.Body);
+
+    // Close the file stream
+    stream.Dispose();
+
+    // Return the response
+    return new EmptyResult();
+}
+```

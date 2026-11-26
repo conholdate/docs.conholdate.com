@@ -1,0 +1,137 @@
+---
+title: "Stop conversion or loading using InterruptMonitor when it is taking too long"
+sidebar_label: "Stop conversion or loading using InterruptMonitor when it is taking too long"
+sidebar_key: "net-cells-stop-conversion-or-loading-using-interruptmonitor-when-it-is-taking-too-long"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/stop-conversion-or-loading-using-interruptmonitor-when-it-is-taking-too-long.html"
+source_commit: ""
+source_sha256: "a6fc1cdee5764602053bf2b1b44da819f69934d514fa567a2a01003a21b1af1a"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/stop-conversion-or-loading-using-interruptmonitor-when-it-is-taking-too-long/"
+source_snapshot_sha256: "4bca15b68bc57674a4e82327696499c71181acf7d82f0128b55c298ca411e474"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Possible Usage Scenarios {#possible-usage-scenarios}
+
+Aspose.Cells allows you to stop the conversion of a Workbook to various formats, such as PDF, HTML, etc., using the <a href="https://reference.aspose.com/cells/net/aspose.cells/interruptmonitor" target="_blank" rel="nofollow noopener noreferrer">**InterruptMonitor**</a> object when it is taking too long. The conversion process is often both CPU‑ and memory‑intensive, and it is useful to halt it when resources are limited. You can use <a href="https://reference.aspose.com/cells/net/aspose.cells/interruptmonitor" target="_blank" rel="nofollow noopener noreferrer">**InterruptMonitor**</a> both for stopping conversion and for loading a huge workbook. Please use the <a href="https://reference.aspose.com/cells/net/aspose.cells/workbook/properties/interruptmonitor" target="_blank" rel="nofollow noopener noreferrer">**Workbook.InterruptMonitor**</a> property for stopping conversion and the <a href="https://reference.aspose.com/cells/net/aspose.cells/loadoptions/properties/interruptmonitor" target="_blank" rel="nofollow noopener noreferrer">**LoadOptions.InterruptMonitor**</a> property for loading a huge workbook.
+
+## Stop conversion or loading using InterruptMonitor when it is taking too long {#stop-conversion-or-loading-using-interruptmonitor-when-it-is-taking-too-long}
+
+The following sample code explains the usage of the <a href="https://reference.aspose.com/cells/net/aspose.cells/interruptmonitor" target="_blank" rel="nofollow noopener noreferrer">**InterruptMonitor**</a> object. The code converts a fairly large Excel file to PDF. It will take several seconds (i.e., *more than 30 seconds*) to be converted because of these lines of code.
+
+```csharp
+// Access cell J1000000 and add some text to it.
+
+Cell cell = ws.Cells["J1000000"];
+cell.PutValue("This is text.");
+```
+
+As you can see, **J1000000** is a faraway cell in the XLSX file. However, the **WaitForWhileAndThenInterrupt()** method interrupts the conversion after 10 seconds, and the program ends/terminates. Please use the following code to run the sample code.
+
+```csharp
+new StopConversionOrLoadingUsingInterruptMonitor().TestRun();
+```
+
+## Sample Code {#sample-code}
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+public class StopConversionOrLoadingUsingInterruptMonitor
+{
+    //Output directory
+    static string outputDir = "./";
+
+    //Create InterruptMonitor object
+    InterruptMonitor im = new InterruptMonitor();
+
+    //This function will create workbook and convert it to Pdf format
+    void CreateWorkbookAndConvertItToPdfFormat(object threadObj)
+    {
+        Thread monitorThread = (Thread)threadObj;
+
+        //Create a workbook object
+        Workbook wb = new Workbook();
+
+        //Assign it InterruptMonitor object
+        wb.InterruptMonitor = im;
+
+        //Access first worksheet
+        Worksheet ws = wb.Worksheets[0];
+
+        //Access cell J1000000 and add some text inside it.
+        Cell cell = ws.Cells["J1000000"];
+        cell.PutValue("This is text.");
+
+        try
+        {
+            //Save the workbook to Pdf format
+            wb.Save(outputDir + "output_InterruptMonitor.pdf");
+
+            //Show successful message
+            Console.WriteLine("Excel to PDF - Successful Conversion");
+
+            //stop monitor thread
+            monitorThread.Interrupt();
+        }
+        catch (Aspose.Cells.CellsException ex)
+        {
+            if (ex.Code == ExceptionType.Interrupted)
+            {
+                Console.WriteLine("Conversion process is interrupted - Message: " + ex.Message);
+            }
+            else
+            {
+                throw ex;
+            }
+        }
+
+    }
+
+    //This function will interrupt the conversion process after 10s
+    void WaitForWhileAndThenInterrupt()
+    {
+        try
+        {
+            Thread.Sleep(1000 * 10);
+            im.Interrupt();
+        }
+        catch(ThreadInterruptedException e)
+        {
+            Console.WriteLine("Monitor thread is interrupted - Message: " + e.Message);
+        }
+    }
+
+    public void TestRun()
+    {
+        Thread monitorThread = new Thread(WaitForWhileAndThenInterrupt);
+        Thread conversionThread = new Thread(CreateWorkbookAndConvertItToPdfFormat);
+
+        monitorThread.Start();
+        conversionThread.Start(monitorThread);
+
+        monitorThread.Join();
+        conversionThread.Join();
+    }
+
+
+    public static void Run()
+    {
+        new StopConversionOrLoadingUsingInterruptMonitor().TestRun();
+
+        Console.WriteLine("StopConversionOrLoadingUsingInterruptMonitor executed successfully.");
+    }
+}
+```

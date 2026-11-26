@@ -1,0 +1,822 @@
+---
+title: "Import Data into Worksheet"
+sidebar_label: "Import Data into Worksheet"
+sidebar_key: "net-cells-import-data-into-worksheet"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/import-data-into-worksheet.html"
+source_commit: ""
+source_sha256: "e218ac5f4a0236c55ebd20ba0ac1fa4939b39f81d9f01a056b4bccf7e76a6686"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/import-data-into-worksheet/"
+source_snapshot_sha256: "a580565a9d27cd6fe203a55f467a759b97c7b5ccc7d595a225cc28ce97094ce0"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+This article discusses some data import techniques that developers have access to through Aspose.Cells.
+:::
+
+## How to Import Data into Worksheet {#how-to-import-data-into-worksheet}
+
+When you open an Excel file with Aspose.Cells, all data in the file is automatically imported. Aspose.Cells can also import data from other data sources.
+
+Aspose.Cells provides a <a href="https://reference.aspose.com/cells/net/aspose.cells/workbook" target="_blank" rel="nofollow noopener noreferrer">**Workbook**</a> class that represents a Microsoft Excel file. The <a href="https://reference.aspose.com/cells/net/aspose.cells/workbook" target="_blank" rel="nofollow noopener noreferrer">**Workbook**</a> class contains a <a href="https://reference.aspose.com/cells/net/aspose.cells/workbook/properties/worksheets" target="_blank" rel="nofollow noopener noreferrer">**Worksheets**</a> collection that allows access to each worksheet in an Excel file. A worksheet is represented by the <a href="https://reference.aspose.com/cells/net/aspose.cells/worksheet" target="_blank" rel="nofollow noopener noreferrer">**Worksheet**</a> class. The <a href="https://reference.aspose.com/cells/net/aspose.cells/worksheet" target="_blank" rel="nofollow noopener noreferrer">**Worksheet**</a> class provides a <a href="https://reference.aspose.com/cells/net/aspose.cells/worksheet/properties/cells" target="_blank" rel="nofollow noopener noreferrer">**Cells**</a> collection. <a href="https://reference.aspose.com/cells/net/aspose.cells/worksheet/properties/cells" target="_blank" rel="nofollow noopener noreferrer">**Cells**</a> collection provides useful methods to import data from different data sources. This article explains how these methods can be used.
+
+## How to Import Data into Excel with ICellsDataTable interface {#how-to-import-data-into-excel-with-icellsdatatable-interface}
+
+Implement <a href="https://reference.aspose.com/cells/net/aspose.cells/icellsdatatable" target="_blank" rel="nofollow noopener noreferrer">ICellsDataTable</a> to wrap your various data sources, then use <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/importdata/#importdata" target="_blank" rel="nofollow noopener noreferrer">Cells.ImportData()</a> to import data to an Excel worksheet.
+
+### Sample Code {#sample-code}
+
+```csharp
+//Init data source
+CustomerList customers = new CustomerList();
+customers.Add(new Customer("Thomas Hardy", "120 Hanover Sq., London"));
+customers.Add(new Customer("Paolo Accorti", "Via Monte Bianco 34, Torino"));
+//Create a new file.
+var wb = new Workbook();
+ImportTableOptions options = new ImportTableOptions();
+options.IsFieldNameShown = true;
+//Import ICellsDataTable with options
+wb.Worksheets[0].Cells.ImportData(new CustomerDataSource(customers), 0, 0, options);
+wb.Save("ICellsDataTable.xlsx");
+```
+
+The implementation of *CustomerDataSource*, *Customer*, and *CustomerList* classes is given below
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+public class CustomerDataSource : ICellsDataTable
+{
+    public CustomerDataSource(CustomerList customers)
+    {
+        this.m_DataSource = customers;
+        this.m_Properties = customers[0].GetType().GetProperties();
+        this.m_Columns = new string[this.m_Properties.Length];
+        this.m_PropHash = new Hashtable(this.m_Properties.Length);
+
+        for (int i = 0; i < m_Properties.Length; i++)
+        {
+            this.m_Columns[i] = m_Properties[i].Name;
+            this.m_PropHash.Add(m_Properties[i].Name, m_Properties[i]);
+        }
+        this.m_IEnumerator = this.m_DataSource.GetEnumerator();
+    }
+
+    internal string[] m_Columns;
+    internal ICollection m_DataSource;
+    private Hashtable m_PropHash;
+    private IEnumerator m_IEnumerator;
+    private System.Reflection.PropertyInfo[] m_Properties;
+
+    public string[] Columns
+    {
+        get
+        {
+            return this.m_Columns;
+        }
+    }
+
+    public int Count
+    {
+        get
+        {
+            return this.m_DataSource.Count;
+        }
+    }
+
+    public void BeforeFirst()
+    {
+        this.m_IEnumerator = this.m_DataSource.GetEnumerator();
+    }
+
+    public object this[int index]
+    {
+        get
+        {
+            return this.m_Properties[index].GetValue(this.m_IEnumerator.Current, null);
+        }
+    }
+
+    public object this[string columnName]
+    {
+        get
+        {
+            return ((System.Reflection.PropertyInfo)this.m_PropHash[columnName]).GetValue(this.m_IEnumerator.Current, null);
+        }
+    }
+
+    public bool Next()
+    {
+        if (this.m_IEnumerator == null)
+            return false;
+
+        return this.m_IEnumerator.MoveNext();
+    }
+}
+
+public class Customer
+{
+    public Customer(string aFullName, string anAddress)
+    {
+        FullName = aFullName;
+        Address = anAddress;
+    }
+
+    public string FullName { get; set; }
+
+    public string Address { get; set; }
+}
+
+public class CustomerList : ArrayList
+{
+    public new Customer this[int index]
+    {
+        get { return (Customer)base[index]; }
+        set { base[index] = value; }
+    }
+}
+```
+
+## How to Import Data into Excel from Array {#how-to-import-data-into-excel-from-array}
+
+To import data to a spreadsheet from an array, call the <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/methods/importarray/index" target="_blank" rel="nofollow noopener noreferrer">**ImportArray**</a> method of the <a href="https://reference.aspose.com/cells/net/aspose.cells/worksheet/properties/cells" target="_blank" rel="nofollow noopener noreferrer">**Cells**</a> collection. There are many overloaded versions of the <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/methods/importarray/index" target="_blank" rel="nofollow noopener noreferrer">**ImportArray**</a> method but a typical overload takes the following parameters:
+
+- **Array** - the array object that you're importing content from.
+- **Row number** - the row number of the first cell that the data will be imported to.
+- **Column number** - the column number of the first cell that the data will be imported to.
+- **Is vertical** - a Boolean value that specifies whether to import data vertically or horizontally.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+// Create directory if it is not already present.
+bool IsExists = System.IO.Directory.Exists(dataDir);
+if (!IsExists)
+    System.IO.Directory.CreateDirectory(dataDir);
+
+// Instantiating a Workbook object
+Workbook workbook = new Workbook();
+
+// Obtaining the reference of the worksheet
+Worksheet worksheet = workbook.Worksheets[0];
+
+// Creating an array containing names as string values
+string[] names = new string[] { "laurence chen", "roman korchagin", "kyle huang" };
+
+// Importing the array of names to 1st row and first column vertically
+worksheet.Cells.ImportArray(names, 0, 0, true);
+
+// Saving the Excel file
+workbook.Save(dataDir + "DataImport.out.xls");
+```
+
+## How to Import Data into Excel from ArrayList {#how-to-import-data-into-excel-from-arraylist}
+
+To import data from an *ArrayList* to worksheets, call the <a href="https://reference.aspose.com/cells/net/aspose.cells/worksheet/properties/cells" target="_blank" rel="nofollow noopener noreferrer">**Cells**</a> collection's <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/methods/importarraylist" target="_blank" rel="nofollow noopener noreferrer">**ImportArrayList**</a> method. The **ImportArrayList** method takes the following parameters:
+
+- **Array list** - represents the *ArrayList* object you're importing.
+- **Row number** - represents the row number of the first cell that the data will be imported to.
+- **Column number** - represents the column number of the first cell that the data will be imported to.
+- **Is vertical** - a Boolean value that specifies whether to import data vertically or horizontally.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+// Create directory if it is not already present.
+bool IsExists = System.IO.Directory.Exists(dataDir);
+if (!IsExists)
+    System.IO.Directory.CreateDirectory(dataDir);
+
+// Instantiating a Workbook object
+Workbook workbook = new Workbook();
+
+// Obtaining the reference of the worksheet
+Worksheet worksheet = workbook.Worksheets[0];
+
+// Instantiating an ArrayList object
+ArrayList list = new ArrayList();
+
+// Add few names to the list as string values
+list.Add("laurence chen");
+list.Add("roman korchagin");
+list.Add("kyle huang");
+list.Add("tommy wang");
+
+// Importing the contents of ArrayList to 1st row and first column vertically
+worksheet.Cells.ImportArrayList(list, 0, 0, true);
+
+// Saving the Excel file
+workbook.Save(dataDir + "DataImport.out.xls");
+```
+
+## How to Import Data into Excel from Custom Objects {#how-to-import-data-into-excel-from-custom-objects}
+
+To import data from a collection of objects to a worksheet, use <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/methods/importcustomobjects/index" target="_blank" rel="nofollow noopener noreferrer">**ImportCustomObjects**</a>. Provide a list of columns/properties to the method to display your desired list of objects.
+
+```csharp
+private void TestImportingFromCustomObject()
+{
+    //Examples-CSharp-Data-Handling-Importing-ImportingFromCustomObject-1.cs
+    // For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+    // The path to the documents directory.
+    string dataDir = "./";
+
+    // Create directory if it is not already present.
+    bool IsExists = System.IO.Directory.Exists(dataDir);
+    if (!IsExists)
+        System.IO.Directory.CreateDirectory(dataDir);
+
+    // Instantiate a new Workbook
+    Workbook book = new Workbook();
+
+    Worksheet sheet = book.Worksheets[0];
+
+    // Define List
+    List<Person> list = new List<Person>();
+
+    list.Add(new Person("Mike", 25));
+    list.Add(new Person("Steve", 30));
+    list.Add(new Person("Billy", 35));
+
+
+
+    ImportTableOptions imp = new ImportTableOptions();
+    imp.InsertRows = true;
+
+    // We pick a few columns not all to import to the worksheet
+    // We pick a few columns not all to import to the worksheet
+    sheet.Cells.ImportCustomObjects((System.Collections.ICollection)list,
+    new string[] { "Name", "Age" },
+    true,
+    0,
+    0,
+    list.Count,
+    true,
+    "dd/mm/yyyy",
+    false);
+
+    // Auto-fit all the columns
+    book.Worksheets[0].AutoFitColumns();
+
+    // Save the Excel file
+    book.Save(dataDir + "ImportedCustomObjects.out.xls");
+
+}
+
+class Person
+{
+    int _age;
+    string _name;
+    public int Age
+    {
+        get
+        {
+            return _age;
+        }
+        set
+        {
+            _age = value;
+        }
+    }
+    public string Name
+    {
+        get
+        {
+            return _name;
+        }
+        set
+        {
+            _name = value;
+        }
+    }
+
+    public Person(string name, int age)
+    {
+        Age = age;
+        Name = name;
+    }
+}
+```
+
+## How to Import Data into Excel from Custom Objects and Check Merged Area {#how-to-import-data-into-excel-from-custom-objects-and-check-merged-area}
+
+To import data from a collection of objects to a worksheet containing merged cells, use <a href="https://reference.aspose.com/cells/net/aspose.cells/importtableoptions/properties/checkmergedcells" target="_blank" rel="nofollow noopener noreferrer">**ImportTableOptions.CheckMergedCells**</a> property. If the Excel template has merged cells, set the value of **ImportTableOptions.CheckMergedCells** property to true. Pass the <a href="https://reference.aspose.com/cells/net/aspose.cells/importtableoptions" target="_blank" rel="nofollow noopener noreferrer">**ImportTableOptions**</a> object along with the list of columns/properties to the method to display your desired list of objects. The following code sample demonstrates the use of <a href="https://reference.aspose.com/cells/net/aspose.cells/importtableoptions/properties/checkmergedcells" target="_blank" rel="nofollow noopener noreferrer">**ImportTableOptions.CheckMergedCells**</a> property to import data from custom objects to merged cells. Please see the attached <a href="https://docs.aspose.com/cells/net/import-data-into-worksheet/90112033.xlsx" target="_blank" rel="nofollow noopener noreferrer">source Excel</a> file and the <a href="https://docs.aspose.com/cells/net/import-data-into-worksheet/90112034.xlsx" target="_blank" rel="nofollow noopener noreferrer">output Excel</a> file for reference.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+public class ImportCustomObjectsToMergedArea
+{
+    public static void Run()
+    {
+        //Source directory
+        string sourceDir = "./";
+
+        //Output directory
+        string outputDir = "./";
+
+        Workbook workbook = new Workbook(sourceDir + "sampleMergedTemplate.xlsx");
+        List<Product> productList = new List<Product>();
+
+        //Creating collection of test items
+        for (int i = 0; i < 3; i++)
+        {
+            Product product = new Product
+            {
+                ProductId = i,
+                ProductName = "Test Product - " + i
+            };
+            productList.Add(product);
+        }
+        ImportTableOptions tableOptions = new ImportTableOptions();
+        tableOptions.CheckMergedCells = true;
+        tableOptions.IsFieldNameShown = false;
+
+        //Insert data to excel template
+        workbook.Worksheets[0].Cells.ImportCustomObjects((ICollection)productList, 1, 0, tableOptions);
+        workbook.Save(outputDir + "sampleMergedTemplate_out.xlsx", SaveFormat.Xlsx);
+
+        Console.WriteLine("ImportCustomObectsToMergedArea executed successfully.\r\n");
+    }
+}
+
+public class Product
+{
+    public int ProductId { get; set; }
+
+    public string ProductName { get; set; }
+}
+```
+
+## How to Import Data into Excel from DataTable {#how-to-import-data-into-excel-from-datatable}
+
+To import data from a *DataTable*, call the <a href="https://reference.aspose.com/cells/net/aspose.cells/worksheet/properties/cells" target="_blank" rel="nofollow noopener noreferrer">**Cells**</a> collection's <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/methods/importdatatable/index" target="_blank" rel="nofollow noopener noreferrer">**ImportDataTable**</a> method. There are many overloaded versions of the <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/methods/importdatatable/index" target="_blank" rel="nofollow noopener noreferrer">**ImportDataTable**</a> method but a typical overload takes the following parameters:
+
+- **Data table** - the *DataTable* object that you're importing the content from.
+- **Is field name shown** - specifies whether the names of the *DataTable* columns should be imported to the worksheet as a first row or not.
+- **Start cell** - represents the name of the start cell (for example "A1") from where to import the contents of the *DataTable*.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+// Create directory if it is not already present.
+bool IsExists = System.IO.Directory.Exists(dataDir);
+if (!IsExists)
+    System.IO.Directory.CreateDirectory(dataDir);
+
+// Instantiating a Workbook object            
+Workbook workbook = new Workbook();
+
+// Obtaining the reference of the worksheet
+Worksheet worksheet = workbook.Worksheets[0];
+
+// Instantiating a "Products" DataTable object
+DataTable dataTable = new DataTable("Products");
+
+// Adding columns to the DataTable object
+dataTable.Columns.Add("Product ID", typeof(Int32));
+dataTable.Columns.Add("Product Name", typeof(string));
+dataTable.Columns.Add("Units In Stock", typeof(Int32));
+
+// Creating an empty row in the DataTable object
+DataRow dr = dataTable.NewRow();
+
+// Adding data to the row
+dr[0] = 1;
+dr[1] = "Aniseed Syrup";
+dr[2] = 15;
+
+// Adding filled row to the DataTable object
+dataTable.Rows.Add(dr);
+
+// Creating another empty row in the DataTable object
+dr = dataTable.NewRow();
+
+// Adding data to the row
+dr[0] = 2;
+dr[1] = "Boston Crab Meat";
+dr[2] = 123;
+
+// Adding filled row to the DataTable object
+dataTable.Rows.Add(dr);
+
+ImportTableOptions tableOptions = new ImportTableOptions();
+// Importing the contents of DataTable to the worksheet starting from "A1" cell,
+// Where true specifies that the column names of the DataTable would be added to
+// The worksheet as a header row
+tableOptions.IsFieldNameShown = true;
+worksheet.Cells.ImportData(dataTable, 0, 0, tableOptions);
+
+// Saving the Excel file
+workbook.Save(dataDir + "DataImport.out.xls");
+```
+
+## How to Import Data into Excel from Dynamic Object as Data Source {#how-to-import-data-into-excel-from-dynamic-object-as-data-source}
+
+Aspose.Cells provides features to work with dynamic objects as a data source. It helps in using a data source where properties are added dynamically to the objects. Once the properties are added to the object, Aspose.Cells considers the first entry as the template and handles the rest accordingly. It means if some dynamic property is added to the first item only and not to other objects, Aspose.Cells considers that all items in the collection should be the same.
+
+In this example, a template model is used which initially contains two variables only. This list is converted to a list of dynamic objects. Then some additional field is added into it and finally loaded into the workbook. The workbook picks only those values which are in the template XLSX file. This template workbook uses Smart Markers which also contain parameters. Parameters allow you to modify how the information is laid out. Details about the Smart Markers can be obtained from the following article:
+
+<a href="https://docs.aspose.com/cells/net/using-smart-markers/" target="_blank" rel="nofollow noopener noreferrer">Using Smart Markers</a>
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+
+using System.Collections.Generic;
+using System.Dynamic;
+using System.ComponentModel;
+using System.Linq;
+
+namespace Aspose.Cells.Examples.CSharp.Data.Handling.Importing
+{
+    public class ImportingFromDynamicDataTable
+    {
+        //Source directory
+        static string sourceDir = "./";
+
+        //Output directory
+        static string outputDir = "./";
+
+        public static void Run()
+        {
+            // ExStart:1
+            // Here data is filled into a list of Model class containing two fields only
+            var data = GetData();
+
+            // Based upon business some additional fields e.g. unique id is added
+            var modifiedData = new Converter().GetModifiedData(data);
+
+            // Modified data is still an object but it is a dynamic one now
+            modifiedData.First().Id = 20;
+
+            // Following field is added in the dynamic objects list, but it will not be added to workbook as template file does not have this field
+            modifiedData.First().Id2 = 200;
+
+
+            // Create workbook and fill it with the data
+            Workbook workbook = new Workbook(sourceDir + @"ExcelTemplate.xlsx");
+            WorkbookDesigner designer = new WorkbookDesigner(workbook);
+            designer.SetDataSource("modifiedData", modifiedData);
+            designer.Process();
+            designer.Workbook.Save(outputDir + @"ModifiedData.xlsx");
+
+            // Base Model does work but doesn't have the Id
+            Workbook workbookRegular = new Workbook(sourceDir + @"ExcelTemplate.xlsx");
+            WorkbookDesigner designerRegular = new WorkbookDesigner(workbookRegular);
+            designerRegular.SetDataSource("ModifiedData", data);
+            designerRegular.Process();
+            designerRegular.Workbook.Save(outputDir + @"ModifiedDataRegular.xlsx");
+
+            // ExEnd:1 
+        }
+        private static List<Model> GetData()
+        {
+            return new List<Model>
+           {
+               new Model{ Code = 1 , Name = "One" },
+               new Model{ Code = 2 , Name = "Two" },
+               new Model{ Code = 3 , Name = "Three" },
+               new Model{ Code = 4 , Name = "Four" },
+               new Model{ Code = 5 , Name = "Five" }
+           };
+        }
+
+    }
+    public class Model
+    {
+        public string Name { get; internal set; }
+        public int Code { get; internal set; }
+    }
+    public class Converter
+    {
+        private int _uniqueNumber;
+
+        public List<dynamic> GetModifiedData(List<Model> data)
+        {
+            var result = new List<dynamic>();
+
+            result.AddRange(data.ConvertAll<dynamic>(i => AddId(i)));
+
+
+            return result;
+        }
+
+        private dynamic AddId(Model i)
+        {
+            var result = TransformToDynamic(i);
+            result.Id = GetUniqueNumber();
+            return result;
+        }
+
+        private int GetUniqueNumber()
+        {
+            var result = _uniqueNumber;
+            _uniqueNumber++;
+            return result;
+        }
+
+        private dynamic TransformToDynamic(object dataObject)
+        {
+
+            IDictionary<string, object> expando = new ExpandoObject();
+
+            foreach (PropertyDescriptor property in TypeDescriptor.GetProperties(dataObject.GetType()))
+                expando.Add(property.Name, property.GetValue(dataObject));
+
+            return expando as dynamic;
+
+        }
+    }
+
+}
+```
+
+## How to Import DataColumn into Excel {#how-to-import-datacolumn-into-excel}
+
+A *DataTable* or *DataView* object is composed of one or more columns. Developers can also import data from any column(s) of the *DataTable* or *DataView* by calling the <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/methods/importdata/index" target="_blank" rel="nofollow noopener noreferrer">**ImportData**</a> method of the <a href="https://reference.aspose.com/cells/net/aspose.cells/worksheet/properties/cells" target="_blank" rel="nofollow noopener noreferrer">**Cells**</a> collection. The <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/methods/importdata/index" target="_blank" rel="nofollow noopener noreferrer">**ImportData**</a> method accepts a parameter of type <a href="https://reference.aspose.com/cells/net/aspose.cells/importtableoptions" target="_blank" rel="nofollow noopener noreferrer">**ImportTableOptions**</a>. The <a href="https://reference.aspose.com/cells/net/aspose.cells/importtableoptions" target="_blank" rel="nofollow noopener noreferrer">**ImportTableOptions**</a> class provides a <a href="https://reference.aspose.com/cells/net/aspose.cells/importtableoptions/properties/columnindexes" target="_blank" rel="nofollow noopener noreferrer">**ColumnIndexes**</a> property that accepts an array of column indexes.
+
+The sample code given below demonstrates the use of <a href="https://reference.aspose.com/cells/net/aspose.cells/importtableoptions/properties/columnindexes" target="_blank" rel="nofollow noopener noreferrer">**ImportTableOptions.ColumnIndexes**</a> to import selective columns.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+// Create directory if it is not already present.
+bool IsExists = System.IO.Directory.Exists(dataDir);
+if (!IsExists)
+    System.IO.Directory.CreateDirectory(dataDir);
+
+// Instantiating a "Products" DataTable object
+DataTable dataTable = new DataTable("Products");
+
+// Adding columns to the DataTable object
+dataTable.Columns.Add("Product ID", typeof(Int32));
+dataTable.Columns.Add("Product Name", typeof(string));
+dataTable.Columns.Add("Units In Stock", typeof(Int32));
+
+// Creating an empty row in the DataTable object
+DataRow dr = dataTable.NewRow();
+
+// Adding data to the row
+dr[0] = 1;
+dr[1] = "Aniseed Syrup";
+dr[2] = 15;
+
+// Adding filled row to the DataTable object
+dataTable.Rows.Add(dr);
+
+// Creating another empty row in the DataTable object
+dr = dataTable.NewRow();
+
+// Adding data to the row
+dr[0] = 2;
+dr[1] = "Boston Crab Meat";
+dr[2] = 123;
+
+// Adding filled row to the DataTable object
+dataTable.Rows.Add(dr);
+
+// Instantiate a new Workbook
+Workbook book = new Workbook();
+
+Worksheet sheet = book.Worksheets[0];
+
+// Create import options
+ImportTableOptions importOptions = new ImportTableOptions();
+importOptions.IsFieldNameShown = true;
+importOptions.IsHtmlString = true;
+
+// Importing the values of 2nd column of the data table
+sheet.Cells.ImportData(dataTable, 1, 1, importOptions);
+
+// Save workbook
+book.Save(dataDir + "DataImport.out.xls");
+```
+
+## How to Import DataView into Excel {#how-to-import-dataview-into-excel}
+
+To import data from a *DataView*, call the <a href="https://reference.aspose.com/cells/net/aspose.cells/worksheet/properties/cells" target="_blank" rel="nofollow noopener noreferrer">**Cells**</a> collection's <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/methods/importdata/index" target="_blank" rel="nofollow noopener noreferrer">**ImportData**</a> method. There are many overloaded versions of the <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/methods/importdata/index" target="_blank" rel="nofollow noopener noreferrer">**ImportData**</a> method but the one for DataView takes the following parameters:
+
+- **DataView** - the *DataView* object that you're about to import content from.
+- **First Row** - the row number of the first cell that the data will be imported to.
+- **First Column** - the column number of the first cell that the data will be imported to.
+- **ImportTableOptions** - the import options.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+// Instantiating a Workbook object            
+Workbook workbook = new Workbook();
+
+// Obtaining the reference of the worksheet
+Worksheet worksheet = workbook.Worksheets[0];
+
+// Instantiating a "Products" DataTable object
+DataTable dataTable = new DataTable("Products");
+
+// Adding columns to the DataTable object
+dataTable.Columns.Add("Product ID", typeof(Int32));
+dataTable.Columns.Add("Product Name", typeof(string));
+dataTable.Columns.Add("Units In Stock", typeof(Int32));
+
+// Creating an empty row in the DataTable object
+DataRow dr = dataTable.NewRow();
+
+// Adding data to the row
+dr[0] = 1;
+dr[1] = "Aniseed Syrup";
+dr[2] = 15;
+
+// Adding filled row to the DataTable object
+dataTable.Rows.Add(dr);
+
+// Creating another empty row in the DataTable object
+dr = dataTable.NewRow();
+
+// Adding data to the row
+dr[0] = 2;
+dr[1] = "Boston Crab Meat";
+dr[2] = 123;
+
+// Adding filled row to the DataTable object
+dataTable.Rows.Add(dr);
+
+// Importing the contents of the data view to the worksheet
+ImportTableOptions options = new ImportTableOptions();
+options.IsFieldNameShown = true;
+
+worksheet.Cells.ImportData(dataTable.DefaultView, 0, 0, options);
+
+// Saving the Excel file
+workbook.Save(dataDir + "output.xls");
+```
+
+## How to Import DataGrid into Excel {#how-to-import-datagrid-into-excel}
+
+It is possible to import data from a *DataGrid* by calling the <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/methods/importdatagrid/index" target="_blank" rel="nofollow noopener noreferrer">**ImportDataGrid**</a> method of the <a href="https://reference.aspose.com/cells/net/aspose.cells/worksheet/properties/cells" target="_blank" rel="nofollow noopener noreferrer">**Cells**</a> collection. There are many overloaded versions of the <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/methods/importdatagrid/index" target="_blank" rel="nofollow noopener noreferrer">**ImportDataGrid**</a> method but a typical overload takes the following parameters:
+
+- **DataGrid** - the *DataGrid* object that you're importing content from.
+- **Row Number** - the row number of the first cell that the data will be imported to.
+- **Column Number** - the column number of the first cell that the data will be imported to.
+- **Insert Rows** - a Boolean property that indicates whether extra rows should be added to the worksheet to fit data or not.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+// Create a DataTable object and set it as DataSource of DataGrid.
+DataTable dataTable = new DataTable("Products");
+dataTable.Columns.Add("Product ID", typeof(Int32));
+dataTable.Columns.Add("Product Name", typeof(string));
+dataTable.Columns.Add("Units In Stock", typeof(Int32));
+DataRow dr = dataTable.NewRow();
+dr[0] = 1;
+dr[1] = "Aniseed Syrup";
+dr[2] = 15;
+dataTable.Rows.Add(dr);
+dr = dataTable.NewRow();
+dr[0] = 2;
+dr[1] = "Boston Crab Meat";
+dr[2] = 123;
+dataTable.Rows.Add(dr);
+
+// Now take care of DataGrid
+System.Web.UI.WebControls.DataGrid dg = new System.Web.UI.WebControls.DataGrid();
+dg.DataSource = dataTable;
+dg.DataBind();
+
+// We have a DataGrid object with some data in it.
+// Lets import it into our spreadsheet
+
+// Creat a new workbook
+Workbook workbook = new Workbook();
+Worksheet worksheet = workbook.Worksheets[0];
+
+// Importing the contents of the data grid to the worksheet
+worksheet.Cells.ImportDataGrid(dg, 0, 0, false);
+
+// Save it as Excel file
+workbook.Save(dataDir + "output.xlsx");
+```
+
+## How to Import GridView into Excel {#how-to-import-gridview-into-excel}
+
+To import data from a *GridView* control, call the <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/methods/importgridview" target="_blank" rel="nofollow noopener noreferrer">**ImportGridView**</a> method of the <a href="https://reference.aspose.com/cells/net/aspose.cells/worksheet/properties/cells" target="_blank" rel="nofollow noopener noreferrer">**Cells**</a> collection.
+
+Aspose.Cells allows us to respect HTML‑formatted values while importing data to the spreadsheet. When HTML parsing is enabled while importing data, Aspose.Cells converts the HTML into corresponding cell formatting.
+
+## How to Import HTML Formatted Data into Excel {#how-to-import-html-formatted-data-into-excel}
+
+Aspose.Cells provides a <a href="https://reference.aspose.com/cells/net/aspose.cells/cells" target="_blank" rel="nofollow noopener noreferrer">**Cells**</a> class that provides very useful methods for importing data from external data sources. This article shows how to parse HTML‑formatted text while importing data and convert the HTML into formatted cell values.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+string output1Path = dataDir + "Output.out.xlsx";
+string output2Path = dataDir + "Output.out.ods";
+
+// Prepare a DataTable with some HTML formatted values
+DataTable dataTable = new DataTable("Products");
+dataTable.Columns.Add("Product ID", typeof(Int32));
+dataTable.Columns.Add("Product Name", typeof(string));
+dataTable.Columns.Add("Units In Stock", typeof(Int32));
+DataRow dr = dataTable.NewRow();
+dr[0] = 1;
+dr[1] = "<i>Aniseed</i> Syrup";
+dr[2] = 15;
+dataTable.Rows.Add(dr);
+dr = dataTable.NewRow();
+dr[0] = 2;
+dr[1] = "<b>Boston Crab Meat</b>";
+dr[2] = 123;
+dataTable.Rows.Add(dr);
+
+// Create import options
+ImportTableOptions importOptions = new ImportTableOptions();
+importOptions.IsFieldNameShown = true;
+importOptions.IsHtmlString = true;
+
+// Create workbook
+Workbook workbook = new Workbook();
+Worksheet worksheet = workbook.Worksheets[0];
+worksheet.Cells.ImportData(dataTable, 0, 0, importOptions);
+worksheet.AutoFitRows();
+worksheet.AutoFitColumns();
+
+workbook.Save(output1Path);
+workbook.Save(output2Path);
+```
+
+## How to Import Data into Excel from JSON {#how-to-import-data-into-excel-from-json}
+
+Aspose.Cells provides a <a href="https://reference.aspose.com/cells/net/aspose.cells.utility/jsonutility" target="_blank" rel="nofollow noopener noreferrer">**JsonUtility**</a> class for processing JSON. <a href="https://reference.aspose.com/cells/net/aspose.cells.utility/jsonutility" target="_blank" rel="nofollow noopener noreferrer">**JsonUtility**</a> class has an <a href="https://reference.aspose.com/cells/net/aspose.cells.utility/jsonutility/methods/importdata" target="_blank" rel="nofollow noopener noreferrer">**ImportData**</a> method for importing JSON data. Aspose.Cells also provides a <a href="https://reference.aspose.com/cells/net/aspose.cells.utility/jsonlayoutoptions" target="_blank" rel="nofollow noopener noreferrer">**JsonLayoutOptions**</a> class that represents the options of JSON layout. The <a href="https://reference.aspose.com/cells/net/aspose.cells.utility/jsonutility/methods/importdata" target="_blank" rel="nofollow noopener noreferrer">**ImportData**</a> method accepts <a href="https://reference.aspose.com/cells/net/aspose.cells.utility/jsonlayoutoptions" target="_blank" rel="nofollow noopener noreferrer">**JsonLayoutOptions**</a> as a parameter. The <a href="https://reference.aspose.com/cells/net/aspose.cells.utility/jsonlayoutoptions" target="_blank" rel="nofollow noopener noreferrer">**JsonLayoutOptions**</a> class provides the following properties.
+
+- **ArrayAsTable** - Indicates whether the array should be processed as a table or not.
+- **ConvertNumericOrDate** - Gets or sets a value that indicates whether the string in JSON is to be converted to numeric or date.
+- **DateFormat** - Gets and sets the format of the date value.
+- **IgnoreArrayTitle** - Indicates whether to ignore the title if the property of the object is an array.
+- **IgnoreNull** - Indicates whether the null value should be ignored or not.
+- **IgnoreObjectTitle** - Indicates whether to ignore the title if the property of the object is an object.
+- **NumberFormat** - Gets and sets the format of the numeric value.
+- **TitleStyle** - Gets and sets the style of the title.
+
+The sample code given below demonstrates the use of the <a href="https://reference.aspose.com/cells/net/aspose.cells.utility/jsonutility" target="_blank" rel="nofollow noopener noreferrer">**JsonUtility**</a> and <a href="https://reference.aspose.com/cells/net/aspose.cells.utility/jsonlayoutoptions" target="_blank" rel="nofollow noopener noreferrer">**JsonLayoutOptions**</a> classes to import JSON data.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+// Instantiating a Workbook object
+Workbook workbook = new Workbook();
+Worksheet worksheet = workbook.Worksheets[0];
+
+// Read File
+string jsonInput = File.ReadAllText(dataDir + "Test.json");
+
+// Set Styles
+CellsFactory factory = new CellsFactory();
+Style style = factory.CreateStyle();
+style.HorizontalAlignment = TextAlignmentType.Center;
+style.Font.Color = System.Drawing.Color.BlueViolet;
+style.Font.IsBold = true;
+
+// Set JsonLayoutOptions
+JsonLayoutOptions options = new JsonLayoutOptions();
+options.TitleStyle = style;
+options.ArrayAsTable = true;
+
+// Import JSON Data
+JsonUtility.ImportData(jsonInput, worksheet.Cells, 0, 0, options);
+
+// Save Excel file
+workbook.Save(dataDir + "ImportingFromJson.out.xlsx");
+```
+
+## Advanced Topics {#advanced-topics}
+
+- [Specify Formula Fields while Importing Data to Worksheet](/net/cells/specify-formula-fields-while-importing-data-to-worksheet/)
+- [Shift First Row down when inserting Cells Data Table Rows](/net/cells/shift-first-row-down-when-inserting-cells-data-table-rows/)

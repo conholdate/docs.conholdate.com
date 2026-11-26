@@ -1,0 +1,144 @@
+---
+title: "Using ICustomFunction Feature"
+sidebar_label: "Using ICustomFunction Feature"
+sidebar_key: "net-cells-how-to-calculate-custom-functions"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/how-to-calculate-custom-functions.html"
+source_commit: ""
+source_sha256: "df5727febc7dd5c2098a7be73b0e4bd0ad79bfe204da7bf2ae37dc2b9b9aa613"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/how-to-calculate-custom-functions/"
+source_snapshot_sha256: "2ae54bda94725080455f435a126e1b4bb31e0f8d34763b5dfe44da3633714093"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+This article provides a detailed understanding of how to use the ICustomFunction feature to implement custom functions with Aspose.Cells APIs.
+
+The ICustomFunction interface allows you to add custom formula calculation functions to extend the Aspose.Cells core calculation engine in order to meet certain requirements. This feature is useful to define custom (user‑defined) functions in a template file or in code where the custom function can be implemented and evaluated using Aspose.Cells APIs like any other default Microsoft Excel function.
+
+Please note, this interface has been replaced by <a href="https://reference.aspose.com/cells/net/aspose.cells/abstractcalculationengine" target="_blank" rel="nofollow noopener noreferrer">**AbstractCalculationEngine**</a> and will be removed in future. Some technical articles/examples about the new API: [here](/net/cells/implement-custom-calculation-engine-to-extend-the-default-calculation-engine-of-aspose-cells/) and [here](/net/cells/returning-a-range-of-values-using-abstractcalculationengine/)
+:::
+
+## Creating and Evaluating a User-defined Function {#creating-and-evaluating-a-user-defined-function}
+
+This article demonstrates the implementation of the ICustomFunction interface to write a custom function and use it in the spreadsheet to get the results. We will define a custom function named **MyFunc** which will accept 2 parameters with the following details.
+
+- 1st parameter refers to a single cell
+- 2nd parameter refers to a range of cells
+
+The custom function will add all the values from the cell range specified as the 2nd parameter and divide the result by the value in the 1st parameter.
+
+Here is how we have implemented the `CalculateCustomFunction` method.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+public class CustomFunction : ICustomFunction
+{
+    public object CalculateCustomFunction(string functionName, System.Collections.ArrayList paramsList, System.Collections.ArrayList contextObjects)
+    {
+        decimal total = 0M;
+        try
+        {
+            // Get value of first parameter
+            decimal firstParamB1 = System.Convert.ToDecimal(paramsList[0]);
+
+            // Get value of second parameter
+            Array secondParamC1C5 = (Array)(paramsList[1]);
+
+            // get every item value of second parameter
+            foreach (object[] value in secondParamC1C5)
+            {
+                total += System.Convert.ToDecimal(value[0]);
+            }
+
+            total = total / firstParamB1;
+        }
+        catch
+        {
+
+        }
+
+        // Return result of the function
+        return total;
+    }
+}
+```
+
+Here is how to use the newly defined function in a spreadsheet
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+// Open the workbook
+Workbook workbook = new Workbook();
+
+// Obtaining the reference of the first worksheet
+Worksheet worksheet = workbook.Worksheets[0];
+
+// Adding sample values to cells
+worksheet.Cells["B1"].PutValue(5);
+worksheet.Cells["C1"].PutValue(100);
+worksheet.Cells["C2"].PutValue(150);
+worksheet.Cells["C3"].PutValue(60);
+worksheet.Cells["C4"].PutValue(32);
+worksheet.Cells["C5"].PutValue(62);
+
+// Adding custom formula to Cell A1
+workbook.Worksheets[0].Cells["A1"].Formula = "=MyFunc(B1,C1:C5)";
+
+// Calcualting Formulas
+workbook.CalculateFormula(false, new CustomFunction());
+
+// Assign resultant value to Cell A1
+workbook.Worksheets[0].Cells["A1"].PutValue(workbook.Worksheets[0].Cells["A1"].Value);
+
+// Save the file
+workbook.Save(dataDir + "UsingICustomFunction_out.xls");
+```
+
+## Overview {#overview}
+
+The Aspose.Cells APIs just put the `ReferredArea` object into the `paramsList` when the corresponding parameter is a reference or its calculated result is a reference. If you need the reference itself, then you can use the `ReferredArea` directly. If you need to get the value of a single cell from the reference corresponding with the formula's position, you can use the `ReferredArea.GetValue(rowOffset, colOffset)` method. If you need a cell‑values array for the whole area, then you can use the `ReferredArea.GetValues` method.
+
+As the Aspose.Cells APIs give the `ReferredArea` in `paramsList`, the `ReferredAreaCollection` in `contextObjects` will not be needed anymore (in old versions it was not able to give a one‑to‑one map to the parameters of the custom function consistently); therefore it has been removed from `contextObjects`.
+
+```java
+ public object CalculateCustomFunction(string functionName, ArrayList paramsList, ArrayList contextObjects)
+{
+    ...
+    object o = paramsList[i];
+    if(o is ReferredArea) // fetch data from reference
+    {
+        ReferredArea ra = (ReferredArea)o;
+        if(ra.IsArea)
+        {
+            o = ra.GetValues();
+        }
+        else
+        {
+            o = ra.GetValue(0, 0);
+        }
+    }
+    if (o is Array)
+    {
+        ...
+    }
+    else if...
+    ...
+}
+```

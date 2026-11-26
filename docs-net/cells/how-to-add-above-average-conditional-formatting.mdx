@@ -1,0 +1,163 @@
+---
+title: "How to Add Above Average Conditional Formatting"
+sidebar_label: "How to Add Above Average Conditional Formatting"
+sidebar_key: "net-cells-how-to-add-above-average-conditional-formatting"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/how-to-add-above-average-conditional-formatting.html"
+source_commit: ""
+source_sha256: "6847eeca3b746b3683da30a13ca53ec6ff749b212d7804d759f8a46d67a1c042"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/how-to-add-above-average-conditional-formatting/"
+source_snapshot_sha256: "1e5193072cc3be723216f431e6d272e0ce7674184b9140ad6037bc9e4d957447"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Possible Usage Scenarios {#possible-usage-scenarios}
+
+Using Above Average Conditional Formatting in tools like Microsoft Excel or Google Sheets is a quick and visual way to highlight data that stands out-specifically, values that are higher than the average in a range. Here's why you might use it:
+
+1. **Spot Trends Quickly:** It helps you instantly identify high‑performing values without manually calculating averages or scanning numbers.
+2. **Simplify Data Analysis:** You don't need to calculate or input any formulas-it's an automatic way to apply logic‑based formatting, saving time.
+3. **Enhance Visual Appeal:** Color‑coding helps make your spreadsheet easier to read and more visually engaging, especially during presentations.
+4. **Supports Decision Making:** Quickly identifying values above average can drive actions, such as rewarding high performers or investigating why certain products are outperforming others.
+
+## How to Add Above Average Conditional Formatting Using Excel {#how-to-add-above-average-conditional-formatting-using-excel}
+
+To add Above Average conditional formatting in Excel, follow these steps:
+
+1. Select the range of cells you want to apply the formatting to. For example: `A1:A20`.
+2. Go to the **Home** tab on the ribbon.
+3. Click **Conditional Formatting** in the **Styles** group.
+4. Hover over **Top/Bottom Rules**.
+5. Click **Above Average…**
+6. In the dialog box that appears, it will automatically detect "Format cells that are ABOVE average." You can change the formatting style by clicking the drop‑down next to **with** (e.g., choose a color fill or custom format).
+7. Click **OK**. All cells in your selected range that are above the average of that range will be highlighted.
+
+## How to Add Above Average Conditional Formatting Using Aspose.Cells for .NET {#how-to-add-above-average-conditional-formatting-using-asposecells-for-net}
+
+Aspose.Cells fully supports the conditional formatting provided by Microsoft Excel 2007 and later versions in XLSX format on cells at runtime. This example demonstrates an exercise for Above Average conditional formatting with different sets of attributes.
+
+```csharp
+private void TestAboveAverage()
+{
+    // Instantiate a workbook object
+    Workbook book = new Workbook();
+    // Create a worksheet object and get the first worksheet
+    Worksheet _sheet = book.Worksheets[0];
+
+    AddAboveAverage(_sheet);
+    AddAboveAverage2(_sheet);
+    AddAboveAverage3(_sheet);
+
+    book.Save(filePath + "AboveAverage.xlsx");
+}
+// This method implements the AboveAverage conditional formatting type.
+private void AddAboveAverage(Worksheet _sheet)
+{            
+
+    FormatConditionCollection conds = GetFormatCondition("A11:C12", Color.Tomato, _sheet);
+    int idx = conds.AddCondition(FormatConditionType.AboveAverage);
+    FormatCondition cond = conds[idx];
+    cond.Style.BackgroundColor = Color.Pink;
+    cond.Style.Pattern = BackgroundType.Solid;
+}
+// This method implements an AboveAverage conditional formatting type with some custom attributes.
+private void AddAboveAverage2(Worksheet _sheet)
+{
+    FormatConditionCollection conds = GetFormatCondition("A13:C14", Color.Empty, _sheet);
+    int idx = conds.AddCondition(FormatConditionType.AboveAverage);
+    FormatCondition cond = conds[idx];
+    cond.AboveAverage.IsAboveAverage = false;
+    cond.AboveAverage.IsEqualAverage = true;
+    cond.Style.BackgroundColor = Color.Pink;
+    cond.Style.Pattern = BackgroundType.Solid;
+}
+// This method implements an AboveAverage conditional formatting type with some custom attributes.
+private void AddAboveAverage3(Worksheet _sheet)
+{
+    FormatConditionCollection conds = GetFormatCondition("A15:C16", Color.Empty, _sheet);
+    int idx = conds.AddCondition(FormatConditionType.AboveAverage);
+    FormatCondition cond = conds[idx];
+    cond.AboveAverage.IsAboveAverage = false;
+    cond.AboveAverage.IsEqualAverage = true;
+    cond.AboveAverage.StdDev = 3;
+    cond.Style.BackgroundColor = Color.Pink;
+    cond.Style.Pattern = BackgroundType.Solid;
+}
+
+// This method adds formatted conditions.
+private FormatConditionCollection GetFormatCondition(string cellAreaName, Color color, Worksheet _sheet)
+{
+    // Adds an empty conditional formattings
+    int index = _sheet.ConditionalFormattings.Add();
+    // Get the formatted conditions
+    FormatConditionCollection formatConditions = _sheet.ConditionalFormattings[index];
+    // Get the cell area calling the custom GetCellAreaByName method
+    CellArea area = GetCellAreaByName(cellAreaName);
+    // Add the formatted conditions cell area.
+    formatConditions.AddArea(area);
+    // Call the custom FillCell method
+    FillCell(cellAreaName, color, _sheet);
+    // Return the formatted conditions
+    return formatConditions;
+}
+
+// This method specifies the cell shading color for the conditional formattings cellarea range.
+private void FillCell(string cellAreaName, Color color, Worksheet _sheet)
+{
+    CellArea area = GetCellAreaByName(cellAreaName);
+    int k = 0;
+    for (int i = area.StartColumn; i <= area.EndColumn; i++)
+    {
+        for (int j = area.StartRow; j <= area.EndRow; j++)
+        {
+            Cell c = _sheet.Cells[j, i];
+            if (!color.IsEmpty)
+            {
+                Style s = c.GetStyle();
+                s.ForegroundColor = color;
+                s.Pattern = BackgroundType.Solid;
+                c.SetStyle(s);
+            }
+            // Set some random values to the cells in the cellarea range
+            int value = j + i + k;
+            c.PutValue(value);
+            k++;
+        }
+    }
+
+}
+// This method specifies the CellArea range (start row, start col, end row, end col etc.)
+// For the conditional formatting
+internal static CellArea GetCellAreaByName(string s)
+{
+    CellArea area = new CellArea();
+    string[] strCellRange = s.Replace("$", "").Split(':');
+    int column;
+    CellsHelper.CellNameToIndex(strCellRange[0], out area.StartRow, out column);
+    area.StartColumn = column;
+    if (strCellRange.Length == 1)
+    {
+        area.EndRow = area.StartRow;
+        area.EndColumn = area.StartColumn;
+    }
+    else
+    {
+        CellsHelper.CellNameToIndex(strCellRange[1], out area.EndRow, out column);
+        area.EndColumn = column;
+    }
+    return area;
+}
+```

@@ -1,0 +1,112 @@
+---
+title: "Reading Cell Values in Multiple Threads Simultaneously"
+sidebar_label: "Reading Cell Values in Multiple Threads Simultaneously"
+sidebar_key: "net-cells-reading-cell-values-in-multiple-threads-simultaneously"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/reading-cell-values-in-multiple-threads-simultaneously.html"
+source_commit: ""
+source_sha256: "fb5520168aa59e58ff77d6e00be5badfe7bb6bb7ae059a29f43929676828bef2"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/reading-cell-values-in-multiple-threads-simultaneously/"
+source_snapshot_sha256: "fda08fdabfb965d66dd5c903d4bb437b9ef769f86d10e6a3e9d5afe6e1a92e6b"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+Needing to read cell values in multiple threads simultaneously is a common requirement. This article explains how to use Aspose.Cells for this purpose.
+:::
+
+To read cell values in more than one thread simultaneously, set <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/properties/multithreadreading" target="_blank" rel="nofollow noopener noreferrer">**Worksheet.Cells.MultiThreadReading**</a> to **true**. If you do not, you might get incorrect cell values.
+
+The following code:
+
+1. Creates a workbook.
+2. Adds a worksheet.
+3. Populates the worksheet with string values.
+4. It then creates two threads that simultaneously read values from random cells.\
+   If the values read are correct, nothing happens. If the values read are incorrect, a message is displayed.
+
+If you comment this line:
+
+```csharp
+testWorkbook.Worksheets[0].Cells.MultiThreadReading = true;
+```
+
+then the following message is displayed:
+
+```csharp
+if (s != "R" + row + "C" + col)
+{
+    MessageBox.Show("This message box will show up when cell values read are incorrect.");
+}
+```
+
+Otherwise, the program runs without showing any message, which means that all values read from the cells are correct.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+public static void Main()
+{
+    // The path to the documents directory.
+    string dataDir = "./";
+}
+
+public static Workbook testWorkbook;
+
+public static void ThreadLoop()
+{
+    Random random = new Random();
+    while (Thread.CurrentThread.IsAlive)
+    {
+        try
+        {
+            int row = random.Next(0, 10000);
+            int col = random.Next(0, 100);
+            string s = testWorkbook.Worksheets[0].Cells[row, col].StringValue;
+            if (s != "R" + row + "C" + col)
+            {
+                Console.WriteLine("This message will show up when cells read values are incorrect.");
+            }
+        }
+        catch { }
+    }
+}
+
+public static void TestMultiThreadingRead()
+{
+    testWorkbook = new Workbook();
+    testWorkbook.Worksheets.Clear();
+    testWorkbook.Worksheets.Add("Sheet1");
+
+    for (var row = 0; row < 10000; row++)
+        for (var col = 0; col < 100; col++)
+            testWorkbook.Worksheets[0].Cells[row, col].Value = "R" + row + "C" + col;
+
+    // Commenting this line will show a pop-up message
+    // testWorkbook.Worksheets[0].Cells.MultiThreadReading = true;
+
+    Thread myThread1;
+    myThread1 = new Thread(new ThreadStart(ThreadLoop));
+    myThread1.Start();
+
+    Thread myThread2;
+    myThread2 = new Thread(new ThreadStart(ThreadLoop));
+    myThread2.Start();
+
+    System.Threading.Thread.Sleep(5 * 1000);
+    myThread1.Abort();
+    myThread2.Abort();
+}
+```

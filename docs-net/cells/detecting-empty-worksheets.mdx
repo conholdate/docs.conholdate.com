@@ -1,0 +1,77 @@
+---
+title: "Detecting Empty Worksheets"
+sidebar_label: "Detecting Empty Worksheets"
+sidebar_key: "net-cells-detecting-empty-worksheets"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/detecting-empty-worksheets.html"
+source_commit: ""
+source_sha256: "a1bc56cdf0ba797d8834dd91e1ef7d161ab093b1e5225369d9d3ea6b3696db56"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/detecting-empty-worksheets/"
+source_snapshot_sha256: "ec92db6b26e818471104da61b241f22ac200f4430b1218599b19bbff08138ac0"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Check for Populated Cells {#check-for-populated-cells}
+
+Worksheets can have one or more cells populated with values where a value can be simple (text, numeric, date/time) or a formula or a formula‑based value. In such a case, it is easy to detect if a given worksheet is empty or not. All we have to check is the <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/properties/maxdatarow" target="_blank" rel="nofollow noopener noreferrer">**Cells.MaxDataRow**</a> or <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/properties/maxdatacolumn" target="_blank" rel="nofollow noopener noreferrer">**Cells.MaxDataColumn**</a> properties. If the aforementioned properties return zero or positive values, that means one or more cells have been populated; however, if any of these properties return **-1**, that indicates that no cells have been populated in the given worksheet.
+
+:::info
+The rows and columns collections have zero‑based indices; therefore, a cell at row 0 and column 0 means the first cell in the worksheet, which is **A1**.
+:::
+
+## Check for Empty Initialized Cells {#check-for-empty-initialized-cells}
+
+All cells which have values are automatically initialized, however, there is a possibility that a worksheet has cells with only formatting applied. In such a scenario, the <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/properties/maxdatarow" target="_blank" rel="nofollow noopener noreferrer">**Cells.MaxDataRow**</a> or <a href="https://reference.aspose.com/cells/net/aspose.cells/cells/properties/maxdatacolumn" target="_blank" rel="nofollow noopener noreferrer">**Cells.MaxDataColumn**</a> properties will return **-1**, indicating the absence of any populated values. However, initialized cells that contain only formatting cannot be detected using this approach. In order to check if a worksheet has initialized cells (even if they are empty), it is advised to use the `IEnumerator.MoveNext` method on the enumerator acquired from the <a href="https://reference.aspose.com/cells/net/aspose.cells/cells" target="_blank" rel="nofollow noopener noreferrer">**Cells**</a> collection. If the `IEnumerator.MoveNext` method returns **true**, that means there is at least one initialized cell in the given worksheet.
+
+## Check for Shapes {#check-for-shapes}
+
+It is possible that a given worksheet does not have any populated cells; however, it could contain shapes and objects such as controls, charts, images, and so on. If we need to check whether a worksheet contains any shapes, we can inspect the <a href="https://reference.aspose.com/cells/net/aspose.cells.drawing/shapecollection" target="_blank" rel="nofollow noopener noreferrer">**ShapeCollection.Count**</a> property. Any positive value indicates the presence of shape(s) in the worksheet.
+
+## Programming Sample {#programming-sample}
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+// Create an instance of Workbook and load an existing spreadsheet
+var book = new Workbook(dataDir + "sample.xlsx");
+// Loop over all worksheets in the workbook
+for (int i = 0; i < book.Worksheets.Count; i++)
+{
+    Worksheet sheet = book.Worksheets[i];
+    // Check if worksheet has populated cells
+    if (sheet.Cells.MaxDataRow != -1)
+    {
+        Console.WriteLine(sheet.Name + " is not empty because one or more cells are populated");
+    }
+    // Check if worksheet has shapes
+    else if (sheet.Shapes.Count > 0)
+    {
+        Console.WriteLine(sheet.Name + " is not empty because there are one or more shapes");
+    }
+    // Check if worksheet has empty initialized cells
+    else
+    {
+        Aspose.Cells.Range range = sheet.Cells.MaxDisplayRange;
+        var rangeIterator = range.GetEnumerator();
+        if (rangeIterator.MoveNext())
+        {
+            Console.WriteLine(sheet.Name + " is not empty because one or more cells are initialized");
+        }
+    }
+}
+```

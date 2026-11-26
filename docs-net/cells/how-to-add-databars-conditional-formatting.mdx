@@ -1,0 +1,145 @@
+---
+title: "How to Add Data Bars Conditional Formatting"
+sidebar_label: "How to Add Data Bars Conditional Formatting"
+sidebar_key: "net-cells-how-to-add-databars-conditional-formatting"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/how-to-add-databars-conditional-formatting.html"
+source_commit: ""
+source_sha256: "738036b7d1dada99096e1ac89ca4ca8344d3db7e6c64f97231be984740d5aad7"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/how-to-add-databars-conditional-formatting/"
+source_snapshot_sha256: "b43ed39936373dc606caff864ac0a8c6cc30921ca76bf8acd1705c06ab02b72f"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Possible Usage Scenarios {#possible-usage-scenarios}
+
+Using Data Bars in conditional formatting is a powerful (and visual!) way to understand your data at a glance.
+
+1. Visual Comparison of Values: Data bars turn numbers into horizontal bars, making it super easy to compare values side by side - like a mini bar chart inside your cells!
+2. Immediate Pattern Recognition: You can instantly see highs, lows, and outliers without sorting or scanning numbers.
+3. Better Readability: Especially useful in long tables - it reduces cognitive load and helps you grasp key trends quickly.
+4. Dynamic & Real-Time: As values change, the bars update automatically - great for tracking live metrics, progress, or KPIs.
+5. Professional-Looking Dashboards: Adds a clean, modern, and polished look to reports or dashboards.
+
+## How to Add Data Bars Conditional Formatting Using Excel {#how-to-add-data-bars-conditional-formatting-using-excel}
+
+To add Data Bars conditional formatting in Excel, here's how you can do it step by step:
+
+1. Select your data range, for example: C2:C20 - this could be sales, scores, or progress values.
+2. Go to the Home tab on the ribbon.
+3. Click **Conditional Formatting** in the Styles group.
+4. Hover over **Data Bars**.
+5. Choose a style: Gradient Fill (bars fade from left to right) and Solid Fill (bars have a solid color).
+6. Click the style you like - and you're done!
+
+## How to Add Data Bars Conditional Formatting Using Aspose.Cells for .NET {#how-to-add-data-bars-conditional-formatting-using-asposecells-for-net}
+
+Aspose.Cells fully supports the conditional formatting provided by Microsoft Excel 2007 and later versions in XLSX format on cells at runtime. This example demonstrates an example of DataBars conditional formatting with different sets of attributes.
+
+```csharp
+private void TestDataBar()
+{
+    // Instantiate a workbook object
+    Workbook book = new Workbook();
+    // Create a worksheet object and get the first worksheet
+    Worksheet _sheet = book.Worksheets[0];
+    AddDataBar1(_sheet);
+    AddDataBar2(_sheet);
+    book.Save(filePath + "DataBar.xlsx");
+}
+// This method implements the DataBars conditional formatting type with Percentile attribute.
+private void AddDataBar2(Worksheet _sheet)
+{            
+    FormatConditionCollection conds = GetFormatCondition("E3:G4", Color.LightGreen, _sheet);
+    int idx = conds.AddCondition(FormatConditionType.DataBar);
+    FormatCondition cond = conds[idx];
+    cond.DataBar.Color = Color.Orange;
+    cond.DataBar.MinCfvo.Type = FormatConditionValueType.Percentile;
+    cond.DataBar.MinCfvo.Value = 30.78;
+    cond.DataBar.ShowValue = false;
+}
+// This method implements the DataBars conditional formatting type.
+private void AddDataBar1(Worksheet _sheet)
+{
+    FormatConditionCollection conds = GetFormatCondition("E1:G2", Color.YellowGreen, _sheet);
+    int idx = conds.AddCondition(FormatConditionType.DataBar);
+    FormatCondition cond = conds[idx];
+}
+
+// This method adds formatted conditions.
+private FormatConditionCollection GetFormatCondition(string cellAreaName, Color color, Worksheet _sheet)
+{
+    // Adds an empty conditional formattings
+    int index = _sheet.ConditionalFormattings.Add();
+    // Get the formatted conditions
+    FormatConditionCollection formatConditions = _sheet.ConditionalFormattings[index];
+    // Get the cell area calling the custom GetCellAreaByName method
+    CellArea area = GetCellAreaByName(cellAreaName);
+    // Add the formatted conditions cell area.
+    formatConditions.AddArea(area);
+    // Call the custom FillCell method
+    FillCell(cellAreaName, color, _sheet);
+    // Return the formatted conditions
+    return formatConditions;
+}
+
+// This method specifies the cell shading color for the conditional formattings cellarea range.
+private void FillCell(string cellAreaName, Color color, Worksheet _sheet)
+{
+    CellArea area = GetCellAreaByName(cellAreaName);
+    int k = 0;
+    for (int i = area.StartColumn; i <= area.EndColumn; i++)
+    {
+        for (int j = area.StartRow; j <= area.EndRow; j++)
+        {
+            Cell c = _sheet.Cells[j, i];
+            if (!color.IsEmpty)
+            {
+                Style s = c.GetStyle();
+                s.ForegroundColor = color;
+                s.Pattern = BackgroundType.Solid;
+                c.SetStyle(s);
+            }
+            // Set some random values to the cells in the cellarea range
+            int value = j + i + k;
+            c.PutValue(value);
+            k++;
+        }
+    }
+
+}
+// This method specifies the CellArea range (start row, start col, end row, end col etc.)
+// For the conditional formatting
+internal static CellArea GetCellAreaByName(string s)
+{
+    CellArea area = new CellArea();
+    string[] strCellRange = s.Replace("$", "").Split(':');
+    int column;
+    CellsHelper.CellNameToIndex(strCellRange[0], out area.StartRow, out column);
+    area.StartColumn = column;
+    if (strCellRange.Length == 1)
+    {
+        area.EndRow = area.StartRow;
+        area.EndColumn = area.StartColumn;
+    }
+    else
+    {
+        CellsHelper.CellNameToIndex(strCellRange[1], out area.EndRow, out column);
+        area.EndColumn = column;
+    }
+    return area;
+}
+```

@@ -1,0 +1,249 @@
+---
+title: "Using LightCells API"
+sidebar_label: "Using LightCells API"
+sidebar_key: "net-cells-using-lightcells-api"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/using-lightcells-api.html"
+source_commit: ""
+source_sha256: "5e5c4b84d550feeb4308432d0a9d545a98f39449cdb320b35b29833cbf2969c0"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/using-lightcells-api/"
+source_snapshot_sha256: "726520078c7f20c7e9328188145d770ddec31b7abbfece66e5143007063fc940"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+Sometimes you need to read and write large Microsoft Excel files with a huge amount of data or content in the worksheet. The LightCells API is useful for creating huge Excel spreadsheets: with it, you need less memory and get better performance and efficiency.
+:::
+
+## Event Driven Architecture {#event-driven-architecture}
+
+Aspose.Cells provides the LightCells API, mainly designed to manipulate cell data one by one without building a complete data model block (using the Cell collection, etc.) into memory. It works in an event‑driven mode.
+
+To save workbooks, provide the cell content cell by cell when saving, and the component saves it directly to the output file.
+
+When reading template files, the component parses every cell and provides its value one by one.
+
+In both procedures, one Cell object is processed and then discarded; the Workbook object does not hold the collection. In this mode, therefore, memory is saved when importing and exporting Microsoft Excel files that have a large data set that would otherwise use a lot of memory.
+
+Even though the LightCells API processes the cells in the same way for XLSX and XLS files (it does not actually load all cells in memory but processes one cell and then discards it), it saves memory more effectively for XLSX files than XLS files because of the different data models and structures of the two formats.
+
+However, **for XLS files**, to save more memory, developers can specify a temporary location for saving temporary data generated during the Save process. Commonly, **using LightCells API to save an XLSX file may save 50% or more memory** than using the common way, **saving XLS may save about 20‑40% memory**.
+
+## Writing a Large Excel File {#writing-a-large-excel-file}
+
+Aspose.Cells **provides** an interface, LightCellsDataProvider, that needs to be implemented in your program. The interface represents a data provider for saving large spreadsheet files in light‑weight mode.
+
+When saving a workbook in this mode, StartSheet(int) is checked when saving every worksheet in the workbook. For one sheet, if StartSheet(int) is true, then all the data and properties of rows and cells of this sheet to be saved **are** provided by this implementation. First, NextRow() is called to get the next row index to be saved. If a valid row index is returned (the row index must be in ascending order for the rows to be saved), then a Row object representing this row is provided **to the implementation to set its properties via** StartRow(Row).
+
+For one row, NextCell() is checked first. If a valid column index is returned (the column index must be in ascending order for all cells of one row to be saved), then a Cell object representing that cell is provided **to the implementation to set its data and properties via** StartCell(Cell). After the data of the cell is set, the cell is saved directly to the generated spreadsheet file and the next cell is checked and processed.
+
+### Writing a Large Excel File: Example {#writing-a-large-excel-file-example}
+
+Please see the following sample code to see the working of the LightCells API. Add, remove, or update the code segments according to your needs.
+
+The program creates a huge file containing **10,000 (10,000 × 30 matrix) records** in a worksheet and fills them with dummy data. You can specify your own matrix by changing the `rowsCount` and `colsCount` variables in the `Main()` method.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+public class WriteUsingLightCellsAPI
+{
+    public static void Run()
+    {
+        // The path to the documents directory.
+        string dataDir = "./";
+
+        // Specify your desired matrix
+        int rowsCount = 10000;
+        int colsCount = 30;
+
+        var workbook = new Workbook();
+        var ooxmlSaveOptions = new OoxmlSaveOptions();
+
+        ooxmlSaveOptions.LightCellsDataProvider = new TestDataProvider(workbook, rowsCount, colsCount);
+
+        workbook.Save(dataDir + "output.out.xlsx", ooxmlSaveOptions);
+    }
+}
+
+class TestDataProvider : LightCellsDataProvider
+{
+    private int _row = -1;
+    private int _column = -1;
+
+    private int maxRows;
+    private int maxColumns;
+
+    private Workbook _workbook;
+    public TestDataProvider(Workbook workbook, int maxRows, int maxColumns)
+    {
+        this._workbook = workbook;
+        this.maxRows = maxRows;
+        this.maxColumns = maxColumns;
+    }
+
+    #region LightCellsDataProvider Members
+    public bool IsGatherString()
+    {
+        return false;
+    }
+
+    public int NextCell()
+    {
+        ++_column;
+        if (_column < this.maxColumns)
+            return _column;
+        else
+        {
+            _column = -1;
+            return -1;
+        }
+    }
+    public int NextRow()
+    {
+        ++_row;
+        if (_row < this.maxRows)
+        {
+            _column = -1;
+            return _row;
+        }
+        else
+            return -1;
+    }
+
+    public void StartCell(Cell cell)
+    {
+        cell.PutValue(_row + _column);
+        if (_row == 1)
+        {
+        }
+        else
+        {
+            cell.Formula = "=Rand() + A2";
+        }
+    }
+
+    public void StartRow(Row row)
+    {
+    }
+
+    public bool StartSheet(int sheetIndex)
+    {
+        if (sheetIndex == 0)
+        {
+            return true;
+        }
+        else
+            return false;
+    }
+    #endregion
+}
+```
+
+## Reading Large Excel Files {#reading-large-excel-files}
+
+Aspose.Cells provides an interface, LightCellsDataHandler, that needs to be implemented in your program. The interface represents a data provider for reading large spreadsheet files in light‑weight mode.
+
+When reading a workbook in this mode, StartSheet is checked when reading every worksheet in the workbook. For a sheet, if StartSheet returns true, then all the data and properties of the cells in rows and columns of the sheet are checked and processed by the implementation of this interface. For every row, StartRow is called to check whether it needs to be processed. If a row needs to be processed, its properties are read first and the developer can access its properties with ProcessRow. If the row's cells also need to be processed, then ProcessRow should return true and then StartCell is called for every existing cell in the row to check whether one cell needs to be processed. If one cell needs to be processed, then ProcessCell is called to process the cell by the implementation of this interface.
+
+### Reading Large Excel Files: Example {#reading-large-excel-files-example}
+
+Please see the following sample code to see the working of the LightCells API. Add, remove, or update the code segments according to your needs.
+
+The program reads a huge file with millions of records in a worksheet. It takes a little time to read each sheet in the workbook. The sample code reads the file and retrieves the total number of cells, the string count, and the formula count in each worksheet.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+public class ReadUsingLightCellsApi
+{
+    public static void Run()
+    {
+        // The path to the documents directory.
+        string dataDir = "./";
+
+        LoadOptions opts = new LoadOptions();
+        LightCellsDataHandlerVisitCells v = new LightCellsDataHandlerVisitCells();
+        opts.LightCellsDataHandler = v;
+        Workbook wb = new Workbook(dataDir + "LargeBook1.xlsx", opts);
+        int sheetCount = wb.Worksheets.Count;
+        Console.WriteLine("Total sheets: " + sheetCount + ", cells: " + v.CellCount
+            + ", strings: " + v.StringCount + ", formulas: " + v.FormulaCount);
+    }
+}
+
+class LightCellsDataHandlerVisitCells : LightCellsDataHandler
+{
+    private int cellCount;
+    private int formulaCount;
+    private int stringCount;
+
+    internal LightCellsDataHandlerVisitCells()
+    {
+        cellCount = 0;
+        formulaCount = 0;
+        stringCount = 0;
+    }
+
+    public int CellCount
+    {
+        get { return cellCount; }
+    }
+
+    public int FormulaCount
+    {
+        get { return formulaCount; }
+    }
+
+    public int StringCount
+    {
+        get { return stringCount; }
+    }
+
+    public bool StartSheet(Worksheet sheet)
+    {
+        Console.WriteLine("Processing sheet[" + sheet.Name + "]");
+        return true;
+    }
+
+    public bool StartRow(int rowIndex)
+    {
+        return true;
+    }
+
+    public bool ProcessRow(Row row)
+    {
+        return true;
+    }
+
+    public bool StartCell(int column)
+    {
+        return true;
+    }
+
+    public bool ProcessCell(Cell cell)
+    {
+        cellCount++;
+        if (cell.IsFormula)
+        {
+            formulaCount++;
+        }
+        else if (cell.Type == CellValueType.IsString)
+        {
+            stringCount++;
+        }
+        return false;
+    }
+}
+```

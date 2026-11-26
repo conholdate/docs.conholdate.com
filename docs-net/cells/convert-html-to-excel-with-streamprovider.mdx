@@ -1,0 +1,140 @@
+---
+title: "Load Html to Excel with StreamProvider"
+sidebar_label: "Load Html to Excel with StreamProvider"
+sidebar_key: "net-cells-convert-html-to-excel-with-streamprovider"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/convert-html-to-excel-with-streamprovider.html"
+source_commit: ""
+source_sha256: "f3161792221eb9b0fd07ce37aa6de1404d85941ba250e16c152e0a69aa737af0"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/convert-html-to-excel-with-streamprovider/"
+source_snapshot_sha256: "04f780ebc7d157c8d66047497fb654e270406439a299c1327a081c1dc6a682f8"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+When loading **HTML** files which contain external resources, we often face the following two issues:
+
+1. When the HTML stream is loaded, the images and external resources referenced by the HTML file cannot be obtained through relative paths.
+2. External resource paths referenced in HTML files need to be mapped.
+
+This article explains how to implement the **IStreamProvider** interface for setting the **HtmlLoadOptions.StreamProvider** property. By implementing this interface, you will be able to load external resources during loading HTML streams, even when these external resources are referenced relatively.
+:::
+
+This is the main code showing the usage of the **HtmlLoadOptions.StreamProvider** property
+
+```csharp
+internal class HtmlAttachedStreamProvider : Aspose.Cells.IStreamProvider
+{
+    internal static bool IsHRef(string picPath)
+    {
+        //This handles http://,https:// file:// and probably ftp://.
+        if (picPath.StartsWith("http://")
+            || picPath.StartsWith("https://")
+            || picPath.StartsWith("file://")
+            || picPath.StartsWith("ftp://"))
+        {
+            return true;
+        }
+        return false;
+    }
+    internal static Stream GetStreamFromHref(string href)
+    {
+        try
+        {
+            WebRequest request = WebRequest.Create(href);
+            WebResponse response = request.GetResponse();
+
+            // FIX: Do not specify capacity since the length of the response is sometimes not known.
+            MemoryStream dstStream = new MemoryStream();
+            using (Stream responseStream = response.GetResponseStream())
+            {
+                byte[] buf = new byte[4096];
+                while (true)
+                {
+                    int bytesRead = responseStream.Read(buf, 0, buf.Length);
+                    // Read returns 0 when reached end of stream. Checking for negative too to make it conceptually close to Java.
+                    if (bytesRead <= 0)
+                        break;
+                    else
+                        dstStream.Write(buf, 0, bytesRead);
+                }
+            }
+
+
+            dstStream.Position = 0;
+            return dstStream;
+        }
+        catch
+        {
+            //ignored
+        }
+        return null;
+
+    }
+    public void InitStream(StreamProviderOptions options)
+    {
+        string absolutePath = null;
+        switch (options.DefaultPath)
+        {
+            case "/Files/Image1.png":
+                absolutePath = @"D:/filetemp/G1.png";
+                break;
+             case "/Files/Image2.png":
+                absolutePath = @"D:/filetemp/E1.png";
+                break;
+            case "https://www.aspose.com/templates/aspose/img/products/cells/aspose_cells-for-net.svg":
+                absolutePath = @"D:/filetemp/F1.png";
+                break;
+            default:
+                break;
+
+        }
+        if(absolutePath == null)
+        {
+            if(IsHRef(options.DefaultPath))
+            {
+                options.Stream = GetStreamFromHref(options.DefaultPath);
+            }
+            else if(File.Exists(options.DefaultPath))
+            {
+                options.Stream = File.OpenRead(options.DefaultPath);
+            }
+            return;
+        }
+        options.Stream = File.OpenRead(absolutePath);
+
+    }
+
+    public void CloseStream(StreamProviderOptions options)
+    {
+        if(options.Stream != null)
+        {
+
+            options.Stream.Close();
+        }
+
+    }
+}
+
+static void Main(string[] args)
+{
+		HtmlAttachedStreamProvider attachedStreamProvider = new HtmlAttachedStreamProvider();
+		HtmlLoadOptions options = new HtmlLoadOptions();
+		options.StreamProvider = attachedStreamProvider;
+		var workbook = new Workbook(@"html1.html", options);
+		workbook.Save("dest.xlsx");
+}
+```

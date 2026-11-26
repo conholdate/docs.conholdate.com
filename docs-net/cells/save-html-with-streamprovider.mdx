@@ -1,0 +1,84 @@
+---
+title: "Save Html With StreamProvider"
+sidebar_label: "Save Html With StreamProvider"
+sidebar_key: "net-cells-save-html-with-streamprovider"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/save-html-with-streamprovider.html"
+source_commit: ""
+source_sha256: "71dac620d79f76dfda1763c56f3ff81d72556bfc8217081d37305a6120bf712a"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/save-html-with-streamprovider/"
+source_snapshot_sha256: "cd883044d46a4e7240276adb9c23817a05ae1d535873838ddee586009a0c0d04"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+When converting Excel files which contain images and shapes to HTML files, we often face the following two issues:
+
+1. Where should we save the images and shapes when saving an Excel file to an HTML stream?
+2. Replace the default path with the expected path.
+
+This article explains how to implement <a href="https://reference.aspose.com/cells/net/aspose.cells/istreamprovider" target="_blank" rel="nofollow noopener noreferrer">IStreamProvider</a> interface for setting the <a href="https://reference.aspose.com/cells/net/aspose.cells/htmlsaveoptions/properties/streamprovider" target="_blank" rel="nofollow noopener noreferrer">HtmlSaveOptions.StreamProvider</a> property. By implementing this interface, you will be able to save the created resources during HTML generation to your specific locations or memory streams.
+:::
+
+This is the main code showing the usage of the <a href="https://reference.aspose.com/cells/net/aspose.cells/htmlsaveoptions/properties/streamprovider" target="_blank" rel="nofollow noopener noreferrer">HtmlSaveOptions.StreamProvider</a> property
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+string outputDir = dataDir + @"out\";
+
+// Create workbook
+Workbook wb = new Workbook(dataDir + "sample.xlsx");
+
+HtmlSaveOptions options = new HtmlSaveOptions();
+options.StreamProvider = new ExportStreamProvider(outputDir);
+
+// Save into .html using HtmlSaveOptions
+wb.Save(outputDir + "output_out.html", options);
+```
+
+Here is the code for *ExportStreamProvider* class which implements <a href="https://reference.aspose.com/cells/net/aspose.cells/istreamprovider" target="_blank" rel="nofollow noopener noreferrer">IStreamProvider</a> interface used inside the above code.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+public class ExportStreamProvider : IStreamProvider
+{
+    private string outputDir;
+
+    public ExportStreamProvider(string dir)
+    {
+        outputDir = dir;
+    }
+
+    public void InitStream(StreamProviderOptions options)
+    {
+        string path = outputDir + Path.GetFileName(options.DefaultPath);
+        options.CustomPath = path;
+        Directory.CreateDirectory(Path.GetDirectoryName(path));
+        options.Stream = File.Create(path);
+    }
+
+    public void CloseStream(StreamProviderOptions options)
+    {
+        if (options != null && options.Stream != null)
+        {
+            options.Stream.Close();
+        }
+    }
+}
+```

@@ -1,0 +1,112 @@
+---
+title: "Implement a Custom Calculation Engine to Extend the Default Calculation Engine of Aspose.Cells"
+sidebar_label: "Implement a Custom Calculation Engine to Extend the Default Calculation Engine of Aspose.Cells"
+sidebar_key: "net-cells-implement-custom-calculation-engine-to-extend-the-default-calculation-engine-of-aspose-cells"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/implement-custom-calculation-engine-to-extend-the-default-calculation-engine-of-aspose-cells.html"
+source_commit: ""
+source_sha256: "d2fa17b1f0076fff8ac57d9d15a7111c634ad67f4e7bf311e54e5e99625874f5"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/implement-custom-calculation-engine-to-extend-the-default-calculation-engine-of-aspose-cells/"
+source_snapshot_sha256: "315f0bf524d3ae7dda2b8d5a085072cc3e75f53e8ef83831d26f1fb10780559b"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Implement Custom Calculation Engine {#implement-custom-calculation-engine}
+
+Aspose.Cells has a powerful calculation engine that can calculate almost all of the Microsoft Excel formulas. Nevertheless, it also allows you to extend the default calculation engine, which provides you greater power and flexibility.
+
+The following property and classes are used in implementing this feature.
+
+- <a href="https://reference.aspose.com/cells/net/aspose.cells/calculationoptions/properties/customengine" target="_blank" rel="nofollow noopener noreferrer">**CalculationOptions.CustomEngine**</a>
+- <a href="https://reference.aspose.com/cells/net/aspose.cells/abstractcalculationengine" target="_blank" rel="nofollow noopener noreferrer">**AbstractCalculationEngine**</a>
+- <a href="https://reference.aspose.com/cells/net/aspose.cells/calculationdata" target="_blank" rel="nofollow noopener noreferrer">**CalculationData**</a>
+
+The following code implements the custom calculation engine. It implements the interface <a href="https://reference.aspose.com/cells/net/aspose.cells/abstractcalculationengine" target="_blank" rel="nofollow noopener noreferrer">**AbstractCalculationEngine**</a>, which has a <a href="https://reference.aspose.com/cells/net/aspose.cells/abstractcalculationengine/methods/calculate" target="_blank" rel="nofollow noopener noreferrer">**Calculate(CalculationData data)**</a> method. This method is called for all of your formulas. Inside this method, we intercept the **TODAY** function and add one day to the system date. So if the current date is 27/07/2023, then the custom engine will calculate TODAY() as 28/07/2023.
+
+### Programming Sample {#programming-sample}
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// Create a new class derived from AbstractCalculationEngine
+class CustomEngine : AbstractCalculationEngine
+{
+    // Override the Calculate method with custom logic
+    public override void Calculate(CalculationData data)
+    {
+        // Check the forumla name and change the implementation
+        if (data.FunctionName.ToUpper() == "TODAY")
+        {
+            // Assign the CalculationData.CalculatedValue: add one day offset for the date
+            data.CalculatedValue = CellsHelper.GetDoubleFromDateTime(DateTime.Today, false) + 1.0;
+        }
+    }
+    public override bool ProcessBuiltInFunctions { get { return true; } }
+}
+
+class ImplementCustomCalculationEngine
+{
+    public static void Run()
+    {
+        // Create an instance of Workbook
+        Workbook workbook = new Workbook();
+
+        // Access first Worksheet from the collection
+        Worksheet sheet = workbook.Worksheets[0];
+
+        // Access Cell A1 and put a formula to sum values of B1 to B2
+        Cell a1 = sheet.Cells["A1"];
+        Style style = a1.GetStyle();
+        style.Number = 14;
+        a1.SetStyle(style);
+        
+        a1.Formula = "=TODAY()";
+
+        // Calculate all formulas in the Workbook 
+        workbook.CalculateFormula();
+
+        // The result of A1 should be 20 as per default calculation engine
+        Console.WriteLine("The value of A1 with default calculation engine: " + a1.StringValue);
+
+        // Create an instance of CustomEngine
+        CustomEngine engine = new CustomEngine();
+
+        // Create an instance of CalculationOptions
+        CalculationOptions opts = new CalculationOptions();
+
+        // Assign the CalculationOptions.CustomEngine property to the instance of CustomEngine
+        opts.CustomEngine = engine;
+
+        // Recalculate all formulas in Workbook using the custom calculation engine
+        workbook.CalculateFormula(opts);
+
+        // The result of A1 will be 50 as per custom calculation engine
+        Console.WriteLine("The value of A1 with custom calculation engine: " + a1.StringValue);
+
+        Console.WriteLine("Press any key to continue...");
+        Console.ReadKey();
+    }
+}
+```
+
+### Result {#result}
+
+Please check the console output of the above sample code; the value (date/time) of A1 with the custom engine should be one day later than the result without the custom engine.
+
+### Related Article {#related-article}
+
+:::info
+[Direct calculation of custom function without writing it in a worksheet](/net/cells/direct-calculation-of-custom-function-without-writing-it-in-a-worksheet/)
+:::

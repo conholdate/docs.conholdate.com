@@ -1,0 +1,80 @@
+---
+title: "Detecting Circular Reference"
+sidebar_label: "Detecting Circular Reference"
+sidebar_key: "net-cells-detecting-circular-reference"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/detecting-circular-reference.html"
+source_commit: ""
+source_sha256: "34f51572c9ac77364b9cdb97463e56efb60d059c47363d1ad1b4cf87ba0fe10d"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/detecting-circular-reference/"
+source_snapshot_sha256: "69cdc0479839953e01884a1bfea9c3f55d344366112ccb568eafab7c5b49f617"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Introduction {#introduction}
+
+Workbooks can contain circular references, and sometimes there is a need to detect whether circular references are present.
+
+## Concept behind detecting the circular reference {#concept-behind-detecting-the-circular-reference}
+
+Circular references can only be detected when the formula is calculated because the references of one formula often depend on the calculated results of other cells or formulas. Therefore, we provide new APIs for this requirement (to gather cells with circular references) in the process of formula calculation:
+
+<a href="https://reference.aspose.com/cells/net/aspose.cells/calculationcell" target="_blank" rel="nofollow noopener noreferrer">**CalculationCell**</a>: Represents the calculation of relevant data about one cell being calculated
+
+<a href="https://reference.aspose.com/cells/net/aspose.cells/abstractcalculationmonitor/methods/oncircular" target="_blank" rel="nofollow noopener noreferrer">**AbstractCalculationMonitor.OnCircular(IEnumerator circularCellsData)**</a>: will be invoked by the formula calculation engine when it encounters circular references; the elements in the enumerator are **CalculationCell** objects that represent all cells in a circular chain. The returned value indicates whether the formula engine should continue calculating those cells involved in the circular reference after this call.
+
+Users may gather those circular references in the implementation of the <a href="https://reference.aspose.com/cells/net/aspose.cells/abstractcalculationmonitor/methods/oncircular" target="_blank" rel="nofollow noopener noreferrer">**AbstractCalculationMonitor.OnCircular()**</a> method.
+
+The source sample file can be downloaded from the following link:
+
+<a href="https://docs.aspose.com/cells/net/detecting-circular-reference/77496332.xls" target="_blank" rel="nofollow noopener noreferrer">Circular Formulas.xls</a>
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+LoadOptions LoadOptions = new LoadOptions();
+Workbook objWB = new Workbook(sourceDir + "Circular Formulas.xls", LoadOptions);
+objWB.Settings.FormulaSettings.EnableIterativeCalculation = true;
+CalculationOptions copts = new CalculationOptions();
+CircularMonitor cm = new CircularMonitor();
+copts.CalculationMonitor = cm;
+objWB.CalculateFormula(copts);
+int lngCircularRef = cm.circulars.Count;
+Console.WriteLine("Circular References found - " + lngCircularRef);
+```
+
+The definition of the *CircularMonitor* class, which derives from the <a href="https://reference.aspose.com/cells/net/aspose.cells/abstractcalculationmonitor" target="_blank" rel="nofollow noopener noreferrer">**AbstractCalculationMonitor**</a> class, is as follows:
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+public class CircularMonitor : AbstractCalculationMonitor
+{
+    public ArrayList circulars = new ArrayList();
+    public ArrayList Circulars { get { return circulars; } }
+
+    public override bool OnCircular(IEnumerator circularCellsData)
+    {
+        CalculationCell cc = null;
+        ArrayList cur = new ArrayList();
+        while (circularCellsData.MoveNext())
+        {
+            cc = (CalculationCell)circularCellsData.Current;
+            cur.Add(cc.Worksheet.Name + "!" + CellsHelper.CellIndexToName(cc.CellRow, cc.CellColumn));
+        }
+        circulars.Add(cur);
+        return true;
+    }
+}
+```
