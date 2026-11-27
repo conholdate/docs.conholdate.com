@@ -1,0 +1,99 @@
+---
+title: "Replace tag with text in a textbox inside the worksheet"
+sidebar_label: "Replace tag with text in a textbox inside the worksheet"
+sidebar_key: "net-cells-replace-tag-with-text-in-a-textbox-inside-the-worksheet"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/replace-tag-with-text-in-a-textbox-inside-the-worksheet.html"
+source_commit: ""
+source_sha256: "8e137b502d960db37dbbd8ea05029106a06916079beeeab8d868be7fba56a20f"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/replace-tag-with-text-in-a-textbox-inside-the-worksheet/"
+source_snapshot_sha256: "7a760bff9e5431da1864aa05e8cc384b8d292be553afe141549bdd029a6bd84e"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Possible Usage Scenarios {#possible-usage-scenarios}
+
+Text boxes can have tags which can be replaced with some text at runtime to configure them according to requirements. Tags are labels enclosed in angle brackets `‘<’` and `‘>’`. There can be multiple tags within a single textbox.
+
+## Sample Code {#sample-code}
+
+The following sample code replaces tags TAG_1 and TAG_2 with some text, say 'ys' and '1'. A sample file for testing the code below can be downloaded from the following link:
+
+<a href="https://docs.aspose.com/cells/net/replace-tag-with-text-in-a-textbox-inside-the-worksheet/79527942.xlsx" target="_blank" rel="nofollow noopener noreferrer">sampleReplaceTagWithText.xlsx</a>
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+string sourceDir = "./";
+string outputDir = "./";
+Workbook wb = new Workbook(sourceDir + "sampleReplaceTagWithText.xlsx");
+string tag = "TAG_2$TAG_1";
+string replace = "1$ys";
+
+for (int i = 0; i < tag.Split('$').Length; i++)
+{
+    sheetReplace(wb, "<" + tag.Split('$')[i] + ">", replace.Split('$')[i]);
+}
+PdfSaveOptions opts = new PdfSaveOptions();
+
+wb.Save(outputDir + "outputReplaceTagWithText.pdf", opts);
+```
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+public static void sheetReplace(Workbook workbook, string sFind, string sReplace)
+{
+    string finding = sFind;
+
+    foreach (Worksheet sheet in workbook.Worksheets)
+    {
+        sheet.Replace(finding, sReplace);
+
+        for (int j = 0; j < 3; j++)
+        {
+
+            if (sheet.PageSetup.GetHeader(j) != null)
+
+                sheet.PageSetup.SetHeader(j, sheet.PageSetup.GetHeader(j).Replace(finding, sReplace));
+
+            if (sheet.PageSetup.GetFooter(j) != null)
+
+                sheet.PageSetup.SetFooter(j, sheet.PageSetup.GetFooter(j).Replace(finding, sReplace));
+
+        }
+
+    }
+
+    foreach (Worksheet sheet in workbook.Worksheets)
+    {
+
+        sFind = sFind.Replace("<", "&lt;");
+        sFind = sFind.Replace(">", "&gt;");
+
+        foreach (Aspose.Cells.Drawing.TextBox mytextbox in sheet.TextBoxes)
+        {
+
+
+            if (mytextbox.HtmlText != null)
+            {
+                if (mytextbox.HtmlText.IndexOf(sFind) >= 0)
+                {
+                    mytextbox.HtmlText = mytextbox.HtmlText.Replace(sFind, sReplace);
+                }
+            }
+        }
+    }
+}
+```

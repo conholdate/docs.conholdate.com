@@ -1,0 +1,145 @@
+---
+title: "Find Query Tables and List Objects related to External Data Connections"
+sidebar_label: "Find Query Tables and List Objects related to External Data Connections"
+sidebar_key: "net-cells-find-query-tables-and-list-objects-related-to-external-data-connections"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/find-query-tables-and-list-objects-related-to-external-data-connections.html"
+source_commit: ""
+source_sha256: "269dd9801a4533c31e5db497c46b91a5a44b4357baf831e6f9e88d8b0e242126"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/find-query-tables-and-list-objects-related-to-external-data-connections/"
+source_snapshot_sha256: "1bcede43563f1fe42316d5b15cf3463058db24d2ea8fd39e4ccbfe517dd6c7bc"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+Sometimes you need to find Query Tables and List Objects related to an External Data Connection. Query Tables are linked to an External Data Connection object with a connection ID, while List Objects are linked to a Query Table.
+:::
+
+## Find Query Tables and List Objects related to External Data Connections {#find-query-tables-and-list-objects-related-to-external-data-connections}
+
+The following sample code, together with a <a href="https://docs.aspose.com/cells/net/find-query-tables-and-list-objects-related-to-external-data-connections/5115493.xlsm" target="_blank" rel="nofollow noopener noreferrer">sample Excel file</a>, demonstrates how to find Query Tables and List Objects related to external data connections.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+// Load workbook object
+Workbook workbook = new Workbook(dataDir + "sample.xlsm");
+
+// Check all the connections inside the workbook
+for (int i = 0; i < workbook.DataConnections.Count; i++)
+{
+    Aspose.Cells.ExternalConnections.ExternalConnection externalConnection = workbook.DataConnections[i];
+    Console.WriteLine("connection: " + externalConnection.Name);
+    PrintTables(workbook, externalConnection);
+    Console.WriteLine();
+}
+
+Console.WriteLine("Press any key to continue...");
+Console.ReadKey();
+```
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+public static void PrintTables(Workbook workbook, Aspose.Cells.ExternalConnections.ExternalConnection ec)
+{
+    // Iterate all the worksheets
+    for (int j = 0; j < workbook.Worksheets.Count; j++)
+    {
+        Worksheet worksheet = workbook.Worksheets[j];
+
+        // Check all the query tables in a worksheet
+        for (int k = 0; k < worksheet.QueryTables.Count; k++)
+        {
+            Aspose.Cells.QueryTable qt = worksheet.QueryTables[k];
+
+            // Check if query table is related to this external connection
+            if (ec.Id == qt.ConnectionId
+                && qt.ConnectionId >= 0)
+            {
+                // Print the query table name and print its refersto range
+                Console.WriteLine("querytable " + qt.Name);
+                string n = qt.Name.Replace('+', '_').Replace('=', '_');
+                Name name = workbook.Worksheets.Names["'" + worksheet.Name + "'!" + n];
+                if (name != null)
+                {
+                    Range range = name.GetRange();
+                    if (range != null)
+                    {
+                        Console.WriteLine("refersto: " + range.RefersTo);
+                    }
+                }
+            }
+        }
+
+        // Iterate all the list objects in this worksheet
+        for (int k = 0; k < worksheet.ListObjects.Count; k++)
+        {
+            ListObject table = worksheet.ListObjects[k];
+
+            // Check the data source type if it is query table
+            if (table.DataSourceType == Aspose.Cells.Tables.TableDataSourceType.QueryTable)
+            {
+                // Access the query table related to list object
+                QueryTable qt = table.QueryTable;
+
+                // Check if query table is related to this external connection
+                if (ec.Id == qt.ConnectionId
+                && qt.ConnectionId >= 0)
+                {
+                    // Print the query table name and print its refersto range
+                    Console.WriteLine("querytable " + qt.Name);
+                    Console.WriteLine("Table " + table.DisplayName);
+                    Console.WriteLine("refersto: " + worksheet.Name + "!" + CellsHelper.CellIndexToName(table.StartRow, table.StartColumn) + ":" + CellsHelper.CellIndexToName(table.EndRow, table.EndColumn));
+                }
+            }
+        }
+    }
+}
+```
+
+The following is the console output of running the above sample codes with this <a href="https://docs.aspose.com/cells/net/find-query-tables-and-list-objects-related-to-external-data-connections/5115493.xlsm" target="_blank" rel="nofollow noopener noreferrer">sample Excel file</a>.
+
+```java
+ connection: AAPL Connection
+
+querytable hp?s=AAPL+Historical+Prices
+
+refersto: =Sheet1!$Q$1:$W$69
+
+connection: BOSL066360W7_SQLEXPRESS Test
+
+querytable BOSL066360W7_SQLEXPRESS Test
+
+Table Table_BOSL066360W7_SQLEXPRESS_Test
+
+refersto: Sheet1!A1:B3
+
+connection: BOSL066360W7_SQLEXPRESS Test1
+
+querytable BOSL066360W7_SQLEXPRESS Test_1
+
+Table Table_BOSL066360W7_SQLEXPRESS_Test_1
+
+refersto: Sheet1!D1:E2
+
+connection: UWTI Connection
+
+querytable hp?s=UWTI+Historical+Prices
+
+refersto: =Sheet1!$H$1:$N$69
+```

@@ -1,0 +1,100 @@
+---
+title: "Getting Notifications while Merging Data with Smart Markers"
+sidebar_label: "Getting Notifications while Merging Data with Smart Markers"
+sidebar_key: "net-cells-getting-notifications-while-merging-data-with-smart-markers"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/getting-notifications-while-merging-data-with-smart-markers.html"
+source_commit: ""
+source_sha256: "ebef3c5d944ec74ce3288c2cd71f72967e26b9a997fe0c2feadf7573a7b55091"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/getting-notifications-while-merging-data-with-smart-markers/"
+source_snapshot_sha256: "8cde8ec146a3438ae48566e013ac3bfdc4d70b7b775c32e86eb767fcefd6bb87"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "./_remote-markdown.css";
+
+:::info
+Aspose.Cells APIs provide the <a href="https://reference.aspose.com/cells/net/aspose.cells/workbookdesigner" target="_blank" rel="nofollow noopener noreferrer">WorkbookDesigner</a> class to **work with Smart Markers**, where the formatting and formulas are placed in the [designer spreadsheets](/net/cells/what-is-a-designer-spreadsheet/) and then processed with the **WorkbookDesigner** class to populate the data according to the specified Smart Markers. Sometimes, it may be required to receive notifications about the cell reference or the particular Smart Marker being processed. This can be achieved using the <a href="https://reference.aspose.com/cells/net/aspose.cells/workbookdesigner/properties/callback" target="_blank" rel="nofollow noopener noreferrer">WorkbookDesigner.CallBack</a> property and the <a href="https://reference.aspose.com/cells/net/aspose.cells/ismartmarkercallback" target="_blank" rel="nofollow noopener noreferrer">ISmartMarkerCallBack</a> interface introduced in Aspose.Cells for .NET 8.6.2.
+:::
+
+The following piece of code demonstrates the usage of the <a href="https://reference.aspose.com/cells/net/aspose.cells/ismartmarkercallback" target="_blank" rel="nofollow noopener noreferrer">ISmartMarkerCallBack</a> interface to define a new class that handles the **callback** for the <a href="https://reference.aspose.com/cells/net/aspose.cells/workbookdesigner/methods/process" target="_blank" rel="nofollow noopener noreferrer">WorkbookDesigner.Process</a> method.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+class SmartMarkerCallBack: ISmartMarkerCallBack
+{
+    Workbook workbook;
+
+    public SmartMarkerCallBack(Workbook workbook) {
+        this.workbook = workbook;
+    }
+
+    public void Process(int sheetIndex, int rowIndex, int colIndex, String tableName, String columnName) {
+        Console.WriteLine("Processing Cell: " + workbook.Worksheets[sheetIndex].Name + "!" + CellsHelper.CellIndexToName(rowIndex, colIndex));
+        Console.WriteLine("Processing Marker: " + tableName + "." + columnName);
+    }
+}
+```
+
+The rest of the process includes loading the designer spreadsheet containing the Smart Markers with **WorkbookDesigner** and processing it by setting the data source. In order to keep the example simple, we used a predefined designer spreadsheet containing only two Smart Markers, as shown in the snapshot below, where the data source is created dynamically to merge the data according to the specified Smart Markers.
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+![Getting notifications while merging data with Smart Markers](/net/cells/images/5d6909be175bff3c-getting-notifications-while-merging-data-with-smart-markers_1.png)
+
+</th>
+</tr>
+</thead>
+</table>
+</div>
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+string dataDir = "./";
+string outputPath = dataDir + "Output.out.xlsx";
+
+// Creating a DataTable that will serve as data source for designer spreadsheet
+DataTable table = new DataTable("OppLineItems");
+table.Columns.Add("PRODUCT_FAMILY");
+table.Columns.Add("OPPORTUNITY_LINEITEM_PRODUCTNAME");
+table.Rows.Add(new object[] { "MMM", "P1" });
+table.Rows.Add(new object[] { "MMM", "P2" });
+table.Rows.Add(new object[] { "DDD", "P1" });
+table.Rows.Add(new object[] { "DDD", "P2" });
+table.Rows.Add(new object[] { "AAA", "P1" });
+
+// Loading the designer spreadsheet in an instance of Workbook
+Workbook workbook = new Workbook(dataDir + "source.xlsx");
+
+// Loading the instance of Workbook in an instance of WorkbookDesigner
+WorkbookDesigner designer = new WorkbookDesigner(workbook);
+
+// Set the WorkbookDesigner.CallBack property to an instance of newly created class
+designer.CallBack = new SmartMarkerCallBack(workbook);
+
+// Set the data source 
+designer.SetDataSource(table);
+
+// Process the Smart Markers in the designer spreadsheet
+designer.Process(false);
+
+// Save the result
+workbook.Save(outputPath);
+```

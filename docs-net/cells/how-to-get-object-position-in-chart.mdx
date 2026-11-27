@@ -1,0 +1,109 @@
+---
+title: "How to Get Object Position in Chart"
+sidebar_label: "How to Get Object Position in Chart"
+sidebar_key: "net-cells-how-to-get-object-position-in-chart"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/how-to-get-object-position-in-chart.html"
+source_commit: ""
+source_sha256: "c5724f079acc22a20fd9e116cc1d09a20e3b07fa8128f2aab70c1789b9137557"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/how-to-get-object-position-in-chart/"
+source_snapshot_sha256: "074974ea0926836a79508c87f583bbc2b668ebef73ba146068afaf94e421b9fd"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Possible Usage Scenarios {#possible-usage-scenarios}
+
+In some scenarios, when you are using an Excel chart, you may need to get the position of the objects in the chart. You can easily achieve this requirement with Aspose.Cells.
+
+## Example: Get object position in chart {#example-get-object-position-in-chart}
+
+The following sample code loads the <a href="https://docs.aspose.com/cells/net/how-to-get-object-position-in-chart/TestFile.xlsx" target="_blank" rel="nofollow noopener noreferrer">sample Excel file</a> and generates the <a href="https://docs.aspose.com/cells/net/how-to-get-object-position-in-chart/Output.xlsx" target="_blank" rel="nofollow noopener noreferrer">output Excel file</a>.
+
+```csharp
+            string filepath = "";
+            Workbook wb = new Workbook(filepath + "TestFile.xlsx");
+            Chart chart = wb.Worksheets[0].Charts[0];
+            chart.Calculate();
+            Shape shapeToMove1 = chart.Shapes[0];
+            Shape shapeToMove2 = chart.Shapes[1];
+
+            //Get the postion of PlotArea, the unit is in units of ratio of the chart area.
+            double PlotAreaLeft = chart.PlotArea.InnerXRatioToChart; 
+            double PlotAreaTop = chart.PlotArea.InnerYRatioToChart;
+            // move the text box to the left edge of the plot area, in unit of 1/4000 of width of the parent chart.
+            shapeToMove1.LeftInShape = (int)(PlotAreaLeft * 4000); 
+            shapeToMove1.TopInShape = (int)(PlotAreaTop * 4000);
+
+            //Get the postion of Chart title, the unit is in units of ratio of the chart area.
+            double TitleLeft = chart.Title.XRatioToChart;
+            double TitleBottom = chart.Title.YRatioToChart + chart.Title.HeightRatioToChart;
+            // move the text box to the left edge of the plot area, in unit of 1/4000 of width of the parent chart.
+            shapeToMove2.LeftInShape = (int)(TitleLeft * 4000);
+            shapeToMove2.TopInShape = (int)(TitleBottom * 4000);
+            wb.Save(filepath + "Output.xlsx");
+            
+            //Convert to pixel units
+            double XInPixels = chart.Title.XRatioToChart * chart.ChartObject.Width;
+            double WidthInPixels = chart.Title.WidthRatioToChart * chart.ChartObject.Width;
+            double YInPixels = chart.Title.YRatioToChart * chart.ChartObject.Height;
+            double HeightInPixels = chart.Title.HeightRatioToChart * chart.ChartObject.Height;
+```
+
+With the above code, you can get the position of the chart title and the chart's PlotArea.\
+With the positional information, the shapes can be placed in the corresponding position in the chart.\
+The output is shown in the following picture, where one shape is placed in the top‑left corner of the PlotArea and the other shape is placed below the chart title.\
+![todo:image_alt_text](/net/cells/images/d5a4f8a4f9fc2603-OutputResult.png)
+
+## Unit explanation and conversion {#unit-explanation-and-conversion}
+
+There are three units for the position of **objects** in a chart:
+
+1. Units expressed as a ratio of the chart area.
+
+2. Units of 1/4000 of the chart area. This is a unit used in older versions of Excel **files**, and it is not recommended.
+
+3. Units of **pixels**.
+
+The conversion code for them is shown in the following code:
+
+```csharp
+            string filepath = "";
+            Workbook wb = new Workbook(filepath + "TestFile.xlsx");
+            Chart chart = wb.Worksheets[0].Charts[0];
+            chart.Calculate();
+            
+            //Get units of ratio of the chart area.
+            double XInRatio = chart.Title.XRatioToChart;
+            double WidthInRatio = chart.Title.WidthRatioToChart;
+            double YInRatio = chart.Title.YRatioToChart;
+            double HeightInRatio = chart.Title.HeightRatioToChart;
+            //Convert to pixel units
+            double XInPixels = XInRatio * chart.ChartObject.Width;
+            double WidthInPixels = WidthInRatio * chart.ChartObject.Width;
+            double YInPixels = YInRatio * chart.ChartObject.Height;
+            double HeightInPixels = HeightInRatio * chart.ChartObject.Height;
+
+            //Get units of 1/4000 of the chart area. This is a unit used in older versions of Excel file, and it is not recommended.
+            double XIn4000 = chart.Title.X;
+            double Width4000 = chart.Title.Width;
+            double YIn4000 = chart.Title.Y;
+            double HeightIn4000 = chart.Title.Height;
+            //Convert to pixel units
+            XInPixels = XIn4000 / 4000 * chart.ChartObject.Width;
+            WidthInPixels = Width4000 / 4000 * chart.ChartObject.Width;
+            YInPixels = YIn4000 / 4000 * chart.ChartObject.Height;
+            HeightInPixels = HeightIn4000 / 4000 * chart.ChartObject.Height;
+```

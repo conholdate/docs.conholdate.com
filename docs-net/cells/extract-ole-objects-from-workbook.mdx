@@ -1,0 +1,147 @@
+---
+title: "Extract OLE Objects from Workbook"
+sidebar_label: "Extract OLE Objects from Workbook"
+sidebar_key: "net-cells-extract-ole-objects-from-workbook"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/extract-ole-objects-from-workbook.html"
+source_commit: ""
+source_sha256: "67ca8399635b9fe507152d2bc4860871b48cf2f5582485dc5096a73756513710"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/extract-ole-objects-from-workbook/"
+source_snapshot_sha256: "ada3aa09ef46841524f87485fa161caaf3dca6d40cfe422ce4f9e05498fda1c8"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "./_remote-markdown.css";
+
+:::info
+Sometimes you need to extract OLE objects from a workbook. Aspose.Cells supports extracting and saving those OLE objects.
+
+This article shows how to create a console application in Visual Studio .NET and extract different OLE objects from a workbook with a few simple lines of code.
+:::
+
+## Extract OLE Objects from a Workbook {#extract-ole-objects-from-a-workbook}
+
+### Creating a Template Workbook {#creating-a-template-workbook}
+
+1. Create a workbook in Microsoft Excel.
+2. Add a Microsoft Word document, an Excel workbook, and a PDF document as OLE objects on the first worksheet.
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+**Template document with OLE objects (OLEFile.xls)**
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+![todo:image_alt_text](/net/cells/images/e83aebfa73f92524-extract-ole-objects-from-workbook_1.png)
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+Next, extract the OLE objects and save them to the hard disk with their respective file types.
+
+### Download and Install Aspose.Cells {#download-and-install-asposecells}
+
+1. <a href="https://downloads.aspose.com/cells/net" target="_blank" rel="nofollow noopener noreferrer">Download Aspose.Cells for .NET</a>.
+2. Install it on your development computer.
+
+All Aspose components, when installed, work in evaluation mode. The evaluation mode has no time limit and only injects watermarks into produced documents.
+
+### Create a Project {#create-a-project}
+
+Start **Visual Studio .NET** and create a new console application. This example will show a C# console application, but you can use VB.NET too.
+
+1. Add References
+   1. Add a reference to the Aspose.Cells component in your project; for example, add a reference to `...\Program Files\Aspose\Aspose.Cells\Bin\Net1.0\Aspose.Cells.dll`.
+
+### Extract OLE Objects {#extract-ole-objects}
+
+The code below does the actual work of finding and extracting OLE objects. The OLE objects (DOC, XLS, and PDF files) are saved to disk.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+// Open the template file.
+Workbook workbook = new Workbook(dataDir + "oleFile.xlsx");
+
+// Get the OleObject Collection in the first worksheet.
+Aspose.Cells.Drawing.OleObjectCollection oles = workbook.Worksheets[0].OleObjects;
+
+// Loop through all the oleobjects and extract each object in the worksheet.
+for (int i = 0; i < oles.Count; i++)
+{
+    Aspose.Cells.Drawing.OleObject ole = oles[i];
+    // Specify the output filename.
+    string fileName = dataDir+ "outOle" + i + ".";
+    // Specify each file format based on the oleobject format type.
+    switch (ole.FileFormatType)
+    {
+        case FileFormatType.Doc:
+            fileName += "doc";
+            break;
+        case FileFormatType.Excel97To2003:
+            fileName += "Xlsx";
+            break;
+        case FileFormatType.Ppt:
+            fileName += "Ppt";
+            break;
+        case FileFormatType.Pdf:
+            fileName += "Pdf";
+            break;
+        case FileFormatType.Unknown:
+            fileName += "Jpg";
+            break;
+        default:
+            //........
+            break;
+    }
+    // Save the oleobject as a new excel file if the object type is xls.
+    if (ole.FileFormatType == FileFormatType.Xlsx)
+    {
+        MemoryStream ms = new MemoryStream();
+        if (ole.ObjectData != null)
+        {
+            ms.Write(ole.ObjectData, 0, ole.ObjectData.Length);
+            Workbook oleBook = new Workbook(ms);
+            oleBook.Settings.IsHidden = false;
+            oleBook.Save(dataDir + "outOle" + i + ".out.xlsx");
+        }
+    }
+    // Create the files based on the oleobject format types.
+    else
+    {
+        if (ole.ObjectData != null)
+        {
+            FileStream fs = File.Create(fileName);
+            fs.Write(ole.ObjectData, 0, ole.ObjectData.Length);
+            fs.Close();
+        }
+    }
+}
+```

@@ -1,0 +1,110 @@
+---
+title: "How to Create a Dynamic Scrolling Chart"
+sidebar_label: "How to Create a Dynamic Scrolling Chart"
+sidebar_key: "net-cells-create-dynamic-scrolling-chart"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/create-dynamic-scrolling-chart.html"
+source_commit: ""
+source_sha256: "31999a0ab7e53c0977c09feb74a29b430eaf8af675c2d988cd07e4c4e2a9536f"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/create-dynamic-scrolling-chart/"
+source_snapshot_sha256: "6679c3dd2a930a1a10487af70d82fa04dd1f68a18a7bcacc8ec85ad72984e2c4"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Possible Usage Scenarios {#possible-usage-scenarios}
+
+A dynamic scrolling chart is a type of graphical representation used to display data that changes over time. It is designed to provide a real-time view of data, allowing users to track continuous updates and trends. The chart continuously updates itself as new data is added, and it automatically scrolls to show the most recent information.
+
+Dynamic scrolling charts are commonly used in various industries, such as finance, stock market analysis, weather tracking, and social media analytics. They enable users to visualize and analyze data patterns and make informed decisions based on real-time information.
+
+These charts are typically interactive, allowing the user to zoom in or out, scroll through historical data, and adjust time intervals. They often support multiple data series, providing a comprehensive view of different metrics and their correlations.
+
+Overall, dynamic scrolling charts are valuable tools for monitoring and analyzing time‑series data, facilitating real-time decision‑making and enhancing data visualization capabilities.
+
+## Use Aspose.Cells to Create a Dynamic Scrolling Chart {#use-asposecells-to-create-a-dynamic-scrolling-chart}
+
+In the following paragraphs, we will show you how to create a dynamic scrolling chart using Aspose.Cells. We'll show you the code for the example, as well as the Excel file created with this code.
+
+## Sample Code {#sample-code}
+
+The following sample code will generate the <a href="https://docs.aspose.com/cells/net/create-dynamic-scrolling-chart/DynamicScrollingChart.xlsx" target="_blank" rel="nofollow noopener noreferrer">Dynamic Scrolling Chart File</a>.
+
+```csharp
+  // How to Create a Dynamic Scrolling Chart
+  
+  // Your local test path
+  string LocalPath = @"";
+
+  //Create a new workbook and access the first worksheet.
+  Workbook workbook = new Workbook();
+  WorksheetCollection sheets = workbook.Worksheets;
+  Worksheet sheet = sheets[0];
+
+  //Populate the data for the chart. Add values to cells and set series names.
+  sheet.Cells["A1"].PutValue("Day");
+  sheet.Cells["B1"].PutValue("Sales");
+  //In this example, we will add 30 days of data
+  int allDays = 30;
+  int showDays = 10;
+  int currentDay = 1;
+  for (int i = 0; i < allDays; i++)
+  {
+      string _cellA = String.Format("A{0}", i + 2);
+      string _cellB = String.Format("B{0}", i + 2);
+      sheet.Cells[_cellA].PutValue(i + 1);
+      sheet.Cells[_cellB].PutValue(50 * (i % 2) + 20 * (i % 3) + 10 * (i/3));
+  }
+  //This is the Dynamic Scrolling Control Data
+  sheet.Cells["G19"].PutValue("Start Day");
+  sheet.Cells["G20"].PutValue(currentDay);
+  sheet.Cells["H19"].PutValue("Show Days");
+  sheet.Cells["H20"].PutValue(showDays);
+
+  //Set the dynamic range for the chart's data source. 
+  int index = sheets.Names.Add("Sheet1!ChtScrollData");
+  sheets.Names[index].RefersTo = "=OFFSET(Sheet1!$B$2,Sheet1!$G$20,0,Sheet1!$H$20,1)";
+
+  //Set the dynamic range for the chart's data labels. 
+  index = sheets.Names.Add("Sheet1!ChtScrollLabels");
+  sheets.Names[index].RefersTo = "=OFFSET(Sheet1!$A$2,Sheet1!$G$20,0,Sheet1!$H$20,1)";
+
+  //Add a ScrollBar for the Dynamic Scrolling Chart
+  ScrollBar bar = sheet.Shapes.AddScrollBar(2, 0, 3, 0, 200, 30);
+  bar.Min = 0;
+  bar.Max = allDays - showDays;
+  bar.CurrentValue = currentDay;
+  bar.LinkedCell = "$G$20";
+
+  //Create a chart object and set its data source.
+  int chartIndex = sheet.Charts.Add(ChartType.Line, 2, 4, 15, 10);
+  Chart chart = sheet.Charts[chartIndex];
+  chart.NSeries.Add("Sales", true);
+  chart.NSeries[0].Values = "Sheet1!ChtScrollData";
+  chart.NSeries[0].XValues = "Sheet1!ChtScrollLabels";
+
+  //Save the workbook as an Excel file.
+  workbook.Save(LocalPath + "DynamicScrollingChart.xlsx");
+```
+
+## Notes {#notes}
+
+In the generated file, you can operate the scroll bar, and the chart dynamically displays the latest 10 sets of data. This is done using the `OFFSET` formula in the sample code:
+
+```text
+"=OFFSET(Sheet1!$B$2,Sheet1!$G$20,0,Sheet1!$H$20,1)"
+```
+
+You can try changing the number "10" to "15" in cell "Sheet1!$H$20", and the dynamic chart will display the latest 15 sets of data. Now we have successfully created a dynamic scrolling chart using Aspose.Cells.

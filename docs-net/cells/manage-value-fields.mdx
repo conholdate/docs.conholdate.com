@@ -1,0 +1,165 @@
+---
+title: "Manage Pivot Table Value Fields in Aspose.Cells for .NET"
+sidebar_label: "Manage Pivot Table Value Fields in Aspose.Cells for .NET"
+sidebar_key: "net-cells-manage-value-fields"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/manage-value-fields.html"
+source_commit: ""
+source_sha256: "c312235982d04d053298cb8bc15320b068d260c2df43483ec869d3192465b6bf"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/manage-value-fields/"
+source_snapshot_sha256: "973b1addeebc662b64b5b836b1ea364731eb5b671416a8f29ac3ed2779ad5aa0"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Adding a Field to the Data Region {#adding-a-field-to-the-data-region}
+
+Adding a base field to the data (value) region is the first step in shaping how a pivot table aggregates the source data. Aspose.Cells exposes `PivotTable.AddFieldToArea(PivotFieldType, string)`, an overload that accepts the constant `PivotFieldType.Data` and the source-column name. Once a field is added to the data region, the API exposes it through the `PivotTable.DataFields` collection, in the order in which the fields were added. By default, a numeric source column is summarised with `ConsolidationFunction.Sum`, while a non-numeric column defaults to `Count`.
+
+```csharp
+using System;
+using Aspose.Cells;
+using Aspose.Cells.Pivot;
+Workbook workbook = new Workbook();
+Worksheet worksheet = workbook.Worksheets[0];
+worksheet.Name = "Data";
+string[] headers = { "Category", "Item", "Year", "Amount" };
+for (int j = 0; j < headers.Length; j++)
+{
+    worksheet.Cells[0, j].PutValue(headers[j]);
+}
+object[,] data = {
+    { "Fruit",     "Apple",  2020, 100 },
+    { "Fruit",     "Apple",  2021, 150 },
+    { "Fruit",     "Banana", 2020,  80 },
+    { "Fruit",     "Banana", 2021,  90 },
+    { "Vegetable", "Carrot", 2020,  50 },
+    { "Vegetable", "Carrot", 2021,  60 },
+    { "Vegetable", "Daikon", 2020,  40 },
+    { "Vegetable", "Daikon", 2021,  45 }
+};
+for (int i = 0; i < data.GetLength(0); i++)
+{
+    for (int j = 0; j < data.GetLength(1); j++)
+    {
+        worksheet.Cells[i + 1, j].PutValue(data[i, j]);
+    }
+}
+PivotTable pivotTable = worksheet.PivotTables.Add("A1:D9", 2, 5);
+pivotTable.AddFieldToArea(PivotFieldType.Row, "Category");
+pivotTable.AddFieldToArea(PivotFieldType.Row, "Item");
+pivotTable.AddFieldToArea(PivotFieldType.Column, "Year");
+pivotTable.AddFieldToArea(PivotFieldType.Data, "Amount");
+pivotTable.CalculateData();
+workbook.Save("output_drag.xlsx");
+```
+
+## Changing the Summary Function {#changing-the-summary-function}
+
+Once a field lives in the data region, Aspose.Cells exposes it through the `PivotField` object on `PivotTable.DataFields`. Each `PivotField` has a writable `Function` property of type `ConsolidationFunction`, which controls the aggregate applied to that field's underlying values. `ConsolidationFunction` is an enum with members `Sum`, `Count`, `Average`, `Max`, `Min`, `Product`, `StdDev`, `StdDevp`, `Var`, and `Varp` - the first six cover the vast majority of real-world use cases, while the last four are statistical aggregates useful for variance analysis.
+
+:::info
+Changing `Function` only affects the aggregate; the source column and the pivot's row/column structure are not modified. To switch the aggregate for an existing data field, set `pivotTable.DataFields[i].Function = ConsolidationFunction.<X>;` and then call `pivotTable.CalculateData()` to re-render the pivot.
+:::
+
+```csharp
+using System;
+using Aspose.Cells;
+using Aspose.Cells.Pivot;
+Workbook workbook = new Workbook();
+Worksheet worksheet = workbook.Worksheets[0];
+worksheet.Name = "Data";
+string[] headers = { "Category", "Item", "Year", "Amount" };
+for (int j = 0; j < headers.Length; j++)
+{
+    worksheet.Cells[0, j].PutValue(headers[j]);
+}
+object[,] data = {
+    { "Fruit",     "Apple",  2020, 100 },
+    { "Fruit",     "Apple",  2021, 150 },
+    { "Fruit",     "Banana", 2020,  80 },
+    { "Fruit",     "Banana", 2021,  90 },
+    { "Vegetable", "Carrot", 2020,  50 },
+    { "Vegetable", "Carrot", 2021,  60 },
+    { "Vegetable", "Daikon", 2020,  40 },
+    { "Vegetable", "Daikon", 2021,  45 }
+};
+for (int i = 0; i < data.GetLength(0); i++)
+{
+    for (int j = 0; j < data.GetLength(1); j++)
+    {
+        worksheet.Cells[i + 1, j].PutValue(data[i, j]);
+    }
+}
+PivotTable pivotTable = worksheet.PivotTables.Add("A1:D9", 2, 5);
+pivotTable.AddFieldToArea(PivotFieldType.Row, "Category");
+pivotTable.AddFieldToArea(PivotFieldType.Row, "Item");
+pivotTable.AddFieldToArea(PivotFieldType.Column, "Year");
+pivotTable.AddFieldToArea(PivotFieldType.Data, "Amount");
+pivotTable.AddFieldToArea(PivotFieldType.Data, "Amount");
+PivotField countField = pivotTable.DataFields[1];
+countField.Function = ConsolidationFunction.Count;
+pivotTable.CalculateData();
+workbook.Save("output_function.xlsx");
+```
+
+## Plotting Value Fields to Row or Column Axis {#plotting-value-fields-to-row-or-column-axis}
+
+When a pivot table contains two or more data fields, Aspose.Cells exposes an additional virtual field called `PivotTable.ValuesField`. This virtual field represents the aggregate of every data field that lives in the data region. You can drag it into the Row or Column region as a base pivot field, which is useful for laying out multiple measures side by side.
+
+:::info
+`PivotTable.ValuesField` does not work if there is no or only one value field.
+:::
+
+```csharp
+using System;
+using Aspose.Cells;
+using Aspose.Cells.Pivot;
+Workbook workbook = new Workbook();
+Worksheet worksheet = workbook.Worksheets[0];
+worksheet.Name = "Data";
+string[] headers = { "Category", "Item", "Year", "Amount" };
+for (int j = 0; j < headers.Length; j++)
+{
+    worksheet.Cells[0, j].PutValue(headers[j]);
+}
+object[,] data = {
+    { "Fruit",     "Apple",  2020, 100 },
+    { "Fruit",     "Apple",  2021, 150 },
+    { "Fruit",     "Banana", 2020,  80 },
+    { "Fruit",     "Banana", 2021,  90 },
+    { "Vegetable", "Carrot", 2020,  50 },
+    { "Vegetable", "Carrot", 2021,  60 },
+    { "Vegetable", "Daikon", 2020,  40 },
+    { "Vegetable", "Daikon", 2021,  45 }
+};
+for (int i = 0; i < data.GetLength(0); i++)
+{
+    for (int j = 0; j < data.GetLength(1); j++)
+    {
+        worksheet.Cells[i + 1, j].PutValue(data[i, j]);
+    }
+}
+PivotTable pivotTable = worksheet.PivotTables.Add("A1:D9", 2, 5);
+pivotTable.AddFieldToArea(PivotFieldType.Row, "Category");
+pivotTable.AddFieldToArea(PivotFieldType.Row, "Item");
+pivotTable.AddFieldToArea(PivotFieldType.Column, "Year");
+pivotTable.AddFieldToArea(PivotFieldType.Data, "Amount");
+pivotTable.AddFieldToArea(PivotFieldType.Data, "Amount");
+pivotTable.DataFields[1].Function = ConsolidationFunction.Count;
+pivotTable.AddFieldToArea(PivotFieldType.Column, pivotTable.ValuesField.Name);
+pivotTable.CalculateData();
+workbook.Save("output_plot.xlsx");
+```

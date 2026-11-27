@@ -1,0 +1,164 @@
+---
+title: "Three methods for filtering Chart Data"
+sidebar_label: "Three methods for filtering Chart Data"
+sidebar_key: "net-cells-filtering-charts-in-excel"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/filtering-charts-in-excel.html"
+source_commit: ""
+source_sha256: "37d110fafa29a76c27010074ce3c4c06c53b3ec90754fe9a1af9068ae20188da"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/filtering-charts-in-excel/"
+source_snapshot_sha256: "37a45e5e8aac59ccb4760b460306fcd158a3a415dda1887302f827d87db5ae3b"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## 1. Filtering out series to render a chart {#1-filtering-out-series-to-render-a-chart}
+
+### Steps to filter series from a chart in Excel {#steps-to-filter-series-from-a-chart-in-excel}
+
+In Excel, we can filter out specific series from a chart, causing those filtered series not to be displayed in the chart. The original chart is shown in **Figure 1**. However, when we filter out **Testseries2** and **Testseries4**, the chart will appear as shown in **Figure 2**.
+
+In Aspose.Cells, we can perform a similar operation. For a <a href="https://docs.aspose.com/cells/net/filtering-charts-in-excel/seriesFiltered.xlsx" target="_blank" rel="nofollow noopener noreferrer">sample</a> file like this, if we want to filter out **Testseries2** and **Testseries4**, we can execute the following code. Additionally, we will maintain two lists: one (<a href="https://reference.aspose.com/cells/net/aspose.cells.charts/chart/nseries/" target="_blank" rel="nofollow noopener noreferrer">NSeries</a>) list to store all the selected series and another (<a href="https://reference.aspose.com/cells/net/aspose.cells.charts/chart/filterednseries/" target="_blank" rel="nofollow noopener noreferrer">FilteredNSeries</a>) to store the filtered series.
+
+Please **note** that in the code, when we set **chart.NSeries\[0].IsFiltered = true;**, the first series in <a href="https://reference.aspose.com/cells/net/aspose.cells.charts/chart/nseries/" target="_blank" rel="nofollow noopener noreferrer">NSeries</a> will be removed and placed in the appropriate position within <a href="https://reference.aspose.com/cells/net/aspose.cells.charts/chart/filterednseries/" target="_blank" rel="nofollow noopener noreferrer">FilteredNSeries</a>. Subsequently, the previous **NSeries\[1]** will become the new first item in the list, and all the following series will shift forward by one position. This means that if we then run **chart.NSeries\[1].IsFiltered = true;**, we are effectively removing the original third series. This can sometimes lead to confusion, so we recommend following the operation in the code, which deletes series from the end to the beginning.
+
+![todo:image_alt_text](/net/cells/images/789b91f808212b0a-Figure1.png)
+
+![todo:image_alt_text](/net/cells/images/e4db6ff48bda62e5-Figure2.png)
+
+### Sample Code {#sample-code}
+
+The following sample code loads the <a href="https://docs.aspose.com/cells/net/filtering-charts-in-excel/seriesFiltered.xlsx" target="_blank" rel="nofollow noopener noreferrer">sample Excel file</a>.
+
+```csharp
+// Create an instance of existing Workbook
+Workbook workbook = new Workbook("seriesFiltered.xlsx");
+// Get filtered series list
+SeriesCollection nSeriesFiltered = workbook.Worksheets[0].Charts["Chart 1"].FilteredNSeries;
+// Get selected series list
+SeriesCollection nSeries = workbook.Worksheets[0].Charts["Chart 1"].NSeries;
+// Should be 0
+Console.WriteLine("Filtered Series count" + nSeriesFiltered.Count);
+// Should be 6
+Console.WriteLine("Visiable Series count" + nSeries.Count);
+// Process from the end to the beginning
+nSeries[1].IsFiltered = true;
+nSeries[0].IsFiltered = true;
+// Should be 2
+Console.WriteLine("Filtered Series count" + nSeriesFiltered.Count);
+// Should be 4
+Console.WriteLine("Visiable Series count" + nSeries.Count);
+workbook.Save("seriesFiltered-out.xlsx");
+workbook = new Workbook("seriesFiltered-out.xlsx");
+// Should be 2
+Console.WriteLine("Filtered Series count" + nSeriesFiltered.Count);
+// Should be 4
+Console.WriteLine("Visiable Series count" + nSeries.Count);
+```
+
+## 2. Filter the data and let the chart change {#2-filter-the-data-and-let-the-chart-change}
+
+Filtering your data is a great way to handle chart filters with a lot of data. When you filter the data, the chart will change. One issue we're going to have to address is making sure the chart stays on the screen. When you filter, you get hidden rows, and occasionally, the chart will be in those hidden rows.
+
+![todo:image_alt_text](/net/cells/images/49c880afd41ad00e-Figure3.png)
+
+### Steps to use Data Filters to change the chart in Excel {#steps-to-use-data-filters-to-change-the-chart-in-excel}
+
+1. Click inside your data range.
+2. Click the **Data** tab, and turn on Filters by clicking **Filters**. Your header row will have drop‑down arrows.
+3. Create a chart by going to the **Insert** tab and selecting a column chart.
+4. Now filter your data using the drop‑down arrows in the data. Don't use the Chart Filters.
+
+### Sample Code {#sample-code-1}
+
+The following sample code shows the same feature using Aspose.Cells.
+
+```csharp
+// Create an instance of Workbook
+Workbook workbook = new Workbook();
+// Get the First sheet.
+Worksheet sheet = workbook.Worksheets["Sheet1"];
+// Add data into details cells.
+sheet.Cells[0, 0].PutValue("Fruits Name");
+sheet.Cells[0, 1].PutValue("Fruits Price");
+sheet.Cells[1, 0].PutValue("Apples");
+sheet.Cells[2, 0].PutValue("Bananas");
+sheet.Cells[3, 0].PutValue("Grapes");
+sheet.Cells[4, 0].PutValue("Oranges");
+sheet.Cells[1, 1].PutValue(5);
+sheet.Cells[2, 1].PutValue(2);
+sheet.Cells[3, 1].PutValue(1);
+sheet.Cells[4, 1].PutValue(4);
+// Add a chart to the worksheet
+int chartIndex = sheet.Charts.Add(Aspose.Cells.Charts.ChartType.Column, 7, 7, 15, 15);
+// Access the instance of the newly added chart
+Aspose.Cells.Charts.Chart chart = sheet.Charts[chartIndex];
+// Set data range
+chart.SetChartDataRange("A1:B5", true);
+// Set AutoFilter range
+sheet.AutoFilter.Range = "A1:B5";
+// Add filters for a filter column.
+sheet.AutoFilter.AddFilter(0, "Bananas");
+sheet.AutoFilter.AddFilter(0, "Oranges");
+// Apply the filters
+sheet.AutoFilter.Refresh();
+chart.ToImage("Autofilter.png");
+workbook.Save("Autofilter.xlsx");
+```
+
+## 3. Filter the data using a Table and let the chart change {#3-filter-the-data-using-a-table-and-let-the-chart-change}
+
+Using a Table is similar to Method 2, which uses a range, but you have advantages using tables over ranges. When you change your range to a Table and add data, the chart automatically updates. With a range, you will have to change the data source.
+
+### Format as table in Excel {#format-as-table-in-excel}
+
+Click inside your data and use **CTRL + T** or use the Home tab, **Format as Table**.
+
+![todo:image_alt_text](/net/cells/images/2a9dabb6c5fc24a0-Figure4.png)
+
+### Sample Code {#sample-code-2}
+
+The following sample code loads the <a href="https://docs.aspose.com/cells/net/filtering-charts-in-excel/TableFilters.xlsx" target="_blank" rel="nofollow noopener noreferrer">sample Excel file</a> and shows the same feature using Aspose.Cells.
+
+```csharp
+// Create a workbook.
+Workbook workbook = new Workbook("TableFilters.xlsx");
+// Access first worksheet
+Worksheet sheet = workbook.Worksheets[0];
+// Access the instance of the newly added chart
+int chartIndex = sheet.Charts.Add(Aspose.Cells.Charts.ChartType.Column, 7, 7, 15, 15);
+Aspose.Cells.Charts.Chart chart = sheet.Charts[chartIndex];
+// Set data range
+chart.SetChartDataRange("A1:B7", true);
+// Convert the chart to image
+chart.ToImage("TableFilters.before.png");
+// Add a new List Object to the worksheet
+Aspose.Cells.Tables.ListObject listObject = sheet.ListObjects[sheet.ListObjects.Add("A1", "B7", true)];
+// Add default style to the table
+listObject.TableStyleType = Aspose.Cells.Tables.TableStyleType.TableStyleMedium10;
+// Show Total
+listObject.ShowTotals = false;
+// Add filters for a filter column.
+listObject.AutoFilter.AddFilter(0, "James");
+// Apply the filters
+listObject.AutoFilter.Refresh();
+//After adding new value the chart will change
+listObject.PutCellValue(7, 0, "Me");
+listObject.PutCellValue(7, 1, 1000);
+// Check the changed images
+chart.ToImage("TableFilters.after.png");
+// Saving the Excel file
+workbook.Save("TableFilter.out.xlsx");
+```

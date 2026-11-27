@@ -1,0 +1,200 @@
+---
+title: "Managing OLE Objects"
+sidebar_label: "Managing OLE Objects"
+sidebar_key: "net-cells-managing-ole-objects"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/managing-ole-objects.html"
+source_commit: ""
+source_sha256: "141c674b279d1407c202820af40ca34db6fec1c1ce522f0a13e07508c72f9b59"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/managing-ole-objects/"
+source_snapshot_sha256: "12fdf41c75f37ba5f3731bb36c504560db26ededd351e3eac872097900630b18"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Introduction {#introduction}
+
+OLE (Object Linking and Embedding) is Microsoft's framework for a compound document technology. Briefly, a compound document is something like a display desktop that can contain visual and information objects of all kinds: text, calendars, animations, sound, motion video, 3D, continually updated news, controls, and so forth. Each desktop object is an independent program entity that can interact with a user and also communicate with other objects on the desktop.
+
+OLE (Object Linking and Embedding) is supported by many different programs and is used to make content created in one program available in another. For example, you can insert a Microsoft Word document into Microsoft Excel. To see what types of content you can insert, click **Object** on the **Insert** menu. Only programs that are installed on the computer and that support OLE objects appear in the **Object type** box.
+
+### Inserting OLE Objects into the Worksheet {#inserting-ole-objects-into-the-worksheet}
+
+Aspose.Cells supports adding, extracting, and manipulating OLE objects in worksheets. For this reason, Aspose.Cells has the <a href="https://reference.aspose.com/cells/net/aspose.cells.drawing/oleobjectcollection" target="_blank" rel="nofollow noopener noreferrer">**OleObjectCollection**</a> class, used to add a new OLE Object to the collection. Another class, <a href="https://reference.aspose.com/cells/net/aspose.cells.drawing/oleobject" target="_blank" rel="nofollow noopener noreferrer">**OleObject**</a>, represents an OLE Object. It has some important members:
+
+- The <a href="https://reference.aspose.com/cells/net/aspose.cells.drawing/oleobject/properties/imagedata" target="_blank" rel="nofollow noopener noreferrer">**ImageData**</a> property specifies the image (icon) data of byte‑array type. The image will be displayed to show the OLE Object in the worksheet.
+- The <a href="https://reference.aspose.com/cells/net/aspose.cells.drawing/oleobject/properties/objectdata" target="_blank" rel="nofollow noopener noreferrer">**ObjectData**</a> property specifies the object data in the form of a byte array. This data will be shown in its related program when you double‑click on the OLE Object icon.
+
+The following example shows how to add OLE Object(s) to a worksheet.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+// Create directory if it is not already present.
+bool IsExists = System.IO.Directory.Exists(dataDir);
+if (!IsExists)
+    System.IO.Directory.CreateDirectory(dataDir);
+
+// Instantiate a new Workbook.
+Workbook workbook = new Workbook();
+
+// Get the first worksheet.
+Worksheet sheet = workbook.Worksheets[0];
+
+// Define a string variable to store the image path.
+string ImageUrl = dataDir + "logo.jpg";
+
+// Get the picture into the streams.
+FileStream fs = File.OpenRead(ImageUrl);
+
+// Define a byte array.
+byte[] imageData = new Byte[fs.Length];
+
+// Obtain the picture into the array of bytes from streams.
+fs.Read(imageData, 0, imageData.Length);
+
+// Close the stream.
+fs.Close();
+
+// Get an excel file path in a variable.
+string path = dataDir + "book1.xls";
+
+// Get the file into the streams.
+fs = File.OpenRead(path);
+
+// Define an array of bytes.
+byte[] objectData = new Byte[fs.Length];
+
+// Store the file from streams.
+fs.Read(objectData, 0, objectData.Length);
+
+// Close the stream.
+fs.Close();
+
+// Add an Ole object into the worksheet with the image
+// Shown in MS Excel.
+sheet.OleObjects.Add(14, 3, 200, 220, imageData);
+
+// Set embedded ole object data.
+sheet.OleObjects[0].ObjectData = objectData;
+
+// Save the excel file
+workbook.Save(dataDir + "output.out.xls");
+```
+
+### Extracting OLE Objects in the Workbook {#extracting-ole-objects-in-the-workbook}
+
+The following example shows how to extract OLE Objects from a Workbook. The example gets different OLE objects from an existing XLS file and saves different files (DOC, XLS, PPT, PDF, etc.) based on the OLE object's file‑format type.
+
+After running the code, you can save different files based on each OLE Object's format type.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+// Open the template file.
+Workbook workbook = new Workbook(dataDir + "book1.xls");
+
+// Get the OleObject Collection in the first worksheet.
+Aspose.Cells.Drawing.OleObjectCollection oles = workbook.Worksheets[0].OleObjects;
+
+// Loop through all the oleobjects and extract each object.
+// In the worksheet.
+for (int i = 0; i < oles.Count; i++)
+{
+    Aspose.Cells.Drawing.OleObject ole = oles[i];
+
+    // Specify the output filename.
+    string fileName = dataDir + "ole_" + i + ".";
+
+    // Specify each file format based on the oleobject format type.
+    switch (ole.FileFormatType)
+    {
+        case FileFormatType.Doc:
+            fileName += "doc";
+            break;
+        case FileFormatType.Xlsx:
+            fileName += "Xlsx";
+            break;
+        case FileFormatType.Ppt:
+            fileName += "Ppt";
+            break;
+        case FileFormatType.Pdf:
+            fileName += "Pdf";
+            break;
+        case FileFormatType.Unknown:
+            fileName += "Jpg";
+            break;
+        default:
+            //........
+            break;
+    }
+
+    // Save the oleobject as a new excel file if the object type is xls.
+    if (ole.FileFormatType == FileFormatType.Xlsx)
+    {
+        MemoryStream ms = new MemoryStream();
+        ms.Write(ole.ObjectData, 0, ole.ObjectData.Length);
+        Workbook oleBook = new Workbook(ms);
+        oleBook.Settings.IsHidden = false;
+        oleBook.Save(dataDir + "Excel_File" + i + ".out.xlsx");
+    }
+
+    // Create the files based on the oleobject format types.
+    else
+    {
+        FileStream fs = File.Create(fileName);
+        fs.Write(ole.ObjectData, 0, ole.ObjectData.Length);
+        fs.Close();
+    }
+}
+```
+
+### Extracting an Embedded MOL File {#extracting-an-embedded-mol-file}
+
+Aspose.Cells supports extracting objects of uncommon types like MOL (Molecular data file containing information about atoms and bonds). The following code snippet demonstrates extracting the embedded MOL file and saving it to disk using this <a href="https://docs.aspose.com/cells/net/managing-ole-objects/94896196.xlsx" target="_blank" rel="nofollow noopener noreferrer">sample Excel file</a>.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+//directories
+string SourceDir = "./";
+string outputDir = "./";
+
+Workbook workbook = new Workbook(SourceDir + "EmbeddedMolSample.xlsx");
+var index = 1;
+foreach (Worksheet sheet in workbook.Worksheets)
+{
+    OleObjectCollection oles = sheet.OleObjects;
+    foreach (var ole in oles)
+    {
+        string fileName = outputDir + "OleObject" + index + ".mol ";
+        FileStream fs = File.Create(fileName);
+        fs.Write(ole.ObjectData, 0, ole.ObjectData.Length);
+        fs.Close();
+        index++;
+    }
+}
+```
+
+## Advanced topics {#advanced-topics}
+
+- [Access and Modify the Display Label of the Linked Ole Object](/net/cells/access-and-modify-the-display-label-of-the-linked-ole-object/)
+- [Automatically refresh OLE object via Microsoft Excel using Aspose.Cells](/net/cells/automatically-refresh-ole-object-via-microsoft-excel-using-aspose-cells/)
+- [Extract OLE Objects from Workbook](/net/cells/extract-ole-objects-from-workbook/)
+- [Get or Set the Class Identifier of the Embedded OLE Object](/net/cells/get-or-set-the-class-identifier-of-the-embedded-ole-object/)
+- [Inserting a WAV file as an Ole Object](/net/cells/inserting-a-wav-file-as-an-ole-object/)

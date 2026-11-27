@@ -1,0 +1,452 @@
+---
+title: "Smartly Importing Nested Objects into Excel With Smart Markers"
+sidebar_label: "Smartly Importing Nested Objects into Excel With Smart Markers"
+sidebar_key: "net-cells-how-to-import-nested-objects-with-smart-markers"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/how-to-import-nested-objects-with-smart-markers.html"
+source_commit: ""
+source_sha256: "6628169b498240fdabecd1af595911b97969035ddfeb5a7c87e2e64c34296470"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/how-to-import-nested-objects-with-smart-markers/"
+source_snapshot_sha256: "ff5613931efe11b88b42c977dc0970da6f24cc36c73d40e1e597aa766d3884fa"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "./_remote-markdown.css";
+
+## Why Use Nested Objects for Smart Markers {#why-use-nested-objects-for-smart-markers}
+
+Smart Markers (in tools like FoxPro, reporting engines, or modern template systems) are placeholders that dynamically inject data into templates. Using nested objects (e.g., «customer.address.city») enhances flexibility, organization, and expressiveness.
+
+1. **Hierarchical Data Representation:** Real‑world data is inherently nested (e.g., an Order contains a Customer, which has an Address). Nested objects mirror this structure, avoiding flattened/artificial fields like customer_city.
+2. **Avoid Naming Collisions:** Flat structures risk clashes (e.g., product_name vs. supplier_name). Nesting scopes names naturally:\
+   «product.name» vs. «supplier.name».
+3. **Modularity & Reusability:** Reuse sub‑objects across contexts. The Address object can be embedded in Customer, Vendor, or Employee markers. Changes to Address propagate universally.
+4. **Simplified Data Binding:** Bind entire nested objects to templates. «order.customer» auto‑expands to all customer fields. Reduces manual mapping for sub‑fields.
+5. **Dynamic Data Traversal:** Traverse relationships on‑demand. «invoice.line_items\[0].price» accesses array elements or child objects. Enables complex queries without pre‑processing.
+6. **Clearer Template Logic:** Markers self‑document relationships; «user.profile.email» is more intuitive than «user_email». Reduces ambiguity in large templates.
+7. **Framework/Tool Support:** Modern engines (e.g., Handlebars, React, FoxPro) natively resolve nested paths. Aligns with JSON/APIs where nested data is standard.
+
+## How to Import Anonymous Types or Custom Objects With Smart Markers {#how-to-import-anonymous-types-or-custom-objects-with-smart-markers}
+
+Aspose.Cells also supports anonymous types or custom objects in smart markers. The example that follows shows how this works. For importing data from dynamic objects using Smart Markers, visit the following article:
+
+[Importing from dynamic object as data source](/net/cells/import-data-into-worksheet/#how-to-import-data-into-excel-from-dynamic-object-as-data-source)
+
+```csharp
+private void SmartMarkers_UsingAnonymousTypes()
+{
+    // For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+    // The path to the documents directory.
+    string dataDir = "./";
+
+    // Instantiate the workbookdesigner object.
+    WorkbookDesigner report = new WorkbookDesigner();
+    // Get the first worksheet(default sheet) in the workbook.
+    Aspose.Cells.Worksheet sheet = report.Workbook.Worksheets[0];
+
+    // Input some markers to the cells.
+    sheet.Cells["A1"].PutValue("Name");
+    sheet.Cells["B1"].PutValue("Age");
+    sheet.Cells["A2"].PutValue("&=MyProduct.Name");
+    sheet.Cells["B2"].PutValue("&=MyProduct.Age");
+
+    // Instantiate the list collection based on the custom class.
+    IList<Person> list = new List<Person>();
+    // Provide values for the markers using the custom class object.
+    list.Add(new Person("Simon", 30));
+    list.Add(new Person("Johnson", 33));
+
+    // Set the data source.
+    report.SetDataSource("MyProduct", list);
+
+    // Process the markers.
+    report.Process(false);
+
+    // Save the excel file.
+    report.Workbook.Save(dataDir + "Smart Marker Customobjects.xls");
+}
+
+
+// Definition of Custom class.
+public class Person
+{
+    private string m_Name;
+
+    public string Name
+    {
+        get { return m_Name; }
+        set { m_Name = value; }
+    }
+    private int m_Age;
+
+    public int Age
+    {
+        get { return m_Age; }
+        set { m_Age = value; }
+    }
+    internal Person(string name, int age)
+    {
+        this.m_Name = name;
+        this.m_Age = age;
+    }
+}
+```
+
+## How to Import Nested Objects With Smart Markers {#how-to-import-nested-objects-with-smart-markers}
+
+Aspose.Cells supports nested objects in smart markers; the nested objects should be simple. We use a simple template file. See the designer spreadsheet that contains some nested smart markers.
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+**The first worksheet of the SM_NestedObjects.xlsx file showing nested smart markers.**
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+![todo:image_alt_text](/net/cells/images/d9c1c9e6d5e3d63c-using-smart-markers_7.png)
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+The example that follows shows how this works.
+
+```csharp
+private void SmartMarkers_UsingNestedObjects()
+{
+    // For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+    // The path to the documents directory.
+    string dataDir = "./";
+
+    // ****** Program ******
+
+    // Initialize WorkbookDesigner object
+    WorkbookDesigner designer = new WorkbookDesigner();
+    // Load the template file
+    designer.Workbook = new Workbook(dataDir + "SM_NestedObjects.xlsx");
+    // Instantiate the List based on the class
+    System.Collections.Generic.ICollection<Individual> list = new System.Collections.Generic.List<Individual>();
+    // Create an object for the Individual class
+    Individual p1 = new Individual("Damian", 30);
+    // Create the relevant Wife class for the Individual
+    p1.Wife = new Wife("Dalya", 28);
+    // Create another object for the Individual class
+    Individual p2 = new Individual("Mack", 31);
+    // Create the relevant Wife class for the Individual
+    p2.Wife = new Wife("Maaria", 29);
+    // Add the objects to the list
+    list.Add(p1);
+    list.Add(p2);
+    // Specify the DataSource
+    designer.SetDataSource("Individual", list);
+    // Process the markers
+    designer.Process(false);
+    // Save the Excel file.
+    designer.Workbook.Save(dataDir + "output.xlsx");
+}
+
+class Individual
+{
+
+    private String m_Name;
+
+    public String Name
+    {
+        get { return m_Name; }
+        set { m_Name = value; }
+    }
+    private int m_Age;
+
+    public int Age
+    {
+        get { return m_Age; }
+        set { m_Age = value; }
+    }
+    internal Individual(string name, int age)
+    {
+        this.Name = name;
+        this.Age = age;
+    }
+    private Wife m_Wife;
+
+    public Wife Wife
+    {
+        get { return m_Wife; }
+        set { m_Wife = value; }
+    }
+
+}
+public class Wife
+{
+    public Wife(string name, int age)
+    {
+        this.m_name = name;
+        this.m_age = age;
+    }
+
+    private string m_name;
+
+    public string Name
+    {
+        get { return m_name; }
+        set { m_name = value; }
+    }
+    private int m_age;
+
+    public int Age
+    {
+        get { return m_age; }
+        set { m_age = value; }
+    }
+}
+```
+
+## How to Import a Generic List as Nested Object With Smart Markers {#how-to-import-a-generic-list-as-nested-object-with-smart-markers}
+
+Aspose.Cells now also supports using a generic list as a nested object. Please check the screenshot of the output Excel file generated with the following code. As you can see in the screenshot, a Teacher object contains multiple nested Student objects.
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+![todo:image_alt_text](/net/cells/images/e2a219969d1d70bf-using-smart-markers_8.png)
+
+</th>
+</tr>
+</thead>
+</table>
+</div>
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+  // The path to the documents directory.
+            string dataDir = RunExamples.GetDataDir(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+            Workbook workbook = new Workbook();
+
+            // Create a designer workbook
+
+            // Workbook workbook = new Workbook();
+            Worksheet worksheet = workbook.Worksheets[0];
+
+            worksheet.Cells["A1"].PutValue("Teacher Name");
+            worksheet.Cells["A2"].PutValue("&=Teacher.Name");
+
+            worksheet.Cells["B1"].PutValue("Teacher Age");
+            worksheet.Cells["B2"].PutValue("&=Teacher.Age");
+
+            worksheet.Cells["C1"].PutValue("Student Name");
+            worksheet.Cells["C2"].PutValue("&=Teacher.Students.Name");
+
+            worksheet.Cells["D1"].PutValue("Student Age");
+            worksheet.Cells["D2"].PutValue("&=Teacher.Students.Age");
+
+            // Apply Style to A1:D1
+            Range range = worksheet.Cells.CreateRange("A1:D1");
+            Style style = workbook.CreateStyle();
+            style.Font.IsBold = true;
+            style.ForegroundColor = Color.Yellow;
+            style.Pattern = BackgroundType.Solid;
+            StyleFlag flag = new StyleFlag();
+            flag.All = true;
+            range.ApplyStyle(style, flag);
+
+            // Initialize WorkbookDesigner object
+            WorkbookDesigner designer = new WorkbookDesigner();
+
+            // Load the template file
+            designer.Workbook = workbook;
+
+            System.Collections.Generic.List<Teacher> list = new System.Collections.Generic.List<Teacher>();
+
+            // Create an object for the Teacher class
+            Teacher h1 = new Teacher("Mark John", 30);
+
+            // Create the relevant student objects for the Teacher object
+            h1.Students = new List<Person>();
+            h1.Students.Add(new Person("Chen Zhao", 14));
+            h1.Students.Add(new Person("Jamima Winfrey", 18));
+            h1.Students.Add(new Person("Reham Smith", 15));
+
+            // Create another object for the Teacher class
+            Teacher h2 = new Teacher("Masood Shankar", 40);
+
+            // Create the relevant student objects for the Teacher object
+            h2.Students = new List<Person>();
+            h2.Students.Add(new Person("Karishma Jathool", 16));
+            h2.Students.Add(new Person("Angela Rose", 13));
+            h2.Students.Add(new Person("Hina Khanna", 15));
+
+            // Add the objects to the list
+            list.Add(h1);
+            list.Add(h2);
+
+            // Specify the DataSource
+            designer.SetDataSource("Teacher", list);
+
+            // Process the markers
+            designer.Process();
+
+            // Autofit columns
+            worksheet.AutoFitColumns();
+
+            // Save the Excel file.
+            designer.Workbook.Save(dataDir + "output.xlsx");
+```
+
+## How to Import Nested Objects Not Line‑by‑Line With Smart Markers {#how-to-import-nested-objects-not-linebyline-with-smart-markers}
+
+The current default processing method is to process smart markers line by line. However, sometimes the smart markers of the same data table need to be processed together, regardless of whether they are in the same row or not. In that case, you must specify a named range "\_CellsSmartMarkers" and set `WorkbookDesigner.LineByLine` to false before invoking the processing.
+
+|![todo:image_alt_text](/net/cells/images/4cafbd3b9c576654-using-smart-markers_11.png)|
+
+```csharp
+string dataDir = "./";
+Workbook workbook = new Workbook();
+Style style = workbook.CreateStyle();
+style.Pattern = BackgroundType.Solid;
+style.ForegroundColor = Color.Black;
+style.Font.Color = Color.White;
+// Create a designer workbook
+
+// Workbook workbook = new Workbook();
+Worksheet worksheet = workbook.Worksheets[0];
+
+worksheet.Cells["A1"].PutValue("Teacher Name");
+worksheet.Cells["A1"].SetStyle(style);
+worksheet.Cells["A2"].PutValue("&=Teacher.Name");
+
+worksheet.Cells["B1"].PutValue("Teacher Age");
+worksheet.Cells["B1"].SetStyle(style);
+worksheet.Cells["B2"].PutValue("&=Teacher.Age");
+
+worksheet.Cells["A3"].PutValue("Student Name");
+worksheet.Cells["A3"].SetStyle(style);
+worksheet.Cells["A4"].PutValue("&=Teacher.Students.Name");
+
+worksheet.Cells["B3"].PutValue("Student Age");
+worksheet.Cells["B3"].SetStyle(style);
+worksheet.Cells["B4"].PutValue("&=Teacher.Students.Age");
+worksheet.AutoFitColumns();
+//A named range "_CellsSmartMarkers" must be added for checking which range contains all smart markers about a table.
+worksheet.Cells.CreateRange("A1:B4").Name = "_CellsSmartMarkers";
+// Initialize WorkbookDesigner object
+WorkbookDesigner designer = new WorkbookDesigner();
+
+// Load the template file
+designer.Workbook = workbook;
+
+System.Collections.Generic.List<Teacher> list = new System.Collections.Generic.List<Teacher>();
+
+// Create an object for the Teacher class
+Teacher h1 = new Teacher("Mark John", 30);
+
+// Create the relevant student objects for the Teacher object
+h1.Students = new List<Person>();
+h1.Students.Add(new Person("Chen Zhao", 14));
+h1.Students.Add(new Person("Jamima Winfrey", 18));
+h1.Students.Add(new Person("Reham Smith", 15));
+
+// Create another object for the Teacher class
+Teacher h2 = new Teacher("Masood Shankar", 40);
+
+// Create the relevant student objects for the Teacher object
+h2.Students = new List<Person>();
+h2.Students.Add(new Person("Karishma Jathool", 16));
+h2.Students.Add(new Person("Angela Rose", 13));
+h2.Students.Add(new Person("Hina Khanna", 15));
+
+// Add the objects to the list
+list.Add(h1);
+list.Add(h2);
+
+// Specify the DataSource
+designer.SetDataSource("Teacher", list);
+designer.LineByLine = false;
+// Process the markers
+designer.Process();
+
+// Autofit columns
+worksheet.AutoFitColumns();
+
+// Save the Excel file.
+designer.Workbook.Save(dataDir + "output.xlsx");
+
+
+public class Person
+{
+    private string m_Name;
+
+    public string Name
+    {
+        get { return m_Name; }
+        set { m_Name = value; }
+    }
+    private int m_Age;
+
+    public int Age
+    {
+        get { return m_Age; }
+        set { m_Age = value; }
+    }
+    internal Person(string name, int age)
+    {
+        this.m_Name = name;
+        this.m_Age = age;
+    }
+}
+
+public class Teacher
+{
+    private string m_Name;
+
+    public string Name
+    {
+        get { return m_Name; }
+        set { m_Name = value; }
+    }
+    private int m_Age;
+
+    public int Age
+    {
+        get { return m_Age; }
+        set { m_Age = value; }
+    }
+
+    private List<Person> mStudents;
+    public List<Person> Students
+    {
+        get { return mStudents; }
+        set { mStudents = value; }
+    }
+    public Teacher(string name, int age)
+    {
+        this.Name = name;
+        this.Age = age;
+    }
+}
+```

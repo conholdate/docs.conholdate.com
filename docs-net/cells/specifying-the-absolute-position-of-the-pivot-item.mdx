@@ -1,0 +1,95 @@
+---
+title: "Specifying the Absolute Position of the Pivot Item"
+sidebar_label: "Specifying the Absolute Position of the Pivot Item"
+sidebar_key: "net-cells-specifying-the-absolute-position-of-the-pivot-item"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/specifying-the-absolute-position-of-the-pivot-item.html"
+source_commit: ""
+source_sha256: "648ea7935e17fb7d12bf40f3286164ecd2fc29b490cab59f081943b7a117ac68"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/specifying-the-absolute-position-of-the-pivot-item/"
+source_snapshot_sha256: "68bdb09bcf7eaffd55123cdc5da274fc571c641579de56c47ab56b9e7d329531"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+Sometimes, the user needs to specify the absolute position of the pivot items. The Aspose.Cells API has exposed a few new properties and a method to achieve this requirement.
+
+- Added the <a href="https://reference.aspose.com/cells/net/aspose.cells.pivot/pivotitem/properties/position" target="_blank" rel="nofollow noopener noreferrer">**PivotItem.Position**</a> property that can be used to specify the position index in all the PivotItems regardless of the parent node. Added the <a href="https://reference.aspose.com/cells/net/aspose.cells.pivot/pivotitem/properties/positioninsameparentnode" target="_blank" rel="nofollow noopener noreferrer">**PivotItem.PositionInSameParentNode**</a> property that can be used to specify the position index in the PivotItems under the same parent node.
+- Added the <a href="https://reference.aspose.com/cells/net/aspose.cells.pivot/pivotitem/methods/move" target="_blank" rel="nofollow noopener noreferrer">**PivotItem.Move(int count, bool isSameParent)**</a> method in order to move the item up or down based on the count value, where count is the number of positions to move the PivotItem. If the count value is less than zero, the item will be moved up, whereas if the count value is greater than zero, the PivotItem will move down. The Boolean **isSameParent** parameter specifies whether the moving operation has to be performed in the same parent node.
+- Obsoleted the *PivotItem.Move(int count)* method; therefore, it is suggested to use the newly added **PivotItem.Move(int count, bool isSameParent)** method instead.
+  :::
+
+The following sample code creates a Pivot Table and then specifies the Pivot Item positions in the same parent node. You can download the <a href="https://docs.aspose.com/cells/net/specifying-the-absolute-position-of-the-pivot-item/5112632.xlsx" target="_blank" rel="nofollow noopener noreferrer">source Excel</a> and <a href="https://docs.aspose.com/cells/net/specifying-the-absolute-position-of-the-pivot-item/5112619.xlsx" target="_blank" rel="nofollow noopener noreferrer">output Excel</a> files for your reference. If you open the output Excel file, you will see that the Pivot Item "4H12" is at the 0th position in parent "K11" and "DIF400" is at the 3rd position. Similarly, CA32 is at position 1 and AAA3 is at position 2.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+Workbook wb = new Workbook(dataDir + "source.xlsx");
+Worksheet wsPivot = wb.Worksheets.Add("pvtNew Hardware");
+Worksheet wsData = wb.Worksheets["New Hardware - Yearly"];
+
+// Get the pivottables collection for the pivot sheet
+PivotTableCollection pivotTables = wsPivot.PivotTables;
+
+// Add PivotTable to the worksheet
+int index = pivotTables.Add("='New Hardware - Yearly'!A1:D621", "A3", "HWCounts_PivotTable");
+
+// Get the PivotTable object
+PivotTable pvtTable = pivotTables[index];
+
+// Add vendor row field
+pvtTable.AddFieldToArea(PivotFieldType.Row, "Vendor");
+
+// Add item row field
+pvtTable.AddFieldToArea(PivotFieldType.Row, "Item");
+
+// Add data field
+pvtTable.AddFieldToArea(PivotFieldType.Data, "2014");
+
+// Turn off the subtotals for the vendor row field
+PivotField pivotField = pvtTable.RowFields["Vendor"];
+pivotField.SetSubtotals(PivotFieldSubtotalType.None, true);
+
+// Turn off grand total
+pvtTable.ColumnGrand = false;
+
+//No change in the data source after creating pivot table,so no need to refresh data.
+//pvtTable.RefreshData();
+pvtTable.CalculateData();
+
+pvtTable.RowFields["Item"].PivotItems["4H12"].PositionInSameParentNode = 0;
+pvtTable.RowFields["Item"].PivotItems["DIF400"].PositionInSameParentNode = 3;
+
+/* 
+ * As a result of using PivotItem.PositionInSameParentNode,
+ * it will change the original sort sequence.
+ * So when you use PivotItem.PositionInSameParentNode in another parent node.
+ * You need call the method named "CalculateData" again. 
+*/
+pvtTable.CalculateData();
+
+pvtTable.RowFields["Item"].PivotItems["CA32"].PositionInSameParentNode = 1;
+pvtTable.RowFields["Item"].PivotItems["AAA3"].PositionInSameParentNode = 2;
+
+// Save file
+wb.Save(dataDir + "output_out.xlsx");
+```
+
+:::info
+Please note that it is necessary to call the PivotTable.RefreshData and PivotTable.CalculateData methods before using the **PivotItem.Position**, **PivotItem.PositionInSameParentNode** properties, and the **PivotItem.Move(int count, bool isSameParent)** method.
+:::
