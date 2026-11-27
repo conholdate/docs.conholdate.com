@@ -1,0 +1,154 @@
+---
+title: "how to run Aspose.Cells.GridWeb in docker"
+sidebar_label: "how to run Aspose.Cells.GridWeb in docker"
+sidebar_key: "net-cells-aspose-cells-gridweb-how-to-build-online-excel-editor"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/aspose-cells-gridweb/how-to-build-online-excel-editor.html"
+source_commit: ""
+source_sha256: "a26ed6fb8fd5689c43c68c1aac9489bcfb97c8db7a42e29910bc70141c4f0979"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/aspose-cells-gridweb/how-to-build-online-excel-editor/"
+source_snapshot_sha256: "9348cb47f5b50c2589df27aa6041eaf93742a65abb23ea2ff02143c9413956d3"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Docker Guide {#docker-guide}
+
+## Prerequisites {#prerequisites}
+
+Ensure you have Docker installed on your machine. You can download and install Docker from the <a href="https://www.docker.com/get-started" target="_blank" rel="nofollow noopener noreferrer">official Docker website</a>.
+
+## Step 1: Create a Dockerfile {#step-1-create-a-dockerfile}
+
+Create a file named `Dockerfile` in your project <a href="https://github.com/aspose-cells/Aspose.Cells.Grid-for-.NET/blob/master/Examples_GridWeb/" target="_blank" rel="nofollow noopener noreferrer">directory</a>. The `Dockerfile` should contain instructions on how to build your Docker image.
+
+## Step 2: Write Dockerfile for GridWeb {#step-2-write-dockerfile-for-gridweb}
+
+Here is a sample <a href="https://github.com/aspose-cells/Aspose.Cells.Grid-for-.NET/blob/master/Examples_GridWeb/Dockerfile" target="_blank" rel="nofollow noopener noreferrer">`Dockerfile`</a> for a GridWeb demo with an ASP.NET Core application:
+
+```dockerfile
+# Use the official .NET6.0 runtime as a parent image
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-focal AS base
+WORKDIR /app  
+EXPOSE 80 
+
+# Use the official .NET6.0 SDK as build environment
+FROM mcr.microsoft.com/dotnet/sdk:6.0-focal AS build
+
+WORKDIR /src  
+# we shall use .NET 6.0 project
+COPY ["GridWeb.Demo.NET6.0.csproj", "."]
+RUN dotnet restore "./GridWeb.Demo.NET6.0.csproj"
+
+# Copy everything else and build
+COPY . .
+WORKDIR "/src/."
+RUN dotnet build "GridWeb.Demo.NET6.0.csproj" -c Release -o /app/build
+
+# Publish the app
+FROM build AS publish
+RUN dotnet publish "GridWeb.Demo.NET6.0.csproj" -c Release -o /app/publish
+
+# Final stage/image
+FROM base AS final
+WORKDIR /app
+# If you want better display like in Windows, you need to install fonts in /usr/share/fonts/
+# Then the application can parse and render the fonts used in the spreadsheet file.
+# Here we don't provide extra font resources.
+# Install Fonts because the SDK image contains very few fonts. The command copies font files from local to the Docker image.
+# Make sure you have a local “fonts” directory that contains all the fonts you need to install.
+# In this example, the local “fonts” directory is placed in the same directory as the Dockerfile.
+# COPY fonts/* /usr/share/fonts/
+# The basic file path which contains the spreadsheet files
+RUN mkdir -p /app/wb
+# The cache file path for GridWeb
+RUN mkdir -p /app/filecache
+# The cache picture path for GridWeb
+RUN mkdir -p /app/piccache
+COPY wwwroot/wb/*.xlsx /app/wb/
+
+COPY --from=publish /app/publish .
+
+# Set the start command for the Docker image 
+ENTRYPOINT ["dotnet", "GridWeb.Demo.NET6.0.dll"]
+```
+
+## Step 3: Building the Docker Image {#step-3-building-the-docker-image}
+
+Build the Docker image: from the terminal, execute the following command:
+
+```bash
+docker build -t gridweb-demo-net6 .
+```
+
+You can replace `gridweb-demo-net6` with the name you want to give your Docker image.
+
+## Step 4: Running a Docker Container {#step-4-running-a-docker-container}
+
+Once the image is built, you can run a container using the following command:
+
+```bash
+docker run -d -p 24262:80 --name gridweb-demo-container gridweb-demo-net6
+```
+
+### Explanation of Docker Run Command Options {#explanation-of-docker-run-command-options}
+
+- `-d`: Run the container in detached mode (in the background).
+- `-p 24262:80`: Map port 80 in the container to port 24262 on the host machine.
+- `--name gridweb-demo-container`: Assign a name to the container.
+
+## Step 5: Verify the Container is Running {#step-5-verify-the-container-is-running}
+
+To check if your container is running, use the following command:
+
+```bash
+docker ps
+```
+
+This will list all running containers. You should see your container listed along with its name and status.
+
+## Step 6: Access the Web Application {#step-6-access-the-web-application}
+
+Open a web browser and go to `http://localhost:24262/`. You should see your application running.
+
+You will see the general development guide for GridWeb.
+
+Click the [demo](http://localhost:24262/grid/index1 "demo") on the page; you can edit the spreadsheet file.
+
+## Additional Commands {#additional-commands}
+
+### Stopping the Container {#stopping-the-container}
+
+To stop a running container, use the following command:
+
+```bash
+docker stop gridweb-demo-container
+```
+
+### Removing a Container {#removing-a-container}
+
+To remove a stopped container, use the following command:
+
+```bash
+docker rm gridweb-demo-container
+```
+
+### Removing an Image {#removing-an-image}
+
+To remove an image, use the following command:
+
+```bash
+docker rmi gridweb-demo-net6
+```

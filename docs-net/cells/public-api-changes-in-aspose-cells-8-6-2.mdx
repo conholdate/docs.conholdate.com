@@ -1,0 +1,160 @@
+---
+title: "Public API Changes in Aspose.Cells 8.6.2"
+sidebar_label: "Public API Changes in Aspose.Cells 8.6.2"
+sidebar_key: "net-cells-public-api-changes-in-aspose-cells-8-6-2"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/public-api-changes-in-aspose-cells-8-6-2.html"
+source_commit: ""
+source_sha256: "ffb7e103f5a0d6230529fa5e30a972dfe479c2ac5bb58e2e190619893c70c100"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/public-api-changes-in-aspose-cells-8-6-2/"
+source_snapshot_sha256: "418a55196cde9c28349f115b3922cd54e396f63353283616854bb376df37c0ce"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+This document describes the changes to the Aspose.Cells API from version 8.6.1 to 8.6.2 that may be of interest to module/application developers. It includes not only new and updated public methods, added classes, but also a description of any changes in the behavior behind the scenes in Aspose.Cells.
+:::
+
+## Added APIs {#added-apis}
+
+### Support for Callback with Smart Markers {#support-for-callback-with-smart-markers}
+
+This release of Aspose.Cells for .NET API has exposed the `WorkbookDesigner.CallBack` property and `ISmartMarkerCallBack` interface that together allow you to receive notifications about the cell reference and/or smart marker being processed. The following piece of code demonstrates the usage of the `ISmartMarkerCallBack` interface to define a new class that handles the callback for the `WorkbookDesigner.Process` method.
+
+**C#**
+
+```csharp
+ class SmartMarkerCallBack : ISmartMarkerCallBack
+
+{
+
+    Workbook workbook;
+
+    internal SmartMarkerCallBack(Workbook workbook)
+
+    {
+
+        this.workbook = workbook;
+
+    }
+
+    public void Process(int sheetIndex, int rowIndex, int colIndex, string tableName, string columnName)
+
+    {
+
+        Console.WriteLine("Processing Cell : " + workbook.Worksheets[sheetIndex].Name + "!" + CellsHelper.CellIndexToName(rowIndex, colIndex));
+
+        Console.WriteLine("Processing Marker : " + tableName + "." + columnName);
+
+    }
+
+}
+```
+
+The rest of the process includes loading the designer spreadsheet containing the Smart Markers with `WorkbookDesigner` and processing it by setting the data source. However, in order to enable the notifications, it is necessary to set the `WorkbookDesigner.CallBack` property before calling the `WorkbookDesigner.Process` method as demonstrated below.
+
+**C#**
+
+```csharp
+ //Loading the designer spreadsheet in an instance of Workbook
+
+Workbook workbook = new Workbook(inputFilePath);
+
+//Loading the instance of Workbook in an instance of WorkbookDesigner
+
+WorkbookDesigner designer = new WorkbookDesigner(workbook);
+
+//Set the WorkbookDesigner.CallBack property to an instance of newly created class
+
+designer.CallBack = new SmartMarkerCallBack(workbook);
+
+//Set the data source 
+
+designer.SetDataSource(table);
+
+//Process the Smart Markers in the designer spreadsheet
+
+designer.Process(false);
+```
+
+### Added Chart.ToPdf Method {#added-charttopdf-method}
+
+Aspose.Cells for .NET 8.6.2 has exposed the `Chart.ToPdf` method that can be used to directly render the Chart shape to PDF format. The method currently accepts a parameter of type `string` as a file‑path location to store the resultant file on disk.
+
+The following is a simple usage scenario.
+
+**C#**
+
+```csharp
+ //Load spreadsheet containing charts
+
+Workbook workbook = new Workbook(inputFilePath);
+
+//Access first worksheet
+
+Worksheet worksheet = workbook.Worksheets[0];
+
+//Access first chart inside the worksheet
+
+Chart chart = worksheet.Charts[0];
+
+//Save the chart in PDF format
+
+chart.ToPdf(outputFilePath);
+```
+
+### Added Workbook.RemoveUnusedStyles Method {#added-workbookremoveunusedstyles-method}
+
+Aspose.Cells for .NET 8.6.2 has exposed the `Workbook.RemoveUnusedStyles` method that can be used to remove all unused `Style` objects from the pool of styles.
+
+The following is a simple usage scenario.
+
+**C#**
+
+```csharp
+ //Load spreadsheet
+
+Workbook workbook = new Workbook(inputFilePath);
+
+//Remove all unused styles from the template
+
+workbook.RemoveUnusedStyles();
+```
+
+### Added Cells.Style Property {#added-cellsstyle-property}
+
+The `Cells.Style` property can be used to access the `Style` of the worksheet representing the default style.
+
+The following is a simple usage scenario.
+
+**C#**
+
+```csharp
+ //Load a spreadsheet
+
+Workbook book = new Workbook(inputFilePath);
+
+//Access the default style of worksheet
+
+Style style = book.Worksheets[0].Cells.Style;
+```
+
+### Events Added for GridWeb {#events-added-for-gridweb}
+
+Aspose.Cells.GridWeb for .NET 8.6.2 has exposed the following two new events.
+
+1. **AjaxCallFinished**: Fires when the AJAX update of the control has finished. (EnableAJAX shall be set to true).
+2. **CellModifiedOnAjax**: Fires when the cell is modified in an AJAX call.

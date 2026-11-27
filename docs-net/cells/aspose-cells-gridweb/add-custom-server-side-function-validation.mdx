@@ -1,0 +1,192 @@
+---
+title: "Add Custom Server-side Function Validation"
+sidebar_label: "Add Custom Server-side Function Validation"
+sidebar_key: "net-cells-aspose-cells-gridweb-add-custom-server-side-function-validation"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/aspose-cells-gridweb/add-custom-server-side-function-validation.html"
+source_commit: ""
+source_sha256: "d9c0ba83a741125ce1235f20a5655f009fe2195bf1a0ee0070c889ea4c74c750"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/aspose-cells-gridweb/add-custom-server-side-function-validation/"
+source_snapshot_sha256: "13b7e19af49f14409f3b53025b154843ad0d209915d90a199adb4344bb7103f3"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Possible Usage Scenarios {#possible-usage-scenarios}
+
+Sometimes, you might need to implement data validation on the server side. Aspose.Cells.GridWeb allows you to add custom server-side data validation. You have to specify a cell range or area. You can also set client-side validation functions for callbacks with custom server-side validation.
+
+## Add Custom Server-side Function Validation {#add-custom-server-side-function-validation}
+
+You need to set the server validation class which implements the **GridCustomServerValidation** interface via the **GridValidation.ServerValidation** attribute. You also need to set the client-side validation function (it should be written in JavaScript on the client side). This function is required to validate the data on the client end during a callback. You can set the error message via **GridValidation.ErrorMessage** and the title via **GridValidation.ErrorTitle** properties as needed. Please see a series of screenshots that show how it works (step by step) in a given scenario after executing the sample code below.
+
+In the example, you cannot update data in B2:C3 cells. When you try to edit those cells, you will be prompted with error messages and the previous value will be restored. You can open the browser's console window to print the cell's information/details for certain events.
+
+![todo:image_alt_text](/net/cells/images/e15c471901d50d18-add-custom-server-side-function-validation_1.png)
+
+![todo:image_alt_text](/net/cells/images/312f3c8c4c8bb356-add-custom-server-side-function-validation_2.png)
+
+![todo:image_alt_text](/net/cells/images/6e92e56537c816af-add-custom-server-side-function-validation_3.png)
+
+![todo:image_alt_text](/net/cells/images/8e451dad48358af4-add-custom-server-side-function-validation_4.png)
+
+![todo:image_alt_text](/net/cells/images/b2df0185bcd0443a-add-custom-server-side-function-validation_5.png)
+
+## Sample Code {#sample-code}
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+
+-----------------------------------------------
+AddCustomServerSideFunctionValidation.aspx
+-----------------------------------------------
+
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="AddCustomServerSideFunctionValidation.aspx.cs" Inherits="Aspose.Cells.GridWeb.Examples.AddCustomServerSideFunctionValidation" %>
+
+<%@ Register TagPrefix="acw" Namespace="Aspose.Cells.GridWeb" Assembly="Aspose.Cells.GridWeb" %>
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <link rel="stylesheet" href="/Scripts/jquery-ui.css" />
+    <script src="/Scripts/jquery-2.1.1.js"></script>
+    <script src="/Scripts/jquery-ui.js"></script>
+    <script type="text/javascript">
+        var lastselectvalue = null;
+        var localvalue = {};
+        function myCellSelect(cell) {
+            //Get the selected cell.
+            var value = this.getCellValueByCell(cell);
+            //Get the value to store.
+            lastselectvalue = value;
+            var key = this.acttab + "_" + this.getCellRow(cell) + "_" + this.getCellColumn(cell);
+            //Store the respective cell's value.
+            localvalue[key] = lastselectvalue;
+            console.log("OnCellSelect: value:" + value + " row:" + this.getCellRow(cell) + ",col:" + this.getCellColumn(cell));
+            console.log("Last selected value:" + lastselectvalue);
+        }
+        function ValidationErrorClientFunctionCallback(cell, msg) {
+            //Get the error message string.
+            var errmsg1 = getattr(cell, "errmsg");
+            //Show the error message in the client dialog.
+            alert(errmsg1);
+            //Showing an alert message where "this" refers to GridWeb
+            alert(this.id + "----> " + msg + " Previous value will be restored.");
+            $("#errmsg").text(msg);
+            console.log("Selected cell:" + " row:" + this.getCellRow(cell) + ",col:" + this.getCellColumn(cell));
+            //Get the GridWeb.
+            var who = this;
+            //Restore to valid value/previous value. 
+            who.setValid(cell);
+            var key = this.acttab + "_" + this.getCellRow(cell) + "_" + this.getCellColumn(cell);
+            lastselectvalue = localvalue[key];
+            setInnerText(cell.children[0], lastselectvalue);
+        }
+    </script>
+
+    <title>Add Custom Server-side Function Validation</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div>
+            <div>
+                <b>GridWeb Version:&nbsp</b>
+                <asp:Label ID="lblVersion" runat="server" Text="Label"></asp:Label>
+                <br />
+
+                <acw:GridWeb ID="GridWeb1" runat="server" OnCellSelectedClientFunction="myCellSelect" Width="44%" Height="384px" ShowLoading="true" XhtmlMode="true"
+                    PresetStyle="Standard" EnableAJAX="true" EnableAsync="true" RenderHiddenRow="true" MaxColumn="15" MaxRow="21">
+                </acw:GridWeb>
+
+            </div>
+        </div>
+
+        <span id="errmsg" style="color: red;"></span>
+    </form>
+</body>
+</html>
+
+-----------------------------------------------
+AddCustomServerSideFunctionValidation.aspx.cs
+-----------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using Aspose.Cells.GridWeb;
+using Aspose.Cells.GridWeb.Data;
+
+
+namespace Aspose.Cells.GridWeb.Examples
+{
+    class MyServerValidation : GridCustomServerValidation
+    {
+        public string Validate(GridWorksheet sheet, int row, int col, string value)
+        {
+            if ((row == 1) || (row == 2))
+            {
+                return "Value Not Passed!";
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+    }
+
+    public partial class AddCustomServerSideFunctionValidation : System.Web.UI.Page 
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (!IsPostBack && !this.GridWeb1.IsPostBack)
+            {
+                lblVersion.Text = GridWeb.GetVersion();
+
+                //Input values to B2:C3 cells in the active worksheet.
+                GridWeb1.ActiveSheet.Cells["B2"].PutValue("This");
+                GridWeb1.ActiveSheet.Cells["C2"].PutValue("cannot");
+                GridWeb1.ActiveSheet.Cells["B3"].PutValue("be");
+                GridWeb1.ActiveSheet.Cells["C3"].PutValue("changed");
+                
+                //Get the validations of the active sheet.
+                var gridValidationCollection = GridWeb1.ActiveSheet.Validations;
+                
+                //Add data validation to range/area: B2:C3
+                GridValidation gv = gridValidationCollection.Add(new GridCellArea(1, 1, 2, 2));
+                
+                //Set the validation type to custom server function.
+                gv.ValidationType = GridValidationType.CustomServerFunction;
+                
+                //Set the server validation class which implements the GridCustomServerValidation interface.
+                gv.ServerValidation = new MyServerValidation();
+                
+                //Set the client validation function (written in JavaScript on client-side).
+                //This function is compulsory to validate the data on client end on callback.
+                gv.ClientValidationFunction = "ValidationErrorClientFunctionCallback";
+                
+                //Set the error message string.
+                gv.ErrorMessage = "Error found! You cannot change this value.";
+                
+                //Set the error title.
+                gv.ErrorTitle = "Error";
+            }
+        }
+    }
+}
+```

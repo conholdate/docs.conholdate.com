@@ -1,0 +1,245 @@
+---
+title: "Read-only Mode and Edit Mode"
+sidebar_label: "Read-only Mode and Edit Mode"
+sidebar_key: "net-cells-aspose-cells-gridjs-user-guide-read-only-mode-and-edit-mode"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/aspose-cells-gridjs/user-guide/read-only-mode-and-edit-mode.html"
+source_commit: ""
+source_sha256: "b0be693aa437d8402680125121b2a52d099aba7c7352efb1675824dddf85ef10"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/aspose-cells-gridjs/user-guide/read-only-mode-and-edit-mode/"
+source_snapshot_sha256: "82782531c5689ceec5a0c3303cc17bb92db254a81e8ab20ac7f2d9c9f254ad22"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "../../_remote-markdown.css";
+
+## Introduction {#introduction}
+
+GridJs mode is configured by `options.mode`, with two values: `'edit'` and `'read'`. The default mode is `'edit'` in `defaultSettings`. In read mode, GridJs keeps navigation-related interactions, but blocks data-editing paths such as editor input, cell text write, and paste workflows.
+
+## How to use {#how-to-use}
+
+1. Initialize GridJs in edit mode when users need full editing features.
+
+2. Initialize GridJs in read mode when users should browse data without changing cell content.
+
+3. In read mode, these editing-related features are disabled by code:
+
+   - Formula bar input and hidden key-input area are set to `disabled`.
+   - Opening the in-cell editor is blocked.
+   - Writing cell text is blocked.
+   - Paste handlers return immediately in read mode (both regular paste and outer-document paste path).
+   - Autofill by drag does not run .
+   - GridInput keydown/composition/paste bindings are attached only when mode is not 'read'.
+
+4. In read mode, sheet-tab management is reduced:
+
+   - The bottom-bar add button is not rendered.
+   - Sheet-tab context-menu and double-click rename handlers are not bound.
+   - Tab click for sheet switching is still bound.
+
+5. In read mode, the selector is created as readonly (`mode !== 'edit'`), so the selection corner UI is hidden.
+
+## JavaScript API {#javascript-api}
+
+```js
+// Edit mode (default behavior)
+const xsEdit = x_spreadsheet('#gridjs-edit', {
+  mode: 'edit',
+});
+
+// Read-only mode
+const xsRead = x_spreadsheet('#gridjs-read', {
+  mode: 'read',
+});
+```
+
+### Relevant functions {#relevant-functions}
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Function / Location
+
+</th>
+<th>
+
+Description
+
+</th>
+<th>
+
+Parameters
+
+</th>
+<th>
+
+Returns
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`Options.mode` (`index.d.ts`)
+
+</td>
+<td>
+
+Declares supported mode values: `'edit' | 'read'`.
+
+</td>
+<td>
+
+`mode`: `'edit'` or `'read'`
+
+</td>
+<td>
+
+n/a
+
+</td>
+</tr>
+<tr>
+<td>
+
+`defaultSettings.mode` (`core/data_proxy.js`)
+
+</td>
+<td>
+
+Sets default mode to `'edit'`.
+
+</td>
+<td>
+
+none
+
+</td>
+<td>
+
+n/a
+
+</td>
+</tr>
+<tr>
+<td>
+
+`editorSet(...)` (`component/sheet.js`)
+
+</td>
+<td>
+
+Stops in-cell editing when `data.settings.mode === 'read'`.
+
+</td>
+<td>
+
+`focus`: optional boolean
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`dataSetCellText(...)` (`component/sheet.js`)
+
+</td>
+<td>
+
+Stops cell text write in read mode.
+
+</td>
+<td>
+
+`text`, `state`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`ContextMenu.setMode(...)` (`component/contextmenu.js`)
+
+</td>
+<td>
+
+Shrinks menu items in read mode to a minimal copy-first set.
+
+</td>
+<td>
+
+`mode`: row/column/range context
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`Bottombar.setItemEvent(...)` (`component/bottombar.js`)
+
+</td>
+<td>
+
+Binds rename/context-menu handlers only in edit mode.
+
+</td>
+<td>
+
+`item`: tab element
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+No public runtime API for switching mode after initialization was found in `index.d.ts` or the inspected `Spreadsheet` public methods in `index.js`.
+
+## Common Questions {#common-questions}
+
+Q: What mode is used if I do not pass `options.mode`? A: GridJs uses `mode: 'edit'` from `defaultSettings`.
+
+Q: What is the simplest way to make GridJs read-only? A: Initialize with `{ mode: 'read' }`.
+
+Q: In read mode, can users still switch worksheets? A: Yes. Sheet-tab click is still bound; only add/rename/context-menu management handlers are removed.
+
+Q: In read mode, why can users not type or paste into cells? A: Multiple edit paths explicitly return early when `data.settings.mode === 'read'`, including editor opening, text writing, and paste handlers.

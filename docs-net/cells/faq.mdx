@@ -1,0 +1,114 @@
+---
+title: "FAQ"
+sidebar_label: "FAQ"
+sidebar_key: "net-cells-faq"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/faq.html"
+source_commit: ""
+source_sha256: "a9fdf14ed75e418d0891cc3e8e7ef75d1b7ce478fa7de782c1a39877e1df06f6"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/faq/"
+source_snapshot_sha256: "3c9f8394bdd08840ade57cd0418db554b40c23f2420d464f6c1a82d983cc7d2a"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## How to Fix the System.StackOverflowException on Workbook.CalculateFormula? {#how-to-fix-the-systemstackoverflowexception-on-workbookcalculateformula}
+
+Sometimes, users face System.StackOverflowException on the Workbook.CalculateFormula method. This exception usually occurs because the default stack size of the IIS is too small (265 KB only). You can fix this error by creating another thread with an increased stack size and then moving your Workbook.CalculateFormula‑related code inside it.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+private HttpPostedFileBase postedFile;
+
+[HttpPost]
+public ActionResult Index(HttpPostedFileBase file, string mode)
+{
+    this.postedFile = file;
+    Thread newThread = new Thread(Calculate, 1048576);
+    newThread.Start();
+    newThread.Join();
+    return View();
+}
+
+private void Calculate()
+{
+    if (postedFile != null && postedFile.ContentLength > 0)
+    {
+        var wbkMain = new Workbook(postedFile.InputStream);
+        wbkMain.CalculateFormula();
+    }
+}
+```
+
+## Thickness of lines issue while rendering Excel to PDF {#thickness-of-lines-issue-while-rendering-excel-to-pdf}
+
+Sometimes, when an Excel file is converted to PDF, the thickness of lines differs in the output PDF. This issue is not caused by Aspose.Cells. It is caused by **Adobe Reader** when its settings **"Smooth line art"** and **"Enhance thin lines"** are checked. Unchecking these options will display the PDF correctly.
+
+If you check **"Smooth line art"** and **"Enhance thin lines"**, the thickness of lines is different. See the following steps on how it's done:
+
+- Go to **Edit**
+- Select **Preferences**
+- In the **Page Display** category, check the **"Smooth line art"** and **"Enhance thin lines"** options
+
+If you uncheck **"Smooth line art"** and **"Enhance thin lines"**, the thickness of lines is the same. To achieve this, just follow the steps below:
+
+- Go to **Edit**
+- Select **Preferences**
+- In the **Page Display** category, uncheck the **"Smooth line art"** and **"Enhance thin lines"** options
+
+## How to Fix the System.OutOfMemoryException while Loading Large Spreadsheets? {#how-to-fix-the-systemoutofmemoryexception-while-loading-large-spreadsheets}
+
+There are fair chances that the Workbook constructor may throw System.OutOfMemoryException while loading large spreadsheets. This exception suggests that the available memory is insufficient to completely load the spreadsheet into memory; therefore, the spreadsheet has to be loaded while enabling the [Memory Preferences](/net/cells/optimizing-memory-usage-while-working-with-big-files-having-large-datasets/).
+
+Aspose.Cells APIs provide Memory Preferences to optimize memory consumption while loading & processing spreadsheets. These options are also helpful in efficiently loading large spreadsheets containing huge data sets into a Workbook object, as demonstrated below.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+// Specify the LoadOptions
+LoadOptions options = new LoadOptions();
+
+// Set the memory preferences
+options.MemorySetting = MemorySetting.MemoryPreference;
+
+// Load the Big Excel file having large Data set in it
+Workbook book = new Workbook(dataDir + "sample.xlsx", options);
+Console.WriteLine("File has been loaded successfully");
+```
+
+## Determine which stack size is needed for a certain Workbook {#determine-which-stack-size-is-needed-for-a-certain-workbook}
+
+Although we have enhanced the Aspose.Cells formula calculation engine and, in most cases, you should be able to get all the formulas calculated successfully for a given template file without specifying a smaller stack size, sometimes a StackOverflowException on the Workbook.CalculateFormula method might be inevitable. We provide new APIs for users to track formula calculations. We have added a class named `AbstractCalculationMonitor` and provided a property, i.e., *CalculationOptions.CalculationMonitor*, to help trace the issue.
+
+Users may trace the stack size themselves using the APIs. Please note that checking the stack for every cell will surely degrade performance to a greater extent. See the sample code segment for your reference:
+
+```csharp
+public class MyCalculationMonitor : AbstractCalculationMonitor
+{
+    public override void BeforeCalculate(int sheetIndex, int rowIndex, int colIndex)
+    {
+        if(new StackTrace(false).FrameCount > 2000)
+        {
+            throw new Exception("Stop the formula calculation because risk of StackOverflowException");
+        }
+    }
+}
+```
+
+:::info
+There is no better way to get the stack size used at runtime. The above code we provided is just an example. The performance will be degraded significantly, for sure. Therefore, we think the code can be optimized by users (who really want to use it) according to their different scenarios and requirements, such as checking the stack when the recursive cell count reaches a certain number, gathering the average increase rate of the stack for one recursive cell, and determining the frequency to check the stack, etc.
+:::

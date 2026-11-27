@@ -1,0 +1,348 @@
+---
+title: "How to Download"
+sidebar_label: "How to Download"
+sidebar_key: "net-cells-aspose-cells-gridjs-user-guide-download-export-from-file-menu"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/aspose-cells-gridjs/user-guide/download-export-from-file-menu.html"
+source_commit: ""
+source_sha256: "e9061bb81d2e04f5d50cb19cc6d4bd5df80a70ff7bb654fa2090f26d7103bc89"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/aspose-cells-gridjs/user-guide/download-export-from-file-menu/"
+source_snapshot_sha256: "513e43eb46df99e20dd6a302d242079d968328ab44af1000ddb8f8e7ef063873"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "../../_remote-markdown.css";
+
+## Introduction {#introduction}
+
+GridJs adds file export entries to the File menu through the `Download` menu item class. The File menu contains **Download Original**, **Download As XLSX**, **Download As PDF**, and **Download As HTML**. When the locale is not `ru` and not `zh`, the same File menu also adds **Save To Google Drive** and **Save To Dropbox** entries.
+
+## How to use {#how-to-use}
+
+1. Open GridJs and use the **File** menu.
+
+2. Select **Download Original** to route the menu action as `download_Original` and call the download flow with save type `Original`.
+
+3. Select **Download As XLSX**, **Download As PDF**, or **Download As HTML** to route the menu action as `download_XLSX`, `download_PDF`, or `download_HTML`. GridJs changes the exported file name suffix to `.xlsx`, `.pdf`, or `.html` before starting the download flow.
+
+![](/net/cells/images/8ba95ab627b06cb2-file-menu.png)
+
+4. If the current locale is neither `ru` nor `zh`, use **Save To Google Drive** or **Save To Dropbox**. Both entries export the original file type and pass the device value as `GoogleDrive` or `Dropbox`.
+
+![](/net/cells/images/8b294a368d453819-file-menu-cloud.png)
+
+5. If `beforeSaveFunc` is configured, GridJs calls it before starting the export. If it returns a false value, the export stops.
+
+6. If `fileDownloadCallFunc` is configured, GridJs calls that function with the target file name, export type, and device value. If no custom callback is configured, GridJs sends a `POST` request to `fileDownloadUrl`.
+
+7. When the `POST` response is JSON or text, GridJs treats the response as a file URL and downloads that URL as a blob. For other response content types, GridJs downloads the response blob directly.
+
+The File menu has a generic `download` handler that opens `ModalDownload`, but the `new Download()` entry without a suffix is commented out in the inspected File menu code. The active File menu entries use the direct typed handlers listed above.
+
+## JavaScript API {#javascript-api}
+
+Configure the built-in download request URL with `setFileDownloadInfo(url)`.
+
+```js
+const xs = x_spreadsheet('#gridjs-demo-uid', options);
+
+xs.setFileDownloadInfo('/GridJs2/Download');
+```
+
+Use `setFileDownloadCallFunction(fileDownloadCallFunc)` when you want to handle the export action yourself instead of using the built-in `POST` request.
+
+```js
+const xs = x_spreadsheet('#gridjs-demo-uid', options);
+
+xs.setFileDownloadCallFunction((toFileName, type, device) => {
+  // toFileName is the final file name selected by GridJs.
+  // type is one of: 'Original', 'XLSX', 'PDF', or 'HTML'.
+  // device is 'Device', 'GoogleDrive', or 'Dropbox'.
+});
+```
+
+Use `setBeforeSaveFunction(beforeSaveFunc)` to run a guard before export starts.
+
+```js
+xs.setBeforeSaveFunction(() => {
+  return true;
+});
+```
+
+### Relevant functions {#relevant-functions}
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Function / Location
+
+</th>
+<th>
+
+Description
+
+</th>
+<th>
+
+Parameters
+
+</th>
+<th>
+
+Returns
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`Download(suffix)` (`component/toolbar/download.js`)
+
+</td>
+<td>
+
+Builds a download menu item tag as `download_<suffix>` and uses the download icon, or the save-to-cloud icon for `GOOGLE` and `DROPBOX`.
+
+</td>
+<td>
+
+`suffix`: export suffix such as `Original`, `XLSX`, `PDF`, `HTML`, `GOOGLE`, or `DROPBOX`
+
+</td>
+<td>
+
+`Download` instance
+
+</td>
+</tr>
+<tr>
+<td>
+
+`Menubar(data, widthFn, isHide, showPartToolbar, local)` (`component/menubar.js`)
+
+</td>
+<td>
+
+Adds `Download("Original")`, `Download("XLSX")`, `Download("PDF")`, and `Download("HTML")` to the File menu, and conditionally adds cloud entries when `local !== 'ru' && local !== 'zh'`.
+
+</td>
+<td>
+
+`data`, `widthFn`, `isHide`, `showPartToolbar`, `local`
+
+</td>
+<td>
+
+`Menubar` instance
+
+</td>
+</tr>
+<tr>
+<td>
+
+`toolbarChange(type, value)` (`component/sheet.js`)
+
+</td>
+<td>
+
+Dispatches `download_Original`, `download_XLSX`, `download_PDF`, `download_HTML`, `download_GOOGLE`, and `download_DROPBOX` to `fileDownloadByType`.
+
+</td>
+<td>
+
+`type`: menu tag; `value`: optional value
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`fileDownloadByType(type, device = 'Device')` (`component/sheet.js`)
+
+</td>
+<td>
+
+Runs `beforeSaveFunc`, builds the target file name, and either calls `downloadFile` or `fileDownloadCallFunc`.
+
+</td>
+<td>
+
+`type`: save type; `device`: destination string
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`downloadFile(toFileName, saveType)` (`component/sheet.js`)
+
+</td>
+<td>
+
+Posts sheet state and requested output type to `fileDownloadUrl`, then downloads the returned file URL or response blob.
+
+</td>
+<td>
+
+`toFileName`: target file name; `saveType`: output type
+
+</td>
+<td>
+
+`Promise<void>`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`fileLinkToStreamDownload(url, fileName, authToken)` (`component/sheet.js`)
+
+</td>
+<td>
+
+Downloads a returned file URL with `XMLHttpRequest` and forwards the blob to `downloadExportFile`.
+
+</td>
+<td>
+
+`url`, `fileName`, `authToken`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`downloadExportFile(blob, tagFileName)` (`component/sheet.js`)
+
+</td>
+<td>
+
+Creates an anchor element, sets `href` and `download`, clicks it, and revokes the object URL for non-string blobs.
+
+</td>
+<td>
+
+`blob`: Blob or string URL; `tagFileName`: download name
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`setFileDownloadInfo(url)` (`index.js`)
+
+</td>
+<td>
+
+Stores the built-in download request URL on `this.sheet.fileDownloadUrl`.
+
+</td>
+<td>
+
+`url`: download endpoint URL
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`setFileDownloadCallFunction(fileDownloadCallFunc)` (`index.js`)
+
+</td>
+<td>
+
+Stores a custom export callback on `this.sheet.fileDownloadCallFunc`.
+
+</td>
+<td>
+
+`fileDownloadCallFunc`: function called with `(toFileName, type, device)`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`setBeforeSaveFunction(beforeSaveFunc)` (`index.js`)
+
+</td>
+<td>
+
+Stores a guard callback on `this.sheet.beforeSaveFunc`.
+
+</td>
+<td>
+
+`beforeSaveFunc`: function returning a truthy value to continue
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+The inspected `index.d.ts` file does not declare `setFileDownloadInfo`, `setFileDownloadCallFunction`, or `setBeforeSaveFunction`, but the `index.js` implementation exposes these methods directly.
+
+## Common Questions {#common-questions}
+
+Q: Which export entries are active in the File menu? A: The inspected File menu code adds Download Original, Download As XLSX, Download As PDF, and Download As HTML.
+
+Q: When are Google Drive and Dropbox entries shown? A: They are added when the `local` value is not `ru` and not `zh`.
+
+Q: How does GridJs choose the exported file extension? A: For non-Original export types, GridJs replaces the current file name suffix with the lowercase export type, such as `.xlsx`, `.pdf`, or `.html`.
+
+Q: Can application code intercept the File menu export? A: Yes. If `fileDownloadCallFunc` is configured, GridJs calls it instead of the built-in `downloadFile` request.

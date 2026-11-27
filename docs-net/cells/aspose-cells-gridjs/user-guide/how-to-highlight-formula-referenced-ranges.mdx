@@ -1,0 +1,348 @@
+---
+title: "How to highlight formula referenced ranges"
+sidebar_label: "How to highlight formula referenced ranges"
+sidebar_key: "net-cells-aspose-cells-gridjs-user-guide-how-to-highlight-formula-referenced-ranges"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/aspose-cells-gridjs/user-guide/how-to-highlight-formula-referenced-ranges.html"
+source_commit: ""
+source_sha256: "515c13e06fe9f67f833d27f47c6ad0457fbe4b9d4f65d83b02390cd0125fe589"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/aspose-cells-gridjs/user-guide/how-to-highlight-formula-referenced-ranges/"
+source_snapshot_sha256: "36453297f305cec194697a12115d3fdfb363ca95df4168df56939eac4f34f3c6"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "../../_remote-markdown.css";
+
+## Introduction {#introduction}
+
+GridJs highlights formula references through the selector layer. When a formula is edited, the inspected code extracts cell references such as `A1` and range references such as `A1:B2`, then draws colored selector areas over the referenced cells.
+
+The highlighting is not exposed as a separate toolbar command in the inspected implementation. It is triggered by formula editing flows in the cell editor and the formula bar.
+
+## How to use {#how-to-use}
+
+1. Select a cell that contains a formula with cell or range references.
+
+   When the cell editor opens for a cell with `cell.f`, GridJs sets `editFormula` for the edited cell and calls `selector.setSelectorsByLocates(cell.f)`.
+
+2. Edit the cell directly.
+
+   The editor reads the cell formula into the edit area. GridJs extracts uppercase references that match the formula-reference pattern used by `extractCellReferences`, including single cells such as `A1` and ranges such as `A1:B2`.
+
+3. Review the highlighted referenced ranges on the sheet.
+
+   Each extracted reference is drawn as a selector area in `formulaRangeEl`. GridJs uses a rotating color sequence for the range borders and translucent background colors.
+
+4. Focus the formula bar while the selected cell contains a formula.
+
+   The formula bar focus handler also sets `editFormula` and calls `selector.setSelectorsByLocates(cell.f)`, so the same referenced cells and ranges are highlighted from the formula bar workflow.
+
+5. While editing a formula, click or drag-select another cell or range on the sheet.
+
+   If formula editing is active, the mouse selection is converted to a reference with `this.selector.range.toString()`. GridJs inserts or replaces the current formula reference with that selected cell or range, updates the formula bar text, reopens the editor for the formula cell, and refreshes the highlighted references.
+
+6. Finish editing the formula.
+
+   When the selector resets or the formula update flow clears formula editing, GridJs hides `formulaRangeEl`. ![](/net/cells/images/4ac2d38a41b0e506-formula-references.png)
+
+## JavaScript API {#javascript-api}
+
+The inspected code does not expose a declared public JavaScript API for enabling or disabling formula referenced range highlighting. The behavior is implemented internally by the editor, formula bar, sheet mouse handling, and selector.
+
+### Relevant functions {#relevant-functions}
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Function / Location
+
+</th>
+<th>
+
+Description
+
+</th>
+<th>
+
+Parameters
+
+</th>
+<th>
+
+Returns
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`FormulaBar` (`component/formula-bar.js`)
+
+</td>
+<td>
+
+Renders the formula bar and raises `inputChange`, `enter`, `tab`, and `focuson` callbacks from the editable formula input.
+
+</td>
+<td>
+
+`data`, `mode`
+
+</td>
+<td>
+
+`FormulaBar` instance
+
+</td>
+</tr>
+<tr>
+<td>
+
+`formulaBar.focuson` (`component/sheet.js`)
+
+</td>
+<td>
+
+Sets `editFormula` when the selected cell has a formula and calls `selector.setSelectorsByLocates(cell.f)`.
+
+</td>
+<td>
+
+None
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`editorSet(focus)` (`component/sheet.js`)
+
+</td>
+<td>
+
+Opens the cell editor, sets `editFormula` for a formula cell, and highlights formula references with `selector.setSelectorsByLocates(cell?.f)`.
+
+</td>
+<td>
+
+optional `focus`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`inputEventHandler(evt)` (`component/editor.js`)
+
+</td>
+<td>
+
+Sets `sheet.editFormula` when cell editor input starts with `=`, shows formula suggestions, and sends the input text through the editor change handler.
+
+</td>
+<td>
+
+`evt`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`overlayerMousedown(evt)` (`component/sheet.js`)
+
+</td>
+<td>
+
+Stores the editor caret position when formula editing is active before processing sheet selection.
+
+</td>
+<td>
+
+`evt`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`mouseMoveUp` completion branch (`component/sheet.js`)
+
+</td>
+<td>
+
+During formula editing, converts the selected range to text and calls `appendFormulaWithCellName` when the selection is not the formula cell itself.
+
+</td>
+<td>
+
+mouse event callbacks
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`appendFormulaWithCellName(formulaCell, appendCellName)` (`component/sheet.js`)
+
+</td>
+<td>
+
+Updates the formula text with the selected cell or range, updates the formula bar, reopens the editor, and refreshes highlighted references.
+
+</td>
+<td>
+
+`formulaCell`, `appendCellName`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`updateFormula(formula, position, appendCellName, selectedText)` (`component/sheet.js`)
+
+</td>
+<td>
+
+Replaces selected text, replaces the reference around the caret, or inserts the selected reference into the formula.
+
+</td>
+<td>
+
+`formula`, `position`, `appendCellName`, `selectedText`
+
+</td>
+<td>
+
+Updated formula string or original formula
+
+</td>
+</tr>
+<tr>
+<td>
+
+`extractCellReferences(formula)` (`component/selector.js`)
+
+</td>
+<td>
+
+Extracts uppercase single-cell and range references with `/[A-Z]+\\d+(:[A-Z]+\\d+)?/g`.
+
+</td>
+<td>
+
+`formula`
+
+</td>
+<td>
+
+Array of reference strings
+
+</td>
+</tr>
+<tr>
+<td>
+
+`Selector.setSelectorsByLocates(locates)` (`component/selector.js`)
+
+</td>
+<td>
+
+Converts references to cell rectangles, creates colored selector areas, and shows `formulaRangeEl`.
+
+</td>
+<td>
+
+formula string or locate array
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`Selector.resetAreaOffset()` (`component/selector.js`)
+
+</td>
+<td>
+
+Hides `formulaRangeEl` when the selector area resets.
+
+</td>
+<td>
+
+None
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+## Common Questions {#common-questions}
+
+Q: Is formula referenced range highlighting controlled by a toolbar button? A: No. The inspected code does not expose a separate toolbar command for this behavior. It appears from formula editing flows.
+
+Q: Which references are highlighted? A: The inspected extractor matches uppercase references like `A1` and `A1:B2`.
+
+Q: What colors are used for referenced ranges? A: The selector uses a seven-color sequence with colored borders and translucent background colors, then loops back to the first color.
+
+Q: What happens when users select a cell range while editing a formula? A: GridJs converts the current selector range to a reference string, updates the formula text, updates the formula bar, reopens the editor for the formula cell, and redraws the referenced range highlights.

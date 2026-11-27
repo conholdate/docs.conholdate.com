@@ -1,0 +1,344 @@
+---
+title: "How to configure token authentication"
+sidebar_label: "How to configure token authentication"
+sidebar_key: "net-cells-aspose-cells-gridjs-user-guide-how-to-configure-token-authentication"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/aspose-cells-gridjs/user-guide/how-to-configure-token-authentication.html"
+source_commit: ""
+source_sha256: "9c85c11eceb67f6ed80bb97979254a501f673701649eb1a1e37d89cfc1bd390d"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/aspose-cells-gridjs/user-guide/how-to-configure-token-authentication/"
+source_snapshot_sha256: "57dd118c558f0b4269162590a47f91408262c7028ecb4176d3e0949f1a62d7fc"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "../../_remote-markdown.css";
+
+## Introduction {#introduction}
+
+GridJs stores the constructor option `token` as `authToken` on the spreadsheet instance. When `authToken` has a value, the inspected request code adds an `Authorization` header with the value `Bearer ${authToken}`. The same instance also exposes `refreshToken(token)`, which replaces the stored token value.
+
+## How to use {#how-to-use}
+
+No UI operation entry was found in the inspected code. Token authentication is configured from JavaScript when the spreadsheet instance is created or when the token value changes.
+
+1. Create the spreadsheet instance with a `token` option.
+
+```js
+const xs = x_spreadsheet('#gridjs-demo-uid', {
+  token: accessToken,
+});
+```
+
+2. Configure the server URLs that your page uses. The inspected code applies the stored token only on request paths that read `authToken`.
+
+```js
+xs.setLazyLoadingUrl('/GridJs2/LazyLoading');
+xs.setImageInfo('/GridJs2/GetImage', '/GridJs2/UploadImage', '/GridJs2/UploadImageByUrl', '/GridJs2/CopyImage', 0);
+xs.setFileDownloadInfo('/GridJs2/Download');
+```
+
+3. When the token changes, call `refreshToken(token)` on the same spreadsheet instance.
+
+```js
+xs.refreshToken(newAccessToken);
+```
+
+4. When a supported request runs and the stored token is not empty, GridJs sends the request with this header:
+
+```text
+Authorization: Bearer <token>
+```
+
+## JavaScript API {#javascript-api}
+
+Pass `token` in the options object when creating the spreadsheet. The constructor stores it as `this.authToken`; if no token is provided, `authToken` is set to `null`.
+
+```js
+const xs = x_spreadsheet('#gridjs-demo-uid', {
+  token: accessToken,
+});
+```
+
+Use `refreshToken(token)` to replace the stored token after the spreadsheet has already been created.
+
+```js
+xs.refreshToken(newAccessToken);
+```
+
+### Relevant functions {#relevant-functions}
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Function / Location
+
+</th>
+<th>
+
+Description
+
+</th>
+<th>
+
+Parameters
+
+</th>
+<th>
+
+Returns
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`Spreadsheet(selectors, options = {})` (`index.js`)
+
+</td>
+<td>
+
+Stores `options.token` as `this.authToken`, or stores `null` when no token is provided.
+
+</td>
+<td>
+
+`selectors`: container selector or element; `options.token`: token value
+
+</td>
+<td>
+
+`Spreadsheet` instance
+
+</td>
+</tr>
+<tr>
+<td>
+
+`refreshToken(token)` (`index.js`)
+
+</td>
+<td>
+
+Replaces the stored `authToken` value on the spreadsheet instance.
+
+</td>
+<td>
+
+`token`: new token value
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`AjaxTask(item, url, token, callback, callbackerror)` (`index.js`)
+
+</td>
+<td>
+
+Stores the token passed by server-update code before the task is handled.
+
+</td>
+<td>
+
+`item`, `url`, `token`, `callback`, `callbackerror`
+
+</td>
+<td>
+
+`AjaxTask` instance
+
+</td>
+</tr>
+<tr>
+<td>
+
+`taskHandler(task, cb)` (`index.js`)
+
+</td>
+<td>
+
+Sends the queued Ajax task and sets `Authorization: Bearer ${task.token}` before send when `task.token` exists.
+
+</td>
+<td>
+
+`task`: `AjaxTask`; `cb`: completion callback
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`d.updateCellServer(operationdata)` (`index.js`)
+
+</td>
+<td>
+
+When `settings.updateMode === 'server'` and the sheet is not collaborative, appends an `AjaxTask` to `settings.updateUrl` with `authToken`.
+
+</td>
+<td>
+
+`operationdata`: operation payload
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`loadSheetDataLazily(data)` (`index.js`)
+
+</td>
+<td>
+
+Posts lazy-loaded sheet data to `lazyLoadingUrl` and includes the Bearer header when `this.authToken` exists.
+
+</td>
+<td>
+
+`data`: sheet data object
+
+</td>
+<td>
+
+`Promise`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`downloadFile(toFileName, saveType)` (`component/sheet.js`)
+
+</td>
+<td>
+
+Posts export data to `fileDownloadUrl` and includes the Bearer header when `authToken` exists.
+
+</td>
+<td>
+
+`toFileName`, `saveType`
+
+</td>
+<td>
+
+`Promise<void>`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`fileLinkToStreamDownload(url, fileName, authToken)` (`component/sheet.js`)
+
+</td>
+<td>
+
+Downloads a returned file URL with `XMLHttpRequest` and includes the Bearer header when `authToken` exists.
+
+</td>
+<td>
+
+`url`, `fileName`, `authToken`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`postImageReq(sheet, reqdata, cb)` (`component/imageOperations/paste.js`)
+
+</td>
+<td>
+
+Posts image upload data to `sheet.imageUploadByLocalUrl` and includes the Bearer header when `authToken` exists.
+
+</td>
+<td>
+
+`sheet`, `reqdata`, `cb`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`Paste.addImageToData(clonedObj)` (`component/imageOperations/paste.js`)
+
+</td>
+<td>
+
+Posts copied image data to `sheet.imageCopyUrl` and includes the Bearer header when `authToken` exists.
+
+</td>
+<td>
+
+`clonedObj`: copied image object
+
+</td>
+<td>
+
+`Promise`
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+The inspected `index.d.ts` file does not declare `token` in the `Options` interface and does not declare `refreshToken(token)` on the `Spreadsheet` class, but the `index.js` implementation reads `options.token` and exposes `refreshToken(token)` directly.
+
+## Common Questions {#common-questions}
+
+Q: Where is the initial token configured? A: The inspected constructor reads `options.token` and stores it as `this.authToken`.
+
+Q: Can the token be changed after the spreadsheet is created? A: Yes. The inspected `refreshToken(token)` method assigns the new value to `this.authToken`.
+
+Q: What request header does GridJs add? A: When the relevant request path has a token value, GridJs sets `Authorization` to `Bearer ${token}`.
+
+Q: Does every request in the inspected code use this token? A: No. The tutorial only lists request paths where the inspected code reads `authToken` or passes it into `AjaxTask`.

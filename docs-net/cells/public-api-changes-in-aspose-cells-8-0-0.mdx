@@ -1,0 +1,171 @@
+---
+title: "Public API Changes in Aspose.Cells 8.0.0"
+sidebar_label: "Public API Changes in Aspose.Cells 8.0.0"
+sidebar_key: "net-cells-public-api-changes-in-aspose-cells-8-0-0"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/public-api-changes-in-aspose-cells-8-0-0.html"
+source_commit: ""
+source_sha256: "e1072cab965a87ddb8829ee58b01bf846d24a8964a634248e9d5b466db89fffd"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/public-api-changes-in-aspose-cells-8-0-0/"
+source_snapshot_sha256: "c6dd849c7f21f4b6bc4ca4b126764329100f30383481aabc0473c10be5ef2448"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+This page lists public API changes that were introduced in Aspose.Cells 8.0.0. It includes not only new and obsolete public methods, but also a description of any changes in the behavior behind the scenes in Aspose.Cells that may affect the existing code.
+:::
+
+## Added MemorySetting to LoadOptions & WorkbookSettings {#added-memorysetting-to-loadoptions--workbooksettings}
+
+Starting from v8.0.0 of Aspose.Cells for .NET, we provide memory‑usage options for performance considerations. The `MemorySetting` property is now available in the `LoadOptions` and `WorkbookSettings` classes.
+
+##### Example {#example}
+
+Demonstrates how to read an Excel file (having large size) in optimized mode.
+
+**C#**
+
+```csharp
+  
+
+ //Initialize LoadOptions  
+
+LoadOptions options = new LoadOptions();  
+
+//Set memory preferences  
+
+options.MemorySetting = MemorySetting.MEMORY_PREFERENCE;  
+
+//Instantiate the Workbook with an object of LoadOptions  
+
+Workbook book = new Workbook(myDir + "large.xlsx", options);  
+```
+
+Demonstrates how to write a large dataset to a worksheet in optimized mode.
+
+**C#**
+
+```csharp
+  
+
+ //Instantiate a new Workbook  
+
+Workbook book = new Workbook();  
+
+//Set the memory preferences for WorkbookSettings  
+
+book.Settings.MemorySetting = MemorySetting.MEMORY_PREFERENCE;  
+
+//Input large data into the cells  
+
+//.........  
+```
+
+:::info
+Please check the detailed article on [Optimizing Memory while Working with Large Files](/net/cells/optimizing-memory-usage-while-working-with-big-files-having-large-datasets/).
+:::
+
+## Implementations of Row & Cell have changed {#implementations-of-row--cell-have-changed}
+
+In previous versions, Row and Cell objects were kept in memory to represent the corresponding row and cell in a worksheet. The same instance was returned whenever `RowCollection[int index]` or `Cells[int row, int column]` were retrieved. For memory‑performance considerations, only the properties and data of Row and Cell are kept in memory from now on. Hence, the Row and Cell objects have become wrappers of the aforementioned properties.
+
+### Example {#example-1}
+
+Demonstrates how to compare the Cell and Row objects from now on.
+
+**C#**
+
+```csharp
+  
+
+ //..  
+
+row1.Equals(row2);  
+
+  
+
+cell1.Equals(cell2);  
+
+ //..  
+```
+
+Because the Row and Cell objects are instantiated according to the invocation, they are not kept and managed in memory by the Cells component. Therefore, after some insertion and deletion operations, the Row and Column indexes may not be updated, or, even worse, these objects become invalid.
+
+### Example {#example-2}
+
+For instance, the following code snippet will return invalid results in 8.0.0 and above,
+
+**C#**
+
+```csharp
+  
+
+ Cell cell = cells["A2"];  
+
+Console.WriteLine(cell.Name + ":" + cell.Value);  
+
+cells.InsertRange(CellArea.CreateCellArea("A1", "A1"), ShiftType.DOWN);  
+
+Console.WriteLine(cell.Name + ":" + cell.Value);  
+```
+
+With the new version, the `Cell` object may become invalid or refer to A2 with an unwanted value. To avoid such a situation, retrieve the Row or Cell objects again from the cells collection to obtain the correct result.
+
+**C#**
+
+```csharp
+  
+
+ Cell cell = cells["A2"];  
+
+Console.WriteLine(cell.Name + ":" + cell.Value);  
+
+cells.InsertRange(CellArea.CreateCellArea("A1", "A1"), ShiftType.DOWN);  
+
+//Fetch the cell reference again  
+
+Cell cell = cells["A3"];  
+
+Console.WriteLine(cell.Name + ":" + cell.Value);  
+```
+
+:::info
+`RowCollection` does not inherit `CollectionBase` anymore because there is no Row object in its inner list.
+:::
+
+## Cell.StringValue behavior changed {#cellstringvalue-behavior-changed}
+
+In previous versions, the special pattern `_` was ignored while formatting cell values, whereas the special character `*` always produced one character in the formatted result. From this version, we have changed the logic to handle the special characters `_` and `*` so that the formatted result matches that of the Excel application. For instance, the custom cell format `"_(\$* #,##0.00_)`" used to represent the value `123` produced the result `"$ 123.00"`. With the new version, `Cell.StringValue` will contain the result `"$123.00"`, which is the same behavior as Excel exhibits when copying the cell to text or exporting to CSV.
+
+## Added CreatedTime to PdfSaveOptions {#added-createdtime-to-pdfsaveoptions}
+
+Now users can get or set the PDF creation time when saving the spreadsheet to PDF using the `PdfSaveOptions` class.
+
+## Added ShowFormulas to Worksheet {#added-showformulas-to-worksheet}
+
+From now on, users may use the Boolean property `ShowFormulas` offered by `Worksheet` to toggle the view between formulas and values in a worksheet.
+
+## Added Ooxml to FileFormatType {#added-ooxml-to-fileformattype}
+
+A new constant `Ooxml` has been added to the `FileFormatType` class to represent encrypted Office Open XML files such as XLSX, DOCX, PPTX, and more.
+
+## Obsoleted FilterColumnCollection of AutoFilter {#obsoleted-filtercolumncollection-of-autofilter}
+
+With Aspose.Cells for Java, the `FilterColumnCollection` property has been marked obsolete. It is suggested to use `AutoFilter.FilterColumns` instead.
+
+## Replaced SeriesCollection.SecondCatergoryData with SeriesCollection.SecondCategoryData {#replaced-seriescollectionsecondcatergorydata-with-seriescollectionsecondcategorydata}
+
+We have corrected the typographical error in the property name for `SeriesCollection.SecondCatergoryData`. You may use `SeriesCollection.SecondCategoryData` from now on, whereas the original property `SeriesCollection.SecondCatergoryData` has been marked obsolete.

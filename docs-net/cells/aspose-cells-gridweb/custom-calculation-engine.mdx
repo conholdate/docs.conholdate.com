@@ -1,0 +1,82 @@
+---
+title: "Working with custom calculation engine"
+sidebar_label: "Working with custom calculation engine"
+sidebar_key: "net-cells-aspose-cells-gridweb-custom-calculation-engine"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/aspose-cells-gridweb/custom-calculation-engine.html"
+source_commit: ""
+source_sha256: "62136246e42d9ab7574bc54b430a1dbbe70e25b3193c6eb43ea7c677949d6116"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/aspose-cells-gridweb/custom-calculation-engine/"
+source_snapshot_sha256: "f1ccc436b883f86ffcfd134d9fef925832961655f59008acce489b4a674da6a5"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Implement Custom Calculation Engine {#implement-custom-calculation-engine}
+
+Aspose.Cells.GridWeb has a powerful calculation engine that can calculate almost all of the Microsoft Excel formulas. However, it also allows you to extend the default calculation engine, which provides you greater power and flexibility.
+
+The following properties and classes are used in implementing this feature.
+
+- <a href="https://reference.aspose.com/cells/net/aspose-cells-gridweb/aspose.cells.gridweb.data/gridabstractcalculationengine" target="_blank" rel="nofollow noopener noreferrer">**GridAbstractCalculationEngine**</a>
+- <a href="https://reference.aspose.com/cells/net/aspose-cells-gridweb/aspose.cells.gridweb.data/gridcalculationdata" target="_blank" rel="nofollow noopener noreferrer">**GridCalculationData**</a>
+
+The following code implements the Custom Calculation Engine. It implements the interface <a href="https://reference.aspose.com/cells/net/aspose-cells-gridweb/aspose.cells.gridweb.data/gridabstractcalculationengine" target="_blank" rel="nofollow noopener noreferrer">**GridAbstractCalculationEngine**</a> which has a <a href="https://reference.aspose.com/cells/net/aspose-cells-gridweb/aspose.cells.gridweb.data/gridabstractcalculationengine/methods/calculate" target="_blank" rel="nofollow noopener noreferrer">**Calculate(GridCalculationData data)**</a> method. This method is called against all of your formulas. Inside this method, we capture the **MYTESTFUNC** formula and multiply its first parameter value by 2.
+
+### Programming Sample {#programming-sample}
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+private class CustomEngineSimple : GridAbstractCalculationEngine
+{
+    public override void Calculate(GridCalculationData data)
+    {
+        if (!"MYTESTFUNC".Equals(data.FunctionName.ToUpper()))
+        {
+            return;
+        }
+        data.CalculatedValue = (decimal)(2.0 * (double)data.GetParamValue(0));  
+    }
+}
+protected void Page_Load(object sender, EventArgs e)
+{
+   
+    // If first visit this page clear GridWeb1 and load data 
+    if (!IsPostBack && !GridWeb1.IsPostBack)
+    {
+		  CustomEngineSimple ce = new CustomEngineSimple();
+          GridWeb1.CustomCalculationEngine = ce;
+          GridWorksheet sheet = GridWeb1.ActiveSheet;
+          GridCell cell = sheet.Cells["A1"];
+          cell.Formula = "=MYTESTFUNC(3.0)";
+
+          cell = sheet.Cells["A2"];
+          cell.PutValue("hello");
+
+          cell = sheet.Cells["B1"];
+          cell.PutValue(1);
+          cell = sheet.Cells["B2"];
+          cell.PutValue(2);
+          cell = sheet.Cells["B3"];
+          cell.PutValue(3);
+
+          cell = sheet.Cells["A3"];
+          cell.Formula = "=SUM(B1:B3)";
+
+          GridWeb1.CalculateFormula();
+          sheet.ActiveCell = "A4";
+    }
+}
+```

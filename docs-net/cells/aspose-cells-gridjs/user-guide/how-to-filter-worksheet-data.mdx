@@ -1,0 +1,442 @@
+---
+title: "How to filter worksheet data"
+sidebar_label: "How to filter worksheet data"
+sidebar_key: "net-cells-aspose-cells-gridjs-user-guide-how-to-filter-worksheet-data"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/aspose-cells-gridjs/user-guide/how-to-filter-worksheet-data.html"
+source_commit: ""
+source_sha256: "85bfdf8c1186aa77d0121018c1986d1fe2d975fea0ddbea1d46aa6994f7366a5"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/aspose-cells-gridjs/user-guide/how-to-filter-worksheet-data/"
+source_snapshot_sha256: "ec64d26f7f35539d0154942a98db0f4f7cc4a77c4445747a8ec121cb9799228b"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "../../_remote-markdown.css";
+
+## Introduction {#introduction}
+
+GridJs includes a toolbar autofilter toggle and a header filter popup for worksheet ranges.
+
+When autofilter is active, clicking the filter arrow area in a header cell opens a popup where you can search values, check or uncheck values, and confirm with **OK**. Applying the filter updates visible rows through `exceptRowSet` and refreshes the sheet.
+
+## How to use {#how-to-use}
+
+1. Select the header range you want to filter.
+
+   The toolbar autofilter button works on the current selected range (`selector.range`).
+
+2. Click the **Autofilter** toolbar button.
+
+   GridJs handles the `autofilter` toolbar action in `sheet.js`, then calls `data.autofilter()` in `data_proxy.js`.
+
+![](/net/cells/images/093bab5d6b54071a-toolbar-autofilter.png)
+
+3. Click the filter arrow area in a header cell.
+
+   In `overlayerMousedown`, when the click is inside the header arrow region, GridJs calls `autoFilter.items(...)` and opens `SortFilter`. ![](/net/cells/images/074e89b606d7b9b9-filter-cell-selected.png)
+
+4. Use **Sort A to Z** or **Sort Z to A** at the top of the popup.
+
+   These actions are handled by `itemClick('asc' | 'desc')` and passed with filter apply on **OK**.
+
+5. Use the search box to filter visible candidate items.
+
+   `searchFilter()` filters item rows by key text and updates the header counter to `checked / visible`.
+
+6. Use the header checkbox row to check or uncheck values in bulk.
+
+   Without search text, `filterClick('all')` toggles all values. With search text, `filterClickAllWithSearch()` only toggles currently visible matched values.
+
+7. Use individual item rows to include or exclude specific values.
+
+   Each row shows `(cnt of total)`. Empty values are rendered with `t('filter.empty')`. Clicking a row toggles checked state and updates `filterValues`, `unfilterValues`, and `unfilterRecheck`.
+
+8. Click **OK** to apply the current sort and filter state.
+
+   `SortFilter.btnClick('ok')` passes selected values to `okActToApplyFilter`, and `sheet.js` calls `data.setAutoFilter(...)`.
+
+9. Click **Cancel** or click outside to close the popup without applying new changes.
+
+`hide()` restores temporarily unhidden rows when **OK** was not clicked.
+
+![](/net/cells/images/377c8117d9e7133e-filtered-options.png)
+
+10. Review the filtered result.
+
+`resetAutoFilter` recomputes filtered rows (`filteredRows`) and updates `exceptRowSet`, which controls hidden rows in the rendered sheet.
+
+11. Click **Autofilter** again to clear filtering for the active worksheet autofilter.
+
+When autofilter is already active, `data.autofilter()` clears filter state and resets `exceptRowSet`.
+
+## JavaScript API {#javascript-api}
+
+The inspected code applies filtering through internal GridJs data and sheet methods.
+
+### Relevant functions {#relevant-functions}
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Function / Location
+
+</th>
+<th>
+
+Description
+
+</th>
+<th>
+
+Parameters
+
+</th>
+<th>
+
+Returns
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`autofilter()` (`component/sheet.js`)
+
+</td>
+<td>
+
+Handles toolbar `autofilter` action and calls the data-layer autofilter toggle.
+
+</td>
+<td>
+
+None
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`canAutofilter()` (`core/data_proxy.js`)
+
+</td>
+<td>
+
+Returns whether worksheet autofilter can be enabled (`!autoFilter.active()`).
+
+</td>
+<td>
+
+None
+
+</td>
+<td>
+
+`boolean`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`autofilter()` (`core/data_proxy.js`)
+
+</td>
+<td>
+
+Toggles worksheet autofilter on selected range; clears filter state when already active.
+
+</td>
+<td>
+
+None
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`SortFilter.set(...)` (`component/sort_filter.js`)
+
+</td>
+<td>
+
+Initializes popup state from current filter items and sort state.
+
+</td>
+<td>
+
+`ci`, `items`, `filter`, `sort`, `autoFilter`, `data`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`SortFilter.itemClick(...)` (`component/sort_filter.js`)
+
+</td>
+<td>
+
+Sets sort direction (`asc` or `desc`) in the popup.
+
+</td>
+<td>
+
+`it`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`SortFilter.searchFilter()` (`component/sort_filter.js`)
+
+</td>
+<td>
+
+Filters visible item rows by search text and updates header counts.
+
+</td>
+<td>
+
+None
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`SortFilter.filterClick(...)` (`component/sort_filter.js`)
+
+</td>
+<td>
+
+Handles select-all and individual include/exclude toggles.
+
+</td>
+<td>
+
+`index`, `it`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`SortFilter.toggleFilterMeOnly()` (`component/sort_filter.js`)
+
+</td>
+<td>
+
+Toggles collaborative "visible to me only" mode.
+
+</td>
+<td>
+
+None
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`SortFilter.btnClick('ok')` (`component/sort_filter.js`)
+
+</td>
+<td>
+
+Collects selected values and triggers `okActToApplyFilter`.
+
+</td>
+<td>
+
+`it`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`SortFilter.hide()` (`component/sort_filter.js`)
+
+</td>
+<td>
+
+Closes popup and restores temp state when user did not confirm with **OK**.
+
+</td>
+<td>
+
+None
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`sortFilterChange(...)` (`component/sheet.js`)
+
+</td>
+<td>
+
+Applies filter change by calling `data.setAutoFilter(...)`, then resets sheet view.
+
+</td>
+<td>
+
+`ci`, `order`, `operator`, `value`, `unfilterValueSet`, `unfilterRecheck`, `showFilterResultForMeOnly`, `isCheckAll`, `isChanged`, `isFiltered`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`setAutoFilter(...)` (`core/data_proxy.js`)
+
+</td>
+<td>
+
+Stores filter and sort settings, recalculates filtered rows, and optionally syncs collaborative filter ops to server.
+
+</td>
+<td>
+
+`ci`, `order`, `operator`, `values`, `unfilterValueSet`, `unfilterRecheck`, `showFilterResultForMeOnly`, `isCheckAll`, `isChanged`, `isFiltered`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`resetAutoFilter(ci)` (`core/data_proxy.js`)
+
+</td>
+<td>
+
+Recomputes filtered rows and updates `exceptRowSet`; applies sort operation when sort is set.
+
+</td>
+<td>
+
+`ci`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`items(ci, getCell)` (`core/auto_filter.js`)
+
+</td>
+<td>
+
+Builds popup value list with visible count (`cnt`) and total count (`total`) for each key.
+
+</td>
+<td>
+
+`ci`, `getCell`
+
+</td>
+<td>
+
+`Object`
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+## Common Questions {#common-questions}
+
+Q: How is the filter popup opened? A: It opens from header cells inside an active autofilter range when the click hits the filter-arrow area handled in `overlayerMousedown`.
+
+Q: What happens if I click **Cancel** or click outside without pressing **OK**? A: `SortFilter.hide()` restores temporarily unhidden rows by calling `autoFilter.restoreTempUnhiddenRows()` when the user did not confirm with **OK**.
+
+Q: Can filtered results be visible only to me? A: The popup includes `filterMeOnlyCheckbox`, and it is shown only when `data.settings.isCollaborative` is enabled.
+
+Q: What does `(cnt of total)` mean in each filter item row? A: `items(...)` computes `cnt` as currently visible count and `total` as total occurrences for that key in the filter range.
+
+Q: Why is **OK** sometimes disabled? A: `resetFilterHeader()` disables **OK** when no item is selected in the current mode (full list or current search scope).
+
+Q: How does GridJs hide rows after filtering? A: `AutoFilter.filteredRows` computes excluded row indexes, and `resetAutoFilter` writes them into `exceptRowSet` through `updateExceptRowSet`.

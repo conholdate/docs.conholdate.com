@@ -1,0 +1,121 @@
+---
+title: "Preguntas frecuentes"
+sidebar_label: "Preguntas frecuentes"
+sidebar_key: "net-cells-faq"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/faq.html"
+source_commit: ""
+source_sha256: "a9fdf14ed75e418d0891cc3e8e7ef75d1b7ce478fa7de782c1a39877e1df06f6"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/faq/"
+source_snapshot_sha256: "3c9f8394bdd08840ade57cd0418db554b40c23f2420d464f6c1a82d983cc7d2a"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "683d3668ae9c252c91b471005d2a128a40276c9f1462806d6ead885775f85213"
+translation_updated_at: "2026-11-27T14:39:50.436Z"
+translation_status: "ai-draft"
+---
+
+:::info
+Aspose.Cells para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+## Cómo solucionar la System.StackOverflowException en Workbook.CalculateFormula? {#how-to-fix-the-systemstackoverflowexception-on-workbookcalculateformula}
+
+A veces, los usuarios encuentran la System.StackOverflowException en el método Workbook.CalculateFormula. Esta excepción generalmente se produce porque el tamaño de pila predeterminado de IIS es demasiado pequeño (solo 265 KB). Puede solucionar este error creando otro subproceso con un tamaño de pila aumentado y, a continuación, moviendo su código relacionado con Workbook.CalculateFormula dentro de él.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+private HttpPostedFileBase postedFile;
+
+[HttpPost]
+public ActionResult Index(HttpPostedFileBase file, string mode)
+{
+    this.postedFile = file;
+    Thread newThread = new Thread(Calculate, 1048576);
+    newThread.Start();
+    newThread.Join();
+    return View();
+}
+
+private void Calculate()
+{
+    if (postedFile != null && postedFile.ContentLength > 0)
+    {
+        var wbkMain = new Workbook(postedFile.InputStream);
+        wbkMain.CalculateFormula();
+    }
+}
+```
+
+## Problema con el grosor de las líneas al convertir Excel a PDF {#thickness-of-lines-issue-while-rendering-excel-to-pdf}
+
+A veces, al convertir un archivo de Excel a PDF, el grosor de las líneas difiere en el PDF resultante. Este problema no es causado por Aspose.Cells, sino por **Adobe Reader**, cuando sus opciones de configuración **"Suavizar arte de líneas"** y **"Mejorar líneas finas"** están activadas. Desmarcar estas opciones mostrará el PDF correctamente.
+
+Si activa **"Suavizar arte de líneas"** y **"Mejorar líneas finas"**, el grosor de las líneas será diferente. A continuación se indican los pasos para realizar esta acción:
+
+- Vaya a **Editar**
+- Seleccione **Preferencias**
+- En la categoría **Visualización de página**, active las opciones **"Suavizar arte de líneas"** y **"Mejorar líneas finas"**
+
+Si desactiva **"Suavizar arte de líneas"** y **"Mejorar líneas finas"**, el grosor de las líneas será el mismo. Para lograrlo, siga los pasos siguientes:
+
+- Vaya a **Editar**
+- Seleccione **Preferencias**
+- En la categoría **Visualización de página**, desactive las opciones **"Suavizar arte de líneas"** y **"Mejorar líneas finas"**
+
+## ¿Cómo solucionar la excepción System.OutOfMemoryException al cargar hojas de cálculo grandes? {#how-to-fix-the-systemoutofmemoryexception-while-loading-large-spreadsheets}
+
+Es probable que el constructor de Workbook lance una System.OutOfMemoryException al cargar hojas de cálculo grandes. Esta excepción indica que la memoria disponible no es suficiente para cargar completamente la hoja de cálculo en memoria; por lo tanto, la hoja de cálculo debe cargarse habilitando las [preferencias de memoria](/net/cells/optimizing-memory-usage-while-working-with-big-files-having-large-datasets/).
+
+Las API de Aspose.Cells ofrecen preferencias de memoria para optimizar el consumo de memoria al cargar y procesar hojas de cálculo. Estas opciones también resultan útiles para cargar eficientemente hojas de cálculo grandes que contienen grandes conjuntos de datos en un objeto Workbook, como se muestra a continuación.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+// Specify the LoadOptions
+LoadOptions options = new LoadOptions();
+
+// Set the memory preferences
+options.MemorySetting = MemorySetting.MemoryPreference;
+
+// Load the Big Excel file having large Data set in it
+Workbook book = new Workbook(dataDir + "sample.xlsx", options);
+Console.WriteLine("File has been loaded successfully");
+```
+
+## Determinar qué tamaño de pila es necesario para un Workbook determinado {#determine-which-stack-size-is-needed-for-a-certain-workbook}
+
+Aunque hemos mejorado el motor de cálculo de fórmulas de Aspose.Cells y, en la mayoría de los casos, debería poder calcular correctamente todas las fórmulas para un archivo de plantilla dado sin especificar un tamaño de pila más pequeño, en ocasiones una StackOverflowException en el método Workbook.CalculateFormula podría ser inevitable. Proporcionamos nuevas API para que los usuarios rastreen los cálculos de fórmulas. Hemos agregado una clase denominada `AbstractCalculationMonitor` y proporcionamos una propiedad, es decir, *CalculationOptions.CalculationMonitor*, para ayudar a rastrear el problema.
+
+Los usuarios pueden rastrear el tamaño de la pila por sí mismos utilizando las API. Tenga en cuenta que verificar la pila para cada celda degradará sin duda el rendimiento en gran medida. Consulte el fragmento de código de ejemplo para su referencia:
+
+```csharp
+public class MyCalculationMonitor : AbstractCalculationMonitor
+{
+    public override void BeforeCalculate(int sheetIndex, int rowIndex, int colIndex)
+    {
+        if(new StackTrace(false).FrameCount > 2000)
+        {
+            throw new Exception("Stop the formula calculation because risk of StackOverflowException");
+        }
+    }
+}
+```
+
+:::info
+No existe una mejor forma de obtener el tamaño de la pila utilizado en tiempo de ejecución. El código anterior que proporcionamos es solo un ejemplo. El rendimiento se degradará significativamente, sin duda. Por lo tanto, consideramos que el código puede optimizarse por los usuarios (que realmente deseen utilizarlo) según sus distintos escenarios y requisitos, como verificar la pila cuando la cantidad de celdas recursivas alcanza un cierto número, recopilar la tasa promedio de aumento de la pila por una celda recursiva, y determinar la frecuencia con la que se debe verificar la pila, entre otros.
+:::

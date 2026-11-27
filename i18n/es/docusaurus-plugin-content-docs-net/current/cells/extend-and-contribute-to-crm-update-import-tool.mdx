@@ -1,0 +1,154 @@
+---
+title: "Extender y contribuir a la herramienta de importación de actualizaciones de CRM"
+sidebar_label: "Extender y contribuir a la herramienta de importación de actualizaciones de CRM"
+sidebar_key: "net-cells-extend-and-contribute-to-crm-update-import-tool"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/extend-and-contribute-to-crm-update-import-tool.html"
+source_commit: ""
+source_sha256: "58e7521e86df307c6d5f91dd6c996a107d0125a5177e563fd81c4919b89407f1"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/extend-and-contribute-to-crm-update-import-tool/"
+source_snapshot_sha256: "47c79a9e83380c115938cfd3136831da6d97702bc98acf53da4b96b546b2e0fe"
+locale: "es"
+translated_from: "en"
+translation_model: "qwen3-next"
+translation_pipeline_version: "2026-11-16-mdx-structure-v6"
+translation_source_sha256: "d803ceebfcb9dc86ebff8ed210b3c8838d663bcbeabf2aecee2bc01f5c6b5126"
+translation_updated_at: "2026-11-27T14:40:57.016Z"
+translation_status: "ai-draft"
+---
+
+:::info
+Aspose.Cells para .NET está incluido en Conholdate.Total for .NET.
+:::
+
+
+Puede descargar el código fuente más reciente en:
+
+- <a href="https://github.com/aspose-cells/Aspose.Cells-for-.NET/tree/master/Plugins/Dynamics%20CRM/Aspose.Plugins.UpdateImportTool" target="_blank" rel="nofollow noopener noreferrer">GitHub</a>.
+
+Exportar datos desde CRM a Excel
+
+```cs
+  SaveFileDialog fileDialog = new SaveFileDialog();
+
+  fileDialog.DefaultExt = ".xlsx";
+
+  fileDialog.FileName = "Aspose ImportTool Export.xlsx";
+
+  if (fileDialog.ShowDialog().Value)
+
+  {
+
+      string FileName = fileDialog.FileName;
+
+      Workbook workbook = new Workbook();
+
+      workbook.Worksheets.Add("Aspose Export");
+
+      Worksheet MyWorksheet = workbook.Worksheets["Aspose Export"];
+
+      int i = 0;
+
+      foreach (string attrib in SelectedAttributes)
+
+          MyWorksheet.Cells[0, i++].Value = attrib;
+
+      int Row = 1, cell = 0;
+
+      foreach (Entity record in Result.Entities)
+
+      {
+
+          cell = 0;
+
+          foreach (string attribute in SelectedAttributes)
+
+          {
+
+              if (record.Contains(attribute))
+
+              {
+
+                  MyWorksheet.Cells[Row, cell].Value = record[attribute].ToString();
+
+              }
+
+              cell++;
+
+          }
+
+          Row++;
+
+      }
+
+      workbook.Save(FileName, SaveFormat.Xlsx);
+
+  }
+```
+
+Importar datos desde Excel a CRM
+
+```cs
+  if (ctrl.CrmConnectionMgr != null && ctrl.CrmConnectionMgr.CrmSvc != null && ctrl.CrmConnectionMgr.CrmSvc.IsReady)
+
+  {
+
+      CrmServiceClient svcClient = ctrl.CrmConnectionMgr.CrmSvc;
+
+      if (svcClient.IsReady)
+
+      {
+
+          OpenFileDialog fileDialog = new OpenFileDialog();
+
+          fileDialog.DefaultExt = ".xlsx";
+
+          if (fileDialog.ShowDialog().Value)
+
+          {
+
+              string FileName = fileDialog.FileName;
+
+              Workbook workbook = new Workbook(FileName);
+
+              Worksheet MyWorksheet = workbook.Worksheets["Aspose Export"];
+
+              DataTable dt = MyWorksheet.Cells.ExportDataTable(0, 0, MyWorksheet.Cells.Rows.Count, MyWorksheet.Cells.Columns.Count, true);
+
+              foreach (DataRow dr in dt.Rows)
+
+              {
+
+                  Entity CrmRecord = new Entity(SelectedEntity);
+
+                  foreach (DataColumn th in dt.Columns)
+
+                  {
+
+                      CrmRecord.Attributes.Add(th.ColumnName, dr[th.ColumnName].ToString());
+
+                  }
+
+                  CreateRequest req = new CreateRequest();
+
+                  req.Target = CrmRecord;
+
+                  CreateResponse res = (CreateResponse)svcClient.OrganizationServiceProxy.Execute(req);
+
+              }
+
+          }
+
+      }
+
+  }
+```

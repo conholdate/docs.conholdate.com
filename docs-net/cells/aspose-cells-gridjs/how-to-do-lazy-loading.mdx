@@ -1,0 +1,112 @@
+---
+title: "How to Implement Lazy Loading in GridJs"
+sidebar_label: "How to Implement Lazy Loading in GridJs"
+sidebar_key: "net-cells-aspose-cells-gridjs-how-to-do-lazy-loading"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/aspose-cells-gridjs/how-to-do-lazy-loading.html"
+source_commit: ""
+source_sha256: "4e44b9f444246bad01f818f11b97931277014e2859f0d5580de73f360b433294"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/aspose-cells-gridjs/how-to-do-lazy-loading/"
+source_snapshot_sha256: "7f5813d304b3c9a43a8901e3322aafc22c0cdc3d52fe70a06d1c810ac58253d1"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## About Lazy Loading {#about-lazy-loading}
+
+When dealing with a spreadsheet file containing numerous worksheets, we can optimize the loading process by initially loading only the active worksheet.
+
+This strategy ensures that the server‑side JSON response initially includes only the data pertaining to the actively selected worksheet. As a result, the initial web traffic is significantly reduced, enhancing the user experience by minimizing load times.
+
+Furthermore, GridJs is designed to dynamically respond to user interactions. Specifically, when a user clicks on a different worksheet, GridJs intelligently triggers a request to the server to fetch the data specifically for that worksheet.
+
+This on‑demand loading mechanism not only further reduces unnecessary data transfers but also ensures that the user always has access to the most up‑to‑date information for the worksheet they are currently working on.
+
+By adopting this approach, we not only optimize the initial load time but also maintain a responsive and efficient application that scales well with the increasing number of worksheets in the spreadsheet file.
+
+## Implementation Steps {#implementation-steps}
+
+### Step 1: Configure Lazy Loading in Startup.cs {#step-1-configure-lazy-loading-in-startupcs}
+
+Set the lazy loading option either through **Config** or **GridJsOptions** - both have the same effect.
+
+**Example using Config:**
+
+```csharp
+Config.LazyLoading = true;
+```
+
+**Example using GridJsOptions:**
+
+```csharp
+services.Configure<GridJsOptions>(options =>
+{
+    // ... other options
+    options.LazyLoading = true;
+    options.BaseRouteName = "GridJs2";
+});
+```
+
+### Step 2: Set Action URL in Client File {#step-2-set-action-url-in-client-file}
+
+Configure the lazy loading URL in your client‑side JavaScript file.
+
+**Example:**
+
+```javascript
+const lazyLoadingUrl = "/GridJs2/LazyLoadingStreamJson";
+xs.setLazyLoadingUrl(lazyLoadingUrl);
+```
+
+After the user clicks on a worksheet that is not the active one, the data‑query action will be triggered automatically by the spreadsheet application.
+
+### Step 3: Implement Lazy Loading Action in Controller {#step-3-implement-lazy-loading-action-in-controller}
+
+Implement the lazy loading action on the server side.\
+(If your controller extends from **GridJsControllerBase**, you don't need to add this implementation, as it is already provided in **GridJsControllerBase**.)
+
+**Example:**
+
+```csharp
+[HttpPost]
+// POST: /GridJs2/LazyLoadingStreamJson?name=&uid=
+public ActionResult LazyLoadingStreamJson()
+{
+    string sheetName = HttpContext.Request.Form["name"];
+    string uid = HttpContext.Request.Form["uid"];
+    GridJsWorkbook wbj = new GridJsWorkbook();
+
+    Response.ContentType = "application/json";
+    Response.Headers.Add("Content-Encoding", "gzip");
+
+    using (GZipStream gzip = new GZipStream(Response.Body, CompressionLevel.Optimal))
+    {
+        wbj.LazyLoadingStream(gzip, uid, sheetName);
+    }
+
+    return new EmptyResult();
+}
+```
+
+## Demo and Examples {#demo-and-examples}
+
+For comprehensive implementation examples and detailed usage scenarios, refer to the official demo repository:
+
+<a href="https://github.com/aspose-cells/Aspose.Cells.Grid-for-.NET/tree/main/Examples_GridJs" target="_blank" rel="nofollow noopener noreferrer">https://github.com/aspose-cells/Aspose.Cells.Grid-for-.NET/tree/main/Examples_GridJs</a>
+
+## Additional Resources {#additional-resources}
+
+- <a href="https://reference.aspose.com/cells/net/aspose.cells.gridjs" target="_blank" rel="nofollow noopener noreferrer">GridJs Server API Documentation</a>
+- [GridJs Client API Documentation](/net/cells/aspose-cells-gridjs/how-to-use-gridjs-client-api/)

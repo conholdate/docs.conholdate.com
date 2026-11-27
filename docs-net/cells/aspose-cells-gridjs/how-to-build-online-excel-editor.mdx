@@ -1,0 +1,157 @@
+---
+title: "how to run Aspose.Cells.GridJs in Docker"
+sidebar_label: "how to run Aspose.Cells.GridJs in Docker"
+sidebar_key: "net-cells-aspose-cells-gridjs-how-to-build-online-excel-editor"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/aspose-cells-gridjs/how-to-build-online-excel-editor.html"
+source_commit: ""
+source_sha256: "7496ac2212b0770c3d7d13d53b9736be056d7bd4bdd7d017b28975c941a764b4"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/aspose-cells-gridjs/how-to-build-online-excel-editor/"
+source_snapshot_sha256: "a42cfd427edae7fda78d98231b2c71dfe7dc5b8ac1845c8aa323c89d35e3e2b6"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Docker Guide {#docker-guide}
+
+## Prerequisites {#prerequisites}
+
+Ensure you have Docker installed on your machine. You can download and install Docker from the <a href="https://www.docker.com/get-started" target="_blank" rel="nofollow noopener noreferrer">official Docker website</a>.
+
+## Step 1: Create a Dockerfile {#step-1-create-a-dockerfile}
+
+Create a file named `Dockerfile` in your project <a href="https://github.com/aspose-cells/Aspose.Cells.Grid-for-.NET/blob/master/Examples_GridJs/" target="_blank" rel="nofollow noopener noreferrer">directory</a>. The `Dockerfile` should contain instructions on how to build your Docker image.
+
+## Step 2: Write Dockerfile for GridJs {#step-2-write-dockerfile-for-gridjs}
+
+Here is a sample <a href="https://github.com/aspose-cells/Aspose.Cells.Grid-for-.NET/blob/master/Examples_GridJs/Dockerfile" target="_blank" rel="nofollow noopener noreferrer">`Dockerfile`</a> for GridJs demo with ASP.NET Core application:
+
+```dockerfile
+# Use the official .NET6.0 runtime as a parent image
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-focal AS base
+WORKDIR /app  
+EXPOSE 80 
+
+
+# Use the official .NET6.0 SDK as build environment
+FROM mcr.microsoft.com/dotnet/sdk:6.0-focal AS build
+
+WORKDIR /src  
+# We shall use .NET 6.0 project
+COPY ["gridjs-demo-.net6.csproj", "."]
+RUN dotnet restore "./gridjs-demo-.net6.csproj"
+
+# Copy everything else and build
+COPY . .
+WORKDIR "/src/."
+RUN dotnet build "gridjs-demo-.net6.csproj" -c Release -o /app/build
+
+# Publish the app
+FROM build AS publish
+RUN dotnet publish "gridjs-demo-.net6.csproj" -c Release -o /app/publish
+
+# Final stage/image
+FROM base AS final
+WORKDIR /app
+# If you want a better display like in Windows, you need to install a variety of fonts in /usr/share/fonts/
+# Then the application can parse and render the fonts that are used in the spreadsheet file.
+# Here we don't provide extra fonts resource.
+# Install Fonts because the SDK image contains very few fonts. The command copies font files from local to Docker image. Make sure you have a local “fonts” directory that contains all the fonts you need to install. In this example, the local “fonts” directory is put in the same directory as the Dockerfile.
+# COPY fonts/* /usr/share/fonts/
+# The basic file path that contains the spreadsheet files
+RUN mkdir -p /app/wb
+# The file path to store the uploaded files
+RUN mkdir -p /app/uploads
+# The cache file path for GridJs
+RUN mkdir -p /app/grid_cache
+# We provide some sample spreadsheet files in the demo 
+COPY wb/*.xlsx /app/wb/
+
+COPY --from=publish /app/publish .
+
+# Set the start command for the Docker image 
+ENTRYPOINT ["dotnet", "gridjs-demo-.net6.dll"]
+```
+
+## Step 3: Building the Docker Image {#step-3-building-the-docker-image}
+
+Build the Docker Image: From the terminal, execute the following command to build your Docker image:
+
+```bash
+docker build -t gridjs-demo-net6 .
+```
+
+You can replace `gridjs-demo-net6` with the name you want to give your Docker image.
+
+## Step 4: Running a Docker Container {#step-4-running-a-docker-container}
+
+Once the image is built, you can run a container using the following command:
+
+```bash
+docker run -d -p 24262:80 -v C:/path/to/license.txt:/app/license --name gridjs-demo-container  gridjs-demo-net6
+```
+
+or just run the demo in trial mode:
+
+```bash
+docker run -d -p 24262:80 --name gridjs-demo-container  gridjs-demo-net6
+```
+
+**Explanation of Docker Run Command Options**
+
+- `-d`: Run the container in detached mode (in the background).
+- `-p 24262:80`: Map port 80 in the container to port 24262 on the host machine.
+- `-v C:/path/to/license.txt:/app/license`: Map the license file path on the host machine to the file path in the container.
+- `--name gridjs-demo-container`: Assign a name to the container.
+
+## Step 5: Verify the Container is Running {#step-5-verify-the-container-is-running}
+
+To check if your container is running, use the following command:
+
+```bash
+docker ps
+```
+
+This will list all running containers. You should see your container listed along with its name and status.
+
+## Step 6: Access the Web Application {#step-6-access-the-web-application}
+
+Open a web browser and go to `http://localhost:24262/GridJs2/List`. You should see your application running.
+
+## Additional Commands {#additional-commands}
+
+### Stopping the Container {#stopping-the-container}
+
+To stop a running container, use the following command:
+
+```bash
+docker stop gridjs-demo-container
+```
+
+### Removing a Container {#removing-a-container}
+
+To remove a stopped container, use the following command:
+
+```bash
+docker rm  gridjs-demo-container
+```
+
+### Removing an Image {#removing-an-image}
+
+To remove an image, use the following command:
+
+```bash
+docker rmi gridjs-demo-net6
+```

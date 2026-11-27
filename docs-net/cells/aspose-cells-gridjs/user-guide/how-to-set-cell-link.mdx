@@ -1,0 +1,268 @@
+---
+title: "How to set cell link in GridJS"
+sidebar_label: "How to set cell link in GridJS"
+sidebar_key: "net-cells-aspose-cells-gridjs-user-guide-how-to-set-cell-link"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/aspose-cells-gridjs/user-guide/how-to-set-cell-link.html"
+source_commit: ""
+source_sha256: "d34eddb5846ce95ede8e90fd44a921b7df740f18edebe9229f96ee3161d28ddc"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/aspose-cells-gridjs/user-guide/how-to-set-cell-link/"
+source_snapshot_sha256: "b455cc10349b4941576b78ed9a33227f9e616a9350fbc29fe76fe7f1d4a48f0e"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "../../_remote-markdown.css";
+
+## Introduction {#introduction}
+
+GridJS provides a `Link` entry in the **Insert** menu and in the cell context menu. The link dialog supports three target types: `Web Page`, `This Document`, and `E-mail Address`. When adding a cell link, GridJS stores link objects in `data.hyperlinks`, applies hyperlink style (`underline: true`, `color: #0000ff`), and updates clickable link positions on the sheet. For web links, the dialog auto-adds `http://` when protocol is missing, and accepts only `http` or `https` URLs.
+
+## How to use {#how-to-use}
+
+1. Select the target cell or range.
+
+2. Open the link dialog. Use either:
+
+- Insert menu: `Link`
+- Right-click menu: `Link` ![](/net/cells/images/43b1aa60cee4eb04-link-open-dialog.png)
+
+3. Choose `Link To` type and fill fields.
+
+- `Web Page`: set `Address`. ![](/net/cells/images/d0f5a221e8911e21-link-web-page.png)
+- `This Document`: set `Document Place` and `Cell Reference` (for example `Sheet2!A1`). ![](/net/cells/images/ccc96c28ca5cd800-link-this-document.png)
+- `E-mail Address`: set `E-mail Address` and `Subject`. ![](/net/cells/images/a796bf3b74b0f083-link-email-address.png)
+
+Click `OK`.
+
+For a new range, GridJS adds a link object with `area`, `type`, `address` (and keeps cell text in `text`), then refreshes hyperlink style and hit-testing.
+
+1. Open, edit, or remove the link.
+
+- If the selected cell has a link, the context menu switches from `Link` to `Edit Link`, `Open Link`, and `Remove Link`.
+- Clicking a linked cell opens the link (non-right-click path).
+- `Remove Link` removes the link from `data.hyperlinks` and clears hyperlink style for that range. ![](/net/cells/images/1dc0c33cd60c16b7-link-open-edit-remove.png)
+
+## JavaScript API {#javascript-api}
+
+You can set links through sheet data and reload it, because `hyperlinks` is part of `getData()` / `loadData()` payload.
+
+```js
+const xs = x_spreadsheet('#gridjs-demo', options);
+
+const data = xs.getData();
+const sheet = data[0];
+
+sheet.hyperlinks = sheet.hyperlinks || [];
+sheet.hyperlinks.push({
+  area: 'B2:B2',
+  type: 0, // 0=web, 2=email, 3=this document
+  address: 'https://example.com',
+  text: 'Example',
+});
+
+xs.loadData(data);
+```
+
+For runtime updates on the current sheet without rebuilding all data, you can mutate `xs.sheet.data.hyperlinks` and refresh link style/positions:
+
+```js
+const link = {
+  area: 'C3:C3',
+  type: 3,
+  address: 'Sheet2!A1',
+  text: 'Jump to Sheet2',
+};
+
+xs.sheet.data.hyperlinks.push(link);
+xs.sheet.hyperlink.setHyperlinkStyleByArea(link.area, xs.sheet, true);
+xs.sheet.hyperlink.loadLinkPosition(xs.sheet);
+xs.sheet.table.render();
+```
+
+### Relevant functions {#relevant-functions}
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Function
+
+</th>
+<th>
+
+Description
+
+</th>
+<th>
+
+Parameters
+
+</th>
+<th>
+
+Returns
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`xs.getData()`
+
+</td>
+<td>
+
+Gets workbook data including each sheet's `hyperlinks`.
+
+</td>
+<td>
+
+none
+
+</td>
+<td>
+
+`Array<sheetData>`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`xs.loadData(data)`
+
+</td>
+<td>
+
+Loads workbook data; `hyperlinks` in payload is applied through data proxy.
+
+</td>
+<td>
+
+`data:Array|Object`
+
+</td>
+<td>
+
+`xs`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`xs.sheet.hyperlink.getSelectArea(range)`
+
+</td>
+<td>
+
+Converts current range to `A1:B2` area string.
+
+</td>
+<td>
+
+`range:{sri,sci,eri,eci}`
+
+</td>
+<td>
+
+`string`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`xs.sheet.hyperlink.setHyperlinkStyleByArea(area, sheet, type)`
+
+</td>
+<td>
+
+Applies or clears hyperlink style for all cells in area.
+
+</td>
+<td>
+
+`area:string`, `sheet:Sheet`, `type:boolean`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`xs.sheet.hyperlink.loadLinkPosition(sheet)`
+
+</td>
+<td>
+
+Rebuilds clickable hyperlink hit regions after data changes.
+
+</td>
+<td>
+
+`sheet:Sheet`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`xs.sheet.hyperlink.access(hyperlink)`
+
+</td>
+<td>
+
+Opens a hyperlink by type (`web/email` opens URL, `this document` jumps to sheet/cell).
+
+</td>
+<td>
+
+`hyperlink:{type,address,...}`
+
+</td>
+<td>
+
+`null|undefined`
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+## Common Questions {#common-questions}
+
+Q: Why is my web link rejected? A: The dialog only accepts `http://` or `https://` URLs. If protocol is missing, GridJS first normalizes it to `http://...`.
+
+Q: Why do I see `Edit Link / Open Link / Remove Link` instead of `Link`? A: Context menu visibility is switched by whether the selected cell already has a hyperlink.
+
+Q: Why can't I add links on a locked sheet from context menu? A: In locked mode, context-menu actions are hidden except copy-related actions and `Open Link`.
+
+Q: How does `This Document` link navigate? A: GridJS stores address as `SheetName!CellRef`; on open, it activates target sheet and then activates the target cell.

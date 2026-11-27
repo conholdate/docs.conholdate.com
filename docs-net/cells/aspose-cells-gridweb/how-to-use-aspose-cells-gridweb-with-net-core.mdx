@@ -1,0 +1,181 @@
+---
+title: "How to use Aspose.Cells.GridWeb with .NET Core"
+sidebar_label: "How to use Aspose.Cells.GridWeb with .NET Core"
+sidebar_key: "net-cells-aspose-cells-gridweb-how-to-use-aspose-cells-gridweb-with-net-core"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/aspose-cells-gridweb/how-to-use-aspose-cells-gridweb-with-net-core.html"
+source_commit: ""
+source_sha256: "cfef401f7385bd45042d8b38fbc61eba34cdcda07dae0795382d516ea65b523e"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/aspose-cells-gridweb/how-to-use-aspose-cells-gridweb-with-net-core/"
+source_snapshot_sha256: "fee39830b506152b7981e71488e92e42b4ce7194393c125c24d652f6e30f7d09"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+:::info
+This topic explains how to use Aspose.Cells.GridWeb with .NET Core applications using Visual Studio 2019. This topic is useful for beginner‑level developers working with Aspose.Cells.GridWeb.
+:::
+
+## Use Aspose.Cells.GridWeb with .NET Core {#use-asposecellsgridweb-with-net-core}
+
+This topic shows how to use Aspose.Cells.GridWeb by making a sample website in Visual Studio 2019. The process has been divided into steps.
+
+### Step 1: Creating a New Project {#step-1-creating-a-new-project}
+
+1. Open Visual Studio 2019.
+2. From the **File** menu, select **New**, then **Project**. The **Create a new project** dialog opens.
+3. Select **ASP.NET Core Web Application** from Visual Studio's installed project templates and click **Next**.
+
+![todo:image_alt_text](/net/cells/images/6ccb7a49160b4f80-how-to-use-aspose-cells-gridweb-with-net-core_1.jpg)
+
+4. Specify the location and name of the project, then click **Create**.
+
+![todo:image_alt_text](/net/cells/images/e6c8a7ad161393eb-how-to-use-aspose-cells-gridweb-with-net-core_2.jpg)
+
+5. Select the **Web Application (Model-View-Controller)** template and make sure that **ASP.NET Core 2.1** is selected.
+
+![todo:image_alt_text](/net/cells/images/ae6557a268dc3566-how-to-use-aspose-cells-gridweb-with-net-core_3.jpg)
+
+6. Click **Create**.
+
+### Step 2: Checking the initial view {#step-2-checking-the-initial-view}
+
+Running the newly created project shows the default template in the browser as shown in the image below.
+
+![todo:image_alt_text](/net/cells/images/f9f6f7223d458a61-how-to-use-aspose-cells-gridweb-with-net-core_4.jpg)
+
+### Step 3: Adding Aspose.Cells.GridWeb {#step-3-adding-asposecellsgridweb}
+
+1. Add the following NuGet packages to the project
+
+```xml
+<PackageReference Include="Microsoft.AspNetCore.App" />
+<PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
+<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+<PackageReference Include="System.Drawing.Common" Version="4.7.0" />
+<PackageReference Include="System.Text.Encoding.CodePages" Version="4.7.0" />
+```
+
+2. Add the Aspose.Cells.GridWeb package
+
+![todo:image_alt_text](/net/cells/images/fd0aee0bd7c94ca0-how-to-use-aspose-cells-gridweb-with-net-core_5.jpg)
+
+3. Add the following to the **\_ViewImports.cshtml** file in the *Views* folder.
+
+```csharp
+@using Aspose.Cells.GridWeb
+@addTagHelper *, Aspose.Cells.GridWeb
+```
+
+The file will look like this after the modifications:
+
+![todo:image_alt_text](/net/cells/images/a408429bc6950d38-how-to-use-aspose-cells-gridweb-with-net-core_6.jpg)
+
+4. Put the following code in the **HomeController**'s `Index` method.
+
+```csharp
+//set a session store path
+GridWeb.SessionStorePath = @"D:\Test\tmp\";
+GridWeb mw = new GridWeb();
+mw.ID = "gid";
+mw.SetSession(HttpContext.Session);
+//set acw_client path
+mw.ResourceFilePath = "/js/acw_client/";
+//load workbook
+mw.ImportExcelFile("D:\\Book1.xlsx");
+//set width height
+mw.Width = Unit.Pixel(800);
+mw.Height = Unit.Pixel(500);
+return View(mw);
+```
+
+:::info
+Remember to update the `SessionStorePath` and the `ImportExcelFile` path.
+:::
+
+![todo:image_alt_text](/net/cells/images/a752355c1adce6f9-how-to-use-aspose-cells-gridweb-with-net-core_7.jpg)
+
+5. Add the following code in the **Index.cshtml** file in the *Views &gt; Home* directory.
+
+```csharp
+@model GridWeb
+<script src="~/js/acw_client/acwmain.js" asp-append-version="true"></script>
+<script src="~/js/acw_client/lang_en.js" asp-append-version="true"></script>
+<link href="~/js/acw_client/menu.css" rel="stylesheet" type="text/css">
+<div class="text-center">
+    <GridWebDiv mw=Model></GridWebDiv>
+</div>
+```
+
+The file will look like this after the change:
+
+![todo:image_alt_text](/net/cells/images/c6748a529d4e8778-how-to-use-aspose-cells-gridweb-with-net-core_8.jpg)
+
+6. Add session support and the **GridScheduledService** in the **Startup.cs** file
+   1. Add the following code snippet in the `ConfigureServices` method.
+
+```csharp
+services.AddSession(options =>
+{
+    // Set a short timeout for easy testing.
+    options.IdleTimeout = TimeSpan.FromSeconds(3600);
+    options.Cookie.HttpOnly = true;
+    // Make the session cookie essential
+    options.Cookie.IsEssential = true;
+});
+
+services.AddSingleton<Microsoft.Extensions.Hosting.IHostedService, GridScheduedService>();
+```
+
+![todo:image_alt_text](/net/cells/images/7c1899f2982b98c6-how-to-use-aspose-cells-gridweb-with-net-core_9.jpg)
+
+2. Add the following code snippet in the `Configure` method.
+
+```csharp
+app.UseSession();
+
+app.UseMvc(routes =>
+{
+    routes.MapRoute("acw", "acw/{type}/{id}",
+    defaults: new { controller = "Acw", action = "Operation" });
+    routes.MapRoute(
+        name: "default",
+        template: "{controller=Home}/{action=Index}/{id?}");
+});
+```
+
+![todo:image_alt_text](/net/cells/images/9cb7c4eaffb98a79-how-to-use-aspose-cells-gridweb-with-net-core_10.jpg)
+
+7. Put the latest `acw_client` in the directory **wwwroot/js**.
+
+8. Add an **AcwController** in the *Controllers* folder to handle the `acw` route, which provides the default operations for general edit actions.
+
+```csharp
+public class AcwController : Controller
+{
+    public IActionResult Operation(string type, string id)
+    {
+        return Aspose.Cells.GridWeb.AcwController.DoAcwAction(this, type, id);
+    }
+}
+```
+
+![todo:image_alt_text](/net/cells/images/71e6c76119e5cf97-how-to-use-aspose-cells-gridweb-with-net-core_11.jpg)
+
+### Step 4: Test the App {#step-4-test-the-app}
+
+Running the app will produce output similar to the one shown in the image below.
+
+![todo:image_alt_text](/net/cells/images/ea4a508b715c2d7b-how-to-use-aspose-cells-gridweb-with-net-core_12.jpg)

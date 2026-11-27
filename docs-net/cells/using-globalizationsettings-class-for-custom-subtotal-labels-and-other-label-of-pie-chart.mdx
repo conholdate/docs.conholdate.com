@@ -1,0 +1,170 @@
+---
+title: "Using GlobalizationSettings Class for Custom Subtotal Labels and Other Label of Pie Chart"
+sidebar_label: "Using GlobalizationSettings Class for Custom Subtotal Labels and Other Label of Pie Chart"
+sidebar_key: "net-cells-using-globalizationsettings-class-for-custom-subtotal-labels-and-other-label-of-pie-chart"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/using-globalizationsettings-class-for-custom-subtotal-labels-and-other-label-of-pie-chart.html"
+source_commit: ""
+source_sha256: "4251c59cce537ef2315a2222b11e38a965fb7602f3dae9feeb6aeb31014755a9"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/using-globalizationsettings-class-for-custom-subtotal-labels-and-other-label-of-pie-chart/"
+source_snapshot_sha256: "7ba40245f0cbc5c6c7fd6e229d6eedf47fff32eb85382d9a6b7b27a8df93b5f8"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+## Possible Usage Scenarios {#possible-usage-scenarios}
+
+Aspose.Cells APIs have exposed the <a href="https://reference.aspose.com/cells/net/aspose.cells/globalizationsettings" target="_blank" rel="nofollow noopener noreferrer">**GlobalizationSettings**</a> class in order to deal with the scenarios where the user wishes to use custom labels for Subtotals in a spreadsheet. Moreover, the <a href="https://reference.aspose.com/cells/net/aspose.cells.charts/chartglobalizationsettings/" target="_blank" rel="nofollow noopener noreferrer">**ChartGlobalizationSettings**</a> class can also be used to modify the **Other** label for the Pie chart while rendering worksheet or chart.
+
+## Introduction to GlobalizationSettings Class {#introduction-to-globalizationsettings-class}
+
+The <a href="https://reference.aspose.com/cells/net/aspose.cells/globalizationsettings" target="_blank" rel="nofollow noopener noreferrer">**GlobalizationSettings**</a> class and <a href="https://reference.aspose.com/cells/net/aspose.cells.charts/chartglobalizationsettings/" target="_blank" rel="nofollow noopener noreferrer">**ChartGlobalizationSettings**</a> class currently offers the following 3 methods which can be overridden in a custom class to get desired labels for the Subtotals or to render custom text for the **Other** label of a Pie chart.
+
+1. <a href="https://reference.aspose.com/cells/net/aspose.cells/globalizationsettings/methods/gettotalname" target="_blank" rel="nofollow noopener noreferrer">**GlobalizationSettings.GetTotalName**</a>: Gets the total name of the function.
+2. <a href="https://reference.aspose.com/cells/net/aspose.cells/globalizationsettings/methods/getgrandtotalname" target="_blank" rel="nofollow noopener noreferrer">**GlobalizationSettings.GetGrandTotalName**</a>: Gets the grand total name of the function.
+3. <a href="https://reference.aspose.com/cells/net/aspose.cells.charts/chartglobalizationsettings/getothername/" target="_blank" rel="nofollow noopener noreferrer">**ChartGlobalizationSettings.GetOtherName**</a>: Gets the name of "Other" labels for Pie charts.
+
+### Custom Labels for Subtotals {#custom-labels-for-subtotals}
+
+The <a href="https://reference.aspose.com/cells/net/aspose.cells/globalizationsettings" target="_blank" rel="nofollow noopener noreferrer">**GlobalizationSettings**</a> class can be used to customize the Subtotal labels by overriding the <a href="https://reference.aspose.com/cells/net/aspose.cells/globalizationsettings/methods/gettotalname" target="_blank" rel="nofollow noopener noreferrer">**GlobalizationSettings.GetTotalName**</a> & <a href="https://reference.aspose.com/cells/net/aspose.cells/globalizationsettings/methods/getgrandtotalname" target="_blank" rel="nofollow noopener noreferrer">**GlobalizationSettings.GetGrandTotalName**</a> methods as demonstrated ahead.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// Defines a custom class derived from GlobalizationSettings class
+class CustomSettings : GlobalizationSettings
+{
+    // Overrides the GetTotalName method
+    public override string GetTotalName(ConsolidationFunction functionType)
+    {
+        // Checks the function type used to add the subtotals
+        switch (functionType)
+        {
+            // Returns custom value based on the function type used to add the subtotals
+            case ConsolidationFunction.Average:
+                return "AVG";
+            // Handle other cases as per requirement
+            default:
+                return base.GetTotalName(functionType);
+        }
+    }
+
+    // Overrides the GetGrandTotalName method
+    public override string GetGrandTotalName(ConsolidationFunction functionType)
+    {
+        // Checks the function type used to add the subtotals
+        switch (functionType)
+        {
+            // Returns custom value based on the function type used to add the subtotals
+            case ConsolidationFunction.Average:
+                return "GRD AVG";
+            // Handle other cases as per requirement
+            default:
+                return base.GetGrandTotalName(functionType);
+        }
+    }
+}
+```
+
+In order to inject custom labels, it is required to assign the <a href="https://reference.aspose.com/cells/net/aspose.cells/workbooksettings/properties/globalizationsettings" target="_blank" rel="nofollow noopener noreferrer">**WorkbookSettings.GlobalizationSettings**</a> property to an instance of the **CustomSettings** class defined above before adding the Subtotals to the worksheet.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+// Loads an existing spreadsheet containing some data
+Workbook book = new Workbook(dataDir + "sample.xlsx");
+
+// Assigns the GlobalizationSettings property of the WorkbookSettings class to the class created in first step
+book.Settings.GlobalizationSettings = new CustomSettings();
+
+// Accesses the 1st worksheet from the collection which contains data resides in the cell range A2:B9
+Worksheet sheet = book.Worksheets[0];
+
+// Adds Subtotal of type Average to the worksheet
+sheet.Cells.Subtotal(CellArea.CreateCellArea("A2", "B9"), 0, ConsolidationFunction.Average, new int[] { 1 });
+
+// Calculates Formulas
+book.CalculateFormula();
+
+// Auto fits all columns
+sheet.AutoFitColumns();
+
+// Saves the workbook on disc
+book.Save(dataDir + "output_out.xlsx");
+```
+
+:::info
+The <a href="https://reference.aspose.com/cells/net/aspose.cells/globalizationsettings" target="_blank" rel="nofollow noopener noreferrer">**GlobalizationSettings**</a> class only works for adding new Subtotals. If a spreadsheet already contains Subtotals, their labels cannot be modified.
+:::
+
+### Custom Text for Other Label of Pie Chart {#custom-text-for-other-label-of-pie-chart}
+
+The <a href="https://reference.aspose.com/cells/net/aspose.cells.charts/chartglobalizationsettings/" target="_blank" rel="nofollow noopener noreferrer">**ChartGlobalizationSettings**</a> class offers <a href="https://reference.aspose.com/cells/net/aspose.cells.charts/chartglobalizationsettings/getothername/" target="_blank" rel="nofollow noopener noreferrer">**GetOtherName**</a> method which is useful to give the "Other" label of Pie charts a custom value. The following snippet defines a custom class and overrides the <a href="https://reference.aspose.com/cells/net/aspose.cells.charts/chartglobalizationsettings/getothername/" target="_blank" rel="nofollow noopener noreferrer">**GetOtherName**</a> method to get a custom label based on the system's culture identifier.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// Defines a custom class inherited by GlobalizationSettings class
+class GlobalCustomSettings : ChartGlobalizationSettings
+{
+    // Overrides the GetOtherName method
+    public override string GetOtherName()
+    {
+        // Gets the culture identifier for the current system
+        int lcid = System.Globalization.CultureInfo.CurrentCulture.LCID;
+        switch (lcid)
+        {
+            // Handles case for English
+            case 1033:
+                return "Other";
+            // Handles case for French
+            case 1036:
+                return "Autre";
+            // Handles case for German
+            case 1031:
+                return "Andere";
+            // Handle other cases
+            default:
+                return base.GetOtherName();
+        }
+    }
+}
+```
+
+The following snippet loads an existing spreadsheet containing a Pie chart and renders the chart to an image while utilizing the **GlobalCustomSettings** class created above.
+
+```csharp
+// For complete examples and data files, please go to https://github.com/aspose-cells/Aspose.Cells-for-.NET
+// The path to the documents directory.
+string dataDir = "./";
+
+// Loads an existing spreadsheet containing a pie chart
+Workbook book = new Workbook(dataDir + "sample.xlsx");
+
+// Assigns the GlobalizationSettings property of the WorkbookSettings class to the class created in first step
+book.Settings.GlobalizationSettings.ChartSettings = new GlobalCustomSettings();
+
+// Accesses the 1st worksheet from the collection which contains pie chart
+Worksheet sheet = book.Worksheets[0];
+
+// Accesses the 1st chart from the collection
+Chart chart = sheet.Charts[0];
+
+// Refreshes the chart
+chart.Calculate();
+
+// Renders the chart to image
+chart.ToImage(dataDir + "output_out.png", new ImageOrPrintOptions());
+```

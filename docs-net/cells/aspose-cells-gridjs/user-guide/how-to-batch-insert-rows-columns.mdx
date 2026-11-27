@@ -1,0 +1,267 @@
+---
+title: "How to batch insert Rows and Columns"
+sidebar_label: "How to batch insert Rows and Columns"
+sidebar_key: "net-cells-aspose-cells-gridjs-user-guide-how-to-batch-insert-rows-columns"
+sidebar_position: 100
+description: ""
+product: "cells"
+platform: "net"
+total_version: "current"
+included_product_version: "current"
+version: "current"
+source_repo: "docs.aspose.com/cells/net"
+source_path: "cells/net/aspose-cells-gridjs/user-guide/how-to-batch-insert-rows-columns.html"
+source_commit: ""
+source_sha256: "75e22a5f5cd319aec7b7c7b692455a346f412eb6265fc03869e7f665d8d4afe7"
+vendor: "aspose"
+source_type: "remote-html"
+source_url: "https://docs.aspose.com/cells/net/aspose-cells-gridjs/user-guide/how-to-batch-insert-rows-columns/"
+source_snapshot_sha256: "3e19350dd836baa0984a8d1cb8b75e6456417ad111be226e691e999a19b8fff6"
+---
+
+:::info
+Aspose.Cells for .NET is included in Conholdate.Total for .NET.
+:::
+
+
+import "../../_remote-markdown.css";
+
+## Introduction {#introduction}
+
+GridJs supports two batch insertion paths. The first path is context-menu batch input for rows/columns (**Insert rows above/below**, **Insert columns left/right**). The second path is the bottom **Row Appender** toolbar for batch appending rows. Both paths use the same row insertion pipeline (`sheet.insertRows(...)`) and update sheet layout/rendering.
+
+## How to use {#how-to-use}
+
+Method 1: Context menu batch insert (rows and columns).
+
+1. Select a range, a row header, or a column header.
+2. Right-click and open **Insert…** in the context menu.
+3. Choose one action:
+   - **Insert rows above**
+   - **Insert rows below**
+   - **Insert columns to left**
+   - **Insert columns to right**
+4. Enter the count in the number box and click **Insert**.
+   - The input is configured with `min=1` and `max=300`.
+   - The insert submenu pre-fills the number input with `10` when opened. ![](/net/cells/images/fce5b358b895d377-batch-insert-open-menu.png)
+
+Method 2: Row Appender batch insert (rows only). In edit mode, scroll near the bottom until the Row Appender appears, enter row count, then click **Add**. ![](/net/cells/images/d7674a23d9b9e6f2-row-appender-add.png)
+
+To automatically jump to the last row after batch row insertion, set `batchInsertAutoScrollToBottom: true` in the GridJs load option.
+
+## JavaScript API {#javascript-api}
+
+```js
+xs = x_spreadsheet('#gridjs-demo-uid', option);
+
+// Insert 5 rows starting at row index 3.
+xs.sheet.insertRows(3, 5);
+
+// Insert 4 columns starting at column index 2.
+xs.sheet.insertColumns(2, 4);
+
+// Row Appender equivalent: append rows to the end.
+const n = 20;
+xs.sheet.insertRows(xs.sheet.data.rows.len, n);
+
+// Optional: listen to insert events.
+xs.on('rows-inserted', (start, count) => {
+  console.log('rows inserted:', start, count);
+});
+
+xs.on('columns-inserted', (start, count) => {
+  console.log('columns inserted:', start, count);
+});
+
+// Optional: enable/disable bottom Row Appender toolbar.
+const xsWithAppender = x_spreadsheet('#gridjs-demo-uid-2', {
+  showRowAppenderToolbar: true,
+  batchInsertAutoScrollToBottom: true,
+});
+```
+
+### Relevant functions {#relevant-functions}
+
+<div className="docs-owner-markdown-table">
+<table>
+<thead>
+<tr>
+<th>
+
+Function
+
+</th>
+<th>
+
+Description
+
+</th>
+<th>
+
+Parameters
+
+</th>
+<th>
+
+Returns
+
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+
+`sheet.insertRows(start, n, raiseServerOpr = true)`
+
+</td>
+<td>
+
+Batch inserts rows at the given start row index.
+
+</td>
+<td>
+
+`start` (row index), `n` (count), `raiseServerOpr` (optional boolean)
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`sheet.insertColumns(start, n, raiseServerOpr = true)`
+
+</td>
+<td>
+
+Batch inserts columns at the given start column index.
+
+</td>
+<td>
+
+`start` (column index), `n` (count), `raiseServerOpr` (optional boolean)
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`data.insert('row' | 'column', n, raiseServerOpr)`
+
+</td>
+<td>
+
+Internal insert operation used by sheet insert flow; updates data structures and triggers insert events.
+
+</td>
+<td>
+
+`type`, `n`, `raiseServerOpr`
+
+</td>
+<td>
+
+`void`
+
+</td>
+</tr>
+<tr>
+<td>
+
+`showRowAppenderToolbar` (option)
+
+</td>
+<td>
+
+Controls whether the bottom Row Appender toolbar is created (default enabled).
+
+</td>
+<td>
+
+`true` / `false`
+
+</td>
+<td>
+
+N/A
+
+</td>
+</tr>
+<tr>
+<td>
+
+`batchInsertAutoScrollToBottom` (option)
+
+</td>
+<td>
+
+When set to `true`, GridJs scrolls to the bottom after batch row insertion.
+
+</td>
+<td>
+
+`true` / `false`
+
+</td>
+<td>
+
+N/A
+
+</td>
+</tr>
+<tr>
+<td>
+
+`xs.on(eventName, handler)`
+
+</td>
+<td>
+
+Binds event handler; insert flow triggers `rows-inserted` and `columns-inserted`.
+
+</td>
+<td>
+
+`eventName`, `handler`
+
+</td>
+<td>
+
+`xs`
+
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+Context menu mapping for batch insert:
+
+- `insert-rows-above` -> `sheet.insertRows(sri, n)`
+- `insert-rows-below` -> `sheet.insertRows(eri + 1, n)`
+- `insert-columns-left` -> `sheet.insertColumns(sci, n)`
+- `insert-columns-right` -> `sheet.insertColumns(eci + 1, n)`
+
+## Common Questions {#common-questions}
+
+Q: Why do I only see row-related or column-related insert options in some cases? A: Context menu mode switches by selection type. In row/column header mode, submenu items are filtered to matching row or column operations.
+
+Q: Why does batch insert do nothing on a protected sheet? A: Insert is blocked when the sheet is locked.
+
+Q: Why is Row Appender not visible? A: It is hidden in read mode, when `showRowAppenderToolbar` is `false`, or for chart-type sheets.
+
+Q: Can I use batch insert in read mode? A: No. In read mode, the context menu is reduced to copy-only behavior.
+
+Q: Where is the insertion anchor for above/below/left/right? A: It uses the current selected range: `sri`/`eri` for rows and `sci`/`eci` for columns, with below/right using `+1` as insertion start.
+
+Q: How can I auto-scroll to the last row after batch inserting rows? A: Set `batchInsertAutoScrollToBottom: true` in the GridJs initialization option. The default value is `false`.
